@@ -1,0 +1,40 @@
+release
+/vendor/
+/themes/nobelprize/vendor/
+phpunit.xml
+
+debug.log
+
+# Sass
+.sass-cache
+.sass-cache/
+.sass-cache/*
+*.map
+
+# NPM
+node_modules/
+npm-debug.log
+
+# Editors
+.idea
+*.esproj
+*.tmproj
+*.tmproject
+tmtags
+.*.sw[a-z]
+*.un~
+Session.vim
+*.swp
+.~lock*
+
+# Mac OSX
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+config.local.php
