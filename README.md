@@ -2,6 +2,8 @@
 
 Classify WordPress Content using [IBM Watson Natural Language Processing API](https://www.ibm.com/watson/services/natural-language-understanding/).
 
+[![Build Status](https://travis-ci.org/10up/klasifai.svg?branch=master)](https://travis-ci.org/10up/klasifai)
+
 ## Features
 
 * Classify Post Content using IBM Watson NLU API
