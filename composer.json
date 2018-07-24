@@ -1,0 +1,24 @@
+{
+  "name": "10up/klasifai",
+  "description": "Classifies WordPress content using IBM Watson NLU API",
+  "authors": [
+    {
+      "name": "Darshan Sawardekar",
+      "email": "darshan@10up.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Klasifai\\": "includes/Klasifai/"
+    },
+    "files": [
+      "includes/Klasifai/Helpers.php"
+    ]
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~5.7.0"
+  }
+}
