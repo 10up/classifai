@@ -21,32 +21,17 @@ class KlasifaiCommand extends \WP_CLI_Command {
 	 *
 	 * ## Options
 	 *
+	 * [<post_ids>]
+	 * : Post IDs to classify
+	 *
 	 * [--post_type=<post_type>]
-	 * : Batch classify posts belonging to this post type. If false
-	 * relies on post_ids in args
-	 * ---
-	 * default: false
-	 * options:
-	 *   - any other post type name
-	 *   - false, if args contains post_ids
-	 * ---
+	 * : Batch classify posts belonging to this post type. If false relies on post_ids in args
 	 *
 	 * [--limit=<limit>]
-	 * : Limit classification to N posts.
-	 * ---
-	 * default: false
-	 * options:
-	 *   - false, no limit
-	 *   - N, max number of posts to classify
-	 * ---
+	 * : Limit classification to N posts. Default false
 	 *
 	 * [--link=<link>]
-	 * : Whether to link classification results to Taxonomy terms
-	 * ---
-	 * default: true
-	 * options:
-	 *   - bool, any bool value
-	 * ---
+	 * : Whether to link classification results to Taxonomy terms. Default true
 	 *
 	 */
 	public function post( $args = [], $opts = [] ) {
@@ -122,55 +107,26 @@ class KlasifaiCommand extends \WP_CLI_Command {
 	 *
 	 * ## Options
 	 *
+	 * [<text>]
+	 * : Text to classify
+	 *
 	 * [--category=<bool>]
-	 * : Enables NLU category feature
-	 * ---
-	 * default: true
-	 * options:
-	 *   - any boolean value
-	 * ---
+	 * : Enables NLU category feature, Default: true
 	 *
 	 * [--keyword=<bool>]
-	 * : Enables NLU keyword feature
-	 * ---
-	 * default: true
-	 * options:
-	 *   - any boolean value
-	 * ---
+	 * : Enables NLU keyword feature, Default: true
 	 *
 	 * [--concept=<bool>]
-	 * : Enables NLU concept feature
-	 * ---
-	 * default: true
-	 * options:
-	 *   - any boolean value
-	 * ---
+	 * : Enables NLU concept feature, Default false
 	 *
 	 * [--entity=<bool>]
-	 * : Enables NLU entity feature
-	 * ---
-	 * default: true
-	 * options:
-	 *   - any boolean value
-	 * ---
+	 * : Enables NLU entity feature, Default false
 	 *
 	 * [--input=<input>]
-	 * : Path to input file or URL
-	 * ---
-	 * default: false
-	 * options:
-	 *   - path to local file
-	 *   - path to remote URL
-	 *   - false, uses args[0] instead
-	 * ---
+	 * : Path to input file or URL, Default false
 	 *
 	 * [--only-normalize=<bool>]
-	 * : Prints the normalized text that will be sent to the NLU API
-	 * ---
-	 * default: false
-	 * options:
-	 *   - any boolean value
-	 * ---
+	 * : Prints the normalized text that will be sent to the NLU API, Default false
 	 */
 	public function text( $args = [], $opts = [] ) {
 		$defaults = [
