@@ -29,7 +29,8 @@ class KeywordTaxonomy extends AbstractTaxonomy {
 	}
 
 	public function get_visibility() {
-		return \Klasifai\get_feature_enabled( 'keyword' );
+		return \Klasifai\get_feature_enabled( 'keyword' ) &&
+			\Klasifai\get_feature_taxonomy( 'keyword' ) === $this->get_name();
 	}
 
 }

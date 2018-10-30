@@ -29,7 +29,8 @@ class CategoryTaxonomy extends AbstractTaxonomy {
 	}
 
 	public function get_visibility() {
-		return \Klasifai\get_feature_enabled( 'category' );
+		return \Klasifai\get_feature_enabled( 'category' ) &&
+			\Klasifai\get_feature_taxonomy( 'category' ) === $this->get_name();
 	}
 
 }
