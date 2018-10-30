@@ -72,7 +72,11 @@ class APIRequest {
 			$json = json_decode( $body, true );
 
 			if ( json_last_error() === JSON_ERROR_NONE ) {
-				return $json;
+				if ( empty( $json['error'] ) ) {
+					return $json;
+				} else {
+					return new \WP_Error( $json['code'], $json['error'] );
+				}
 			} else {
 				return new \WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
 			}
