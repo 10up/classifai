@@ -1,0 +1,10 @@
+.fm-category_threshold-wrapper,
+.fm-category_taxonomy-wrapper,
+.fm-keyword_threshold-wrapper,
+.fm-keyword_taxonomy-wrapper,
+.fm-concept_threshold-wrapper,
+.fm-concept_taxonomy-wrapper,
+.fm-entity_threshold-wrapper,
+.fm-entity_taxonomy-wrapper {
+	margin-left: 2.2em;
+}

@@ -29,7 +29,8 @@ class EntityTaxonomy extends AbstractTaxonomy {
 	}
 
 	public function get_visibility() {
-		return \Klasifai\get_feature_enabled( 'entity' );
+		return \Klasifai\get_feature_enabled( 'entity' ) &&
+			\Klasifai\get_feature_taxonomy( 'entity' ) === $this->get_name();
 	}
 
 }

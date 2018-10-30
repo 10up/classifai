@@ -29,7 +29,8 @@ class ConceptTaxonomy extends AbstractTaxonomy {
 	}
 
 	public function get_visibility() {
-		return \Klasifai\get_feature_enabled( 'concept' );
+		return \Klasifai\get_feature_enabled( 'concept' ) &&
+			\Klasifai\get_feature_taxonomy( 'concept' ) === $this->get_name();
 	}
 
 }

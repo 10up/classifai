@@ -75,6 +75,7 @@ class Linker {
 	 */
 	function link_categories( $post_id, $categories ) {
 		$terms_to_link = [];
+		$taxonomy      = \Klasifai\get_feature_taxonomy( 'category' );
 
 		foreach ( $categories as $category ) {
 			if ( $this->can_link_category( $category ) ) {
@@ -85,10 +86,10 @@ class Linker {
 					$parent = null;
 
 					foreach ( $parts as $part ) {
-						$term = get_term_by( 'name', $part, WATSON_CATEGORY_TAXONOMY );
+						$term     = get_term_by( 'name', $part, $taxonomy );
 
 						if ( $term === false ) {
-							$term = wp_insert_term( $part, WATSON_CATEGORY_TAXONOMY, [
+							$term = wp_insert_term( $part, $taxonomy, [
 								'parent' => $parent
 							] );
 
@@ -106,7 +107,7 @@ class Linker {
 		}
 
 		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, WATSON_CATEGORY_TAXONOMY, false );
+			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 		}
 	}
 
@@ -126,15 +127,16 @@ class Linker {
 	 */
 	function link_keywords( $post_id, $keywords ) {
 		$terms_to_link = [];
+		$taxonomy      = \Klasifai\get_feature_taxonomy( 'keyword' );
 
 		foreach ( $keywords as $keyword ) {
 			if ( $this->can_link_keyword( $keyword ) ) {
 				$name = $keyword['text'];
 				$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
-				$term = get_term_by( 'name', $name, WATSON_KEYWORD_TAXONOMY );
+				$term = get_term_by( 'name', $name, $taxonomy );
 
 				if ( $term === false ) {
-					$term = wp_insert_term( $name, WATSON_KEYWORD_TAXONOMY, [ ] );
+					$term = wp_insert_term( $name, $taxonomy, [ ] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -146,7 +148,7 @@ class Linker {
 		}
 
 		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, WATSON_KEYWORD_TAXONOMY, false );
+			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 		}
 	}
 
@@ -166,14 +168,15 @@ class Linker {
 	 */
 	function link_concepts( $post_id, $concepts ) {
 		$terms_to_link = [];
+		$taxonomy      = \Klasifai\get_feature_taxonomy( 'concept' );
 
 		foreach ( $concepts as $concept ) {
 			if ( $this->can_link_concept( $concept ) ) {
 				$name = $concept['text'];
-				$term = get_term_by( 'name', $name, WATSON_CONCEPT_TAXONOMY );
+				$term = get_term_by( 'name', $name, $taxonomy );
 
 				if ( $term === false ) {
-					$term = wp_insert_term( $name, WATSON_CONCEPT_TAXONOMY, [ ] );
+					$term = wp_insert_term( $name, $taxonomy, [ ] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -193,7 +196,7 @@ class Linker {
 		}
 
 		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, WATSON_CONCEPT_TAXONOMY, false );
+			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 		}
 	}
 
@@ -213,6 +216,7 @@ class Linker {
 	 */
 	function link_entities( $post_id, $entities ) {
 		$terms_to_link = [];
+		$taxonomy      = \Klasifai\get_feature_taxonomy( 'entity' );
 
 		foreach ( $entities as $entity ) {
 			if ( $this->can_link_entity( $entity ) ) {
@@ -222,10 +226,10 @@ class Linker {
 					$name = $entity['text'];
 				}
 
-				$term = get_term_by( 'name', $name, WATSON_ENTITY_TAXONOMY );
+				$term = get_term_by( 'name', $name, $taxonomy );
 
 				if ( $term === false ) {
-					$term = wp_insert_term( $name, WATSON_ENTITY_TAXONOMY, [ ] );
+					$term = wp_insert_term( $name, $taxonomy, [ ] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -251,7 +255,7 @@ class Linker {
 		}
 
 		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, WATSON_ENTITY_TAXONOMY, false );
+			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 		}
 	}
 

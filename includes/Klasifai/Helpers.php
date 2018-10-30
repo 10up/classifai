@@ -52,19 +52,25 @@ function reset_plugin_settings() {
 			'page'
 		],
 		'features' => [
-			'category' => true,
+			'category'           => true,
 			'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+			'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
 
-			'keyword' => true,
+			'keyword'           => true,
 			'keyword_threshold' => WATSON_KEYWORD_THRESHOLD,
+			'keyword_taxonomy'  => WATSON_KEYWORD_TAXONOMY,
 
-			'concept' => false,
+			'concept'           => false,
 			'concept_threshold' => WATSON_CONCEPT_THRESHOLD,
+			'concept_taxonomy'  => WATSON_CONCEPT_TAXONOMY,
 
-			'entity' => false,
+			'entity'           => false,
 			'entity_threshold' => WATSON_ENTITY_THRESHOLD,
+			'entity_taxonomy'  => WATSON_ENTITY_TAXONOMY,
 		]
 	];
+
+	update_option( 'klasifai_settings', $settings );
 }
 
 /**
@@ -186,7 +192,7 @@ function get_feature_threshold( $feature ) {
 		$constant = 'WATSON_' . strtoupper( $feature ) . '_THRESHOLD';
 
 		if ( defined( $constant ) ) {
-			$threshold = intval( $constant );
+			$threshold = intval( constant( $constant ) );
 		}
 	}
 
@@ -195,4 +201,32 @@ function get_feature_threshold( $feature ) {
 	} else {
 		return 0.7;
 	}
+}
+
+/**
+ * Returns the Taxonomy for the specified NLU feature. Returns defaults
+ * in config.php if options have not been configured.
+ *
+ * @param string $feature NLU feature name
+ * @return string Taxonomy mapped to the feature
+ */
+function get_feature_taxonomy( $feature ) {
+	$settings  = get_plugin_settings();
+	$taxonomy  = 0;
+
+	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
+		if ( ! empty( $settings['features'][ $feature . '_taxonomy' ] ) ) {
+			$taxonomy = $settings['features'][ $feature . '_taxonomy' ];
+		}
+	}
+
+	if ( empty( $taxonomy ) ) {
+		$constant = 'WATSON_' . strtoupper( $feature ) . '_TAXONOMY';
+
+		if ( defined( $constant ) ) {
+			$taxonomy = constant( $constant );
+		}
+	}
+
+	return $taxonomy;
 }

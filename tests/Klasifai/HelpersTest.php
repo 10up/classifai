@@ -85,4 +85,47 @@ class HelpersTest extends \WP_UnitTestCase {
 		$this->assertEquals( 'foo', $actual );
 	}
 
+	function test_it_has_default_feature_taxonomies() {
+		$expected = [
+			'category' => WATSON_CATEGORY_TAXONOMY,
+			'keyword'  => WATSON_KEYWORD_TAXONOMY,
+			'concept'  => WATSON_CONCEPT_TAXONOMY,
+			'entity'   => WATSON_ENTITY_TAXONOMY,
+		];
+
+		foreach ( $expected as $feature => $taxonomy ) {
+			$actual = get_feature_taxonomy( $feature );
+			$this->assertEquals( $taxonomy, $actual );
+		}
+	}
+
+	function test_it_knows_configured_feature_taxonomies() {
+		set_plugin_settings( [
+			'features'              => [
+				'category'          => true,
+				'category_taxonomy' => 'a',
+
+				'keyword'          => true,
+				'keyword_taxonomy' => 'b',
+
+				'concept'          => true,
+				'concept_taxonomy' => 'c',
+
+				'entity'          => true,
+				'entity_taxonomy' => 'd',
+			]
+		] );
+
+		$expected = [
+			'category' => 'a',
+			'keyword'  => 'b',
+			'concept'  => 'c',
+			'entity'   => 'd',
+		];
+
+		foreach ( $expected as $feature => $taxonomy ) {
+			$actual = get_feature_taxonomy( $feature );
+			$this->assertEquals( $taxonomy, $actual );
+		}
+	}
 }

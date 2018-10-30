@@ -52,19 +52,19 @@ class SavePostHandler {
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
-			wp_delete_object_term_relationships( $post_id, WATSON_CATEGORY_TAXONOMY );
+			wp_delete_object_term_relationships( $post_id, \Klasifai\get_feature_taxonomy( 'category' ) );
 		}
 
 		if ( \Klasifai\get_feature_enabled( 'keyword' ) ) {
-			wp_delete_object_term_relationships( $post_id, WATSON_KEYWORD_TAXONOMY );
+			wp_delete_object_term_relationships( $post_id, \Klasifai\get_feature_taxonomy( 'keyword' ) );
 		}
 
 		if ( \Klasifai\get_feature_enabled( 'concept' ) ) {
-			wp_delete_object_term_relationships( $post_id, WATSON_CONCEPT_TAXONOMY );
+			wp_delete_object_term_relationships( $post_id, \Klasifai\get_feature_taxonomy( 'concept' ) );
 		}
 
 		if ( \Klasifai\get_feature_enabled( 'entity' ) ) {
-			wp_delete_object_term_relationships( $post_id, WATSON_ENTITY_TAXONOMY );
+			wp_delete_object_term_relationships( $post_id, \Klasifai\get_feature_taxonomy( 'entity' ) );
 		}
 
 		$output = $classifier->classify_and_link( $post_id );
