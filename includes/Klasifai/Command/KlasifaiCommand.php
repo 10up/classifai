@@ -93,7 +93,7 @@ class KlasifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
 
 			foreach ( $errors as $post_id => $error ) {
-				\WP_CLI::log( $post_id . ': ' . $error->get_error_message() );
+				\WP_CLI::log( $post_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 			}
 		} else {
 			\WP_CLI::log( 'No posts to classify.' );
