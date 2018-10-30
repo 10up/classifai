@@ -43,6 +43,14 @@ class SettingsSupport {
 	 * Renders the Fieldmanager settings
 	 */
 	function render() {
+		wp_enqueue_style(
+			'klasifai-admin',
+			KLASIFAI_PLUGIN_URL . '/assets/css/admin.css',
+			[],
+			KLASIFAI_PLUGIN_VERSION,
+			'all'
+		);
+
 		$fm = new \Fieldmanager_Group( [
 				'name'     => $this->group,
 				'children' => [
@@ -117,6 +125,10 @@ class SettingsSupport {
 			]
 		] );
 
+		$fields['category_taxonomy'] = $this->get_taxonomy_picker(
+			'category_taxonomy', 'Category Taxonomy', 'category'
+		);
+
 		$fields['keyword'] = new \Fieldmanager_Checkbox( [
 			'label' => 'Keywords',
 			'display_if' => [
@@ -139,6 +151,10 @@ class SettingsSupport {
 				'max' => 100,
 			]
 		] );
+
+		$fields['keyword_taxonomy'] = $this->get_taxonomy_picker(
+			'keyword_taxonomy', 'Keyword Taxonomy', 'keyword'
+		);
 
 		$fields['concept'] = new \Fieldmanager_Checkbox( [
 			'label' => 'Concepts',
@@ -163,6 +179,9 @@ class SettingsSupport {
 			]
 		] );
 
+		$fields['concept_taxonomy'] = $this->get_taxonomy_picker(
+			'concept_taxonomy', 'Concept Taxonomy', 'concept'
+		);
 
 		$fields['entity'] = new \Fieldmanager_Checkbox( [
 			'label' => 'Entities',
@@ -187,8 +206,35 @@ class SettingsSupport {
 			]
 		] );
 
+		$fields['entity_taxonomy'] = $this->get_taxonomy_picker(
+			'entity_taxonomy', 'Entity Taxonomy', 'entity'
+		);
 
 		return $fields;
+	}
+
+	function get_taxonomy_picker( $name, $label, $parent ) {
+		return new \Fieldmanager_Select( [
+			'name'        => $name,
+			'label'       => $label,
+			'first_empty' => true,
+			'options'     => $this->get_supported_taxonomies(),
+			'display_if'  => [
+				'src'     => $parent,
+				'value'   => true,
+			]
+		] );
+	}
+
+	function get_supported_taxonomies() {
+		$taxonomies = \get_taxonomies( [], 'objects' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		return $supported;
 	}
 
 }
