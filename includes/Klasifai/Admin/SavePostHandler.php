@@ -17,6 +17,7 @@ class SavePostHandler {
 	 */
 	public function register() {
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
+		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 	}
 
 	/**
@@ -68,7 +69,14 @@ class SavePostHandler {
 		}
 
 		$output = $classifier->classify_and_link( $post_id );
-		//error_log( var_export( $output, true ) );
+
+		if ( is_wp_error( $output ) ) {
+			update_post_meta( $post_id, '_klasifai_error', [
+				'code'    => $output->get_error_code(),
+				'message' => $output->get_error_message(),
+			] );
+		}
+
 		return $output;
 	}
 
@@ -81,6 +89,46 @@ class SavePostHandler {
 		}
 
 		return $this->classifier;
+	}
+
+	/**
+	 * Outputs an Admin Notice with the error message if NLU
+	 * classification had failed earlier.
+	 */
+	function show_error_if() {
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		$post_id = $post->ID;
+
+		if ( empty( $post_id ) ) {
+			return;
+		}
+
+		$error = get_post_meta( $post_id, '_klasifai_error', true );
+
+		if ( ! empty( $error ) ) {
+			delete_post_meta( $post_id, '_klasifai_error' );
+
+			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
+			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown NLU API error';
+
+		?>
+		<div class="notice notice-error is-dismissible">
+			<p>
+				Error: Failed to classify content with the IBM Watson NLU API.
+			</p>
+			<p>
+				<?php echo esc_html( $code ); ?>
+				-
+				<?php echo esc_html( $message ); ?>
+			</p>
+		</div>
+		<?php
+		}
 	}
 
 }
