@@ -35,16 +35,20 @@ class Plugin {
 		// NOTE: Must initialize before Fieldmanager ie:- priority = 99
 		add_action( 'init', [ $this, 'init' ], 50 );
 
-		// Fire this notice if Fieldmanager is missing or inactive.
-		if ( ! function_exists( 'fm_register_submenu_page' ) ) {
-			add_action( 'admin_notices', [ $this, 'klasifai_fieldmanager_notice' ] );
-		}
+
 	}
 
 	/**
 	 * Initializes the Klasifai plugin modules and support objects.
 	 */
 	function init() {
+
+		// Fire this notice if Fieldmanager is missing or inactive.
+		if ( ! function_exists( 'fm_register_submenu_page' ) ) {
+			add_action( 'admin_notices', [ $this, 'klasifai_fieldmanager_notice' ] );
+		}
+
+		
 		do_action( 'before_klasifai_init' );
 		$this->taxonomy_factory = new Taxonomy\TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
