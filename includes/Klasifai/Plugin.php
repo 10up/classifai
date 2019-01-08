@@ -34,6 +34,11 @@ class Plugin {
 	public function enable() {
 		// NOTE: Must initialize before Fieldmanager ie:- priority = 99
 		add_action( 'init', [ $this, 'init' ], 50 );
+
+		// Fire this notice if Fieldmanager is missing or inactive.
+		if ( ! function_exists( 'fm_register_submenu_page' ) ) {
+			add_action( 'admin_notices', [ $this, 'klasifai_fieldmanager_notice' ] );
+		}
 	}
 
 	/**
@@ -41,7 +46,6 @@ class Plugin {
 	 */
 	function init() {
 		do_action( 'before_klasifai_init' );
-
 		$this->taxonomy_factory = new Taxonomy\TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -85,6 +89,16 @@ class Plugin {
 				'rss', 'Klasifai\Command\RSSImporterCommand'
 			);
 		}
+	}
+
+	/**
+	 * Create a notice if Fieldmanager is missing or inactive.
+	 */
+	function klasifai_fieldmanager_notice() {
+		$class   = 'notice notice-error';
+		$message = 'Klasifai requires the Fieldmanager plugin. It is either not installed or inactive.';
+		printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+		error_log( $message );
 	}
 
 }

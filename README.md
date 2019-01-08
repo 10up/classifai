@@ -4,6 +4,10 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 
 [![Build Status](https://travis-ci.org/10up/klasifai.svg?branch=master)](https://travis-ci.org/10up/klasifai)
 
+## Dependencies
+
+* [Fieldmanager](http://fieldmanager.org/)
+
 ## Features
 
 * Classify Post Content using IBM Watson NLU API
@@ -15,7 +19,7 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 
 #### 1. Download or Clone this repo
 
-#### 2. Activate Plugin
+#### 2. Activate Plugin ( ensure the Fieldmanager is also installed and active )
 
 #### 3. Configure IBM Watson API Keys under Settings > Klasifai
 
