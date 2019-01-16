@@ -74,35 +74,65 @@ class SettingsPage {
 	 * Set up the fields for each section.
 	 */
 	public function setup_fields_sections() {
+		//Create the Credentials Section
+		$this->do_credentials_section();
+
+		// Create the post types section
+		$this->do_post_types_section();
+
+		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'klasifai-settings' );
+	}
+
+	/**
+	 * Helper method to keep the setup_fields_sections method manageable
+	 */
+	protected function do_credentials_section() {
 		add_settings_section( 'credentials', esc_html__( 'IBM Watson API Credentials', 'klasifai' ), '', 'klasifai-settings' );
 		add_settings_field(
 			'username',
 			esc_html__( 'Username', 'klasifai' ),
-			[ $this, 'text_input' ],
+			[ $this, 'render_input' ],
 			'klasifai-settings',
 			'credentials',
 			[
 				'label_for'    => 'watson_username',
 				'option_index' => 'credentials',
+				'input_type'   => 'text',
 			]
 		);
 		add_settings_field(
 			'password',
 			esc_html__( 'Password', 'klasifai' ),
-			[ $this, 'text_input' ],
+			[ $this, 'render_input' ],
 			'klasifai-settings',
 			'credentials',
 			[
 				'label_for'    => 'watson_password',
 				'option_index' => 'credentials',
+				'input_type'   => 'text',
 			]
 		);
+	}
 
-
-
-
+	protected function do_post_types_section() {
+		//Add the settings section
 		add_settings_section( 'post-types', 'Post Types to classify', '', 'klasifai-settings' );
-		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'klasifai-settings' );
+
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		foreach ( $post_types as $post_type ) {
+			add_settings_field(
+				$post_type->name,
+				$post_type->label,
+				[ $this, 'render_input' ],
+				'klasifai-settings',
+				'post-types',
+				[
+					'label_for'    => $post_type->name,
+					'option_index' => 'post_types',
+					'input_type'   => 'checkbox',
+				]
+			);
+		}
 	}
 
 
@@ -118,6 +148,9 @@ class SettingsPage {
 	 * Render the settings page.
 	 */
 	public function render_settings_page() {
+
+		$settings = $this->get_settings();
+		echo '<pre>' . print_r( $settings ,1 ) . '</pre>';
 		?>
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Klasifai Settings', 'klasifai' ); ?></h2>
@@ -139,20 +172,34 @@ class SettingsPage {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function text_input( $args ) {
+	public function render_input( $args ) {
 		$setting_index = $this->get_settings( $args['option_index'] );
+		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 		?>
-		<input type="text" id="<?php echo esc_attr( $args['label_for'] ); ?>" name="klasifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]" value="<?php echo esc_attr( $value ); ?>" />
+		<input
+			type="<?php echo esc_attr( $type ); ?>"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="klasifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
+			<?php if ( 'text' === $type ) : ?>
+				value="<?php echo esc_attr( $value ); ?>"
+			<?php elseif ( 'checkbox' === $type ) : ?>
+				value="1"
+				<?php checked( '1', $value ); ?>
+			<?php endif; ?>
+		/>
 		<?php
 	}
+
+
+
 
 
 	/**
 	 * Sanitization for the options being saved.
 	 * @param array $settings Array of settings about to be saved.
 	 *
-	 * @return array
+	 * @return array The sanitized settings to be saved.
 	 */
 	function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
@@ -163,6 +210,16 @@ class SettingsPage {
 
 		if ( isset( $settings['credentials']['watson_password'] ) ) {
 			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
+		}
+
+		// Sanitize the post type checkboxes
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		foreach ( $post_types as $post_type ) {
+			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = absint( $settings['post_types'][ $post_type->name ] );
+			} else {
+				$new_settings['post_types'][ $post_type->name ] = null;
+			}
 		}
 
 		return $new_settings;
