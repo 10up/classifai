@@ -63,6 +63,7 @@ class Plugin {
 		$this->admin_support = [
 			new Admin\SettingsSupport(),
 			new Admin\SavePostHandler(),
+			new Admin\SettingsPage()
 		];
 
 		foreach ( $this->admin_support as $support ) {
