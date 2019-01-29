@@ -16,6 +16,12 @@ class SettingsPage {
 	 */
 	public $option = 'klasifai_settings';
 
+	public $features = [
+		'category',
+		'keyword',
+		'entity',
+	];
+
 	/**
 	 * The admin_support items require this method.
 	 * @todo remove this requirement.
@@ -61,8 +67,8 @@ class SettingsPage {
 	public function register_admin_menu_item() {
 		add_submenu_page(
 			'options-general.php',
-			esc_html__( 'Klasifai 2', 'klasifai' ),
-			esc_html__( 'Klasifai 2', 'klasifai' ),
+			esc_html__( 'Klasifai', 'klasifai' ),
+			esc_html__( 'Klasifai', 'klasifai' ),
 			'manage_options',
 			'klasifai-settings',
 			[ $this, 'render_settings_page' ]
@@ -80,7 +86,10 @@ class SettingsPage {
 		// Create the post types section
 		$this->do_post_types_section();
 
-		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'klasifai-settings' );
+		// Create features section
+		$this->do_watson_features_section();
+
+
 	}
 
 	/**
@@ -135,6 +144,55 @@ class SettingsPage {
 		}
 	}
 
+	protected function do_watson_features_section() {
+		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'klasifai-settings' );
+
+		foreach ( $this->features as $feature ) {
+			$title = ucfirst( $feature );
+			//Checkbox
+			add_settings_field(
+				$feature,
+				sprintf( esc_html__( '%s:', 'klasifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				[ $this, 'render_input' ],
+				'klasifai-settings',
+				'watson-features',
+				[
+					'label_for'    => $feature,
+					'option_index' => 'features',
+					'input_type'   => 'checkbox',
+				]
+			);
+			// Threshold
+			add_settings_field(
+				"{$feature}-threshold",
+				sprintf( esc_html__( '%s Threshold (%%):', 'klasifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				[ $this, 'render_input' ],
+				'klasifai-settings',
+				'watson-features',
+				[
+					'label_for'     => "{$feature}_threshold",
+					'option_index'  => 'features',
+					'input_type'    => 'text',
+					'default_value' => 70,
+				]
+			);
+			// Taxonomy
+			add_settings_field(
+				"{$feature}-taxonomy",
+				sprintf( esc_html__( '%s Taxonomy:', 'klasifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				[ $this, 'render_select' ],
+				'klasifai-settings',
+				'watson-features',
+				[
+					'label_for'    => "{$feature}_taxonomy",
+					'option_index' => 'features',
+					'feature'      => $feature,
+				]
+			);
+
+		}
+	}
+
 
 	/**
 	 * Register the settings and sanitzation callback method.
@@ -150,7 +208,6 @@ class SettingsPage {
 	public function render_settings_page() {
 
 		$settings = $this->get_settings();
-		echo '<pre>' . print_r( $settings ,1 ) . '</pre>';
 		?>
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Klasifai Settings', 'klasifai' ); ?></h2>
@@ -176,19 +233,55 @@ class SettingsPage {
 		$setting_index = $this->get_settings( $args['option_index'] );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		// Check for a default value
+		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="klasifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
-			<?php if ( 'text' === $type ) : ?>
-				value="<?php echo esc_attr( $value ); ?>"
-			<?php elseif ( 'checkbox' === $type ) : ?>
-				value="1"
-				<?php checked( '1', $value ); ?>
-			<?php endif; ?>
+			<?php
+			switch ( $type ) {
+				case 'text':
+				case 'number':
+					echo 'value="' . esc_attr( $value ) . '"';
+					break;
+				case 'checkbox':
+					echo 'value="1"';
+					checked( '1', $value );
+					break;
+			}
+			?>
 		/>
 		<?php
+	}
+
+	public function render_select( $args ) {
+		$taxonomies = $this->get_supported_taxonomies();
+		$features   = $this->get_settings( 'features' );
+		?>
+		<select id="<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>" name="klasifai_settings[features][<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>]">
+			<option><?php esc_html_e( 'Please choose', 'klasifai' ); ?></option>
+			<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
+				<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $features[ "{$args['feature']}_taxonomy" ], esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Return the list of supported taxonomies
+	 * @return array
+	 */
+	public function get_supported_taxonomies() {
+		$taxonomies = \get_taxonomies( [], 'objects' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		return $supported;
 	}
 
 
@@ -222,6 +315,25 @@ class SettingsPage {
 			}
 		}
 
+
+		foreach ( $this->features as $feature ) {
+
+			// Set the enabled flag.
+			if ( isset( $settings['features'][ $feature ] ) ) {
+				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
+			} else {
+				$new_settings['features'][ $feature ] = null;
+			}
+
+			// Set the threshold
+			if ( isset( $settings['features'][ "{$feature}_threshold" ] ) ) {
+				$new_settings['features'][ "{$feature}_threshold" ] = min( absint( $settings['features'][ "{$feature}_threshold" ] ), 100 );
+			}
+
+			if ( isset( $settings['features'][ "{$feature}_taxonomy"] ) ) {
+				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
+			}
+		}
 		return $new_settings;
 	}
 
