@@ -209,8 +209,6 @@ class SettingsPage {
 	 * Render the settings page.
 	 */
 	public function render_settings_page() {
-
-		$settings = $this->get_settings();
 		?>
 		<div class="wrap">
 			<h2><?php esc_html_e( 'Klasifai Settings', 'klasifai' ); ?></h2>
