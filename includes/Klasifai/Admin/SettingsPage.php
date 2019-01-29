@@ -16,6 +16,9 @@ class SettingsPage {
 	 */
 	public $option = 'klasifai_settings';
 
+	/**
+	 * List of Watson Features.
+	 */
 	public $features = [
 		'category',
 		'keyword',
@@ -70,7 +73,7 @@ class SettingsPage {
 			esc_html__( 'Klasifai', 'klasifai' ),
 			esc_html__( 'Klasifai', 'klasifai' ),
 			'manage_options',
-			'klasifai-settings',
+			'klasifai_settings',
 			[ $this, 'render_settings_page' ]
 		);
 	}
