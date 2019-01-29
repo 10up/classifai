@@ -61,9 +61,8 @@ class Plugin {
 	 */
 	function init_admin_support() {
 		$this->admin_support = [
-			new Admin\SettingsSupport(),
 			new Admin\SavePostHandler(),
-			new Admin\SettingsPage()
+			new Admin\SettingsPage(),
 		];
 
 		foreach ( $this->admin_support as $support ) {
