@@ -1,23 +1,16 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: ryanwelcher
- * Date: 2019-01-16
- * Time: 11:45
- */
 
 namespace Klasifai\Admin;
-
 
 class SettingsPage {
 
 	/**
-	 * Option that stores the klasifai settings
+	 * @var string $option Option that stores the klasifai settings
 	 */
 	public $option = 'klasifai_settings';
 
 	/**
-	 * List of Watson Features.
+	 * @var array $features of Watson Features.
 	 */
 	public $features = [
 		'category',
@@ -27,6 +20,7 @@ class SettingsPage {
 
 	/**
 	 * The admin_support items require this method.
+	 *
 	 * @todo remove this requirement.
 	 * @return bool
 	 */
@@ -37,7 +31,7 @@ class SettingsPage {
 	/**
 	 * Helper to get the settings and allow for settings default values.
 	 *
-	 * @package string|bool|mixed Optional. Name of the settings option index.
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
 	 *
 	 * @return array
 	 */
@@ -83,7 +77,7 @@ class SettingsPage {
 	 * Set up the fields for each section.
 	 */
 	public function setup_fields_sections() {
-		//Create the Credentials Section
+		// Create the Credentials Section.
 		$this->do_credentials_section();
 
 		// Create the post types section
@@ -92,11 +86,10 @@ class SettingsPage {
 		// Create features section
 		$this->do_watson_features_section();
 
-
 	}
 
 	/**
-	 * Helper method to keep the setup_fields_sections method manageable
+	 * Helper method to create the credentials section
 	 */
 	protected function do_credentials_section() {
 		add_settings_section( 'credentials', esc_html__( 'IBM Watson API Credentials', 'klasifai' ), '', 'klasifai-settings' );
@@ -126,8 +119,11 @@ class SettingsPage {
 		);
 	}
 
+	/**
+	 * Helper method to create the post types section
+	 */
 	protected function do_post_types_section() {
-		//Add the settings section
+		// Add the settings section.
 		add_settings_section( 'post-types', 'Post Types to classify', '', 'klasifai-settings' );
 
 		$post_types = get_post_types( [ 'public' => true ], 'objects' );
@@ -147,12 +143,15 @@ class SettingsPage {
 		}
 	}
 
+	/**
+	 * Helper method to create the watson features section
+	 */
 	protected function do_watson_features_section() {
 		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'klasifai-settings' );
 
 		foreach ( $this->features as $feature ) {
 			$title = ucfirst( $feature );
-			//Checkbox
+			// Checkbox.
 			add_settings_field(
 				$feature,
 				sprintf( esc_html__( '%s:', 'klasifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
@@ -257,6 +256,9 @@ class SettingsPage {
 		<?php
 	}
 
+	/**
+	 * @param array $args The settings for the select input instance.
+	 */
 	public function render_select( $args ) {
 		$taxonomies = $this->get_supported_taxonomies();
 		$features   = $this->get_settings( 'features' );
@@ -272,6 +274,7 @@ class SettingsPage {
 
 	/**
 	 * Return the list of supported taxonomies
+	 *
 	 * @return array
 	 */
 	public function get_supported_taxonomies() {
@@ -291,11 +294,12 @@ class SettingsPage {
 
 	/**
 	 * Sanitization for the options being saved.
+	 *
 	 * @param array $settings Array of settings about to be saved.
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	function sanitize_settings( $settings ) {
+	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 
 		if ( isset( $settings['credentials']['watson_username'] ) ) {
@@ -316,7 +320,6 @@ class SettingsPage {
 			}
 		}
 
-
 		foreach ( $this->features as $feature ) {
 
 			// Set the enabled flag.
@@ -331,7 +334,7 @@ class SettingsPage {
 				$new_settings['features'][ "{$feature}_threshold" ] = min( absint( $settings['features'][ "{$feature}_threshold" ] ), 100 );
 			}
 
-			if ( isset( $settings['features'][ "{$feature}_taxonomy"] ) ) {
+			if ( isset( $settings['features'][ "{$feature}_taxonomy" ] ) ) {
 				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
 			}
 		}
