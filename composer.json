@@ -3,8 +3,8 @@
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "authors": [
     {
-      "name": "Darshan Sawardekar",
-      "email": "darshan@10up.com"
+      "name": "10up",
+      "email": "info@10up.com"
     }
   ],
   "require": {

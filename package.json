@@ -2,9 +2,6 @@
   "name": "klasifai",
   "version": "1.1.0",
   "description": "Classifies WordPress content using IBM Watson NLU API",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
