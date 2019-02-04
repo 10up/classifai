@@ -5,6 +5,7 @@
 		<!-- All of the files are missing comments -->
 		<exclude name="Squiz.Commenting.FileComment.Missing" />
 		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
 		<!-- Class properties don't need this -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 	</rule>

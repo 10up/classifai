@@ -2,20 +2,22 @@
 
 namespace Klasifai;
 
+use Klasifai\Taxonomy\TaxonomyFactory;
+
 /**
  * The main Klasifai plugin object. Used as a singleton.
  */
 class Plugin {
 
 	/**
-	 * singleton plugin instance
+	 * @var $instance Plugin singleton plugin instance
 	 */
-	static public $instance = null;
+	public static $instance = null;
 
 	/**
 	 * Lazy initialize the plugin
 	 */
-	static public function get_instance() {
+	public static function get_instance() {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new Plugin();
 		}
@@ -24,7 +26,7 @@ class Plugin {
 	}
 
 	/**
-	 * Watson taxonomy factory
+	 * @var $taxonomy_factory TaxonomyFactory Watson taxonomy factory
 	 */
 	public $taxonomy_factory;
 
@@ -34,12 +36,13 @@ class Plugin {
 	public function enable() {
 		// NOTE: Must initialize before Fieldmanager ie:- priority = 99
 		add_action( 'init', [ $this, 'init' ], 50 );
+		add_action( 'init', [ $this, 'i18n' ] );
 	}
 
 	/**
 	 * Initializes the Klasifai plugin modules and support objects.
 	 */
-	function init() {
+	public function init() {
 		do_action( 'before_klasifai_init' );
 
 		$this->taxonomy_factory = new Taxonomy\TaxonomyFactory();
@@ -57,9 +60,18 @@ class Plugin {
 	}
 
 	/**
+	 * Loads the plugin translations.
+	 *
+	 * @return bool
+	 */
+	public function i18n() {
+		return load_plugin_textdomain( 'klasifai', false, KLASIFAI_PLUGIN_DIR . '/languages' );
+	}
+
+	/**
 	 * Initializes Admin only support objects
 	 */
-	function init_admin_support() {
+	public function init_admin_support() {
 		$this->admin_support = [
 			new Admin\SavePostHandler(),
 			new Admin\SettingsPage(),
@@ -75,14 +87,16 @@ class Plugin {
 	/**
 	 * Initializes the Klasifai WP CLI integration
 	 */
-	function init_commands() {
+	public function init_commands() {
 		\WP_CLI::add_command(
-			'klasifai', 'Klasifai\Command\KlasifaiCommand'
+			'klasifai',
+			'Klasifai\Command\KlasifaiCommand'
 		);
 
 		if ( defined( 'KLASIFAI_DEV' ) && KLASIFAI_DEV ) {
 			\WP_CLI::add_command(
-				'rss', 'Klasifai\Command\RSSImporterCommand'
+				'rss',
+				'Klasifai\Command\RSSImporterCommand'
 			);
 		}
 	}

@@ -2,10 +2,10 @@
 /**
  * Plugin Name:     Klasifai
  * Description:     Classifies WordPress content using IBM Watson NLU API
- * Author:          Darshan Sawardekar, 10up
+ * Author:          Darshan Sawardekar, Ryan Welcher, 10up
  * Author URI:      https://10up.com
  * Text Domain:     klasifai
- * Domain Path:     /languages
+ * Domain Path:     /languages/
  * Version:         1.1.0
  */
 
@@ -15,7 +15,7 @@
  * config.local.php to override any constant in config.php.
  *
  * @param string $name The constant name
- * @param mixed $value The constant value
+ * @param mixed  $value The constant value
  * @return void
  */
 function klasifai_define( $name, $value ) {
@@ -59,7 +59,7 @@ function klasifai_can_autoload() {
 		return true;
 	} else {
 		error_log(
-			"Fatal Error: Composer not setup in " . KLASIFAI_PLUGIN_DIR
+			'Fatal Error: Composer not setup in ' . KLASIFAI_PLUGIN_DIR
 		);
 
 		return false;
@@ -93,11 +93,14 @@ function klasifai_autorun() {
 	}
 }
 
+/**
+ * Generate a notice if autoload fails.
+ */
 function klasifai_autoload_notice() {
 	$class   = 'notice notice-error';
 	$message = 'Error: Please run $ composer install in the klasifai plugin directory.';
 
-	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );// @codingStandardsIgnoreLine This is not a security issue.
 	error_log( $message );
 }
 
