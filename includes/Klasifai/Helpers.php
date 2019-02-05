@@ -228,5 +228,13 @@ function get_feature_taxonomy( $feature ) {
 		}
 	}
 
-	return $taxonomy;
+	/**
+	 * Filter the Taxonomy for the specified NLU feature.
+	 *
+	 * @param $taxonomy The taxonomy to use.
+	 * @param $feature  The NLU feature this taxonomy is for.
+	 *
+	 * @return $taxonomy The filtered taxonomy.
+	 */
+	return apply_filters( 'klassify_taxonomy_for_feature', $taxonomy, $feature );
 }
