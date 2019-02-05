@@ -50,6 +50,19 @@ class SavePostHandler {
 	 * @param int $post_id the post to classify & link
 	 */
 	function classify( $post_id ) {
+
+		/**
+		 * Filter whether Klassify should classify a post.
+		 *
+		 * Default is true, return false to skip classifying a post.
+		 *
+		 * @param int $post_id The id of the post to be classified.
+		 */
+		$klassify_should_classify_post = apply_filters( 'klassify_should_classify_post', true );
+
+		if ( ! $klassify_should_classify_post ) {
+			return false;
+		}
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
