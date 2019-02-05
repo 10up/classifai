@@ -46,7 +46,11 @@ class Classifier {
 			$request_options['timeout'] = WATSON_TIMEOUT;
 		}
 
-		return $request->post( $this->endpoint, $request_options );
+		$classified_data = $request->post( $this->endpoint, $request_options );
+		/**
+		 * Filter the classified data returned from the API call.
+		 */
+		return apply_filters( 'klassify_classified_data', $classified_data );
 	}
 
 	/* helpers */
