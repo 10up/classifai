@@ -203,7 +203,7 @@ function get_feature_threshold( $feature ) {
  	 * @param string $threshold The threshold to use
  	 * @param string $feature   The feature whose threshold to lookup.
 	 */
-	return apply_filters( 'klassify_feature_threshold', $threshold, $feature );
+	return apply_filters( 'klasifai_feature_threshold', $threshold, $feature );
 }
 
 /**
@@ -239,5 +239,5 @@ function get_feature_taxonomy( $feature ) {
 	 *
 	 * @return string $taxonomy The filtered taxonomy.
 	 */
-	return apply_filters( 'klassify_taxonomy_for_feature', $taxonomy, $feature );
+	return apply_filters( 'klasifai_taxonomy_for_feature', $taxonomy, $feature );
 }

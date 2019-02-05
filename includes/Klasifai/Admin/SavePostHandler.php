@@ -58,9 +58,9 @@ class SavePostHandler {
 		 *
 		 * @param int $post_id The id of the post to be classified.
 		 */
-		$klassify_should_classify_post = apply_filters( 'klassify_should_classify_post', true );
+		$klasifai_should_classify_post = apply_filters( 'klasifai_should_classify_post', true );
 
-		if ( ! $klassify_should_classify_post ) {
+		if ( ! $klasifai_should_classify_post ) {
 			return false;
 		}
 		$classifier = $this->get_classifier();

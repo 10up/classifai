@@ -50,7 +50,7 @@ class Classifier {
 		/**
 		 * Filter the classified data returned from the API call.
 		 */
-		return apply_filters( 'klassify_classified_data', $classified_data );
+		return apply_filters( 'klasifai_classified_data', $classified_data );
 	}
 
 	/* helpers */
