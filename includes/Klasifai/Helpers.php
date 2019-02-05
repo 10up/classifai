@@ -196,11 +196,14 @@ function get_feature_threshold( $feature ) {
 		}
 	}
 
-	if ( ! empty( $threshold ) ) {
-		return $threshold / 100;
-	} else {
-		return 0.7;
-	}
+	$threshold = empty( $threshold ) ? 0.7 : $threshold / 100;
+	/**
+	 * Filter the threshold for a specific feature.
+	 *
+ 	 * @param string $threshold The threshold to use
+ 	 * @param string $feature   The feature whose threshold to lookup.
+	 */
+	return apply_filters( 'klassify_feature_threshold', $threshold, $feature );
 }
 
 /**
@@ -231,10 +234,10 @@ function get_feature_taxonomy( $feature ) {
 	/**
 	 * Filter the Taxonomy for the specified NLU feature.
 	 *
-	 * @param $taxonomy The taxonomy to use.
-	 * @param $feature  The NLU feature this taxonomy is for.
+	 * @param string $taxonomy The taxonomy to use.
+	 * @param string $feature  The NLU feature this taxonomy is for.
 	 *
-	 * @return $taxonomy The filtered taxonomy.
+	 * @return string $taxonomy The filtered taxonomy.
 	 */
 	return apply_filters( 'klassify_taxonomy_for_feature', $taxonomy, $feature );
 }
