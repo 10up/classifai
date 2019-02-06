@@ -1,3 +1,6 @@
 {
+  "globals": {
+    "wp": "readable"
+  },
   "extends": "@10up/eslint-config"
 }
