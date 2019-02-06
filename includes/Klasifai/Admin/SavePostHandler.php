@@ -49,7 +49,7 @@ class SavePostHandler {
 	 *
 	 * @param int $post_id the post to classify & link
 	 */
-	function classify( $post_id ) {
+	public function classify( $post_id ) {
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
@@ -83,7 +83,7 @@ class SavePostHandler {
 	/**
 	 * Lazy initializes the Post Classifier object
 	 */
-	function get_classifier() {
+	public function get_classifier() {
 		if ( is_null( $this->classifier ) ) {
 			$this->classifier = new \Klasifai\PostClassifier();
 		}
@@ -95,7 +95,7 @@ class SavePostHandler {
 	 * Outputs an Admin Notice with the error message if NLU
 	 * classification had failed earlier.
 	 */
-	function show_error_if() {
+	public function show_error_if() {
 		global $post;
 
 		if ( empty( $post ) ) {
@@ -114,7 +114,7 @@ class SavePostHandler {
 			delete_post_meta( $post_id, '_klasifai_error' );
 
 			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
-			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown NLU API error';
+			$message = ! empty( $error['message'] ) ? $error['message'] : esc_attr_e( 'Unknown NLU API error', 'klasifai' );
 
 		?>
 		<div class="notice notice-error is-dismissible">
