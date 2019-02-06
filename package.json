@@ -3,7 +3,8 @@
   "version": "1.1.0",
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "webpack --mode=production",
+    "dev": "webpack --watch --mode=development"
   },
   "husky": {
     "hooks": {
@@ -22,7 +23,17 @@
     "role": "developer"
   },
   "devDependencies": {
+    "@10up/eslint-config": "^1.0.8",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-react": "^7.0.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.5",
+    "eslint": "^5.13.0",
+    "eslint-loader": "^2.1.2",
     "husky": "^1.3.1",
-    "lint-staged": "^8.1.1"
+    "lint-staged": "^8.1.1",
+    "webpack": "^4.29.2",
+    "webpack-cli": "^3.2.3"
   }
 }
