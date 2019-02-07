@@ -11,7 +11,7 @@ if ( file_exists( __DIR__ . '/.commit' ) ) {
 }
 
 // Useful global constants
-klasifai_define( 'KLASIFAI_PLUGIN', __DIR__ . '/ama.php' );
+klasifai_define( 'KLASIFAI_PLUGIN', __DIR__ . '/klasifai.php' );
 klasifai_define( 'KLASIFAI_PLUGIN_VERSION', $plugin_version );
 klasifai_define( 'KLASIFAI_PLUGIN_DIR', __DIR__ );
 klasifai_define( 'KLASIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
