@@ -62,6 +62,19 @@ class Plugin {
 			$this->init_commands();
 		}
 
+		$post_types = get_supported_post_types();
+		foreach ( $post_types as $post_type ) {
+			register_meta(
+				$post_type,
+				'_klasifai_error',
+				[
+					'show_in_rest' => true,
+					'type'         => 'string',
+					'single'       => true,
+				]
+			);
+		}
+
 		do_action( 'after_klasifai_init' );
 	}
 
