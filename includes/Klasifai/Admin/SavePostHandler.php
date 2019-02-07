@@ -150,14 +150,16 @@ class SavePostHandler {
 		}
 	}
 
-	function is_rest_route() {
-		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+	/**
+	 * We need to determine if we're doing a REST call.
+	 *
+	 * @return bool
+	 */
+	public function is_rest_route() {
+		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/post' ) ) {
 			return true;
-		} else if ( ! empty( $_GET['rest_route'] ) ) {
-			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 }
