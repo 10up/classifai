@@ -8,7 +8,7 @@ namespace Klasifai\Admin;
 class SavePostHandler {
 
 	/**
-	 * Lazy loaded classifier object
+	 * @var $classifier \Klasifai\PostClassifier Lazy loaded classifier object
 	 */
 	public $classifier;
 
@@ -26,11 +26,11 @@ class SavePostHandler {
 	public function can_register() {
 		if ( is_admin() ) {
 			return true;
-		} else if ( $this->is_rest_route() ) {
+		} elseif ( $this->is_rest_route() ) {
 			return true;
-		} else if ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
+		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
 			return false;
-		} else if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return false;
 		} else {
 			return false;
@@ -47,8 +47,8 @@ class SavePostHandler {
 	 *
 	 * @param int $post_id The post that was saved
 	 */
-	function did_save_post( $post_id ) {
-		if ( ! empty( $_GET['classic-editor'] ) ) {
+	public function did_save_post( $post_id ) {
+		if ( ! empty( $_GET['classic-editor'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -56,7 +56,7 @@ class SavePostHandler {
 		$post_type   = get_post_type( $post_id );
 		$post_status = get_post_status( $post_id );
 
-		if ( $post_status === 'publish' && in_array( $post_type, $supported ) ) {
+		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) ) {
 			$this->classify( $post_id );
 		}
 	}
@@ -66,9 +66,10 @@ class SavePostHandler {
 	 * Existing terms relationships are removed before classification.
 	 *
 	 * @param int $post_id the post to classify & link
+	 *
+	 * @return array
 	 */
-	function classify( $post_id ) {
-		//error_log( 'classify: ' . $post_id );
+	public function classify( $post_id ) {
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
@@ -90,10 +91,14 @@ class SavePostHandler {
 		$output = $classifier->classify_and_link( $post_id );
 
 		if ( is_wp_error( $output ) ) {
-			update_post_meta( $post_id, '_klasifai_error', [
-				'code'    => $output->get_error_code(),
-				'message' => $output->get_error_message(),
-			] );
+			update_post_meta(
+				$post_id,
+				'_klasifai_error',
+				[
+					'code'    => $output->get_error_code(),
+					'message' => $output->get_error_message(),
+				]
+			);
 		}
 
 		return $output;
@@ -102,7 +107,7 @@ class SavePostHandler {
 	/**
 	 * Lazy initializes the Post Classifier object
 	 */
-	function get_classifier() {
+	public function get_classifier() {
 		if ( is_null( $this->classifier ) ) {
 			$this->classifier = new \Klasifai\PostClassifier();
 		}
@@ -114,7 +119,7 @@ class SavePostHandler {
 	 * Outputs an Admin Notice with the error message if NLU
 	 * classification had failed earlier.
 	 */
-	function show_error_if() {
+	public function show_error_if() {
 		global $post;
 
 		if ( empty( $post ) ) {
@@ -135,18 +140,18 @@ class SavePostHandler {
 			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
 			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown NLU API error';
 
-		?>
-		<div class="notice notice-error is-dismissible">
-			<p>
-				Error: Failed to classify content with the IBM Watson NLU API.
-			</p>
-			<p>
-				<?php echo esc_html( $code ); ?>
-				-
-				<?php echo esc_html( $message ); ?>
-			</p>
-		</div>
-		<?php
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p>
+					Error: Failed to classify content with the IBM Watson NLU API.
+				</p>
+				<p>
+					<?php echo esc_html( $code ); ?>
+					-
+					<?php echo esc_html( $message ); ?>
+				</p>
+			</div>
+			<?php
 		}
 	}
 
