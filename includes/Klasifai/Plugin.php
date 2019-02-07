@@ -82,8 +82,7 @@ class Plugin {
 				'_klasifai_error',
 				[
 					'show_in_rest' => true,
-					'type'         => 'string',
-					'single'       => true,
+					//'type' => 'array',
 				]
 			);
 		}

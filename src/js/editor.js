@@ -10,14 +10,14 @@ subscribe( () => {
 		saveHappened = true === wp.data.select( 'core/editor' ).isSavingPost();
 	}
 
-	console.log( 'saveHappened', saveHappened );
 	if ( saveHappened && false === wp.data.select( 'core/editor' ).isSavingPost() && false === showingNotice ) {
-
 		const meta = select( 'core/editor' ).getCurrentPostAttribute( 'meta' );
-		console.log( meta, meta._klasifai_error );
-		showingNotice = true;
-		dispatch( 'core/notices' ).createErrorNotice( 'test' );
-		saveHappened = false;
-		showingNotice = false;
+		if ( meta._klasifai_error ) {
+			showingNotice = true;
+			const error = JSON.parse( meta._klasifai_error );
+			dispatch( 'core/notices' ).createErrorNotice( 'Failed to classify content with the IBM Watson NLU API. Error: ' + error.code + ' - ' + error.message );
+			saveHappened = false;
+			showingNotice = false;
+		}
 	}
 } );

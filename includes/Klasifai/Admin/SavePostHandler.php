@@ -95,12 +95,17 @@ class SavePostHandler {
 		if ( is_wp_error( $output ) ) {
 			update_post_meta(
 				$post_id,
-				'klasifai_error',
-				[
-					'code'    => $output->get_error_code(),
-					'message' => $output->get_error_message(),
-				]
+				'_klasifai_error',
+				wp_json_encode(
+					[
+						'code'    => $output->get_error_code(),
+						'message' => $output->get_error_message(),
+					]
+				)
 			);
+		} else {
+			// If there is no error, clear any existing error states.
+			delete_post_meta( $post_id, '_klasifai_error' );
 		}
 
 		return $output;
@@ -138,7 +143,7 @@ class SavePostHandler {
 
 		if ( ! empty( $error ) ) {
 			delete_post_meta( $post_id, '_klasifai_error' );
-
+			$error   = (array) json_decode( $error );
 			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
 			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown NLU API error';
 
