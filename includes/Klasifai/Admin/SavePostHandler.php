@@ -21,19 +21,37 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Always enabled by default. TODO: capabilities
+	 * Save Post handler only runs on admin or REST requests
 	 */
 	public function can_register() {
-		return true;
+		if ( is_admin() ) {
+			return true;
+		} else if ( $this->is_rest_route() ) {
+			return true;
+		} else if ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
+			return false;
+		} else if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return false;
+		} else {
+			return false;
+		}
 	}
 
 	/**
 	 * If current post type support is enabled in Klasifai settings, it
 	 * is tagged using the IBM Watson classification result.
 	 *
+	 * Skips classification if running under the Gutenberg Metabox
+	 * compatibility request. The classification is performed during the REST
+	 * lifecyle when using Gutenberg.
+	 *
 	 * @param int $post_id The post that was saved
 	 */
 	function did_save_post( $post_id ) {
+		if ( ! empty( $_GET['classic-editor'] ) ) {
+			return;
+		}
+
 		$supported   = \Klasifai\get_supported_post_types();
 		$post_type   = get_post_type( $post_id );
 		$post_status = get_post_status( $post_id );
@@ -50,6 +68,7 @@ class SavePostHandler {
 	 * @param int $post_id the post to classify & link
 	 */
 	function classify( $post_id ) {
+		//error_log( 'classify: ' . $post_id );
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
@@ -128,6 +147,16 @@ class SavePostHandler {
 			</p>
 		</div>
 		<?php
+		}
+	}
+
+	function is_rest_route() {
+		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
+			return true;
+		} else if ( ! empty( $_GET['rest_route'] ) ) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
