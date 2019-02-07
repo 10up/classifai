@@ -10,7 +10,7 @@ use function Klasifai\get_supported_post_types;
 class SavePostHandler {
 
 	/**
-	 * Lazy loaded classifier object
+	 * @var $classifier \Klasifai\PostClassifier Lazy loaded classifier object
 	 */
 	public $classifier;
 
@@ -23,24 +23,42 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Always enabled by default. TODO: capabilities
+	 * Save Post handler only runs on admin or REST requests
 	 */
 	public function can_register() {
-		return true;
+		if ( is_admin() ) {
+			return true;
+		} elseif ( $this->is_rest_route() ) {
+			return true;
+		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
+			return false;
+		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return false;
+		} else {
+			return false;
+		}
 	}
 
 	/**
 	 * If current post type support is enabled in Klasifai settings, it
 	 * is tagged using the IBM Watson classification result.
 	 *
+	 * Skips classification if running under the Gutenberg Metabox
+	 * compatibility request. The classification is performed during the REST
+	 * lifecyle when using Gutenberg.
+	 *
 	 * @param int $post_id The post that was saved
 	 */
-	function did_save_post( $post_id ) {
+	public function did_save_post( $post_id ) {
+		if ( ! empty( $_GET['classic-editor'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
 		$supported   = \Klasifai\get_supported_post_types();
 		$post_type   = get_post_type( $post_id );
 		$post_status = get_post_status( $post_id );
 
-		if ( $post_status === 'publish' && in_array( $post_type, $supported ) ) {
+		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) ) {
 			$this->classify( $post_id );
 		}
 	}
@@ -50,8 +68,10 @@ class SavePostHandler {
 	 * Existing terms relationships are removed before classification.
 	 *
 	 * @param int $post_id the post to classify & link
+	 *
+	 * @return array
 	 */
-	function classify( $post_id ) {
+	public function classify( $post_id ) {
 		$classifier = $this->get_classifier();
 
 		if ( \Klasifai\get_feature_enabled( 'category' ) ) {
@@ -73,10 +93,14 @@ class SavePostHandler {
 		$output = $classifier->classify_and_link( $post_id );
 
 		if ( is_wp_error( $output ) ) {
-			update_post_meta( $post_id, 'klasifai_error', [
-				'code'    => $output->get_error_code(),
-				'message' => $output->get_error_message(),
-			] );
+			update_post_meta(
+				$post_id,
+				'klasifai_error',
+				[
+					'code'    => $output->get_error_code(),
+					'message' => $output->get_error_message(),
+				]
+			);
 		}
 
 		return $output;
@@ -85,7 +109,7 @@ class SavePostHandler {
 	/**
 	 * Lazy initializes the Post Classifier object
 	 */
-	function get_classifier() {
+	public function get_classifier() {
 		if ( is_null( $this->classifier ) ) {
 			$this->classifier = new \Klasifai\PostClassifier();
 		}
@@ -97,7 +121,7 @@ class SavePostHandler {
 	 * Outputs an Admin Notice with the error message if NLU
 	 * classification had failed earlier.
 	 */
-	function show_error_if() {
+	public function show_error_if() {
 		global $post;
 
 		if ( empty( $post ) ) {
@@ -118,19 +142,31 @@ class SavePostHandler {
 			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
 			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown NLU API error';
 
-		?>
-		<div class="notice notice-error is-dismissible">
-			<p>
-				Error: Failed to classify content with the IBM Watson NLU API.
-			</p>
-			<p>
-				<?php echo esc_html( $code ); ?>
-				-
-				<?php echo esc_html( $message ); ?>
-			</p>
-		</div>
-		<?php
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p>
+					Error: Failed to classify content with the IBM Watson NLU API.
+				</p>
+				<p>
+					<?php echo esc_html( $code ); ?>
+					-
+					<?php echo esc_html( $message ); ?>
+				</p>
+			</div>
+			<?php
 		}
+	}
+
+	/**
+	 * We need to determine if we're doing a REST call.
+	 *
+	 * @return bool
+	 */
+	public function is_rest_route() {
+		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/post' ) ) {
+			return true;
+		}
+		return false;
 	}
 
 }
