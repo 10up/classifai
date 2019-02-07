@@ -29,30 +29,43 @@ class Plugin {
 	public $taxonomy_factory;
 
 	/**
+	 * Triggers a classification with Watson
+	 */
+	public $save_post_handler;
+
+	/**
 	 * Setup WP hooks
 	 */
 	public function enable() {
-		// NOTE: Must initialize before Fieldmanager ie:- priority = 99
-		add_action( 'init', [ $this, 'init' ], 50 );
+		add_action( 'init', [ $this, 'init' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 
+	/**
+	 * Enqueue the editor scripts.
+	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
 			'klasifai-editor', // Handle.
-			KLASIFAI_PLUGIN_URL . '/dist/js/editor.min.js', // Block.build.js: We register the block here. Built with Webpack.
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ) // Dependencies, defined above.
+			KLASIFAI_PLUGIN_URL . '/dist/js/editor.min.js',
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' )
 		);
 	}
 
 	/**
 	 * Initializes the Klasifai plugin modules and support objects.
 	 */
-	function init() {
+	public function init() {
 		do_action( 'before_klasifai_init' );
 
 		$this->taxonomy_factory = new Taxonomy\TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
+
+		$this->save_post_handler = new Admin\SavePostHandler();
+
+		if ( $this->save_post_handler->can_register() ) {
+			$this->save_post_handler->register();
+		}
 
 		if ( is_admin() ) {
 			$this->init_admin_support();
@@ -68,9 +81,8 @@ class Plugin {
 	/**
 	 * Initializes Admin only support objects
 	 */
-	function init_admin_support() {
+	public function init_admin_support() {
 		$this->admin_support = [
-			new Admin\SavePostHandler(),
 			new Admin\SettingsPage(),
 		];
 
@@ -82,9 +94,24 @@ class Plugin {
 	}
 
 	/**
+	 * Adds Klasifai Gutenberg Support if on the Gutenberg editor page
+	 */
+	public function init_admin_scripts() {
+		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
+			wp_enqueue_script(
+				'klasifai-gutenberg-support',
+				KLASIFAI_PLUGIN_URL . 'assets/js/klasifai-gutenberg-support.js',
+				[ 'editor' ],
+				KLASIFAI_PLUGIN_VERSION,
+				true
+			);
+		}
+	}
+
+	/**
 	 * Initializes the Klasifai WP CLI integration
 	 */
-	function init_commands() {
+	public function init_commands() {
 		\WP_CLI::add_command(
 			'klasifai', 'Klasifai\Command\KlasifaiCommand'
 		);
