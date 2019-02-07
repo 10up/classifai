@@ -39,7 +39,15 @@ class Plugin {
 	public function enable() {
 		// NOTE: Must initialize before Fieldmanager ie:- priority = 99
 		add_action( 'init', [ $this, 'init' ], 50 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'init_admin_scripts' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	}
+
+	public function enqueue_editor_assets() {
+		wp_enqueue_script(
+			'klasifai-editor', // Handle.
+			KLASIFAI_PLUGIN_URL . '/dist/js/editor.min.js', // Block.build.js: We register the block here. Built with Webpack.
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ) // Dependencies, defined above.
+		);
 	}
 
 	/**
@@ -73,7 +81,7 @@ class Plugin {
 	 */
 	function init_admin_support() {
 		$this->admin_support = [
-			new Admin\SettingsSupport(),
+			new Admin\SettingsPage(),
 		];
 
 		foreach ( $this->admin_support as $support ) {
