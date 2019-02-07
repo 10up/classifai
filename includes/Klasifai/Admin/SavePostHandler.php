@@ -73,7 +73,7 @@ class SavePostHandler {
 		$output = $classifier->classify_and_link( $post_id );
 
 		if ( is_wp_error( $output ) ) {
-			update_post_meta( $post_id, '_klasifai_error', [
+			update_post_meta( $post_id, 'klasifai_error', [
 				'code'    => $output->get_error_code(),
 				'message' => $output->get_error_message(),
 			] );
