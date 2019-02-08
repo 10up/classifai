@@ -2,20 +2,23 @@
 
 namespace Klasifai;
 
+use Klasifai\Admin\SavePostHandler;
+use Klasifai\Taxonomy\TaxonomyFactory;
+
 /**
  * The main Klasifai plugin object. Used as a singleton.
  */
 class Plugin {
 
 	/**
-	 * singleton plugin instance
+	 * @var $instance Plugin Singleton plugin instance
 	 */
-	static public $instance = null;
+	public static $instance = null;
 
 	/**
 	 * Lazy initialize the plugin
 	 */
-	static public function get_instance() {
+	public static function get_instance() {
 		if ( is_null( self::$instance ) ) {
 			self::$instance = new Plugin();
 		}
@@ -24,12 +27,12 @@ class Plugin {
 	}
 
 	/**
-	 * Watson taxonomy factory
+	 * @var $taxonomy_factory TaxonomyFactory Watson taxonomy factory
 	 */
 	public $taxonomy_factory;
 
 	/**
-	 * Triggers a classification with Watson
+	 * @var $save_post_handler SavePostHandler Triggers a classification with Watson
 	 */
 	public $save_post_handler;
 
@@ -48,7 +51,9 @@ class Plugin {
 		wp_enqueue_script(
 			'klasifai-editor', // Handle.
 			KLASIFAI_PLUGIN_URL . '/dist/js/editor.min.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' )
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
+			KLASIFAI_PLUGIN_VERSION,
+			true
 		);
 	}
 
@@ -73,6 +78,17 @@ class Plugin {
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$this->init_commands();
+		}
+
+		$post_types = get_supported_post_types();
+		foreach ( $post_types as $post_type ) {
+			register_meta(
+				$post_type,
+				'_klasifai_error',
+				[
+					'show_in_rest' => true,
+				]
+			);
 		}
 
 		do_action( 'after_klasifai_init' );
@@ -113,12 +129,14 @@ class Plugin {
 	 */
 	public function init_commands() {
 		\WP_CLI::add_command(
-			'klasifai', 'Klasifai\Command\KlasifaiCommand'
+			'klasifai',
+			'Klasifai\Command\KlasifaiCommand'
 		);
 
 		if ( defined( 'KLASIFAI_DEV' ) && KLASIFAI_DEV ) {
 			\WP_CLI::add_command(
-				'rss', 'Klasifai\Command\RSSImporterCommand'
+				'rss',
+				'Klasifai\Command\RSSImporterCommand'
 			);
 		}
 	}
