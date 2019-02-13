@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:     ClassifAI
- * Description:     Classifies WordPress content using IBM Watson NLU API
+ * Description:     AI-powered classification and machine learning for WordPress content
  * Author:          Darshan Sawardekar, 10up
  * Author URI:      https://10up.com
  * Text Domain:     classifai
