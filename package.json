@@ -1,5 +1,5 @@
 {
-  "name": "klasifai",
+  "name": "classifai",
   "version": "1.1.0",
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "scripts": {

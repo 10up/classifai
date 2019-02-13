@@ -1,6 +1,6 @@
 <?php
 /**
- * Global Constants for the KLASIFAI Support Plugin. Constants should be
+ * Global Constants for the Classifai Support Plugin. Constants should be
  * declared here instead of a Class.
  */
 
@@ -11,10 +11,10 @@ if ( file_exists( __DIR__ . '/.commit' ) ) {
 }
 
 // Useful global constants
-klasifai_define( 'KLASIFAI_PLUGIN', __DIR__ . '/klasifai.php' );
-klasifai_define( 'KLASIFAI_PLUGIN_VERSION', $plugin_version );
-klasifai_define( 'KLASIFAI_PLUGIN_DIR', __DIR__ );
-klasifai_define( 'KLASIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+klasifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );
+klasifai_define( 'CLASSIFAI_PLUGIN_VERSION', $plugin_version );
+klasifai_define( 'CLASSIFAI_PLUGIN_DIR', __DIR__ );
+klasifai_define( 'CLASSIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Taxonomies
 klasifai_define( 'WATSON_CATEGORY_TAXONOMY', 'watson-category' );
