@@ -4,7 +4,8 @@
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "scripts": {
     "build": "webpack --mode=production",
-    "dev": "webpack --watch --mode=development"
+    "dev": "webpack --watch --mode=development",
+    "tests": "./vendor/bin/phpunit"
   },
   "husky": {
     "hooks": {
