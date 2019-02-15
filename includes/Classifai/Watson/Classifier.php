@@ -49,8 +49,12 @@ class Classifier {
 		$classified_data = $request->post( $this->endpoint, $request_options );
 		/**
 		 * Filter the classified data returned from the API call.
+		 *
+		 * @param array $classified_data The classified data.
+		 *
+		 * @return array $classified_data The filtered classified data.
 		 */
-		return apply_filters( 'klasifai_classified_data', $classified_data );
+		return apply_filters( 'classifai_classified_data', $classified_data );
 	}
 
 	/* helpers */

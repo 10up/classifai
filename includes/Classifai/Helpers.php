@@ -198,12 +198,15 @@ function get_feature_threshold( $feature ) {
 
 	$threshold = empty( $threshold ) ? 0.7 : $threshold / 100;
 	/**
-	 * Filter the threshold for a specific feature.
+	 * Filter the threshold for a specific feature. Any results below the
+	 * threshold will be ignored.
 	 *
- 	 * @param string $threshold The threshold to use
- 	 * @param string $feature   The feature whose threshold to lookup.
+ 	 * @param string $threshold The threshold to use.
+	 * @param string $feature   The feature whose threshold to lookup.
+	 *
+	 * @ return string $threshold The filtered threshold.
 	 */
-	return apply_filters( 'klasifai_feature_threshold', $threshold, $feature );
+	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
 }
 
 /**
@@ -239,5 +242,5 @@ function get_feature_taxonomy( $feature ) {
 	 *
 	 * @return string $taxonomy The filtered taxonomy.
 	 */
-	return apply_filters( 'klasifai_taxonomy_for_feature', $taxonomy, $feature );
+	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
 }
