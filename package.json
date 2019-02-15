@@ -5,6 +5,7 @@
   "scripts": {
     "build": "webpack --mode=production",
     "dev": "webpack --watch --mode=development",
+    "setup_tests" : "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "tests": "./vendor/bin/phpunit"
   },
   "husky": {
