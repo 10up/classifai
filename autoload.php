@@ -1,6 +1,6 @@
 <?php
 
-namespace Klasifai;
+namespace Classifai;
 
 /**
  * PSR-4 Autoloader:
@@ -148,12 +148,12 @@ class Psr4AutoloaderClass
 }
 
 // instantiate the loader
-$klasifai_loader = new \Klasifai\Psr4AutoloaderClass();
+$classifai_loader = new \Classifai\Psr4AutoloaderClass();
 
 // register the autoloader
-$klasifai_loader->register();
+$classifai_loader->register();
 
 // register the base directories for the namespace prefix
-$klasifai_loader->addNamespace('Klasifai', __DIR__ . '/includes/Klasifai' );
+$classifai_loader->addNamespace('Classifai', __DIR__ . '/includes/Classifai' );
 
-require_once( __DIR__ . '/includes/Klasifai/Helpers.php' );
+require_once( __DIR__ . '/includes/Classifai/Helpers.php' );
