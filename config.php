@@ -1,6 +1,6 @@
 <?php
 /**
- * Global Constants for the KLASIFAI Support Plugin. Constants should be
+ * Global Constants for the Classifai Support Plugin. Constants should be
  * declared here instead of a Class.
  */
 
@@ -11,26 +11,26 @@ if ( file_exists( __DIR__ . '/.commit' ) ) {
 }
 
 // Useful global constants
-klasifai_define( 'KLASIFAI_PLUGIN', __DIR__ . '/klasifai.php' );
-klasifai_define( 'KLASIFAI_PLUGIN_VERSION', $plugin_version );
-klasifai_define( 'KLASIFAI_PLUGIN_DIR', __DIR__ );
-klasifai_define( 'KLASIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+classifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );
+classifai_define( 'CLASSIFAI_PLUGIN_VERSION', $plugin_version );
+classifai_define( 'CLASSIFAI_PLUGIN_DIR', __DIR__ );
+classifai_define( 'CLASSIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 // Taxonomies
-klasifai_define( 'WATSON_CATEGORY_TAXONOMY', 'watson-category' );
-klasifai_define( 'WATSON_KEYWORD_TAXONOMY', 'watson-keyword' );
-klasifai_define( 'WATSON_ENTITY_TAXONOMY', 'watson-entity' );
-klasifai_define( 'WATSON_CONCEPT_TAXONOMY', 'watson-concept' );
+classifai_define( 'WATSON_CATEGORY_TAXONOMY', 'watson-category' );
+classifai_define( 'WATSON_KEYWORD_TAXONOMY', 'watson-keyword' );
+classifai_define( 'WATSON_ENTITY_TAXONOMY', 'watson-entity' );
+classifai_define( 'WATSON_CONCEPT_TAXONOMY', 'watson-concept' );
 
 // Misc defaults
-klasifai_define( 'WATSON_TIMEOUT', 60 ); // seconds
+classifai_define( 'WATSON_TIMEOUT', 60 ); // seconds
 
 // Default Thresholds
-klasifai_define( 'WATSON_CATEGORY_THRESHOLD', 70 );
-klasifai_define( 'WATSON_KEYWORD_THRESHOLD', 70 );
-klasifai_define( 'WATSON_ENTITY_THRESHOLD', 70 );
-klasifai_define( 'WATSON_CONCEPT_THRESHOLD', 70 );
+classifai_define( 'WATSON_CATEGORY_THRESHOLD', 70 );
+classifai_define( 'WATSON_KEYWORD_THRESHOLD', 70 );
+classifai_define( 'WATSON_ENTITY_THRESHOLD', 70 );
+classifai_define( 'WATSON_CONCEPT_THRESHOLD', 70 );
 
-klasifai_define( 'WATSON_KEYWORD_LIMIT', 10 );
+classifai_define( 'WATSON_KEYWORD_LIMIT', 10 );
 
 // For Debugging

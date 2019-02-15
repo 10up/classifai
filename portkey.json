@@ -1,10 +1,10 @@
 {
-	"includes/Klasifai/*.php": {
+	"includes/Classifai/*.php": {
 		"type": "plugin",
-		"test": "tests/Klasifai/%sTest.php"
+		"test": "tests/Classifai/%sTest.php"
 	},
-	"tests/Klasifai/*Test.php": {
+	"tests/Classifai/*Test.php": {
 		"type": "test",
-		"alternate": "includes/Klasifai/%s.php"
+		"alternate": "includes/Classifai/%s.php"
 	}
 }
