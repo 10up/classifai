@@ -64,8 +64,8 @@ class SettingsPage {
 	public function register_admin_menu_item() {
 		add_submenu_page(
 			'options-general.php',
-			esc_html__( 'Classifai', 'classifai' ),
-			esc_html__( 'Classifai', 'classifai' ),
+			esc_html__( 'ClassifAI', 'classifai' ),
+			esc_html__( 'ClassifAI', 'classifai' ),
 			'manage_options',
 			'classifai_settings',
 			[ $this, 'render_settings_page' ]

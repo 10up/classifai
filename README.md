@@ -1,4 +1,4 @@
-## Klasifai
+## ClassifAI
 
 Classify WordPress Content using [IBM Watson Natural Language Processing API](https://www.ibm.com/watson/services/natural-language-understanding/).
 
@@ -17,9 +17,9 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 
 #### 2. Activate Plugin
 
-#### 3. Configure IBM Watson API Keys under Settings > Klasifai
+#### 3. Configure IBM Watson API Keys under Settings > ClassifAI
 
-#### 4. Configure Post Types unde Settings > Klasifai
+#### 4. Configure Post Types unde Settings > ClassifAI
 
 #### 5. Save Post or run WP CLI command to batch classify posts
 
@@ -122,7 +122,7 @@ Options
 
 ## License
 
-Klasifai is free software; you can redistribute it and/or modify it
+ClassifAI is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation; either version 2 of the License, or (at your
 option) any later version.
