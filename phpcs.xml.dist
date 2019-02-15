@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="Klasifai">
+<ruleset name="Classifai">
 	<description>Extension of the 10up-Default</description>
 	<rule ref="10up-Default">
 		<!-- All of the files are missing comments -->
