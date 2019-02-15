@@ -2,6 +2,8 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Plugin;
+
 class SettingsPage {
 
 	/**
@@ -289,7 +291,44 @@ class SettingsPage {
 	}
 
 
+	/**
+	 * Helper to ensure the authentication works.
+	 *
+	 * @param array $settings The list of settings to be saved
+	 *
+	 * @return bool
+	 */
+	protected function authentication_check_failed( $settings ) {
 
+		$request           = new \Classifai\Watson\APIRequest();
+		$request->username = $settings['credentials']['watson_username'];
+		$request->password = $settings['credentials']['watson_password'];
+		$url               = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
+		$options           = [
+			'body' => wp_json_encode(
+				[
+					'text'     => 'Lorem ipsum dolor sit amet.',
+					'language' => 'en',
+					'features' => [
+						'keywords' => [
+							'emotion' => false,
+							'limit'   => 1,
+						],
+					],
+				]
+			),
+		];
+		$response          = $request->post( $url, $options );
+
+		$is_error = is_wp_error( $response );
+		if ( ! $is_error ) {
+			update_option( 'classifai_configured', true );
+		} else {
+			delete_option( 'classifai_configured' );
+		}
+		return $is_error;
+
+	}
 
 
 	/**
@@ -301,6 +340,18 @@ class SettingsPage {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
+
+		// If the api authentication fails, return whatever is already saved.
+		if ( $this->authentication_check_failed( $settings ) ) {
+			add_settings_error(
+				'credentials',
+				'classifai-auth',
+				'Authentication Failed. Please check credentails.',
+				'error'
+			);
+			return $new_settings;
+		}
+
 
 		if ( isset( $settings['credentials']['watson_username'] ) ) {
 			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
