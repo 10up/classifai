@@ -354,7 +354,7 @@ class SettingsPage {
 			add_settings_error(
 				'credentials',
 				'classifai-auth',
-				esc_html__( 'Authentication Failed. Please check credentails.', 'classifai' ),
+				esc_html__( 'Authentication Failed. Please check credentials.', 'classifai' ),
 				'error'
 			);
 			return $new_settings;
