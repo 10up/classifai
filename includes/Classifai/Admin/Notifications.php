@@ -2,7 +2,6 @@
 
 namespace Classifai\Admin;
 
-
 class Notifications {
 
 	/**
@@ -12,7 +11,6 @@ class Notifications {
 
 	/**
 	 * Check to see if we can register this class.
-	 *
 	 *
 	 * @return bool
 	 */
@@ -54,7 +52,7 @@ class Notifications {
 		$should_render = get_transient( 'classifai_activation_notice' );
 		if ( $should_render ) {
 			printf(
-				'<div class="notice notice-warning"><p>' . esc_html( $this->message ) . '<a href="%s">setup</a></p></div>',
+				'<div class="notice notice-warning"><p><a href="%s">' . esc_html( $this->message ) . '</a></p></div>',
 				esc_url( admin_url( 'options-general.php?page=classifai_settings' ) )
 			);
 			delete_transient( 'classifai_activation_notice' );

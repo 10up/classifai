@@ -341,17 +341,16 @@ class SettingsPage {
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 
-		// If the api authentication fails, return whatever is already saved.
+		// If the API authentication fails, return whatever is already saved.
 		if ( $this->authentication_check_failed( $settings ) ) {
 			add_settings_error(
 				'credentials',
 				'classifai-auth',
-				'Authentication Failed. Please check credentails.',
+				esc_html__( 'Authentication Failed. Please check credentails.', 'classifai' ),
 				'error'
 			);
 			return $new_settings;
 		}
-
 
 		if ( isset( $settings['credentials']['watson_username'] ) ) {
 			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
