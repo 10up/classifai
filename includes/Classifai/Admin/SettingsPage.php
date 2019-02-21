@@ -305,7 +305,7 @@ class SettingsPage {
 			|| empty( $settings['credentials']['watson_username'] )
 			|| empty( $settings['credentials']['watson_password'] )
 		) {
-			return false;
+			return true;
 		}
 
 		$request           = new \Classifai\Watson\APIRequest();
