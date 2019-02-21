@@ -300,6 +300,14 @@ class SettingsPage {
 	 */
 	protected function authentication_check_failed( $settings ) {
 
+		// Check that we have credentials before hitting the API.
+		if ( ! isset( $settings['credentials'] )
+			|| empty( $settings['credentials']['watson_username'] )
+			|| empty( $settings['credentials']['watson_password'] )
+		) {
+			return false;
+		}
+
 		$request           = new \Classifai\Watson\APIRequest();
 		$request->username = $settings['credentials']['watson_username'];
 		$request->password = $settings['credentials']['watson_password'];
