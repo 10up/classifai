@@ -126,7 +126,7 @@ class SettingsPage {
 	 */
 	protected function do_post_types_section() {
 		// Add the settings section.
-		add_settings_section( 'post-types', 'Post Types to classify', '', 'classifai-settings' );
+		add_settings_section( 'post-types', esc_html__( 'Post Types to classify', 'classifai' ), '', 'classifai-settings' );
 
 		$post_types = get_post_types( [ 'public' => true ], 'objects' );
 		foreach ( $post_types as $post_type ) {
@@ -149,7 +149,7 @@ class SettingsPage {
 	 * Helper method to create the watson features section
 	 */
 	protected function do_watson_features_section() {
-		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'classifai-settings' );
+		add_settings_section( 'watson-features', esc_html__( 'IBM Watson Features to enable', 'classifai' ), '', 'classifai-settings' );
 
 		foreach ( $this->features as $feature ) {
 			$title = ucfirst( $feature );
