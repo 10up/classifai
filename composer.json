@@ -1,5 +1,5 @@
 {
-  "name": "10up/klasifai",
+  "name": "10up/classifai",
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "authors": [
     {
@@ -12,10 +12,10 @@
   },
   "autoload": {
     "psr-4": {
-      "Klasifai\\": "includes/Klasifai/"
+      "Classifai\\": "includes/Classifai/"
     },
     "files": [
-      "includes/Klasifai/Helpers.php"
+      "includes/Classifai/Helpers.php"
     ]
   },
   "require-dev": {
