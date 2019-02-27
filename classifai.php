@@ -15,7 +15,7 @@
  * config.local.php to override any constant in config.php.
  *
  * @param string $name The constant name
- * @param mixed $value The constant value
+ * @param mixed  $value The constant value
  * @return void
  */
 function classifai_define( $name, $value ) {
@@ -59,7 +59,7 @@ function classifai_can_autoload() {
 		return true;
 	} else {
 		error_log(
-			"Fatal Error: Composer not setup in " . CLASSIFAI_PLUGIN_DIR
+			sprintf( esc_html__( 'Fatal Error: Composer not setup in %', 'classifai' ), CLASSIFAI_PLUGIN_DIR )
 		);
 
 		return false;
@@ -93,18 +93,18 @@ function classifai_autorun() {
 	}
 }
 
-function classifai_autoload_notice() {
-	$class   = 'notice notice-error';
-	$message = 'Error: Please run $ composer install in the classifai plugin directory.';
 
-	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
-	error_log( $message );
+/**
+ * Generate a notice if autoload fails.
+ */
+function classifai_autoload_notice() {
+	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
+	error_log( esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
 }
 
 
 /**
  * Register an activation hook that we can hook into.
- *
  */
 function classifai_activation() {
 	set_transient( 'classifai_activation_notice', 'classifai', HOUR_IN_SECONDS );
