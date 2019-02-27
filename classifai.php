@@ -98,11 +98,8 @@ function classifai_autorun() {
  * Generate a notice if autoload fails.
  */
 function classifai_autoload_notice() {
-	$class   = 'notice notice-error';
-	$message = esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' );
-
-	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );// @codingStandardsIgnoreLine This is not a security issue.
-	error_log( $message );
+	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
+	error_log( esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
 }
 
 
