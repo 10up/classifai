@@ -41,7 +41,15 @@ class Plugin {
 	 */
 	public function enable() {
 		add_action( 'init', [ $this, 'init' ] );
+		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	}
+
+	/**
+	 * Load translations.
+	 */
+	public function i18n() {
+		load_plugin_textdomain( 'classifai', false, CLASSIFAI_PLUGIN_DIR . '/languages' );
 	}
 
 	/**

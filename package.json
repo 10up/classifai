@@ -5,8 +5,9 @@
   "scripts": {
     "build": "webpack --mode=production",
     "dev": "webpack --watch --mode=development",
-    "install_tests" : "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
-    "tests": "./vendor/bin/phpunit"
+    "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
+    "tests": "./vendor/bin/phpunit",
+    "makepot": "wpi18n makepot && echo '.pot file updated'"
   },
   "husky": {
     "hooks": {
@@ -37,5 +38,8 @@
     "lint-staged": "^8.1.1",
     "webpack": "^4.29.2",
     "webpack-cli": "^3.2.3"
+  },
+  "dependencies": {
+    "node-wp-i18n": "^1.2.3"
   }
 }
