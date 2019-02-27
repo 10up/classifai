@@ -59,7 +59,7 @@ function classifai_can_autoload() {
 		return true;
 	} else {
 		error_log(
-			"Fatal Error: Composer not setup in " . CLASSIFAI_PLUGIN_DIR
+			sprintf( esc_html__( 'Fatal Error: Composer not setup in %', 'classifai' ), CLASSIFAI_PLUGIN_DIR )
 		);
 
 		return false;
@@ -99,7 +99,7 @@ function classifai_autorun() {
  */
 function classifai_autoload_notice() {
 	$class   = 'notice notice-error';
-	$message = 'Error: Please run $ composer install in the classifai plugin directory.';
+	$message = esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' );
 
 	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );// @codingStandardsIgnoreLine This is not a security issue.
 	error_log( $message );
@@ -108,7 +108,6 @@ function classifai_autoload_notice() {
 
 /**
  * Register an activation hook that we can hook into.
- *
  */
 function classifai_activation() {
 	set_transient( 'classifai_activation_notice', 'classifai', HOUR_IN_SECONDS );
