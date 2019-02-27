@@ -34,6 +34,8 @@ class SavePostHandler {
 			return false;
 		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return false;
+		} elseif ( ! get_option( 'classifai_configured', false ) ) {
+			return false;
 		} else {
 			return false;
 		}

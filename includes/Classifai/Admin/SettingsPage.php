@@ -2,6 +2,8 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Plugin;
+
 class SettingsPage {
 
 	/**
@@ -124,7 +126,7 @@ class SettingsPage {
 	 */
 	protected function do_post_types_section() {
 		// Add the settings section.
-		add_settings_section( 'post-types', 'Post Types to classify', '', 'classifai-settings' );
+		add_settings_section( 'post-types', esc_html__( 'Post Types to classify', 'classifai' ), '', 'classifai-settings' );
 
 		$post_types = get_post_types( [ 'public' => true ], 'objects' );
 		foreach ( $post_types as $post_type ) {
@@ -147,7 +149,7 @@ class SettingsPage {
 	 * Helper method to create the watson features section
 	 */
 	protected function do_watson_features_section() {
-		add_settings_section( 'watson-features', 'IBM Watson Features to enable', '', 'classifai-settings' );
+		add_settings_section( 'watson-features', esc_html__( 'IBM Watson Features to enable', 'classifai' ), '', 'classifai-settings' );
 
 		foreach ( $this->features as $feature ) {
 			$title = ucfirst( $feature );
@@ -289,7 +291,52 @@ class SettingsPage {
 	}
 
 
+	/**
+	 * Helper to ensure the authentication works.
+	 *
+	 * @param array $settings The list of settings to be saved
+	 *
+	 * @return bool
+	 */
+	protected function authentication_check_failed( $settings ) {
 
+		// Check that we have credentials before hitting the API.
+		if ( ! isset( $settings['credentials'] )
+			|| empty( $settings['credentials']['watson_username'] )
+			|| empty( $settings['credentials']['watson_password'] )
+		) {
+			return true;
+		}
+
+		$request           = new \Classifai\Watson\APIRequest();
+		$request->username = $settings['credentials']['watson_username'];
+		$request->password = $settings['credentials']['watson_password'];
+		$url               = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
+		$options           = [
+			'body' => wp_json_encode(
+				[
+					'text'     => 'Lorem ipsum dolor sit amet.',
+					'language' => 'en',
+					'features' => [
+						'keywords' => [
+							'emotion' => false,
+							'limit'   => 1,
+						],
+					],
+				]
+			),
+		];
+		$response          = $request->post( $url, $options );
+
+		$is_error = is_wp_error( $response );
+		if ( ! $is_error ) {
+			update_option( 'classifai_configured', true );
+		} else {
+			delete_option( 'classifai_configured' );
+		}
+		return $is_error;
+
+	}
 
 
 	/**
@@ -301,6 +348,17 @@ class SettingsPage {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
+
+		// If the API authentication fails, return whatever is already saved.
+		if ( $this->authentication_check_failed( $settings ) ) {
+			add_settings_error(
+				'credentials',
+				'classifai-auth',
+				esc_html__( 'Authentication Failed. Please check credentials.', 'classifai' ),
+				'error'
+			);
+			return $new_settings;
+		}
 
 		if ( isset( $settings['credentials']['watson_username'] ) ) {
 			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
