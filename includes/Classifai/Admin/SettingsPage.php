@@ -2,8 +2,6 @@
 
 namespace Classifai\Admin;
 
-use Classifai\Plugin;
-
 class SettingsPage {
 
 	/**
