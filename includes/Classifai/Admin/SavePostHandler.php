@@ -34,6 +34,8 @@ class SavePostHandler {
 			return false;
 		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return false;
+		} elseif ( ! get_option( 'classifai_configured', false ) ) {
+			return false;
 		} else {
 			return false;
 		}
@@ -72,6 +74,22 @@ class SavePostHandler {
 	 * @return array
 	 */
 	public function classify( $post_id ) {
+		/**
+		 * Filter whether Classifai should classify a post.
+		 *
+		 * Default is true, return false to skip classifying a post.
+		 *
+		 * @param bool $should_classify Whether the post should be classified. Default true, return false to skip
+		 *                              classification for this post.
+		 * @param int  $post_id         The id of the post to be considered for classification.
+		 *
+		 * @return bool $should_classify Whether the post should be classified.
+		 */
+		$classifai_should_classify_post = apply_filters( 'classifai_should_classify_post', true, $post_id );
+		if ( ! $classifai_should_classify_post ) {
+			return false;
+		}
+
 		$classifier = $this->get_classifier();
 
 		if ( \Classifai\get_feature_enabled( 'category' ) ) {

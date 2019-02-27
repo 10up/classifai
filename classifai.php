@@ -101,4 +101,14 @@ function classifai_autoload_notice() {
 	error_log( $message );
 }
 
+
+/**
+ * Register an activation hook that we can hook into.
+ *
+ */
+function classifai_activation() {
+	set_transient( 'classifai_activation_notice', 'classifai', HOUR_IN_SECONDS );
+}
+register_activation_hook( __FILE__, 'classifai_activation' );
+
 classifai_autorun();

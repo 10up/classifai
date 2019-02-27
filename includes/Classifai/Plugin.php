@@ -100,6 +100,7 @@ class Plugin {
 	public function init_admin_support() {
 		$this->admin_support = [
 			new Admin\SettingsPage(),
+			new Admin\Notifications(),
 		];
 
 		foreach ( $this->admin_support as $support ) {
