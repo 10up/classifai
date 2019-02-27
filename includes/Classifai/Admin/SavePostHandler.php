@@ -2,8 +2,6 @@
 
 namespace Classifai\Admin;
 
-use function Classifai\get_supported_post_types;
-
 /**
  * Classifies Posts based on the current Classifai configuration.
  */
