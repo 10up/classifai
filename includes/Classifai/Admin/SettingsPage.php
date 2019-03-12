@@ -95,7 +95,7 @@ class SettingsPage {
 		add_settings_section( 'credentials', esc_html__( 'IBM Watson API Credentials', 'classifai' ), '', 'classifai-settings' );
 		add_settings_field(
 			'username',
-			esc_html__( 'Username', 'classifai' ),
+			esc_html__( 'API User (usually "apikey")', 'classifai' ),
 			[ $this, 'render_input' ],
 			'classifai-settings',
 			'credentials',
@@ -107,7 +107,7 @@ class SettingsPage {
 		);
 		add_settings_field(
 			'password',
-			esc_html__( 'Password', 'classifai' ),
+			esc_html__( 'API Key', 'classifai' ),
 			[ $this, 'render_input' ],
 			'classifai-settings',
 			'credentials',
@@ -266,7 +266,7 @@ class SettingsPage {
 		<select id="<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>" name="classifai_settings[features][<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>]">
 			<option><?php esc_html_e( 'Please choose', 'classifai' ); ?></option>
 			<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-				<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $features[ "{$args['feature']}_taxonomy" ], esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
+				<option value="<?php echo esc_attr( $name ); ?>" <?php selected( isset( $features[ "{$args['feature']}_taxonomy" ] ) ? $features[ "{$args['feature']}_taxonomy" ] : '', esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
 			<?php endforeach; ?>
 		</select>
 		<?php
