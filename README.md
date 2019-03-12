@@ -6,22 +6,34 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 
 ## Features
 
-* Classify Post Content using IBM Watson NLU API
+* Classify Post Content using IBM Watson Natural Language Understanding API (https://www.ibm.com/watson/services/natural-language-understanding/)
 * Supports Watson Categories, Keywords, Concepts & Entities
 * Bulk Classify Posts
 * Automatically classify content on save
 
 ## Installation
 
-#### 1. Download or Clone this repo
+#### 1. Download or Clone this repo, install dependencies and build.
+- `git clone https://github.com/10up/classifai-for-wordpress.git && cd classifai-for-wordpress`
+- `composer install && npm install && npm run build`
 
 #### 2. Activate Plugin
 
-#### 3. Configure IBM Watson API Keys under Settings > ClassifAI
+#### 3. Sign up for Watson services
+- Start here: https://cloud.ibm.com/registration, set up an account to begin.
+- Check for an email from `IBM Cloud` and click the `Confirm Account` link.
+- Log into your account (accepting the privacy policy) and create a new *"Natural Language Understanding"* Resource - https://cloud.ibm.com/catalog/services/natural-language-understanding.
+- Click `Manage` in the left hand menu, then `Show credentials` on the Manage page and copy the `API Key` value.
 
-#### 4. Configure Post Types unde Settings > ClassifAI
+#### 4. Configure IBM Watson API Keys under Settings > ClassifAI
+- In the `API User` field, enter `apikey`.
+- Enter your API Key in the `API Key` field.
 
-#### 5. Save Post or run WP CLI command to batch classify posts
+#### 5. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
+- Choose to classifytypes when saved:  posts, pages and media.
+- Chose whether to assign category, keyword and entity and the taxonomies used for each.
+
+#### 6. Save Post or run WP CLI command to batch classify posts
 
 ## WP CLI
 
