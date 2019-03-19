@@ -9,22 +9,30 @@ namespace Classifai;
 class PostClassifier {
 
 	/**
-	 * API Request object that sends requests to Watson NLU
+	 * API Request object that sends requests to Watson NLU.
+	 *
+	 * @var object $api_request The API request object.
 	 */
 	public $api_request;
 
 	/**
-	 * Converts post content to plain text for classification
+	 * Converts post content to plain text for classification.
+	 *
+	 * @var object $normalizer Normalizer object..
 	 */
 	public $normalizer;
 
 	/**
-	 * Classifier object that takes plain text
+	 * Classifier object that takes plain text.
+	 *
+	 * @var object $classifier Classifier object.
 	 */
 	public $classifier;
 
 	/**
-	 * Links results from NLU API with Taxonomy Terms
+	 * Links results from NLU API with Taxonomy Terms.
+	 *
+	 * @var object $linker Linker object.
 	 */
 	public $linker;
 
@@ -33,7 +41,7 @@ class PostClassifier {
 	 * The features option can be used to override the configured
 	 * settings.
 	 *
-	 * @param int $post_id The post to classify
+	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
 	 * @return array
 	 */
@@ -58,7 +66,7 @@ class PostClassifier {
 	 * Classifies the specified post using Watson NLU and also links to
 	 * Taxonomy terms if output was valid.
 	 *
-	 * @param int $post_id The post to classify
+	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
 	 * @return array
 	 */
@@ -67,7 +75,7 @@ class PostClassifier {
 
 		if ( is_wp_error( $output ) ) {
 			return $output;
-		} else if ( empty( $output ) ) {
+		} elseif ( empty( $output ) ) {
 			return false;
 		} else {
 			$this->link( $post_id, $output, $opts );
@@ -77,6 +85,10 @@ class PostClassifier {
 
 	/**
 	 * Links the Watson NLU response output to Taxonomy Terms
+	 *
+	 * @param int   $post_id The post id.
+	 * @param array $output  The classification results from Watson NLU.
+	 * @param array $opts    Link options.
 	 */
 	public function link( $post_id, $output, $opts = [] ) {
 		$linker = $this->get_linker();
@@ -88,7 +100,7 @@ class PostClassifier {
 	/**
 	 * Lazy init api request object
 	 */
-	function get_api_request() {
+	public function get_api_request() {
 		if ( is_null( $this->api_request ) ) {
 			$this->api_request = new Watson\APIRequest();
 		}
@@ -99,7 +111,7 @@ class PostClassifier {
 	/**
 	 * Lazy init normalizer object
 	 */
-	function get_normalizer() {
+	public function get_normalizer() {
 		if ( is_null( $this->normalizer ) ) {
 			$this->normalizer = new Watson\Normalizer();
 		}
@@ -110,7 +122,7 @@ class PostClassifier {
 	/**
 	 * Lazy init linker object
 	 */
-	function get_linker() {
+	public function get_linker() {
 		if ( is_null( $this->linker ) ) {
 			$this->linker = new Watson\Linker();
 		}
@@ -121,7 +133,7 @@ class PostClassifier {
 	/**
 	 * Lazy init classifier object
 	 */
-	function get_classifier() {
+	public function get_classifier() {
 		if ( is_null( $this->classifier ) ) {
 			$this->classifier          = new Watson\Classifier();
 			$this->classifier->request = $this->get_api_request();
@@ -136,7 +148,7 @@ class PostClassifier {
 	 *
 	 * @return array
 	 */
-	function get_features() {
+	public function get_features() {
 		$features = [];
 
 		if ( get_feature_enabled( 'category' ) ) {
