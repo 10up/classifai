@@ -16,5 +16,5 @@ before_script:
   - composer install
 
 script:
-  - phpcs .
+  - ./vendor/bin/phpcs .
   - ./vendor/bin/phpunit
