@@ -23,14 +23,25 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 - Start here: https://cloud.ibm.com/registration, set up an account to begin.
 - Check for an email from `IBM Cloud` and click the `Confirm Account` link.
 - Log into your account (accepting the privacy policy) and create a new *"Natural Language Understanding"* Resource - https://cloud.ibm.com/catalog/services/natural-language-understanding.
-- Click `Manage` in the left hand menu, then `Show credentials` on the Manage page and copy the `API Key` value.
+- Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
 #### 4. Configure IBM Watson API Keys under Settings > ClassifAI
+
+**The credentials screen will show either an API key, or a username/password combination:**
+
+##### Credentials contain API Key
+- In the `API URL` field enter the URL
 - In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
+##### Credentials contain username and password
+- In the `API URL` field enter the URL
+- Enter the `username` value into the `API User field`.
+- Enter the `password` into the `API key` field.
+
+
 #### 5. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
-- Choose to classifytypes when saved:  posts, pages and media.
+- Choose which types to classify when saved:  posts, pages and media.
 - Chose whether to assign category, keyword and entity and the taxonomies used for each.
 
 #### 6. Save Post or run WP CLI command to batch classify posts
@@ -138,3 +149,7 @@ ClassifAI is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation; either version 2 of the License, or (at your
 option) any later version.
+
+## Work with us
+
+<a href="http://10up.com/contact/"><img src="https://10updotcom-wpengine.s3.amazonaws.com/uploads/2016/10/10up-Github-Banner.png" width="850"></a>
