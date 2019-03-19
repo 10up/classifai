@@ -37,6 +37,8 @@ function get_plugin_settings() {
 		 'watson_password' => <string>
 	 ]
  * ]
+ *
+ * @param array $settings The settings we're saving.
  */
 function set_plugin_settings( $settings ) {
 	update_option( 'classifai_settings', $settings );
@@ -49,29 +51,52 @@ function reset_plugin_settings() {
 	$settings = [
 		'post_types' => [
 			'post',
-			'page'
+			'page',
 		],
-		'features' => [
+		'features'   => [
 			'category'           => true,
 			'category_threshold' => WATSON_CATEGORY_THRESHOLD,
 			'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
 
-			'keyword'           => true,
-			'keyword_threshold' => WATSON_KEYWORD_THRESHOLD,
-			'keyword_taxonomy'  => WATSON_KEYWORD_TAXONOMY,
+			'keyword'            => true,
+			'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+			'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
 
-			'concept'           => false,
-			'concept_threshold' => WATSON_CONCEPT_THRESHOLD,
-			'concept_taxonomy'  => WATSON_CONCEPT_TAXONOMY,
+			'concept'            => false,
+			'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+			'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
 
-			'entity'           => false,
-			'entity_threshold' => WATSON_ENTITY_THRESHOLD,
-			'entity_taxonomy'  => WATSON_ENTITY_TAXONOMY,
-		]
+			'entity'             => false,
+			'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+			'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
+		],
 	];
 
 	update_option( 'classifai_settings', $settings );
 }
+
+
+/**
+ * Returns the currently configured Watson API URL. Lookup order is,
+ *
+ * - Options
+ * - Constant
+ *
+ * @return string
+ */
+function get_watson_api_url() {
+	$settings = get_plugin_settings();
+	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
+
+	if ( ! empty( $creds['watson_url'] ) ) {
+		return $creds['watson_url'];
+	} elseif ( defined( 'WATSON_URL' ) ) {
+		return WATSON_URL;
+	} else {
+		return '';
+	}
+}
+
 
 /**
  * Returns the currently configured Watson username. Lookup order is,
@@ -156,7 +181,8 @@ function get_feature_enabled( $feature ) {
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature ] ) ) {
 			return filter_var(
-				$settings['features'][ $feature ], FILTER_VALIDATE_BOOLEAN
+				$settings['features'][ $feature ],
+				FILTER_VALIDATE_BOOLEAN
 			);
 		}
 	}
@@ -183,7 +209,8 @@ function get_feature_threshold( $feature ) {
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature . '_threshold' ] ) ) {
 			$threshold = filter_var(
-				$settings['features'][ $feature . '_threshold' ], FILTER_VALIDATE_INT
+				$settings['features'][ $feature . '_threshold' ],
+				FILTER_VALIDATE_INT
 			);
 		}
 	}
@@ -201,7 +228,7 @@ function get_feature_threshold( $feature ) {
 	 * Filter the threshold for a specific feature. Any results below the
 	 * threshold will be ignored.
 	 *
- 	 * @param string $threshold The threshold to use.
+	 * @param string $threshold The threshold to use.
 	 * @param string $feature   The feature whose threshold to lookup.
 	 *
 	 * @ return string $threshold The filtered threshold.
