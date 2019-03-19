@@ -30,8 +30,10 @@ class Linker {
 	 * Links the IBM Watson NLU classification results to the
 	 * corresponding taxonomies in WordPress.
 	 *
-	 * @param int $post_id The post to link to
-	 * @param array $output The classification results from Watson NLU
+	 * @param int   $post_id The post to link to.
+	 * @param array $output  The classification results from Watson NLU.
+	 * @param array $options Unused.
+
 	 * @return void
 	 */
 	public function link( $post_id, $output, $options = [] ) {
@@ -69,11 +71,11 @@ class Linker {
 	 *
 	 * Eg:- /animals/pets/cats
 	 *
-	 * @param int $post_id The id of the post to link
+	 * @param int   $post_id The id of the post to link
 	 * @param array $categories The list of categories to link
 	 * @return void
 	 */
-	function link_categories( $post_id, $categories ) {
+	public function link_categories( $post_id, $categories ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'category' );
 
@@ -86,19 +88,23 @@ class Linker {
 					$parent = null;
 
 					foreach ( $parts as $part ) {
-						$term     = get_term_by( 'name', $part, $taxonomy );
+						$term = get_term_by( 'name', $part, $taxonomy );
 
-						if ( $term === false ) {
-							$term = wp_insert_term( $part, $taxonomy, [
-								'parent' => $parent
-							] );
+						if ( false === $term ) {
+							$term = wp_insert_term(
+								$part,
+								$taxonomy,
+								[
+									'parent' => $parent,
+								]
+							);
 
 							if ( ! is_wp_error( $term ) ) {
-								$parent = intval( $term['term_id'] );
+								$parent          = intval( $term['term_id'] );
 								$terms_to_link[] = intval( $term['term_id'] );
 							}
 						} else {
-							$parent = intval( $term->term_id );
+							$parent          = intval( $term->term_id );
 							$terms_to_link[] = intval( $term->term_id );
 						}
 					}
@@ -121,11 +127,11 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int $post_id The post to link to
+	 * @param int   $post_id The post to link to
 	 * @param array $keywords NLU returned keywords
 	 * @return void
 	 */
-	function link_keywords( $post_id, $keywords ) {
+	public function link_keywords( $post_id, $keywords ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'keyword' );
 
@@ -135,8 +141,8 @@ class Linker {
 				$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
 				$term = get_term_by( 'name', $name, $taxonomy );
 
-				if ( $term === false ) {
-					$term = wp_insert_term( $name, $taxonomy, [ ] );
+				if ( false === $term ) {
+					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -162,11 +168,11 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int $post_id The post to link to
-	 * @param array $concept The NLU returned concepts
+	 * @param int   $post_id  The post to link to.
+	 * @param array $concepts The NLU returned concepts.
 	 * @return void
 	 */
-	function link_concepts( $post_id, $concepts ) {
+	public function link_concepts( $post_id, $concepts ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'concept' );
 
@@ -175,8 +181,8 @@ class Linker {
 				$name = $concept['text'];
 				$term = get_term_by( 'name', $name, $taxonomy );
 
-				if ( $term === false ) {
-					$term = wp_insert_term( $name, $taxonomy, [ ] );
+				if ( false === $term ) {
+					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -210,11 +216,11 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int $post_id The post to link to
+	 * @param int   $post_id The post to link to
 	 * @param array $entities The entities returned by the NLU api
 	 * @return void
 	 */
-	function link_entities( $post_id, $entities ) {
+	public function link_entities( $post_id, $entities ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'entity' );
 
@@ -228,8 +234,8 @@ class Linker {
 
 				$term = get_term_by( 'name', $name, $taxonomy );
 
-				if ( $term === false ) {
-					$term = wp_insert_term( $name, $taxonomy, [ ] );
+				if ( false === $term ) {
+					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
 						$terms_to_link[] = intval( $term['term_id'] );
@@ -260,12 +266,14 @@ class Linker {
 	}
 
 	/**
-	 * Checks whether an NLU category can be linked based on its score
+	 * Checks whether an NLU category can be linked based on its score.
+	 *
+	 * @param array $category The category to check.
 	 */
-	function can_link_category( $category ) {
+	public function can_link_category( $category ) {
 		if ( ! empty( $category['label'] ) ) {
 			if ( ! empty( $category['score'] ) ) {
-				$score = floatval( $category['score'] );
+				$score     = floatval( $category['score'] );
 				$threshold = \Classifai\get_feature_threshold( 'category' );
 				return $score >= $threshold;
 			} else {
@@ -277,9 +285,11 @@ class Linker {
 	}
 
 	/**
-	 * Checks whether an NLU keyword can be linked based on its relevance
+	 * Checks whether an NLU keyword can be linked based on its relevance.
+	 *
+	 * @param array $keyword The keyword to check.
 	 */
-	function can_link_keyword( $keyword ) {
+	public function can_link_keyword( $keyword ) {
 		if ( ! empty( $keyword['text'] ) ) {
 			if ( ! empty( $keyword['relevance'] ) ) {
 				$relevance = floatval( $keyword['relevance'] );
@@ -292,9 +302,11 @@ class Linker {
 	}
 
 	/**
-	 * Checks whether an NLU concept can be linked based on its relevance
+	 * Checks whether an NLU concept can be linked based on its relevance.
+	 *
+	 * @param array $concept The concept to check.
 	 */
-	function can_link_concept( $concept ) {
+	public function can_link_concept( $concept ) {
 		if ( ! empty( $concept['text'] ) ) {
 			if ( ! empty( $concept['relevance'] ) ) {
 				$relevance = floatval( $concept['relevance'] );
@@ -307,9 +319,11 @@ class Linker {
 	}
 
 	/**
-	 * Checks whether an NLU entity can be linked based in its relevance
+	 * Checks whether an NLU entity can be linked based in its relevance.
+	 *
+	 * @param array $entity The entity to check.
 	 */
-	function can_link_entity( $entity ) {
+	public function can_link_entity( $entity ) {
 		if ( ! empty( $entity['text'] ) ) {
 			if ( ! empty( $entity['relevance'] ) ) {
 				$relevance = floatval( $entity['relevance'] );
