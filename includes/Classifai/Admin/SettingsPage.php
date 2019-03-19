@@ -10,13 +10,11 @@ class SettingsPage {
 	public $option = 'classifai_settings';
 
 	/**
-	 * @var array $features of Watson Features.
+	 * @var array $features Array of Watson Features.
+	 *
+	 * This is populated upon construct because of translation functions
 	 */
-	public $features = [
-		'category',
-		'keyword',
-		'entity',
-	];
+	public $nlu_features = [];
 
 	/**
 	 * The admin_support items require this method.
@@ -26,6 +24,29 @@ class SettingsPage {
 	 */
 	public function can_register() {
 		return true;
+	}
+
+	/**
+	 * Object setup
+	 */
+	public function __construct() {
+		$this->nlu_features = [
+			'category' => [
+				'feature' => __( 'Category' ),
+				'threshold' => __( 'Category Threshold (%)' ),
+				'taxonomy' => __( 'Category Taxonomy' ),
+			],
+			'keyword' => [
+				'feature' => __( 'Keyword' ),
+				'threshold' => __( 'Keyword Threshold (%)' ),
+				'taxonomy' => __( 'Keyword Taxonomy' ),
+			],
+			'entity' => [
+				'feature' => __( 'Entity' ),
+				'threshold' => __( 'Entity Threshold (%)' ),
+				'taxonomy' => __( 'Entity Taxonomy' ),
+			],
+		];
 	}
 
 	/**
@@ -84,7 +105,7 @@ class SettingsPage {
 		$this->do_post_types_section();
 
 		// Create features section
-		$this->do_watson_features_section();
+		$this->do_nlu_features_sections();
 
 	}
 
@@ -158,15 +179,14 @@ class SettingsPage {
 	/**
 	 * Helper method to create the watson features section
 	 */
-	protected function do_watson_features_section() {
+	protected function do_nlu_features_sections() {
 		add_settings_section( 'watson-features', esc_html__( 'IBM Watson Features to enable', 'classifai' ), '', 'classifai-settings' );
 
-		foreach ( $this->features as $feature ) {
-			$title = ucfirst( $feature );
+		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Checkbox.
 			add_settings_field(
 				$feature,
-				sprintf( esc_html__( '%s:', 'classifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				esc_html( $labels['feature'] ),
 				[ $this, 'render_input' ],
 				'classifai-settings',
 				'watson-features',
@@ -179,7 +199,7 @@ class SettingsPage {
 			// Threshold
 			add_settings_field(
 				"{$feature}-threshold",
-				sprintf( esc_html__( '%s Threshold (%%):', 'classifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				esc_html( $labels['threshold'] ),
 				[ $this, 'render_input' ],
 				'classifai-settings',
 				'watson-features',
@@ -193,7 +213,7 @@ class SettingsPage {
 			// Taxonomy
 			add_settings_field(
 				"{$feature}-taxonomy",
-				sprintf( esc_html__( '%s Taxonomy:', 'classifai' ), esc_html( $title ) ), //@codingStandardsIgnoreLine.
+				esc_html( $labels['taxonomy'] ),
 				[ $this, 'render_select' ],
 				'classifai-settings',
 				'watson-features',
