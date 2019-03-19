@@ -323,7 +323,7 @@ class SettingsPage {
 		$request->username = $settings['credentials']['watson_username'];
 		$request->password = $settings['credentials']['watson_password'];
 		$base_url          = trailingslashit( $settings['credentials']['watson_url'] ) . 'v1/analyze';
-		$url               = esc_url( add_query_arg( [ 'version' => '2018-03-19' ], $base_url ) );
+		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
 			'body' => wp_json_encode(
 				[

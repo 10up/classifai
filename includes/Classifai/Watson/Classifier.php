@@ -36,7 +36,7 @@ class Classifier {
 	public function get_endpoint() {
 		if ( empty( $this->endpoint ) ) {
 			$base_url       = trailingslashit( \Classifai\get_watson_api_url() ) . 'v1/analyze';
-			$this->endpoint = esc_url( add_query_arg( [ 'version' => '2018-03-19' ], $base_url ) );
+			$this->endpoint = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		}
 		return $this->endpoint;
 	}
