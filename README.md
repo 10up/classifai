@@ -26,11 +26,18 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page and copy the `API Key` value.
 
 #### 4. Configure IBM Watson API Keys under Settings > ClassifAI
+
+##### Credentials contain API Key
 - In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
+##### Credentials contain username and password
+- Enter the username value into the `API User field`.
+- Enter the password into the `API key` field.
+
+
 #### 5. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
-- Choose to classifytypes when saved:  posts, pages and media.
+- Choose which types to classify when saved:  posts, pages and media.
 - Chose whether to assign category, keyword and entity and the taxonomies used for each.
 
 #### 6. Save Post or run WP CLI command to batch classify posts
