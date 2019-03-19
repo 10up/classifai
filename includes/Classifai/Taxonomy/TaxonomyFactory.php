@@ -19,6 +19,11 @@ namespace Classifai\Taxonomy;
  */
 class TaxonomyFactory {
 
+	/**
+	 * Define the taxonomy mapping object.
+	 *
+	 * @var array $mapping A map of Watson taxonomies.
+	 */
 	public $mapping = [
 		WATSON_CATEGORY_TAXONOMY => 'CategoryTaxonomy',
 		WATSON_KEYWORD_TAXONOMY  => 'KeywordTaxonomy',
@@ -28,6 +33,8 @@ class TaxonomyFactory {
 
 	/**
 	 * Previously created taxonomies instances.
+	 *
+	 * @var array $taxonomies Taxonomies instances.
 	 */
 	public $taxonomies = [];
 
@@ -46,12 +53,15 @@ class TaxonomyFactory {
 	/**
 	 * Conditionally builds a taxonomy or returns the stored instance.
 	 *
-	 * @param string $taxonomy The taxonomy name
-	 * @return BaseTaxonomy A base taxonomy subclass instance
+	 * @param string $taxonomy            The taxonomy name.
+	 * @param array  $supported_post_types The supported post types.
+	 *
+	 * @return BaseTaxonomy A base taxonomy subclass instance.
 	 */
 	public function build_if( $taxonomy, $supported_post_types = [] ) {
 		if ( ! $this->exists( $taxonomy ) ) {
-			$instance = $this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
+			$this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
+			$instance = $this->taxonomies[ $taxonomy ];
 			$instance->register();
 
 			if ( ! empty( $supported_post_types ) ) {
@@ -70,8 +80,8 @@ class TaxonomyFactory {
 	 *
 	 * @param string $taxonomy The taxonomy name
 	 *
-	 * @return \Taxonomy\Taxonomy\BaseTaxonomy A base taxonomy subclass instance
-	 * @throws \Exception
+	 * @return \Taxonomy\Taxonomy\BaseTaxonomy A base taxonomy subclass instance.
+	 * @throws \Exception An exception.
 	 */
 	public function build( $taxonomy ) {
 		if ( ! empty( $this->mapping[ $taxonomy ] ) ) {
