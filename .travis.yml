@@ -16,5 +16,5 @@ before_script:
   - composer install
 
 script:
-  - ./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
+  - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
