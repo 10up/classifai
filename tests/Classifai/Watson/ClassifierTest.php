@@ -10,6 +10,7 @@ class ClassifierTest extends \WP_UnitTestCase {
 		parent::setUp();
 
 		$this->classifier = new Classifier();
+		$this->classifier->endpoint = 'http://watsonplatform.net';
 	}
 
 	function test_it_has_an_endpoint() {
