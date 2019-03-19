@@ -134,6 +134,13 @@ abstract class AbstractTaxonomy {
 		return false;
 	}
 
+	/**
+	 * Check to see if a feature is enabled.
+	 *
+	 * @param string $feature The feature name.
+	 *
+	 * @return bool|mixed
+	 */
 	public function get_feature_enabled( $feature ) {
 		$settings = get_option( 'classifai_settings' );
 
