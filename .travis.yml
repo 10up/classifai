@@ -1,8 +1,6 @@
 language: php
 
 php:
-  - 5.6
-  - 7.0
   - 7.1
   - 7.2
 
@@ -13,11 +11,10 @@ branches:
   except:
     - /^dist-.*$/
 
-install:
-  - composer install
-
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test travis ''  localhost $WP_VERSION
+  - composer install
 
 script:
+  - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
