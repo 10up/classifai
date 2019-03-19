@@ -2,9 +2,9 @@
 
 namespace Classifai\Command;
 
-require_once(ABSPATH . 'wp-admin/includes/media.php');
-require_once(ABSPATH . 'wp-admin/includes/file.php');
-require_once(ABSPATH . 'wp-admin/includes/image.php');
+require_once ABSPATH . 'wp-admin/includes/media.php';
+require_once ABSPATH . 'wp-admin/includes/file.php';
+require_once ABSPATH . 'wp-admin/includes/image.php';
 
 /**
  * RSSImporterCommand provides basic support for importing RSS feeds
@@ -14,6 +14,12 @@ require_once(ABSPATH . 'wp-admin/includes/image.php');
  */
 class RSSImporterCommand extends \WP_CLI_Command {
 
+	/**
+	 * Import an RSS feed.
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
 	public function import( $args = [], $opts = [] ) {
 		$defaults = [
 			'limit' => 1,
@@ -42,9 +48,15 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		\WP_CLI::success( "Imported $imported posts." );
 	}
 
-	/* helpers */
+	// Helpers.
 
-	function import_post( $info, $source ) {
+	/**
+	 * Import a post.
+	 *
+	 * @param array  $info  The post info.
+	 * @param string $source The post source.
+	 */
+	public function import_post( $info, $source ) {
 		if ( empty( $info['meta'] ) || empty( $info['meta']['content'] ) ) {
 			return false;
 		}
@@ -66,7 +78,9 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		if ( ! is_wp_error( $result ) ) {
 			if ( ! empty( $info['meta']['lead_image_url'] ) ) {
 				$this->import_thumbnail(
-					$result, $info['meta']['lead_image_url'], $info['meta']['excerpt']
+					$result,
+					$info['meta']['lead_image_url'],
+					$info['meta']['excerpt']
 				);
 			}
 
@@ -80,9 +94,19 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 	}
 
-	function import_thumbnail( $post_id, $thumbnail, $description ) {
+	/**
+	 * Import a post thumbnail.
+	 *
+	 * @param int    $post_id     The post id.
+	 * @param string $thumbnail   URL of the image to download.
+	 * @param string $description Description for the image.
+	 */
+	public function import_thumbnail( $post_id, $thumbnail, $description ) {
 		$attachment_id = media_sideload_image(
-			$thumbnail, $post_id, '', 'id'
+			$thumbnail,
+			$post_id,
+			'',
+			'id'
 		);
 
 		if ( ! empty( $attachment_id ) ) {
@@ -96,11 +120,16 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 	}
 
-	function get_rss_item_info( $item ) {
+	/**
+	 * Get information about an RSS item.
+	 *
+	 * @param object $item The item to get information on.
+	 */
+	public function get_rss_item_info( $item ) {
 		$info                = [];
 		$info['title']       = (string) $item->title;
 		$info['description'] = (string) $item->description;
-		$info['date']        = (string) $item->pubDate;
+		$info['date']        = (string) $item->pubDate; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$info['thumbnail']   = (string) $item->thumbnail->attributes['url'];
 		$info['link']        = (string) $item->link;
 		$info['meta']        = $this->get_url_meta( (string) $item->link );
@@ -108,12 +137,20 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		return $info;
 	}
 
-	function get_rss_feed( $feed_url ) {
+	/**
+	 * Get an RSS feed.
+	 *
+	 * @param string $feed_url The feed URL.
+	 */
+	public function get_rss_feed( $feed_url ) {
 		$rss = simplexml_load_file( $feed_url );
 		return $rss;
 	}
 
-	function get_rss_feeds() {
+	/**
+	 * Get the RSS feeds.
+	 */
+	public function get_rss_feeds() {
 		return [
 			'http://feeds.bbci.co.uk/news/world/rss.xml',
 			'http://feeds.bbci.co.uk/news/business/rss.xml',
@@ -121,7 +158,12 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		];
 	}
 
-	function get_post_author( $name ) {
+	/**
+	 * Get an author by name.
+	 *
+	 * @param string $name The author name.
+	 */
+	public function get_post_author( $name ) {
 		$slug = sanitize_title_with_dashes( $name );
 		$user = get_user_by( 'slug', $slug );
 
@@ -145,7 +187,12 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 	}
 
-	function get_url_meta( $url ) {
+	/**
+	 * Get meta for a URL.
+	 *
+	 * @param $string $url The URL.
+	 */
+	public function get_url_meta( $url ) {
 		$options = [];
 
 		if ( empty( $options['headers'] ) ) {
@@ -153,7 +200,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 
 		$options['headers']['x-api-key'] = MERCURY_PARSER_API_KEY;
-		$options['timeout'] = 60;
+		$options['timeout']              = 60;
 
 		$request_url = 'https://mercury.postlight.com/parser?url=' . urlencode( $url );
 		$response    = wp_remote_get( $request_url, $options );
