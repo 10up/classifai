@@ -23,15 +23,17 @@ Classify WordPress Content using [IBM Watson Natural Language Processing API](ht
 - Start here: https://cloud.ibm.com/registration, set up an account to begin.
 - Check for an email from `IBM Cloud` and click the `Confirm Account` link.
 - Log into your account (accepting the privacy policy) and create a new *"Natural Language Understanding"* Resource - https://cloud.ibm.com/catalog/services/natural-language-understanding.
-- Click `Manage` in the left hand menu, then `Show credentials` on the Manage page and copy the `API Key` value.
+- Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view `API Key` and `URL` information
 
 #### 4. Configure IBM Watson API Keys under Settings > ClassifAI
 
 ##### Credentials contain API Key
+- In the `API URL` field enter the URL
 - In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
 ##### Credentials contain username and password
+- In the `API URL` field enter the URL
 - Enter the username value into the `API User field`.
 - Enter the password into the `API key` field.
 

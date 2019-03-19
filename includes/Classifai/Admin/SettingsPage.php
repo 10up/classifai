@@ -94,6 +94,18 @@ class SettingsPage {
 	protected function do_credentials_section() {
 		add_settings_section( 'credentials', esc_html__( 'IBM Watson API Credentials', 'classifai' ), '', 'classifai-settings' );
 		add_settings_field(
+			'url',
+			esc_html__( 'API URL', 'classifai' ),
+			[ $this, 'render_input' ],
+			'classifai-settings',
+			'credentials',
+			[
+				'label_for'    => 'watson_url',
+				'option_index' => 'credentials',
+				'input_type'   => 'text',
+			]
+		);
+		add_settings_field(
 			'username',
 			esc_html__( 'API User (usually "apikey")', 'classifai' ),
 			[ $this, 'render_input' ],
@@ -302,6 +314,7 @@ class SettingsPage {
 		if ( ! isset( $settings['credentials'] )
 			|| empty( $settings['credentials']['watson_username'] )
 			|| empty( $settings['credentials']['watson_password'] )
+			|| empty( $settings['credentials']['watson_url'] )
 		) {
 			return true;
 		}
@@ -309,7 +322,8 @@ class SettingsPage {
 		$request           = new \Classifai\Watson\APIRequest();
 		$request->username = $settings['credentials']['watson_username'];
 		$request->password = $settings['credentials']['watson_password'];
-		$url               = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
+		$base_url          = trailingslashit( $settings['credentials']['watson_url'] ) . 'v1/analyze';
+		$url               = esc_url( add_query_arg( [ 'version' => '2018-03-19' ], $base_url ) );
 		$options           = [
 			'body' => wp_json_encode(
 				[
@@ -356,6 +370,10 @@ class SettingsPage {
 				'error'
 			);
 			return $new_settings;
+		}
+
+		if ( isset( $settings['credentials']['watson_url'] ) ) {
+			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
 		}
 
 		if ( isset( $settings['credentials']['watson_username'] ) ) {

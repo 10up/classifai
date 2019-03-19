@@ -15,14 +15,31 @@ namespace Classifai\Watson;
 class Classifier {
 
 	/**
+	 * @var $request
 	 * The request object to make Watson api requests
 	 */
 	public $request;
 
 	/**
+	 * @var $endpoint
+	 *
 	 * The NLU API endpoint
 	 */
-	public $endpoint = 'https://gateway.watsonplatform.net/natural-language-understanding/api/v1/analyze?version=2017-02-27';
+	public $endpoint;
+
+
+	/**
+	 * Generate the API Url
+	 *
+	 * @return string
+	 */
+	public function get_endpoint() {
+		if ( empty( $this->endpoint ) ) {
+			$base_url       = trailingslashit( \Classifai\get_watson_api_url() ) . 'v1/analyze';
+			$this->endpoint = esc_url( add_query_arg( [ 'version' => '2018-03-19' ], $base_url ) );
+		}
+		return $this->endpoint;
+	}
 
 	/**
 	 * Classifies the text specified using IBM Watson NLU API.
@@ -30,8 +47,9 @@ class Classifier {
 	 * https://www.ibm.com/watson/developercloud/natural-language-understanding/api/v1/#post-analyze
 	 *
 	 * @param string $text The plain text to classify
-	 * @param array $options NLU classification options
-	 * @param array $request_options Extra options to pass to the underlying HTTP request
+	 * @param array  $options NLU classification options
+	 * @param array  $request_options Extra options to pass to the underlying HTTP request
+	 *
 	 * @return array|WP_Error
 	 */
 	public function classify( $text, $options = [], $request_options = [] ) {
@@ -46,7 +64,7 @@ class Classifier {
 			$request_options['timeout'] = WATSON_TIMEOUT;
 		}
 
-		$classified_data = $request->post( $this->endpoint, $request_options );
+		$classified_data = $request->post( $this->get_endpoint(), $request_options );
 		/**
 		 * Filter the classified data returned from the API call.
 		 *
@@ -65,7 +83,7 @@ class Classifier {
 	 *
 	 * @return \Classifai\Watson\APIRequest
 	 */
-	function get_request() {
+	public function get_request() {
 		if ( empty( $this->request ) ) {
 			$this->request = new APIRequest();
 		}
@@ -77,10 +95,10 @@ class Classifier {
 	 * Prepares the NLU Request body JSON from the arguments specified.
 	 *
 	 * @param string $text The plain text to classify
-	 * @param array $options The NLU classification options
+	 * @param array  $options The NLU classification options
 	 * @return array
 	 */
-	function get_body( $text, $options = [] ) {
+	public function get_body( $text, $options = [] ) {
 		$options['text'] = $text;
 
 		if ( empty( $options['language'] ) ) {
@@ -89,14 +107,14 @@ class Classifier {
 
 		if ( empty( $options['features'] ) ) {
 			$options['features'] = [
-				'categories'    => (object) [],
-				'keywords'      => [
+				'categories' => (object) [],
+				'keywords'   => [
 					'emotion'   => false,
 					'sentiment' => false,
 					'limit'     => 10,
 				],
-				'concepts' => (object) [],
-				'entities' => (object) [],
+				'concepts'   => (object) [],
+				'entities'   => (object) [],
 			];
 		}
 
