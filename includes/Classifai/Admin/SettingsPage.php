@@ -110,10 +110,7 @@ class SettingsPage {
 		// Create the Credentials Section.
 		$this->do_credentials_section();
 
-		// Create the post types section
-		$this->do_post_types_section();
-
-		// Create features section
+		// Create content tagging section
 		$this->do_nlu_features_sections();
 
 	}
@@ -162,33 +159,23 @@ class SettingsPage {
 	}
 
 	/**
-	 * Helper method to create the post types section
-	 */
-	protected function do_post_types_section() {
-		// Add the settings section.
-		add_settings_section( 'post-types', esc_html__( 'Post Types to classify', 'classifai' ), '', 'classifai-settings' );
-
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
-		foreach ( $post_types as $post_type ) {
-			add_settings_field(
-				$post_type->name,
-				$post_type->label,
-				[ $this, 'render_input' ],
-				'classifai-settings',
-				'post-types',
-				[
-					'label_for'    => $post_type->name,
-					'option_index' => 'post_types',
-					'input_type'   => 'checkbox',
-				]
-			);
-		}
-	}
-
-	/**
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
+		// Add the settings section.
+		add_settings_section( 'watson-content-tagging', esc_html__( 'Content Tagging with IBM Watson NLU', 'classifai' ), '', 'classifai-settings' );
+
+		add_settings_field(
+			'post-types',
+			esc_html__( 'Post Types to Tag', 'classifai' ),
+			[ $this, 'render_post_types_checkboxes' ],
+			'classifai-settings',
+			'watson-content-tagging',
+			[
+				'option_index' => 'post_types',
+			]
+		);
+
 		add_settings_section( 'watson-features', esc_html__( 'IBM Watson Features to enable', 'classifai' ), '', 'classifai-settings' );
 
 		foreach ( $this->nlu_features as $feature => $labels ) {
@@ -279,7 +266,7 @@ class SettingsPage {
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="classifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php
 			switch ( $type ) {
@@ -311,6 +298,31 @@ class SettingsPage {
 			<?php endforeach; ?>
 		</select>
 		<?php
+	}
+
+	/**
+	 * Render the post types checkbox array.
+	 *
+	 * @param array $args Settings for the input
+	 * @return void
+	 */
+	public function render_post_types_checkboxes( $args ) {
+		echo '<ul>';
+		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		foreach ( $post_types as $post_type ) {
+			$args = [
+				'label_for'    => $post_type->name,
+				'option_index' => 'post_types',
+				'input_type'   => 'checkbox',
+			];
+
+			echo '<li>';
+			$this->render_input( $args );
+			echo '<label for="classifai-settings-' . esc_attr( $post_type->name ) . '">' . esc_html( $post_type->label ) . '</label>';
+			echo '</li>';
+		}
+
+		echo '</ul>';
 	}
 
 	/**
