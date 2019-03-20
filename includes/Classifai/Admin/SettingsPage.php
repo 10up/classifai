@@ -32,19 +32,19 @@ class SettingsPage {
 	public function __construct() {
 		$this->nlu_features = [
 			'category' => [
-				'feature' => __( 'Category' ),
-				'threshold' => __( 'Category Threshold (%)' ),
-				'taxonomy' => __( 'Category Taxonomy' ),
+				'feature' => __( 'Category', 'classifai' ),
+				'threshold' => __( 'Category Threshold (%)', 'classifai' ),
+				'taxonomy' => __( 'Category Taxonomy', 'classifai' ),
 			],
 			'keyword' => [
-				'feature' => __( 'Keyword' ),
-				'threshold' => __( 'Keyword Threshold (%)' ),
-				'taxonomy' => __( 'Keyword Taxonomy' ),
+				'feature' => __( 'Keyword', 'classifai' ),
+				'threshold' => __( 'Keyword Threshold (%)', 'classifai' ),
+				'taxonomy' => __( 'Keyword Taxonomy', 'classifai' ),
 			],
 			'entity' => [
-				'feature' => __( 'Entity' ),
-				'threshold' => __( 'Entity Threshold (%)' ),
-				'taxonomy' => __( 'Entity Taxonomy' ),
+				'feature' => __( 'Entity', 'classifai' ),
+				'threshold' => __( 'Entity Threshold (%)', 'classifai' ),
+				'taxonomy' => __( 'Entity Taxonomy', 'classifai' ),
 			],
 		];
 	}
