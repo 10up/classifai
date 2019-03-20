@@ -418,7 +418,6 @@ class SettingsPage {
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 
-		// If the API authentication fails, return whatever is already saved.
 		if ( $this->authentication_check_failed( $settings ) ) {
 			add_settings_error(
 				'credentials',
@@ -426,7 +425,6 @@ class SettingsPage {
 				esc_html__( 'Authentication Failed. Please check credentials.', 'classifai' ),
 				'error'
 			);
-			return $new_settings;
 		}
 
 		if ( isset( $settings['credentials']['watson_url'] ) ) {
@@ -451,8 +449,7 @@ class SettingsPage {
 			}
 		}
 
-		foreach ( $this->features as $feature ) {
-
+		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
 				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
@@ -469,6 +466,7 @@ class SettingsPage {
 				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
 			}
 		}
+
 		return $new_settings;
 	}
 
