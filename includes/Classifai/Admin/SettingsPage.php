@@ -89,12 +89,12 @@ class SettingsPage {
 	 * Adds the submenu item.
 	 */
 	public function register_admin_menu_item() {
-		$needs_setup = empty( $this->get_settings() );
+		$is_setup = get_option( 'classifai_configured' );
 
 		$title = esc_html__( 'ClassifAI', 'classifai' );
 		$menu_title = $title;
 
-		if ( $needs_setup ) {
+		if ( ! $is_setup ) {
 			$menu_title = sprintf( __( 'ClassifAI %s' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
 		}
 
