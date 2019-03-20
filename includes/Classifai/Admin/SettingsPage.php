@@ -35,16 +35,22 @@ class SettingsPage {
 				'feature' => __( 'Category', 'classifai' ),
 				'threshold' => __( 'Category Threshold (%)', 'classifai' ),
 				'taxonomy' => __( 'Category Taxonomy', 'classifai' ),
+				'threshold_default' => WATSON_CATEGORY_THRESHOLD,
+				'taxonomy_default' => WATSON_CATEGORY_TAXONOMY,
 			],
 			'keyword' => [
 				'feature' => __( 'Keyword', 'classifai' ),
 				'threshold' => __( 'Keyword Threshold (%)', 'classifai' ),
 				'taxonomy' => __( 'Keyword Taxonomy', 'classifai' ),
+				'threshold_default' => WATSON_KEYWORD_THRESHOLD,
+				'taxonomy_default' => WATSON_KEYWORD_TAXONOMY,
 			],
 			'entity' => [
 				'feature' => __( 'Entity', 'classifai' ),
 				'threshold' => __( 'Entity Threshold (%)', 'classifai' ),
 				'taxonomy' => __( 'Entity Taxonomy', 'classifai' ),
+				'threshold_default' => WATSON_ENTITY_THRESHOLD,
+				'taxonomy_default' => WATSON_ENTITY_TAXONOMY,
 			],
 		];
 	}
@@ -163,63 +169,32 @@ class SettingsPage {
 	 */
 	protected function do_nlu_features_sections() {
 		// Add the settings section.
-		add_settings_section( 'watson-content-tagging', esc_html__( 'Content Tagging with IBM Watson NLU', 'classifai' ), '', 'classifai-settings' );
+		add_settings_section( 'watson-content-classification', esc_html__( 'Content Classification with IBM Watson NLU', 'classifai' ), '', 'classifai-settings' );
 
 		add_settings_field(
 			'post-types',
-			esc_html__( 'Post Types to Tag', 'classifai' ),
+			esc_html__( 'Post Types to Classify', 'classifai' ),
 			[ $this, 'render_post_types_checkboxes' ],
 			'classifai-settings',
-			'watson-content-tagging',
+			'watson-content-classification',
 			[
 				'option_index' => 'post_types',
 			]
 		);
 
-		add_settings_section( 'watson-features', esc_html__( 'IBM Watson Features to enable', 'classifai' ), '', 'classifai-settings' );
-
 		foreach ( $this->nlu_features as $feature => $labels ) {
-			// Checkbox.
 			add_settings_field(
 				$feature,
 				esc_html( $labels['feature'] ),
-				[ $this, 'render_input' ],
+				[ $this, 'render_nlu_feature_settings' ],
 				'classifai-settings',
-				'watson-features',
+				'watson-content-classification',
 				[
-					'label_for'    => $feature,
 					'option_index' => 'features',
-					'input_type'   => 'checkbox',
+					'feature' => $feature,
+					'labels' => $labels,
 				]
 			);
-			// Threshold
-			add_settings_field(
-				"{$feature}-threshold",
-				esc_html( $labels['threshold'] ),
-				[ $this, 'render_input' ],
-				'classifai-settings',
-				'watson-features',
-				[
-					'label_for'     => "{$feature}_threshold",
-					'option_index'  => 'features',
-					'input_type'    => 'text',
-					'default_value' => 70,
-				]
-			);
-			// Taxonomy
-			add_settings_field(
-				"{$feature}-taxonomy",
-				esc_html( $labels['taxonomy'] ),
-				[ $this, 'render_select' ],
-				'classifai-settings',
-				'watson-features',
-				[
-					'label_for'    => "{$feature}_taxonomy",
-					'option_index' => 'features',
-					'feature'      => $feature,
-				]
-			);
-
 		}
 	}
 
@@ -261,42 +236,31 @@ class SettingsPage {
 		$setting_index = $this->get_settings( $args['option_index'] );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+
 		// Check for a default value
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$attrs = '';
+		$class = '';
+
+		switch ( $type ) {
+			case 'text':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+				break;
+			case 'number':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+				$class = 'small-text';
+				break;
+			case 'checkbox':
+				$attrs = ' value="1"' . checked( '1', $value, false );
+				break;
+		}
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			class="<?php echo esc_attr( $class ); ?>"
 			name="classifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
-			<?php
-			switch ( $type ) {
-				case 'text':
-				case 'number':
-					echo 'value="' . esc_attr( $value ) . '"';
-					break;
-				case 'checkbox':
-					echo 'value="1"';
-					checked( '1', $value );
-					break;
-			}
-			?>
-		/>
-		<?php
-	}
-
-	/**
-	 * @param array $args The settings for the select input instance.
-	 */
-	public function render_select( $args ) {
-		$taxonomies = $this->get_supported_taxonomies();
-		$features   = $this->get_settings( 'features' );
-		?>
-		<select id="<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>" name="classifai_settings[features][<?php echo esc_attr( "{$args['feature']}_taxonomy" ); ?>]">
-			<option><?php esc_html_e( 'Please choose', 'classifai' ); ?></option>
-			<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-				<option value="<?php echo esc_attr( $name ); ?>" <?php selected( isset( $features[ "{$args['feature']}_taxonomy" ] ) ? $features[ "{$args['feature']}_taxonomy" ] : '', esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
-			<?php endforeach; ?>
-		</select>
+			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 	}
 
@@ -323,6 +287,58 @@ class SettingsPage {
 		}
 
 		echo '</ul>';
+	}
+
+	/**
+	 * Render the NLU features settings.
+	 *
+	 * @param array $args Settings for the inputs
+	 * @return void
+	 */
+	public function render_nlu_feature_settings( $args ) {
+		$feature = $args['feature'];
+		$labels = $args['labels'];
+
+		$taxonomies = $this->get_supported_taxonomies();
+		$features   = $this->get_settings( 'features' );
+		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
+
+		// Enable classification type
+		$feature_args = [
+			'label_for'    => $feature,
+			'option_index' => 'features',
+			'input_type'   => 'checkbox',
+		];
+
+		$threshold_args = [
+			'label_for'     => "{$feature}_threshold",
+			'option_index'  => 'features',
+			'input_type'    => 'number',
+			'default_value' => $labels['threshold_default'],
+		];
+		?>
+
+		<fieldset><legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
+
+			<p>
+				<?php $this->render_input( $feature_args ); ?>
+				<label for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
+			</p>
+
+		<p>
+			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br />
+			<?php $this->render_input( $threshold_args ); ?>
+		</p>
+
+		<p>
+			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br />
+			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="classifai_settings[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
+					<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+		<?php
 	}
 
 	/**
