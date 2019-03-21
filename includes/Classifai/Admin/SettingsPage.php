@@ -147,26 +147,28 @@ class SettingsPage {
 		);
 		add_settings_field(
 			'username',
-			esc_html__( 'API User (usually "apikey")', 'classifai' ),
+			esc_html__( 'API Username', 'classifai' ),
 			[ $this, 'render_input' ],
 			'classifai-settings',
 			'credentials',
 			[
-				'label_for'    => 'watson_username',
-				'option_index' => 'credentials',
-				'input_type'   => 'text',
+				'label_for'     => 'watson_username',
+				'option_index'  => 'credentials',
+				'input_type'    => 'text',
+				'default_value' => 'apikey',
+				'description'   => __( 'If your credentials do not include a username, it is typically apikey', 'classifai' ),
 			]
 		);
 		add_settings_field(
 			'password',
-			esc_html__( 'API Key', 'classifai' ),
+			esc_html__( 'API Key / Password', 'classifai' ),
 			[ $this, 'render_input' ],
 			'classifai-settings',
 			'credentials',
 			[
 				'label_for'    => 'watson_password',
 				'option_index' => 'credentials',
-				'input_type'   => 'text',
+				'input_type'   => 'password',
 			]
 		);
 	}
@@ -251,6 +253,7 @@ class SettingsPage {
 
 		switch ( $type ) {
 			case 'text':
+			case 'password':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
 				break;
 			case 'number':
@@ -269,6 +272,9 @@ class SettingsPage {
 			name="classifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . esc_html( $args['description'] ) . '</span>';
+		}
 	}
 
 	/**
