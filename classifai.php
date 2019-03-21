@@ -7,7 +7,7 @@
  * License:         MIT
  * Text Domain:     classifai
  * Domain Path:     /languages
- * Version:         1.1.0
+ * Version:         1.2.0
  */
 
 /**
