@@ -1,7 +1,7 @@
 # ![ClassifAI](https://cldup.com/zn3_j2A-DL.png)
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Build Status](https://travis-ci.com/10up/classifai-for-wordpress.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai-for-wordpress)
+[![Build Status](https://travis-ci.com/10up/classifai-for-wordpress.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai-for-wordpress) [![Release Version](https://img.shields.io/github/release/10up/classifai-for-wordpress.svg)](https://github.com/10up/classifai-for-wordpress/releases/latest)
 
 ## Features
 
