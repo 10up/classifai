@@ -1,10 +1,11 @@
 # Copyright (C) 2019 Darshan Sawardekar, 10up
-# This file is distributed under the same license as the ClassifAI package.
+# This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.1.0\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2019-02-27 14:28:14+00:00\n"
+"Project-Id-Version: ClassifAI 1.2.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/classifai-for-wordpress\n"
+"POT-Creation-Date: 2019-03-21 16:22:41+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -13,11 +14,11 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.3\n"
 
-#: classifai.php:62
+#: classifai.php:63
 msgid "Fatal Error: Composer not setup in %"
 msgstr ""
 
-#: classifai.php:102
+#: classifai.php:102 classifai.php:103
 msgid "Error: Please run $ composer install in the classifai plugin directory."
 msgstr ""
 
@@ -25,51 +26,103 @@ msgstr ""
 msgid "ClassifAI requires setup"
 msgstr ""
 
+#: includes/Classifai/Admin/SettingsPage.php:35
+msgid "Category"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:36
+msgid "Category Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:37
+msgid "Category Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:42
+msgid "Keyword"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:43
+msgid "Keyword Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:44
+msgid "Keyword Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:49
+msgid "Entity"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:50
+msgid "Entity Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:51
+msgid "Entity Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:56
+msgid "Concept"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:57
+msgid "Concept Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:58
+msgid "Concept Taxonomy"
+msgstr ""
+
 #. Plugin Name of the plugin/theme
 msgid "ClassifAI"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:95
+#: includes/Classifai/Admin/SettingsPage.php:105
+msgid "ClassifAI %s"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:135
 msgid "IBM Watson API Credentials"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:98
-msgid "Username"
-msgstr ""
-
-#: includes/Classifai/Admin/SettingsPage.php:110
-msgid "Password"
-msgstr ""
-
-#: includes/Classifai/Admin/SettingsPage.php:127
-msgid "Post Types to classify"
+#: includes/Classifai/Admin/SettingsPage.php:138
+msgid "API URL"
 msgstr ""
 
 #: includes/Classifai/Admin/SettingsPage.php:150
-msgid "IBM Watson Features to enable"
+msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:157
-msgid "%s:"
+#: includes/Classifai/Admin/SettingsPage.php:159
+msgid "If your credentials do not include a username, it is typically apikey"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:170
-msgid "%s Threshold (%%):"
+#: includes/Classifai/Admin/SettingsPage.php:164
+msgid "API Key / Password"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:184
-msgid "%s Taxonomy:"
+#: includes/Classifai/Admin/SettingsPage.php:181
+msgid "Content Classification with IBM Watson NLU"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:213
+#: includes/Classifai/Admin/SettingsPage.php:185
+msgid "Post Types to Classify"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:225
 msgid "Classifai Settings"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:267
-msgid "Please choose"
+#: includes/Classifai/Admin/SettingsPage.php:334
+msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:355
+#: includes/Classifai/Admin/SettingsPage.php:338
+msgid "Enable"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:438
 msgid "Authentication Failed. Please check credentials."
 msgstr ""
 
@@ -121,35 +174,35 @@ msgstr ""
 msgid "No %s found in Trash."
 msgstr ""
 
-#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:24
+#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:30
 msgid "Watson Category"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:28
+#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:37
 msgid "Watson Categories"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:24
+#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:30
 msgid "Watson Concept"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:28
+#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:37
 msgid "Watson Concepts"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/EntityTaxonomy.php:24
+#: includes/Classifai/Taxonomy/EntityTaxonomy.php:30
 msgid "Watson Entity"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/EntityTaxonomy.php:28
+#: includes/Classifai/Taxonomy/EntityTaxonomy.php:37
 msgid "Watson Entities"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:24
+#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:30
 msgid "Watson Keyword"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:28
+#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:37
 msgid "Watson Keywords"
 msgstr ""
 
