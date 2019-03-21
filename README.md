@@ -5,10 +5,10 @@
 
 ## Features
 
-* Classify your content using [IBM Watson's Natural Language Understanding API] \(https://www.ibm.com/watson/services/natural-language-understanding/)
+* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/)
 * Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities)
 * Automatically classify content on save
-* Bulk classify content with WP-CLI
+* Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ## Installation
 
