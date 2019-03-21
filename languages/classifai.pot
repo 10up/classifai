@@ -1,0 +1,219 @@
+# Copyright (C) 2019 Darshan Sawardekar, 10up
+# This file is distributed under the MIT.
+msgid ""
+msgstr ""
+"Project-Id-Version: ClassifAI 1.2.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/classifai-for-wordpress\n"
+"POT-Creation-Date: 2019-03-21 16:22:41+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: node-wp-i18n 1.2.3\n"
+
+#: classifai.php:63
+msgid "Fatal Error: Composer not setup in %"
+msgstr ""
+
+#: classifai.php:102 classifai.php:103
+msgid "Error: Please run $ composer install in the classifai plugin directory."
+msgstr ""
+
+#: includes/Classifai/Admin/Notifications.php:26
+msgid "ClassifAI requires setup"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:35
+msgid "Category"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:36
+msgid "Category Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:37
+msgid "Category Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:42
+msgid "Keyword"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:43
+msgid "Keyword Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:44
+msgid "Keyword Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:49
+msgid "Entity"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:50
+msgid "Entity Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:51
+msgid "Entity Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:56
+msgid "Concept"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:57
+msgid "Concept Threshold (%)"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:58
+msgid "Concept Taxonomy"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "ClassifAI"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:105
+msgid "ClassifAI %s"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:135
+msgid "IBM Watson API Credentials"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:138
+msgid "API URL"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:150
+msgid "API Username"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:159
+msgid "If your credentials do not include a username, it is typically apikey"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:164
+msgid "API Key / Password"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:181
+msgid "Content Classification with IBM Watson NLU"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:185
+msgid "Post Types to Classify"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:225
+msgid "Classifai Settings"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:334
+msgid "Watson Category Settings"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:338
+msgid "Enable"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:438
+msgid "Authentication Failed. Please check credentials."
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:102
+msgid "Search %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:103
+msgid "Popular %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:104
+msgid "All %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:105
+msgid "Edit %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:106
+msgid "Update %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:107
+msgid "Add New %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:108
+msgid "New %s Name"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:109
+msgid "Separate %s with commas"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:110
+msgid "Add or remove %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:111
+msgid "Choose from the most used %s"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:112
+msgid "No %s found."
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:113
+msgid "No %s found in Trash."
+msgstr ""
+
+#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:30
+msgid "Watson Category"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/CategoryTaxonomy.php:37
+msgid "Watson Categories"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:30
+msgid "Watson Concept"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/ConceptTaxonomy.php:37
+msgid "Watson Concepts"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/EntityTaxonomy.php:30
+msgid "Watson Entity"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/EntityTaxonomy.php:37
+msgid "Watson Entities"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:30
+msgid "Watson Keyword"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/KeywordTaxonomy.php:37
+msgid "Watson Keywords"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "AI-powered classification and machine learning for WordPress content"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "Darshan Sawardekar, 10up"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "https://10up.com"
+msgstr ""

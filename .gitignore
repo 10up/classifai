@@ -1,7 +1,7 @@
 release
 /vendor/
-/themes/nobelprize/vendor/
 phpunit.xml
+/dist
 
 debug.log
 
