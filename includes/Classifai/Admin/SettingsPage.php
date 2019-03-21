@@ -52,6 +52,13 @@ class SettingsPage {
 				'threshold_default' => WATSON_ENTITY_THRESHOLD,
 				'taxonomy_default' => WATSON_ENTITY_TAXONOMY,
 			],
+			'concept' => [
+				'feature' => __( 'Concept', 'classifai' ),
+				'threshold' => __( 'Concept Threshold (%)', 'classifai' ),
+				'taxonomy' => __( 'Concept Taxonomy', 'classifai' ),
+				'threshold_default' => WATSON_CONCEPT_THRESHOLD,
+				'taxonomy_default' => WATSON_CONCEPT_TAXONOMY,
+			],
 		];
 	}
 
