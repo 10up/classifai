@@ -1,8 +1,10 @@
 <?php
 
-namespace Classifai\Admin;
+namespace Classifai\Watson;
 
-class SettingsPage {
+use Classifai\Admin\ProviderSettings;
+
+class WatsonSettings extends ProviderSettings {
 
 	/**
 	 * @var string $option Option that stores the classifai settings
@@ -30,6 +32,8 @@ class SettingsPage {
 	 * Object setup
 	 */
 	public function __construct() {
+		parent::__construct( 'watson_settings' );
+
 		$this->nlu_features = [
 			'category' => [
 				'feature' => __( 'Category', 'classifai' ),
@@ -83,10 +87,10 @@ class SettingsPage {
 
 
 	/**
-	 * Register the actions required for the settings page.
-	 */
+ * Register the actions required for the settings page.
+ */
 	public function register() {
-		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
+		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ], 11 );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
 	}
@@ -98,19 +102,15 @@ class SettingsPage {
 	public function register_admin_menu_item() {
 		$is_setup = get_option( 'classifai_configured' );
 
-		$title = esc_html__( 'ClassifAI', 'classifai' );
+		$title = esc_html__( 'IBM Watson NLU', 'classifai' );
 		$menu_title = $title;
 
-		if ( ! $is_setup ) {
-			$menu_title = sprintf( __( 'ClassifAI %s' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
-		}
-
 		add_submenu_page(
-			'options-general.php',
+			'classifai_settings',
 			$title,
 			$menu_title,
 			'manage_options',
-			'classifai_settings',
+			$this->menu_slug,
 			[ $this, 'render_settings_page' ]
 		);
 	}
@@ -222,7 +222,7 @@ class SettingsPage {
 	public function render_settings_page() {
 		?>
 		<div class="wrap">
-			<h2><?php esc_html_e( 'Classifai Settings', 'classifai' ); ?></h2>
+			<h2><?php esc_html_e( 'IBM Watson NLU Settings', 'classifai' ); ?></h2>
 
 			<form action="options.php" method="post">
 
