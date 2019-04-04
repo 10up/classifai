@@ -19,49 +19,39 @@ class WatsonSettings extends ProviderSettings {
 	public $nlu_features = [];
 
 	/**
-	 * The admin_support items require this method.
-	 *
-	 * @todo remove this requirement.
-	 * @return bool
-	 */
-	public function can_register() {
-		return true;
-	}
-
-	/**
 	 * Object setup
 	 */
 	public function __construct() {
-		parent::__construct( 'watson_settings' );
+		parent::__construct( 'watson', 'watson_settings' );
 
 		$this->nlu_features = [
 			'category' => [
-				'feature' => __( 'Category', 'classifai' ),
-				'threshold' => __( 'Category Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Category Taxonomy', 'classifai' ),
+				'feature'           => __( 'Category', 'classifai' ),
+				'threshold'         => __( 'Category Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Category Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CATEGORY_THRESHOLD,
-				'taxonomy_default' => WATSON_CATEGORY_TAXONOMY,
+				'taxonomy_default'  => WATSON_CATEGORY_TAXONOMY,
 			],
-			'keyword' => [
-				'feature' => __( 'Keyword', 'classifai' ),
-				'threshold' => __( 'Keyword Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Keyword Taxonomy', 'classifai' ),
+			'keyword'  => [
+				'feature'           => __( 'Keyword', 'classifai' ),
+				'threshold'         => __( 'Keyword Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Keyword Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_KEYWORD_THRESHOLD,
-				'taxonomy_default' => WATSON_KEYWORD_TAXONOMY,
+				'taxonomy_default'  => WATSON_KEYWORD_TAXONOMY,
 			],
-			'entity' => [
-				'feature' => __( 'Entity', 'classifai' ),
-				'threshold' => __( 'Entity Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Entity Taxonomy', 'classifai' ),
+			'entity'   => [
+				'feature'           => __( 'Entity', 'classifai' ),
+				'threshold'         => __( 'Entity Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Entity Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_ENTITY_THRESHOLD,
-				'taxonomy_default' => WATSON_ENTITY_TAXONOMY,
+				'taxonomy_default'  => WATSON_ENTITY_TAXONOMY,
 			],
-			'concept' => [
-				'feature' => __( 'Concept', 'classifai' ),
-				'threshold' => __( 'Concept Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Concept Taxonomy', 'classifai' ),
+			'concept'  => [
+				'feature'           => __( 'Concept', 'classifai' ),
+				'threshold'         => __( 'Concept Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Concept Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CONCEPT_THRESHOLD,
-				'taxonomy_default' => WATSON_CONCEPT_TAXONOMY,
+				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
 	}
@@ -87,8 +77,8 @@ class WatsonSettings extends ProviderSettings {
 
 
 	/**
- * Register the actions required for the settings page.
- */
+	 * Register the actions required for the settings page.
+	 */
 	public function register() {
 		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ], 11 );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
@@ -102,7 +92,7 @@ class WatsonSettings extends ProviderSettings {
 	public function register_admin_menu_item() {
 		$is_setup = get_option( 'classifai_configured' );
 
-		$title = esc_html__( 'IBM Watson NLU', 'classifai' );
+		$title      = esc_html__( 'IBM Watson NLU', 'classifai' );
 		$menu_title = $title;
 
 		add_submenu_page(
@@ -200,8 +190,8 @@ class WatsonSettings extends ProviderSettings {
 				'watson-content-classification',
 				[
 					'option_index' => 'features',
-					'feature' => $feature,
-					'labels' => $labels,
+					'feature'      => $feature,
+					'labels'       => $labels,
 				]
 			);
 		}
@@ -281,6 +271,7 @@ class WatsonSettings extends ProviderSettings {
 	 * Render the post types checkbox array.
 	 *
 	 * @param array $args Settings for the input
+	 *
 	 * @return void
 	 */
 	public function render_post_types_checkboxes( $args ) {
@@ -306,11 +297,12 @@ class WatsonSettings extends ProviderSettings {
 	 * Render the NLU features settings.
 	 *
 	 * @param array $args Settings for the inputs
+	 *
 	 * @return void
 	 */
 	public function render_nlu_feature_settings( $args ) {
 		$feature = $args['feature'];
-		$labels = $args['labels'];
+		$labels  = $args['labels'];
 
 		$taxonomies = $this->get_supported_taxonomies();
 		$features   = $this->get_settings( 'features' );
@@ -331,23 +323,29 @@ class WatsonSettings extends ProviderSettings {
 		];
 		?>
 
-		<fieldset><legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
-
-			<p>
-				<?php $this->render_input( $feature_args ); ?>
-				<label for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
-			</p>
+		<fieldset>
+		<legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
 
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br />
+			<?php $this->render_input( $feature_args ); ?>
+			<label
+				for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
+		</p>
+
+		<p>
+			<label
+				for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br/>
 			<?php $this->render_input( $threshold_args ); ?>
 		</p>
 
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br />
-			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="classifai_settings[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+			<label
+				for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
+			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"
+					name="classifai_settings[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
 				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-					<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
+					<option
+						value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</p>
@@ -416,6 +414,7 @@ class WatsonSettings extends ProviderSettings {
 		} else {
 			delete_option( 'classifai_configured' );
 		}
+
 		return $is_error;
 
 	}

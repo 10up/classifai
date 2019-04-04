@@ -11,8 +11,20 @@ class ProviderSettingsManager {
 	 * @var array Array of Classes that represent settings pages.
 	 */
 	protected $settings_pages;
+
+	/**
+	 * @var string The page title.
+	 */
 	protected $title;
+
+	/**
+	 * @var string The menu title
+	 */
 	protected $menu_title;
+
+	/**
+	 * @var array Array of provider Classes.
+	 */
 	protected $provider_instances = [];
 
 	/**
@@ -27,17 +39,6 @@ class ProviderSettingsManager {
 	}
 
 	/**
-	 * Filter the Provider settings pages to ensure that the class both exists and extends the correct base class.
-	 *
-	 * @param string $class The full namespaced class.
-	 *
-	 * @return bool
-	 */
-	protected function filter_settings_pages( $class ) {
-		return ( class_exists( $class ) && in_array( 'Classifai\Admin\ProviderSettings', class_parents( $class ), true ) );
-	}
-
-	/**
 	 * The admin_support items require this method.
 	 *
 	 * @todo remove this requirement.
@@ -47,6 +48,16 @@ class ProviderSettingsManager {
 		return true;
 	}
 
+	/**
+	 * Filter the Provider settings pages to ensure that the class both exists and extends the correct base class.
+	 *
+	 * @param string $class The full namespaced class.
+	 *
+	 * @return bool
+	 */
+	protected function filter_settings_pages( $class ) {
+		return ( class_exists( $class ) && in_array( 'Classifai\Admin\ProviderSettings', class_parents( $class ), true ) );
+	}
 	/**
 	 * Register the actions required for the settings page.
 	 */
@@ -67,12 +78,17 @@ class ProviderSettingsManager {
 		$this->menu_title = $this->title;
 
 		if ( ! $is_setup ) {
-			$this->menu_title = sprintf( __( 'ClassifAI %s' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
+			/*
+			 * Translators: Main title.
+			 */
+			$this->menu_title = sprintf( __( 'ClassifAI %s', 'classifai' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
 		}
 	}
 
 
-
+	/**
+	 * Register a sub page.
+	 */
 	public function register_admin_menu_item() {
 		add_submenu_page(
 			'options-general.php',
@@ -87,6 +103,9 @@ class ProviderSettingsManager {
 
 	}
 
+	/**
+	 * Register a top level page.
+	 */
 	public function register_top_level_admin_menu_item() {
 		add_menu_page(
 			$this->title,
@@ -98,6 +117,9 @@ class ProviderSettingsManager {
 		$this->init_provider_pages();
 	}
 
+	/**
+	 * Registers each of the provider pages.
+	 */
 	public function init_provider_pages() {
 		foreach ( $this->settings_pages as $class ) {
 			if ( class_exists( $class ) ) {
@@ -108,6 +130,9 @@ class ProviderSettingsManager {
 		}
 	}
 
+	/**
+	 * Render the main settings page for the Classifai plugin.
+	 */
 	public function render_settings_page() {
 
 		if ( count( $this->settings_pages ) > 1 ) {
