@@ -107,10 +107,10 @@ class Plugin {
 	 */
 	public function init_admin_support() {
 		$this->admin_support = [
-			new Admin\ProviderSettingsManager(
+			new Services\ServicesManager(
 				apply_filters(
-					'classify_service_provider_settings',
-					[ 'Classifai\Azure\AzureSettings', 'Classifai\Watson\WatsonSettings' ]
+					'classifai_services',
+					[ 'Classifai\Services\LanguageProcessing', 'Classifai\Services\ImageProcessing' ]
 				)
 			),
 			new Admin\Notifications(),
