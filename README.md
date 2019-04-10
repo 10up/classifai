@@ -48,7 +48,7 @@
 
 #### 1. Batch Classify Posts
 
-`$ wp klasifai post {post_ids} [--post_type=post_type] [--limit=limit] [--link=link]`
+`$ wp classifai post {post_ids} [--post_type=post_type] [--limit=limit] [--link=link]`
 
 ##### Options
 
@@ -78,7 +78,7 @@ default: `true`
 
 #### 2. Classify Text
 
-`$ wp klasifai text {text} [--category=bool] [--keyword=bool] [--concept=bool] [--entity=bool] [--input=input] [--only-normalize=bool]`
+`$ wp classifai text {text} [--category=bool] [--keyword=bool] [--concept=bool] [--entity=bool] [--input=input] [--only-normalize=bool]`
 
 Directly classify text using Watson NLU.
 
