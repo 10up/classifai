@@ -36,9 +36,9 @@ class Normalizer {
 	/**
 	 * Normalizes post_content into plain text.
 	 *
-	 * @param string $post_content
-	 * @param string $post_title optional, append to content to improve accuracy
-	 * @param int $post_id optional
+	 * @param string $post_content The post content.
+	 * @param string $post_title   The post title. Optional: append to content to improve accuracy.
+	 * @param int    $post_id      The post id. Optional.
 	 */
 	public function normalize_content( $post_content, $post_title = '', $post_id = false ) {
 		/* Strip HTML entities */

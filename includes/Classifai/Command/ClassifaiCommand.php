@@ -11,7 +11,6 @@ use Classifai\PostClassifier;
  * ClassifaiCommand is the command line interface of the Classifai plugin.
  * It provides subcommands to test classification results and batch
  * classify posts using the IBM Watson NLU API.
- *
  */
 class ClassifaiCommand extends \WP_CLI_Command {
 
@@ -33,6 +32,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--link=<link>]
 	 * : Whether to link classification results to Taxonomy terms. Default true
 	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
 	 */
 	public function post( $args = [], $opts = [] ) {
 		$defaults = [
@@ -127,6 +128,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 *
 	 * [--only-normalize=<bool>]
 	 * : Prints the normalized text that will be sent to the NLU API, Default false
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
 	 */
 	public function text( $args = [], $opts = [] ) {
 		$defaults = [
@@ -154,7 +158,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		if ( ! empty( $opts['input'] ) ) {
 			$text = file_get_contents( $opts['input'] );
-		} else if ( ! empty( $args ) ) {
+		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
 			\WP_CLI::error( 'Please specify text to classify' );
@@ -205,6 +209,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * Prints the Basic Auth header based on credentials configured in
 	 * the plugin.
 	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
 	 */
 	public function auth( $args = [], $opts = [] ) {
 		$username = \Classifai\get_watson_username();
@@ -218,7 +224,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::error( 'Watson Password not found in options or constant.' );
 		}
 
-		$request = new APIRequest();
+		$request           = new APIRequest();
 		$request->username = $username;
 		$request->password = $password;
 
@@ -230,6 +236,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Restores the plugin configuration to factory defaults. IBM Watson
 	 * credentials must be reentered after this command.
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
 	 */
 	public function reset( $args = [], $opts = [] ) {
 		\WP_CLI::warning(
@@ -250,7 +259,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Returns the list of post ids to classify with Watson
 	 *
-	 * @param array $opts Options from WP CLI
+	 * @param array $opts Options from WP CLI.
 	 * @return array
 	 */
 	private function get_posts_to_classify( $opts = [] ) {
@@ -273,9 +282,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 	/**
 	 * TODO: gc
+	 *
+	 * @param int $index The index.
 	 */
 	private function gc( $index ) {
-		if ( $index % 10 === 0 ) {
+		if ( 0 === $index % 10 ) {
 			// TODO
 			return true;
 		} else {
@@ -285,6 +296,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 	/**
 	 * Prints the output from the NLU API.
+	 *
+	 * @param mixed $output  The variable to oputput.
+	 * @param int   $post_id The post id.
 	 */
 	private function print( $output, $post_id ) {
 		if ( ! is_wp_error( $output ) ) {

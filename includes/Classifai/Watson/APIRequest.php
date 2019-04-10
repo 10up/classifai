@@ -18,12 +18,16 @@ namespace Classifai\Watson;
 class APIRequest {
 
 	/**
-	 * The Watson API username
+	 * The Watson API username.
+	 *
+	 * @var string The Watson API username.
 	 */
 	public $username;
 
 	/**
-	 * The Watson API password
+	 * The Watson API password.
+	 *
+	 * @var string The Watson API password.
 	 */
 	public $password;
 
@@ -32,7 +36,7 @@ class APIRequest {
 	 * HTTP request. The result is parsed and returned if valid JSON.
 	 *
 	 * @param string $url The Watson API url
-	 * @param array $options Additional query params
+	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
 	public function request( $url, $options = [] ) {
@@ -45,7 +49,7 @@ class APIRequest {
 	 * response if valid.
 	 *
 	 * @param string $url The Watson API url
-	 * @param array $options Additional query params
+	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
 	public function get( $url, $options = [] ) {
@@ -58,7 +62,7 @@ class APIRequest {
 	 * response if valid.
 	 *
 	 * @param string $url The Watson API url
-	 * @param array $options Additional query params
+	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
 	public function post( $url, $options = [] ) {
@@ -66,7 +70,12 @@ class APIRequest {
 		return $this->get_result( wp_remote_post( $url, $options ) );
 	}
 
-	function get_result( $response ) {
+	/**
+	 * Get results from the response.
+	 *
+	 * @param object $response The API response.
+	 */
+	public function get_result( $response ) {
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
 			$json = json_decode( $body, true );
@@ -85,7 +94,12 @@ class APIRequest {
 		}
 	}
 
-	function get_username() {
+	/**
+	 * Get the Watson username.
+	 *
+	 * @return string $username.
+	 */
+	public function get_username() {
 		if ( empty( $this->username ) ) {
 			$this->username = \Classifai\get_watson_username();
 		}
@@ -93,7 +107,10 @@ class APIRequest {
 		return $this->username;
 	}
 
-	function get_password() {
+	/**
+	 * Get the Watson API password.
+	 */
+	public function get_password() {
 		if ( empty( $this->password ) ) {
 			$this->password = \Classifai\get_watson_password();
 		}
@@ -101,18 +118,33 @@ class APIRequest {
 		return $this->password;
 	}
 
-	function get_auth_header() {
+	/**
+	 * Get the auth header.
+	 *
+	 * @return string The header.
+	 */
+	public function get_auth_header() {
 		return 'Basic ' . $this->get_auth_hash();
 	}
 
-	function get_auth_hash() {
+	/**
+	 * Get the auth hash.
+	 *
+	 * @return string The auth hash.
+	 */
+	public function get_auth_hash() {
 		$username = $this->get_username();
 		$password = $this->get_password();
 
 		return base64_encode( $username . ':' . $password );
 	}
 
-	function add_headers( &$options ) {
+	/**
+	 * Add the headers.
+	 *
+	 * @param array $options The header optins, passed by reference.
+	 */
+	public function add_headers( &$options ) {
 		if ( empty( $options['headers'] ) ) {
 			$options['headers'] = [];
 		}

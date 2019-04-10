@@ -4,9 +4,10 @@
  * Description:     AI-powered classification and machine learning for WordPress content
  * Author:          Darshan Sawardekar, 10up
  * Author URI:      https://10up.com
+ * License:         MIT
  * Text Domain:     classifai
  * Domain Path:     /languages
- * Version:         1.1.0
+ * Version:         1.2.0
  */
 
 /**
