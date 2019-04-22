@@ -40,7 +40,7 @@ class Plugin {
 	 * Setup WP hooks
 	 */
 	public function enable() {
-		add_action( 'init', [ $this, 'init' ] );
+		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
