@@ -38,3 +38,6 @@ Thumbs.db
 Desktop.ini
 
 config.local.php
+
+# Don't ignore
+!vendor/yahnis-elsts
