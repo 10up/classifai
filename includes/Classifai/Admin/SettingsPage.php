@@ -483,4 +483,35 @@ class SettingsPage {
 		return $new_settings;
 	}
 
+	/**
+	 * Hit license API to see if key/email is valid
+	 *
+	 * @param  string $email Email address.
+	 * @param  string $license_key License key.
+	 * @since  1.2
+	 * @return bool
+	 */
+	public function check_license_key( $email, $license_key ) {
+
+		$request = wp_remote_post(
+			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
+			[
+				'timeout' => 10,
+				'body'    => [
+					'license_key' => $license_key,
+					'email'       => $email,
+				],
+			]
+		);
+
+		if ( is_wp_error( $request ) ) {
+			return false;
+		}
+
+		if ( 200 === wp_remote_retrieve_response_code( $request ) ) {
+			return true;
+		}
+
+		return false;
+	}
 }
