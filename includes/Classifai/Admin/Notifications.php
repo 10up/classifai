@@ -15,31 +15,44 @@ class Notifications {
 	 * @return bool
 	 */
 	public function can_register() {
-		$is_setup = get_option( 'classifai_configured' );
-		return ( ! $is_setup );
+		return true;
 	}
 
 	/**
 	 * Register the actions needed.
 	 */
 	public function register() {
-		$this->message = esc_html__( 'ClassifAI requires setup', 'classifai' );
 		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
-		add_action( 'admin_notices', [ $this, 'maybe_render_activation_notice' ] );
+		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ] );
 	}
 
 	/**
 	 * Respond to the activation hook.
 	 */
-	public function maybe_render_activation_notice() {
-		$should_render = get_transient( 'classifai_activation_notice' );
-		if ( $should_render ) {
+	public function maybe_render_notices() {
+		$settings = \Classifai\get_plugin_settings();
+
+		if (
+			'settings_page_classifai_settings' === get_current_screen()->base &&
+			( ! isset( $settings['valid_license'] ) || ! $settings['valid_license'] )
+		) {
+			$notice_url = 'https://classifaiplugin.com/#cta';
+
+			?>
+			<div data-notice="auto-upgrade-disabled" class="notice notice-warning">
+				<?php /* translators: %s: Classifai settings url */ ?>
+				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s">Register ClassifAI</a> to receive important plugin updates and other ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
+			</div>
+			<?php
+		}
+
+		$needs_setup = get_transient( 'classifai_activation_notice' );
+		if ( $needs_setup ) {
 			printf(
-				'<div class="notice notice-warning"><p><a href="%s">' . esc_html( $this->message ) . '</a></p></div>',
+				'<div class="notice notice-warning"><p><a href="%s">' . esc_html__( 'ClassifAI requires setup', 'classifai' ) . '</a></p></div>',
 				esc_url( admin_url( 'options-general.php?page=classifai_settings' ) )
 			);
 			delete_transient( 'classifai_activation_notice' );
 		}
 	}
-
 }
