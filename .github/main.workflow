@@ -1,5 +1,5 @@
 workflow "Build Release" {
-  resolves = ["WordPress Plugin Deploy"]
+  resolves = ["Release to Stable"]
   on = "push"
 }
 
