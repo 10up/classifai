@@ -1,5 +1,5 @@
 release
-/vendor/
+/vendor/*
 phpunit.xml
 /dist
 
@@ -40,4 +40,4 @@ Desktop.ini
 config.local.php
 
 # Don't ignore
-!vendor/yahnis-elsts
+!/vendor/yahnis-elsts
