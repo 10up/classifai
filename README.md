@@ -1,7 +1,7 @@
 # ![ClassifAI](https://cldup.com/zn3_j2A-DL.png)
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Build Status](https://travis-ci.com/10up/classifai-for-wordpress.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai-for-wordpress) [![Release Version](https://img.shields.io/github/release/10up/classifai-for-wordpress.svg)](https://github.com/10up/classifai-for-wordpress/releases/latest)
+[![Build Status](https://travis-ci.com/10up/classifai-for-wordpress.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai-for-wordpress) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest)
 
 ## Features
 
@@ -13,7 +13,7 @@
 ## Installation
 
 #### 1. Download or Clone this repo, install dependencies and build.
-- `git clone https://github.com/10up/classifai-for-wordpress.git && cd classifai-for-wordpress`
+- `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
 
 #### 2. Activate Plugin
@@ -126,11 +126,11 @@ default: `false`
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai-for-wordpress/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai-for-wordpress/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
 
 ## License
 
-ClassifAI utilizes an [MIT license](https://github.com/10up/classifai-for-wordpress/blob/develop/LICENSE.md).
+ClassifAI utilizes an [MIT license](https://github.com/10up/classifai/blob/develop/LICENSE.md).
 
 ## Like what you see?
 
