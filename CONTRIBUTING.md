@@ -33,7 +33,7 @@ The `develop` branch is the development branch which means it contains the next 
 3. Changelog: Add/update the changelog in `CHANGELOG.md`
 4. Update the `.pot` file by running `npm run makepot`.
 5. Check to be sure any new files/paths that are unnecessary in the production version are included in `.github/action-release/rsync-filter.txt`.
-6. Merge: Make a non-fast-forward merge from your release branch to `master`. `master` contains the stable development version.
+6. Merge: Make a non-fast-forward merge from your release branch to `develop`, then do the same for `develop` into `master`. `master` contains the stable development version.
 7. Push: Push your master branch to GitHub, e.g. `git push origin master`.
 8. [Wait for build](https://xkcd.com/303/): Head to the [Actions](https://github.com/10up/classifai/actions) tab in the repo and wait for it to finish if it hasn't already. If it doesn't succeed, figure out why and start over.
 9. Check the build: Check out the `stable` branch and test for functionality locally.
