@@ -6,7 +6,7 @@ workflow "Build Release" {
 # Filter for master branch
 action "master" {
     uses = "actions/bin/filter@master"
-    args = "branch develop"
+    args = "branch master"
 }
 
 action "Install" {
