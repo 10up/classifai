@@ -1,13 +1,15 @@
 <?php
 /**
  * Plugin Name:     ClassifAI
- * Description:     AI-powered classification and machine learning for WordPress content
+ * Plugin URI:      https://github.com/10up/classifai-for-wordpress
+ * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
+ * Version:         1.2.1
  * Author:          Darshan Sawardekar, 10up
  * Author URI:      https://10up.com
  * License:         MIT
+ * License URI:     https://spdx.org/licenses/MIT.html
  * Text Domain:     classifai
  * Domain Path:     /languages
- * Version:         1.2.0
  */
 
 /**
@@ -113,3 +115,32 @@ function classifai_activation() {
 register_activation_hook( __FILE__, 'classifai_activation' );
 
 classifai_autorun();
+
+// Include in case we have composer issues.
+require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+
+if ( class_exists( 'Puc_v4_Factory' ) ) {
+	/*
+	 * Enable updates if we have a valid license
+	 */
+	$settings = \Classifai\get_plugin_settings();
+
+	if ( isset( $settings['valid_license'] ) && $settings['valid_license'] ) {
+		// @codingStandardsIgnoreStart
+		$updateChecker = Puc_v4_Factory::buildUpdateChecker(
+			'https://github.com/10up/classifai/',
+			__FILE__,
+			'classifai'
+		);
+
+		$updateChecker->addResultFilter(
+			function( $plugin_info, $http_response = null ) {
+				$plugin_info->icons = array(
+					'svg' => plugins_url( '/assets/img/icon.svg', __FILE__ ),
+				);
+				return $plugin_info;
+			}
+		);
+		// @codingStandardsIgnoreEnd
+	}
+}

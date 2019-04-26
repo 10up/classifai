@@ -1,19 +1,19 @@
 # ![ClassifAI](https://cldup.com/zn3_j2A-DL.png)
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Build Status](https://travis-ci.com/10up/classifai-for-wordpress.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai-for-wordpress)
+[![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest)
 
 ## Features
 
-* Classify your content using [IBM Watson's Natural Language Understanding API] \(https://www.ibm.com/watson/services/natural-language-understanding/)
+* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/)
 * Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities)
 * Automatically classify content on save
-* Bulk classify content with WP-CLI
+* Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ## Installation
 
 #### 1. Download or Clone this repo, install dependencies and build.
-- `git clone https://github.com/10up/classifai-for-wordpress.git && cd classifai-for-wordpress`
+- `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
 
 #### 2. Activate Plugin
@@ -48,7 +48,7 @@
 
 #### 1. Batch Classify Posts
 
-`$ wp klasifai post {post_ids} [--post_type=post_type] [--limit=limit] [--link=link]`
+`$ wp classifai post {post_ids} [--post_type=post_type] [--limit=limit] [--link=link]`
 
 ##### Options
 
@@ -78,7 +78,7 @@ default: `true`
 
 #### 2. Classify Text
 
-`$ wp klasifai text {text} [--category=bool] [--keyword=bool] [--concept=bool] [--entity=bool] [--input=input] [--only-normalize=bool]`
+`$ wp classifai text {text} [--category=bool] [--keyword=bool] [--concept=bool] [--entity=bool] [--input=input] [--only-normalize=bool]`
 
 Directly classify text using Watson NLU.
 
@@ -126,11 +126,11 @@ default: `false`
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai-for-wordpress/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai-for-wordpress/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
 
 ## License
 
-ClassifAI utilizes an [MIT license](https://github.com/10up/classifai-for-wordpress/blob/develop/LICENSE.md).
+ClassifAI utilizes an [MIT license](https://github.com/10up/classifai/blob/develop/LICENSE.md).
 
 ## Like what you see?
 
