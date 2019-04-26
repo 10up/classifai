@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Darshan Sawardekar, 10up
+# Copyright (C) 2019 10up
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
