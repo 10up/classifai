@@ -27,15 +27,15 @@ function get_plugin_settings() {
  * Overwrites the ClassifAI plugin's stored settings. Expected format is,
  *
  * [
-	 'post_types' => [ <list of post type names> ]
-	 'features' => [
-		 <feature_name> => <bool>
-		 <feature_threshold> => <int>
-	 ],
-	 'credentials' => [
-		 'watson_username' => <string>
-		 'watson_password' => <string>
-	 ]
+ *     'post_types' => [ <list of post type names> ]
+ *     'features' => [
+ *         <feature_name> => <bool>
+ *         <feature_threshold> => <int>
+ *     ],
+ *     'credentials' => [
+ *         'watson_username' => <string>
+ *         'watson_password' => <string>
+ *     ]
  * ]
  *
  * @param array $settings The settings we're saving.
