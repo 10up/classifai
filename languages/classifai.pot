@@ -1,4 +1,4 @@
-# Copyright (C) 2019 Darshan Sawardekar, 10up
+# Copyright (C) 2019 10up
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
@@ -22,7 +22,7 @@ msgid "Error: Please run $ composer install in the classifai plugin directory."
 msgstr ""
 
 #: includes/Classifai/Admin/Notifications.php:44
-#. translators: %s: Classifai settings url
+#. translators: %s: ClassifAI settings url
 msgid ""
 "<a href=\"%s\">Register ClassifAI</a> to receive important plugin updates "
 "and other ClassifAI news."
@@ -136,7 +136,7 @@ msgid "Post Types to Classify"
 msgstr ""
 
 #: includes/Classifai/Admin/SettingsPage.php:261
-msgid "Classifai Settings"
+msgid "ClassifAI Settings"
 msgstr ""
 
 #: includes/Classifai/Admin/SettingsPage.php:371
@@ -256,7 +256,7 @@ msgid "There is no changelog available."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://github.com/10up/classifai-for-wordpress"
+msgid "https://github.com/10up/classifai"
 msgstr ""
 
 #. Description of the plugin/theme
@@ -266,7 +266,7 @@ msgid ""
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Darshan Sawardekar, 10up"
+msgid "10up"
 msgstr ""
 
 #. Author URI of the plugin/theme

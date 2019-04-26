@@ -5,7 +5,7 @@ namespace Classifai\Admin;
 class SettingsPage {
 
 	/**
-	 * @var string $option Option that stores the classifai settings
+	 * @var string $option Option that stores the ClassifAI settings
 	 */
 	public $option = 'classifai_settings';
 
