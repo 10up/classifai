@@ -2,10 +2,9 @@
 # This file is distributed under the MIT.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.2.0\n"
-"Report-Msgid-Bugs-To: "
-"https://wordpress.org/support/plugin/classifai-for-wordpress\n"
-"POT-Creation-Date: 2019-03-21 16:22:41+00:00\n"
+"Project-Id-Version: ClassifAI 1.2.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
+"POT-Creation-Date: 2019-04-25 22:26:43+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -14,15 +13,22 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.3\n"
 
-#: classifai.php:63
+#: classifai.php:65
 msgid "Fatal Error: Composer not setup in %"
 msgstr ""
 
-#: classifai.php:102 classifai.php:103
+#: classifai.php:104 classifai.php:105
 msgid "Error: Please run $ composer install in the classifai plugin directory."
 msgstr ""
 
-#: includes/Classifai/Admin/Notifications.php:26
+#: includes/Classifai/Admin/Notifications.php:44
+#. translators: %s: Classifai settings url
+msgid ""
+"<a href=\"%s\">Register ClassifAI</a> to receive important plugin updates "
+"and other ClassifAI news."
+msgstr ""
+
+#: includes/Classifai/Admin/Notifications.php:52
 msgid "ClassifAI requires setup"
 msgstr ""
 
@@ -82,48 +88,71 @@ msgstr ""
 msgid "ClassifAI %s"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:135
+#: includes/Classifai/Admin/SettingsPage.php:137
+msgid "ClassifAI Registration Key"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:141
+msgid "Registered Email"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:154
+msgid "Registration Key"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:162
+msgid ""
+"Registration is 100% free and provides update notifications and upgrades "
+"inside the dashboard.<br /><a "
+"href=\"https://classifaiplugin.com/#cta\">Register for your key</a>"
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:171
 msgid "IBM Watson API Credentials"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:138
+#: includes/Classifai/Admin/SettingsPage.php:174
 msgid "API URL"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:150
+#: includes/Classifai/Admin/SettingsPage.php:186
 msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:159
+#: includes/Classifai/Admin/SettingsPage.php:195
 msgid "If your credentials do not include a username, it is typically apikey"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:164
+#: includes/Classifai/Admin/SettingsPage.php:200
 msgid "API Key / Password"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:181
+#: includes/Classifai/Admin/SettingsPage.php:217
 msgid "Content Classification with IBM Watson NLU"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:185
+#: includes/Classifai/Admin/SettingsPage.php:221
 msgid "Post Types to Classify"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:225
+#: includes/Classifai/Admin/SettingsPage.php:261
 msgid "Classifai Settings"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:334
+#: includes/Classifai/Admin/SettingsPage.php:371
 msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:338
+#: includes/Classifai/Admin/SettingsPage.php:375
 msgid "Enable"
 msgstr ""
 
-#: includes/Classifai/Admin/SettingsPage.php:438
-msgid "Authentication Failed. Please check credentials."
+#: includes/Classifai/Admin/SettingsPage.php:483
+msgid "Invalid ClassifAI registration info. Please check and try again."
+msgstr ""
+
+#: includes/Classifai/Admin/SettingsPage.php:493
+msgid "IBM Watson NLU Authentication Failed. Please check credentials."
 msgstr ""
 
 #: includes/Classifai/Taxonomy/AbstractTaxonomy.php:102
@@ -206,8 +235,34 @@ msgstr ""
 msgid "Watson Keywords"
 msgstr ""
 
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:54
+msgid "View details"
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:77
+msgid "More information about %s"
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:128
+msgid "Check for updates"
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:223
+msgid "Unknown update checker status \"%s\""
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Vcs/PluginUpdateChecker.php:98
+msgid "There is no changelog available."
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "https://github.com/10up/classifai-for-wordpress"
+msgstr ""
+
 #. Description of the plugin/theme
-msgid "AI-powered classification and machine learning for WordPress content"
+msgid ""
+"Enhance your WordPress content with Artificial Intelligence and Machine "
+"Learning services."
 msgstr ""
 
 #. Author of the plugin/theme
@@ -216,4 +271,19 @@ msgstr ""
 
 #. Author URI of the plugin/theme
 msgid "https://10up.com"
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:213
+msgctxt "the plugin title"
+msgid "The %s plugin is up to date."
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:215
+msgctxt "the plugin title"
+msgid "A new version of the %s plugin is available."
+msgstr ""
+
+#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:217
+msgctxt "the plugin title"
+msgid "Could not determine if updates are available for %s."
 msgstr ""
