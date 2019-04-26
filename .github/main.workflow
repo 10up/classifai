@@ -23,6 +23,6 @@ action "Build" {
 
 action "Release to Stable" {
   needs = ["Build"]
-  uses = "./github/action-release/"
+  uses = "./.github/action-release/"
   secrets = ["GITHUB_TOKEN"]
 }
