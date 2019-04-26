@@ -40,7 +40,7 @@ class Notifications {
 
 			?>
 			<div data-notice="auto-upgrade-disabled" class="notice notice-warning">
-				<?php /* translators: %s: Classifai settings url */ ?>
+				<?php /* translators: %s: ClassifAI settings url */ ?>
 				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s">Register ClassifAI</a> to receive important plugin updates and other ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
 			</div>
 			<?php

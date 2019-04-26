@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name:     ClassifAI
- * Plugin URI:      https://github.com/10up/classifai-for-wordpress
+ * Plugin URI:      https://github.com/10up/classifai
  * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
  * Version:         1.2.1
- * Author:          Darshan Sawardekar, 10up
+ * Author:          10up
  * Author URI:      https://10up.com
  * License:         MIT
  * License URI:     https://spdx.org/licenses/MIT.html
