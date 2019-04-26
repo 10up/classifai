@@ -21,9 +21,6 @@ echo "ℹ︎ Configuring git"
 git config --global user.email "10upbot+github@10up.com"
 git config --global user.name "10upbot on GitHub"
 
-# Debug - do not do this after the remote set-url because you'll expose your token
-git remote -v
-
 git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/10up/classifai.git"
 
 echo "ℹ︎ Getting stable branch"
@@ -47,7 +44,12 @@ cp -a "$TMP/.git" release/
 echo "ℹ︎ Push it"
 # Commit everything
 cd release
-git commit -am "Committing latest production-ready version of master"
+
+# Explicit add command because -a doesn't pick up new files
+git add .
+
+# Skipping pre-commit hook because it's not installed in stable
+git commit -m "Committing latest production-ready version of master" --no-verify
 git push origin stable
 
 echo "✓ All set!"
