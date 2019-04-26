@@ -258,7 +258,7 @@ class SettingsPage {
 	public function render_settings_page() {
 		?>
 		<div class="wrap">
-			<h2><?php esc_html_e( 'Classifai Settings', 'classifai' ); ?></h2>
+			<h2><?php esc_html_e( 'ClassifAI Settings', 'classifai' ); ?></h2>
 
 			<form action="options.php" method="post">
 
