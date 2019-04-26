@@ -4,11 +4,11 @@ namespace Classifai;
 
 /**
  * Miscellaneous Helper functions to access different parts of the
- * Classifai plugin.
+ * ClassifAI plugin.
  */
 
 /**
- * Returns the Classifai plugin's singleton instance
+ * Returns the ClassifAI plugin's singleton instance
  *
  * @return Plugin
  */
@@ -17,14 +17,14 @@ function get_plugin() {
 }
 
 /**
- * Returns the Classifai plugin's stored settings in the WP options
+ * Returns the ClassifAI plugin's stored settings in the WP options
  */
 function get_plugin_settings() {
 	return get_option( 'classifai_settings' );
 }
 
 /**
- * Overwrites the Classifai plugin's stored settings. Expected format is,
+ * Overwrites the ClassifAI plugin's stored settings. Expected format is,
  *
  * [
 	 'post_types' => [ <list of post type names> ]
@@ -141,7 +141,7 @@ function get_watson_password() {
 }
 
 /**
- * The list of post types that get the Classifai taxonomies. Defaults
+ * The list of post types that get the ClassifAI taxonomies. Defaults
  * to 'post'.
  *
  * return array

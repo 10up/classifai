@@ -22,7 +22,7 @@ msgid "Error: Please run $ composer install in the classifai plugin directory."
 msgstr ""
 
 #: includes/Classifai/Admin/Notifications.php:44
-#. translators: %s: Classifai settings url
+#. translators: %s: ClassifAI settings url
 msgid ""
 "<a href=\"%s\">Register ClassifAI</a> to receive important plugin updates "
 "and other ClassifAI news."
@@ -136,7 +136,7 @@ msgid "Post Types to Classify"
 msgstr ""
 
 #: includes/Classifai/Admin/SettingsPage.php:261
-msgid "Classifai Settings"
+msgid "ClassifAI Settings"
 msgstr ""
 
 #: includes/Classifai/Admin/SettingsPage.php:371

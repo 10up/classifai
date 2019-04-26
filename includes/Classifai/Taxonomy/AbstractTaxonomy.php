@@ -3,7 +3,7 @@
 namespace Classifai\Taxonomy;
 
 /**
- * Abstract Base Class for Classifai Taxonomies. A Taxonomy should
+ * Abstract Base Class for ClassifAI Taxonomies. A Taxonomy should
  * declare a constant in the config.php file.
  *
  * Usage:
