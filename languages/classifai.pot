@@ -256,7 +256,7 @@ msgid "There is no changelog available."
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "https://github.com/10up/classifai-for-wordpress"
+msgid "https://github.com/10up/classifai"
 msgstr ""
 
 #. Description of the plugin/theme
@@ -266,7 +266,7 @@ msgid ""
 msgstr ""
 
 #. Author of the plugin/theme
-msgid "Darshan Sawardekar, 10up"
+msgid "10up"
 msgstr ""
 
 #. Author URI of the plugin/theme
