@@ -1,17 +1,12 @@
 <?xml version="1.0"?>
-<ruleset name="WordPress Coding Standards for Plugins">
-	<description>Generally-applicable sniffs for WordPress plugins</description>
-
-	<rule ref="WordPress-Core" />
-	<rule ref="WordPress-Docs" />
-
-	<!-- Check all PHP files in directory tree by default. -->
-	<arg name="extensions" value="php"/>
-	<file>.</file>
-
-	<!-- Show progress and sniff codes in all reports -->
-	<arg value="ps"/>
-
-	<exclude-pattern>*/node_modules/*</exclude-pattern>
-	<exclude-pattern>*/vendor/*</exclude-pattern>
+<ruleset name="Classifai">
+	<description>Extension of the 10up-Default</description>
+	<rule ref="10up-Default">
+		<!-- All of the files are missing comments -->
+		<exclude name="Squiz.Commenting.FileComment.Missing" />
+		<exclude name="Squiz.Commenting.ClassComment.Missing" />
+		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
+		<!-- Class properties don't need this -->
+		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+	</rule>
 </ruleset>

@@ -1,7 +1,7 @@
 release
-/vendor/
-/themes/nobelprize/vendor/
+/vendor/*
 phpunit.xml
+/dist
 
 debug.log
 
@@ -38,3 +38,6 @@ Thumbs.db
 Desktop.ini
 
 config.local.php
+
+# Don't ignore
+!/vendor/yahnis-elsts
