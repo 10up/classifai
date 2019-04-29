@@ -6,7 +6,7 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Taxonomy\TaxonomyFactory;
 
 /**
- * The main Classifai plugin object. Used as a singleton.
+ * The main ClassifAI plugin object. Used as a singleton.
  */
 class Plugin {
 
@@ -40,7 +40,7 @@ class Plugin {
 	 * Setup WP hooks
 	 */
 	public function enable() {
-		add_action( 'init', [ $this, 'init' ] );
+		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
@@ -66,7 +66,7 @@ class Plugin {
 	}
 
 	/**
-	 * Initializes the Classifai plugin modules and support objects.
+	 * Initializes the ClassifAI plugin modules and support objects.
 	 */
 	public function init() {
 		do_action( 'before_classifai_init' );
@@ -124,7 +124,7 @@ class Plugin {
 	}
 
 	/**
-	 * Adds Classifai Gutenberg Support if on the Gutenberg editor page
+	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
 	 */
 	public function init_admin_scripts() {
 		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
@@ -139,7 +139,7 @@ class Plugin {
 	}
 
 	/**
-	 * Initializes the Classifai WP CLI integration
+	 * Initializes the ClassifAI WP CLI integration
 	 */
 	public function init_commands() {
 		\WP_CLI::add_command(
