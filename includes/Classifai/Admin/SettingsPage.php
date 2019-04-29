@@ -5,7 +5,7 @@ namespace Classifai\Admin;
 class SettingsPage {
 
 	/**
-	 * @var string $option Option that stores the classifai settings
+	 * @var string $option Option that stores the ClassifAI settings
 	 */
 	public $option = 'classifai_settings';
 
@@ -120,12 +120,48 @@ class SettingsPage {
 	 * Set up the fields for each section.
 	 */
 	public function setup_fields_sections() {
+		$this->do_registration_section();
+
 		// Create the Credentials Section.
 		$this->do_credentials_section();
 
 		// Create content tagging section
 		$this->do_nlu_features_sections();
 
+	}
+
+	/**
+	 * Helper method to create the registration section
+	 */
+	protected function do_registration_section() {
+		add_settings_section( 'registration', esc_html__( 'ClassifAI Registration Key', 'classifai' ), '', 'classifai-settings' );
+
+		add_settings_field(
+			'email',
+			esc_html__( 'Registered Email', 'classifai' ),
+			[ $this, 'render_input' ],
+			'classifai-settings',
+			'registration',
+			[
+				'label_for'    => 'email',
+				'option_index' => 'registration',
+				'input_type'   => 'text',
+			]
+		);
+
+		add_settings_field(
+			'registration-key',
+			esc_html__( 'Registration Key', 'classifai' ),
+			[ $this, 'render_input' ],
+			'classifai-settings',
+			'registration',
+			[
+				'label_for'    => 'license_key',
+				'option_index' => 'registration',
+				'input_type'   => 'password',
+				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -222,7 +258,7 @@ class SettingsPage {
 	public function render_settings_page() {
 		?>
 		<div class="wrap">
-			<h2><?php esc_html_e( 'Classifai Settings', 'classifai' ); ?></h2>
+			<h2><?php esc_html_e( 'ClassifAI Settings', 'classifai' ); ?></h2>
 
 			<form action="options.php" method="post">
 
@@ -255,6 +291,7 @@ class SettingsPage {
 			case 'text':
 			case 'password':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
+				$class = 'regular-text';
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
@@ -273,7 +310,7 @@ class SettingsPage {
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . esc_html( $args['description'] ) . '</span>';
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -378,7 +415,7 @@ class SettingsPage {
 	 *
 	 * @return bool
 	 */
-	protected function authentication_check_failed( $settings ) {
+	protected function nlu_authentication_check_failed( $settings ) {
 
 		// Check that we have credentials before hitting the API.
 		if ( ! isset( $settings['credentials'] )
@@ -431,11 +468,29 @@ class SettingsPage {
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 
-		if ( $this->authentication_check_failed( $settings ) ) {
+		if ( isset( $settings['registration']['email'] ) && isset( $settings['registration']['license_key'] ) ) {
+			if ( $this->check_license_key( $settings['registration']['email'], $settings['registration']['license_key'] ) ) {
+				$new_settings['valid_license'] = true;
+				$new_settings['registration']['email'] = sanitize_text_field( $settings['registration']['email'] );
+				$new_settings['registration']['license_key'] = sanitize_text_field( $settings['registration']['license_key'] );
+			} else {
+				$new_settings['valid_license'] = false;
+				$new_settings['registration']['email'] = '';
+				$new_settings['registration']['license_key'] = '';
+				add_settings_error(
+					'registration',
+					'classifai-registration',
+					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
+					'error'
+				);
+			}
+		}
+
+		if ( $this->nlu_authentication_check_failed( $settings ) ) {
 			add_settings_error(
 				'credentials',
 				'classifai-auth',
-				esc_html__( 'Authentication Failed. Please check credentials.', 'classifai' ),
+				esc_html__( 'IBM Watson NLU Authentication Failed. Please check credentials.', 'classifai' ),
 				'error'
 			);
 		}
@@ -483,4 +538,35 @@ class SettingsPage {
 		return $new_settings;
 	}
 
+	/**
+	 * Hit license API to see if key/email is valid
+	 *
+	 * @param  string $email Email address.
+	 * @param  string $license_key License key.
+	 * @since  1.2
+	 * @return bool
+	 */
+	public function check_license_key( $email, $license_key ) {
+
+		$request = wp_remote_post(
+			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
+			[
+				'timeout' => 10,
+				'body'    => [
+					'license_key' => $license_key,
+					'email'       => $email,
+				],
+			]
+		);
+
+		if ( is_wp_error( $request ) ) {
+			return false;
+		}
+
+		if ( 200 === wp_remote_retrieve_response_code( $request ) ) {
+			return true;
+		}
+
+		return false;
+	}
 }

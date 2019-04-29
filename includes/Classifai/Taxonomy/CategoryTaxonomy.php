@@ -17,28 +17,28 @@ namespace Classifai\Taxonomy;
 class CategoryTaxonomy extends AbstractTaxonomy {
 
 	/**
-	 * Get the classifai category taxonomy name.
+	 * Get the ClassifAI category taxonomy name.
 	 */
 	public function get_name() {
 		return WATSON_CATEGORY_TAXONOMY;
 	}
 
 	/**
-	 * Get the classifai category taxonomy label.
+	 * Get the ClassifAI category taxonomy label.
 	 */
 	public function get_singular_label() {
 		return esc_html__( 'Watson Category', 'classifai' );
 	}
 
 	/**
-	 * Get the classifai category taxonomy plural label.
+	 * Get the ClassifAI category taxonomy plural label.
 	 */
 	public function get_plural_label() {
 		return esc_html__( 'Watson Categories', 'classifai' );
 	}
 
 	/**
-	 * Get the classifai category taxonomy visibility.
+	 * Get the ClassifAI category taxonomy visibility.
 	 */
 	public function get_visibility() {
 		return \Classifai\get_feature_enabled( 'category' ) &&
