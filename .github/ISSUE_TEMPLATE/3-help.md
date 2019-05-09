@@ -1,5 +1,5 @@
 ---
-name: "⁉️ Need help with ClassifAI?"
+name: "❓Need help with ClassifAI?"
 about: Ask us question, we're here to help!
 title: ''
 labels: question
