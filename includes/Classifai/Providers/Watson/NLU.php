@@ -93,6 +93,28 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Enqueue the editor scripts.
+	 */
+	public function enqueue_editor_assets() {
+		wp_enqueue_script(
+			'classifai-editor', // Handle.
+			CLASSIFAI_PLUGIN_URL . '/dist/js/editor.min.js',
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
+			wp_enqueue_script(
+				'classifai-gutenberg-support',
+				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
+				[ 'editor' ],
+				CLASSIFAI_PLUGIN_VERSION,
+				true
+			);
+		}
+	}
+
+	/**
 	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
 	 */
 	public function init_admin_scripts() {
