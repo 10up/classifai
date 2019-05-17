@@ -3,11 +3,11 @@
  * Azure Computer vision
  */
 
-namespace Classifai\Providers\Azure;
+namespace Classifai\Providers\AWS;
 
 use Classifai\Providers\Provider;
 
-class ComputerVision extends Provider {
+class Comprehend extends Provider {
 
 	/**
 	 * ComputerVision constructor.
@@ -16,9 +16,9 @@ class ComputerVision extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'Azure',
-			'Computer Vision',
-			'computer_vision',
+			'Amazon Web Services',
+			'Comprehend',
+			'comprehend',
 			$service
 		);
 	}

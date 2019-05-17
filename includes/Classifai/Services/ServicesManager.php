@@ -10,7 +10,7 @@ class ServicesManager {
 	/**
 	 * @var array List of registered services
 	 */
-	protected $services;
+	protected $services = [];
 
 
 	/**
@@ -85,7 +85,7 @@ class ServicesManager {
 	 */
 	protected function register_services() {
 		foreach ( $this->service_classes as $service_class ) {
-			$service_class->register();
+			$service_class->init();
 		}
 	}
 
