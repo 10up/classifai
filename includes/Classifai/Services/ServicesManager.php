@@ -78,6 +78,83 @@ class ServicesManager {
 		} else {
 			add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
 		}
+
+		add_action( 'admin_init', [ $this, 'register_settings' ] );
+		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+	}
+
+	/**
+	 * Register the settings and sanitization callback method.
+	 *
+	 * It's very important that the option group matches the page slug.
+	 */
+	public function register_settings() {
+		register_setting( 'classifai_settings', 'classifai_settings', [ $this, 'sanitize_settings' ] );
+	}
+
+	/**
+	 * Sanitize settings.
+	 *
+	 * @param array $settings The settings to be sanitized.
+	 *
+	 * @return mixed
+	 */
+	public function sanitize_settings( $settings ) {
+		// TODO: Implement sanitize_settings() method.
+		return $settings;
+	}
+
+	/**
+	 * Setup fields
+	 */
+	public function setup_fields_sections() {
+		add_settings_section( 'classifai_settings', 'Classifai Settings', '', 'classifai_settings' );
+
+		add_settings_field(
+			'email',
+			esc_html__( 'Registered Email', 'classifai' ),
+			[ $this, 'render_email_field' ],
+			'classifai_settings',
+			'classifai_settings',
+			[
+				'label_for'    => 'email',
+				'option_index' => 'registration',
+				'input_type'   => 'text',
+			]
+		);
+
+		add_settings_field(
+			'registration-key',
+			esc_html__( 'Registration Key', 'classifai' ),
+			[ $this, 'render_password_field' ],
+			'classifai_settings',
+			'classifai_settings',
+			[
+				'label_for'    => 'license_key',
+				'option_index' => 'registration',
+				'input_type'   => 'password',
+				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
+			]
+		);
+	}
+
+	/**
+	 * Render the email field
+	 */
+	public function render_email_field() {
+		?>
+		<input type="text" name="classifai_settings[email]" class="regular-text" value=""/>
+		<?php
+	}
+
+	/**
+	 * Render the password field
+	 */
+	public function render_password_field() {
+		?>
+		<input type="password" name="classifai_settings[license_key]" class="regular-text value=""/>
+		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
+		<?php
 	}
 
 	/**
@@ -163,6 +240,8 @@ class ServicesManager {
 		}
 	}
 
+
+
 	/**
 	 * Render the main settings page for the Classifai plugin.
 	 */
@@ -172,8 +251,14 @@ class ServicesManager {
 
 			?>
 			<div class="wrap">
-				<h2><?php esc_html_e( 'General Settings', 'classifai' ); ?></h2>
-				<p>Render the settings for the overall plugin. I see this as the place to enable/disable Providers and Services.</p>
+
+				<form method="post" action="options.php">
+					<?php
+					settings_fields( 'classifai_settings' );
+					do_settings_sections( 'classifai_settings' );
+					submit_button();
+					?>
+				</form>
 			</div>
 			<?php
 		} else {

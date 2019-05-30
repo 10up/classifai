@@ -133,47 +133,10 @@ class NLU extends Provider {
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
-		$this->do_registration_section();
-
 		// Create the Credentials Section.
 		$this->do_credentials_section();
-
 		// Create content tagging section
 		$this->do_nlu_features_sections();
-	}
-
-	/**
-	 * Helper method to create the registration section
-	 */
-	protected function do_registration_section() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-
-		add_settings_field(
-			'email',
-			esc_html__( 'Registered Email', 'classifai' ),
-			[ $this, 'render_input' ],
-			'classifai-settings',
-			'registration',
-			[
-				'label_for'    => 'email',
-				'option_index' => 'registration',
-				'input_type'   => 'text',
-			]
-		);
-
-		add_settings_field(
-			'registration-key',
-			esc_html__( 'Registration Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			'classifai-settings',
-			'registration',
-			[
-				'label_for'    => 'license_key',
-				'option_index' => 'registration',
-				'input_type'   => 'password',
-				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
-			]
-		);
 	}
 
 	/**
