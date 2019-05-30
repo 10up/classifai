@@ -105,6 +105,7 @@ abstract class Service {
 				<?php endforeach; ?>
 			</h2>
 			<?php endif; ?>
+			<?php settings_errors(); ?>
 			<form method="post" action="options.php">
 			<?php
 				settings_fields( 'classifai_' . $active_tab );

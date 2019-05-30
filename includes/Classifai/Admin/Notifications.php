@@ -30,11 +30,11 @@ class Notifications {
 	 * Respond to the activation hook.
 	 */
 	public function maybe_render_notices() {
-		$settings = \Classifai\get_plugin_settings();
+		$registration_settings = get_option( 'classifai_settings' );
 
 		if (
-			'settings_page_classifai_settings' === get_current_screen()->base &&
-			( ! isset( $settings['valid_license'] ) || ! $settings['valid_license'] )
+			'classifai_settings' === get_current_screen()->parent_base &&
+			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';
 

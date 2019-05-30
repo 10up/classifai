@@ -422,25 +422,6 @@ class NLU extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-
-		if ( isset( $settings['registration']['email'] ) && isset( $settings['registration']['license_key'] ) ) {
-			if ( $this->check_license_key( $settings['registration']['email'], $settings['registration']['license_key'] ) ) {
-				$new_settings['valid_license']               = true;
-				$new_settings['registration']['email']       = sanitize_text_field( $settings['registration']['email'] );
-				$new_settings['registration']['license_key'] = sanitize_text_field( $settings['registration']['license_key'] );
-			} else {
-				$new_settings['valid_license']               = false;
-				$new_settings['registration']['email']       = '';
-				$new_settings['registration']['license_key'] = '';
-				add_settings_error(
-					'registration',
-					'classifai-registration',
-					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
-					'error'
-				);
-			}
-		}
-
 		if ( $this->nlu_authentication_check_failed( $settings ) ) {
 			add_settings_error(
 				'credentials',

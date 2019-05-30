@@ -100,8 +100,25 @@ class ServicesManager {
 	 * @return mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		// TODO: Implement sanitize_settings() method.
-		return $settings;
+		if ( isset( $settings['email'] ) && isset( $settings['license_key'] ) ) {
+			if ( $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
+				$new_settings['valid_license'] = true;
+				$new_settings['email']         = sanitize_text_field( $settings['email'] );
+				$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
+			} else {
+				$new_settings['valid_license'] = false;
+				$new_settings['email']         = '';
+				$new_settings['license_key']   = '';
+				add_settings_error(
+					'registration',
+					'classifai-registration',
+					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
+					'error'
+				);
+			}
+		}
+
+		return $new_settings;
 	}
 
 	/**
@@ -255,7 +272,7 @@ class ServicesManager {
 
 			?>
 			<div class="wrap">
-
+				<?php settings_errors(); ?>
 				<form method="post" action="options.php">
 					<?php
 					settings_fields( 'classifai_settings' );
@@ -269,5 +286,37 @@ class ServicesManager {
 			// Render settings page for the first ( and only ) settings page.
 			$this->service_classes[0]->render_settings_page();
 		}
+	}
+
+	/**
+	 * Hit license API to see if key/email is valid
+	 *
+	 * @param  string $email Email address.
+	 * @param  string $license_key License key.
+	 * @since  1.2
+	 * @return bool
+	 */
+	public function check_license_key( $email, $license_key ) {
+
+		$request = wp_remote_post(
+			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
+			[
+				'timeout' => 10,
+				'body'    => [
+					'license_key' => $license_key,
+					'email'       => $email,
+				],
+			]
+		);
+
+		if ( is_wp_error( $request ) ) {
+			return false;
+		}
+
+		if ( 200 === wp_remote_retrieve_response_code( $request ) ) {
+			return true;
+		}
+
+		return false;
 	}
 }
