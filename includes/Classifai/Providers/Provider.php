@@ -69,9 +69,14 @@ abstract class Provider {
 	abstract public function can_register();
 
 	/**
+	 * Register the functionality for the Provider.
+	 */
+	abstract public function register();
+
+	/**
 	 * Initialization routine
 	 */
-	public function register() {
+	public function register_admin() {
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
 	}

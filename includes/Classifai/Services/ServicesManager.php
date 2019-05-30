@@ -100,6 +100,7 @@ class ServicesManager {
 	 * @return mixed
 	 */
 	public function sanitize_settings( $settings ) {
+		$new_settings = [];
 		if ( isset( $settings['email'] ) && isset( $settings['license_key'] ) ) {
 			if ( $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
 				$new_settings['valid_license'] = true;
