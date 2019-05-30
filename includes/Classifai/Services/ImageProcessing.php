@@ -16,7 +16,6 @@ class ImageProcessing extends Service {
 			'image_processing',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
-				'Classifai\Providers\AWS\Comprehend',
 			]
 		);
 	}
