@@ -142,8 +142,10 @@ class ServicesManager {
 	 * Render the email field
 	 */
 	public function render_email_field() {
+		$settings = get_option( 'classifai_settings' );
+		$email    = isset( $settings['email'] ) ? $settings['email'] : '';
 		?>
-		<input type="text" name="classifai_settings[email]" class="regular-text" value=""/>
+		<input type="text" name="classifai_settings[email]" class="regular-text" value="<?php echo esc_attr( $email ); ?>"/>
 		<?php
 	}
 
@@ -151,8 +153,10 @@ class ServicesManager {
 	 * Render the password field
 	 */
 	public function render_password_field() {
+		$settings    = get_option( 'classifai_settings' );
+		$license_key = isset( $settings['license_key'] ) ? $settings['license_key'] : '';
 		?>
-		<input type="password" name="classifai_settings[license_key]" class="regular-text value=""/>
+		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
 		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
 		<?php
 	}
