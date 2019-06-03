@@ -18,13 +18,15 @@
 
 #### 2. Activate Plugin
 
-#### 3. Sign up for Watson services
+## Setup Content Tagging (via IBM Watson)
+
+#### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
 - Check for an email from `IBM Cloud` and click the `Confirm Account` link.
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-#### 4. Configure IBM Watson API Keys under Settings > ClassifAI
+#### 2. Configure IBM Watson API Keys under Settings > ClassifAI
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -38,11 +40,21 @@
 - Enter the `username` value into the `API User field`.
 - Enter the `password` into the `API key` field.
 
-#### 5. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
+#### 3. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
 - Choose which public post types to classify when saved.
 - Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
-#### 6. Save Post or run WP CLI command to batch classify posts
+#### 4. Save Post or run WP CLI command to batch classify posts
+
+## Setup Image Alt Text (via Microsoft Azure)
+
+#### 1. Sign up for Azure services
+
+#### 2. Configure Microsoft Azure API Keys under Settings > ClassifAI
+
+#### 3. Configure Images to classify and Microsoft Azure Features to enable under Settings > ClassifAI
+
+#### 4. Save Image or run WP CLI command to batch classify images
 
 ## WP CLI Usage Instructions
 
