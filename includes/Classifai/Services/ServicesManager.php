@@ -66,6 +66,36 @@ class ServicesManager {
 		$this->register_services();
 	}
 
+	/**
+	 * Get general ClassifAI settings
+	 *
+	 * @param string $index Optional specific setting to be retrieved.
+	 */
+	protected function get_settings( $index = false ) {
+		$settings = get_option( 'classifai_settings' );
+
+		// Special handling polyfill for pre-1.3 settings which were nested
+		if ( ! isset( $settings['email'] ) && isset( $settings['registration']['email'] ) ) {
+			$settings['email'] = $settings['registration']['email'];
+		}
+
+		if ( ! isset( $settings['license_key'] ) && isset( $settings['registration']['license_key'] ) ) {
+			$settings['license_key'] = $settings['registration']['license_key'];
+		}
+
+		if ( ! isset( $settings['valid_license'] ) && isset( $settings['registration']['valid_license'] ) ) {
+			$settings['valid_license'] = $settings['registration']['valid_license'];
+		}
+
+		if ( ! $index ) {
+			return $settings;
+		} elseif ( ! isset( $settings[ $index ] ) ) {
+			return '';
+		} else {
+			return $settings[ $index ];
+		}
+	}
+
 
 	/**
 	 * Create the settings pages.
@@ -160,8 +190,7 @@ class ServicesManager {
 	 * Render the email field
 	 */
 	public function render_email_field() {
-		$settings = get_option( 'classifai_settings' );
-		$email    = isset( $settings['email'] ) ? $settings['email'] : '';
+		$email = $this->get_settings( 'email' );
 		?>
 		<input type="text" name="classifai_settings[email]" class="regular-text" value="<?php echo esc_attr( $email ); ?>"/>
 		<?php
@@ -171,8 +200,7 @@ class ServicesManager {
 	 * Render the password field
 	 */
 	public function render_password_field() {
-		$settings    = get_option( 'classifai_settings' );
-		$license_key = isset( $settings['license_key'] ) ? $settings['license_key'] : '';
+		$license_key = $this->get_settings( 'license_key' );
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
 		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
