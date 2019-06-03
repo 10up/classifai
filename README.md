@@ -26,7 +26,7 @@
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-#### 2. Configure IBM Watson API Keys under Settings > ClassifAI
+#### 2. Configure IBM Watson API Keys under ClassifAI > Language Processing
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -40,7 +40,7 @@
 - Enter the `username` value into the `API User field`.
 - Enter the `password` into the `API key` field.
 
-#### 3. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
+#### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
 - Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
