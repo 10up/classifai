@@ -53,6 +53,8 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
 
+Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.  
+
 #### 1. Sign up for Azure services
 
 #### 2. Configure Microsoft Azure API Keys under Settings > ClassifAI
