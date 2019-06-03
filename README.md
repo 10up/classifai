@@ -48,6 +48,11 @@
 
 ## Setup Image Alt Text (via Microsoft Azure)
 
+Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze images that meet the following requirements:
+- The image must be presented in JPEG, PNG, GIF, or BMP format
+- The file size of the image must be less than 4 megabytes (MB)
+- The dimensions of the image must be greater than 50 x 50 pixels
+
 #### 1. Sign up for Azure services
 
 #### 2. Configure Microsoft Azure API Keys under Settings > ClassifAI
