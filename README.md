@@ -46,7 +46,7 @@
 
 #### 4. Save Post or run WP CLI command to batch classify posts
 
-## Setup Image Alt Text (via Microsoft Azure)
+## Setup Image Processing (via Microsoft Azure)
 
 Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze images that meet the following requirements:
 - The image must be presented in JPEG, PNG, GIF, or BMP format
@@ -56,12 +56,16 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.  
 
 #### 1. Sign up for Azure services
+- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+- Log into your account and create a new [*Computer Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+- Click `Quick start` in the left hand Resource Management menu to view the `API endpoint` credential for this resource in section `2b`.
+- Click `Keys` in the left hand Resource Management menu to view the `Key 1` credential for this resource.
 
-#### 2. Configure Microsoft Azure API Keys under Settings > ClassifAI
+#### 2. Configure Microsoft Azure API and Key under ClassifAI > Image Processing
+- In the `Endpoint URL` field, enter your `API endpoint`.
+- In the `API Key` field, enter your `Key 1`.
 
-#### 3. Configure Images to classify and Microsoft Azure Features to enable under Settings > ClassifAI
-
-#### 4. Save Image or run WP CLI command to batch classify images
+#### 3. Save Image or run WP CLI command to batch classify images
 
 ## WP CLI Usage Instructions
 
