@@ -92,6 +92,46 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Helper to get the settings and allow for settings default values.
+	 *
+	 * Overridden from parent to polyfill older settings storage schema.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return array
+	 */
+	protected function get_settings( $index = false ) {
+		$defaults = [];
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// If no settings have been saved, check for older storage to polyfill
+		// These are pre-1.3 settings
+		if ( empty( $settings ) ) {
+			$old_settings = get_option( 'classifai_settings' );
+
+			if ( isset( $old_settings['credentials'] ) ) {
+				$defaults['credentials'] = $old_settings['credentials'];
+			}
+
+			if ( isset( $old_settings['post_types'] ) ) {
+				$defaults['post_types'] = $old_settings['post_types'];
+			}
+
+			if ( isset( $old_settings['features'] ) ) {
+				$defaults['features'] = $old_settings['features'];
+			}
+		}
+
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
+	}
+
+	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
