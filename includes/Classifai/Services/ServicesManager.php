@@ -83,10 +83,6 @@ class ServicesManager {
 			$settings['license_key'] = $settings['registration']['license_key'];
 		}
 
-		if ( ! isset( $settings['valid_license'] ) && isset( $settings['registration']['valid_license'] ) ) {
-			$settings['valid_license'] = $settings['registration']['valid_license'];
-		}
-
 		if ( ! $index ) {
 			return $settings;
 		} elseif ( ! isset( $settings[ $index ] ) ) {
