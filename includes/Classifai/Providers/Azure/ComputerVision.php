@@ -120,8 +120,9 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'  => 'url',
-				'input_type' => 'text',
+				'label_for'   => 'url',
+				'input_type'  => 'text',
+				'description' => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -132,7 +133,7 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			[
 				'label_for'  => 'api_key',
-				'input_type' => 'text',
+				'input_type' => 'password',
 			]
 		);
 	}
