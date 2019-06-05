@@ -8,6 +8,10 @@ namespace Classifai\Providers\Azure;
 use Classifai\Providers\Provider;
 
 class ComputerVision extends Provider {
+	/**
+	 * @var string URL fragment to the describe (caption) API endpoint.
+	 */
+	protected $describe_url = 'vision/v1.0/describe?maxCandidates=3';
 
 	/**
 	 * ComputerVision constructor.
@@ -78,7 +82,7 @@ class ComputerVision extends Provider {
 		$rtn      = false;
 
 		$request = wp_remote_post(
-			$settings['url'],
+			trailingslashit( $settings['url'] ) . $this->describe_url,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -183,7 +187,7 @@ class ComputerVision extends Provider {
 	protected function authenticate_credentials( $url, $api_key ) {
 		$rtn     = false;
 		$request = wp_remote_post(
-			$url,
+			trailingslashit( $url ) . $this->describe_url,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $api_key,
@@ -195,7 +199,7 @@ class ComputerVision extends Provider {
 
 		if ( ! is_wp_error( $request ) ) {
 			$response = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( $response->error ) {
+			if ( ! empty( $response->error ) ) {
 				$rtn = new \WP_Error( 'auth', $response->error->message );
 			} else {
 				$rtn = true;
