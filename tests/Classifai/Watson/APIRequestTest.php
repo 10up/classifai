@@ -26,7 +26,7 @@ class APIRequestTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_uses_option_username_if_present() {
-		update_option( 'classifai_settings', [ 'credentials' => [ 'watson_username' => 'foo-option' ] ] );
+		update_option( 'classifai_watson_nlu', [ 'credentials' => [ 'watson_username' => 'foo-option' ] ] );
 		$actual = $this->request->get_username();
 		$this->assertEquals( 'foo-option', $actual );
 	}
@@ -45,7 +45,7 @@ class APIRequestTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_uses_option_password_if_present() {
-		update_option( 'classifai_settings', [ 'credentials' => [ 'watson_password' => 'foo-option' ] ] );
+		update_option( 'classifai_watson_nlu', [ 'credentials' => [ 'watson_password' => 'foo-option' ] ] );
 		$actual = $this->request->get_password();
 		$this->assertEquals( 'foo-option', $actual );
 	}

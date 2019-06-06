@@ -20,7 +20,7 @@ function get_plugin() {
  * Returns the ClassifAI plugin's stored settings in the WP options
  */
 function get_plugin_settings() {
-	return get_option( 'classifai_settings' );
+	return get_option( 'classifai_watson_nlu' );
 }
 
 /**
