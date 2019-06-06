@@ -136,6 +136,19 @@ class ComputerVision extends Provider {
 				'input_type' => 'password',
 			]
 		);
+		add_settings_field(
+			'caption-threshold',
+			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'caption_threshold',
+				'input_type'    => 'number',
+				'default_value' => 85,
+				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 80.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -174,6 +187,13 @@ class ComputerVision extends Provider {
 				'error'
 			);
 		}
+
+		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
+			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
+		} else {
+			$new_settings['caption_threshold'] = 85;
+		}
+
 		return $new_settings;
 	}
 
