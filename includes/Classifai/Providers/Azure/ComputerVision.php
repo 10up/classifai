@@ -65,7 +65,7 @@ class ComputerVision extends Provider {
 		$captions  = $this->scan_image( $image_url );
 		if ( ! is_wp_error( $captions ) && isset( $captions[0] ) ) {
 			// Save the first caption as the alt text if it passes the threshold.
-			if ( $captions[0]->confidence > $threshold ) {
+			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
 			}
 			// Save all the results for later.
