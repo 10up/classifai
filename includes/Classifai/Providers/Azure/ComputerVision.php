@@ -149,8 +149,8 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
-				'default_value' => 85,
-				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 80.', 'classifai' ),
+				'default_value' => 75,
+				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
 	}
@@ -195,7 +195,7 @@ class ComputerVision extends Provider {
 		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
-			$new_settings['caption_threshold'] = 85;
+			$new_settings['caption_threshold'] = 75;
 		}
 
 		return $new_settings;
