@@ -3,6 +3,15 @@
 
 [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.2%20tested-success.svg)
 
+## Table of Contents  
+* [Features](#features)
+* [Installation](#installation)
+* [Setup Content Tagging](#setup-content-tagging-via-ibm-watson)
+* [Setup Image Processing](#setup-image-processing-via-microsoft-azure)
+* [WP CLI Usage Instructions](#wp-cli-usage-instructions)
+* [Changelog](#changelog)
+* [Contributing](#contributing)
+
 ## Features
 
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -146,6 +155,10 @@ options:
 Prints the normalized text that will be sent to the NLU API
 
 default: `false`
+
+## Changelog
+
+A complete listing of all notable changes to Distributor are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
 
 ## Contributing
 
