@@ -12,6 +12,9 @@ All notable changes to this project will be documented in this file, per [the Ke
 ### Changed
 - Settings page split into separate Language and Image Processing settings pages (props @ryanwelcher, @helen via #46)
 
+### Security
+- Bump js-yaml from 3.12.1 to 3.13.1 (props @dependabot via #74)
+
 ## [1.2.1] - 2019-04-25
 ### Added
 - Free registration for in-admin updates
