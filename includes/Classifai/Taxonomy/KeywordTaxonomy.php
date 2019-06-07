@@ -3,7 +3,7 @@
 namespace Classifai\Taxonomy;
 
 /**
- * The Classifai Keyword Taxonomy.
+ * The ClassifAI Keyword Taxonomy.
  *
  * Usage:
  *
@@ -17,28 +17,28 @@ namespace Classifai\Taxonomy;
 class KeywordTaxonomy extends AbstractTaxonomy {
 
 	/**
-	 * Get the classifai keyword taxonomy name.
+	 * Get the ClassifAI keyword taxonomy name.
 	 */
 	public function get_name() {
 		return WATSON_KEYWORD_TAXONOMY;
 	}
 
 	/**
-	 * Get the classifai keyword taxonomy label.
+	 * Get the ClassifAI keyword taxonomy label.
 	 */
 	public function get_singular_label() {
 		return esc_html__( 'Watson Keyword', 'classifai' );
 	}
 
 	/**
-	 * Get the classifai keyword taxonomy plural label.
+	 * Get the ClassifAI keyword taxonomy plural label.
 	 */
 	public function get_plural_label() {
 		return esc_html__( 'Watson Keywords', 'classifai' );
 	}
 
 	/**
-	 * Get the classifai keyword taxonomy visibility.
+	 * Get the ClassifAI keyword taxonomy visibility.
 	 */
 	public function get_visibility() {
 		return \Classifai\get_feature_enabled( 'keyword' ) &&
