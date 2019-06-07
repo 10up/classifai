@@ -3,11 +3,20 @@
 
 [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.2%20tested-success.svg)
 
+## Table of Contents  
+* [Features](#features)
+* [Installation](#installation)
+* [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
+* [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [WP CLI Usage Instructions](#wp-cli-usage-instructions)
+* [Changelog](#changelog)
+* [Contributing](#contributing)
+
 ## Features
 
-* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/)
-* Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities)
-* Automatically classify content on save
+* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
+* Automatically classify content and images on save
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ## Installation
@@ -18,13 +27,15 @@
 
 #### 2. Activate Plugin
 
-#### 3. Sign up for Watson services
+## Set Up Content Tagging (via IBM Watson)
+
+#### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
 - Check for an email from `IBM Cloud` and click the `Confirm Account` link.
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-#### 4. Configure IBM Watson API Keys under Settings > ClassifAI
+#### 2. Configure IBM Watson API Keys under ClassifAI > Language Processing
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -38,11 +49,32 @@
 - Enter the `username` value into the `API User field`.
 - Enter the `password` into the `API key` field.
 
-#### 5. Configure Post Types to classify and IBM Watson Features to enable under Settings > ClassifAI
+#### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
 - Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
-#### 6. Save Post or run WP CLI command to batch classify posts
+#### 4. Save Post or run WP CLI command to batch classify posts
+
+## Set Up Image Processing (via Microsoft Azure)
+
+Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze images that meet the following requirements:
+- The image must be presented in JPEG, PNG, GIF, or BMP format
+- The file size of the image must be less than 4 megabytes (MB)
+- The dimensions of the image must be greater than 50 x 50 pixels
+
+Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.  
+
+#### 1. Sign up for Azure services
+- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+- Log into your account and create a new [*Computer Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+- Click `Quick start` in the left hand Resource Management menu to view the `API endpoint` credential for this resource in section `2b`.
+- Click `Keys` in the left hand Resource Management menu to view the `Key 1` credential for this resource.
+
+#### 2. Configure Microsoft Azure API and Key under ClassifAI > Image Processing
+- In the `Endpoint URL` field, enter your `API endpoint`.
+- In the `API Key` field, enter your `Key 1`.
+
+#### 3. Save Image to classify image
 
 ## WP CLI Usage Instructions
 
@@ -123,6 +155,10 @@ options:
 Prints the normalized text that will be sent to the NLU API
 
 default: `false`
+
+## Changelog
+
+A complete listing of all notable changes to Distributor are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
 
 ## Contributing
 
