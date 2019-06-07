@@ -6,8 +6,8 @@
 ## Table of Contents  
 * [Features](#features)
 * [Installation](#installation)
-* [Setup Content Tagging](#setup-content-tagging-via-ibm-watson)
-* [Setup Image Processing](#setup-image-processing-via-microsoft-azure)
+* [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
+* [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
 * [Changelog](#changelog)
 * [Contributing](#contributing)
@@ -27,7 +27,7 @@
 
 #### 2. Activate Plugin
 
-## Setup Content Tagging (via IBM Watson)
+## Set Up Content Tagging (via IBM Watson)
 
 #### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
@@ -55,7 +55,7 @@
 
 #### 4. Save Post or run WP CLI command to batch classify posts
 
-## Setup Image Processing (via Microsoft Azure)
+## Set Up Image Processing (via Microsoft Azure)
 
 Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze images that meet the following requirements:
 - The image must be presented in JPEG, PNG, GIF, or BMP format
