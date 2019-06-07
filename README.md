@@ -74,7 +74,7 @@ Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/
 - In the `Endpoint URL` field, enter your `API endpoint`.
 - In the `API Key` field, enter your `Key 1`.
 
-#### 3. Save Image or run WP CLI command to batch classify images
+#### 3. Save Image to classify image
 
 ## WP CLI Usage Instructions
 
