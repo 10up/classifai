@@ -1,69 +1,100 @@
 <?php
+/**
+ * IBM Watson NLU
+ */
 
-namespace Classifai\Admin;
+namespace Classifai\Providers\Watson;
 
-class SettingsPage {
+use Classifai\Admin\SavePostHandler;
+use Classifai\Providers\Provider;
+use Classifai\Taxonomy\TaxonomyFactory;
+
+class NLU extends Provider {
 
 	/**
-	 * @var string $option Option that stores the ClassifAI settings
+	 * @var $taxonomy_factory TaxonomyFactory Watson taxonomy factory
 	 */
-	public $option = 'classifai_settings';
+	public $taxonomy_factory;
 
 	/**
-	 * @var array $features Array of Watson Features.
+	 * @var $save_post_handler SavePostHandler Triggers a classification with Watson
+	 */
+	public $save_post_handler;
+
+	/**
+	 * Watson NLU constructor.
 	 *
-	 * This is populated upon construct because of translation functions
+	 * @param string $service The service this class belongs to.
 	 */
-	public $nlu_features = [];
+	public function __construct( $service ) {
+		parent::__construct(
+			'IBM Watson',
+			'Natural Language Understanding',
+			'watson_nlu',
+			$service
+		);
 
-	/**
-	 * The admin_support items require this method.
-	 *
-	 * @todo remove this requirement.
-	 * @return bool
-	 */
-	public function can_register() {
-		return true;
-	}
-
-	/**
-	 * Object setup
-	 */
-	public function __construct() {
 		$this->nlu_features = [
 			'category' => [
-				'feature' => __( 'Category', 'classifai' ),
-				'threshold' => __( 'Category Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Category Taxonomy', 'classifai' ),
+				'feature'           => __( 'Category', 'classifai' ),
+				'threshold'         => __( 'Category Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Category Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CATEGORY_THRESHOLD,
-				'taxonomy_default' => WATSON_CATEGORY_TAXONOMY,
+				'taxonomy_default'  => WATSON_CATEGORY_TAXONOMY,
 			],
-			'keyword' => [
-				'feature' => __( 'Keyword', 'classifai' ),
-				'threshold' => __( 'Keyword Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Keyword Taxonomy', 'classifai' ),
+			'keyword'  => [
+				'feature'           => __( 'Keyword', 'classifai' ),
+				'threshold'         => __( 'Keyword Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Keyword Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_KEYWORD_THRESHOLD,
-				'taxonomy_default' => WATSON_KEYWORD_TAXONOMY,
+				'taxonomy_default'  => WATSON_KEYWORD_TAXONOMY,
 			],
-			'entity' => [
-				'feature' => __( 'Entity', 'classifai' ),
-				'threshold' => __( 'Entity Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Entity Taxonomy', 'classifai' ),
+			'entity'   => [
+				'feature'           => __( 'Entity', 'classifai' ),
+				'threshold'         => __( 'Entity Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Entity Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_ENTITY_THRESHOLD,
-				'taxonomy_default' => WATSON_ENTITY_TAXONOMY,
+				'taxonomy_default'  => WATSON_ENTITY_TAXONOMY,
 			],
-			'concept' => [
-				'feature' => __( 'Concept', 'classifai' ),
-				'threshold' => __( 'Concept Threshold (%)', 'classifai' ),
-				'taxonomy' => __( 'Concept Taxonomy', 'classifai' ),
+			'concept'  => [
+				'feature'           => __( 'Concept', 'classifai' ),
+				'threshold'         => __( 'Concept Threshold (%)', 'classifai' ),
+				'taxonomy'          => __( 'Concept Taxonomy', 'classifai' ),
 				'threshold_default' => WATSON_CONCEPT_THRESHOLD,
-				'taxonomy_default' => WATSON_CONCEPT_TAXONOMY,
+				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
 	}
 
 	/**
+	 * Can the functionality be initialized?
+	 *
+	 * @return bool
+	 */
+	public function can_register() {
+		// TODO: Implement can_register() method.
+		return true;
+	}
+
+	/**
+	 * Register what we need for the plugin.
+	 */
+	public function register() {
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		$this->taxonomy_factory = new TaxonomyFactory();
+		$this->taxonomy_factory->build_all();
+
+		$this->save_post_handler = new SavePostHandler();
+
+		if ( $this->save_post_handler->can_register() ) {
+			$this->save_post_handler->register();
+		}
+	}
+
+	/**
 	 * Helper to get the settings and allow for settings default values.
+	 *
+	 * Overridden from parent to polyfill older settings storage schema.
 	 *
 	 * @param string|bool|mixed $index Optional. Name of the settings option index.
 	 *
@@ -71,7 +102,26 @@ class SettingsPage {
 	 */
 	protected function get_settings( $index = false ) {
 		$defaults = [];
-		$settings = get_option( $this->option, [] );
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// If no settings have been saved, check for older storage to polyfill
+		// These are pre-1.3 settings
+		if ( empty( $settings ) ) {
+			$old_settings = get_option( 'classifai_settings' );
+
+			if ( isset( $old_settings['credentials'] ) ) {
+				$defaults['credentials'] = $old_settings['credentials'];
+			}
+
+			if ( isset( $old_settings['post_types'] ) ) {
+				$defaults['post_types'] = $old_settings['post_types'];
+			}
+
+			if ( isset( $old_settings['features'] ) ) {
+				$defaults['features'] = $old_settings['features'];
+			}
+		}
+
 		$settings = wp_parse_args( $settings, $defaults );
 
 		if ( $index && isset( $settings[ $index ] ) ) {
@@ -81,100 +131,64 @@ class SettingsPage {
 		return $settings;
 	}
 
-
 	/**
-	 * Register the actions required for the settings page.
+	 * Enqueue the editor scripts.
 	 */
-	public function register() {
-		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
-		add_action( 'admin_init', [ $this, 'register_settings' ] );
-	}
-
-
-	/**
-	 * Adds the submenu item.
-	 */
-	public function register_admin_menu_item() {
-		$is_setup = get_option( 'classifai_configured' );
-
-		$title = esc_html__( 'ClassifAI', 'classifai' );
-		$menu_title = $title;
-
-		if ( ! $is_setup ) {
-			$menu_title = sprintf( __( 'ClassifAI %s' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
-		}
-
-		add_submenu_page(
-			'options-general.php',
-			$title,
-			$menu_title,
-			'manage_options',
-			'classifai_settings',
-			[ $this, 'render_settings_page' ]
+	public function enqueue_editor_assets() {
+		wp_enqueue_script(
+			'classifai-editor', // Handle.
+			CLASSIFAI_PLUGIN_URL . '/dist/js/editor.min.js',
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
+			CLASSIFAI_PLUGIN_VERSION,
+			true
 		);
+		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
+			wp_enqueue_script(
+				'classifai-gutenberg-support',
+				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
+				[ 'editor' ],
+				CLASSIFAI_PLUGIN_VERSION,
+				true
+			);
+		}
 	}
 
+	/**
+	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
+	 */
+	public function init_admin_scripts() {
+		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
+			wp_enqueue_script(
+				'classifai-gutenberg-support',
+				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
+				[ 'editor' ],
+				CLASSIFAI_PLUGIN_VERSION,
+				true
+			);
+		}
+	}
 
 	/**
-	 * Set up the fields for each section.
+	 * Setup fields
 	 */
 	public function setup_fields_sections() {
-		$this->do_registration_section();
-
 		// Create the Credentials Section.
 		$this->do_credentials_section();
-
 		// Create content tagging section
 		$this->do_nlu_features_sections();
-
-	}
-
-	/**
-	 * Helper method to create the registration section
-	 */
-	protected function do_registration_section() {
-		add_settings_section( 'registration', esc_html__( 'ClassifAI Registration Key', 'classifai' ), '', 'classifai-settings' );
-
-		add_settings_field(
-			'email',
-			esc_html__( 'Registered Email', 'classifai' ),
-			[ $this, 'render_input' ],
-			'classifai-settings',
-			'registration',
-			[
-				'label_for'    => 'email',
-				'option_index' => 'registration',
-				'input_type'   => 'text',
-			]
-		);
-
-		add_settings_field(
-			'registration-key',
-			esc_html__( 'Registration Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			'classifai-settings',
-			'registration',
-			[
-				'label_for'    => 'license_key',
-				'option_index' => 'registration',
-				'input_type'   => 'password',
-				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
-			]
-		);
 	}
 
 	/**
 	 * Helper method to create the credentials section
 	 */
 	protected function do_credentials_section() {
-		add_settings_section( 'credentials', esc_html__( 'IBM Watson API Credentials', 'classifai' ), '', 'classifai-settings' );
+		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
 		add_settings_field(
 			'url',
 			esc_html__( 'API URL', 'classifai' ),
 			[ $this, 'render_input' ],
-			'classifai-settings',
-			'credentials',
+			$this->get_option_name(),
+			$this->get_option_name(),
 			[
 				'label_for'    => 'watson_url',
 				'option_index' => 'credentials',
@@ -185,8 +199,8 @@ class SettingsPage {
 			'username',
 			esc_html__( 'API Username', 'classifai' ),
 			[ $this, 'render_input' ],
-			'classifai-settings',
-			'credentials',
+			$this->get_option_name(),
+			$this->get_option_name(),
 			[
 				'label_for'     => 'watson_username',
 				'option_index'  => 'credentials',
@@ -199,8 +213,8 @@ class SettingsPage {
 			'password',
 			esc_html__( 'API Key / Password', 'classifai' ),
 			[ $this, 'render_input' ],
-			'classifai-settings',
-			'credentials',
+			$this->get_option_name(),
+			$this->get_option_name(),
 			[
 				'label_for'    => 'watson_password',
 				'option_index' => 'credentials',
@@ -214,14 +228,14 @@ class SettingsPage {
 	 */
 	protected function do_nlu_features_sections() {
 		// Add the settings section.
-		add_settings_section( 'watson-content-classification', esc_html__( 'Content Classification with IBM Watson NLU', 'classifai' ), '', 'classifai-settings' );
+		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
 
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
 			[ $this, 'render_post_types_checkboxes' ],
-			'classifai-settings',
-			'watson-content-classification',
+			$this->get_option_name(),
+			$this->get_option_name(),
 			[
 				'option_index' => 'post_types',
 			]
@@ -232,44 +246,15 @@ class SettingsPage {
 				$feature,
 				esc_html( $labels['feature'] ),
 				[ $this, 'render_nlu_feature_settings' ],
-				'classifai-settings',
-				'watson-content-classification',
+				$this->get_option_name(),
+				$this->get_option_name(),
 				[
 					'option_index' => 'features',
-					'feature' => $feature,
-					'labels' => $labels,
+					'feature'      => $feature,
+					'labels'       => $labels,
 				]
 			);
 		}
-	}
-
-
-	/**
-	 * Register the settings and sanitzation callback method.
-	 */
-	public function register_settings() {
-		register_setting( 'classifai_settings', 'classifai_settings', [ $this, 'sanitize_settings' ] );
-	}
-
-
-	/**
-	 * Render the settings page.
-	 */
-	public function render_settings_page() {
-		?>
-		<div class="wrap">
-			<h2><?php esc_html_e( 'ClassifAI Settings', 'classifai' ); ?></h2>
-
-			<form action="options.php" method="post">
-
-				<?php settings_fields( 'classifai_settings' ); ?>
-				<?php do_settings_sections( 'classifai-settings' ); ?>
-
-				<?php submit_button(); ?>
-
-			</form>
-		</div>
-		<?php
 	}
 
 	/**
@@ -306,7 +291,7 @@ class SettingsPage {
 			type="<?php echo esc_attr( $type ); ?>"
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_settings[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
@@ -318,6 +303,7 @@ class SettingsPage {
 	 * Render the post types checkbox array.
 	 *
 	 * @param array $args Settings for the input
+	 *
 	 * @return void
 	 */
 	public function render_post_types_checkboxes( $args ) {
@@ -343,11 +329,12 @@ class SettingsPage {
 	 * Render the NLU features settings.
 	 *
 	 * @param array $args Settings for the inputs
+	 *
 	 * @return void
 	 */
 	public function render_nlu_feature_settings( $args ) {
 		$feature = $args['feature'];
-		$labels = $args['labels'];
+		$labels  = $args['labels'];
 
 		$taxonomies = $this->get_supported_taxonomies();
 		$features   = $this->get_settings( 'features' );
@@ -368,23 +355,29 @@ class SettingsPage {
 		];
 		?>
 
-		<fieldset><legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
-
-			<p>
-				<?php $this->render_input( $feature_args ); ?>
-				<label for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
-			</p>
+		<fieldset>
+		<legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
 
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br />
+			<?php $this->render_input( $feature_args ); ?>
+			<label
+				for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
+		</p>
+
+		<p>
+			<label
+				for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br/>
 			<?php $this->render_input( $threshold_args ); ?>
 		</p>
 
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br />
-			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="classifai_settings[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+			<label
+				for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
+			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"
+				name="classifai_<?php echo esc_attr( $this->option_name ); ?>[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
 				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-					<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
+					<option
+						value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
 				<?php endforeach; ?>
 			</select>
 		</p>
@@ -453,6 +446,7 @@ class SettingsPage {
 		} else {
 			delete_option( 'classifai_configured' );
 		}
+
 		return $is_error;
 
 	}
@@ -467,25 +461,6 @@ class SettingsPage {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-
-		if ( isset( $settings['registration']['email'] ) && isset( $settings['registration']['license_key'] ) ) {
-			if ( $this->check_license_key( $settings['registration']['email'], $settings['registration']['license_key'] ) ) {
-				$new_settings['valid_license'] = true;
-				$new_settings['registration']['email'] = sanitize_text_field( $settings['registration']['email'] );
-				$new_settings['registration']['license_key'] = sanitize_text_field( $settings['registration']['license_key'] );
-			} else {
-				$new_settings['valid_license'] = false;
-				$new_settings['registration']['email'] = '';
-				$new_settings['registration']['license_key'] = '';
-				add_settings_error(
-					'registration',
-					'classifai-registration',
-					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
-					'error'
-				);
-			}
-		}
-
 		if ( $this->nlu_authentication_check_failed( $settings ) ) {
 			add_settings_error(
 				'credentials',
@@ -541,10 +516,11 @@ class SettingsPage {
 	/**
 	 * Hit license API to see if key/email is valid
 	 *
-	 * @param  string $email Email address.
-	 * @param  string $license_key License key.
-	 * @since  1.2
+	 * @param string $email Email address.
+	 * @param string $license_key License key.
+	 *
 	 * @return bool
+	 * @since  1.2
 	 */
 	public function check_license_key( $email, $license_key ) {
 
@@ -569,4 +545,5 @@ class SettingsPage {
 
 		return false;
 	}
+
 }

@@ -13,7 +13,6 @@
 - LICENSE.md
 - PULL_REQUEST_TEMPLATE.md
 - /bin/
-- composer.json
 - composer.lock
 - /node_modules/
 - package-lock.json
