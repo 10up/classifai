@@ -13,6 +13,23 @@
  */
 
 /**
+ * Require PHP version 7+ - throw an error if the plugin is activated on an older version.
+ *
+ * Note that this itself is only PHP5.3+ compatible because of the anonymous callback.
+ */
+register_activation_hook(
+	__FILE__,
+	function() {
+		if ( version_compare( PHP_VERSION, '7.0.0', '<' ) ) {
+			wp_die(
+				esc_html__( 'ClassifAI requires PHP version 7.', 'classifai' ),
+				esc_html__( 'Error Activating', 'classifai' )
+			);
+		}
+	}
+);
+
+/**
  * Small wrapper around PHP's define function. The defined constant is
  * ignored if it has already been defined. This allows the
  * config.local.php to override any constant in config.php.
