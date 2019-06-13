@@ -5,6 +5,7 @@
 
 ## Table of Contents  
 * [Features](#features)
+* [Requirements](#requirements)
 * [Installation](#installation)
 * [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
@@ -18,6 +19,13 @@
 * Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
+
+## Requirements
+
+* PHP 7.0+
+* [WordPress](http://wordpress.org) 4.7+
+* To utilize the Lanaguage Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
+* To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Installation
 
