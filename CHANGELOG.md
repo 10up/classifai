@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file, per [the Keep a Changelog standard](http://keepachangelog.com/).
 
+## [1.3.1] - 2019-06-13
+## Fixed
+- Specify and handle minimum PHP version support (props @helen via #84)
+
 ## [1.3.0] - 2019-06-06
 ### Added
 - Support for automatic image alt text with Microsoft Azure's Computer Vision API (props @ryanwelcher, @helen via #46)
