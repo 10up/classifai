@@ -1,6 +1,6 @@
 <?php
 /**
- * Global Constants for the Classifai Support Plugin. Constants should be
+ * Global Constants for the ClassifAI Support Plugin. Constants should be
  * declared here instead of a Class.
  */
 
