@@ -10,6 +10,8 @@
 * [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
+* [Data Gathering](#data-gathering)
+* [Support](#support-level)
 * [Changelog](#changelog)
 * [Contributing](#contributing)
 
@@ -163,6 +165,10 @@ options:
 Prints the normalized text that will be sent to the NLU API
 
 default: `false`
+
+## Data Gathering
+
+ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
 
 ## Support Level
 
