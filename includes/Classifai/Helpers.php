@@ -2,6 +2,8 @@
 
 namespace Classifai;
 
+use Classifai\Services\ServicesManager;
+
 /**
  * Miscellaneous Helper functions to access different parts of the
  * ClassifAI plugin.
@@ -17,10 +19,17 @@ function get_plugin() {
 }
 
 /**
- * Returns the ClassifAI plugin's stored settings in the WP options
+ * Returns the ClassifAI plugin's stored settings in the WP options.
+ *
+ * @return array The array of ClassifAI settings.
  */
 function get_plugin_settings() {
-	return get_option( 'classifai_watson_nlu' );
+	$service_manager = Plugin::$instance->services[ 'service_manager' ];
+	if ( $service_manager instanceof ServicesManager ) {
+		return $service_manager->get_settings();
+	}
+
+	return [];
 }
 
 /**

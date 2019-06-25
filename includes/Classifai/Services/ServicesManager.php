@@ -71,7 +71,7 @@ class ServicesManager {
 	 *
 	 * @param string $index Optional specific setting to be retrieved.
 	 */
-	protected function get_settings( $index = false ) {
+	public function get_settings( $index = false ) {
 		$settings = get_option( 'classifai_settings' );
 
 		// Special handling polyfill for pre-1.3 settings which were nested
