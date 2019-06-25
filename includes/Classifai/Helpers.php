@@ -2,6 +2,7 @@
 
 namespace Classifai;
 
+use Classifai\Providers\Provider;
 use Classifai\Services\ServicesManager;
 
 /**
@@ -21,15 +22,28 @@ function get_plugin() {
 /**
  * Returns the ClassifAI plugin's stored settings in the WP options.
  *
+ * @param string $service The service to get settings from.
+ *
  * @return array The array of ClassifAI settings.
  */
-function get_plugin_settings() {
+function get_plugin_settings( $service = '' ) {
 	$service_manager = Plugin::$instance->services[ 'service_manager' ];
-	if ( $service_manager instanceof ServicesManager ) {
+	if ( ! $service_manager instanceof ServicesManager ) {
+		return [];
+	}
+
+	if ( empty( $service ) ) {
 		return $service_manager->get_settings();
 	}
 
-	return [];
+	if ( ! isset( $service_manager->services[ $service ] ) || ! $service_manager->services[ $service ] instanceof Provider ) {
+		return [];
+	}
+
+	/** @var Provider $provider An instance or extension of the provider abstract class. */
+	$provider = $service_manager->services[ $service ];
+	return $provider->get_settings();
+
 }
 
 /**

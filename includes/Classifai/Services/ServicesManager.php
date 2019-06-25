@@ -10,8 +10,7 @@ class ServicesManager {
 	/**
 	 * @var array List of registered services
 	 */
-	protected $services = [];
-
+	public $services = [];
 
 	/**
 	 * @var array List of class instances being managed.

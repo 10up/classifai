@@ -100,7 +100,7 @@ class NLU extends Provider {
 	 *
 	 * @return array
 	 */
-	protected function get_settings( $index = false ) {
+	public function get_settings( $index = false ) {
 		$defaults = [];
 		$settings = get_option( $this->get_option_name(), [] );
 
