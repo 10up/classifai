@@ -15,7 +15,7 @@ class ServicesManager {
 	/**
 	 * @var array List of class instances being managed.
 	 */
-	protected $service_classes;
+	public $service_classes;
 
 	/**
 	 * @var string Page title for the admin page
@@ -52,9 +52,9 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
-		foreach ( $this->services as $service ) {
+		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
-				$this->service_classes[] = new $service();
+				$this->service_classes[ $key ] = new $service();
 			}
 		}
 

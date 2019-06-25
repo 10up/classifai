@@ -3,6 +3,7 @@
 namespace Classifai;
 
 use Classifai\Providers\Provider;
+use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 
 /**
@@ -22,28 +23,29 @@ function get_plugin() {
 /**
  * Returns the ClassifAI plugin's stored settings in the WP options.
  *
- * @param string $service The service to get settings from.
+ * @param string $service The service to get settings from, defaults to the ServiceManager class.
  *
- * @return array The array of ClassifAI settings.
+ * @return array The array of ClassifAi settings.
  */
 function get_plugin_settings( $service = '' ) {
-	$service_manager = Plugin::$instance->services[ 'service_manager' ];
-	if ( ! $service_manager instanceof ServicesManager ) {
+	$services = Plugin::$instance->services;
+	if ( empty( $services ) ||  empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
 	}
 
+	/** @var ServicesManager $service_manager Instance of the services manager class. */
+	$service_manager = $services['service_manager'];
 	if ( empty( $service ) ) {
 		return $service_manager->get_settings();
 	}
 
-	if ( ! isset( $service_manager->services[ $service ] ) || ! $service_manager->services[ $service ] instanceof Provider ) {
+	if ( ! isset( $service_manager->service_classes[ $service ] ) || ! $service_manager->service_classes[ $service ] instanceof Service ) {
 		return [];
 	}
 
 	/** @var Provider $provider An instance or extension of the provider abstract class. */
-	$provider = $service_manager->services[ $service ];
+	$provider = $service_manager->service_classes[ $service ]->provider_classes[0];
 	return $provider->get_settings();
-
 }
 
 /**
@@ -108,7 +110,7 @@ function reset_plugin_settings() {
  * @return string
  */
 function get_watson_api_url() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_url'] ) ) {
@@ -130,7 +132,7 @@ function get_watson_api_url() {
  * @return string
  */
 function get_watson_username() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_username'] ) ) {
@@ -151,7 +153,7 @@ function get_watson_username() {
  * @return string
  */
 function get_watson_password() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_password'] ) ) {
@@ -170,7 +172,7 @@ function get_watson_password() {
  * return array
  */
 function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings();
+	$classifai_settings = get_plugin_settings( 'language_processing' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_types = [];
@@ -199,7 +201,7 @@ function get_supported_post_types() {
  * @return bool
  */
 function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature ] ) ) {
@@ -226,7 +228,7 @@ function get_feature_enabled( $feature ) {
  * @return int
  */
 function get_feature_threshold( $feature ) {
-	$settings  = get_plugin_settings();
+	$settings  = get_plugin_settings( 'language_processing' );
 	$threshold = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
@@ -267,8 +269,8 @@ function get_feature_threshold( $feature ) {
  * @return string Taxonomy mapped to the feature
  */
 function get_feature_taxonomy( $feature ) {
-	$settings  = get_plugin_settings();
-	$taxonomy  = 0;
+	$settings = get_plugin_settings( 'language_processing' );
+	$taxonomy = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature . '_taxonomy' ] ) ) {
