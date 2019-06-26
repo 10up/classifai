@@ -140,7 +140,8 @@ if ( class_exists( 'Puc_v4_Factory' ) ) {
 	/*
 	 * Enable updates if we have a valid license
 	 */
-	$settings = \Classifai\get_plugin_settings();
+	$service_manager = new \Classifai\Services\ServicesManager();
+	$settings        = $service_manager->get_settings();
 
 	if ( isset( $settings['valid_license'] ) && $settings['valid_license'] ) {
 		// @codingStandardsIgnoreStart
