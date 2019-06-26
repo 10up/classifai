@@ -97,7 +97,23 @@ function reset_plugin_settings() {
 		],
 	];
 
-	update_option( 'classifai_settings', $settings );
+	$services = get_plugin()->services;
+	if ( ! isset( $services['service_manager'] ) || ! $services['service_manager']->service_classes ) {
+		return;
+	}
+
+	$service_classes = $services['service_manager']->service_classes;
+	foreach ( $service_classes as $service_class ) {
+		if ( ! $service_class instanceof Service || empty( $service_class->provider_classes ) ) {
+			continue;
+		}
+
+		foreach ( $service_class->provider_classes as $provider_class ) {
+			if ( ! $provider_class instanceof Provider || method_exists( $provider_class, 'reset_settings' ) ) {
+				continue;
+			}
+		}
+	}
 }
 
 
