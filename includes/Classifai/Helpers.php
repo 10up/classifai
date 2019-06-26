@@ -112,6 +112,8 @@ function reset_plugin_settings() {
 			if ( ! $provider_class instanceof Provider || method_exists( $provider_class, 'reset_settings' ) ) {
 				continue;
 			}
+
+			$provider_class->register_settings();
 		}
 	}
 }
