@@ -249,7 +249,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		\Classifai\reset_plugin_settings();
 
 		\WP_CLI::success(
-			'Defaults restored successfully. Please update the IBM Watson credentials.'
+			'Defaults restored successfully. Please update all your API credentials.'
 		);
 	}
 
