@@ -29,7 +29,7 @@ function get_plugin() {
  */
 function get_plugin_settings( $service = '' ) {
 	$services = Plugin::$instance->services;
-	if ( empty( $services ) ||  empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
 	}
 
@@ -77,11 +77,12 @@ function reset_plugin_settings() {
 	$options = get_option( 'classifai_settings' );
 	if ( $options && isset( $options['registration'] ) ) {
 		// This is a legacy option set, so let's update it to the new format.
-		update_option( 'classifai_settings', [
+		$new_settings = [
 			'valid_license' => $options['valid_license'],
 			'email'         => isset( $options['registration']['email'] ) ? $options['registration']['email'] : '',
 			'license_key'   => isset( $options['registration']['license_key'] ) ? $options['registration']['license_key'] : '',
-		] );
+		];
+		update_option( 'classifai_settings', $new_settings );
 	}
 
 	$services = get_plugin()->services;

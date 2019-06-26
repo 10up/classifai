@@ -142,7 +142,7 @@ function classifai_autorun() {
  * Generate a notice if autoload fails.
  */
 function classifai_autoload_notice() {
-	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', get_error_install_message() );
+	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', get_error_install_message() ); // @codingStandardsIgnoreLine Text is escaped in calling function already.
 	error_log( get_error_install_message() );
 }
 
