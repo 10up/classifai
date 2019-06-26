@@ -74,6 +74,11 @@ abstract class Provider {
 	abstract public function register();
 
 	/**
+	 * Resets the settings for this provider.
+	 */
+	abstract public function reset_settings();
+
+	/**
 	 * Initialization routine
 	 */
 	public function register_admin() {

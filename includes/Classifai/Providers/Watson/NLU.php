@@ -67,6 +67,13 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Resets the settings for the NLU provider.
+	 */
+	public function reset_settings() {
+		// TODO: Implement reset_settings() method.
+	}
+
+	/**
 	 * Can the functionality be initialized?
 	 *
 	 * @return bool
