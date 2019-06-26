@@ -113,7 +113,7 @@ function reset_plugin_settings() {
 				continue;
 			}
 
-			$provider_class->register_settings();
+			$provider_class->reset_settings();
 		}
 	}
 }
