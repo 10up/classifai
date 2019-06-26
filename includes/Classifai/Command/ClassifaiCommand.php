@@ -309,3 +309,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	}
 
 }
+
+try {
+	\WP_CLI::add_command( 'classifai', __NAMESPACE__ . '\\ClassifaiCommand' );
+} catch ( \Exception $e ) {
+	error_log( $e->getMessage() );
+}
