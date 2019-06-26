@@ -234,8 +234,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	}
 
 	/**
-	 * Restores the plugin configuration to factory defaults. IBM Watson
-	 * credentials must be reentered after this command.
+	 * Restores the plugin configuration to factory defaults. Any API credentials will
+	 * need to be re-entered after this is ran.
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
