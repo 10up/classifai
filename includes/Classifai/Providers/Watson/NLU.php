@@ -70,7 +70,31 @@ class NLU extends Provider {
 	 * Resets the settings for the NLU provider.
 	 */
 	public function reset_settings() {
-		// TODO: Implement reset_settings() method.
+		$settings = [
+			'post_types' => [
+				'post',
+				'page',
+			],
+			'features'   => [
+				'category'           => true,
+				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
+
+				'keyword'            => true,
+				'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+				'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+
+				'concept'            => false,
+				'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+				'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+
+				'entity'             => false,
+				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
+			],
+		];
+
+		update_option( $this->get_option_name(), $settings );
 	}
 
 	/**

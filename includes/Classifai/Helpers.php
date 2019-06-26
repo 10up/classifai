@@ -70,32 +70,19 @@ function set_plugin_settings( $settings ) {
 }
 
 /**
- * Resets the plugin to factory defaults.
+ * Resets the plugin to factory defaults, keeping licensing information only.
  */
 function reset_plugin_settings() {
-	$settings = [
-		'post_types' => [
-			'post',
-			'page',
-		],
-		'features'   => [
-			'category'           => true,
-			'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-			'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
 
-			'keyword'            => true,
-			'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-			'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-			'concept'            => false,
-			'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-			'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-			'entity'             => false,
-			'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-			'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-		],
-	];
+	$options = get_option( 'classifai_settings' );
+	if ( $options && isset( $options['registration'] ) ) {
+		// This is a legacy option set, so let's update it to the new format.
+		update_option( 'classifai_settings', [
+			'valid_license' => $options['valid_license'],
+			'email'         => isset( $options['registration']['email'] ) ? $options['registration']['email'] : '',
+			'license_key'   => isset( $options['registration']['license_key'] ) ? $options['registration']['license_key'] : '',
+		] );
+	}
 
 	$services = get_plugin()->services;
 	if ( ! isset( $services['service_manager'] ) || ! $services['service_manager']->service_classes ) {
