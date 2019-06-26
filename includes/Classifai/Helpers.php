@@ -109,7 +109,7 @@ function reset_plugin_settings() {
 		}
 
 		foreach ( $service_class->provider_classes as $provider_class ) {
-			if ( ! $provider_class instanceof Provider || method_exists( $provider_class, 'reset_settings' ) ) {
+			if ( ! $provider_class instanceof Provider || ! method_exists( $provider_class, 'reset_settings' ) ) {
 				continue;
 			}
 
