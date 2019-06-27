@@ -2,8 +2,10 @@
 
 All notable changes to this project will be documented in this file, per [the Keep a Changelog standard](http://keepachangelog.com/).
 
+## [Unreleased] - TBD
+
 ## [1.3.1] - 2019-06-13
-## Fixed
+### Fixed
 - Specify and handle minimum PHP version support (props @helen via #84)
 
 ## [1.3.0] - 2019-06-06
@@ -43,3 +45,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [1.0.0]
 - Initial closed source release
+
+[Unreleased]: https://github.com/10up/classifai/compare/1.3.1...develop
+[1.3.1]: https://github.com/10up/classifai/compare/1.3.0...1.3.1
+[1.3.0]: https://github.com/10up/classifai/compare/1.2.1...1.3.0
+[1.2.1]: https://github.com/10up/classifai/compare/1.2.0...1.2.1
+[1.2.0]: https://github.com/10up/classifai/compare/1.1.0...1.2.0
+[1.1.0]: https://github.com/10up/classifai/compare/4bf845...1.1.0
+[1.0.0]: https://github.com/10up/classifai/commit/4bf8456816c73c509001ad4cad03a6fcdcb7e478
