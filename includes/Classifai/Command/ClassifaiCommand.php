@@ -6,6 +6,7 @@ use Classifai\Watson\APIRequest;
 use Classifai\Watson\Classifier;
 use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
+use Classifai\Providers\Azure\ComputerVision;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -205,6 +206,62 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 	}
 
+
+	/**
+	 * Batch classifies attachments(s) using the current ClassifAI configuration.
+	 *
+	 * ## Options
+	 *
+	 * [<post_ids>]
+	 * : Comma delimeted Post IDs to classify
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function image( $args = [], $opts = [] ) {
+
+		if ( ! empty( $args[0] ) ) {
+			$post_ids = explode( ',', $args[0] );
+		} else {
+			$post_ids = $this->get_attachment_to_classify( $opts );
+		}
+
+		$total      = count( $post_ids );
+		$classifier = new ComputerVision( false );
+		if ( ! empty( $total ) ) {
+			$limit_total = $total;
+
+			$errors       = [];
+			$message      = "Classifying $limit_total posts ...";
+			$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
+
+			for ( $index = 0; $index < $limit_total; $index++ ) {
+				$post_id = $post_ids[ $index ];
+
+				$progress_bar->tick();
+
+				$current_metas = wp_get_attachment_metadata( $post_id );
+				\WP_CLI::line( 'Processing ' . $post_id );
+				$classifier->generate_alt_tags( $current_metas, $post_id );
+			}
+
+			$progress_bar->finish();
+
+			$total_errors  = count( $errors );
+			$total_success = $total - $total_errors;
+
+			\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
+
+			foreach ( $errors as $post_id => $error ) {
+				\WP_CLI::log( $post_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
+			}
+		} else {
+			\WP_CLI::log( 'No posts to classify.' );
+		}
+
+	}
+
+
 	/**
 	 * Prints the Basic Auth header based on credentials configured in
 	 * the plugin.
@@ -267,6 +324,44 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
 			'posts_per_page' => -1,
+		];
+
+		\WP_CLI::log( 'Fetching posts to classify ...' );
+
+		$query = new \WP_Query( $query_params );
+		$posts = $query->posts;
+
+		\WP_CLI::log( 'Fetching posts to classify ... DONE (' . count( $posts ) . ')' );
+
+		return $posts;
+	}
+
+	/**
+	 * Returns the list of attachment ids to classify with Azure Compute Vision
+	 *
+	 * @param array $opts Options from WP CLI.
+	 * @return array
+	 */
+	private function get_attachment_to_classify( $opts = [] ) {
+		$query_params = [
+			'post_type'      => 'attachment',
+			'post_mime_type' => array( 'image/jpeg', 'image/png' ),
+			'post_status'    => 'any',
+			'fields'         => 'ids',
+			'posts_per_page' => -1,
+			'meta_query'     => [
+				'relation' => 'OR',
+				[
+					'key'     => '_wp_attachment_image_alt',
+					'compare' => 'NOT EXISTS',
+					'value'   => '',
+				],
+				[
+					'key'     => '_wp_attachment_image_alt',
+					'compare' => '=',
+					'value'   => '',
+				],
+			],
 		];
 
 		\WP_CLI::log( 'Fetching posts to classify ...' );
