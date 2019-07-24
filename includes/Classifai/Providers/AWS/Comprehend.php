@@ -24,6 +24,13 @@ class Comprehend extends Provider {
 	}
 
 	/**
+	 * Resets the settings for the Comprehend provider.
+	 */
+	public function reset_settings() {
+		// TODO: Implement reset_settings() method.
+	}
+
+	/**
 	 * Can the functionality be initialized?
 	 *
 	 * @return bool
