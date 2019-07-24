@@ -48,6 +48,7 @@ class Plugin {
 				'_classifai_error',
 				[
 					'show_in_rest' => true,
+					'single'       => true,
 				]
 			);
 		}
