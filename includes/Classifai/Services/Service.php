@@ -25,7 +25,7 @@ abstract class Service {
 	/**
 	 * @var array Array of class instances.
 	 */
-	protected $provider_classes;
+	public $provider_classes;
 
 	/**
 	 * Service constructor.
