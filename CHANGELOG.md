@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.3.2] - 2019-07-24
+### Fixed
+- Only run Watson NLU when it's fully configured (props @helen, @eflorea via #103)
+- NLU Settings backwards compatibility and WP-CLI command registration (props @JayWood, @aaronjorbin via #96)
+
 ## [1.3.1] - 2019-06-13
 ### Fixed
 - Specify and handle minimum PHP version support (props @helen via #84)
@@ -43,10 +48,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Taxonomy mapping support
 - Admin notice on API errors
 
-## [1.0.0]
+## [1.0.0] - 2018-07-24
 - Initial closed source release
 
-[Unreleased]: https://github.com/10up/classifai/compare/1.3.1...develop
+[Unreleased]: https://github.com/10up/classifai/compare/1.3.2...develop
+[1.3.2]: https://github.com/10up/classifai/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/10up/classifai/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/10up/classifai/compare/1.2.1...1.3.0
 [1.2.1]: https://github.com/10up/classifai/compare/1.2.0...1.2.1
