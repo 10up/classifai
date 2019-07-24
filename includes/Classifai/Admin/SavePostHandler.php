@@ -24,7 +24,9 @@ class SavePostHandler {
 	 * Save Post handler only runs on admin or REST requests
 	 */
 	public function can_register() {
-		if ( is_admin() ) {
+		if ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
+			return false;
+		} elseif ( is_admin() ) {
 			return true;
 		} elseif ( $this->is_rest_route() ) {
 			return true;
