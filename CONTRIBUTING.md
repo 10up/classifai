@@ -29,7 +29,7 @@ The `develop` branch is the development branch which means it contains the next 
 ## Release instructions
 
 1. Starting from `develop`, cut a release branch named `release/X.Y.Z` for your changes.
-2. Version bump: Bump the version number in `classifai.php` if it does not already reflect the version being released.
+2. Version bump: Bump the version number in `classifai.php` and `config.php` if it does not already reflect the version being released.
 3. Changelog: Add/update the changelog in `CHANGELOG.md`
 4. Update the `.pot` file by running `npm run makepot`.
 5. Check to be sure any new files/paths that are unnecessary in the production version are included in `.github/action-release/rsync-filter.txt`.
