@@ -8,6 +8,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 ### Fixed
 - Only run Watson NLU when it's fully configured (props @helen, @eflorea via #103)
 - NLU Settings backwards compatibility and WP-CLI command registration (props @JayWood, @aaronjorbin via #96)
+- Avoid JS errors and inaccurate data representation of `_classifai_error` meta (props @johnwatkins0 via #106)
+- Resolve sudden Travis test failures (props @jeffpaul via #107)
+
+### Changed
+- Documentation updates (props @jeffpaul, @dustinrue via #89, #90, #94, and #97)
 
 ## [1.3.1] - 2019-06-13
 ### Fixed
