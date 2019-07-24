@@ -26,6 +26,8 @@ class SavePostHandler {
 	public function can_register() {
 		if ( ! get_option( 'classifai_configured', false ) ) {
 			return false;
+		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
+			return false;
 		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
 			return false;
 		} elseif ( is_admin() ) {
