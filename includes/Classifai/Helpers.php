@@ -2,6 +2,10 @@
 
 namespace Classifai;
 
+use Classifai\Providers\Provider;
+use Classifai\Services\Service;
+use Classifai\Services\ServicesManager;
+
 /**
  * Miscellaneous Helper functions to access different parts of the
  * ClassifAI plugin.
@@ -17,10 +21,31 @@ function get_plugin() {
 }
 
 /**
- * Returns the ClassifAI plugin's stored settings in the WP options
+ * Returns the ClassifAI plugin's stored settings in the WP options.
+ *
+ * @param string $service The service to get settings from, defaults to the ServiceManager class.
+ *
+ * @return array The array of ClassifAi settings.
  */
-function get_plugin_settings() {
-	return get_option( 'classifai_watson_nlu' );
+function get_plugin_settings( $service = '' ) {
+	$services = Plugin::$instance->services;
+	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+		return [];
+	}
+
+	/** @var ServicesManager $service_manager Instance of the services manager class. */
+	$service_manager = $services['service_manager'];
+	if ( empty( $service ) ) {
+		return $service_manager->get_settings();
+	}
+
+	if ( ! isset( $service_manager->service_classes[ $service ] ) || ! $service_manager->service_classes[ $service ] instanceof Service ) {
+		return [];
+	}
+
+	/** @var Provider $provider An instance or extension of the provider abstract class. */
+	$provider = $service_manager->service_classes[ $service ]->provider_classes[0];
+	return $provider->get_settings();
 }
 
 /**
@@ -45,34 +70,40 @@ function set_plugin_settings( $settings ) {
 }
 
 /**
- * Resets the plugin to factory defaults.
+ * Resets the plugin to factory defaults, keeping licensing information only.
  */
 function reset_plugin_settings() {
-	$settings = [
-		'post_types' => [
-			'post',
-			'page',
-		],
-		'features'   => [
-			'category'           => true,
-			'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-			'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
 
-			'keyword'            => true,
-			'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-			'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+	$options = get_option( 'classifai_settings' );
+	if ( $options && isset( $options['registration'] ) ) {
+		// This is a legacy option set, so let's update it to the new format.
+		$new_settings = [
+			'valid_license' => $options['valid_license'],
+			'email'         => isset( $options['registration']['email'] ) ? $options['registration']['email'] : '',
+			'license_key'   => isset( $options['registration']['license_key'] ) ? $options['registration']['license_key'] : '',
+		];
+		update_option( 'classifai_settings', $new_settings );
+	}
 
-			'concept'            => false,
-			'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-			'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+	$services = get_plugin()->services;
+	if ( ! isset( $services['service_manager'] ) || ! $services['service_manager']->service_classes ) {
+		return;
+	}
 
-			'entity'             => false,
-			'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-			'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-		],
-	];
+	$service_classes = $services['service_manager']->service_classes;
+	foreach ( $service_classes as $service_class ) {
+		if ( ! $service_class instanceof Service || empty( $service_class->provider_classes ) ) {
+			continue;
+		}
 
-	update_option( 'classifai_settings', $settings );
+		foreach ( $service_class->provider_classes as $provider_class ) {
+			if ( ! $provider_class instanceof Provider || ! method_exists( $provider_class, 'reset_settings' ) ) {
+				continue;
+			}
+
+			$provider_class->reset_settings();
+		}
+	}
 }
 
 
@@ -85,7 +116,7 @@ function reset_plugin_settings() {
  * @return string
  */
 function get_watson_api_url() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_url'] ) ) {
@@ -107,7 +138,7 @@ function get_watson_api_url() {
  * @return string
  */
 function get_watson_username() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_username'] ) ) {
@@ -128,7 +159,7 @@ function get_watson_username() {
  * @return string
  */
 function get_watson_password() {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_password'] ) ) {
@@ -147,7 +178,7 @@ function get_watson_password() {
  * return array
  */
 function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings();
+	$classifai_settings = get_plugin_settings( 'language_processing' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_types = [];
@@ -176,7 +207,7 @@ function get_supported_post_types() {
  * @return bool
  */
 function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings();
+	$settings = get_plugin_settings( 'language_processing' );
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature ] ) ) {
@@ -203,7 +234,7 @@ function get_feature_enabled( $feature ) {
  * @return int
  */
 function get_feature_threshold( $feature ) {
-	$settings  = get_plugin_settings();
+	$settings  = get_plugin_settings( 'language_processing' );
 	$threshold = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
@@ -244,8 +275,8 @@ function get_feature_threshold( $feature ) {
  * @return string Taxonomy mapped to the feature
  */
 function get_feature_taxonomy( $feature ) {
-	$settings  = get_plugin_settings();
-	$taxonomy  = 0;
+	$settings = get_plugin_settings( 'language_processing' );
+	$taxonomy = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature . '_taxonomy' ] ) ) {

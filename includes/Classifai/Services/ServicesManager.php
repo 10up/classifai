@@ -10,13 +10,12 @@ class ServicesManager {
 	/**
 	 * @var array List of registered services
 	 */
-	protected $services = [];
-
+	public $services = [];
 
 	/**
 	 * @var array List of class instances being managed.
 	 */
-	protected $service_classes;
+	public $service_classes;
 
 	/**
 	 * @var string Page title for the admin page
@@ -53,9 +52,9 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
-		foreach ( $this->services as $service ) {
+		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
-				$this->service_classes[] = new $service();
+				$this->service_classes[ $key ] = new $service();
 			}
 		}
 
@@ -73,7 +72,7 @@ class ServicesManager {
 	 *
 	 * @param string $index Optional specific setting to be retrieved.
 	 */
-	protected function get_settings( $index = false ) {
+	public function get_settings( $index = false ) {
 		$settings = get_option( 'classifai_settings' );
 
 		// Special handling polyfill for pre-1.3 settings which were nested
@@ -154,7 +153,7 @@ class ServicesManager {
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
-		add_settings_section( 'classifai_settings', 'Classifai Settings', '', 'classifai_settings' );
+		add_settings_section( 'classifai_settings', 'ClassifAI Settings', '', 'classifai_settings' );
 
 		add_settings_field(
 			'email',

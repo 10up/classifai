@@ -1,10 +1,10 @@
 <?php
 /**
- * Global Constants for the Classifai Support Plugin. Constants should be
+ * Global Constants for the ClassifAI Support Plugin. Constants should be
  * declared here instead of a Class.
  */
 
-$plugin_version = '1.2.0';
+$plugin_version = '1.3.2';
 
 if ( file_exists( __DIR__ . '/.commit' ) ) {
 	$plugin_version .= '-' . file_get_contents( __DIR__ . '/.commit' );
