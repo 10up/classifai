@@ -551,12 +551,19 @@ class NLU extends Provider {
 	/**
 	 * Provides debug information related to the provider.
 	 *
+	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
+	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
 	 * @return string|array
 	 * @since 1.4.0
 	 */
-	public function get_provider_debug_information() {
-		$settings   = $this->sanitize_settings( $this->get_settings() );
-		$configured = get_option( 'classifai_configured' ) ? __( 'true', 'classifai' ) : __( 'false', 'classifai' );
+	public function get_provider_debug_information( $settings = null, $configured = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		if ( is_null( $configured ) ) {
+			$configured = get_option( 'classifai_configured' );
+		}
 
 		$settings_post_types = $settings['post_types'] ?? [];
 		$post_types          = array_filter(

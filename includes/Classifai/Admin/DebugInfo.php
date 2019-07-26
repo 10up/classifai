@@ -31,7 +31,7 @@ class DebugInfo {
 	 * @since 1.4.0
 	 */
 	public function register() {
-		add_filter( 'debug_information', [ $this, 'filter_debug_information' ] );
+		add_filter( 'debug_information', [ $this, 'add_classifai_debug_information' ] );
 	}
 
 	/**
@@ -45,7 +45,7 @@ class DebugInfo {
 	 *
 	 * @since 1.4.0
 	 */
-	public function filter_debug_information( $information ) {
+	public function add_classifai_debug_information( $information ) {
 		$plugin_data = get_plugin_data( CLASSIFAI_PLUGIN );
 
 		/**

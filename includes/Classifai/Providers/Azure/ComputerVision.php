@@ -192,7 +192,7 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
+		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
@@ -237,13 +237,15 @@ class ComputerVision extends Provider {
 	/**
 	 * Provides debug information related to the provider.
 	 *
-	 * @return string|array
+	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
 	 * @since 1.4.0
 	 */
-	public function get_provider_debug_information() {
-		$settings = $this->sanitize_settings( $this->get_settings() );
+	public function get_provider_debug_information( $settings = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
 
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 ) ? __( 'true', 'classifai' ) : __( 'false', 'classifai' );
+		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
 			__( 'Authenticated', 'classifai' )     => $authenticated,
