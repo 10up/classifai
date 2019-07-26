@@ -52,6 +52,17 @@ class Plugin {
 			);
 		}
 
+		$plugin_classes = [
+			new Admin\Notifications(),
+			new Admin\DebugInfo(),
+		];
+
+		foreach ( $plugin_classes as $class ) {
+			if ( $class->can_register() ) {
+				$class->register();
+			}
+		}
+
 		do_action( 'after_classifai_init' );
 	}
 
@@ -73,7 +84,6 @@ class Plugin {
 					[ 'Classifai\Services\LanguageProcessing', 'Classifai\Services\ImageProcessing' ]
 				)
 			),
-			new Admin\Notifications(),
 		];
 
 		foreach ( $this->services as $service ) {

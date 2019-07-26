@@ -233,4 +233,22 @@ class ComputerVision extends Provider {
 
 		return $rtn;
 	}
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @return string|array
+	 * @since 1.4.0
+	 */
+	public function get_provider_debug_information() {
+		$settings = $this->sanitize_settings( $this->get_settings() );
+
+		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 ) ? __( 'true', 'classifai' ) : __( 'false', 'classifai' );
+
+		return [
+			__( 'Authenticated', 'classifai' )     => $authenticated,
+			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
+			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
+		];
+	}
 }

@@ -521,6 +521,8 @@ class NLU extends Provider {
 	 *
 	 * @return bool
 	 * @since  1.2
+	 *
+	 * @todo Is this function supposed to be here?
 	 */
 	public function check_license_key( $email, $license_key ) {
 
@@ -546,4 +548,32 @@ class NLU extends Provider {
 		return false;
 	}
 
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @return string|array
+	 * @since 1.4.0
+	 */
+	public function get_provider_debug_information() {
+		$settings   = $this->sanitize_settings( $this->get_settings() );
+		$configured = get_option( 'classifai_configured' ) ? __( 'true', 'classifai' ) : __( 'false', 'classifai' );
+
+		$settings_post_types = $settings['post_types'] ?? [];
+		$post_types          = array_filter(
+			array_keys( $settings_post_types ),
+			function( $post_type ) use ( $settings_post_types ) {
+				return 1 === intval( $settings_post_types[ $post_type ] );
+			}
+		);
+
+		$credentials = $settings['credentials'] ?? [];
+
+		return [
+			__( 'Configured', 'classifai' )   => $configured,
+			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
+			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
+			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
+			__( 'Features', 'classifai' )     => wp_json_encode( $settings['features'] ?? '' ),
+		];
+	}
 }

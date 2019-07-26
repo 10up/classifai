@@ -64,6 +64,8 @@ class ServicesManager {
 
 		// Register the functionality
 		$this->register_services();
+
+		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
 	}
 
 	/**
@@ -343,5 +345,31 @@ class ServicesManager {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Adds debug information to the ClassifAI Site Health screen.
+	 *
+	 * @param array $debug_information Array of lines representing debug information.
+	 * @return array Array with lines added.
+	 * @since 1.4.0
+	 */
+	public function add_debug_information( $debug_information ) {
+		$settings = $this->sanitize_settings( $this->get_settings() );
+
+		$valid_licence       = 1 === intval( $settings['valid_license'] ?? 0 )
+			? __( 'true', 'classifai' )
+			: __( 'false', 'classifai' );
+		$debug_information[] = [
+			'label' => __( 'Valid license', 'classifai' ),
+			'value' => $valid_licence,
+		];
+
+		$debug_information[] = [
+			'label' => __( 'Email', 'classifai' ),
+			'value' => $settings['email'] ?? '',
+		];
+
+		return $debug_information;
 	}
 }
