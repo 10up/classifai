@@ -11,7 +11,7 @@ class Plugin {
 	/**
 	 * @var array $services The known list of services.
 	 */
-	protected $services = [];
+	public $services = [];
 
 	/**
 	 * Lazy initialize the plugin
@@ -48,6 +48,7 @@ class Plugin {
 				'_classifai_error',
 				[
 					'show_in_rest' => true,
+					'single'       => true,
 				]
 			);
 		}
@@ -66,14 +67,17 @@ class Plugin {
 	 * Initialize the Services.
 	 */
 	public function init_services() {
+		$classifai_services = apply_filters(
+			'classifai_services',
+			[
+				'language_processing' => 'Classifai\Services\LanguageProcessing',
+				'image_processing'    => 'Classifai\Services\ImageProcessing',
+			]
+		);
+
 		$this->services = [
-			new Services\ServicesManager(
-				apply_filters(
-					'classifai_services',
-					[ 'Classifai\Services\LanguageProcessing', 'Classifai\Services\ImageProcessing' ]
-				)
-			),
-			new Admin\Notifications(),
+			'service_manager'     => new Services\ServicesManager( $classifai_services ),
+			'admin_notifications' => new Admin\Notifications(),
 		];
 
 		foreach ( $this->services as $service ) {

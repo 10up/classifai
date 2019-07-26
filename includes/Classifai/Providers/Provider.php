@@ -74,6 +74,11 @@ abstract class Provider {
 	abstract public function register();
 
 	/**
+	 * Resets the settings for this provider.
+	 */
+	abstract public function reset_settings();
+
+	/**
 	 * Initialization routine
 	 */
 	public function register_admin() {
@@ -97,7 +102,7 @@ abstract class Provider {
 	 *
 	 * @return array
 	 */
-	protected function get_settings( $index = false ) {
+	public function get_settings( $index = false ) {
 		$defaults = [];
 		$settings = get_option( $this->get_option_name(), [] );
 		$settings = wp_parse_args( $settings, $defaults );

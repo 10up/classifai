@@ -28,6 +28,13 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Resets settings for the ComputerVision provider.
+	 */
+	public function reset_settings() {
+		// TODO: Implement reset_settings() method.
+	}
+
+	/**
 	 * Can the functionality be initialized?
 	 *
 	 * @return bool
