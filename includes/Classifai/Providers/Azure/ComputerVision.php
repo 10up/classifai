@@ -58,6 +58,22 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Provides the max filesize for the ComputerVision service.
+	 *
+	 * @return int
+	 *
+	 * @since 1.4.0
+	 */
+	public function get_max_filesize() {
+		/**
+		 * Filters the ComputerVision maximum allowed filesize.
+		 *
+		 * @param int Default 4MB.
+		 */
+		return apply_filters( 'classifai_computervision_max_filesize', 4000000 ); // 4MB default.
+	}
+
+	/**
 	 * Generate the alt tags for the image being uploaded.
 	 *
 	 * @param array $metadata      The metadata for the image
@@ -68,8 +84,17 @@ class ComputerVision extends Provider {
 	public function generate_alt_tags( $metadata, $attachment_id ) {
 		$threshold = $this->get_settings( 'caption_threshold' );
 
-		$image_url = wp_get_attachment_image_url( $attachment_id );
-		$captions  = $this->scan_image( $image_url );
+		$image_url = $this->get_largest_acceptable_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id, 'full' ),
+			$metadata['sizes']
+		);
+
+		if ( empty( $image_url ) ) {
+			return $metadata;
+		}
+
+		$captions = $this->scan_image( $image_url );
 		if ( ! is_wp_error( $captions ) && isset( $captions[0] ) ) {
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
@@ -79,6 +104,50 @@ class ComputerVision extends Provider {
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
 		}
 		return $metadata;
+	}
+
+	/**
+	 * Retrieves the URL of the largest version of an attachment image accepted by the ComputerVision service.
+	 *
+	 * @param string $full_image The path to the full-sized image source file.
+	 * @param string $full_url   The URL of the full-sized image.
+	 * @param array  $intermediate_sizes Intermediate size data from attachment meta.
+	 * @return string|null The image URL, or null if no acceptable image found.
+	 *
+	 * @since 1.4.0
+	 */
+	public function get_largest_acceptable_image_url( $full_image, $full_url, $intermediate_sizes ) {
+		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( $file_size && $this->get_max_filesize() > $file_size ) {
+			return $full_url;
+		}
+
+		$sizes = $intermediate_sizes['sizes'];
+
+		// Sort the image sizes in order of total width + height, descending.
+		$sort_sizes = function( $size_1, $size_2 ) {
+			$size_1_total = $size_1['width'] + $size_1['height'];
+			$size_2_total = $size_2['width'] + $size_2['height'];
+
+			if ( $size_1_total === $size_2_total ) {
+				return 0;
+			}
+
+			return $size_1_total > $size_2_total ? -1 : 1;
+		};
+
+		usort( $sizes, $sort_sizes );
+
+		foreach ( $sizes as $size ) {
+			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
+			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+			if ( $file_size && $this->get_max_filesize() > $file_size ) {
+				return str_replace( basename( $full_url ), $size['file'], $full_url );
+			}
+		}
+
+		return null;
 	}
 
 	/**
