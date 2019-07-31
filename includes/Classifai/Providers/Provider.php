@@ -187,7 +187,5 @@ abstract class Provider {
 	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
 	 * @since 1.4.0
 	 */
-	public function get_provider_debug_information() {
-		return '';
-	}
+	abstract public function get_provider_debug_information();
 }
