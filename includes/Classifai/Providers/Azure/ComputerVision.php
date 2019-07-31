@@ -118,7 +118,7 @@ class ComputerVision extends Provider {
 	 */
 	public function get_largest_acceptable_image_url( $full_image, $full_url, $intermediate_sizes ) {
 		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		if ( $file_size && $this->get_max_filesize() > $file_size ) {
+		if ( $file_size && $this->get_max_filesize() >= $file_size ) {
 			return $full_url;
 		}
 
@@ -142,7 +142,7 @@ class ComputerVision extends Provider {
 			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
 			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 
-			if ( $file_size && $this->get_max_filesize() > $file_size ) {
+			if ( $file_size && $this->get_max_filesize() >= $file_size ) {
 				return str_replace( basename( $full_url ), $size['file'], $full_url );
 			}
 		}
