@@ -14,6 +14,11 @@ class Plugin {
 	public $services = [];
 
 	/**
+	 * @var array $admin_helpers Class instances providing features in the admin UI.
+	 */
+	public $admin_helpers = [];
+
+	/**
 	 * Lazy initialize the plugin
 	 */
 	public static function get_instance() {
@@ -30,6 +35,7 @@ class Plugin {
 	public function enable() {
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
+		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
 	}
 
 	/**
@@ -76,14 +82,34 @@ class Plugin {
 		);
 
 		$this->services = [
-			'service_manager'     => new Services\ServicesManager( $classifai_services ),
-			'admin_notifications' => new Admin\Notifications(),
-			'debug_information'   => new Admin\DebugInfo(),
+			'service_manager' => new Services\ServicesManager( $classifai_services ),
 		];
 
 		foreach ( $this->services as $service ) {
 			if ( $service->can_register() ) {
 				$service->register();
+			}
+		}
+	}
+
+	/**
+	 * Initiates classes providing admin feature sfor the plugin.
+	 *
+	 * @since 1.4.0
+	 */
+	public function init_admin_helpers() {
+		if ( ! empty( $this->admin_helpers ) ) {
+			return;
+		}
+
+		$this->admin_helpers = [
+			'notifications' => new Admin\Notifications(),
+			'debug_info'    => new Admin\DebugInfo(),
+		];
+
+		foreach ( $this->admin_helpers as $instance ) {
+			if ( $instance->can_register() ) {
+				$instance->register();
 			}
 		}
 	}
