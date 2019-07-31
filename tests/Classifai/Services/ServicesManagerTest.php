@@ -37,7 +37,7 @@ class ServicesManagerTest extends WP_UnitTestCase {
 			[
 				[
 					'label' => 'Valid license',
-					'value' => 1,
+					'value' => 'yes',
 				],
 				[
 					'label' => 'Email',

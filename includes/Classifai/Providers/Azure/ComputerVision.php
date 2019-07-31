@@ -255,7 +255,7 @@ class ComputerVision extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )     => $authenticated,
+			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
 			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
 		];

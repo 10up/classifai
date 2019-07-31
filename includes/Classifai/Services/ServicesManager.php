@@ -359,10 +359,11 @@ class ServicesManager {
 			$settings = $this->sanitize_settings( $this->get_settings() );
 		}
 
-		$valid_licence       = 1 === intval( $settings['valid_license'] ?? 0 );
+		$valid_license       = intval( $settings['valid_license'] ?? 0 );
+		$valid_license_text  = 1 === $valid_license ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' );
 		$debug_information[] = [
 			'label' => __( 'Valid license', 'classifai' ),
-			'value' => $valid_licence,
+			'value' => $valid_license_text,
 		];
 
 		$debug_information[] = [

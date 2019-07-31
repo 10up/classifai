@@ -41,7 +41,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			[
-				'Authenticated'     => 1,
+				'Authenticated'     => 'yes',
 				'API URL'           => 'my-azure-url.com',
 				'Caption threshold' => 77,
 			],

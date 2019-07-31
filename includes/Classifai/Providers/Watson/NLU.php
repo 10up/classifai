@@ -607,7 +607,7 @@ class NLU extends Provider {
 		$credentials = $settings['credentials'] ?? [];
 
 		return [
-			__( 'Configured', 'classifai' )   => $configured,
+			__( 'Configured', 'classifai' )   => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
 			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),

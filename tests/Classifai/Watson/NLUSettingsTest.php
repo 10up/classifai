@@ -69,7 +69,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 
 		$this->assertEquals(
 			[
-				'Configured'   => 1,
+				'Configured'   => 'yes',
 				'API URL'      => 'my-watson-url.com',
 				'API username' => 'my-watson-username',
 				'Post types'   => 'post, attachment, event',
