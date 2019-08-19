@@ -71,12 +71,23 @@ class ComputerVision extends Provider {
 		$image_url = wp_get_attachment_image_url( $attachment_id );
 		$captions  = $this->scan_image( $image_url );
 		if ( ! is_wp_error( $captions ) && isset( $captions[0] ) ) {
-			// Save the first caption as the alt text if it passes the threshold.
-			if ( $captions[0]->confidence * 100 > $threshold ) {
-				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+			/**
+			 * Filter the captions returned from the API.
+			 *
+			 * @param array $captions. The caption data.
+			 *
+			 * @return array $captions The filtered caption data.
+			 */
+			$captions = apply_filters( 'classifai_computer_vision_alt_tags', $captions );
+			// If $captions isn't an array, don't save them.
+			if ( is_array( $captions ) ) {
+				// Save the first caption as the alt text if it passes the threshold.
+				if ( $captions[0]->confidence * 100 > $threshold ) {
+					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+				}
+				// Save all the results for later.
+				update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
 			}
-			// Save all the results for later.
-			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
 		}
 		return $metadata;
 	}
