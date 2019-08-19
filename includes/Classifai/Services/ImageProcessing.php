@@ -5,6 +5,8 @@
 
 namespace Classifai\Services;
 
+use Classifai\Taxonomy\ImageTagTaxonomy;
+
 class ImageProcessing extends Service {
 
 	/**
@@ -18,5 +20,22 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\Azure\ComputerVision',
 			]
 		);
+	}
+
+	/**
+	 * Register the Image Tags taxonomy along with
+	 */
+	public function init() {
+		parent::init();
+		$this->register_image_tags_taxonomy();
+	}
+
+	/**
+	 * Register a common image tag taxonomy
+	 */
+	protected function register_image_tags_taxonomy() {
+		$tax = new ImageTagTaxonomy();
+		$tax->register();
+		register_taxonomy_for_object_type( 'classifai-image-tags', 'attachment' );
 	}
 }

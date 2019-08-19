@@ -14,6 +14,11 @@ class ComputerVision extends Provider {
 	protected $describe_url = 'vision/v1.0/describe?maxCandidates=3';
 
 	/**
+	 * @var string string URL fragment to the tag API endoint.
+	 */
+	protected $tag_url = '/vision/v2.0/tag';
+
+	/**
 	 * ComputerVision constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -55,6 +60,11 @@ class ComputerVision extends Provider {
 	 */
 	public function register() {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_alt_tags' ], 10, 2 );
+
+		// Only tag if setting is enabled.
+		if ( 'no' !== $this->get_settings( 'enable_image_tagging' ) ) {
+			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_img_tags' ], 10, 2 );
+		}
 	}
 
 	/**
@@ -131,6 +141,78 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Generate the image tags for the image being uploaded.
+	 *
+	 * @param array $metadata      The metadata for the image
+	 * @param int   $attachment_id Post ID for the attachment.
+	 *
+	 * @return mixed
+	 */
+	public function generate_img_tags( $metadata, $attachment_id ) {
+		$threshold = $this->get_settings( 'tag_threshold' );
+		$image_url = wp_get_attachment_image_url( $attachment_id );
+		$tags      = $this->get_image_tags( $image_url );
+		if ( ! is_wp_error( $tags ) && isset( $tags[0] ) ) {
+			/**
+			 * Filter the tags returned from the API.
+			 *
+			 * @param array $tags. The caption data.
+			 *
+			 * @return array $tags The filtered caption data.
+			 */
+			$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
+			// If $tags isn't an array, don't save them.
+			if ( is_array( $tags ) ) {
+				// Save the first caption as the alt text if it passes the threshold.
+				foreach ( $tags as $tag ) {
+					if ( $tag->confidence * 100 > $threshold ) {
+						wp_add_object_terms( $attachment_id, $tag->name, 'classifai-image-tags' );
+					}
+				}
+			}
+		}
+		return $metadata;
+	}
+
+	/**
+	 * Scan the image and return the tags
+	 *
+	 * @param string $image_url The image being uploaded.
+	 *
+	 * @return array|bool|\WP_Error
+	 */
+	protected function get_image_tags( $image_url ) {
+		$settings = get_option( $this->get_option_name() );
+		$rtn      = false;
+
+		$request = wp_remote_post(
+			trailingslashit( $settings['url'] ) . $this->tag_url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+					'Content-Type'              => 'application/json',
+				],
+				'body'    => '{"url":"' . $image_url . '"}',
+			]
+		);
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( isset( $response->error ) ) {
+				$rtn = new \WP_Error( 'auth', $response->error->message );
+			} else {
+				if ( $response->tags ) {
+					return $response->tags;
+				}
+			}
+		} else {
+			$rtn = $request;
+		}
+
+		return $rtn;
+	}
+
+	/**
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
@@ -169,6 +251,32 @@ class ComputerVision extends Provider {
 				'input_type'    => 'number',
 				'default_value' => 75,
 				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+			]
+		);
+		add_settings_field(
+			'enable-image-tagging',
+			esc_html__( 'Automatically Tag Images', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_image_tagging',
+				'input_type'    => 'checkbox',
+				'default_value' => true,
+				'description'   => __( 'Uploaded images will be auto-tagged', 'classifai' ),
+			]
+		);
+		add_settings_field(
+			'image-tag-threshold',
+			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'tag_threshold',
+				'input_type'    => 'number',
+				'default_value' => 75,
+				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
 	}
@@ -214,6 +322,15 @@ class ComputerVision extends Provider {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
+		}
+
+		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
+		$new_settings['enable_image_tagging'] = $tag_enabled;
+
+		if ( is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
+			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
+		} else {
+			$new_settings['tag_threshold'] = 75;
 		}
 
 		return $new_settings;
