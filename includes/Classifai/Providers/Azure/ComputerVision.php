@@ -164,11 +164,14 @@ class ComputerVision extends Provider {
 			// If $tags isn't an array, don't save them.
 			if ( is_array( $tags ) ) {
 				// Save the first caption as the alt text if it passes the threshold.
+				$custom_tags = [];
 				foreach ( $tags as $tag ) {
 					if ( $tag->confidence * 100 > $threshold ) {
+						$custom_tags[] = $tag->name;
 						wp_add_object_terms( $attachment_id, $tag->name, 'classifai-image-tags' );
 					}
 				}
+				wp_update_term_count_now( $custom_tags, 'classifai-image-tags' );
 			}
 		}
 		return $metadata;
