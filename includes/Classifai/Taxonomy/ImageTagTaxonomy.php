@@ -32,4 +32,12 @@ class ImageTagTaxonomy extends AbstractTaxonomy {
 		return true;
 	}
 
+	/**
+	 * Override the update_count_callback because we're using attachments.
+	 *
+	 * @return string
+	 */
+	public function update_count_callback() {
+		return '_update_generic_term_count';
+	}
 }
