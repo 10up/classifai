@@ -1,6 +1,6 @@
 ---
-name: "⁉️ Need help with ClassifAI?"
-about: Ask us question, we're here to help!
+name: "❓ Need help with ClassifAI?"
+about: Ask us a question, we're here to help!
 title: ''
 labels: question
 assignees: ''

@@ -3,7 +3,7 @@
  * Plugin Name:     ClassifAI
  * Plugin URI:      https://github.com/10up/classifai
  * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:         1.2.1
+ * Version:         1.3.2
  * Author:          10up
  * Author URI:      https://10up.com
  * License:         MIT
@@ -11,6 +11,23 @@
  * Text Domain:     classifai
  * Domain Path:     /languages
  */
+
+/**
+ * Require PHP version 7+ - throw an error if the plugin is activated on an older version.
+ *
+ * Note that this itself is only PHP5.3+ compatible because of the anonymous callback.
+ */
+register_activation_hook(
+	__FILE__,
+	function() {
+		if ( version_compare( PHP_VERSION, '7.0.0', '<' ) ) {
+			wp_die(
+				esc_html__( 'ClassifAI requires PHP version 7.', 'classifai' ),
+				esc_html__( 'Error Activating', 'classifai' )
+			);
+		}
+	}
+);
 
 /**
  * Small wrapper around PHP's define function. The defined constant is
@@ -81,6 +98,18 @@ function classifai_autoloader() {
 }
 
 /**
+ * Gets the installation message error.
+ *
+ * This was put in a function specifically because it's used both in WP-CLI and within an admin notice if not using
+ * WP-CLI.
+ *
+ * @return string
+ */
+function get_error_install_message() {
+	return esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' );
+}
+
+/**
  * Plugin code entry point. Singleton instance is used to maintain a common single
  * instance of the plugin throughout the current request's lifecycle.
  *
@@ -91,7 +120,19 @@ function classifai_autorun() {
 	if ( classifai_autoload() ) {
 		$plugin = \Classifai\Plugin::get_instance();
 		$plugin->enable();
+
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			require_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Command/ClassifaiCommand.php';
+		}
 	} else {
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			try {
+				\WP_CLI::error( get_error_install_message() );
+			} catch ( \WP_CLI\ExitException $e ) {
+				error_log( $e->getMessage() );
+			}
+		}
+
 		add_action( 'admin_notices', 'classifai_autoload_notice' );
 	}
 }
@@ -101,8 +142,8 @@ function classifai_autorun() {
  * Generate a notice if autoload fails.
  */
 function classifai_autoload_notice() {
-	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
-	error_log( esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' ) );
+	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', get_error_install_message() ); // @codingStandardsIgnoreLine Text is escaped in calling function already.
+	error_log( get_error_install_message() );
 }
 
 
@@ -123,7 +164,8 @@ if ( class_exists( 'Puc_v4_Factory' ) ) {
 	/*
 	 * Enable updates if we have a valid license
 	 */
-	$settings = \Classifai\get_plugin_settings();
+	$service_manager = new \Classifai\Services\ServicesManager();
+	$settings        = $service_manager->get_settings();
 
 	if ( isset( $settings['valid_license'] ) && $settings['valid_license'] ) {
 		// @codingStandardsIgnoreStart

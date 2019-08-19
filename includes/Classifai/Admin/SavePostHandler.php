@@ -24,15 +24,19 @@ class SavePostHandler {
 	 * Save Post handler only runs on admin or REST requests
 	 */
 	public function can_register() {
-		if ( is_admin() ) {
+		if ( ! get_option( 'classifai_configured', false ) ) {
+			return false;
+		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
+			return false;
+		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
+			return false;
+		} elseif ( is_admin() ) {
 			return true;
 		} elseif ( $this->is_rest_route() ) {
 			return true;
 		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
 			return false;
 		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return false;
-		} elseif ( ! get_option( 'classifai_configured', false ) ) {
 			return false;
 		} else {
 			return false;
