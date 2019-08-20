@@ -18,6 +18,8 @@ class ComputerVision extends Provider {
 	 */
 	protected $tag_url = '/vision/v2.0/tag';
 
+	protected $analyze_url = '/vision/v2.0/analyze?visualFeatures=Description,Tags';
+
 	/**
 	 * ComputerVision constructor.
 	 *
@@ -59,12 +61,53 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_alt_tags' ], 10, 2 );
+		//add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_alt_tags' ], 10, 2 );
 
 		// Only tag if setting is enabled.
 		if ( 'no' !== $this->get_settings( 'enable_image_tagging' ) ) {
-			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_img_tags' ], 10, 2 );
+			//add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_img_tags' ], 10, 2 );
 		}
+
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_items' ], 10, 2 );
+	}
+
+	public function generate_items( $metatdata, $attachment_id ) {
+
+		$settings = $this->get_settings();
+		$image_url = wp_get_attachment_image_url( $attachment_id );
+		$this->common_scan( $image_url );
+	}
+
+	public function common_scan( $image_url ) {
+		$settings = get_option( $this->get_option_name() );
+		$rtn      = false;
+
+		$request = wp_remote_post(
+			trailingslashit( $settings['url'] ) . $this->analyze_url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+					'Content-Type'              => 'application/json',
+				],
+				'body'    => '{"url":"' . $image_url . '"}',
+			]
+		);
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( isset( $response->error ) ) {
+				$rtn = new \WP_Error( 'auth', $response->error->message );
+			} else {
+				if ( $response->description ) {
+					return $response->description->captions;
+				}
+			}
+		} else {
+			$rtn = $request;
+		}
+
+		return $rtn;
+
 	}
 
 	/**
