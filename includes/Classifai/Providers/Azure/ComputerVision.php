@@ -63,7 +63,7 @@ class ComputerVision extends Provider {
 
 		// Only tag if setting is enabled.
 		if ( 'no' !== $this->get_settings( 'enable_image_tagging' ) ) {
-			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_img_tags' ], 10, 2 );
+			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_tags' ], 10, 2 );
 		}
 	}
 
@@ -88,7 +88,7 @@ class ComputerVision extends Provider {
 			 *
 			 * @return array $captions The filtered caption data.
 			 */
-			$captions = apply_filters( 'classifai_computer_vision_alt_tags', $captions );
+			$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
 			// If $captions isn't an array, don't save them.
 			if ( is_array( $captions ) ) {
 				// Save the first caption as the alt text if it passes the threshold.
@@ -148,7 +148,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return mixed
 	 */
-	public function generate_img_tags( $metadata, $attachment_id ) {
+	public function generate_image_tags( $metadata, $attachment_id ) {
 		$threshold = $this->get_settings( 'tag_threshold' );
 		$image_url = wp_get_attachment_image_url( $attachment_id );
 		$tags      = $this->get_image_tags( $image_url );
