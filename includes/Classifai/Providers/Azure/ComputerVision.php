@@ -22,7 +22,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analye API endpoint
 	 */
-	protected $analyze_url = '/vision/v1.0/analyze?visualFeatures=Description,Tags';
+	protected $analyze_url = '/vision/v1.0/analyze';
 
 	/**
 	 * ComputerVision constructor.
@@ -65,89 +65,41 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-//		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_alt_tags' ], 10, 2 );
-//
-//		// Only tag if setting is enabled.
-//		if ( 'no' !== $this->get_settings( 'enable_image_tagging' ) ) {
-//			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_tags' ], 10, 2 );
-//		}
-//		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_items' ], 10, 2 );
-
-		// Add a single filter callback to process the image in Computer Vision
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'process_image' ], 10, 2 );
 	}
 
-	public function process_image( $metatdata, $attachment_id ) {
-
-		$settings = $this->get_settings();
-		$image_url = wp_get_attachment_image_url( $attachment_id );
-		$this->common_scan( $image_url );
-	}
-
-	public function common_scan( $image_url ) {
-		$settings = get_option( $this->get_option_name() );
-		$rtn      = false;
-
-		$request = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $this->analyze_url,
-			[
-				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
-					'Content-Type'              => 'application/json',
-				],
-				'body'    => '{"url":"' . $image_url . '"}',
-			]
-		);
-
-		if ( ! is_wp_error( $request ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( isset( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
-			} else {
-				if ( $response->description ) {
-					return $response->description->captions;
-				}
-			}
-		} else {
-			$rtn = $request;
-		}
-
-		return $rtn;
-
-	}
 
 	/**
-	 * Generate the alt tags for the image being uploaded.
+	 * Process the image via Computer Vision based on the settings.
 	 *
-	 * @param array $metadata      The metadata for the image
+	 * @param array $metadata      The metadata for the image.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
 	 * @return mixed
 	 */
-	public function generate_alt_tags( $metadata, $attachment_id ) {
-		$threshold = $this->get_settings( 'caption_threshold' );
+	public function process_image( $metadata, $attachment_id ) {
 
-		$image_url = wp_get_attachment_image_url( $attachment_id );
-		$captions  = $this->scan_image( $image_url );
-		if ( ! is_wp_error( $captions ) && isset( $captions[0] ) ) {
-			/**
-			 * Filter the captions returned from the API.
-			 *
-			 * @param array $captions. The caption data.
-			 *
-			 * @return array $captions The filtered caption data.
-			 */
-			$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
-			// If $captions isn't an array, don't save them.
-			if ( is_array( $captions ) ) {
-				// Save the first caption as the alt text if it passes the threshold.
-				if ( $captions[0]->confidence * 100 > $threshold ) {
-					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+		$settings = $this->get_settings();
+		if (
+			'no' !== $settings['enable_image_tagging'] ||
+			'no' !== $settings['enable_image_captions']
+		) {
+			$image_url  = wp_get_attachment_image_url( $attachment_id );
+			$image_scan = $this->scan_image( $image_url );
+			if ( ! is_wp_error( $image_scan ) ) {
+				// Check for captions
+				if ( isset( $image_scan->description->captions ) ) {
+					// Process the captions
+					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 				}
-				// Save all the results for later.
-				update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+				// Check for tags
+				if ( isset( $image_scan->tags ) ) {
+					// Process the tags
+					$this->generate_image_tags( $image_scan->tags, $attachment_id );
+				}
 			}
 		}
+
 		return $metadata;
 	}
 
@@ -156,14 +108,14 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string $image_url Path to the uploaded image.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|object|\WP_Error
 	 */
 	protected function scan_image( $image_url ) {
-		$settings = get_option( $this->get_option_name() );
-		$rtn      = false;
+		$settings = $this->get_settings();
+		$url      = $this->prep_api_url();
 
 		$request = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $this->describe_url,
+			$url,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -178,90 +130,93 @@ class ComputerVision extends Provider {
 			if ( isset( $response->error ) ) {
 				$rtn = new \WP_Error( 'auth', $response->error->message );
 			} else {
-				if ( $response->description ) {
-					return $response->description->captions;
-				}
+				return $response;
 			}
 		} else {
 			$rtn = $request;
 		}
 
 		return $rtn;
+	}
+
+	/**
+	 * Build and return the API endpoint based on settings.
+	 *
+	 * @return string
+	 */
+	protected function prep_api_url() {
+		$settings     = $this->get_settings();
+		$api_features = [];
+		if ( 'no' !== $settings['enable_image_captions'] ) {
+			$api_features[] = 'Description';
+		}
+		if ( 'no' !== $settings['enable_image_tagging'] ) {
+			$api_features[] = 'Tags';
+		}
+		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['url'] ) . $this->analyze_url );
+		return $endpoint;
+	}
+
+	/**
+	 * Generate the alt tags for the image being uploaded.
+	 *
+	 * @param array $captions      Captions returned from the API
+	 * @param int   $attachment_id Post ID for the attachment.
+	 */
+	protected function generate_alt_tags( $captions, $attachment_id ) {
+		/**
+		 * Filter the captions returned from the API.
+		 *
+		 * @param array $captions. The caption data.
+		 *
+		 * @return array $captions The filtered caption data.
+		 */
+		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
+		// If $captions isn't an array, don't save them.
+		if ( is_array( $captions ) && ! empty( $captions ) ) {
+			// Save the first caption as the alt text if it passes the threshold.
+			if ( $captions[0]->confidence * 100 > $threshold ) {
+				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+			}
+			// Save all the results for later.
+			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+		}
 	}
 
 	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
-	 * @param array $metadata      The metadata for the image
+	 * @param array $tags          Array ot tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
 	 * @return mixed
 	 */
-	public function generate_image_tags( $metadata, $attachment_id ) {
-		$threshold = $this->get_settings( 'tag_threshold' );
-		$image_url = wp_get_attachment_image_url( $attachment_id );
-		$tags      = $this->get_image_tags( $image_url );
-		if ( ! is_wp_error( $tags ) && isset( $tags[0] ) ) {
-			/**
-			 * Filter the tags returned from the API.
-			 *
-			 * @param array $tags. The caption data.
-			 *
-			 * @return array $tags The filtered caption data.
-			 */
-			$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
-			// If $tags isn't an array, don't save them.
-			if ( is_array( $tags ) ) {
-				// Save the first caption as the alt text if it passes the threshold.
-				$custom_tags = [];
-				foreach ( $tags as $tag ) {
-					if ( $tag->confidence * 100 > $threshold ) {
-						$custom_tags[] = $tag->name;
-						wp_add_object_terms( $attachment_id, $tag->name, 'classifai-image-tags' );
-					}
+	protected function generate_image_tags( $tags, $attachment_id ) {
+		/**
+		 * Filter the tags returned from the API.
+		 *
+		 * @param array $tags. The caption data.
+		 *
+		 * @return array $tags The filtered caption data.
+		 */
+		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
+		// If $tags isn't an array, don't save them.
+		if ( is_array( $tags ) && ! empty( $tags ) ) {
+			// Save the first caption as the alt text if it passes the threshold.
+			$custom_tags = [];
+			foreach ( $tags as $tag ) {
+				if ( $tag->confidence * 100 > $threshold ) {
+					$custom_tags[] = $tag->name;
+					wp_add_object_terms( $attachment_id, $tag->name, 'classifai-image-tags' );
 				}
+			}
+			if ( ! empty( $custom_tags ) ) {
 				wp_update_term_count_now( $custom_tags, 'classifai-image-tags' );
 			}
+
+			// Save the tags for later
+			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
 		}
-		return $metadata;
-	}
-
-	/**
-	 * Scan the image and return the tags
-	 *
-	 * @param string $image_url The image being uploaded.
-	 *
-	 * @return array|bool|\WP_Error
-	 */
-	protected function get_image_tags( $image_url ) {
-		$settings = get_option( $this->get_option_name() );
-		$rtn      = false;
-
-		$request = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $this->tag_url,
-			[
-				'headers' => [
-					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
-					'Content-Type'              => 'application/json',
-				],
-				'body'    => '{"url":"' . $image_url . '"}',
-			]
-		);
-
-		if ( ! is_wp_error( $request ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( isset( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
-			} else {
-				if ( $response->tags ) {
-					return $response->tags;
-				}
-			}
-		} else {
-			$rtn = $request;
-		}
-
-		return $rtn;
 	}
 
 	/**
@@ -290,6 +245,19 @@ class ComputerVision extends Provider {
 			[
 				'label_for'  => 'api_key',
 				'input_type' => 'password',
+			]
+		);
+		add_settings_field(
+			'enable-image-captions',
+			esc_html__( 'Automatically Caption Images', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_image_captions',
+				'input_type'    => 'checkbox',
+				'default_value' => true,
+				'description'   => __( 'Uploaded images will be auto-captioned', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -369,6 +337,9 @@ class ComputerVision extends Provider {
 				'error'
 			);
 		}
+
+		$caption_enabled                       = isset( $settings['enable_image_captions'] ) ? '1' : 'no';
+		$new_settings['enable_image_captions'] = $caption_enabled;
 
 		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
