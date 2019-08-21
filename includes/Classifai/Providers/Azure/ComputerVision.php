@@ -8,16 +8,6 @@ namespace Classifai\Providers\Azure;
 use Classifai\Providers\Provider;
 
 class ComputerVision extends Provider {
-	/**
-	 * @var string URL fragment to the describe (caption) API endpoint.
-	 */
-	protected $describe_url = 'vision/v1.0/describe?maxCandidates=3';
-
-	/**
-	 * @var string string URL fragment to the tag API endoint.
-	 */
-	protected $tag_url = '/vision/v2.0/tag';
-
 
 	/**
 	 * @var string URL fragment to the analye API endpoint
