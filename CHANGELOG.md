@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.4.0] - TBD
+### Added
+- Image tagging via Azure Computer Vision (props @ryanwelcher via #125)
+- Hooks to catch alt text and image tags being returned from Azure (props @ryanwelcher via #125)
+- Plugin debug information within WordPress's Site Health Info screen (props @johnwatkins0 via #108)
+
+### Changed
+- Enable comma delimited list of Post IDs in WP CLI command for Watson NLU bulk language processing (props @adamsilverstein via #55)
+
+### Fixed
+- Provide backup behavior when full-sized image is greater than the maximum size accepted by Azure Computer Vision (props @johnwatkins0 via #110)
+
 ## [1.3.2] - 2019-07-24
 ### Fixed
 - Only run Watson NLU when it's fully configured (props @helen, @eflorea via #103)
@@ -57,6 +69,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/master...develop
+[1.4.0]: https://github.com/10up/classifai/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/10up/classifai/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/10up/classifai/compare/1.3.0...1.3.1
 [1.3.0]: https://github.com/10up/classifai/compare/1.2.1...1.3.0
