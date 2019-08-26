@@ -164,6 +164,7 @@ class ComputerVision extends Provider {
 		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
 		// If $captions isn't an array, don't save them.
 		if ( is_array( $captions ) && ! empty( $captions ) ) {
+			$threshold = $this->get_settings( 'caption_threshold' );
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
@@ -192,16 +193,18 @@ class ComputerVision extends Provider {
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
 		// If $tags isn't an array, don't save them.
 		if ( is_array( $tags ) && ! empty( $tags ) ) {
+			$threshold = $this->get_settings( 'tag_threshold' );
+			$taxonomy  = $this->get_settings( 'image_tag_taxonomy' );
 			// Save the first caption as the alt text if it passes the threshold.
 			$custom_tags = [];
 			foreach ( $tags as $tag ) {
 				if ( $tag->confidence * 100 > $threshold ) {
 					$custom_tags[] = $tag->name;
-					wp_add_object_terms( $attachment_id, $tag->name, 'classifai-image-tags' );
+					wp_add_object_terms( $attachment_id, $tag->name, $taxonomy );
 				}
 			}
 			if ( ! empty( $custom_tags ) ) {
-				wp_update_term_count_now( $custom_tags, 'classifai-image-tags' );
+				wp_update_term_count_now( $custom_tags, $taxonomy );
 			}
 
 			// Save the tags for later
@@ -289,6 +292,25 @@ class ComputerVision extends Provider {
 				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
+
+		// What taxonomy should we tag images with?
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$options               = [];
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$options[ $name ] = $taxonomy->label;
+		}
+		add_settings_field(
+			'image-tag-taxonomy',
+			esc_html__( 'Tag Taxonomy', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'   => 'image_tag_taxonomy',
+				'options'     => $options,
+				'description' => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -346,6 +368,10 @@ class ComputerVision extends Provider {
 			$new_settings['tag_threshold'] = 75;
 		}
 
+		if ( isset( $settings['image_tag_taxonomy'] ) && taxonomy_exists( $settings['image_tag_taxonomy'] ) ) {
+			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
+		}
+
 		return $new_settings;
 	}
 
@@ -360,7 +386,7 @@ class ComputerVision extends Provider {
 	protected function authenticate_credentials( $url, $api_key ) {
 		$rtn     = false;
 		$request = wp_remote_post(
-			trailingslashit( $url ) . $this->describe_url,
+			trailingslashit( $url ) . $this->analyze_url,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $api_key,
