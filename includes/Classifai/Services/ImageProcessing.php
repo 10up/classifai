@@ -28,6 +28,7 @@ class ImageProcessing extends Service {
 	public function init() {
 		parent::init();
 		$this->register_image_tags_taxonomy();
+		add_filter( 'attachment_fields_to_edit', [ $this, 'custom_fields_edit' ] );
 	}
 
 	/**
@@ -37,5 +38,21 @@ class ImageProcessing extends Service {
 		$tax = new ImageTagTaxonomy();
 		$tax->register();
 		register_taxonomy_for_object_type( 'classifai-image-tags', 'attachment' );
+	}
+
+	/**
+	 * Removes the UI on attachment modals for all taxonomies introduced by this plugin.
+	 *
+	 * @param array $form_fields The forms fields being rendered on the modal.
+	 *
+	 * @return mixed
+	 */
+	public function custom_fields_edit( $form_fields ) {
+		unset( $form_fields['classifai-image-tags'] );
+		unset( $form_fields['watson-category'] );
+		unset( $form_fields['watson-keyword'] );
+		unset( $form_fields['watson-concept'] );
+		unset( $form_fields['watson-entity'] );
+		return $form_fields;
 	}
 }
