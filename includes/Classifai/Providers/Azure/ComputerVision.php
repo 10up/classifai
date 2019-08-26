@@ -168,6 +168,14 @@ class ComputerVision extends Provider {
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+			} else {
+				/**
+				 * Fire an action if there were no captions added.
+				 *
+				 * @param array $tags.   The caption data.
+				 * @param int $threshold The caption_threshold setting.
+				 */
+				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
 			}
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
@@ -186,9 +194,9 @@ class ComputerVision extends Provider {
 		/**
 		 * Filter the tags returned from the API.
 		 *
-		 * @param array $tags. The caption data.
+		 * @param array $tags. The image tag data.
 		 *
-		 * @return array $tags The filtered caption data.
+		 * @return array $tags The filtered image tags.
 		 */
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
 		// If $tags isn't an array, don't save them.
@@ -205,6 +213,14 @@ class ComputerVision extends Provider {
 			}
 			if ( ! empty( $custom_tags ) ) {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
+			} else {
+				/**
+				 * Fire an action if there were no tags added.
+				 *
+				 * @param array $tags.   The image tag data.
+				 * @param int $threshold The tag_threshold setting.
+				 */
+				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}
 
 			// Save the tags for later
