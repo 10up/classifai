@@ -10,7 +10,7 @@ use Classifai\Providers\Provider;
 class ComputerVision extends Provider {
 
 	/**
-	 * @var string URL fragment to the analye API endpoint
+	 * @var string URL fragment to the analyze API endpoint
 	 */
 	protected $analyze_url = '/vision/v1.0/analyze';
 
