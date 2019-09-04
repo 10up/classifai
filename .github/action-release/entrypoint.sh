@@ -10,6 +10,11 @@ if [[ -z "$GITHUB_TOKEN" ]]; then
 	exit 1
 fi
 
+if [[ -z "$VERSION_FILE" ]]; then
+	echo "Set the VERSION_FILE env variable"
+	exit 1
+fi
+
 TMP="/github/tmp"
 mkdir $TMP
 
@@ -38,14 +43,15 @@ rsync -r "$GITHUB_WORKSPACE/" release/ --exclude-from=".github/action-release/rs
 # Put .git folder back
 cp -a "$TMP/.git" release/
 
-echo "ℹ︎ Committing files"
-# Commit everything
+echo "ℹ︎ Modifying version string"
 cd release
 
+# replace -dev' with ' in the specified file that contains the version number
+sed -i "s/-dev'/'/g" "$VERSION_FILE"
+
+echo "ℹ︎ Committing files"
 # Explicit add command because -a doesn't pick up new files
 git add .
-
-git status
 
 # Skipping pre-commit hook because it's not installed in stable
 git commit -m "Committing built version of $GITHUB_SHA" --no-verify

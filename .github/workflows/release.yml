@@ -22,3 +22,4 @@ jobs:
       uses: ./.github/action-release/
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VERSION_FILE: config.php
