@@ -3,7 +3,7 @@
 namespace Classifai\Admin;
 
 /**
- * Classifies Posts based on the current Classifai configuration.
+ * Classifies Posts based on the current ClassifAI configuration.
  */
 class SavePostHandler {
 
@@ -24,7 +24,13 @@ class SavePostHandler {
 	 * Save Post handler only runs on admin or REST requests
 	 */
 	public function can_register() {
-		if ( is_admin() ) {
+		if ( ! get_option( 'classifai_configured', false ) ) {
+			return false;
+		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
+			return false;
+		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
+			return false;
+		} elseif ( is_admin() ) {
 			return true;
 		} elseif ( $this->is_rest_route() ) {
 			return true;
@@ -32,15 +38,13 @@ class SavePostHandler {
 			return false;
 		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
 			return false;
-		} elseif ( ! get_option( 'classifai_configured', false ) ) {
-			return false;
 		} else {
 			return false;
 		}
 	}
 
 	/**
-	 * If current post type support is enabled in Classifai settings, it
+	 * If current post type support is enabled in ClassifAI settings, it
 	 * is tagged using the IBM Watson classification result.
 	 *
 	 * Skips classification if running under the Gutenberg Metabox
@@ -73,7 +77,7 @@ class SavePostHandler {
 	 */
 	public function classify( $post_id ) {
 		/**
-		 * Filter whether Classifai should classify a post.
+		 * Filter whether ClassifAI should classify a post.
 		 *
 		 * Default is true, return false to skip classifying a post.
 		 *

@@ -8,7 +8,7 @@ use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
 
 /**
- * ClassifaiCommand is the command line interface of the Classifai plugin.
+ * ClassifaiCommand is the command line interface of the ClassifAI plugin.
  * It provides subcommands to test classification results and batch
  * classify posts using the IBM Watson NLU API.
  */
@@ -16,7 +16,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 
 	/**
-	 * Batch classifies post(s) using the current Classifai configuration.
+	 * Batch classifies post(s) using the current ClassifAI configuration.
 	 *
 	 * ## Options
 	 *
@@ -234,8 +234,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	}
 
 	/**
-	 * Restores the plugin configuration to factory defaults. IBM Watson
-	 * credentials must be reentered after this command.
+	 * Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
@@ -250,7 +249,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		\Classifai\reset_plugin_settings();
 
 		\WP_CLI::success(
-			'Defaults restored successfully. Please update the IBM Watson credentials.'
+			'Defaults restored successfully. Please update all your API credentials.'
 		);
 	}
 
@@ -310,3 +309,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 }
 
+try {
+	\WP_CLI::add_command( 'classifai', __NAMESPACE__ . '\\ClassifaiCommand' );
+} catch ( \Exception $e ) {
+	error_log( $e->getMessage() );
+}

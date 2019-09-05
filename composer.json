@@ -7,8 +7,11 @@
       "email": "info@10up.com"
     }
   ],
+  "type": "wordpress-plugin",
+  "license": "MIT",
   "require": {
-    "php": ">=7.0"
+    "php": ">=7.0",
+    "yahnis-elsts/plugin-update-checker": "^4.4"
   },
   "autoload": {
     "psr-4": {
