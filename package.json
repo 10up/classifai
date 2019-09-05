@@ -1,12 +1,14 @@
 {
   "name": "classifai",
   "version": "1.1.0",
+  "license": "MIT",
+  "repository": "https://github.com/10up/classifai/",
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "scripts": {
     "build": "webpack --mode=production",
     "dev": "webpack --watch --mode=development",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
-    "tests": "./vendor/bin/phpunit",
+    "test": "./vendor/bin/phpunit",
     "makepot": "wpi18n makepot && echo '.pot file updated'"
   },
   "husky": {
