@@ -111,18 +111,16 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string $full_image The path to the full-sized image source file.
 	 * @param string $full_url   The URL of the full-sized image.
-	 * @param array  $intermediate_sizes Intermediate size data from attachment meta.
+	 * @param array  $sizes      Intermediate size data from attachment meta.
 	 * @return string|null The image URL, or null if no acceptable image found.
 	 *
 	 * @since 1.4.0
 	 */
-	public function get_largest_acceptable_image_url( $full_image, $full_url, $intermediate_sizes ) {
+	public function get_largest_acceptable_image_url( $full_image, $full_url, $sizes ) {
 		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 		if ( $file_size && $this->get_max_filesize() >= $file_size ) {
 			return $full_url;
 		}
-
-		$sizes = $intermediate_sizes['sizes'];
 
 		// Sort the image sizes in order of total width + height, descending.
 		$sort_sizes = function( $size_1, $size_2 ) {
