@@ -26,6 +26,7 @@ tmtags
 Session.vim
 *.swp
 .~lock*
+.vscode
 
 # Mac OSX
 .DS_Store
