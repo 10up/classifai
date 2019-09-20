@@ -56,8 +56,68 @@ class ComputerVision extends Provider {
 	 */
 	public function register() {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'process_image' ], 10, 2 );
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 	}
 
+	/**
+	 * Adds a meta box for rescanning options if the settings are configured
+	 */
+	public function setup_attachment_meta_box() {
+		add_meta_box(
+			'attachment_meta_box',
+			__( 'Azure Computer Vision Scan' ),
+			[ $this, 'attachment_data_meta_box' ],
+			'attachment',
+			'side',
+			'high'
+		);
+	}
+
+	/**
+	 * Display meta data
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function attachment_data_meta_box( $post ) {
+		$captions = get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ? __( 'Rescan Captions', 'classifai' ) : __( 'Generate Captions', 'classifai' );
+		$tags     = get_post_meta( $post->ID, 'classifai_computer_vision_image_tags', true ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		?>
+		<div class="misc-publishing-actions">
+			<div class="misc-pub-section">
+				<label for="rescan-captions">
+					<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
+					<?php echo esc_html( $captions ); ?>
+				</label>
+			</div>
+			<div class="misc-pub-section">
+				<label for="rescan-captions">
+					<input type="checkbox" value="yes" id="rescan-captions" name="rescan-tags"/>
+					<?php echo esc_html( $tags ); ?>
+				</label>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 *
+	 * @param int $attachment_id Post id for the attachment
+	 */
+	public function maybe_rescan_image( $attachment_id ) {
+		$image_url  = wp_get_attachment_image_url( $attachment_id );
+		$image_scan = $this->scan_image( $image_url );
+		if ( ! is_wp_error( $image_scan ) ) {
+			// Are we updating the captions?
+			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+			}
+			// Are we updating the tags?
+			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+				$this->generate_image_tags( $image_scan->tags, $attachment_id );
+			}
+		}
+	}
 
 	/**
 	 * Process the image via Computer Vision based on the settings.
