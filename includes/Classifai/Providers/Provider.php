@@ -171,7 +171,6 @@ abstract class Provider {
 		<select
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
-			class="<?php echo esc_attr( $class ); ?>"
 			>
 			<?php if ( count( $options ) > 1 ) : ?>
 				<option><?php esc_html_e( 'Please Choose', 'classifai' ); ?></option>
