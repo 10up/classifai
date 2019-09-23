@@ -90,11 +90,15 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_tagging'] ||
 			'no' !== $settings['enable_image_captions']
 		) {
-			$image_url = $this->get_largest_acceptable_image_url(
-				get_attached_file( $attachment_id ),
-				wp_get_attachment_url( $attachment_id, 'full' ),
-				$metadata['sizes']
-			);
+			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+				$image_url = $this->get_largest_acceptable_image_url(
+					get_attached_file( $attachment_id ),
+					wp_get_attachment_url( $attachment_id, 'full' ),
+					$metadata['sizes']
+				);
+			} else {
+				$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+			}
 
 			if ( ! empty( $image_url ) ) {
 				$image_scan = $this->scan_image( $image_url );
