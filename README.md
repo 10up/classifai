@@ -3,7 +3,7 @@
 
 [![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.2%20tested-success.svg) [![MIT License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
-## Table of Contents  
+## Table of Contents
 * [Features](#features)
 * [Requirements](#requirements)
 * [Installation](#installation)
@@ -72,7 +72,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
 
-Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.  
+Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 #### 1. Sign up for Azure services
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
@@ -96,20 +96,28 @@ Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/
 
 `--post_type=post_type`
 
-Batch classify posts belonging to this post type. If `false` or absent relies on `post_ids` in args
+Batch classify posts belonging to this post type. If `false` or absent relies on `post_ids`.
 
-default: `false`    
-options:    
-- any post type name    
+default: `false`
+options:
+- any post type name
 - `false`, if args contains `post_ids`
+
+
+`{ post_ids }`
+
+A comma delimited list of post ids to classify. Used if `post_type` is false or absent.
+
+default: `true`
+
 
 `--limit=limit`
 
 Limit classification to N posts.
 
-default: `false`    
-options:    
-- `false`, no limit    
+default: `false`
+options:
+- `false`, no limit
 - `N`, max number of posts to classify
 
 `--link=link`
@@ -130,13 +138,13 @@ Directly classify text using Watson NLU.
 
 Enables NLU category feature
 
-default: `true`    
+default: `true`
 
 `--keyword=bool`
 
 Enables NLU keyword feature
 
-default: `true`    
+default: `true`
 
 `--concept=bool`
 
@@ -154,10 +162,10 @@ default: `true`
 
 Path to input file or URL
 
-default: `false`    
-options:    
-- path to local file    
-- path to remote URL    
+default: `false`
+options:
+- path to local file
+- path to remote URL
 - `false`, uses args[0] instead
 
 `--only-normalize=<bool>`
