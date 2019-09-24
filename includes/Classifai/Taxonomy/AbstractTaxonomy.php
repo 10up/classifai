@@ -77,15 +77,27 @@ abstract class AbstractTaxonomy {
 		$visibility = $this->get_visibility();
 
 		return array(
-			'labels'            => $this->get_labels(),
-			'hierarchical'      => false,
-			'show_ui'           => $visibility,
-			'show_in_rest'      => $visibility,
-			'show_admin_column' => $visibility,
-			'query_var'         => true,
-			'rewrite'           => $this->get_rewrite_option(),
+			'labels'                => $this->get_labels(),
+			'hierarchical'          => false,
+			'show_ui'               => $visibility,
+			'show_in_rest'          => $visibility,
+			'show_admin_column'     => $visibility,
+			'query_var'             => true,
+			'rewrite'               => $this->get_rewrite_option(),
+			'update_count_callback' => $this->update_count_callback(),
 		);
 	}
+
+	/**
+	 * Return the default value for the update_count_callback param
+	 *
+	 * @return string
+	 */
+	public function update_count_callback() {
+		return '';
+	}
+
+
 
 	/**
 	 * Get the labels for the taxonomy.
