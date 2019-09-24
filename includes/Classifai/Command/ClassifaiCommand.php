@@ -21,7 +21,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<post_ids>]
-	 * : Comma delimeted Post IDs to classify
+	 * : Comma-delimited list of post IDs to classify
 	 *
 	 * [--post_type=<post_type>]
 	 * : Batch classify posts belonging to this post type. If false relies on post_ids in args
