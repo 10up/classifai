@@ -72,7 +72,7 @@ class ComputerVision extends Provider {
 		 *
 		 * @param int Default 4MB.
 		 */
-		return apply_filters( 'classifai_computervision_max_filesize', 4000000 ); // 4MB default.
+		return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
 	}
 
 	/**
