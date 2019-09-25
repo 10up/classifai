@@ -216,11 +216,11 @@ class ServicesManager {
 	 * Helper to return the $menu title
 	 */
 	protected function get_menu_title() {
-		$is_setup         = get_option( 'classifai_configured' );
-		$this->title      = esc_html__( 'ClassifAI', 'classifai' );
-		$this->menu_title = $this->title;
+		$registration_settings = get_option( 'classifai_settings' );
+		$this->title           = esc_html__( 'ClassifAI', 'classifai' );
+		$this->menu_title      = $this->title;
 
-		if ( ! $is_setup ) {
+		if ( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] ) {
 			/*
 			 * Translators: Main title.
 			 */
