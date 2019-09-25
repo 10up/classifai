@@ -126,22 +126,22 @@ class ServicesManager {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = [];
-		if ( isset( $settings['email'] ) && isset( $settings['license_key'] ) ) {
-			if ( $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
-				$new_settings['valid_license'] = true;
-				$new_settings['email']         = sanitize_text_field( $settings['email'] );
-				$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
-			} else {
-				$new_settings['valid_license'] = false;
-				$new_settings['email']         = '';
-				$new_settings['license_key']   = '';
-				add_settings_error(
-					'registration',
-					'classifai-registration',
-					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
-					'error'
-				);
-			}
+		if ( isset( $settings['email'] )
+			&& isset( $settings['license_key'] )
+			&& $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
+			$new_settings['valid_license'] = true;
+			$new_settings['email']         = sanitize_text_field( $settings['email'] );
+			$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
+		} else {
+			$new_settings['valid_license'] = false;
+			$new_settings['email']         = isset( $settings['email'] ) ? sanitize_text_field( $settings['email'] ) : '';
+			$new_settings['license_key']   = isset( $settings['license_key'] ) ? sanitize_text_field( $settings['license_key'] ) : '';
+			add_settings_error(
+				'registration',
+				'classifai-registration',
+				esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
+				'error'
+			);
 		}
 
 		return $new_settings;
