@@ -38,6 +38,7 @@ rsync -r "$GITHUB_WORKSPACE/" release/ --exclude-from=".github/action-release/rs
 # Put .git folder back
 cp -a "$TMP/.git" release/
 
+echo "ℹ︎ Committing files"
 cd release
 
 # Explicit add command because -a doesn't pick up new files
