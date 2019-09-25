@@ -56,6 +56,7 @@ class ComputerVision extends Provider {
 	 */
 	public function register() {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'process_image' ], 10, 2 );
+		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
 
@@ -491,5 +492,34 @@ class ComputerVision extends Provider {
 		}
 
 		return $rtn;
+	}
+
+	/**
+	 * Filter the SQL clauses of an attachment query to include tags and alt text.
+	 *
+	 * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
+	 *                       DISTINCT, fields (SELECT), and LIMITS clauses.
+	 * @return array The modified clauses.
+	 */
+	public function filter_attachment_query_keywords( $clauses ) {
+		global $wpdb;
+		remove_filter( 'posts_clauses', __FUNCTION__ );
+
+		if ( ! preg_match( "/\({$wpdb->posts}.post_content (NOT LIKE|LIKE) (\'[^']+\')\)/", $clauses['where'] ) ) {
+			return $clauses;
+		}
+
+		// Add a LEFT JOIN of the postmeta table so we don't trample existing JOINs.
+		$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS classifai_postmeta ON ( {$wpdb->posts}.ID = classifai_postmeta.post_id AND ( classifai_postmeta.meta_key = 'classifai_computer_vision_image_tags' OR classifai_postmeta.meta_key = '_wp_attachment_image_alt' ) )";
+
+		$clauses['groupby'] = "{$wpdb->posts}.ID";
+
+		$clauses['where'] = preg_replace(
+			"/\({$wpdb->posts}.post_content (NOT LIKE|LIKE) (\'[^']+\')\)/",
+			'$0 OR ( classifai_postmeta.meta_value $1 $2 )',
+			$clauses['where']
+		);
+
+		return $clauses;
 	}
 }
