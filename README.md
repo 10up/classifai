@@ -71,6 +71,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - The image must be presented in JPEG, PNG, GIF, or BMP format
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
+- The file must be externally accessible via URL (i.e. local sites and setups that block direct file access will not work out of the box)
 
 Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
