@@ -394,7 +394,6 @@ class ComputerVision extends Provider {
 			[
 				'label_for'   => 'image_tag_taxonomy',
 				'options'     => $options,
-				'description' => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
 	}
