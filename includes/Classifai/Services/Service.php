@@ -57,6 +57,8 @@ abstract class Service {
 			}
 			$this->register_providers();
 		}
+
+		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
 	}
 
 	/**
@@ -116,5 +118,33 @@ abstract class Service {
 			</form>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Adds plugin debug information to be printed on the Site Health screen.
+	 *
+	 * @param array $debug_information Array of associative arrays corresponding to lines of debug information.
+	 * @return array Array with lines added.
+	 * @since 1.4.0
+	 */
+	public function add_service_debug_information( $debug_information ) {
+		return array_merge( $debug_information, $this->get_service_debug_information() );
+	}
+
+	/**
+	 * Provides debug information for the service.
+	 *
+	 * @return array Array of associative arrays respresenting lines of debug information.
+	 * @since 1.4.0
+	 */
+	public function get_service_debug_information() {
+		$make_line = function( $provider ) {
+			return [
+				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
+				'value' => $provider->get_provider_debug_information(),
+			];
+		};
+
+		return array_map( $make_line, $this->provider_classes );
 	}
 }

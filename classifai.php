@@ -6,8 +6,8 @@
  * Version:         1.3.2
  * Author:          10up
  * Author URI:      https://10up.com
- * License:         MIT
- * License URI:     https://spdx.org/licenses/MIT.html
+ * License:         GPLv2
+ * License URI:     https://spdx.org/licenses/GPL-2.0-or-later.html
  * Text Domain:     classifai
  * Domain Path:     /languages
  */
