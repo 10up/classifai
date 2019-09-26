@@ -109,7 +109,7 @@ abstract class Provider {
 	 *
 	 * @param string|bool|mixed $index Optional. Name of the settings option index.
 	 *
-	 * @return array
+	 * @return string|array|mixed
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = [];
@@ -159,6 +159,37 @@ abstract class Provider {
 			class="<?php echo esc_attr( $class ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
+	 * Renders a select menu
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_select( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		// Check for a default value
+		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
+		$options = isset( $args['options'] ) ? $args['options'] : [];
+		?>
+		<select
+			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			>
+			<?php if ( count( $options ) > 1 ) : ?>
+				<option><?php esc_html_e( 'Please Choose', 'classifai' ); ?></option>
+			<?php endif; ?>
+			<?php foreach ( $options as $value => $name ) : ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved, $value ); ?>>
+					<?php echo esc_attr( $name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
