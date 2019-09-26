@@ -140,7 +140,7 @@ abstract class Service {
 	public function get_service_debug_information() {
 		$make_line = function( $provider ) {
 			return [
-				'label' => sprintf( '%s - %s', $this->get_display_name(), $provider->get_provider_name() ),
+				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
 				'value' => $provider->get_provider_debug_information(),
 			];
 		};

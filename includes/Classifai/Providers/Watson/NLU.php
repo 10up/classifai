@@ -611,7 +611,7 @@ class NLU extends Provider {
 			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
 			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
-			__( 'Features', 'classifai' )     => wp_json_encode( $settings['features'] ?? '' ),
+			__( 'Features', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
 		];
 	}
 }
