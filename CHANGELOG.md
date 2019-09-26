@@ -7,14 +7,17 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [1.4.0] - TBD
 ### Added
 - Image tagging via Azure Computer Vision (props @ryanwelcher via #125)
+- Search images by alt text and tags (props @helen via #134)
 - Hooks to catch alt text and image tags being returned from Azure (props @ryanwelcher via #125)
 - Plugin debug information within WordPress's Site Health Info screen (props @johnwatkins0 via #108)
+- Show a notice if you're running a development version of the plugin (props @helen via #144)
 
 ### Changed
 - Enable comma delimited list of Post IDs in WP CLI command for Watson NLU bulk language processing (props @adamsilverstein via #55)
 
 ### Fixed
 - Provide backup behavior when full-sized image is greater than the maximum size accepted by Azure Computer Vision (props @johnwatkins0 via #110)
+- Don't show the admin menu alert when NLU is unconfigured (props @helen via #142)
 
 ## [1.3.2] - 2019-07-24
 ### Fixed
