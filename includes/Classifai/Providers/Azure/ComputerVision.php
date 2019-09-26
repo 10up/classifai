@@ -439,7 +439,7 @@ class ComputerVision extends Provider {
 		$caption_enabled                       = isset( $settings['enable_image_captions'] ) ? '1' : 'no';
 		$new_settings['enable_image_captions'] = $caption_enabled;
 
-		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
+		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
@@ -448,7 +448,7 @@ class ComputerVision extends Provider {
 		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
 		$new_settings['enable_image_tagging'] = $tag_enabled;
 
-		if ( is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
+		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
 			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
 		} else {
 			$new_settings['tag_threshold'] = 75;
@@ -492,6 +492,26 @@ class ComputerVision extends Provider {
 		}
 
 		return $rtn;
+	}
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
+	 * @since 1.4.0
+	 */
+	public function get_provider_debug_information( $settings = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+
+		return [
+			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
+			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
+		];
 	}
 
 	/**
