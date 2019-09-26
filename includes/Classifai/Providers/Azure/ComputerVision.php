@@ -336,7 +336,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
 				'default_value' => true,
-				'description'   => __( 'Uploaded images will be auto-captioned', 'classifai' ),
+				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -362,7 +362,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
 				'default_value' => true,
-				'description'   => __( 'Uploaded images will be auto-tagged', 'classifai' ),
+				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -375,7 +375,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
 				'default_value' => 70,
-				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
 
@@ -394,7 +394,6 @@ class ComputerVision extends Provider {
 			[
 				'label_for'   => 'image_tag_taxonomy',
 				'options'     => $options,
-				'description' => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
 	}
