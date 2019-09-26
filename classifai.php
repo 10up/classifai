@@ -6,8 +6,8 @@
  * Version:         1.3.2
  * Author:          10up
  * Author URI:      https://10up.com
- * License:         MIT
- * License URI:     https://spdx.org/licenses/MIT.html
+ * License:         GPLv2
+ * License URI:     https://spdx.org/licenses/GPL-2.0-or-later.html
  * Text Domain:     classifai
  * Domain Path:     /languages
  */
@@ -158,7 +158,12 @@ register_activation_hook( __FILE__, 'classifai_activation' );
 classifai_autorun();
 
 // Include in case we have composer issues.
-require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+if ( file_exists( __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' ) ) {
+	require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+} else {
+	add_action( 'admin_notices', 'classifai_dev_notice' );
+	add_action( 'network_admin_notices', 'classifai_dev_notice' );
+}
 
 if ( class_exists( 'Puc_v4_Factory' ) ) {
 	/*
@@ -184,5 +189,19 @@ if ( class_exists( 'Puc_v4_Factory' ) ) {
 			}
 		);
 		// @codingStandardsIgnoreEnd
+	}
+}
+
+/**
+ * Show dev version notice on ClassifAI pages if necessary.
+ */
+function classifai_dev_notice() {
+	if ( 0 === strpos( get_current_screen()->parent_base, 'classifai' ) ) {
+		?>
+		<div class="notice notice-warning">
+		<?php /* translators: %1$s: CLI install commands, %2$s: classifai url */ ?>
+		<p><?php echo wp_kses_post( sprintf( __( 'You appear to be running a development version of ClassifAI. Certain features may not work correctly without running %1$s. If you&rsquo;re not sure what this means, you may want to <a href="%2$s">download and install</a> the stable version of ClassifAI instead.', 'classifai' ), '<code>composer install && npm install && npm run build</code>', 'https://classifaiplugin.com/' ) ); ?></p>
+		</div>
+		<?php
 	}
 }

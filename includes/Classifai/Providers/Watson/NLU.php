@@ -552,6 +552,8 @@ class NLU extends Provider {
 	 *
 	 * @return bool
 	 * @since  1.2
+	 *
+	 * @todo Is this function supposed to be here?
 	 */
 	public function check_license_key( $email, $license_key ) {
 
@@ -577,4 +579,39 @@ class NLU extends Provider {
 		return false;
 	}
 
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
+	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
+	 * @return string|array
+	 * @since 1.4.0
+	 */
+	public function get_provider_debug_information( $settings = null, $configured = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		if ( is_null( $configured ) ) {
+			$configured = get_option( 'classifai_configured' );
+		}
+
+		$settings_post_types = $settings['post_types'] ?? [];
+		$post_types          = array_filter(
+			array_keys( $settings_post_types ),
+			function( $post_type ) use ( $settings_post_types ) {
+				return 1 === intval( $settings_post_types[ $post_type ] );
+			}
+		);
+
+		$credentials = $settings['credentials'] ?? [];
+
+		return [
+			__( 'Configured', 'classifai' )   => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
+			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
+			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
+			__( 'Features', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+		];
+	}
 }

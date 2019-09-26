@@ -39,13 +39,10 @@ rsync -r "$GITHUB_WORKSPACE/" release/ --exclude-from=".github/action-release/rs
 cp -a "$TMP/.git" release/
 
 echo "ℹ︎ Committing files"
-# Commit everything
 cd release
 
 # Explicit add command because -a doesn't pick up new files
 git add .
-
-git status
 
 # Skipping pre-commit hook because it's not installed in stable
 git commit -m "Committing built version of $GITHUB_SHA" --no-verify
