@@ -61,7 +61,23 @@ class ComputerVision extends Provider {
 
 
 	/**
-	 * Process the image via Computer Vision based on the settings.
+	 * Provides the max filesize for the ComputerVision service.
+	 *
+	 * @return int
+	 *
+	 * @since 1.4.0
+	 */
+	public function get_max_filesize() {
+		/**
+		 * Filters the ComputerVision maximum allowed filesize.
+		 *
+		 * @param int Default 4MB.
+		 */
+		return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+	}
+
+	/**
+	 * Generate the alt tags for the image being uploaded.
 	 *
 	 * @param array $metadata      The metadata for the image.
 	 * @param int   $attachment_id Post ID for the attachment.
@@ -75,23 +91,76 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_tagging'] ||
 			'no' !== $settings['enable_image_captions']
 		) {
-			$image_url  = wp_get_attachment_image_url( $attachment_id );
-			$image_scan = $this->scan_image( $image_url );
-			if ( ! is_wp_error( $image_scan ) ) {
-				// Check for captions
-				if ( isset( $image_scan->description->captions ) ) {
-					// Process the captions
-					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
-				}
-				// Check for tags
-				if ( isset( $image_scan->tags ) ) {
-					// Process the tags
-					$this->generate_image_tags( $image_scan->tags, $attachment_id );
+			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+				$image_url = $this->get_largest_acceptable_image_url(
+					get_attached_file( $attachment_id ),
+					wp_get_attachment_url( $attachment_id, 'full' ),
+					$metadata['sizes']
+				);
+			} else {
+				$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+			}
+
+			if ( ! empty( $image_url ) ) {
+				$image_scan = $this->scan_image( $image_url );
+				if ( ! is_wp_error( $image_scan ) ) {
+					// Check for captions
+					if ( isset( $image_scan->description->captions ) ) {
+						// Process the captions
+						$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+					}
+					// Check for tags
+					if ( isset( $image_scan->tags ) ) {
+						// Process the tags
+						$this->generate_image_tags( $image_scan->tags, $attachment_id );
+					}
 				}
 			}
 		}
 
 		return $metadata;
+	}
+
+	/**
+	 * Retrieves the URL of the largest version of an attachment image accepted by the ComputerVision service.
+	 *
+	 * @param string $full_image The path to the full-sized image source file.
+	 * @param string $full_url   The URL of the full-sized image.
+	 * @param array  $sizes      Intermediate size data from attachment meta.
+	 * @return string|null The image URL, or null if no acceptable image found.
+	 *
+	 * @since 1.4.0
+	 */
+	public function get_largest_acceptable_image_url( $full_image, $full_url, $sizes ) {
+		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( $file_size && $this->get_max_filesize() >= $file_size ) {
+			return $full_url;
+		}
+
+		// Sort the image sizes in order of total width + height, descending.
+		$sort_sizes = function( $size_1, $size_2 ) {
+			$size_1_total = $size_1['width'] + $size_1['height'];
+			$size_2_total = $size_2['width'] + $size_2['height'];
+
+			if ( $size_1_total === $size_2_total ) {
+				return 0;
+			}
+
+			return $size_1_total > $size_2_total ? -1 : 1;
+		};
+
+		usort( $sizes, $sort_sizes );
+
+		foreach ( $sizes as $size ) {
+			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
+			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+			if ( $file_size && $this->get_max_filesize() >= $file_size ) {
+				return str_replace( basename( $full_url ), $size['file'], $full_url );
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -370,7 +439,7 @@ class ComputerVision extends Provider {
 		$caption_enabled                       = isset( $settings['enable_image_captions'] ) ? '1' : 'no';
 		$new_settings['enable_image_captions'] = $caption_enabled;
 
-		if ( is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
+		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
@@ -379,7 +448,7 @@ class ComputerVision extends Provider {
 		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
 		$new_settings['enable_image_tagging'] = $tag_enabled;
 
-		if ( is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
+		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
 			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
 		} else {
 			$new_settings['tag_threshold'] = 75;
@@ -423,6 +492,26 @@ class ComputerVision extends Provider {
 		}
 
 		return $rtn;
+	}
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
+	 * @since 1.4.0
+	 */
+	public function get_provider_debug_information( $settings = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+
+		return [
+			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
+			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
+		];
 	}
 
 	/**
