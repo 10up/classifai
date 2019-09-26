@@ -448,7 +448,7 @@ class ComputerVision extends Provider {
 		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
 		$new_settings['enable_image_tagging'] = $tag_enabled;
 
-		if ( is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
+		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
 			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
 		} else {
 			$new_settings['tag_threshold'] = 75;
