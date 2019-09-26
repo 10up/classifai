@@ -45,6 +45,15 @@ abstract class Provider {
 		$this->service               = $service;
 	}
 
+	/**
+	 * Provides the provider name.
+	 *
+	 * @return string
+	 */
+	public function get_provider_name() {
+		return $this->provider_name;
+	}
+
 	/** Returns the name of the settings section for this provider
 	 *
 	 * @return string
@@ -100,7 +109,7 @@ abstract class Provider {
 	 *
 	 * @param string|bool|mixed $index Optional. Name of the settings option index.
 	 *
-	 * @return array
+	 * @return string|array|mixed
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = [];
@@ -155,6 +164,37 @@ abstract class Provider {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
+
+	/**
+	 * Renders a select menu
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_select( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		// Check for a default value
+		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
+		$options = isset( $args['options'] ) ? $args['options'] : [];
+		?>
+		<select
+			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			>
+			<?php if ( count( $options ) > 1 ) : ?>
+				<option><?php esc_html_e( 'Please Choose', 'classifai' ); ?></option>
+			<?php endif; ?>
+			<?php foreach ( $options as $value => $name ) : ?>
+				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved, $value ); ?>>
+					<?php echo esc_attr( $name ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
 	/**
 	 * Set up the fields for each section.
 	 */
@@ -171,4 +211,12 @@ abstract class Provider {
 		// TODO: Implement sanitize_settings() method.
 		return $settings;
 	}
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
+	 * @since 1.4.0
+	 */
+	abstract public function get_provider_debug_information();
 }

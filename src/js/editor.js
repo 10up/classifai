@@ -15,7 +15,7 @@ subscribe( () => {
 		if ( meta._classifai_error ) {
 			showingNotice = true;
 			const error = JSON.parse( meta._classifai_error );
-			dispatch( 'core/notices' ).createErrorNotice( 'Failed to classify content with the IBM Watson NLU API. Error: ' + error.code + ' - ' + error.message );
+			dispatch( 'core/notices' ).createErrorNotice( `Failed to classify content with the IBM Watson NLU API. Error: ${ error.code } - ${ error.message }` );
 			saveHappened = false;
 			showingNotice = false;
 		}
