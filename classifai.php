@@ -200,7 +200,7 @@ function classifai_dev_notice() {
 		?>
 		<div class="notice notice-warning">
 		<?php /* translators: %1$s: CLI install commands, %2$s: classifai url */ ?>
-		<p><?php echo wp_kses_post( sprintf( __( 'You appear to be running a development version of ClassifAI. Certain features may not work correctly without running %1$s. If you&rsquo;re not sure what this means, you may want to <a href="%2$s">download and install</a> the stable version of ClassifAI instead.', 'distributor' ), '<code>composer install && npm install && npm run build</code>', 'https://classifaiplugin.com/' ) ); ?></p>
+		<p><?php echo wp_kses_post( sprintf( __( 'You appear to be running a development version of ClassifAI. Certain features may not work correctly without running %1$s. If you&rsquo;re not sure what this means, you may want to <a href="%2$s">download and install</a> the stable version of ClassifAI instead.', 'classifai' ), '<code>composer install && npm install && npm run build</code>', 'https://classifaiplugin.com/' ) ); ?></p>
 		</div>
 		<?php
 	}
