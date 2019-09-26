@@ -375,7 +375,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
 				'default_value' => 70,
-				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
 
