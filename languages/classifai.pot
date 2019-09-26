@@ -1,10 +1,10 @@
 # Copyright (C) 2019 10up
-# This file is distributed under the GPLv2 license.
+# This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.3.2\n"
+"Project-Id-Version: ClassifAI 1.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2019-07-24 21:17:35+00:00\n"
+"POT-Creation-Date: 2019-09-26 21:07:08+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -25,8 +25,21 @@ msgstr ""
 msgid "Fatal Error: Composer not setup in %"
 msgstr ""
 
-#: classifai.php:121 classifai.php:122
+#: classifai.php:109
 msgid "Error: Please run $ composer install in the classifai plugin directory."
+msgstr ""
+
+#: classifai.php:203
+#. translators: %1$s: CLI install commands, %2$s: classifai url
+msgid ""
+"You appear to be running a development version of ClassifAI. Certain "
+"features may not work correctly without running %1$s. If you&rsquo;re not "
+"sure what this means, you may want to <a href=\"%2$s\">download and "
+"install</a> the stable version of ClassifAI instead."
+msgstr ""
+
+#: includes/Classifai/Admin/DebugInfo.php:62
+msgid "Version"
 msgstr ""
 
 #: includes/Classifai/Admin/Notifications.php:44
@@ -40,32 +53,93 @@ msgstr ""
 msgid "ClassifAI requires setup"
 msgstr ""
 
-#: includes/Classifai/Providers/AWS/Comprehend.php:43
-#: includes/Classifai/Providers/Azure/ComputerVision.php:122
+#: includes/Classifai/Providers/AWS/Comprehend.php:50
+#: includes/Classifai/Providers/Azure/ComputerVision.php:308
 msgid "Endpoint URL"
 msgstr ""
 
-#: includes/Classifai/Providers/AWS/Comprehend.php:54
-#: includes/Classifai/Providers/Azure/ComputerVision.php:134
+#: includes/Classifai/Providers/AWS/Comprehend.php:61
+#: includes/Classifai/Providers/Azure/ComputerVision.php:320
 msgid "API Key"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:129
+#: includes/Classifai/Providers/Azure/ComputerVision.php:315
 msgid "e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:145
+#: includes/Classifai/Providers/Azure/ComputerVision.php:331
+msgid "Automatically Caption Images"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:339
+msgid "Uploaded images will be auto-captioned"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:344
 msgid "Caption Confidence Threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:153
+#: includes/Classifai/Providers/Azure/ComputerVision.php:352
 msgid ""
 "Minimum confidence score for automatically applied image captions, numeric "
 "value from 0-100. Recommended to be set to at least 75."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:190
+#: includes/Classifai/Providers/Azure/ComputerVision.php:357
+msgid "Automatically Tag Images"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:365
+msgid "Uploaded images will be auto-tagged"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:370
+msgid "Tag Confidence Threshold"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:378
+#: includes/Classifai/Providers/Azure/ComputerVision.php:397
+msgid ""
+"Minimum confidence score for automatically applied image tags, numeric "
+"value from 0-100. Recommended to be set to at least 75."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:390
+msgid "Tag Taxonomy"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:434
 msgid "Please enter your credentials"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:511
+msgid "Authenticated"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:511
+#: includes/Classifai/Providers/Watson/NLU.php:610
+#: includes/Classifai/Services/ServicesManager.php:363
+msgid "yes"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:511
+#: includes/Classifai/Providers/Watson/NLU.php:610
+#: includes/Classifai/Services/ServicesManager.php:363
+msgid "no"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:512
+#: includes/Classifai/Providers/Watson/NLU.php:219
+#: includes/Classifai/Providers/Watson/NLU.php:611
+msgid "API URL"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:513
+msgid "Caption threshold"
+msgstr ""
+
+#: includes/Classifai/Providers/Provider.php:185
+msgid "Please Choose"
 msgstr ""
 
 #: includes/Classifai/Providers/Watson/NLU.php:39
@@ -116,55 +190,67 @@ msgstr ""
 msgid "Concept Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:188
-msgid "API URL"
-msgstr ""
-
-#: includes/Classifai/Providers/Watson/NLU.php:200
+#: includes/Classifai/Providers/Watson/NLU.php:231
 msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:209
+#: includes/Classifai/Providers/Watson/NLU.php:240
 msgid "If your credentials do not include a username, it is typically apikey"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:214
+#: includes/Classifai/Providers/Watson/NLU.php:245
 msgid "API Key / Password"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:235
+#: includes/Classifai/Providers/Watson/NLU.php:266
 msgid "Post Types to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:359
+#: includes/Classifai/Providers/Watson/NLU.php:390
 msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:364
+#: includes/Classifai/Providers/Watson/NLU.php:395
 msgid "Enable"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:468
+#: includes/Classifai/Providers/Watson/NLU.php:499
 msgid "IBM Watson NLU Authentication Failed. Please check credentials."
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:610
+msgid "Configured"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:612
+msgid "API username"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:613
+msgid "Post types"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:614
+msgid "Features"
 msgstr ""
 
 #: includes/Classifai/Services/LanguageProcessing.php:14
 msgid "Language Processing"
 msgstr ""
 
-#: includes/Classifai/Services/ServicesManager.php:142
+#: includes/Classifai/Services/ServicesManager.php:144
 msgid "Invalid ClassifAI registration info. Please check and try again."
 msgstr ""
 
-#: includes/Classifai/Services/ServicesManager.php:159
+#: includes/Classifai/Services/ServicesManager.php:160
 msgid "Registered Email"
 msgstr ""
 
-#: includes/Classifai/Services/ServicesManager.php:172
+#: includes/Classifai/Services/ServicesManager.php:173
 msgid "Registration Key"
 msgstr ""
 
-#: includes/Classifai/Services/ServicesManager.php:180
+#: includes/Classifai/Services/ServicesManager.php:181
 msgid ""
 "Registration is 100% free and provides update notifications and upgrades "
 "inside the dashboard.<br /><a "
@@ -175,56 +261,64 @@ msgstr ""
 msgid "ClassifAI"
 msgstr ""
 
-#: includes/Classifai/Services/ServicesManager.php:228
+#: includes/Classifai/Services/ServicesManager.php:229
 #. Translators: Main title.
 msgid "ClassifAI %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:102
+#: includes/Classifai/Services/ServicesManager.php:365
+msgid "Valid license"
+msgstr ""
+
+#: includes/Classifai/Services/ServicesManager.php:370
+msgid "Email"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:114
 msgid "Search %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:103
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:115
 msgid "Popular %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:104
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:116
 msgid "All %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:105
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:117
 msgid "Edit %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:106
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:118
 msgid "Update %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:107
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:119
 msgid "Add New %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:108
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:120
 msgid "New %s Name"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:109
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:121
 msgid "Separate %s with commas"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:110
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:122
 msgid "Add or remove %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:111
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:123
 msgid "Choose from the most used %s"
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:112
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:124
 msgid "No %s found."
 msgstr ""
 
-#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:113
+#: includes/Classifai/Taxonomy/AbstractTaxonomy.php:125
 msgid "No %s found in Trash."
 msgstr ""
 
@@ -250,6 +344,14 @@ msgstr ""
 
 #: includes/Classifai/Taxonomy/EntityTaxonomy.php:37
 msgid "Watson Entities"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/ImageTagTaxonomy.php:18
+msgid "Image Tag"
+msgstr ""
+
+#: includes/Classifai/Taxonomy/ImageTagTaxonomy.php:25
+msgid "Image Tags"
 msgstr ""
 
 #: includes/Classifai/Taxonomy/KeywordTaxonomy.php:30
