@@ -336,7 +336,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
 				'default_value' => true,
-				'description'   => __( 'Uploaded images will be auto-captioned', 'classifai' ),
+				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -362,7 +362,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
 				'default_value' => true,
-				'description'   => __( 'Uploaded images will be auto-tagged', 'classifai' ),
+				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
 			]
 		);
 		add_settings_field(
