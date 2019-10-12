@@ -8,7 +8,7 @@
     }
   ],
   "type": "wordpress-plugin",
-  "license": "MIT",
+  "license": "GPLv2",
   "require": {
     "php": ">=7.0",
     "yahnis-elsts/plugin-update-checker": "^4.4"
