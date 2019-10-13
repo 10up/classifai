@@ -147,6 +147,53 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @covers \Classifai\sort_images_by_size_cb
+	 */
+	public function test_sort_images_by_size_cb() {
+		$this->assertEquals(
+			0,
+			sort_images_by_size_cb(
+				[
+					'height' => 4,
+					'width'  => 6,
+				],
+				[
+					'height' => 2,
+					'width'  => 8,
+				]
+			)
+		);
+
+		$this->assertEquals(
+			-1,
+			sort_images_by_size_cb(
+				[
+					'height' => 4,
+					'width'  => 7,
+				],
+				[
+					'height' => 2,
+					'width'  => 8,
+				]
+			)
+		);
+
+		$this->assertEquals(
+			1,
+			sort_images_by_size_cb(
+				[
+					'height' => 4,
+					'width'  => 6,
+				],
+				[
+					'height' => 2,
+					'width'  => 9,
+				]
+			)
+		);
+	}
+
+	/**
 	 * @covers \Classifai\get_largest_acceptable_image_url
 	 */
 	public function test_get_largest_acceptable_image_url() {
