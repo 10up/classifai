@@ -304,7 +304,7 @@ function get_feature_taxonomy( $feature ) {
 }
 
 /**
- * Provides the max filesize for the ComputerVision service.
+ * Provides the max filesize for the Computer Vision service.
  *
  * @since 1.4.0
  *
@@ -312,11 +312,11 @@ function get_feature_taxonomy( $feature ) {
  */
 function computer_vision_max_filesize() {
 	/**
-	 * Filters the ComputerVision maximum allowed filesize.
+	 * Filters the Computer Vision maximum allowed filesize.
 	 *
 	 * @param int Default 4MB.
 	 */
-	return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+	return apply_filters( 'classifai_computer_vision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
 }
 
 /**

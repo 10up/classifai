@@ -13,14 +13,14 @@ use function Classifai\get_largest_acceptable_image_url;
 
 /**
  * SmartCropping class.
- * Connects to ComputerVision's generateThumbnail endpoint to crop images to a region of interest.
+ * Connects to Computer Vision's generateThumbnail endpoint to crop images to a region of interest.
  *
  * @see https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail/
  * @since 1.5.0
  */
 class SmartCropping {
 	/**
-	 * The ComputerVision API path to the thumbnail generation service.
+	 * The Computer Vision API path to the thumbnail generation service.
 	 *
 	 * @since 1.5.0
 	 *
@@ -51,7 +51,7 @@ class SmartCropping {
 	 *
 	 * @since 1.5.0
 	 *
-	 * @param array $settings ComputerVision settings.
+	 * @param array $settings Computer Vision settings.
 	 */
 	public function __construct( array $settings ) {
 		$this->settings = $settings;

@@ -202,7 +202,7 @@ class HelpersTest extends \WP_UnitTestCase {
 		$set_150kb_max_filesize = function() {
 			return 150000;
 		};
-		add_filter( 'classifai_computervision_max_filesize', $set_150kb_max_filesize );
+		add_filter( 'classifai_computer_vision_max_filesize', $set_150kb_max_filesize );
 
 		$url = get_largest_acceptable_image_url(
 			get_attached_file( $attachment ),
@@ -221,12 +221,12 @@ class HelpersTest extends \WP_UnitTestCase {
 		);
 		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/2004-07-22-DSC_0008.jpg', date( 'Y' ), date( 'm' ) ), $url );
 
-		remove_filter( 'classifai_computervision_max_filesize', $set_150kb_max_filesize );
+		remove_filter( 'classifai_computer_vision_max_filesize', $set_150kb_max_filesize );
 
 		$set_1kb_max_filesize = function() {
 			return 1000;
 		};
-		add_filter( 'classifai_computervision_max_filesize', $set_1kb_max_filesize );
+		add_filter( 'classifai_computer_vision_max_filesize', $set_1kb_max_filesize );
 
 		$url = get_largest_acceptable_image_url(
 			get_attached_file( $attachment ),
@@ -236,6 +236,6 @@ class HelpersTest extends \WP_UnitTestCase {
 		);
 		$this->assertNull( $url );
 
-		remove_filter( 'classifai_computervision_max_filesize', $set_1kb_max_filesize );
+		remove_filter( 'classifai_computer_vision_max_filesize', $set_1kb_max_filesize );
 	}
 }
