@@ -302,3 +302,62 @@ function get_feature_taxonomy( $feature ) {
 	 */
 	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
 }
+
+/**
+ * Provides the max filesize for the ComputerVision service.
+ *
+ * @return int
+ *
+ * @since 1.4.0
+ */
+function computer_vision_max_filesize() {
+	/**
+	 * Filters the ComputerVision maximum allowed filesize.
+	 *
+	 * @param int Default 4MB.
+	 */
+	return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+}
+
+/**
+ * Retrieves the URL of the largest version of an attachment image lower than a specified max size..
+ *
+ * @param string $full_image The path to the full-sized image source file.
+ * @param string $full_url   The URL of the full-sized image.
+ * @param array  $sizes      Intermediate size data from attachment meta.
+ * @param int    $max        The maximum acceptable size.
+ * @return string|null The image URL, or null if no acceptable image found.
+ *
+ * @since 1.4.0
+ */
+function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max = MB_IN_BYTES ) {
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	if ( $file_size && $max >= $file_size ) {
+		return $full_url;
+	}
+
+	// Sort the image sizes in order of total width + height, descending.
+	$sort_sizes = function( $size_1, $size_2 ) {
+		$size_1_total = $size_1['width'] + $size_1['height'];
+		$size_2_total = $size_2['width'] + $size_2['height'];
+
+		if ( $size_1_total === $size_2_total ) {
+			return 0;
+		}
+
+		return $size_1_total > $size_2_total ? -1 : 1;
+	};
+
+	usort( $sizes, $sort_sizes );
+
+	foreach ( $sizes as $size ) {
+		$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
+		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		if ( $file_size && $max >= $file_size ) {
+			return str_replace( basename( $full_url ), $size['file'], $full_url );
+		}
+	}
+
+	return null;
+}
