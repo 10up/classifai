@@ -243,56 +243,31 @@ class SmartCropping {
 			$this->get_api_url()
 		);
 
+		$response = wp_remote_post(
+			$url,
+			[
+				'body'    => wp_json_encode(
+					[
+						'url' => $data['url'],
+					]
+				),
+				'headers' => [
+					'Content-Type'              => 'application/json',
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+				],
+			]
+		);
+
 		/**
-		 * Filters the response from the generateThumbnail endpoint before it is run. Allows testing and overriding of
-		 * default behavior. Any non-null value returned from the filter will prevent the default request from running.
+		 * Fires after the request to the generateThumbnail smart-cropping endpoint has run.
 		 *
 		 * @since 1.5.0
 		 *
-		 * @param null The default value.
+		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
 		 * @param array  Array containing the image height and width.
 		 */
-		$response = apply_filters( 'classifai_smart_cropping_pre_request', null, $url, $data );
-
-		if ( is_null( $response ) ) {
-			$response = wp_remote_post(
-				$url,
-				[
-					'body'    => wp_json_encode(
-						[
-							'url' => $data['url'],
-						]
-					),
-					'headers' => [
-						'Content-Type'              => 'application/json',
-						'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
-					],
-				]
-			);
-
-			/**
-			 * Fires after the request to the generateThumbnail smart-cropping endpoint has run.
-			 *
-			 * @since 1.5.0
-			 *
-			 * @param array|WP_Error Response data or a WP_Error if the request failed.
-			 * @param string The request URL with query args added.
-			 * @param array  Array containing the image height and width.
-			 */
-			do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
-
-			/**
-			 * Filters the generateThumbnail smart-cropping API response.
-			 *
-			 * @since 1.5.0
-			 *
-			 * @param array|WP_Error Response data or a WP_Error if the request failed.
-			 * @param string The request URL with query args added.
-			 * @param array  Array containing the image height and width.
-			 */
-			$response = apply_filters( 'classifai_smart_cropping_response', $response, $url, $data );
-		}
+		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
 			return wp_remote_retrieve_body( $response );
