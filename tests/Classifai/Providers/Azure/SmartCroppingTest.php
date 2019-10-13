@@ -71,8 +71,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 	/**
 	 * @covers ::__construct
-     * @covers ::get_wp_filesystem
-     */
+	 * @covers ::get_wp_filesystem
+	 */
 	public function test_get_wp_filesystem() {
 		$this->assertInstanceOf(
 			WP_Filesystem_Direct::class,
@@ -102,8 +102,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	}
 
 	/**
-     * @covers ::generate_attachment_metadata
-     */
+	 * @covers ::generate_attachment_metadata
+	 */
 	public function test_generate_attachment_metadata() {
 		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' );
 
@@ -132,8 +132,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	}
 
 	/**
-     * @covers ::get_cropped_thumbnail
-     */
+	 * @covers ::get_cropped_thumbnail
+	 */
 	public function test_get_cropped_thumbnail() {
 		// Test invalid data returns false.
 		$this->assertFalse( $this->get_smart_cropping()->get_cropped_thumbnail( 999999999, [] ) );
@@ -177,8 +177,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	}
 
 	/**
-     * @covers ::get_api_url
-     */
+	 * @covers ::get_api_url
+	 */
 	public function test_get_api_url() {
 		$this->assertEquals(
 			'my-api-url.com/vision/v2.0/generateThumbnail/',
@@ -187,8 +187,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	}
 
 	/**
-     * @covers ::request_cropped_thumbnail
-     */
+	 * @covers ::request_cropped_thumbnail
+	 */
 	public function test_request_cropped_thumbnail() {
 		$with_filter_cb = function() {
 			// Test successful request.
