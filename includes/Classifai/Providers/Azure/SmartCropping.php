@@ -106,10 +106,19 @@ class SmartCropping {
 		// If positions are specified in the add_image_size crop argument, as indicated by the crop field being an
 		// array, then that should take priority and smart cropping should not run.
 		if ( is_array( $image_sizes[ $size ]['crop'] ) ) {
-			return false;
+			$return = false;
+		} else {
+			$return = boolval( $image_sizes[ $size ]['crop'] );
 		}
 
-		return boolval( $image_sizes[ $size ]['crop'] );
+		/**
+		 * Filters whether to smart crop images of a given size.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param boolean Whether non-position-based cropping was opted into when registering the image size.
+		 */
+		return apply_filters( 'classifai_should_crop_size', $return );
 	}
 
 	/**
