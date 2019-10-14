@@ -95,7 +95,7 @@ class SmartCropping {
 	 */
 	public function should_crop( $size ) {
 		if ( 'thumbnail' === $size ) {
-			return boolval( get_option( "{$size}_crop", false ) );
+			return boolval( get_option( 'thumbnail_crop', false ) );
 		}
 
 		$image_sizes = wp_get_additional_image_sizes();
