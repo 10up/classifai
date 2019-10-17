@@ -143,7 +143,6 @@ class SmartCropping {
 			$data = [
 				'width'  => $size_data['width'],
 				'height' => $size_data['height'],
-				'file'   => $size_data['file'],
 			];
 
 			$better_thumb_filename = $this->get_cropped_thumbnail( $attachment_id, $data );
