@@ -123,7 +123,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			);
 
 			$this->assertEquals(
-				'33772-smart-cropped-150x150.jpg',
+				'33772-150x150.jpg',
 				$filtered_data['sizes']['thumbnail']['file']
 			);
 		};
@@ -155,7 +155,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 		$with_filter_cb = function() use ( $attachment ) {
 			$this->assertEquals(
-				sprintf( '/tmp/wordpress/wp-content/uploads/%s/%s/33772-smart-cropped-150x150.jpg', date( 'Y' ), date( 'm' ) ),
+				sprintf( '/tmp/wordpress/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
 				$this->get_smart_cropping()->get_cropped_thumbnail(
 					$attachment,
 					wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
