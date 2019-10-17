@@ -24,5 +24,9 @@
   "require-dev": {
     "phpunit/phpunit": "~5.7.0",
     "10up/phpcs-composer": "dev-master"
+  },
+  "scripts": {
+    "test": "phpunit --coverage-html tests/coverage",
+    "lint": "phpcs ."
   }
 }

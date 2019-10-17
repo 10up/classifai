@@ -164,12 +164,26 @@ class SmartCropping {
 	 * @return bool|mixed The thumbnail file name or false on failure.
 	 */
 	public function get_cropped_thumbnail( $attachment_id, $size_data ) {
-		$url = get_largest_acceptable_image_url(
-			get_attached_file( $attachment_id ),
-			wp_get_attachment_url( $attachment_id, 'full' ),
-			$size_data,
-			computer_vision_max_filesize()
-		);
+
+		/**
+		 * Filters the image URL to send to Computer Vision for smart cropping. A non-null value will override default
+		 * plugin behavior.
+		 *
+		 * @since 1.5.0
+		 *
+		 * @param null|string Null to use default plugin behavior; string to override.
+		 * @param int         The attachment image ID.
+		 */
+		$url = apply_filters( 'classifai_smart_cropping_source_url', null, $attachment_id );
+
+		if ( empty( $url ) ) {
+			$url = get_largest_acceptable_image_url(
+				get_attached_file( $attachment_id ),
+				wp_get_attachment_url( $attachment_id, 'full' ),
+				$size_data,
+				computer_vision_max_filesize()
+			);
+		}
 
 		if ( empty( $url ) || empty( $size_data ) || ! is_array( $size_data ) ) {
 			return false;
