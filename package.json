@@ -1,7 +1,7 @@
 {
   "name": "classifai",
   "version": "1.1.0",
-  "license": "MIT",
+  "license": "GPLv2",
   "repository": "https://github.com/10up/classifai/",
   "description": "Classifies WordPress content using IBM Watson NLU API",
   "scripts": {
