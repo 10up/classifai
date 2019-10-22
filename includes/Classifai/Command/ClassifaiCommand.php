@@ -21,7 +21,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<post_ids>]
-	 * : Post IDs to classify
+	 * : Comma-delimited list of post IDs to classify
 	 *
 	 * [--post_type=<post_type>]
 	 * : Batch classify posts belonging to this post type. If false relies on post_ids in args
@@ -45,7 +45,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$opts = wp_parse_args( $opts, $defaults );
 
 		if ( empty( $opts['post_type'] ) ) {
-			$post_ids = $args;
+			$post_ids = explode( ',', $args[0] );
 		} else {
 			$post_ids = $this->get_posts_to_classify( $opts );
 		}

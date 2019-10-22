@@ -45,6 +45,15 @@ abstract class Provider {
 		$this->service               = $service;
 	}
 
+	/**
+	 * Provides the provider name.
+	 *
+	 * @return string
+	 */
+	public function get_provider_name() {
+		return $this->provider_name;
+	}
+
 	/** Returns the name of the settings section for this provider
 	 *
 	 * @return string
@@ -202,4 +211,12 @@ abstract class Provider {
 		// TODO: Implement sanitize_settings() method.
 		return $settings;
 	}
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
+	 * @since 1.4.0
+	 */
+	abstract public function get_provider_debug_information();
 }

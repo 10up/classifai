@@ -52,4 +52,46 @@ class NLUSettingsTest extends WP_UnitTestCase {
 		$this->assertEquals( $this->settings, $options );
 	}
 
+	/**
+	 * Tests the function providing debug information.
+	 */
+	public function test_get_provider_debug_information() {
+		$this->assertEquals(
+			[
+				'Configured',
+				'API URL',
+				'API username',
+				'Post types',
+				'Features',
+			],
+			array_keys( $this->provider->get_provider_debug_information() )
+		);
+
+		$this->assertEquals(
+			[
+				'Configured'   => 'yes',
+				'API URL'      => 'my-watson-url.com',
+				'API username' => 'my-watson-username',
+				'Post types'   => 'post, attachment, event',
+				'Features'     => '{"feature":true}',
+			],
+			$this->provider->get_provider_debug_information(
+				[
+					'credentials' => [
+						'watson_url'      => 'my-watson-url.com',
+						'watson_username' => 'my-watson-username',
+					],
+					'post_types'  => [
+						'post'       => 1,
+						'page'       => 0,
+						'attachment' => 1,
+						'event'      => 1,
+						'list'       => 0,
+					],
+					'features'     => [ 'feature' => true ],
+				],
+				true
+			)
+		);
+	}
 }
