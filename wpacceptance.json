@@ -3,6 +3,7 @@
     "tests": [
         "./tests/e2e/*.php"
     ],
+    "project_path": "%WP_ROOT%/wp-/plugins/classifai",
     "enforce_clean_db": true,
-    "snapshot_id": false
+    "snapshot_id": "a54dba3b7f6b4e6c4bf4e49b900cddba"
 }

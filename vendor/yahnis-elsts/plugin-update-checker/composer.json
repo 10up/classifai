@@ -17,6 +17,6 @@
 		"php": ">=5.2.0"
 	},
 	"autoload": {
-		"files": ["plugin-update-checker.php"]
+		"files": ["load-v4p8.php"]
 	}
 }
