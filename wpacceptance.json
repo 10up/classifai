@@ -1,0 +1,8 @@
+{
+    "name": "wpacceptance",
+    "tests": [
+        "./tests/e2e/*.php"
+    ],
+    "enforce_clean_db": true,
+    "snapshot_id": false
+}
