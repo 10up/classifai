@@ -5,5 +5,8 @@
     ],
     "project_path": "%WP_ROOT%/wp-/plugins/classifai",
     "enforce_clean_db": true,
-    "snapshot_id": "a54dba3b7f6b4e6c4bf4e49b900cddba"
+    "environment_instructions": [
+      "install wordpress where site url is http://classifai.test and home url is http://classifai.test",
+      "install theme where theme name is twentynineteen"
+    ],
 }
