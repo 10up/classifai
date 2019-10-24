@@ -36,16 +36,17 @@
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.6.3",
+    "@wordpress/babel-preset-default": "^4.6.2",
+    "@wordpress/e2e-test-utils": "^2.4.3",
+    "@wordpress/scripts": "^5.1.0",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
     "eslint": "^6.5.1",
     "eslint-loader": "^3.0.2",
     "husky": "^3.0.9",
     "lint-staged": "^9.4.2",
+    "node-wp-i18n": "^1.2.3",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9"
-  },
-  "dependencies": {
-    "node-wp-i18n": "^1.2.3"
   }
 }
