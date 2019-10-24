@@ -9,7 +9,8 @@
     "dev": "webpack --watch --mode=development",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
-    "makepot": "wpi18n makepot && echo '.pot file updated'"
+    "makepot": "wpi18n makepot && echo '.pot file updated'",
+    "tests:e2e": "./vendor/bin/wpacceptance run"
   },
   "husky": {
     "hooks": {
