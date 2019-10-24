@@ -14,10 +14,12 @@ branches:
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test travis ''  localhost $WP_VERSION
   - composer install
+  - npm install
 
 script:
   - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
+  - npm run tests:e2e
 
 services:
   - mysql
