@@ -1,9 +1,9 @@
 {
     "name": "wpacceptance",
     "tests": [
-        "./tests/e2e/*.php"
+        "./tests/e2e/wpacceptance/*.php"
     ],
-    "project_path": "%WP_ROOT%/wp-/plugins/classifai",
+    "project_path": "%WP_ROOT%/wp-content/plugins/classifai",
     "enforce_clean_db": true,
     "environment_instructions": [
       "install wordpress where site url is http://classifai.test and home url is http://classifai.test",
