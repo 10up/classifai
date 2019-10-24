@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.4.0] - TBD
+## [1.4.0] - 2019-09-26
 ### Added
 - Image tagging via Azure Computer Vision (props @ryanwelcher via #125)
 - Search images by alt text and tags (props @helen via #134)
