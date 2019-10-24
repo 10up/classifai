@@ -19,7 +19,9 @@ before_script:
 script:
   - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
+  - npm run env:start
+  - npm run env:reset-site
   - npm run tests:e2e
-
+  - npm run env:stop
 services:
   - mysql
