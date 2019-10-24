@@ -9,7 +9,11 @@
     "dev": "webpack --watch --mode=development",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
-    "makepot": "wpi18n makepot && echo '.pot file updated'"
+    "makepot": "wpi18n makepot && echo '.pot file updated'",
+    "test:e2e": "WP_BASE_URL=http://localhost:9002 wp-scripts test-e2e --config=tests/e2e/jest.config.js",
+    "env:start": "./bin/local-env/start.sh",
+    "env:stop": "./bin/local-env/stop.sh",
+    "env:reset-site": "./bin/local-env/install-wordpress.sh --reset-site"
   },
   "husky": {
     "hooks": {
