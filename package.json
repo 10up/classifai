@@ -29,17 +29,17 @@
   },
   "devDependencies": {
     "@10up/eslint-config": "^1.0.9",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
     "babel-eslint": "^10.0.3",
     "babel-loader": "^8.0.6",
-    "eslint": "^6.3.0",
-    "eslint-loader": "^3.0.0",
-    "husky": "^3.0.5",
-    "lint-staged": "^9.2.5",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "eslint": "^6.5.1",
+    "eslint-loader": "^3.0.2",
+    "husky": "^3.0.9",
+    "lint-staged": "^9.4.2",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
     "node-wp-i18n": "^1.2.3"
