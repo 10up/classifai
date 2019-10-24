@@ -9,4 +9,8 @@
       "install wordpress where site url is http://classifai.test and home url is http://classifai.test",
       "install theme where theme name is twentynineteen"
     ],
+    "exclude": [
+      "node_modules",
+      "vendor"
+    ]
 }
