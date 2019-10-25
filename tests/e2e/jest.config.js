@@ -3,7 +3,7 @@ const path = require( 'path' );
 module.exports = {
 	preset: 'jest-puppeteer',
 	setupFilesAfterEnv: [
-		'./bootstrap.js',
+		'<rootDir>/bootstrap.js',
 		'expect-puppeteer',
 	],
 	transform: {
