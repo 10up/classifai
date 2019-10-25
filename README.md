@@ -186,7 +186,7 @@ ClassifAI connects your WordPress site directly to your account with specific se
 
 ## Changelog
 
-A complete listing of all notable changes to Distributor are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
+A complete listing of all notable changes to ClassifAI are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
 
 ## Contributing
 
