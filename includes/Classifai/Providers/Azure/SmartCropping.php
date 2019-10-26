@@ -86,6 +86,23 @@ class SmartCropping {
 	}
 
 	/**
+	 * Provides the maximum allowable width or height in pixels accepted by the generateThumbnail endpoint.
+	 *
+	 * @since 1.5.0
+	 * @see https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail/generatethumbnail#uri-parameters
+	 *
+	 * @return int
+	 */
+	public function get_max_pixel_dimension() {
+		/**
+		 * Filters the maximum allowable width or height of an image to be cropped. Default 1024.
+		 *
+		 * @param int The width/height in pixels.
+		 */
+		return apply_filters( 'classifai_smart_crop_max_pixel_dimension', 1024 );
+	}
+
+	/**
 	 * Returns whether smart cropping should be applied to images of a given size.
 	 *
 	 * @since 1.5.0
@@ -99,7 +116,9 @@ class SmartCropping {
 		}
 
 		$image_sizes = wp_get_additional_image_sizes();
-		if ( ! isset( $image_sizes[ $size ] ) ) {
+		if ( ! isset( $image_sizes[ $size ] )
+			|| ! isset( $image_sizes[ $size ]['height'] )
+			|| ! isset( $image_sizes[ $size ]['width'] ) ) {
 			return false;
 		}
 
@@ -111,14 +130,20 @@ class SmartCropping {
 			$return = boolval( $image_sizes[ $size ]['crop'] );
 		}
 
+		$max_pixels = $this->get_max_pixel_dimension();
+		if ( $max_pixels < $image_sizes[ $size ]['height'] || $max_pixels < $image_sizes[ $size ]['width'] ) {
+			$return = false;
+		}
+
 		/**
 		 * Filters whether to smart crop images of a given size.
 		 *
 		 * @since 1.5.0
 		 *
 		 * @param boolean Whether non-position-based cropping was opted into when registering the image size.
+		 * @param string  The image size.
 		 */
-		return apply_filters( 'classifai_should_crop_size', $return );
+		return apply_filters( 'classifai_should_crop_size', $return, $size );
 	}
 
 	/**
@@ -164,7 +189,6 @@ class SmartCropping {
 	 * @return bool|mixed The thumbnail file name or false on failure.
 	 */
 	public function get_cropped_thumbnail( $attachment_id, $size_data ) {
-
 		/**
 		 * Filters the image URL to send to Computer Vision for smart cropping. A non-null value will override default
 		 * plugin behavior.
