@@ -12,7 +12,7 @@ class Settings extends \TestCaseBase {
 	/**
 	 * @testdox Plugin settings page loads correctly.
 	 */
-	public function testPostPublish() {
+	public function testSettings() {
 		$actor = $this->openBrowserPage();
 		$actor->loginAs( 'admin' );
 

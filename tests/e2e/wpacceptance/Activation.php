@@ -7,12 +7,12 @@
 /**
  * PHPUnit test class
  */
-class AdminPostTest extends \TestCaseBase {
+class ActivationTest extends \TestCaseBase {
 
 	/**
 	 * @testdox Plugin successfully activates.
 	 */
-	public function testPostPublish() {
+	public function testActivation() {
 		$actor = $this->openBrowserPage();
 		$actor->loginAs( 'admin' );
 
