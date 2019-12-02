@@ -27,6 +27,13 @@ class Classifier {
 	 */
 	public $endpoint;
 
+	/**
+	 * @var $language
+	 *
+	 * The language to be used in the classification
+	 */
+	public $language = 'en';
+
 
 	/**
 	 * Generate the API Url
@@ -102,7 +109,7 @@ class Classifier {
 		$options['text'] = $text;
 
 		if ( empty( $options['language'] ) ) {
-			$options['language'] = 'en';
+			$options['language'] = $this->get_language();
 		}
 
 		if ( empty( $options['features'] ) ) {
@@ -119,6 +126,27 @@ class Classifier {
 		}
 
 		return json_encode( $options );
+	}
+
+	/**
+	 * Get language to be used for classification
+	 *
+	 * @return string
+	 */
+	private function get_language() {
+		$post_id = wp_unslash( $_POST['post_ID'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		if ( empty( $post_id ) ) {
+			return $this->language;
+		}
+
+		$language = get_post_meta( absint( $post_id ), 'classifai-language', true );
+
+		if ( ! empty( $language ) ) {
+			$this->language = $language; // TODO: Validate language code
+		}
+
+		return $this->language;
 	}
 
 }

@@ -205,6 +205,8 @@ class NLU extends Provider {
 	public function setup_fields_sections() {
 		// Create the Credentials Section.
 		$this->do_credentials_section();
+		// Create the Languages Section.
+		$this->do_languages_section();
 		// Create content tagging section
 		$this->do_nlu_features_sections();
 	}
@@ -255,6 +257,27 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Create the languages section
+	 */
+	protected function do_languages_section() {
+		// Add the settings section.
+		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
+
+		add_settings_field(
+			'language',
+			esc_html__( 'Languages', 'classifai' ),
+			[ $this, 'render_language_selectors' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'option_index' => 'languages',
+				'languages' => $this->get_languages_available(),
+			]
+		);
+
+	}
+
+	/**
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
@@ -286,6 +309,15 @@ class NLU extends Provider {
 				]
 			);
 		}
+	}
+
+	/**
+	 * Retrieve languages available
+	 *
+	 * @return array
+	 */
+	protected function get_languages_available() {
+		return array();
 	}
 
 	/**
@@ -354,6 +386,30 @@ class NLU extends Provider {
 		}
 
 		echo '</ul>';
+	}
+
+	/**
+	 * Render language selectors
+	 *
+	 * @param array $args Settings for the input
+	 */
+	public function render_language_selectors( $args ) {
+		?>
+		<fieldset>
+			<p>
+				<label for="classifai-settings-language-master">Master Language</label><br/>
+				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][master]">
+					<option value="en">English</option>
+				</select>
+			</p>
+			<p>
+				<label for="classifai-settings-language-alternative">Alternative Classification Language</label><br/>
+				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][alternative]">
+					<option value="en">English</option>
+				</select>
+			</p>
+		</fieldset>
+		<?php
 	}
 
 	/**
