@@ -143,7 +143,7 @@ function get_watson_username() {
 
 	if ( ! empty( $creds['watson_username'] ) ) {
 		return $creds['watson_username'];
-	} else if ( defined( 'WATSON_USERNAME' ) ) {
+	} elseif ( defined( 'WATSON_USERNAME' ) ) {
 		return WATSON_USERNAME;
 	} else {
 		return '';
@@ -164,7 +164,7 @@ function get_watson_password() {
 
 	if ( ! empty( $creds['watson_password'] ) ) {
 		return $creds['watson_password'];
-	} else if ( defined( 'WATSON_PASSWORD' ) ) {
+	} elseif ( defined( 'WATSON_PASSWORD' ) ) {
 		return WATSON_PASSWORD;
 	} else {
 		return '';
