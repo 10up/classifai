@@ -569,6 +569,15 @@ class NLU extends Provider {
 			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
 		}
 
+		// Sanitize language choices
+		if ( isset( $settings['languages']['master'] ) ) {
+			$new_settings['languages']['master'] = sanitize_text_field( $settings['languages']['master'] );
+		}
+
+		if ( isset( $settings['languages']['alternative'] ) ) {
+			$new_settings['languages']['alternative'] = sanitize_text_field( $settings['languages']['alternative'] );
+		}
+
 		// Sanitize the post type checkboxes
 		$post_types = get_post_types( [ 'public' => true ], 'objects' );
 		foreach ( $post_types as $post_type ) {
