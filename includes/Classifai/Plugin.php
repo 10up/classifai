@@ -76,8 +76,9 @@ class Plugin {
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
-				'language_processing' => 'Classifai\Services\LanguageProcessing',
-				'image_processing'    => 'Classifai\Services\ImageProcessing',
+				'language_processing'  => 'Classifai\Services\LanguageProcessing',
+				'image_processing'     => 'Classifai\Services\ImageProcessing',
+				'multilingual_support' => 'Classifai\Services\MultilingualSupport',
 			]
 		);
 
