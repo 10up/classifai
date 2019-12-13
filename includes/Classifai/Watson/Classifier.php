@@ -63,7 +63,7 @@ class Classifier {
 		$body = $this->get_body( $text, $options );
 
 		$request_options['body'] = $body;
-		$request = $this->get_request();
+		$request                 = $this->get_request();
 
 		if ( empty( $request_options['timeout'] ) && ! empty( $options['timeout'] ) ) {
 			$request_options['timeout'] = $options['timeout'];
