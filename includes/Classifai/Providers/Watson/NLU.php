@@ -545,41 +545,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Hit license API to see if key/email is valid
-	 *
-	 * @param string $email Email address.
-	 * @param string $license_key License key.
-	 *
-	 * @return bool
-	 * @since  1.2
-	 *
-	 * @todo Is this function supposed to be here?
-	 */
-	public function check_license_key( $email, $license_key ) {
-
-		$request = wp_remote_post(
-			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
-			[
-				'timeout' => 10,
-				'body'    => [
-					'license_key' => $license_key,
-					'email'       => $email,
-				],
-			]
-		);
-
-		if ( is_wp_error( $request ) ) {
-			return false;
-		}
-
-		if ( 200 === wp_remote_retrieve_response_code( $request ) ) {
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Provides debug information related to the provider.
 	 *
 	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
@@ -612,6 +577,31 @@ class NLU extends Provider {
 			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
 			__( 'Features', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+		];
+	}
+
+	/**
+	 * Retrieve a list of languages naturally supported in NLU
+	 *
+	 * @return array
+	 */
+	public function get_languages() {
+		// There is currently no API available to retrieve this list from. This was taken from the documentation here
+		// https://cloud.ibm.com/docs/services/natural-language-understanding?topic=natural-language-understanding-language-support
+		return [
+			'en' => __( 'English', 'classifai' ),
+			'ar' => __( 'Arabic', 'classifai' ),
+			'zh' => __( 'Chinese (Simplified)', 'classifai' ),
+			'nl' => __( 'Dutch', 'classifai' ),
+			'fr' => __( 'French', 'classifai' ),
+			'de' => __( 'German', 'classifai' ),
+			'it' => __( 'Italian', 'classifai' ),
+			'ja' => __( 'Japanese', 'classifai' ),
+			'ko' => __( 'Korean', 'classifai' ),
+			'pt' => __( 'Portuguese', 'classifai' ),
+			'ru' => __( 'Russian', 'classifai' ),
+			'es' => __( 'Spanish', 'classifai' ),
+			'sv' => __( 'Swedish', 'classifai' ),
 		];
 	}
 }

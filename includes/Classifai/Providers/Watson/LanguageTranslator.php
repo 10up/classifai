@@ -22,6 +22,16 @@ class LanguageTranslator extends Provider {
 	public $save_post_handler;
 
 	/**
+	 * @var $master_languages array A list of languages supported in the Language Translator service
+	 */
+	public $master_languages;
+
+	/**
+	 * @var $alternative_languages array A list of languages natively supported in the NLU service
+	 */
+	public $alternative_languages;
+
+	/**
 	 * Watson NLU constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -162,7 +172,8 @@ class LanguageTranslator extends Provider {
 			$this->get_option_name(),
 			[
 				'option_index' => 'languages',
-				'languages' => $this->get_languages_available(),
+				'languages'    => $this->get_languages_available(),
+				'selected'     => $this->get_selected_languages(),
 			]
 		);
 	}
@@ -173,7 +184,25 @@ class LanguageTranslator extends Provider {
 	 * @return array
 	 */
 	protected function get_languages_available() {
-		return array();
+		$nlu                         = new NLU( 'lt' );
+		$this->master_languages      = $this->get_languages();
+		$this->alternative_languages = $nlu->get_languages();
+
+		return [
+			'master'      => $this->master_languages,
+			'alternative' => $this->alternative_languages,
+		];
+	}
+
+	/**
+	 * Get the user's choice of languages from the settings
+	 *
+	 * @return array
+	 */
+	protected function get_selected_languages() {
+		$settings = $this->get_settings();
+
+		return $settings['languages'];
 	}
 
 	/**
@@ -228,15 +257,45 @@ class LanguageTranslator extends Provider {
 		<fieldset>
 			<p>
 				<label for="classifai-settings-language-master">Master Language</label><br/>
+				<span class="description">
+				<?php esc_html_e( 'Select the language that your content is primarily written in. You can override this setting on each post.', 'classifai' ); ?>
+				</span><br/>
 				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][master]">
-					<option value="en">English</option>
-				</select>
+					<?php
+					foreach ( (array) $args['languages']['master']['languages'] as $lang ) {
+						echo '<option value="' . esc_attr( $lang['language'] ) . '" ' . selected( $lang['language'], $args['selected']['master'], false ) . '>' . esc_html( $lang['name'] ) . '</option>';
+					}
+					?>
+				</select><br/>
 			</p>
 			<p>
 				<label for="classifai-settings-language-alternative">Alternative Classification Language</label><br/>
+				<span class="description">
+				<?php
+				esc_html_e(
+					'Select the language you wish your content is translated into before classification.
+				This will most likely be a language that shares the most vocabulary and structure with your master language',
+					'classifai'
+				);
+				?>
+				</span><br/>
 				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][alternative]">
-					<option value="en">English</option>
-				</select>
+					<?php
+					foreach ( (array) $args['languages']['alternative'] as $code => $lang ) {
+						echo '<option value="' . esc_attr( $code ) . '" ' . selected( $code, $args['selected']['alternative'], false ) . '>' . esc_html( $lang ) . '</option>';
+					}
+					?>
+				</select><br/>
+				<span class="description">
+					<?php
+					esc_html_e(
+						'The support for features in each language varies. For broader support, choose English.
+					You can find the latest support information in the documentation: ',
+						'classifai'
+					);
+					?>
+					<a href="https://cloud.ibm.com/docs/services/natural-language-understanding?topic=natural-language-understanding-language-support">IBM Watson NLU: Language Support</a>
+				</span>
 			</p>
 		</fieldset>
 		<?php
@@ -285,6 +344,28 @@ class LanguageTranslator extends Provider {
 	}
 
 	/**
+	 * Get Language Translation service language support
+	 *
+	 * @return array
+	 */
+	public function get_languages() {
+		$settings = $this->get_settings();
+
+		$request           = new \Classifai\Watson\APIRequest();
+		$request->username = $settings['credentials']['watson_username'];
+		$request->password = $settings['credentials']['watson_password'];
+		$base_url          = trailingslashit( $settings['credentials']['watson_url'] ) . 'v3/identifiable_languages';
+		$url               = esc_url( add_query_arg( [ 'version' => WATSON_LT_VERSION ], $base_url ) );
+		$response          = $request->get( $url );
+
+		if ( is_wp_error( $response ) ) {
+			return $response->get_error_messages();
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Helper to ensure the authentication works.
 	 *
 	 * @param array $settings The list of settings to be saved
@@ -323,8 +404,10 @@ class LanguageTranslator extends Provider {
 	/**
 	 * Provides debug information related to the provider.
 	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
+	 * @param array|null $settings   Settings array. If empty, settings will be retrieved.
+	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be
+	 *                               retrieved.
+	 *
 	 * @return string|array
 	 * @since 1.4.0
 	 */
@@ -340,7 +423,7 @@ class LanguageTranslator extends Provider {
 		$settings_post_types = $settings['post_types'] ?? [];
 		$post_types          = array_filter(
 			array_keys( $settings_post_types ),
-			function( $post_type ) use ( $settings_post_types ) {
+			function ( $post_type ) use ( $settings_post_types ) {
 				return 1 === intval( $settings_post_types[ $post_type ] );
 			}
 		);
@@ -351,7 +434,7 @@ class LanguageTranslator extends Provider {
 			__( 'Configured', 'classifai' )   => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
 			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
-			__( 'Languages', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['languages'] ?? '' ) ),
+			__( 'Languages', 'classifai' )    => preg_replace( '/,"/', ', "', wp_json_encode( $settings['languages'] ?? '' ) ),
 		];
 	}
 }
