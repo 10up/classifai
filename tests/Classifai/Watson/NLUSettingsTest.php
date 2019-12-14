@@ -63,7 +63,6 @@ class NLUSettingsTest extends WP_UnitTestCase {
 				'API username',
 				'Post types',
 				'Features',
-				'Languages',
 			],
 			array_keys( $this->provider->get_provider_debug_information() )
 		);
@@ -75,7 +74,6 @@ class NLUSettingsTest extends WP_UnitTestCase {
 				'API username' => 'my-watson-username',
 				'Post types'   => 'post, attachment, event',
 				'Features'     => '{"feature":true}',
-				'Languages'    => '{"master":"en"}',
 			],
 			$this->provider->get_provider_debug_information(
 				[
@@ -91,7 +89,6 @@ class NLUSettingsTest extends WP_UnitTestCase {
 						'list'       => 0,
 					],
 					'features'     => [ 'feature' => true ],
-					'languages'    => [ 'master' => 'en' ],
 				],
 				true
 			)
