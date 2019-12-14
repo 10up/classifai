@@ -256,10 +256,8 @@ class LanguageTranslator extends Provider {
 		?>
 		<fieldset>
 			<p>
-				<label for="classifai-settings-language-master">Master Language</label><br/>
-				<span class="description">
-				<?php esc_html_e( 'Select the language that your content is primarily written in. You can override this setting on each post.', 'classifai' ); ?>
-				</span><br/>
+				<label
+					for="classifai-settings-language-master"><?php esc_html_e( 'Master Language', 'classifai' ); ?></label><br/>
 				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][master]">
 					<?php
 					foreach ( (array) $args['languages']['master']['languages'] as $lang ) {
@@ -267,18 +265,12 @@ class LanguageTranslator extends Provider {
 					}
 					?>
 				</select><br/>
+				<span class="description">
+				<?php esc_html_e( 'Select the language that your content is primarily written in. You can override this setting on each post.', 'classifai' ); ?>
+				</span>
 			</p>
 			<p>
 				<label for="classifai-settings-language-alternative">Alternative Classification Language</label><br/>
-				<span class="description">
-				<?php
-				esc_html_e(
-					'Select the language you wish your content is translated into before classification.
-				This will most likely be a language that shares the most vocabulary and structure with your master language',
-					'classifai'
-				);
-				?>
-				</span><br/>
 				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][alternative]">
 					<?php
 					foreach ( (array) $args['languages']['alternative'] as $code => $lang ) {
@@ -287,13 +279,15 @@ class LanguageTranslator extends Provider {
 					?>
 				</select><br/>
 				<span class="description">
-					<?php
-					esc_html_e(
-						'The support for features in each language varies. For broader support, choose English.
+				<?php
+				esc_html_e(
+					'Select the language you wish your content is translated into before classification.
+					This will most likely be a language that shares the most vocabulary and structure with your master language.
+					The support for features in each language varies. For broader support, choose English.
 					You can find the latest support information in the documentation: ',
-						'classifai'
-					);
-					?>
+					'classifai'
+				);
+				?>
 					<a href="https://cloud.ibm.com/docs/services/natural-language-understanding?topic=natural-language-understanding-language-support">IBM Watson NLU: Language Support</a>
 				</span>
 			</p>
