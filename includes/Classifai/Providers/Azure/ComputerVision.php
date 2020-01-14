@@ -392,8 +392,8 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'   => 'image_tag_taxonomy',
-				'options'     => $options,
+				'label_for' => 'image_tag_taxonomy',
+				'options'   => $options,
 			]
 		);
 	}
