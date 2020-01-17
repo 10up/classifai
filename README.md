@@ -42,13 +42,14 @@
 
 ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
 
-#### 1. Sign up for a ClassifAI account
-- Register for a free ClassifAI account [here](https://classifaiplugin.com/#cta).
+#### 1. Sign up for a ClassifAI Team account
+- Register for a free ClassifAI Team account [here](https://classifaiplugin.com/#cta).
 - Check for an email from ClassifAI Team which contains the registration key.
+- Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
 #### 2. Configure ClassifAI API Keys under admin area > ClassifAI
 - In the `Registered Email` field, enter the email you used for registration.
-- In the `Registration Key` field, enter the registration key from the email in step 1 above
+- In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
 ## Set Up Content Tagging (via IBM Watson)
 
