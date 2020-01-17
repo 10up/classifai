@@ -42,6 +42,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			'non-array-data',
 			$this->get_computer_vision()->smart_crop_image( 'non-array-data', 999999 )
 		);
+		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/33772-1536x864.jpg', date( 'Y' ), date( 'm' ) ), $url );
 
 		$this->assertEquals(
 			[ 'no-smart-cropping' => 1 ],
