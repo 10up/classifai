@@ -63,6 +63,8 @@ class ServicesManager {
 
 		// Register the functionality
 		$this->register_services();
+
+		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
 	}
 
 	/**
@@ -126,22 +128,22 @@ class ServicesManager {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = [];
-		if ( isset( $settings['email'] ) && isset( $settings['license_key'] ) ) {
-			if ( $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
-				$new_settings['valid_license'] = true;
-				$new_settings['email']         = sanitize_text_field( $settings['email'] );
-				$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
-			} else {
-				$new_settings['valid_license'] = false;
-				$new_settings['email']         = '';
-				$new_settings['license_key']   = '';
-				add_settings_error(
-					'registration',
-					'classifai-registration',
-					esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
-					'error'
-				);
-			}
+		if ( isset( $settings['email'] )
+			&& isset( $settings['license_key'] )
+			&& $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
+			$new_settings['valid_license'] = true;
+			$new_settings['email']         = sanitize_text_field( $settings['email'] );
+			$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
+		} else {
+			$new_settings['valid_license'] = false;
+			$new_settings['email']         = isset( $settings['email'] ) ? sanitize_text_field( $settings['email'] ) : '';
+			$new_settings['license_key']   = isset( $settings['license_key'] ) ? sanitize_text_field( $settings['license_key'] ) : '';
+			add_settings_error(
+				'registration',
+				'classifai-registration',
+				esc_html__( 'Invalid ClassifAI registration info. Please check and try again.', 'classifai' ),
+				'error'
+			);
 		}
 
 		return $new_settings;
@@ -151,7 +153,7 @@ class ServicesManager {
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
-		add_settings_section( 'classifai_settings', 'Classifai Settings', '', 'classifai_settings' );
+		add_settings_section( 'classifai_settings', 'ClassifAI Settings', '', 'classifai_settings' );
 
 		add_settings_field(
 			'email',
@@ -216,11 +218,11 @@ class ServicesManager {
 	 * Helper to return the $menu title
 	 */
 	protected function get_menu_title() {
-		$is_setup         = get_option( 'classifai_configured' );
-		$this->title      = esc_html__( 'ClassifAI', 'classifai' );
-		$this->menu_title = $this->title;
+		$registration_settings = get_option( 'classifai_settings' );
+		$this->title           = esc_html__( 'ClassifAI', 'classifai' );
+		$this->menu_title      = $this->title;
 
-		if ( ! $is_setup ) {
+		if ( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] ) {
 			/*
 			 * Translators: Main title.
 			 */
@@ -342,5 +344,33 @@ class ServicesManager {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Adds debug information to the ClassifAI Site Health screen.
+	 *
+	 * @param array      $debug_information Array of lines representing debug information.
+	 * @param array|null $settings Settings array. If empty, will be fetched.
+	 * @return array Array with lines added.
+	 * @since 1.4.0
+	 */
+	public function add_debug_information( $debug_information, $settings = null ) {
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		$valid_license       = intval( $settings['valid_license'] ?? 0 );
+		$valid_license_text  = 1 === $valid_license ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' );
+		$debug_information[] = [
+			'label' => __( 'Valid license', 'classifai' ),
+			'value' => $valid_license_text,
+		];
+
+		$debug_information[] = [
+			'label' => __( 'Email', 'classifai' ),
+			'value' => $settings['email'] ?? '',
+		];
+
+		return $debug_information;
 	}
 }

@@ -61,7 +61,7 @@ class TaxonomyFactory {
 	public function build_if( $taxonomy, $supported_post_types = [] ) {
 		if ( ! $this->exists( $taxonomy ) ) {
 			$this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
-			$instance = $this->taxonomies[ $taxonomy ];
+			$instance                      = $this->taxonomies[ $taxonomy ];
 			$instance->register();
 
 			if ( ! empty( $supported_post_types ) ) {
