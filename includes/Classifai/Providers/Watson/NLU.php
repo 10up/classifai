@@ -203,8 +203,26 @@ class NLU extends Provider {
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
+		// Add the settings section.
+		add_settings_section(
+			$this->get_option_name(),
+			$this->provider_service_name,
+			function() {
+				printf(
+					wp_kses(
+						__( 'Don\'t have an IBM Cloud account yet? <a href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
+						[ 'a' => [] ]
+					),
+					esc_url( 'https://cloud.ibm.com/registration' ),
+					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
+				);
+			},
+			$this->get_option_name()
+		);
+
 		// Create the Credentials Section.
 		$this->do_credentials_section();
+
 		// Create content tagging section
 		$this->do_nlu_features_sections();
 	}
@@ -213,7 +231,6 @@ class NLU extends Provider {
 	 * Helper method to create the credentials section
 	 */
 	protected function do_credentials_section() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
 		add_settings_field(
 			'url',
 			esc_html__( 'API URL', 'classifai' ),
@@ -258,9 +275,6 @@ class NLU extends Provider {
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
-		// Add the settings section.
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
