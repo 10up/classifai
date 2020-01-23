@@ -112,6 +112,7 @@ class NLU extends Provider {
 	 */
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -187,6 +188,29 @@ class NLU extends Provider {
 	/**
 	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
 	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-admin',
+			CLASSIFAI_PLUGIN_URL . 'dist/js/admin.min.js',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+		wp_localize_script(
+			'classifai-admin',
+			'ClassifAI',
+			[
+				'api_password' => __( 'API Password', 'classifai' ),
+				'api_key'      => __( 'API Key', 'classifai' ),
+				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+			]
+		);
+	}
+
+	/**
+	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
+	 */
 	public function init_admin_scripts() {
 		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
 			wp_enqueue_script(
@@ -255,13 +279,13 @@ class NLU extends Provider {
 				'option_index'  => 'credentials',
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
-				'description'   => __( 'If your credentials do not include a username, it is typically apikey', 'classifai' ),
 				'large'         => true,
+				'class'         => $this->use_usename_password() ? 'hidden' : '',
 			]
 		);
 		add_settings_field(
 			'password',
-			esc_html__( 'API Key / Password', 'classifai' ),
+			esc_html__( 'API Key', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -272,6 +296,27 @@ class NLU extends Provider {
 				'large'        => true,
 			]
 		);
+		add_settings_field(
+			'toggle',
+			'',
+			function() {
+				printf(
+					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
+					$this->use_usename_password()
+						? esc_html__( 'Use a username/password instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' )
+				);
+			},
+			$this->get_option_name(),
+			$this->get_option_name()
+		);
+	}
+
+	/**
+	 * Check if a username/password is using instead of API key.
+	 */
+	protected function use_usename_password() {
+		return 'apikey' === $this->get_settings( 'credentials' )['watson_username'];
 	}
 
 	/**
