@@ -241,6 +241,7 @@ class NLU extends Provider {
 				'label_for'    => 'watson_url',
 				'option_index' => 'credentials',
 				'input_type'   => 'text',
+				'large'        => true,
 			]
 		);
 		add_settings_field(
@@ -255,6 +256,7 @@ class NLU extends Provider {
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
 				'description'   => __( 'If your credentials do not include a username, it is typically apikey', 'classifai' ),
+				'large'         => true,
 			]
 		);
 		add_settings_field(
@@ -267,6 +269,7 @@ class NLU extends Provider {
 				'label_for'    => 'watson_password',
 				'option_index' => 'credentials',
 				'input_type'   => 'password',
+				'large'        => true,
 			]
 		);
 	}
@@ -321,7 +324,7 @@ class NLU extends Provider {
 			case 'text':
 			case 'password':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = 'regular-text';
+				$class = empty( $args['large'] ) ? 'regular-text' : 'large-text';
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
