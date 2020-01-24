@@ -219,7 +219,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options.
 	 */
 	public function image( $args = [], $opts = [] ) {
-
 		if ( ! empty( $args[0] ) ) {
 			$post_ids = explode( ',', $args[0] );
 		} else {
@@ -228,37 +227,37 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		$total      = count( $post_ids );
 		$classifier = new ComputerVision( false );
-		if ( ! empty( $total ) ) {
-			$limit_total = $total;
 
-			$errors       = [];
-			$message      = "Classifying $limit_total posts ...";
-			$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
-
-			for ( $index = 0; $index < $limit_total; $index++ ) {
-				$post_id = $post_ids[ $index ];
-
-				$progress_bar->tick();
-
-				$current_metas = wp_get_attachment_metadata( $post_id );
-				\WP_CLI::line( 'Processing ' . $post_id );
-				$classifier->generate_alt_tags( $current_metas, $post_id );
-			}
-
-			$progress_bar->finish();
-
-			$total_errors  = count( $errors );
-			$total_success = $total - $total_errors;
-
-			\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
-
-			foreach ( $errors as $post_id => $error ) {
-				\WP_CLI::log( $post_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
-			}
-		} else {
-			\WP_CLI::log( 'No posts to classify.' );
+		if ( empty( $total ) ) {
+			return \WP_CLI::log( 'No posts to classify.' );
 		}
 
+		$limit_total = $total;
+
+		$errors       = [];
+		$message      = "Classifying $limit_total posts ...";
+		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
+
+		for ( $index = 0; $index < $limit_total; $index++ ) {
+			$post_id = $post_ids[ $index ];
+
+			$progress_bar->tick();
+
+			$current_meta = wp_get_attachment_metadata( $post_id );
+			\WP_CLI::line( 'Processing ' . $post_id );
+			$classifier->process_image( $current_meta, $post_id );
+		}
+
+		$progress_bar->finish();
+
+		$total_errors  = count( $errors );
+		$total_success = $total - $total_errors;
+
+		\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
+
+		foreach ( $errors as $post_id => $error ) {
+			\WP_CLI::log( $post_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
+		}
 	}
 
 
