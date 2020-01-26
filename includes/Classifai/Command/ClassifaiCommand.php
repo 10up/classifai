@@ -218,12 +218,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--limit=<limit>]
 	 * : Limit classification to N attachments. Default false
 	 *
+	 * [--force]
+	 * : Force classification to N attachments. Default false
+	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
 	public function image( $args = [], $opts = [] ) {
 		$default_opts = [
 			'limit' => false,
+			'force' => false,
 		];
 
 		$opts = wp_parse_args( $opts, $default_opts );
@@ -361,7 +365,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_status'    => 'any',
 			'fields'         => 'ids',
 			'posts_per_page' => $limit,
-			'meta_query'     => [
+		];
+
+		if ( ! $opts['force'] ) {
+			$query_params['meta_query'] = [
 				'relation' => 'OR',
 				[
 					'key'     => '_wp_attachment_image_alt',
@@ -373,8 +380,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					'compare' => '=',
 					'value'   => '',
 				],
-			],
-		];
+			];
+		}
 
 		\WP_CLI::log( 'Fetching images to classify ...' );
 
