@@ -220,12 +220,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 */
 	public function image( $args = [], $opts = [] ) {
 		if ( ! empty( $args[0] ) ) {
-			$post_ids = explode( ',', $args[0] );
+			$attachment_ids = explode( ',', $args[0] );
 		} else {
-			$post_ids = $this->get_attachment_to_classify( $opts );
+			$attachment_ids = $this->get_attachment_to_classify( $opts );
 		}
 
-		$total      = count( $post_ids );
+		$total      = count( $attachment_ids );
 		$classifier = new ComputerVision( false );
 
 		if ( empty( $total ) ) {
@@ -239,13 +239,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
 
 		for ( $index = 0; $index < $limit_total; $index++ ) {
-			$post_id = $post_ids[ $index ];
+			$attachment_id = $attachment_ids[ $index ];
 
 			$progress_bar->tick();
 
-			$current_meta = wp_get_attachment_metadata( $post_id );
-			\WP_CLI::line( 'Processing ' . $post_id );
-			$classifier->process_image( $current_meta, $post_id );
+			$current_meta = wp_get_attachment_metadata( $attachment_id );
+			\WP_CLI::line( 'Processing ' . $attachment_id );
+			$classifier->process_image( $current_meta, $attachment_id );
 		}
 
 		$progress_bar->finish();
@@ -255,8 +255,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
 
-		foreach ( $errors as $post_id => $error ) {
-			\WP_CLI::log( $post_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
+		foreach ( $errors as $attachment_id => $error ) {
+			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 		}
 	}
 
