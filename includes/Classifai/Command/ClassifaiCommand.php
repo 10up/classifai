@@ -361,7 +361,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		$query_params = [
 			'post_type'      => 'attachment',
-			'post_mime_type' => array( 'image/jpeg', 'image/png' ),
+			'post_mime_type' => array( 'image/jpeg', 'image/png', 'image/gif', 'image/bmp' ),
 			'post_status'    => 'any',
 			'fields'         => 'ids',
 			'posts_per_page' => $limit,
