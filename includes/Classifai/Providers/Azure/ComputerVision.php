@@ -59,8 +59,8 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 10, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
