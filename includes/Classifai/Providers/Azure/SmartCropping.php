@@ -213,11 +213,11 @@ class SmartCropping {
 			return false;
 		}
 
-		$data = array(
+		$data = [
 			'width'  => $size_data['width'],
 			'height' => $size_data['height'],
 			'url'    => $url,
-		);
+		];
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
 		if ( empty( $new_thumb_image ) ) {
