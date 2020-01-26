@@ -212,13 +212,22 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 *
 	 * ## Options
 	 *
-	 * [<post_ids>]
-	 * : Comma delimeted Post IDs to classify
+	 * [<attachment_ids>]
+	 * : Comma delimeted Attachment IDs to classify
+	 *
+	 * [--limit=<limit>]
+	 * : Limit classification to N attachments. Default false
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
 	public function image( $args = [], $opts = [] ) {
+		$default_opts = [
+			'limit' => false,
+		];
+
+		$opts = wp_parse_args( $opts, $default_opts );
+
 		if ( ! empty( $args[0] ) ) {
 			$attachment_ids = explode( ',', $args[0] );
 		} else {
@@ -229,13 +238,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$classifier = new ComputerVision( false );
 
 		if ( empty( $total ) ) {
-			return \WP_CLI::log( 'No posts to classify.' );
+			return \WP_CLI::log( 'No images to classify.' );
 		}
 
 		$limit_total = $total;
+		if ( $opts['limit'] ) {
+			$limit_total = min( $total, intval( $opts['limit'] ) );
+		}
 
 		$errors       = [];
-		$message      = "Classifying $limit_total posts ...";
+		$message      = "Classifying $limit_total images ...";
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
 
 		for ( $index = 0; $index < $limit_total; $index++ ) {
@@ -253,13 +265,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$total_errors  = count( $errors );
 		$total_success = $total - $total_errors;
 
-		\WP_CLI::success( "Classified $total_success posts, $total_errors errors." );
+		\WP_CLI::success( "Classified $total_success images, $total_errors errors." );
 
 		foreach ( $errors as $attachment_id => $error ) {
 			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 		}
 	}
-
 
 	/**
 	 * Prints the Basic Auth header based on credentials configured in
@@ -342,12 +353,14 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @return array
 	 */
 	private function get_attachment_to_classify( $opts = [] ) {
+		$limit = is_numeric( $opts['limit'] ) ? $opts['limit'] : - 1;
+
 		$query_params = [
 			'post_type'      => 'attachment',
 			'post_mime_type' => array( 'image/jpeg', 'image/png' ),
 			'post_status'    => 'any',
 			'fields'         => 'ids',
-			'posts_per_page' => -1,
+			'posts_per_page' => $limit,
 			'meta_query'     => [
 				'relation' => 'OR',
 				[
@@ -363,14 +376,14 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			],
 		];
 
-		\WP_CLI::log( 'Fetching posts to classify ...' );
+		\WP_CLI::log( 'Fetching images to classify ...' );
 
 		$query = new \WP_Query( $query_params );
-		$posts = $query->posts;
+		$images = $query->posts;
 
-		\WP_CLI::log( 'Fetching posts to classify ... DONE (' . count( $posts ) . ')' );
+		\WP_CLI::log( 'Fetching images to classify ... DONE (' . count( $images ) . ')' );
 
-		return $posts;
+		return $images;
 	}
 
 	/**
