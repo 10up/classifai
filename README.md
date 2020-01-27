@@ -179,13 +179,13 @@ default: `false`
 
 `$ wp classifai image {image_ids} [--limit=int] [--force]`
 
-Directly classify image using Azure Computer Vision
+Directly classify images using Azure Computer Vision.
 
 ##### Options
 
 `--limit=int`
 
-Limit images to classify.
+Limit number of images to classify.
 
 default: `false`
 
