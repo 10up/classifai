@@ -26,6 +26,7 @@ class BulkActions {
 	 */
 	public function register() {
 		$post_types = get_supported_post_types();
+
 		if ( empty( $post_types ) ) {
 			return;
 		}
@@ -35,6 +36,12 @@ class BulkActions {
 		foreach ( $post_types as $post_type ) {
 			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
 			add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
+
+			if ( is_post_type_hierarchical( $post_type ) ) {
+				add_action( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
+			} else {
+				add_action( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
+			}
 		}
 
 		add_action( 'admin_notices', [ $this, 'bulk_action_admin_notice' ] );
@@ -103,5 +110,25 @@ class BulkActions {
 				'p'   => [],
 			]
 		);
+	}
+
+	/**
+	 * Register Classifai row action.
+	 *
+	 * @param array    $actions Current row actions.
+	 * @param \WP_Post $post    Post object.
+	 *
+	 * @return array
+	 */
+	public function register_row_action( $actions, $post ) {
+		$current_screen = get_current_screen();
+
+		$actions['classify'] = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( wp_nonce_url( admin_url( $current_screen->parent_file . '&action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
+			esc_html__( 'Classify', 'classifai' )
+		);
+
+		return $actions;
 	}
 }
