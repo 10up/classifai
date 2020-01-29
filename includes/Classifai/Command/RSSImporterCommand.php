@@ -61,7 +61,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 			return false;
 		}
 
-		$post_date_gmt = date( 'Y-m-d H:i:s', strtotime( $info['date'] ) );
+		$post_date_gmt = gmdate( 'Y-m-d H:i:s', strtotime( $info['date'] ) );
 
 		$post = [
 			'post_title'    => $info['title'],
