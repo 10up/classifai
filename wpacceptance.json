@@ -1,0 +1,17 @@
+{
+    "name": "wpacceptance",
+    "tests": [
+        "./tests/e2e/wpacceptance/*.php"
+    ],
+    "project_path": "%WP_ROOT%/wp-content/plugins/classifai",
+    "enforce_clean_db": true,
+    "environment_instructions": [
+      "install wordpress where site url is http://classifai.test and home url is http://classifai.test",
+      "install theme where theme name is twentynineteen"
+    ],
+    "bootstrap": "tests\/e2e\/wpacceptance\/bootstrap.php",
+    "exclude": [
+      "node_modules",
+      "vendor"
+    ]
+}

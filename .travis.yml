@@ -18,6 +18,7 @@ before_script:
 script:
   - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
+  - ./vendor/bin/wpacceptance run
 
 services:
   - mysql
