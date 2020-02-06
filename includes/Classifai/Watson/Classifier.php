@@ -65,6 +65,7 @@ class Classifier {
 		}
 
 		$classified_data = $request->post( $this->get_endpoint(), $request_options );
+		set_transient( 'classifai_watson_nlu_latest_response', $classified_data, DAY_IN_SECONDS * 30 );
 		/**
 		 * Filter the classified data returned from the API call.
 		 *
