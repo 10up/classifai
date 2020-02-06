@@ -623,30 +623,27 @@ class NLU extends Provider {
 	 */
 	private function format_latest_response() {
 		$data = get_transient( 'classifai_watson_nlu_latest_response' );
+
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
-
-		$output = [];
 
 		if ( is_wp_error( $data ) ) {
 			return $data->get_error_message();
 		}
 
-		$formatted_data             = $data['usage'];
-		$formatted_data['language'] = $data['language'];
+		$formatted_data = array_intersect_key(
+			$data,
+			[
+				'usage'    => 1,
+				'language' => 1,
+			]
+		);
 
-		unset( $data['usage'] );
-		unset( $data['language'] );
-
-		foreach ( $data as $key => $value ) {
+		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
 			$formatted_data[ $key ] = count( $value );
 		}
 
-		foreach ( $formatted_data as $key => $value ) {
-			$output[] = "$key: $value";
-		}
-
-		return implode( ', ', $output );
+		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
 	}
 }
