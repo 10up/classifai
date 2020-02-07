@@ -34,7 +34,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			[
 				'Authenticated',
 				'API URL',
-				'Caption threshold'
+				'Caption threshold',
+				'Latest response',
 			],
 			array_keys( $this->provider->get_provider_debug_information() )
 		);
@@ -44,6 +45,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Authenticated'     => 'yes',
 				'API URL'           => 'my-azure-url.com',
 				'Caption threshold' => 77,
+				'Latest response'   => 'N/A',
 			],
 			$this->provider->get_provider_debug_information(
 				[
