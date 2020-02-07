@@ -44,6 +44,8 @@ class LanguageTranslator extends Provider {
 			$service
 		);
 
+		add_action( 'add_meta_boxes', array( $this, 'override_language_metabox' ) );
+		add_action( 'save_post', array( $this, 'save_override_language' ) );
 	}
 
 	/**
@@ -69,7 +71,6 @@ class LanguageTranslator extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -430,5 +431,70 @@ class LanguageTranslator extends Provider {
 			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
 			__( 'Languages', 'classifai' )    => preg_replace( '/,"/', ', "', wp_json_encode( $settings['languages'] ?? '' ) ),
 		];
+	}
+
+	public function override_language_metabox() {
+		add_meta_box(
+			'classifai-override-language',
+			__( 'Content Classification', 'classifai' ),
+			array( $this, 'content_classification' ),
+			array( 'post', 'page' ),
+			'side'
+		);
+	}
+
+	public function content_classification() {
+		$settings = $this->get_settings();
+		$override_language = $this->alternative_languages[ $settings['languages']['master'] ];
+	?>
+			<p>
+				<span class="description">
+				<?php
+				esc_html_e(
+					sprintf( 'Classifai will consider %s as the language for this content', $override_language ),
+					'classifai'
+				);
+				?>
+				</span>
+				<br/><br/>
+				<input type="checkbox" name="classifai-settings-language-override-opt-in" value="1" />
+				<label for="classifai-settings-language-override-opt-in">Override Classification Language?</label><br/>
+			</p>
+			<p class="overrides">
+				<label for="classifai-settings-language-alternative">Classification Language</label><br/>
+				<select name="classifai_<?php echo esc_attr( $this->option_name ); ?>[languages][alternative]" disabled>
+					<?php
+					foreach ( $this->alternative_languages as $code => $lang ) {
+						echo '<option value="' . esc_attr( $code ) . '" ' . selected( $code, $settings['languages']['master'], false ) . '>' . esc_html( $lang ) . '</option>';
+					}
+					?>
+				</select><br/>
+			</p>
+	<?php
+	}
+
+	public function save_override_language() {
+		if ( ! empty( $_GET['classic-editor'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		$supported   = \Classifai\get_supported_post_types();
+		$post_type   = get_post_type( $post_id );
+		$opt_in = $_POST['classifai-settings-language-override-opt-in'] ?? false;
+		$language = $_POST['classifai-settings-language-override'] ?? false;
+
+		if ( in_array( $post_type, $supported, true ) ) {
+
+			if ( $opt_in ) {
+				delete_post_meta( $post_id, 'classifai_override_language' );
+			} else {
+				if ( $language ) {
+					if ( in_array( $language, array_keys( $this->alternative_languages, true ) ) ) {
+						update_post_meta( $post_id, 'classifai_override_language', sanitize_text_field() );
+					}
+				}
+			}
+
+		}
 	}
 }
