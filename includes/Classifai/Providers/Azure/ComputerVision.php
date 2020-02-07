@@ -601,4 +601,42 @@ class ComputerVision extends Provider {
 
 		return $clauses;
 	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id       The Post Id we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 *
+	 * @return mixed
+	 */
+	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+		$metadata           = wp_get_attachment_metadata( $post_id );
+		$image_url          = $this->get_largest_acceptable_image_url(
+			get_attached_file( $post_id ),
+			wp_get_attachment_url( $post_id ),
+			$metadata['sizes']
+		);
+		$image_scan_results = $this->scan_image( $image_url );
+
+		if ( is_wp_error( $image_scan_results ) ) {
+			return $image_scan_results;
+		}
+
+		switch ( $route_to_call ) {
+			case 'alt-tags':
+				if ( isset( $image_scan_results->description->captions ) ) {
+					// Process the captions.
+					$this->generate_alt_tags( $image_scan_results->description->captions, $post_id );
+				}
+				break;
+			case 'image-tags':
+				if ( isset( $image_scan_results->tags ) ) {
+					// Process the tags.
+					$this->generate_image_tags( $image_scan_results->tags, $post_id );
+				}
+				break;
+		}
+	}
 }
