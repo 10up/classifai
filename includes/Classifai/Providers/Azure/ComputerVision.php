@@ -506,14 +506,32 @@ class ComputerVision extends Provider {
 		}
 
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
-		$latest_response = get_transient( 'classifai_azure_computer_vision_latest_response' );
 
 		return [
 			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
 			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
-			__( 'Latest response', 'classifai' )   => $latest_response ? preg_replace( '/,"/', ', "', wp_json_encode( $latest_response ) ) : __( 'N/A', 'classifai' ),
+			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response(),
 		];
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @return string
+	 */
+	private function get_formatted_latest_response() {
+		$data = get_transient( 'classifai_azure_computer_vision_latest_response' );
+
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**

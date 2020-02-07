@@ -612,7 +612,7 @@ class NLU extends Provider {
 			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
 			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
-			__( 'Latest response', 'classifai' ) => $this->format_latest_response(),
+			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response(),
 		];
 	}
 
@@ -621,7 +621,7 @@ class NLU extends Provider {
 	 *
 	 * @return string
 	 */
-	private function format_latest_response() {
+	private function get_formatted_latest_response() {
 		$data = get_transient( 'classifai_watson_nlu_latest_response' );
 
 		if ( ! $data ) {
