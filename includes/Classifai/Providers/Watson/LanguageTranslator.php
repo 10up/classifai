@@ -183,7 +183,7 @@ class LanguageTranslator extends Provider {
 	 *
 	 * @return array
 	 */
-	protected function get_languages_available() {
+	public function get_languages_available() {
 		$nlu                         = new NLU( 'lt' );
 		$this->master_languages      = $this->get_languages();
 		$this->alternative_languages = $nlu->get_languages();
@@ -199,7 +199,7 @@ class LanguageTranslator extends Provider {
 	 *
 	 * @return array
 	 */
-	protected function get_selected_languages() {
+	public function get_selected_languages() {
 		$settings = $this->get_settings();
 
 		return $settings['languages'];

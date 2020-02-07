@@ -18,7 +18,7 @@ class LanguageTranslatorSettingsTest extends WP_UnitTestCase {
 
 	protected $provider;
 	protected $settings = [
-		'crendentials' => [
+		'credentials' => [
 			'watson_url' => 'url',
 			'watson_username' => 'username',
 			'watson_password' => 'password',
@@ -84,5 +84,12 @@ class LanguageTranslatorSettingsTest extends WP_UnitTestCase {
 				true
 			)
 		);
+	}
+
+	public function test_get_settings() {
+		$settings = $this->provider->get_settings();
+
+		$this->assertEquals( $this->settings, $settings );
+
 	}
 }
