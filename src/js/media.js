@@ -16,20 +16,32 @@
 		spinner.classList.add( 'is-active' );
 
 		const path = `${ endpoint }${ postID }`;
-		wp.apiRequest( { path } ).then( () => {
+		wp.apiRequest( { path } ).then( ( response ) => {
 			button.removeAttribute( 'disabled' );
 			spinner.style.display = 'none';
 			spinner.classList.remove( 'is-active' );
-			callback && callback();
+			callback && callback( response );
 		} );
-	}
+	};
 
 	$( document ).ready( function() {
 		wp.media.frame.on( 'edit:attachment', () => {
 			
 			const altTagsButton = document.getElementById( 'classifai-rescan-alt-tags' );
 			const imageTagsButton = document.getElementById( 'classifai-rescan-image-tags' );
-			altTagsButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/alt-tags/', callback: () => console.log( 'callback' ) } ) );
+			altTagsButton.addEventListener( 'click', e => handleClick(
+				{ 
+					button: e.target, 
+					endpoint: '/classifai/v1/alt-tags/', 
+					callback: resp => {
+						if ( resp ) {
+							const textField = document.getElementById( 'attachment-details-two-column-alt-text' );
+							textField.value = resp;
+						}
+					}
+				}
+			) );
+			
 			imageTagsButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/image-tags/' } ) );
 		} );
 	} );

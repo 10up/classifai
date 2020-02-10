@@ -298,6 +298,7 @@ class ComputerVision extends Provider {
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+				return esc_html( $captions[0]->text );
 			} else {
 				/**
 				 * Fire an action if there were no captions added.
@@ -628,13 +629,13 @@ class ComputerVision extends Provider {
 			case 'alt-tags':
 				if ( isset( $image_scan_results->description->captions ) ) {
 					// Process the captions.
-					$this->generate_alt_tags( $image_scan_results->description->captions, $post_id );
+					return $this->generate_alt_tags( $image_scan_results->description->captions, $post_id );
 				}
 				break;
 			case 'image-tags':
 				if ( isset( $image_scan_results->tags ) ) {
 					// Process the tags.
-					$this->generate_image_tags( $image_scan_results->tags, $post_id );
+					return $this->generate_image_tags( $image_scan_results->tags, $post_id );
 				}
 				break;
 		}
