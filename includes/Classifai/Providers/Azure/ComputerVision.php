@@ -92,7 +92,7 @@ class ComputerVision extends Provider {
 				</label>
 			</div>
 			<div class="misc-pub-section">
-				<label for="rescan-captions">
+				<label for="rescan-tags">
 					<input type="checkbox" value="yes" id="rescan-captions" name="rescan-tags"/>
 					<?php echo esc_html( $tags ); ?>
 				</label>

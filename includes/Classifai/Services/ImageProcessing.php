@@ -48,16 +48,20 @@ class ImageProcessing extends Service {
 	 * @param \WP_post $post        Post object for the attachment being viewed.
 	 */
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
-		$form_fields['rescan_alt_tags'] = [
-			'label' => __( 'Classifai Alt Tags', 'classifai' ),
-			'input' => 'html',
-			'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
-		];
-		$form_fields['rescan_captions'] = [
-			'label' => __( 'Classifai Image Tags', 'classifai' ),
-			'input' => 'html',
-			'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
-		];
+		$screen = get_current_screen();
+		// Screen returns null on the Media library page.
+		if ( ! $screen ) {
+			$form_fields['rescan_alt_tags'] = [
+				'label' => __( 'Classifai Alt Tags', 'classifai' ),
+				'input' => 'html',
+				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
+			];
+			$form_fields['rescan_captions'] = [
+				'label' => __( 'Classifai Image Tags', 'classifai' ),
+				'input' => 'html',
+				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
+			];
+		}
 		return $form_fields;
 	}
 
