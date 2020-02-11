@@ -50,16 +50,20 @@ class ImageProcessing extends Service {
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
 		$screen = get_current_screen();
 		// Screen returns null on the Media library page.
+		$image_tags = wp_get_object_terms( $post->ID, 'classifai-image-tags' );
+		$alt_tags   = get_post_meta( $post->ID, 'classifai_computer_vision_captions', true );
 		if ( ! $screen ) {
+			$alt_tags_text   = empty( get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$form_fields['rescan_alt_tags'] = [
 				'label' => __( 'Classifai Alt Tags', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
 			];
 			$form_fields['rescan_captions'] = [
 				'label' => __( 'Classifai Image Tags', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . __( 'Rescan', 'classifai' ) . '<span class="spinner" style="display:none;"></span></button>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
 			];
 		}
 		return $form_fields;

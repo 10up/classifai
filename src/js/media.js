@@ -9,7 +9,7 @@
 	 */
 	const handleClick = ( { button, endpoint, callback = false } ) => {
 		const postID = button.getAttribute( 'data-id' );
-		const [ spinner ] = button.getElementsByClassName( 'spinner' );
+		const [ spinner ] = button.parentNode.getElementsByClassName( 'spinner' );
 		
 		button.setAttribute( 'disabled', 'disabled' );
 		spinner.style.display = 'inline-block';
@@ -20,6 +20,7 @@
 			button.removeAttribute( 'disabled' );
 			spinner.style.display = 'none';
 			spinner.classList.remove( 'is-active' );
+			button.textContent = 'Rescan';
 			callback && callback( response );
 		} );
 	};
