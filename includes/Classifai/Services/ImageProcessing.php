@@ -50,10 +50,8 @@ class ImageProcessing extends Service {
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
 		$screen = get_current_screen();
 		// Screen returns null on the Media library page.
-		$image_tags = wp_get_object_terms( $post->ID, 'classifai-image-tags' );
-		$alt_tags   = get_post_meta( $post->ID, 'classifai_computer_vision_captions', true );
 		if ( ! $screen ) {
-			$alt_tags_text   = empty( get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+			$alt_tags_text   = ( ! get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$form_fields['rescan_alt_tags'] = [
 				'label' => __( 'Classifai Alt Tags', 'classifai' ),

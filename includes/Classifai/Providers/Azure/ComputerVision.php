@@ -284,6 +284,7 @@ class ComputerVision extends Provider {
 	 * @param int   $attachment_id Post ID for the attachment.
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
+		$rtn = '';
 		/**
 		 * Filter the captions returned from the API.
 		 *
@@ -298,7 +299,7 @@ class ComputerVision extends Provider {
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
-				return esc_html( $captions[0]->text );
+				$rtn = $captions[0]->text;
 			} else {
 				/**
 				 * Fire an action if there were no captions added.
@@ -310,6 +311,8 @@ class ComputerVision extends Provider {
 			}
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+			// return the caption or empty string
+			return $rtn;
 		}
 	}
 
