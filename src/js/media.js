@@ -10,6 +10,7 @@
 	const handleClick = ( { button, endpoint, callback = false } ) => {
 		const postID = button.getAttribute( 'data-id' );
 		const [ spinner ] = button.parentNode.getElementsByClassName( 'spinner' );
+		const { __ } = wp.i18n;
 		
 		button.setAttribute( 'disabled', 'disabled' );
 		spinner.style.display = 'inline-block';
@@ -20,7 +21,7 @@
 			button.removeAttribute( 'disabled' );
 			spinner.style.display = 'none';
 			spinner.classList.remove( 'is-active' );
-			button.textContent = 'Rescan';
+			button.textContent = __( 'Rescan', 'classifai' );
 			callback && callback( response );
 		} );
 	};
