@@ -26,7 +26,7 @@
 
 * PHP 7.0+
 * [WordPress](http://wordpress.org) 5.0+
-* To utilize the Lanaguage Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
+* To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Installation
@@ -61,7 +61,7 @@
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
-- Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
+- Choose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
 #### 4. Save Post or run WP CLI command to batch classify posts
 
