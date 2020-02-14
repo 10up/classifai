@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
 	entry: {
-		'editor': './src/js/editor.js'
+		'editor': [ './src/js/editor.js', './src/js/post-sidebar.js' ]
 	},
 	output: {
 		filename: '[name].min.js',

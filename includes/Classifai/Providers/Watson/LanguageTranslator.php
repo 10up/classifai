@@ -44,8 +44,24 @@ class LanguageTranslator extends Provider {
 			$service
 		);
 
+		$this->register_post_meta();
+
 		add_action( 'add_meta_boxes', array( $this, 'override_language_metabox' ) );
 		add_action( 'save_post', array( $this, 'save_override_language' ) );
+	}
+
+	public function register_post_meta() {
+		register_post_meta( 'post', 'classifai_override_language', array(
+			'show_in_rest' => true,
+			'type'         => 'string',
+			'single'       => true,
+		) );
+
+		register_post_meta( 'post', 'classifai_override_language_opt_in', array(
+			'show_in_rest' => true,
+			'type'         => 'integer',
+			'single'       => true,
+		) );
 	}
 
 	/**

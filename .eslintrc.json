@@ -2,5 +2,13 @@
   "globals": {
     "wp": "readable"
   },
-  "extends": "@10up/eslint-config"
+  "extends": [ "@10up/eslint-config", "eslint:recommended", "plugin:react/recommended" ],
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "rules": {
+        "camelcase": "off"
+      }
+    }
+  ]
 }
