@@ -7,6 +7,9 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
 
+use function Classifai\computer_vision_max_filesize;
+use function Classifai\get_largest_acceptable_image_url;
+
 class ComputerVision extends Provider {
 
 	/**
@@ -48,6 +51,7 @@ class ComputerVision extends Provider {
 		if ( empty( $options ) ) {
 			return false;
 		}
+
 		return true;
 	}
 
@@ -55,25 +59,52 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'process_image' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
-
 	/**
-	 * Provides the max filesize for the ComputerVision service.
+	 * Adds smart-cropped image thumbnails to the attachment metadata.
 	 *
-	 * @return int
+	 * @since 1.5.0
+	 * @filter wp_generate_attachment_metadata
 	 *
-	 * @since 1.4.0
+	 * @param array $metadata Attachment metadata.
+	 * @param int   $attachment_id Attachment ID.
+	 * @return array Filtered attachment metadata.
 	 */
-	public function get_max_filesize() {
+	public function smart_crop_image( $metadata, $attachment_id ) {
+		$settings = $this->get_settings();
+
+		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
+			return $metadata;
+		}
+
+		$should_smart_crop = isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'];
+
 		/**
-		 * Filters the ComputerVision maximum allowed filesize.
+		 * Filters whether to apply smart cropping to the current image.
 		 *
-		 * @param int Default 4MB.
+		 * @since 1.5.0
+		 *
+		 * @param boolean Whether to apply smart cropping. The default value is set in ComputerVision settings.
+		 * @param array   Image metadata.
+		 * @param int     The attachment ID.
 		 */
-		return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
+			return $metadata;
+		}
+
+		// Direct file system access is required for the current implementation of this feature.
+		$access_type = get_filesystem_method();
+		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
+			return $metadata;
+		}
+
+		$smart_cropping = new SmartCropping( $settings );
+
+		return $smart_cropping->generate_attachment_metadata( $metadata, intval( $attachment_id ) );
 	}
 
 	/**
@@ -84,7 +115,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return mixed
 	 */
-	public function process_image( $metadata, $attachment_id ) {
+	public function generate_image_alt_tags( $metadata, $attachment_id ) {
 
 		$settings = $this->get_settings();
 		if (
@@ -92,10 +123,11 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_captions']
 		) {
 			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-				$image_url = $this->get_largest_acceptable_image_url(
+				$image_url = get_largest_acceptable_image_url(
 					get_attached_file( $attachment_id ),
 					wp_get_attachment_url( $attachment_id, 'full' ),
-					$metadata['sizes']
+					$metadata['sizes'],
+					computer_vision_max_filesize()
 				);
 			} else {
 				$image_url = wp_get_attachment_url( $attachment_id, 'full' );
@@ -119,48 +151,6 @@ class ComputerVision extends Provider {
 		}
 
 		return $metadata;
-	}
-
-	/**
-	 * Retrieves the URL of the largest version of an attachment image accepted by the ComputerVision service.
-	 *
-	 * @param string $full_image The path to the full-sized image source file.
-	 * @param string $full_url   The URL of the full-sized image.
-	 * @param array  $sizes      Intermediate size data from attachment meta.
-	 * @return string|null The image URL, or null if no acceptable image found.
-	 *
-	 * @since 1.4.0
-	 */
-	public function get_largest_acceptable_image_url( $full_image, $full_url, $sizes ) {
-		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		if ( $file_size && $this->get_max_filesize() >= $file_size ) {
-			return $full_url;
-		}
-
-		// Sort the image sizes in order of total width + height, descending.
-		$sort_sizes = function( $size_1, $size_2 ) {
-			$size_1_total = $size_1['width'] + $size_1['height'];
-			$size_2_total = $size_2['width'] + $size_2['height'];
-
-			if ( $size_1_total === $size_2_total ) {
-				return 0;
-			}
-
-			return $size_1_total > $size_2_total ? -1 : 1;
-		};
-
-		usort( $sizes, $sort_sizes );
-
-		foreach ( $sizes as $size ) {
-			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
-			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-
-			if ( $file_size && $this->get_max_filesize() >= $file_size ) {
-				return str_replace( basename( $full_url ), $size['file'], $full_url );
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -396,6 +386,23 @@ class ComputerVision extends Provider {
 				'options'   => $options,
 			]
 		);
+
+		add_settings_field(
+			'enable-smart-cropping',
+			esc_html__( 'Enable smart cropping', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_smart_cropping',
+				'input_type'    => 'checkbox',
+				'default_value' => false,
+				'description'   => __(
+					'Crop images around a region of interest identified by ComputerVision',
+					'classifai'
+				),
+			]
+		);
 	}
 
 	/**
@@ -457,6 +464,9 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
+		$smart_cropping_enabled                = isset( $settings['enable_smart_cropping'] ) ? '1' : 'no';
+		$new_settings['enable_smart_cropping'] = $smart_cropping_enabled;
+
 		return $new_settings;
 	}
 
@@ -497,6 +507,7 @@ class ComputerVision extends Provider {
 	 * Provides debug information related to the provider.
 	 *
 	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
+	 * @return array Keyed array of debug information.
 	 * @since 1.4.0
 	 */
 	public function get_provider_debug_information( $settings = null ) {
