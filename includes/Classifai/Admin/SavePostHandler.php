@@ -193,7 +193,7 @@ class SavePostHandler {
 			return false;
 		}
 
-		// Support custome post types with custom rest base.
+		// Support custom post types with custom rest base.
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
