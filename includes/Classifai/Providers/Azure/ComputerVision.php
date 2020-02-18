@@ -81,8 +81,8 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
-		$captions = get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ? __( 'Rescan Captions', 'classifai' ) : __( 'Generate Captions', 'classifai' );
-		$tags     = get_post_meta( $post->ID, 'classifai_computer_vision_image_tags', true ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Captions', 'classifai' ) : __( 'Generate Captions', 'classifai' );
+		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">

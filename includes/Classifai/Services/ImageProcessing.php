@@ -51,7 +51,7 @@ class ImageProcessing extends Service {
 		$screen = get_current_screen();
 		// Screen returns null on the Media library page.
 		if ( ! $screen ) {
-			$alt_tags_text   = ( ! get_post_meta( $post->ID, 'classifai_computer_vision_captions', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$form_fields['rescan_alt_tags'] = [
 				'label' => __( 'Classifai Alt Tags', 'classifai' ),
