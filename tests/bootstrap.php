@@ -6,6 +6,7 @@
 
 $_tests_dir = getenv( 'WP_TESTS_DIR' );
 
+define( 'FS_METHOD', 'direct' );
 define( 'TEST_DIR', dirname( __FILE__ ) );
 define( 'PHPUNIT_RUNNER', true );
 
