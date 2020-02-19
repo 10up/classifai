@@ -234,8 +234,13 @@ class NLU extends Provider {
 			function() {
 				printf(
 					wp_kses(
-						__( 'Don\'t have an IBM Cloud account yet? <a href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
-						[ 'a' => [] ]
+						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
 					),
 					esc_url( 'https://cloud.ibm.com/registration' ),
 					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
