@@ -7,7 +7,7 @@
 * [Features](#features)
 * [Requirements](#requirements)
 * [Installation](#installation)
-* [Set Up ClassifAI account](#set-up-classifai-account)
+* [Register ClassifAI account](#register-classifai-account)
 * [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
@@ -39,13 +39,13 @@
 
 #### 2. Activate Plugin
 
-## Set Up ClassifAI account
+## Register ClassifAI account
 
 ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
 
-#### 1. Sign up for a ClassifAI Team account
-- Register for a free ClassifAI Team account [here](https://classifaiplugin.com/#cta).
-- Check for an email from ClassifAI Team which contains the registration key.
+#### 1. Register for a ClassifAI account
+- Register for a free ClassifAI account [here](https://classifaiplugin.com/#cta).
+- Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
 #### 2. Configure ClassifAI API Keys under admin area > ClassifAI
