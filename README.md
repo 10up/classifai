@@ -62,7 +62,7 @@
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
-- Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
+- Choose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
 #### 4. Save Post or run WP CLI command to batch classify posts
 
