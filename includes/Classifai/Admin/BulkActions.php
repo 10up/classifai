@@ -125,7 +125,7 @@ class BulkActions {
 
 		$actions['classify'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( wp_nonce_url( admin_url( $current_screen->parent_file . '&action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
+			esc_url( wp_nonce_url( admin_url( $current_screen->parent_file . '?action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
 			esc_html__( 'Classify', 'classifai' )
 		);
 
