@@ -6,9 +6,10 @@
 ## Table of Contents
 * [Features](#features)
 * [Requirements](#requirements)
+* [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
+* [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
 * [Data Gathering](#data-gathering)
@@ -31,6 +32,14 @@
 * To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
+## Pricing
+
+Note that there is no cost to using ClassifAI and that both IBM Watson and Microsoft Azure have free plans for their AI services, but that above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage.
+
+The service that powers ClassifAI's Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
+
+The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+
 ## Installation
 
 #### 1. Download or Clone this repo, install dependencies and build.
@@ -52,7 +61,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
-## Set Up Content Tagging (via IBM Watson)
+## Set Up Language Processing (via IBM Watson)
 
 #### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
@@ -87,8 +96,6 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
 - The file must be externally accessible via URL (i.e. local sites and setups that block direct file access will not work out of the box)
-
-Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 #### 1. Sign up for Azure services
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
