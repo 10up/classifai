@@ -61,7 +61,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
-## Set Up Lanauge Processing (via IBM Watson)
+## Set Up Language Processing (via IBM Watson)
 
 #### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
