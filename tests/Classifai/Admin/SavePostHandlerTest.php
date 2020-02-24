@@ -34,6 +34,9 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 
 		$this->assertEquals( false, $this->save_post_handler->is_rest_route() );
 
+		$_SERVER['REQUEST_URI'] = '/wp-json/wp/v2/users/me';
+		$this->assertEquals( false, $this->save_post_handler->is_rest_route() );
+
 		$_SERVER['REQUEST_URI'] = '/wp-json/wp/v2/posts/1';
 		$this->assertEquals( true, $this->save_post_handler->is_rest_route() );
 
