@@ -9,7 +9,7 @@
 * [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up Langauge Processing](#set-up-language-processing-via-ibm-watson)
+* [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
 * [Data Gathering](#data-gathering)
