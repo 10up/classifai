@@ -50,7 +50,7 @@ class Notifications {
 		if ( $needs_setup ) {
 			printf(
 				'<div class="notice notice-warning"><p><a href="%s">' . esc_html__( 'ClassifAI requires setup', 'classifai' ) . '</a></p></div>',
-				esc_url( admin_url( 'options-general.php?page=classifai_settings' ) )
+				esc_url( admin_url( 'admin.php?page=classifai_settings' ) )
 			);
 			delete_transient( 'classifai_activation_notice' );
 		}
