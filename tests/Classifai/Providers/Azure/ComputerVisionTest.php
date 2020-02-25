@@ -13,19 +13,12 @@ use Classifai\Providers\Azure\ComputerVision;
  * @package Classifai\Tests\Providers\Azure;
  *
  * @group azure
+ * @coversDefaultClass \Classifai\Providers\Azure\ComputerVision
  */
 class ComputerVisionTest extends WP_UnitTestCase {
-	protected $computer_vision;
-
 	/**
-	 * Setup method.
+	 * Tear down method.
 	 */
-	public function setUp() {
-		parent::setUp();
-
-		$this->computer_vision = new ComputerVision( 'my_service' );
-	}
-
 	public function tearDown() {
 		parent::tearDown();
 
@@ -33,45 +26,57 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests the get_largest_acceptable_image_url method.
+	 * Provides a ComputerVision instance.
+	 *
+	 * @return ComputerVision
 	 */
-	public function test_get_largest_acceptable_image_url() {
-		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' ); // ~172KB image.
+	public function get_computer_vision() : ComputerVision {
+		return new ComputerVision( 'my_service' );
+	}
 
-		$set_150kb_max_filesize = function() {
-			return 150000;
+	/**
+	 * @covers ::smart_crop_image
+	 */
+	public function test_smart_crop_image() {
+		$this->assertEquals(
+			'non-array-data',
+			$this->get_computer_vision()->smart_crop_image( 'non-array-data', 999999 )
+		);
+
+		$this->assertEquals(
+			[ 'no-smart-cropping' => 1 ],
+			$this->get_computer_vision()->smart_crop_image(
+				[ 'no-smart-cropping' => 1 ],
+				999999
+			)
+		);
+
+		add_filter( 'classifai_should_smart_crop_image', '__return_true' );
+
+		$filter_file_system_method = function() {
+			return 'not-direct';
 		};
-		add_filter( 'classifai_computervision_max_filesize', $set_150kb_max_filesize );
 
-		$url = $this->computer_vision->get_largest_acceptable_image_url(
-			get_attached_file( $attachment ),
-			wp_get_attachment_url( $attachment, 'full' ),
-			wp_get_attachment_metadata( $attachment )['sizes']
+		add_filter( 'filesystem_method', $filter_file_system_method );
+		$this->assertEquals(
+			[ 'not-direct-file-system-method' => 1 ],
+			$this->get_computer_vision()->smart_crop_image(
+				[ 'not-direct-file-system-method' => 1 ],
+				999999
+			)
 		);
-		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/33772-1536x864.jpg', date( 'Y' ), date( 'm' ) ), $url );
+		remove_filter( 'filesystem_method', $filter_file_system_method );
 
-		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/2004-07-22-DSC_0008.jpg' ); // ~109kb image.
-		$url = $this->computer_vision->get_largest_acceptable_image_url(
-			get_attached_file( $attachment ),
-			wp_get_attachment_url( $attachment, 'full' ),
-			wp_get_attachment_metadata( $attachment )['sizes']
+		// Test that SmartCropping is initiated and runs, as will be indicated in the coverage report, though it won't
+		// actually do anything because the data and attachment are invalid.
+		$this->assertEquals(
+			[ 'my-data' => 1 ],
+			$this->get_computer_vision()->smart_crop_image(
+				[ 'my-data' => 1 ],
+				999999
+			)
 		);
-		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/2004-07-22-DSC_0008.jpg', date( 'Y' ), date( 'm' ) ), $url );
 
-		remove_filter( 'classifai_computervision_max_filesize', $set_150kb_max_filesize );
-
-		$set_1kb_max_filesize = function() {
-			return 1000;
-		};
-		add_filter( 'classifai_computervision_max_filesize', $set_1kb_max_filesize );
-
-		$url = $this->computer_vision->get_largest_acceptable_image_url(
-			get_attached_file( $attachment ),
-			wp_get_attachment_url( $attachment, 'full' ),
-			wp_get_attachment_metadata( $attachment )['sizes']
-		);
-		$this->assertNull( $url );
-
-		remove_filter( 'classifai_computervision_max_filesize', $set_1kb_max_filesize );
+		remove_filter( 'classifai_should_smart_crop_image', '__return_true' );
 	}
 }
