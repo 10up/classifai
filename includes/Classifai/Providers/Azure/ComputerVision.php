@@ -135,7 +135,7 @@ class ComputerVision extends Provider {
 
 			if ( ! empty( $image_url ) ) {
 				$image_scan = $this->scan_image( $image_url );
-				set_transient( 'classifai_azure_computer_vision_latest_response', $image_scan, DAY_IN_SECONDS * 30 );
+				set_transient( 'classifai_azure_computer_vision_image_scan_latest_response', $image_scan, DAY_IN_SECONDS * 30 );
 				if ( ! is_wp_error( $image_scan ) ) {
 					// Check for captions
 					if ( isset( $image_scan->description->captions ) ) {
@@ -519,21 +519,22 @@ class ComputerVision extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
-			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
-			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response(),
+			__( 'Authenticated', 'classifai' )                    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )                          => $settings['url'] ?? '',
+			__( 'Caption threshold', 'classifai' )                => $settings['caption_threshold'] ?? null,
+			__( 'Latest response - Image Scan', 'classifai' )     => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_scan_latest_response' ) ),
+			__( 'Latest response - Smart Cropping', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ),
 		];
 	}
 
 	/**
 	 * Format the result of most recent request.
 	 *
+	 * @param mixed $data Response data to format.
+	 *
 	 * @return string
 	 */
-	private function get_formatted_latest_response() {
-		$data = get_transient( 'classifai_azure_computer_vision_latest_response' );
-
+	private function get_formatted_latest_response( $data ) {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
