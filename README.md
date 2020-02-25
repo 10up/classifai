@@ -76,7 +76,6 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 ##### If your credentials contain an API Key, then:
 - In the `API URL` field enter the URL
-- In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
 ##### If your credentials contain a username and password, then:

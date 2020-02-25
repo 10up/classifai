@@ -34,16 +34,20 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			[
 				'Authenticated',
 				'API URL',
-				'Caption threshold'
+				'Caption threshold',
+				'Latest response - Image Scan',
+				'Latest response - Smart Cropping',
 			],
 			array_keys( $this->provider->get_provider_debug_information() )
 		);
 
 		$this->assertEquals(
 			[
-				'Authenticated'     => 'yes',
-				'API URL'           => 'my-azure-url.com',
-				'Caption threshold' => 77,
+				'Authenticated'                    => 'yes',
+				'API URL'                          => 'my-azure-url.com',
+				'Caption threshold'                => 77,
+				'Latest response - Image Scan'     => 'N/A',
+				'Latest response - Smart Cropping' => 'N/A',
 			],
 			$this->provider->get_provider_debug_information(
 				[
