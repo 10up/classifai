@@ -53,8 +53,9 @@ class Plugin {
 				$post_type,
 				'_classifai_error',
 				[
-					'show_in_rest' => true,
-					'single'       => true,
+					'show_in_rest'  => true,
+					'single'        => true,
+					'auth_callback' => '__return_true',
 				]
 			);
 		}
