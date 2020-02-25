@@ -674,11 +674,43 @@ class NLU extends Provider {
 		$credentials = $settings['credentials'] ?? [];
 
 		return [
-			__( 'Configured', 'classifai' )   => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
-			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
-			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
-			__( 'Features', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+			__( 'Configured', 'classifai' )      => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )         => $credentials['watson_url'] ?? '',
+			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
+			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
+			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response(),
 		];
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @return string
+	 */
+	private function get_formatted_latest_response() {
+		$data = get_transient( 'classifai_watson_nlu_latest_response' );
+
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		$formatted_data = array_intersect_key(
+			$data,
+			[
+				'usage'    => 1,
+				'language' => 1,
+			]
+		);
+
+		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
+			$formatted_data[ $key ] = count( $value );
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
 	}
 }
