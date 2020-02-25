@@ -264,7 +264,8 @@ class ServicesManager {
 			$this->menu_title,
 			'manage_options',
 			'classifai_settings',
-			[ $this, 'render_settings_page' ]
+			[ $this, 'render_settings_page' ],
+			CLASSIFAI_PLUGIN_URL . 'assets/img/menu-icon.svg'
 		);
 
 		$this->init_services_settings();
