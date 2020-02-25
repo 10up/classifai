@@ -216,10 +216,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * : Comma delimeted Attachment IDs to classify
 	 *
 	 * [--limit=<limit>]
-	 * : Limit classification to N attachments. Default false
+	 * : Limit classification to N attachments. Default 100.
+	 *
+	 * [--skip=<skip>]
+	 * : Skip first N attachments. Default false.
 	 *
 	 * [--force]
-	 * : Force classification to N attachments. Default false
+	 * : Force classification to N attachments. Default false.
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
@@ -357,7 +360,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @return array
 	 */
 	private function get_attachment_to_classify( $opts = [] ) {
-		$limit = is_numeric( $opts['limit'] ) ? $opts['limit'] : - 1;
+		$limit = is_numeric( $opts['limit'] ) ? $opts['limit'] : 100;
 
 		$query_params = [
 			'post_type'      => 'attachment',
@@ -366,6 +369,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'fields'         => 'ids',
 			'posts_per_page' => $limit,
 		];
+
+		if ( ! empty( $opts['skip'] ) ) {
+			$query_params['offset'] = $opts['skip'];
+		}
 
 		if ( ! $opts['force'] ) {
 			$query_params['meta_query'] = [
