@@ -2,6 +2,7 @@ release
 /vendor/*
 phpunit.xml
 /dist
+coverage
 
 debug.log
 
