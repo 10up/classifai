@@ -7,7 +7,7 @@
   "project_path": "%WP_ROOT%/wp-content/plugins/classifai",
   "enforce_clean_db": true,
   "repository": "10up",
-  "snapshot_id": "fb5b0ed1f35e50d2360bef44b9d52ea0",
+  "snapshot_id": "d611e1485da06e153aef192471893fc6",
   "bootstrap": "tests\/e2e\/wpacceptance\/bootstrap.php",
   "exclude": [
     "node_modules",
