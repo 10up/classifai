@@ -1,7 +1,9 @@
 {
-    "name": "wpacceptance",
-    "tests": [
-        "./tests/e2e/wpacceptance/*.php"
+  "name": "classifai",
+  "license": "GPLv2",
+  "repository": "https://github.com/10up/classifai/",
+  "tests": [
+    "./tests/e2e/wpacceptance/*.php"
     ],
     "project_path": "%WP_ROOT%/wp-content/plugins/classifai",
     "enforce_clean_db": true,
