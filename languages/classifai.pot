@@ -1,14 +1,14 @@
-# Copyright (C) 2019 10up
+# Copyright (C) 2020 10up
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
 "Project-Id-Version: ClassifAI 1.4.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2019-09-26 21:07:08+00:00\n"
+"POT-Creation-Date: 2020-01-23 09:41:42+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2019-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2020-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.3\n"
@@ -60,6 +60,8 @@ msgstr ""
 
 #: includes/Classifai/Providers/AWS/Comprehend.php:61
 #: includes/Classifai/Providers/Azure/ComputerVision.php:320
+#: includes/Classifai/Providers/Watson/NLU.php:204
+#: includes/Classifai/Providers/Watson/NLU.php:288
 msgid "API Key"
 msgstr ""
 
@@ -72,7 +74,7 @@ msgid "Automatically Caption Images"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:339
-msgid "Uploaded images will be auto-captioned"
+msgid "Images will be captioned with alt text upon upload"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:344
@@ -90,7 +92,7 @@ msgid "Automatically Tag Images"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:365
-msgid "Uploaded images will be auto-tagged"
+msgid "Images will be tagged upon upload"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:370
@@ -98,43 +100,42 @@ msgid "Tag Confidence Threshold"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:378
-#: includes/Classifai/Providers/Azure/ComputerVision.php:397
 msgid ""
 "Minimum confidence score for automatically applied image tags, numeric "
-"value from 0-100. Recommended to be set to at least 75."
+"value from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:390
 msgid "Tag Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:434
+#: includes/Classifai/Providers/Azure/ComputerVision.php:433
 msgid "Please enter your credentials"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:511
+#: includes/Classifai/Providers/Azure/ComputerVision.php:510
 msgid "Authenticated"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:511
-#: includes/Classifai/Providers/Watson/NLU.php:610
+#: includes/Classifai/Providers/Azure/ComputerVision.php:510
+#: includes/Classifai/Providers/Watson/NLU.php:672
 #: includes/Classifai/Services/ServicesManager.php:363
 msgid "yes"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:511
-#: includes/Classifai/Providers/Watson/NLU.php:610
+#: includes/Classifai/Providers/Azure/ComputerVision.php:510
+#: includes/Classifai/Providers/Watson/NLU.php:672
 #: includes/Classifai/Services/ServicesManager.php:363
 msgid "no"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:512
-#: includes/Classifai/Providers/Watson/NLU.php:219
-#: includes/Classifai/Providers/Watson/NLU.php:611
+#: includes/Classifai/Providers/Azure/ComputerVision.php:511
+#: includes/Classifai/Providers/Watson/NLU.php:260
+#: includes/Classifai/Providers/Watson/NLU.php:673
 msgid "API URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:513
+#: includes/Classifai/Providers/Azure/ComputerVision.php:512
 msgid "Caption threshold"
 msgstr ""
 
@@ -190,47 +191,60 @@ msgstr ""
 msgid "Concept Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:231
+#: includes/Classifai/Providers/Watson/NLU.php:203
+msgid "API Password"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:205
+#: includes/Classifai/Providers/Watson/NLU.php:307
+msgid "Use an API Key instead?"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:206
+#: includes/Classifai/Providers/Watson/NLU.php:306
+msgid "Use a username/password instead?"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:237
+msgid ""
+"Don't have an IBM Cloud account yet? <a href=\"%1$s\">Register for one</a> "
+"and set up a <a href=\"%2$s\">Natural Language Understanding</a> Resource "
+"to get your API key."
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:273
 msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:240
-msgid "If your credentials do not include a username, it is typically apikey"
-msgstr ""
-
-#: includes/Classifai/Providers/Watson/NLU.php:245
-msgid "API Key / Password"
-msgstr ""
-
-#: includes/Classifai/Providers/Watson/NLU.php:266
+#: includes/Classifai/Providers/Watson/NLU.php:328
 msgid "Post Types to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:390
+#: includes/Classifai/Providers/Watson/NLU.php:452
 msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:395
+#: includes/Classifai/Providers/Watson/NLU.php:457
 msgid "Enable"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:499
+#: includes/Classifai/Providers/Watson/NLU.php:561
 msgid "IBM Watson NLU Authentication Failed. Please check credentials."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:610
+#: includes/Classifai/Providers/Watson/NLU.php:672
 msgid "Configured"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:612
+#: includes/Classifai/Providers/Watson/NLU.php:674
 msgid "API username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:613
+#: includes/Classifai/Providers/Watson/NLU.php:675
 msgid "Post types"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:614
+#: includes/Classifai/Providers/Watson/NLU.php:676
 msgid "Features"
 msgstr ""
 
