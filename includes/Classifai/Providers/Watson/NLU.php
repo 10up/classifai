@@ -112,6 +112,7 @@ class NLU extends Provider {
 	 */
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -173,38 +174,60 @@ class NLU extends Provider {
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
-		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-			wp_enqueue_script(
-				'classifai-gutenberg-support',
-				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
-				[ 'editor' ],
-				CLASSIFAI_PLUGIN_VERSION,
-				true
-			);
-		}
 	}
 
 	/**
-	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
+	 * Enqueue the admin scripts.
 	 */
-	public function init_admin_scripts() {
-		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-			wp_enqueue_script(
-				'classifai-gutenberg-support',
-				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
-				[ 'editor' ],
-				CLASSIFAI_PLUGIN_VERSION,
-				true
-			);
-		}
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-admin',
+			CLASSIFAI_PLUGIN_URL . 'dist/js/admin.min.js',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+		wp_localize_script(
+			'classifai-admin',
+			'ClassifAI',
+			[
+				'api_password' => __( 'API Password', 'classifai' ),
+				'api_key'      => __( 'API Key', 'classifai' ),
+				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+			]
+		);
 	}
 
 	/**
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {
+		// Add the settings section.
+		add_settings_section(
+			$this->get_option_name(),
+			$this->provider_service_name,
+			function() {
+				printf(
+					wp_kses(
+						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://cloud.ibm.com/registration' ),
+					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
+				);
+			},
+			$this->get_option_name()
+		);
+
 		// Create the Credentials Section.
 		$this->do_credentials_section();
+
 		// Create content tagging section
 		$this->do_nlu_features_sections();
 	}
@@ -213,7 +236,6 @@ class NLU extends Provider {
 	 * Helper method to create the credentials section
 	 */
 	protected function do_credentials_section() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
 		add_settings_field(
 			'url',
 			esc_html__( 'API URL', 'classifai' ),
@@ -224,6 +246,7 @@ class NLU extends Provider {
 				'label_for'    => 'watson_url',
 				'option_index' => 'credentials',
 				'input_type'   => 'text',
+				'large'        => true,
 			]
 		);
 		add_settings_field(
@@ -237,12 +260,13 @@ class NLU extends Provider {
 				'option_index'  => 'credentials',
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
-				'description'   => __( 'If your credentials do not include a username, it is typically apikey', 'classifai' ),
+				'large'         => true,
+				'class'         => $this->use_usename_password() ? 'hidden' : '',
 			]
 		);
 		add_settings_field(
 			'password',
-			esc_html__( 'API Key / Password', 'classifai' ),
+			esc_html__( 'API Key', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -250,17 +274,36 @@ class NLU extends Provider {
 				'label_for'    => 'watson_password',
 				'option_index' => 'credentials',
 				'input_type'   => 'password',
+				'large'        => true,
 			]
 		);
+		add_settings_field(
+			'toggle',
+			'',
+			function() {
+				printf(
+					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
+					$this->use_usename_password()
+						? esc_html__( 'Use a username/password instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' )
+				);
+			},
+			$this->get_option_name(),
+			$this->get_option_name()
+		);
+	}
+
+	/**
+	 * Check if a username/password is using instead of API key.
+	 */
+	protected function use_usename_password() {
+		return 'apikey' === $this->get_settings( 'credentials' )['watson_username'];
 	}
 
 	/**
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
-		// Add the settings section.
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
@@ -307,7 +350,7 @@ class NLU extends Provider {
 			case 'text':
 			case 'password':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = 'regular-text';
+				$class = empty( $args['large'] ) ? 'regular-text' : 'large-text';
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
@@ -607,11 +650,43 @@ class NLU extends Provider {
 		$credentials = $settings['credentials'] ?? [];
 
 		return [
-			__( 'Configured', 'classifai' )   => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )      => $credentials['watson_url'] ?? '',
-			__( 'API username', 'classifai' ) => $credentials['watson_username'] ?? '',
-			__( 'Post types', 'classifai' )   => implode( ', ', $post_types ),
-			__( 'Features', 'classifai' )     => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+			__( 'Configured', 'classifai' )      => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )         => $credentials['watson_url'] ?? '',
+			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
+			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
+			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
+			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response(),
 		];
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @return string
+	 */
+	private function get_formatted_latest_response() {
+		$data = get_transient( 'classifai_watson_nlu_latest_response' );
+
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		$formatted_data = array_intersect_key(
+			$data,
+			[
+				'usage'    => 1,
+				'language' => 1,
+			]
+		);
+
+		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
+			$formatted_data[ $key ] = count( $value );
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
 	}
 }
