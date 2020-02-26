@@ -121,11 +121,9 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_row_action( $actions, $post ) {
-		$current_screen = get_current_screen();
-
 		$actions['classify'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( wp_nonce_url( admin_url( $current_screen->parent_file . '?action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
+			esc_url( wp_nonce_url( admin_url( 'edit.php?action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
 			esc_html__( 'Classify', 'classifai' )
 		);
 
