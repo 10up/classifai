@@ -197,6 +197,26 @@ Prints the normalized text that will be sent to the NLU API
 
 default: `false`
 
+#### 3. Classify Image 
+
+`$ wp classifai image {image_ids} [--limit=int] [--force]`
+
+Directly classify images using Azure Computer Vision.
+
+##### Options
+
+`--limit=int`
+
+Limit number of images to classify.
+
+default: `false`
+
+`--force`
+
+Force classifying images regardless of their `alt`.
+
+default: `false`
+
 ## Data Gathering
 
 ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
