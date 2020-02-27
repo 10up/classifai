@@ -11,6 +11,7 @@
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
     "makepot": "wpi18n makepot && echo '.pot file updated'"
+    "build:docs": "rm -rf hook_docs && jsdoc -c hookdoc-conf.json classifai.php includes"
   },
   "husky": {
     "hooks": {
@@ -38,9 +39,11 @@
     "eslint": "^6.3.0",
     "eslint-loader": "^3.0.0",
     "husky": "^3.0.5",
+    "jsdoc": "^3.6.3",
     "lint-staged": "^9.2.5",
     "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "webpack-cli": "^3.3.7",
+    "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
     "node-wp-i18n": "^1.2.3"
