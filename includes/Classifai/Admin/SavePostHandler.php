@@ -188,9 +188,20 @@ class SavePostHandler {
 	 * @return bool
 	 */
 	public function is_rest_route() {
-		if ( isset( $_SERVER['REQUEST_URI'] ) && false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/post' ) ) {
-			return true;
+
+		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
 		}
+
+		// Support custom post types with custom rest base.
+		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
+
+		foreach ( $rest_bases as $rest_base ) {
+			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) ) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 

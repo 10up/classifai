@@ -174,19 +174,10 @@ class NLU extends Provider {
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
-		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-			wp_enqueue_script(
-				'classifai-gutenberg-support',
-				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
-				[ 'editor' ],
-				CLASSIFAI_PLUGIN_VERSION,
-				true
-			);
-		}
 	}
 
 	/**
-	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
+	 * Enqueue the admin scripts.
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
@@ -206,21 +197,6 @@ class NLU extends Provider {
 				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
 			]
 		);
-	}
-
-	/**
-	 * Adds ClassifAI Gutenberg Support if on the Gutenberg editor page
-	 */
-	public function init_admin_scripts() {
-		if ( function_exists( 'is_gutenberg_page' ) && is_gutenberg_page() ) {
-			wp_enqueue_script(
-				'classifai-gutenberg-support',
-				CLASSIFAI_PLUGIN_URL . 'assets/js/classifai-gutenberg-support.js',
-				[ 'editor' ],
-				CLASSIFAI_PLUGIN_VERSION,
-				true
-			);
-		}
 	}
 
 	/**

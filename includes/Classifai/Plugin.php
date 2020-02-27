@@ -106,6 +106,7 @@ class Plugin {
 		$this->admin_helpers = [
 			'notifications' => new Admin\Notifications(),
 			'debug_info'    => new Admin\DebugInfo(),
+			'bulk_actions'  => new Admin\BulkActions(),
 		];
 
 		foreach ( $this->admin_helpers as $instance ) {
