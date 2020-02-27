@@ -2,6 +2,9 @@
 ( () => {
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
 	const $userField = document.getElementById( 'classifai-settings-watson_username' );
+
+	if ( null === $toggler || null === $userField ) return;
+
 	const $userFieldWrapper = $userField.closest( 'tr' );
 	const [$passwordFieldTitle] = document.getElementById( 'classifai-settings-watson_password' ).closest( 'tr' ).getElementsByTagName( 'label' );
 

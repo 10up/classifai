@@ -1,6 +1,7 @@
 {
   "globals": {
-    "wp": "readable"
+	"wp": "readable",
+	"jQuery": "readable"
   },
   "extends": "@10up/eslint-config"
 }
