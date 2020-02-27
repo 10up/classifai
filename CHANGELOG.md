@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.5.0] - 2020-02-27
+### Added
+- Smart image cropping via Microsoft Azure Computer Vision (props [@johnwatkins0](https://github.com/johnwatkins0), [@rickalee](https://github.com/rickalee), [@dinhtungdu](https://github.com/dinhtungdu), [@Ritesh-patel](https://github.com/Ritesh-patel) via [#149](https://github.com/10up/classifai/pull/149))
+- Process Existing Images with Microsoft Azure Computer Vision (props [@ryanwelcher](https://github.com/ryanwelcher), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#135](https://github.com/10up/classifai/pull/135))
+- Bulk processing for posts, pages, and images (props [@dinhtungdu](https://github.com/dinhtungdu), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#178](https://github.com/10up/classifai/pull/178))
+- WP-CLI command to bulk process images (props [@dinhtungdu](https://github.com/dinhtungdu), [@eflorea](https://github.com/eflorea), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#177](https://github.com/10up/classifai/pull/177))
+- ClassifAI settings and result of latest service provider requests to Site Health Info screen (props [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#180](https://github.com/10up/classifai/pull/180))
+- ClassifAI icon to WP Admin menu (props [@dinhtungdu](https://github.com/dinhtungdu), [@JackieKjome](https://github.com/JackieKjome), [@jeffpaul](https://github.com/jeffpaul) via [#173](https://github.com/10up/classifai/pull/173))
+- [WP Acceptance](https://github.com/10up/wpacceptance) end-to-end acceptance tests (props [@dinhtungdu](https://github.com/dinhtungdu), [@adamsilverstein](https://github.com/adamsilverstein), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#179](https://github.com/10up/classifai/pull/179))
+
+### Changed
+- Bump WordPress version "tested up to" 5.3 (props [@ryanwelcher](https://github.com/ryanwelcher) via [#160](https://github.com/10up/classifai/pull/160))
+- IBM Watson credentials settings UX (props [@dinhtungdu](https://github.com/dinhtungdu), [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen) via [#175](https://github.com/10up/classifai/pull/175))
+- PHP version error message when attempting to install ClassifAI with PHP lower than v7.0 (props [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#174](https://github.com/10up/classifai/pull/174))
+- Documentation updates (props [@jeffpaul](https://github.com/jeffpaul), [@kant](https://github.com/kant), [@dinhtungdu](https://github.com/dinhtungdu) via [#151](https://github.com/10up/classifai/pull/151), [#153](https://github.com/10up/classifai/pull/153), [#170](https://github.com/10up/classifai/pull/170), [#181](https://github.com/10up/classifai/pull/181), [#184](https://github.com/10up/classifai/pull/184))
+
+### Removed
+- Double slashes in IBM Watson JavaScript URL (props [@dinhtungdu](https://github.com/dinhtungdu) via [#168](https://github.com/10up/classifai/pull/168))
+
+### Fixed
+- Issue where pages are not scanned by Language Processing (props [@dinhtungdu](https://github.com/dinhtungdu), [@ryanwelcher](https://github.com/ryanwelcher) via [#164](https://github.com/10up/classifai/pull/164))
+- Properly saves protected meta in Gutenberg (props [@dinhtungdu](https://github.com/dinhtungdu) via [#172](https://github.com/10up/classifai/pull/172))
+- Duplicate notification and wrong settings link after activation (props [@dinhtungdu](https://github.com/dinhtungdu), [@eflorea](https://github.com/eflorea) via [#169](https://github.com/10up/classifai/pull/169))
+- PHP Coding Standards updates (props [@mmcachran](https://github.com/mmcachran) via [#156](https://github.com/10up/classifai/pull/156))
+- Integration test update (props [@johnwatkins0](https://github.com/johnwatkins0) via [#162](https://github.com/10up/classifai/pull/162))
+
 ## [1.4.0] - 2019-09-26
 ### Added
 - Image tagging via Azure Computer Vision (props @ryanwelcher via #125)
@@ -72,6 +98,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/master...develop
+[1.5.0]: https://github.com/10up/classifai/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/10up/classifai/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/10up/classifai/compare/1.3.1...1.3.2
 [1.3.1]: https://github.com/10up/classifai/compare/1.3.0...1.3.1
