@@ -219,4 +219,17 @@ abstract class Provider {
 	 * @since 1.4.0
 	 */
 	abstract public function get_provider_debug_information();
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id       The Post Id we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 *
+	 * @return mixed
+	 */
+	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+		return null;
+	}
 }

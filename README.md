@@ -22,6 +22,7 @@
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
+* Manually generate alt text and image tags for images
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
@@ -75,7 +76,6 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 ##### If your credentials contain an API Key, then:
 - In the `API URL` field enter the URL
-- In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
 ##### If your credentials contain a username and password, then:
@@ -197,6 +197,26 @@ Prints the normalized text that will be sent to the NLU API
 
 default: `false`
 
+#### 3. Classify Image 
+
+`$ wp classifai image {image_ids} [--limit=int] [--force]`
+
+Directly classify images using Azure Computer Vision.
+
+##### Options
+
+`--limit=int`
+
+Limit number of images to classify.
+
+default: `false`
+
+`--force`
+
+Force classifying images regardless of their `alt`.
+
+default: `false`
+
 ## Data Gathering
 
 ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
@@ -211,7 +231,7 @@ A complete listing of all notable changes to ClassifAI are documented in [CHANGE
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct, [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us, and [CREDITS.md](https://github.com/10up/classifai/blob/develop/CREDITS.md) for a listing of maintainers, contributors, and libraries for ClassifAI.
 
 ## Like what you see?
 
