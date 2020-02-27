@@ -143,7 +143,7 @@ function get_watson_username() {
 
 	if ( ! empty( $creds['watson_username'] ) ) {
 		return $creds['watson_username'];
-	} else if ( defined( 'WATSON_USERNAME' ) ) {
+	} elseif ( defined( 'WATSON_USERNAME' ) ) {
 		return WATSON_USERNAME;
 	} else {
 		return '';
@@ -164,7 +164,7 @@ function get_watson_password() {
 
 	if ( ! empty( $creds['watson_password'] ) ) {
 		return $creds['watson_password'];
-	} else if ( defined( 'WATSON_PASSWORD' ) ) {
+	} elseif ( defined( 'WATSON_PASSWORD' ) ) {
 		return WATSON_PASSWORD;
 	} else {
 		return '';
@@ -301,4 +301,71 @@ function get_feature_taxonomy( $feature ) {
 	 * @return string $taxonomy The filtered taxonomy.
 	 */
 	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
+}
+
+/**
+ * Provides the max filesize for the Computer Vision service.
+ *
+ * @since 1.4.0
+ *
+ * @return int
+ */
+function computer_vision_max_filesize() {
+	/**
+	 * Filters the Computer Vision maximum allowed filesize.
+	 *
+	 * @param int Default 4MB.
+	 */
+	return apply_filters( 'classifai_computer_vision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+}
+
+/**
+ * Callback for sorting images by width plus height, descending.
+ *
+ * @since 1.5.0
+ *
+ * @param array $size_1 Associative array containing width and height values.
+ * @param array $size_2 Associative array containing width and height values.
+ * @return int Returns -1 if $size_1 is larger, 1 if $size_2 is larger, and 0 if they are equal.
+ */
+function sort_images_by_size_cb( $size_1, $size_2 ) {
+	$size_1_total = $size_1['width'] + $size_1['height'];
+	$size_2_total = $size_2['width'] + $size_2['height'];
+
+	if ( $size_1_total === $size_2_total ) {
+		return 0;
+	}
+
+	return $size_1_total > $size_2_total ? -1 : 1;
+}
+
+/**
+ * Retrieves the URL of the largest version of an attachment image lower than a specified max size.
+ *
+ * @since 1.4.0
+ *
+ * @param string $full_image The path to the full-sized image source file.
+ * @param string $full_url   The URL of the full-sized image.
+ * @param array  $sizes      Intermediate size data from attachment meta.
+ * @param int    $max        The maximum acceptable size.
+ * @return string|null The image URL, or null if no acceptable image found.
+ */
+function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max = MB_IN_BYTES ) {
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	if ( $file_size && $max >= $file_size ) {
+		return $full_url;
+	}
+
+	usort( $sizes, __NAMESPACE__ . '\sort_images_by_size_cb' );
+
+	foreach ( $sizes as $size ) {
+		$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
+		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+		if ( $file_size && $max >= $file_size ) {
+			return str_replace( basename( $full_url ), $size['file'], $full_url );
+		}
+	}
+
+	return null;
 }

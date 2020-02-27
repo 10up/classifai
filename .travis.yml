@@ -1,8 +1,8 @@
 language: php
 
 php:
-  - 7.1
   - 7.2
+  - 7.3
 
 env:
   - WP_VERSION=latest WP_MULTISITE=0
@@ -18,6 +18,11 @@ before_script:
 script:
   - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
+  - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpsnapshots configure 10up --aws_key=$AWS_ACCESS_KEY --aws_secret=$AWS_SECRET_ACCESS_KEY --user_name=Travis --user_email=travis@10up.com; fi
+  - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpacceptance run; fi
+
+sudo: required
 
 services:
   - mysql
+  - docker
