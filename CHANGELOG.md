@@ -32,45 +32,45 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [1.4.0] - 2019-09-26
 ### Added
-- Image tagging via Azure Computer Vision (props @ryanwelcher via #125)
-- Search images by alt text and tags (props @helen via #134)
-- Hooks to catch alt text and image tags being returned from Azure (props @ryanwelcher via #125)
-- Plugin debug information within WordPress's Site Health Info screen (props @johnwatkins0 via #108)
-- Show a notice if you're running a development version of the plugin (props @helen via #144)
+- Image tagging via Azure Computer Vision (props [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#125](https://github.com/10up/classifai/pull/125))
+- Search images by alt text and tags (props [@helen](https://github.com/helen), [@ryanwelcher](https://github.com/ryanwelcher) via [#134](https://github.com/10up/classifai/pull/134))
+- Hooks to catch alt text and image tags being returned from Azure (props [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#125](https://github.com/10up/classifai/pull/125))
+- Plugin debug information within WordPress's Site Health Info screen (props [@johnwatkins0](https://github.com/johnwatkins0), [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#108](https://github.com/10up/classifai/pull/108))
+- Show a notice if you're running a development version of the plugin (props [@helen](https://github.com/helen), [@adamsilverstein](https://github.com/adamsilverstein), [@jeffpaul](https://github.com/jeffpaul) via [#144](https://github.com/10up/classifai/pull/144))
 
 ### Changed
-- Enable comma delimited list of Post IDs in WP CLI command for Watson NLU bulk language processing (props @adamsilverstein via #55)
+- Enable comma delimited list of Post IDs in WP CLI command for Watson NLU bulk language processing (props [@adamsilverstein](https://github.com/adamsilverstein), [@helen](https://github.com/helen) via [#55](https://github.com/10up/classifai/pull/55))
 
 ### Fixed
-- Provide backup behavior when full-sized image is greater than the maximum size accepted by Azure Computer Vision (props @johnwatkins0 via #110)
-- Don't show the admin menu alert when NLU is unconfigured (props @helen via #142)
+- Provide backup behavior when full-sized image is greater than the maximum size accepted by Azure Computer Vision (props [@johnwatkins0](https://github.com/johnwatkins0), [@adamsilverstein](https://github.com/adamsilverstein), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#110](https://github.com/10up/classifai/pull/110))
+- Don't show the admin menu alert when NLU is unconfigured (props [@helen](https://github.com/helen), [@eflorea](https://github.com/eflorea) via [#142](https://github.com/10up/classifai/pull/142))
 
 ## [1.3.2] - 2019-07-24
 ### Fixed
-- Only run Watson NLU when it's fully configured (props @helen, @eflorea via #103)
-- NLU Settings backwards compatibility and WP-CLI command registration (props @JayWood, @aaronjorbin via #96)
-- Avoid JS errors and inaccurate data representation of `_classifai_error` meta (props @johnwatkins0 via #106)
-- Resolve sudden Travis test failures (props @jeffpaul via #107)
+- Only run Watson NLU when it's fully configured (props [@helen](https://github.com/helen), [@eflorea](https://github.com/eflorea) via [#103](https://github.com/10up/classifai/pull/103))
+- NLU Settings backwards compatibility and WP-CLI command registration (props [@JayWood](https://github.com/JayWood), [@aaronjorbin](https://github.com/aaronjorbin), [@jeffpaul](https://github.com/jeffpaul), [@helen](https://github.com/helen) via [#96](https://github.com/10up/classifai/pull/96))
+- Avoid JS errors and inaccurate data representation of `_classifai_error` meta (props [@johnwatkins0](https://github.com/johnwatkins0) via [#106](https://github.com/10up/classifai/pull/106))
+- Resolve sudden Travis test failures (props [@jeffpaul](https://github.com/jeffpaul), [@johnwatkins0](https://github.com/johnwatkins0) via [#107](https://github.com/10up/classifai/pull/107))
 
 ### Changed
-- Documentation updates (props @jeffpaul, @dustinrue via #89, #90, #94, and #97)
+- Documentation updates (props [@jeffpaul](https://github.com/jeffpaul), [@dustinrue](https://github.com/dustinrue) via [#89](https://github.com/10up/classifai/pull/89), [#90](https://github.com/10up/classifai/pull/90), [#94](https://github.com/10up/classifai/pull/94), and [#97](https://github.com/10up/classifai/pull/97))
 
 ## [1.3.1] - 2019-06-13
 ### Fixed
-- Specify and handle minimum PHP version support (props @helen via #84)
+- Specify and handle minimum PHP version support (props [@helen](https://github.com/helen) via [#84](https://github.com/10up/classifai/pull/84))
 
 ## [1.3.0] - 2019-06-06
 ### Added
-- Support for automatic image alt text with Microsoft Azure's Computer Vision API (props @ryanwelcher, @helen via #46)
-- Azure seutp and configuration details to docs (props @jeffpaul via #71)
-- Composer `type` and `license` attributes (props @christianc1 via #57)
-- WordPress version support badge (props @adamsilverstein, @jeffpaul via #67)
+- Support for automatic image alt text with Microsoft Azure's Computer Vision API (props [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen) via [#46](https://github.com/10up/classifai/pull/46))
+- Azure seutp and configuration details to docs (props [@jeffpaul](https://github.com/jeffpaul) via [#71](https://github.com/10up/classifai/pull/71))
+- Composer `type` and `license` attributes (props [@christianc1](https://github.com/christianc1), [@helen](https://github.com/helen) via [#57](https://github.com/10up/classifai/pull/57))
+- WordPress version support badge (props [@adamsilverstein](https://github.com/adamsilverstein), [@jeffpaul](https://github.com/jeffpaul) via [#67](https://github.com/10up/classifai/pull/67))
 
 ### Changed
-- Settings page split into separate Language and Image Processing settings pages (props @ryanwelcher, @helen via #46)
+- Settings page split into separate Language and Image Processing settings pages (props [@ryanwelcher](https://github.com/ryanwelcher), [@helen](https://github.com/helen) via [#46](https://github.com/10up/classifai/pull/46))
 
 ### Security
-- Bump js-yaml from 3.12.1 to 3.13.1 (props @dependabot via #74)
+- Bump `js-yaml` from 3.12.1 to 3.13.1 (props [@dependabot](https://github.com/dependabot) via [#74](https://github.com/10up/classifai/pull/74))
 
 ## [1.2.1] - 2019-04-25
 ### Added
