@@ -6,6 +6,7 @@ use Classifai\Watson\APIRequest;
 use Classifai\Watson\Classifier;
 use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
+use Classifai\Providers\Azure\ComputerVision;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -205,6 +206,79 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 	}
 
+
+	/**
+	 * Batch classifies attachments(s) using the current ClassifAI configuration.
+	 *
+	 * ## Options
+	 *
+	 * [<attachment_ids>]
+	 * : Comma delimeted Attachment IDs to classify
+	 *
+	 * [--limit=<limit>]
+	 * : Limit classification to N attachments. Default 100.
+	 *
+	 * [--skip=<skip>]
+	 * : Skip first N attachments. Default false.
+	 *
+	 * [--force]
+	 * : Force classification to N attachments. Default false.
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function image( $args = [], $opts = [] ) {
+		$default_opts = [
+			'limit' => false,
+			'force' => false,
+		];
+
+		$opts = wp_parse_args( $opts, $default_opts );
+
+		if ( ! empty( $args[0] ) ) {
+			$attachment_ids = explode( ',', $args[0] );
+		} else {
+			$attachment_ids = $this->get_attachment_to_classify( $opts );
+		}
+
+		$total      = count( $attachment_ids );
+		$classifier = new ComputerVision( false );
+
+		if ( empty( $total ) ) {
+			return \WP_CLI::log( 'No images to classify.' );
+		}
+
+		$limit_total = $total;
+		if ( $opts['limit'] ) {
+			$limit_total = min( $total, intval( $opts['limit'] ) );
+		}
+
+		$errors       = [];
+		$message      = "Classifying $limit_total images ...";
+		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
+
+		for ( $index = 0; $index < $limit_total; $index++ ) {
+			$attachment_id = $attachment_ids[ $index ];
+
+			$progress_bar->tick();
+
+			$current_meta = wp_get_attachment_metadata( $attachment_id );
+			\WP_CLI::line( 'Processing ' . $attachment_id );
+			$classifier->process_image( $current_meta, $attachment_id );
+		}
+
+		$progress_bar->finish();
+
+		$total_errors  = count( $errors );
+		$total_success = $total - $total_errors;
+
+		\WP_CLI::success( "Classified $total_success images, $total_errors errors." );
+
+		foreach ( $errors as $attachment_id => $error ) {
+			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
+		}
+	}
+
 	/**
 	 * Prints the Basic Auth header based on credentials configured in
 	 * the plugin.
@@ -277,6 +351,53 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		\WP_CLI::log( 'Fetching posts to classify ... DONE (' . count( $posts ) . ')' );
 
 		return $posts;
+	}
+
+	/**
+	 * Returns the list of attachment ids to classify with Azure Compute Vision
+	 *
+	 * @param array $opts Options from WP CLI.
+	 * @return array
+	 */
+	private function get_attachment_to_classify( $opts = [] ) {
+		$limit = is_numeric( $opts['limit'] ) ? $opts['limit'] : 100;
+
+		$query_params = [
+			'post_type'      => 'attachment',
+			'post_mime_type' => array( 'image/jpeg', 'image/png', 'image/gif', 'image/bmp' ),
+			'post_status'    => 'any',
+			'fields'         => 'ids',
+			'posts_per_page' => $limit,
+		];
+
+		if ( ! empty( $opts['skip'] ) ) {
+			$query_params['offset'] = $opts['skip'];
+		}
+
+		if ( ! $opts['force'] ) {
+			$query_params['meta_query'] = [
+				'relation' => 'OR',
+				[
+					'key'     => '_wp_attachment_image_alt',
+					'compare' => 'NOT EXISTS',
+					'value'   => '',
+				],
+				[
+					'key'     => '_wp_attachment_image_alt',
+					'compare' => '=',
+					'value'   => '',
+				],
+			];
+		}
+
+		\WP_CLI::log( 'Fetching images to classify ...' );
+
+		$query = new \WP_Query( $query_params );
+		$images = $query->posts;
+
+		\WP_CLI::log( 'Fetching images to classify ... DONE (' . count( $images ) . ')' );
+
+		return $images;
 	}
 
 	/**

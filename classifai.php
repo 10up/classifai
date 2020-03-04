@@ -3,7 +3,7 @@
  * Plugin Name:     ClassifAI
  * Plugin URI:      https://github.com/10up/classifai
  * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:         1.4.0
+ * Version:         1.5.0
  * Author:          10up
  * Author URI:      https://10up.com
  * License:         GPLv2
@@ -22,7 +22,16 @@ register_activation_hook(
 	function() {
 		if ( version_compare( PHP_VERSION, '7.0.0', '<' ) ) {
 			wp_die(
-				esc_html__( 'ClassifAI requires PHP version 7.', 'classifai' ),
+				sprintf(
+					wp_kses(
+						/* translators: PHP Update guide URL */
+						__( 'ClassifAI requires PHP version 7. <a href="%s">Click here</a> to learn how to update your PHP version.', 'classifai' ),
+						array(
+							'a' => array( 'href' => array() ),
+						)
+					),
+					esc_url( 'https://wordpress.org/support/update-php/' )
+				),
 				esc_html__( 'Error Activating', 'classifai' )
 			);
 		}

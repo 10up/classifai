@@ -1,13 +1,15 @@
 # ![ClassifAI](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/logo.svg "ClassifAI")
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.2%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.3%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 ## Table of Contents
 * [Features](#features)
 * [Requirements](#requirements)
+* [Pricing](#pricing)
 * [Installation](#installation)
-* [Set Up Content Tagging](#set-up-content-tagging-via-ibm-watson)
+* [Register ClassifAI account](#register-classifai-account)
+* [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
 * [Data Gathering](#data-gathering)
@@ -20,14 +22,24 @@
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
+* Manually generate alt text and image tags for images
+* [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ## Requirements
 
 * PHP 7.0+
 * [WordPress](http://wordpress.org) 5.0+
-* To utilize the Lanaguage Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
+* To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+
+## Pricing
+
+Note that there is no cost to using ClassifAI and that both IBM Watson and Microsoft Azure have free plans for their AI services, but that above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage.
+
+The service that powers ClassifAI's Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
+
+The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 ## Installation
 
@@ -37,7 +49,20 @@
 
 #### 2. Activate Plugin
 
-## Set Up Content Tagging (via IBM Watson)
+## Register ClassifAI account
+
+ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
+
+#### 1. Register for a ClassifAI account
+- Register for a free ClassifAI account [here](https://classifaiplugin.com/#cta).
+- Check for an email from `ClassifAI Team` which contains the registration key.
+- Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
+
+#### 2. Configure ClassifAI API Keys under admin area > ClassifAI
+- In the `Registered Email` field, enter the email you used for registration.
+- In the `Registration Key` field, enter the registration key from the email in step 1 above.
+
+## Set Up Language Processing (via IBM Watson)
 
 #### 1. Sign up for Watson services
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
@@ -51,7 +76,6 @@
 
 ##### If your credentials contain an API Key, then:
 - In the `API URL` field enter the URL
-- In the `API User` field, enter `apikey`.
 - Enter your API Key in the `API Key` field.
 
 ##### If your credentials contain a username and password, then:
@@ -61,19 +85,17 @@
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
-- Chose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
+- Choose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
 
 #### 4. Save Post or run WP CLI command to batch classify posts
 
 ## Set Up Image Processing (via Microsoft Azure)
 
-Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze images that meet the following requirements:
+Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
 - The image must be presented in JPEG, PNG, GIF, or BMP format
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
 - The file must be externally accessible via URL (i.e. local sites and setups that block direct file access will not work out of the box)
-
-Note that Computer Vision has a [free pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 #### 1. Sign up for Azure services
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
@@ -175,6 +197,26 @@ Prints the normalized text that will be sent to the NLU API
 
 default: `false`
 
+#### 3. Classify Image 
+
+`$ wp classifai image {image_ids} [--limit=int] [--force]`
+
+Directly classify images using Azure Computer Vision.
+
+##### Options
+
+`--limit=int`
+
+Limit number of images to classify.
+
+default: `false`
+
+`--force`
+
+Force classifying images regardless of their `alt`.
+
+default: `false`
+
 ## Data Gathering
 
 ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
@@ -185,11 +227,11 @@ ClassifAI connects your WordPress site directly to your account with specific se
 
 ## Changelog
 
-A complete listing of all notable changes to Distributor are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
+A complete listing of all notable changes to ClassifAI are documented in [CHANGELOG.md](https://github.com/10up/classifai/blob/develop/CHANGELOG.md).
 
 ## Contributing
 
-Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct and [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us.
+Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/CODE_OF_CONDUCT.md) for details on our code of conduct, [CONTRIBUTING.md](https://github.com/10up/classifai/blob/develop/CONTRIBUTING.md) for details on the process for submitting pull requests to us, and [CREDITS.md](https://github.com/10up/classifai/blob/develop/CREDITS.md) for a listing of maintainers, contributors, and libraries for ClassifAI.
 
 ## Like what you see?
 

@@ -56,7 +56,7 @@ class Classifier {
 		$body = $this->get_body( $text, $options );
 
 		$request_options['body'] = $body;
-		$request = $this->get_request();
+		$request                 = $this->get_request();
 
 		if ( empty( $request_options['timeout'] ) && ! empty( $options['timeout'] ) ) {
 			$request_options['timeout'] = $options['timeout'];
@@ -65,6 +65,7 @@ class Classifier {
 		}
 
 		$classified_data = $request->post( $this->get_endpoint(), $request_options );
+		set_transient( 'classifai_watson_nlu_latest_response', $classified_data, DAY_IN_SECONDS * 30 );
 		/**
 		 * Filter the classified data returned from the API call.
 		 *

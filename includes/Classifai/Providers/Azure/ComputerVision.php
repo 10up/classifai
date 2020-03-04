@@ -7,6 +7,9 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
 
+use function Classifai\computer_vision_max_filesize;
+use function Classifai\get_largest_acceptable_image_url;
+
 class ComputerVision extends Provider {
 
 	/**
@@ -48,6 +51,7 @@ class ComputerVision extends Provider {
 		if ( empty( $options ) ) {
 			return false;
 		}
+
 		return true;
 	}
 
@@ -56,24 +60,114 @@ class ComputerVision extends Provider {
 	 */
 	public function register() {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'process_image' ], 10, 2 );
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
+	/**
+	 * Adds a meta box for rescanning options if the settings are configured
+	 */
+	public function setup_attachment_meta_box() {
+		add_meta_box(
+			'attachment_meta_box',
+			__( 'Azure Computer Vision Scan' ),
+			[ $this, 'attachment_data_meta_box' ],
+			'attachment',
+			'side',
+			'high'
+		);
+	}
 
 	/**
-	 * Provides the max filesize for the ComputerVision service.
+	 * Display meta data
 	 *
-	 * @return int
-	 *
-	 * @since 1.4.0
+	 * @param \WP_Post $post The post object.
 	 */
-	public function get_max_filesize() {
+	public function attachment_data_meta_box( $post ) {
+		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Captions', 'classifai' ) : __( 'Generate Captions', 'classifai' );
+		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		?>
+		<div class="misc-publishing-actions">
+			<div class="misc-pub-section">
+				<label for="rescan-captions">
+					<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
+					<?php echo esc_html( $captions ); ?>
+				</label>
+			</div>
+			<div class="misc-pub-section">
+				<label for="rescan-tags">
+					<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
+					<?php echo esc_html( $tags ); ?>
+				</label>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 *
+	 * @param int $attachment_id Post id for the attachment
+	 */
+	public function maybe_rescan_image( $attachment_id ) {
+		$image_url  = wp_get_attachment_image_url( $attachment_id );
+		$image_scan = $this->scan_image( $image_url );
+		if ( ! is_wp_error( $image_scan ) ) {
+			// Are we updating the captions?
+			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+			}
+			// Are we updating the tags?
+			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+				$this->generate_image_tags( $image_scan->tags, $attachment_id );
+			}
+		}
+	}
+
+	/**
+	 * Adds smart-cropped image thumbnails to the attachment metadata.
+	 *
+	 * @since 1.5.0
+	 * @filter wp_generate_attachment_metadata
+	 *
+	 * @param array $metadata Attachment metadata.
+	 * @param int   $attachment_id Attachment ID.
+	 * @return array Filtered attachment metadata.
+	 */
+	public function smart_crop_image( $metadata, $attachment_id ) {
+		$settings = $this->get_settings();
+
+		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
+			return $metadata;
+		}
+
+		$should_smart_crop = isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'];
+
 		/**
-		 * Filters the ComputerVision maximum allowed filesize.
+		 * Filters whether to apply smart cropping to the current image.
 		 *
-		 * @param int Default 4MB.
+		 * @since 1.5.0
+		 *
+		 * @param boolean Whether to apply smart cropping. The default value is set in ComputerVision settings.
+		 * @param array   Image metadata.
+		 * @param int     The attachment ID.
 		 */
-		return apply_filters( 'classifai_computervision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
+			return $metadata;
+		}
+
+		// Direct file system access is required for the current implementation of this feature.
+		$access_type = get_filesystem_method();
+		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
+			return $metadata;
+		}
+
+		$smart_cropping = new SmartCropping( $settings );
+
+		return $smart_cropping->generate_attachment_metadata( $metadata, intval( $attachment_id ) );
 	}
 
 	/**
@@ -84,7 +178,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return mixed
 	 */
-	public function process_image( $metadata, $attachment_id ) {
+	public function generate_image_alt_tags( $metadata, $attachment_id ) {
 
 		$settings = $this->get_settings();
 		if (
@@ -92,10 +186,11 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_captions']
 		) {
 			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-				$image_url = $this->get_largest_acceptable_image_url(
+				$image_url = get_largest_acceptable_image_url(
 					get_attached_file( $attachment_id ),
 					wp_get_attachment_url( $attachment_id, 'full' ),
-					$metadata['sizes']
+					$metadata['sizes'],
+					computer_vision_max_filesize()
 				);
 			} else {
 				$image_url = wp_get_attachment_url( $attachment_id, 'full' );
@@ -103,6 +198,7 @@ class ComputerVision extends Provider {
 
 			if ( ! empty( $image_url ) ) {
 				$image_scan = $this->scan_image( $image_url );
+				set_transient( 'classifai_azure_computer_vision_image_scan_latest_response', $image_scan, DAY_IN_SECONDS * 30 );
 				if ( ! is_wp_error( $image_scan ) ) {
 					// Check for captions
 					if ( isset( $image_scan->description->captions ) ) {
@@ -119,48 +215,6 @@ class ComputerVision extends Provider {
 		}
 
 		return $metadata;
-	}
-
-	/**
-	 * Retrieves the URL of the largest version of an attachment image accepted by the ComputerVision service.
-	 *
-	 * @param string $full_image The path to the full-sized image source file.
-	 * @param string $full_url   The URL of the full-sized image.
-	 * @param array  $sizes      Intermediate size data from attachment meta.
-	 * @return string|null The image URL, or null if no acceptable image found.
-	 *
-	 * @since 1.4.0
-	 */
-	public function get_largest_acceptable_image_url( $full_image, $full_url, $sizes ) {
-		$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		if ( $file_size && $this->get_max_filesize() >= $file_size ) {
-			return $full_url;
-		}
-
-		// Sort the image sizes in order of total width + height, descending.
-		$sort_sizes = function( $size_1, $size_2 ) {
-			$size_1_total = $size_1['width'] + $size_1['height'];
-			$size_2_total = $size_2['width'] + $size_2['height'];
-
-			if ( $size_1_total === $size_2_total ) {
-				return 0;
-			}
-
-			return $size_1_total > $size_2_total ? -1 : 1;
-		};
-
-		usort( $sizes, $sort_sizes );
-
-		foreach ( $sizes as $size ) {
-			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
-			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-
-			if ( $file_size && $this->get_max_filesize() >= $file_size ) {
-				return str_replace( basename( $full_url ), $size['file'], $full_url );
-			}
-		}
-
-		return null;
 	}
 
 	/**
@@ -224,6 +278,7 @@ class ComputerVision extends Provider {
 	 * @param int   $attachment_id Post ID for the attachment.
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
+		$rtn = '';
 		/**
 		 * Filter the captions returned from the API.
 		 *
@@ -238,6 +293,7 @@ class ComputerVision extends Provider {
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
+				$rtn = $captions[0]->text;
 			} else {
 				/**
 				 * Fire an action if there were no captions added.
@@ -249,6 +305,8 @@ class ComputerVision extends Provider {
 			}
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+			// return the caption or empty string
+			return $rtn;
 		}
 	}
 
@@ -392,8 +450,25 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'   => 'image_tag_taxonomy',
-				'options'     => $options,
+				'label_for' => 'image_tag_taxonomy',
+				'options'   => $options,
+			]
+		);
+
+		add_settings_field(
+			'enable-smart-cropping',
+			esc_html__( 'Enable smart cropping', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_smart_cropping',
+				'input_type'    => 'checkbox',
+				'default_value' => false,
+				'description'   => __(
+					'Crop images around a region of interest identified by ComputerVision',
+					'classifai'
+				),
 			]
 		);
 	}
@@ -457,6 +532,9 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
+		$smart_cropping_enabled                = isset( $settings['enable_smart_cropping'] ) ? '1' : 'no';
+		$new_settings['enable_smart_cropping'] = $smart_cropping_enabled;
+
 		return $new_settings;
 	}
 
@@ -497,6 +575,7 @@ class ComputerVision extends Provider {
 	 * Provides debug information related to the provider.
 	 *
 	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
+	 * @return array Keyed array of debug information.
 	 * @since 1.4.0
 	 */
 	public function get_provider_debug_information( $settings = null ) {
@@ -507,10 +586,31 @@ class ComputerVision extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )           => $settings['url'] ?? '',
-			__( 'Caption threshold', 'classifai' ) => $settings['caption_threshold'] ?? null,
+			__( 'Authenticated', 'classifai' )                    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'API URL', 'classifai' )                          => $settings['url'] ?? '',
+			__( 'Caption threshold', 'classifai' )                => $settings['caption_threshold'] ?? null,
+			__( 'Latest response - Image Scan', 'classifai' )     => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_scan_latest_response' ) ),
+			__( 'Latest response - Smart Cropping', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ),
 		];
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param mixed $data Response data to format.
+	 *
+	 * @return string
+	 */
+	private function get_formatted_latest_response( $data ) {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**
@@ -540,5 +640,43 @@ class ComputerVision extends Provider {
 		);
 
 		return $clauses;
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id       The Post Id we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 *
+	 * @return mixed
+	 */
+	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+		$metadata           = wp_get_attachment_metadata( $post_id );
+		$image_url          = get_largest_acceptable_image_url(
+			get_attached_file( $post_id ),
+			wp_get_attachment_url( $post_id ),
+			$metadata['sizes']
+		);
+		$image_scan_results = $this->scan_image( $image_url );
+
+		if ( is_wp_error( $image_scan_results ) ) {
+			return $image_scan_results;
+		}
+
+		switch ( $route_to_call ) {
+			case 'alt-tags':
+				if ( isset( $image_scan_results->description->captions ) ) {
+					// Process the captions.
+					return $this->generate_alt_tags( $image_scan_results->description->captions, $post_id );
+				}
+				break;
+			case 'image-tags':
+				if ( isset( $image_scan_results->tags ) ) {
+					// Process the tags.
+					return $this->generate_image_tags( $image_scan_results->tags, $post_id );
+				}
+				break;
+		}
 	}
 }

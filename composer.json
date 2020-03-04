@@ -1,6 +1,6 @@
 {
   "name": "10up/classifai",
-  "description": "Classifies WordPress content using IBM Watson NLU API",
+  "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "authors": [
     {
       "name": "10up",
@@ -10,8 +10,8 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "php": ">=7.0",
-    "yahnis-elsts/plugin-update-checker": "^4.4"
+    "php": ">=7.2",
+    "yahnis-elsts/plugin-update-checker": "4.6"
   },
   "autoload": {
     "psr-4": {
@@ -22,7 +22,9 @@
     ]
   },
   "require-dev": {
-    "phpunit/phpunit": "~5.7.0",
-    "10up/phpcs-composer": "dev-master"
-  }
+    "phpunit/phpunit": "^7.5",
+    "10up/phpcs-composer": "dev-master",
+    "10up/wpacceptance": "dev-master"
+  },
+  "minimum-stability": "dev"
 }
