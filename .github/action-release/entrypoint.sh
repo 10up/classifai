@@ -23,6 +23,8 @@ git config --global user.name "10upbot on GitHub"
 git remote set-url origin "https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY.git"
 
 echo "ℹ︎ Getting stable branch"
+# Fetch everything
+git fetch
 # Use worktree to check out into a subfolder so we don't have lingering files hanging out
 # This assumes there's already a stable branch!
 git worktree add -B stable release origin/stable
