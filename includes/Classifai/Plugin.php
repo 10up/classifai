@@ -86,6 +86,16 @@ class Plugin {
 	 * Initialize the Services.
 	 */
 	public function init_services() {
+		/**
+		 * Filter available Services.
+		 *
+		 * @since 1.3.0
+		 * @hook classifai_services
+		 *
+		 * @param {array} 'services' Associative array of service slugs and PHP class namespace.
+		 *
+		 * @return {array} The filtered list of services.
+		 */
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
