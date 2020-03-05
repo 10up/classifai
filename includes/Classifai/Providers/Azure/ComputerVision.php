@@ -296,10 +296,13 @@ class ComputerVision extends Provider {
 				$rtn = $captions[0]->text;
 			} else {
 				/**
-				 * Fire an action if there were no captions added.
+				 * Fires if there were no captions returned.
 				 *
-				 * @param array $tags.   The caption data.
-				 * @param int $threshold The caption_threshold setting.
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_caption_failed
+				 *
+				 * @param array $tags      The caption data.
+				 * @param int   $threshold The caption_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
 			}
@@ -343,10 +346,13 @@ class ComputerVision extends Provider {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
 			} else {
 				/**
-				 * Fire an action if there were no tags added.
+				 * Fires if there were no tags added.
 				 *
-				 * @param array $tags.   The image tag data.
-				 * @param int $threshold The tag_threshold setting.
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_image_tag_failed
+				 *
+				 * @param array $tags      The image tag data.
+				 * @param int   $threshold The tag_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}

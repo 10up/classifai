@@ -312,6 +312,7 @@ class SmartCropping {
 		 * Fires after the request to the generateThumbnail smart-cropping endpoint has run.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_after_request
 		 *
 		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
@@ -327,6 +328,7 @@ class SmartCropping {
 		 * Fires when the generateThumbnail smart-cropping API response did not have a 200 status code.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_unsuccessful_response
 		 *
 		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
