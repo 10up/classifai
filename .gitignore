@@ -3,6 +3,7 @@ release
 phpunit.xml
 /dist
 coverage
+/docs
 
 debug.log
 

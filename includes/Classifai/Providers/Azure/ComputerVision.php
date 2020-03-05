@@ -150,10 +150,13 @@ class ComputerVision extends Provider {
 		 * Filters whether to apply smart cropping to the current image.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_should_smart_crop_image
 		 *
-		 * @param boolean Whether to apply smart cropping. The default value is set in ComputerVision settings.
-		 * @param array   Image metadata.
-		 * @param int     The attachment ID.
+		 * @param {bool}  $should_smart_crop Whether to apply smart cropping. The default value is set in ComputerVision settings.
+		 * @param {array} $metadata          Image metadata.
+		 * @param {int}   $attachment_id     The attachment ID.
+		 *
+		 * @return {bool} Whether to apply smart cropping.
 		 */
 		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
 			return $metadata;
@@ -282,9 +285,12 @@ class ComputerVision extends Provider {
 		/**
 		 * Filter the captions returned from the API.
 		 *
-		 * @param array $captions. The caption data.
+		 * @since 1.4.0
+		 * @hook classifai_computer_vision_captions
 		 *
-		 * @return array $captions The filtered caption data.
+		 * @param {array} $captions The returned caption data.
+		 *
+		 * @return {array} The filtered caption data.
 		 */
 		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
 		// If $captions isn't an array, don't save them.
@@ -296,10 +302,13 @@ class ComputerVision extends Provider {
 				$rtn = $captions[0]->text;
 			} else {
 				/**
-				 * Fire an action if there were no captions added.
+				 * Fires if there were no captions returned.
 				 *
-				 * @param array $tags.   The caption data.
-				 * @param int $threshold The caption_threshold setting.
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_caption_failed
+				 *
+				 * @param array $tags      The caption data.
+				 * @param int   $threshold The caption_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
 			}
@@ -322,9 +331,12 @@ class ComputerVision extends Provider {
 		/**
 		 * Filter the tags returned from the API.
 		 *
-		 * @param array $tags. The image tag data.
+		 * @since 1.4.0
+		 * @hook classifai_computer_vision_image_tags
 		 *
-		 * @return array $tags The filtered image tags.
+		 * @param {array} $tags The image tag data.
+		 *
+		 * @return {array} The filtered image tags.
 		 */
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
 		// If $tags isn't an array, don't save them.
@@ -343,10 +355,13 @@ class ComputerVision extends Provider {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
 			} else {
 				/**
-				 * Fire an action if there were no tags added.
+				 * Fires if there were no tags added.
 				 *
-				 * @param array $tags.   The image tag data.
-				 * @param int $threshold The tag_threshold setting.
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_image_tag_failed
+				 *
+				 * @param array $tags      The image tag data.
+				 * @param int   $threshold The tag_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}

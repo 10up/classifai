@@ -11,7 +11,7 @@
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
     "makepot": "wpi18n makepot && echo '.pot file updated'",
-    "build:docs": "rm -rf hook_docs && jsdoc -c hookdoc-conf.json classifai.php includes"
+    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes"
   },
   "husky": {
     "hooks": {
