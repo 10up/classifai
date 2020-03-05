@@ -16,6 +16,7 @@
 - PULL_REQUEST_TEMPLATE.md
 - /bin/
 - composer.lock
+- /docs/
 - /node_modules/
 - package-lock.json
 - package.json
