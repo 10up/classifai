@@ -4,7 +4,7 @@ on:
     branches:
     - master
 jobs:
-  master:
+  release:
     name: Push (merge) to master
     runs-on: ubuntu-latest
     steps:
@@ -13,7 +13,7 @@ jobs:
     - name: Set Node.js 10.x
       uses: actions/setup-node@master
       with:
-        version: 10.x
+        node-version: 10.x
     - name: npm install and build
       run: |
         npm install
@@ -22,3 +22,10 @@ jobs:
       uses: ./.github/action-release/
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build docs
+      run: npm run build:docs
+    - name: Deploy docs update
+      uses: maxheld83/ghpages@v0.2.1
+      env:
+        BUILD_DIR: 'docs/'
+        GH_PAT: ${{ secrets.GH_PAT }}
