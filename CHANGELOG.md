@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [1.5.1] - 2020-03-06
 ### Added
+- Unit test coverage (props [@ryanwelcher](https://github.com/ryanwelcher) via [#198](https://github.com/10up/classifai/pull/198))
 - `readme.txt` file to ensure plugin details surface in WP Admin (props [@jeffpaul](https://github.com/jeffpaul) via [#196](https://github.com/10up/classifai/pull/196))
 
 ### Changed
