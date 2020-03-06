@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.5.0] - 2020-02-27
+## [1.5.1] - 2020-03-06
+### Added
+- `readme.txt` file to ensure plugin details surface in WP Admin (props [@jeffpaul](https://github.com/jeffpaul) via [#196](https://github.com/10up/classifai/pull/196))
+
+### Changed
+- Consolidated hook documentation and release workflows (props [@helen](https://github.com/helen) via [#192](https://github.com/10up/classifai/pull/192))
+
+### Fixed
+- Remove references to obsolete `process_image` method in favor of new functions (props [@johnwatkins0](https://github.com/johnwatkins0), [@helen](https://github.com/helen) via [#195](https://github.com/10up/classifai/pull/195))
+- Hook documentation generator ([@helen](https://github.com/helen) via [#191](https://github.com/10up/classifai/pull/191))
+
+## [1.5.0] - 2020-3-04
 ### Added
 - Smart image cropping via Microsoft Azure Computer Vision (props [@johnwatkins0](https://github.com/johnwatkins0), [@Ritesh-patel](https://github.com/Ritesh-patel), [@daveross](https://github.com/daveross) [@rickalee](https://github.com/rickalee), [@dinhtungdu](https://github.com/dinhtungdu) via [#149](https://github.com/10up/classifai/pull/149))
 - Process Existing Images with Microsoft Azure Computer Vision (props [@ryanwelcher](https://github.com/ryanwelcher), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#135](https://github.com/10up/classifai/pull/135))
@@ -98,6 +109,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/master...develop
+[1.5.1]: https://github.com/10up/classifai/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/10up/classifai/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/10up/classifai/compare/1.3.2...1.4.0
 [1.3.2]: https://github.com/10up/classifai/compare/1.3.1...1.3.2
