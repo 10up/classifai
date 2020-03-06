@@ -195,6 +195,16 @@ function get_supported_post_types() {
 		$post_types = [ 'post' ];
 	}
 
+	/**
+	 * Filter post types supported for language processing.
+	 *
+	 * @since 1.0.0
+	 * @hook classifai_post_types
+	 *
+	 * @param {array} $post_types Array of post types to be classified with language processing.
+	 *
+	 * @return {array} Array of post types.
+	 */
 	$post_types = apply_filters( 'classifai_post_types', $post_types );
 
 	return $post_types;
@@ -259,10 +269,13 @@ function get_feature_threshold( $feature ) {
 	 * Filter the threshold for a specific feature. Any results below the
 	 * threshold will be ignored.
 	 *
-	 * @param string $threshold The threshold to use.
-	 * @param string $feature   The feature whose threshold to lookup.
+	 * @since 1.0.0
+	 * @hook classifai_feature_threshold
 	 *
-	 * @ return string $threshold The filtered threshold.
+	 * @param {string} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
+	 * @param {string} $feature   The feature in question.
+	 *
+	 * @return {string} The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
 }
@@ -295,10 +308,13 @@ function get_feature_taxonomy( $feature ) {
 	/**
 	 * Filter the Taxonomy for the specified NLU feature.
 	 *
-	 * @param string $taxonomy The taxonomy to use.
-	 * @param string $feature  The NLU feature this taxonomy is for.
+	 * @since 1.1.0
+	 * @hook classifai_taxonomy_for_feature
 	 *
-	 * @return string $taxonomy The filtered taxonomy.
+	 * @param {string} $taxonomy The slug of the taxonomy to use.
+	 * @param {string} $feature  The NLU feature this taxonomy is for.
+	 *
+	 * @return {string} The filtered taxonomy slug.
 	 */
 	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
 }
@@ -314,7 +330,12 @@ function computer_vision_max_filesize() {
 	/**
 	 * Filters the Computer Vision maximum allowed filesize.
 	 *
-	 * @param int Default 4MB.
+	 * @since 1.5.0
+	 * @hook classifai_computer_vision_max_filesize
+	 *
+	 * @param {int} file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
+	 *
+	 * @return {int} Filtered filesize in bytes.
 	 */
 	return apply_filters( 'classifai_computer_vision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
 }
