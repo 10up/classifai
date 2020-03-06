@@ -59,13 +59,15 @@ class Normalizer {
 		}
 
 		/**
-		 * Filters the normalized content to allow for additional
-		 * cleanup.
+		 * Filters the normalized content to allow for additional cleanup.
 		 *
 		 * @since 0.1.0
+		 * @hook classifai_normalize
 		 *
-		 * @param string $post_content The normalized post_content
-		 * @param int $post_id The ID of the post whose content is being normalized
+		 * @param {string} $post_content The normalized post content.
+		 * @param {int}    $post_id      The ID of the post whose content is being normalized.
+		 *
+		 * @return {string} The filtered normalized post content.
 		 */
 		$post_content = apply_filters( 'classifai_normalize', $post_content, $post_id );
 

@@ -45,7 +45,14 @@ abstract class Service {
 	 */
 	public function init() {
 		/**
-		 * Filter the list of providers
+		 * Filter the list of providers for the service.
+		 *
+		 * @since 1.3.0
+		 * @hook {$this->menu_slug}_providers
+		 *
+		 * @param {array} $this->providers Array of available providers for the service.
+		 *
+		 * @return {array} The filtered available providers.
 		 */
 		$this->providers = apply_filters( "{$this->menu_slug}_providers", $this->providers );
 

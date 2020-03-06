@@ -42,6 +42,12 @@ class Plugin {
 	 * Initializes the ClassifAI plugin modules and support objects.
 	 */
 	public function init() {
+		/**
+		 * Fires before ClassifAI services are loaded.
+		 *
+		 * @since 1.2.0
+		 * @hook before_classifai_init
+		 */
 		do_action( 'before_classifai_init' );
 
 		// Initialize the services, each services handles the providers
@@ -60,6 +66,12 @@ class Plugin {
 			);
 		}
 
+		/**
+		 * Fires after ClassifAI services are loaded.
+		 *
+		 * @since 1.2.0
+		 * @hook after_classifai_init
+		 */
 		do_action( 'after_classifai_init' );
 	}
 
@@ -74,6 +86,16 @@ class Plugin {
 	 * Initialize the Services.
 	 */
 	public function init_services() {
+		/**
+		 * Filter available Services.
+		 *
+		 * @since 1.3.0
+		 * @hook classifai_services
+		 *
+		 * @param {array} 'services' Associative array of service slugs and PHP class namespace.
+		 *
+		 * @return {array} The filtered list of services.
+		 */
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
