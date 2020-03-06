@@ -81,11 +81,14 @@ class SavePostHandler {
 		 *
 		 * Default is true, return false to skip classifying a post.
 		 *
-		 * @param bool $should_classify Whether the post should be classified. Default true, return false to skip
-		 *                              classification for this post.
-		 * @param int  $post_id         The id of the post to be considered for classification.
+		 * @since 1.2.0
+		 * @hook classifai_should_classify_post
 		 *
-		 * @return bool $should_classify Whether the post should be classified.
+		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
+		 *                              classification for this post.
+		 * @param {int}  $post_id         The ID of the post to be considered for classification.
+		 *
+		 * @return {bool} Whether the post should be classified.
 		 */
 		$classifai_should_classify_post = apply_filters( 'classifai_should_classify_post', true, $post_id );
 		if ( ! $classifai_should_classify_post ) {
@@ -193,7 +196,16 @@ class SavePostHandler {
 			return false;
 		}
 
-		// Support custom post types with custom rest base.
+		/**
+		 * Filter the REST bases. Supports custom post types with a custom REST base.
+		 *
+		 * @since 1.5.0
+		 * @hook classifai_rest_bases
+		 *
+		 * @param {array} rest_bases Array of REST bases.
+		 *
+		 * @return {array} The filtered array of REST bases.
+		 */
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
