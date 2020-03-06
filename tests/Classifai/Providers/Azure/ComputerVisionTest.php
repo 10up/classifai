@@ -79,4 +79,24 @@ class ComputerVisionTest extends WP_UnitTestCase {
 
 		remove_filter( 'classifai_should_smart_crop_image', '__return_true' );
 	}
+
+	/**
+	 * Ensure that attachment meta is being set.
+	 */
+	public function test_set_image_meta_data() {
+		// Create A settings object
+		$settings = [
+			'enable_image_tagging' => 'no',
+			'enable_image_captions' => 'no'
+		];
+		// Add the settings.
+		add_option( 'classifai_computer_vision', $settings );
+
+		// Instantiate the hookds
+		$this->get_computer_vision()->register();
+
+		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' );
+		$meta       = wp_get_attachment_metadata( $attachment);
+		$this->assertNotFalse( $meta );
+	}
 }
