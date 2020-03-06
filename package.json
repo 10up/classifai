@@ -1,6 +1,6 @@
 {
   "name": "classifai",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "license": "GPLv2",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
@@ -25,7 +25,7 @@
   },
   "author": {
     "name": "10up",
-    "email": "info@10up.com",
+    "email": "opensource@10up.com",
     "url": "https://10up.com",
     "role": "developer"
   },
