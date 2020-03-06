@@ -20,9 +20,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	 * Tear down method.
 	 */
 	public function tearDown() {
-		parent::tearDown();
-
 		$this->remove_added_uploads();
+		parent::tearDown();
 	}
 
 	/**
@@ -92,11 +91,12 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		// Add the settings.
 		add_option( 'classifai_computer_vision', $settings );
 
-		// Instantiate the hookds
+		// Instantiate the hooks
 		$this->get_computer_vision()->register();
 
-		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' );
-		$meta       = wp_get_attachment_metadata( $attachment);
+		$attachment = $this->factory->attachment->create_and_get();
+		wp_generate_attachment_metadata( $attachment->ID, DIR_TESTDATA .'/images/33772.jpg' );
+		$meta = wp_get_attachment_metadata( $attachment->ID );
 		$this->assertNotFalse( $meta );
 	}
 }
