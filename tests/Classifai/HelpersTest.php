@@ -2,20 +2,16 @@
 
 namespace Classifai;
 
+/**
+ * @group helpers
+ */
 class HelpersTest extends \WP_UnitTestCase {
-
-	function setUp() {
-		parent::setUp();
-		$this->remove_added_uploads();
-	}
-
 	/**
 	 * Tear down method.
 	 */
 	public function tearDown() {
-		parent::tearDown();
-
 		$this->remove_added_uploads();
+		parent::tearDown();
 	}
 
 	function test_it_has_a_plugin_instance() {
