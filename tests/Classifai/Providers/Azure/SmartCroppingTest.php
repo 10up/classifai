@@ -154,12 +154,19 @@ class SmartCroppingTest extends WP_UnitTestCase {
 		);
 
 		$with_filter_cb = function() use ( $attachment ) {
+
+			// Get the uploaded image url
+			$cropped_thumbnail_url = $this->get_smart_cropping()->get_cropped_thumbnail(
+				$attachment,
+				wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
+			);
+			// Strip out everything before /wp-content/ because it won't match.
+			$prepped_url = substr( $cropped_thumbnail_url,  strpos( $cropped_thumbnail_url , '/wp-content/' ) );
+
+			
 			$this->assertEquals(
-				sprintf( '/tmp/wordpress/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
-				$this->get_smart_cropping()->get_cropped_thumbnail(
-					$attachment,
-					wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
-				)
+				sprintf( '/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
+				$prepped_url
 			);
 
 			// Test when file operations fail.
