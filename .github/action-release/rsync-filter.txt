@@ -10,11 +10,13 @@
 - CODE_OF_CONDUCT.md
 - CONTRIBUTING.md
 - CREDITS.md
+- hookdoc-conf.json
 - /ISSUE_TEMPLATE/
 - LICENSE.md
 - PULL_REQUEST_TEMPLATE.md
 - /bin/
 - composer.lock
+- /docs/
 - /node_modules/
 - package-lock.json
 - package.json

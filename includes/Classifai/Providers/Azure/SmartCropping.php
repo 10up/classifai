@@ -79,8 +79,11 @@ class SmartCropping {
 		 * Filters the filesystem class instance used to save image files.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_crop_wp_filesystem
 		 *
-		 * @param WP_Filesystem_Base
+		 * @param {WP_Filesystem_Base} $this->wp_filesystem Filesystem class for saving images.
+		 *
+		 * @return {WP_Filesystem_Base} Filtered Filesystem class.
 		 */
 		return apply_filters( 'classifai_smart_crop_wp_filesystem', $this->wp_filesystem );
 	}
@@ -97,7 +100,12 @@ class SmartCropping {
 		/**
 		 * Filters the maximum allowable width or height of an image to be cropped. Default 1024.
 		 *
-		 * @param int The width/height in pixels.
+		 * @since 1.5.0
+		 * @hook classifai_smart_crop_max_pixel_dimension
+		 *
+		 * @param {int} max The max width/height in pixels.
+		 *
+		 * @return {int} Filtered max dimension in pixels.
 		 */
 		return apply_filters( 'classifai_smart_crop_max_pixel_dimension', 1024 );
 	}
@@ -139,9 +147,12 @@ class SmartCropping {
 		 * Filters whether to smart crop images of a given size.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_should_crop_size
 		 *
-		 * @param boolean Whether non-position-based cropping was opted into when registering the image size.
-		 * @param string  The image size.
+		 * @param {bool}   $return Whether non-position-based cropping was opted into when registering the image size.
+		 * @param {string} $size   The image size.
+		 *
+		 * @return {bool} Whether this image size should be smart cropped.
 		 */
 		return apply_filters( 'classifai_should_crop_size', $return, $size );
 	}
@@ -194,9 +205,12 @@ class SmartCropping {
 		 * plugin behavior.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_source_url
 		 *
-		 * @param null|string Null to use default plugin behavior; string to override.
-		 * @param int         The attachment image ID.
+		 * @param {null|string} url            `null` to use default plugin behavior; `string` to override.
+		 * @param {int}         $attachment_id The attachment image ID.
+		 *
+		 * @return {null|string} URL to be sent to Computer Vision for smart cropping.
 		 */
 		$url = apply_filters( 'classifai_smart_cropping_source_url', null, $attachment_id );
 
@@ -312,6 +326,7 @@ class SmartCropping {
 		 * Fires after the request to the generateThumbnail smart-cropping endpoint has run.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_after_request
 		 *
 		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
@@ -327,6 +342,7 @@ class SmartCropping {
 		 * Fires when the generateThumbnail smart-cropping API response did not have a 200 status code.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_unsuccessful_response
 		 *
 		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
