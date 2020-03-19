@@ -25,9 +25,10 @@ module.exports = {
 			{
 				test: /\.js$/,
 				exclude: /(node_modules)/,
+				enforce: 'pre',
 				loader: 'eslint-loader',
-				query: {
-					configFile: './.eslintrc.json'
+				options: {
+					fix: true
 				}
 			}
 		],
