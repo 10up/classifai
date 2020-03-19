@@ -40,6 +40,6 @@ module.exports = {
 		new WebpackBar(),
 
 		// Extract dependencies.
-		new DependencyExtractionWebpackPlugin( { injectPolyfill: true } ),
+		new DependencyExtractionWebpackPlugin( { injectPolyfill: true, combineAssets: true } ),
 	]
 };
