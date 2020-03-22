@@ -495,7 +495,6 @@ class ComputerVision extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		// TODO: Implement sanitize_settings() method.
 		$new_settings = [];
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
