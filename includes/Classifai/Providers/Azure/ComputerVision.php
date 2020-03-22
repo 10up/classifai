@@ -523,17 +523,26 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		$caption_enabled                       = isset( $settings['enable_image_captions'] ) ? '1' : 'no';
-		$new_settings['enable_image_captions'] = $caption_enabled;
+		$checkbox_settings = [
+			'enable_image_captions',
+			'enable_image_tagging',
+			'enable_smart_cropping',
+		];
+
+		foreach( $checkbox_settings as $checkbox_setting ) {
+
+			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
+				$new_settings[ $checkbox_setting ] = 'no';
+			} else {
+				$new_settings[ $checkbox_setting ] = '1';
+			}
+		}
 
 		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
 		}
-
-		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
-		$new_settings['enable_image_tagging'] = $tag_enabled;
 
 		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
 			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
@@ -545,8 +554,6 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
-		$smart_cropping_enabled                = isset( $settings['enable_smart_cropping'] ) ? '1' : 'no';
-		$new_settings['enable_smart_cropping'] = $smart_cropping_enabled;
 
 		return $new_settings;
 	}
