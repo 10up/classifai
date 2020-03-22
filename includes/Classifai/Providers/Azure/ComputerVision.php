@@ -499,12 +499,7 @@ class ComputerVision extends Provider {
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {
-				add_settings_error(
-					$this->get_option_name(),
-					'classifai-registration',
-					$auth_check->get_error_message(),
-					'error'
-				);
+				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
 				$new_settings['authenticated'] = false;
 			} else {
 				$new_settings['authenticated'] = true;
@@ -515,12 +510,8 @@ class ComputerVision extends Provider {
 			$new_settings['valid']   = false;
 			$new_settings['url']     = '';
 			$new_settings['api_key'] = '';
-			add_settings_error(
-				$this->get_option_name(),
-				'classifai-registration',
-				esc_html__( 'Please enter your credentials', 'classifai' ),
-				'error'
-			);
+
+			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
 
 		$checkbox_settings = [
@@ -554,6 +545,22 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
+		if ( ! empty( $settings_errors ) ) {
+
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+
+			foreach ( $settings_errors as $k => $v ) {
+
+				if ( ! in_array( $k, $registered_settings_errors, true ) ) {
+					add_settings_error(
+						$this->get_option_name(),
+						$k,
+						esc_html__( $v ),
+						'error'
+					);
+				}
+			}
+		}
 
 		return $new_settings;
 	}
