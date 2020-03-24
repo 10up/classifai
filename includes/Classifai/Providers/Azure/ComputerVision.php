@@ -555,7 +555,7 @@ class ComputerVision extends Provider {
 					add_settings_error(
 						$this->get_option_name(),
 						$k,
-						esc_html__( $v ),
+						esc_html( $v ),
 						'error'
 					);
 				}
