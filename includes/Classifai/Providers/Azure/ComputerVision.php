@@ -549,13 +549,13 @@ class ComputerVision extends Provider {
 
 			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
 
-			foreach ( $settings_errors as $k => $v ) {
+			foreach ( $settings_errors as $code => $message ) {
 
-				if ( ! in_array( $k, $registered_settings_errors, true ) ) {
+				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
 					add_settings_error(
 						$this->get_option_name(),
-						$k,
-						esc_html( $v ),
+						$code,
+						esc_html( $message ),
 						'error'
 					);
 				}
