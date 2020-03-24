@@ -520,7 +520,7 @@ class ComputerVision extends Provider {
 			'enable_smart_cropping',
 		];
 
-		foreach( $checkbox_settings as $checkbox_setting ) {
+		foreach ( $checkbox_settings as $checkbox_setting ) {
 
 			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
 				$new_settings[ $checkbox_setting ] = 'no';
