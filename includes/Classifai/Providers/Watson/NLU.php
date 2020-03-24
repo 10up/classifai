@@ -299,11 +299,11 @@ class NLU extends Provider {
 	protected function use_username_password() {
 		$settings = $this->get_settings( 'credentials' );
 
-		if ( ! empty( $settings['watson_username'] ) && 'apikey' === $settings['watson_username'] ) {
-			return true;
+		if ( empty( $settings['watson_username'] ) ) {
+			return false;
 		}
 
-		return false;
+		return 'apikey' === $settings['watson_username'];
 	}
 
 	/**
