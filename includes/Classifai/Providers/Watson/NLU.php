@@ -297,7 +297,8 @@ class NLU extends Provider {
 	 * Check if a username/password is using instead of API key.
 	 */
 	protected function use_usename_password() {
-		return 'apikey' === $this->get_settings( 'credentials' )['watson_username'];
+		$credentials = $this->get_settings( 'credentials' );
+		return isset( $credentials['watson_username'] ) && 'apikey' === $credentials['watson_username'];
 	}
 
 	/**
