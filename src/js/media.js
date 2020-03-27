@@ -1,4 +1,4 @@
-(function($) { // eslint-disable-line
+(($) => {
 	/**
 	 * Handle button clicks
 	 *
@@ -28,7 +28,7 @@
 		});
 	};
 
-	$(document).ready(function() { // eslint-disable-line
+	$(document).ready(() => {
 		if (wp.media.frame) {
 			wp.media.frame.on('edit:attachment', () => {
 				const altTagsButton = document.getElementById('classifai-rescan-alt-tags');

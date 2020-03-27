@@ -1,4 +1,4 @@
-const { subscribe, select, dispatch } = wp.data;
+import { subscribe, select, dispatch } from '@wordpress/data'; // eslint-disable-line
 
 let saveHappened = false;
 let showingNotice = false;
