@@ -1,5 +1,5 @@
 {
-	"extends": "@10up/eslint-config/gutenberg",
+	"extends": "@10up/eslint-config/wordpress",
 	"globals": {
 		"wp": true,
 		"jQuery": true

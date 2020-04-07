@@ -1,4 +1,4 @@
-import { subscribe, select, dispatch } from '@wordpress/data'; // eslint-disable-line
+import { subscribe, select, dispatch } from '@wordpress/data';
 
 let saveHappened = false;
 let showingNotice = false;

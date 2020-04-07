@@ -5,13 +5,11 @@
 
 	if ($toggler === null || $userField === null) return;
 
-	const $userFieldWrapper = $userField.closest('tr'); // eslint-disable-line
-	const [$passwordFieldTitle] = document // eslint-disable-line
+	const $userFieldWrapper = $userField.closest('tr');
+	const [$passwordFieldTitle] = document
 		.getElementById('classifai-settings-watson_password')
 		.closest('tr')
 		.getElementsByTagName('label');
-
-	if ($toggler === null) return;
 
 	$toggler.addEventListener('click', (e) => {
 		e.preventDefault();
