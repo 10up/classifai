@@ -259,7 +259,7 @@ function get_feature_threshold( $feature ) {
 	if ( empty( $threshold ) ) {
 		$constant = 'WATSON_' . strtoupper( $feature ) . '_THRESHOLD';
 
-		if ( defined( $constant ) ) {
+		if ( defined( $constant ) ) { // @vipcs - Constant name, as a string, should be used along with `defined()`.
 			$threshold = intval( constant( $constant ) );
 		}
 	}
@@ -300,7 +300,7 @@ function get_feature_taxonomy( $feature ) {
 	if ( empty( $taxonomy ) ) {
 		$constant = 'WATSON_' . strtoupper( $feature ) . '_TAXONOMY';
 
-		if ( defined( $constant ) ) {
+		if ( defined( $constant ) ) { // @vipcs - Constant name, as a string, should be used along with `defined()`.
 			$taxonomy = constant( $constant );
 		}
 	}
@@ -372,7 +372,7 @@ function sort_images_by_size_cb( $size_1, $size_2 ) {
  * @return string|null The image URL, or null if no acceptable image found.
  */
 function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max = MB_IN_BYTES ) {
-	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged  @vipcs - Silencing errors is forbidden; found: @filesize( ...
 	if ( $file_size && $max >= $file_size ) {
 		return $full_url;
 	}
@@ -381,7 +381,7 @@ function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max 
 
 	foreach ( $sizes as $size ) {
 		$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
-		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged @vipcs - Silencing errors is forbidden; found: @filesize( ...
 
 		if ( $file_size && $max >= $file_size ) {
 			return str_replace( basename( $full_url ), $size['file'], $full_url );

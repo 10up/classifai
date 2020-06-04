@@ -283,7 +283,7 @@ class NLU extends Provider {
 			function() {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
-					$this->use_usename_password()
+					$this->use_usename_password() // @vipcs - Variable $this is undefined.
 						? esc_html__( 'Use a username/password instead?', 'classifai' )
 						: esc_html__( 'Use an API Key instead?', 'classifai' )
 				);
@@ -566,7 +566,7 @@ class NLU extends Provider {
 			}
 		}
 
-		foreach ( $this->nlu_features as $feature => $labels ) {
+		foreach ( $this->nlu_features as $feature => $labels ) { // @vipcs - Unused variable `$labels`.
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
 				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
@@ -603,7 +603,7 @@ class NLU extends Provider {
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
-				'timeout' => 10,
+				'timeout' => 10, // @vipcs - Detected high remote request timeout. `timeout` is set to `10`.
 				'body'    => [
 					'license_key' => $license_key,
 					'email'       => $email,

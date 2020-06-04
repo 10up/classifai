@@ -13,6 +13,7 @@ require_once ABSPATH . 'wp-admin/includes/image.php';
  * For development use only.
  */
 class RSSImporterCommand extends \WP_CLI_Command {
+	// @vipcs - We recommend extending `WPCOM_VIP_CLI_Command` instead of `WP_CLI_Command` and using the helper functions available in it (such as `stop_the_insanity()`), see https://vip.wordpress.com/documentation/writing-bin-scripts/ for more information.
 
 	/**
 	 * Import an RSS feed.
@@ -200,10 +201,10 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 
 		$options['headers']['x-api-key'] = MERCURY_PARSER_API_KEY;
-		$options['timeout']              = 60;
+		$options['timeout']              = 60; // @vipcs - Detected high remote request timeout. `timeout` is set to `60`.
 
-		$request_url = 'https://mercury.postlight.com/parser?url=' . urlencode( $url );
-		$response    = wp_remote_get( $request_url, $options );
+		$request_url = 'https://mercury.postlight.com/parser?url=' . urlencode( $url ); // @vipcs - urlencode() should only be used when dealing with legacy applications rawurlencode() should now be used instead. See http://php.net/manual/en/function.rawurlencode.php and http://www.faqs.org/rfcs/rfc3986.html
+		$response    = wp_remote_get( $request_url, $options ); // @vipcs - wp_remote_get() is highly discouraged, please use vip_safe_wp_remote_get() instead.
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );

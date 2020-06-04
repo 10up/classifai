@@ -48,8 +48,8 @@ register_activation_hook(
  * @return void
  */
 function classifai_define( $name, $value ) {
-	if ( ! defined( $name ) ) {
-		define( $name, $value );
+	if ( ! defined( $name ) ) {// @vipcs - Constant name, as a string, should be used along with `defined()`.
+		define( $name, $value );// @vipcs - Constant name, as a string, should be used along with `defined()`.
 	}
 }
 
@@ -70,7 +70,7 @@ require_once( __DIR__ . '/config.php' );
  */
 function classifai_autoload() {
 	if ( classifai_can_autoload() ) {
-		require_once( classifai_autoloader() );
+		require_once( classifai_autoloader() );// @vipcs - File inclusion using custom function ( `classifai_autoloader()` ). Must return local file source, as external URLs are prohibited on WordPress VIP. Probably needs manual inspection.
 
 		return true;
 	} else {
@@ -87,7 +87,7 @@ function classifai_can_autoload() {
 	if ( file_exists( classifai_autoloader() ) ) {
 		return true;
 	} else {
-		error_log(
+		error_log(// @vipcs - error_log() found. Debug code should not normally be used in production.
 			sprintf( esc_html__( 'Fatal Error: Composer not setup in %', 'classifai' ), CLASSIFAI_PLUGIN_DIR )
 		);
 
@@ -131,14 +131,14 @@ function classifai_autorun() {
 		$plugin->enable();
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			require_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Command/ClassifaiCommand.php';
+			require_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Command/ClassifaiCommand.php'; // @vipcs - File inclusion using custom constant (`CLASSIFAI_PLUGIN_DIR`). Probably needs manual inspection.
 		}
 	} else {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			try {
 				\WP_CLI::error( get_error_install_message() );
 			} catch ( \WP_CLI\ExitException $e ) {
-				error_log( $e->getMessage() );
+				error_log( $e->getMessage() );// @vipcs - error_log() found. Debug code should not normally be used in production.
 			}
 		}
 
@@ -152,7 +152,7 @@ function classifai_autorun() {
  */
 function classifai_autoload_notice() {
 	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', get_error_install_message() ); // @codingStandardsIgnoreLine Text is escaped in calling function already.
-	error_log( get_error_install_message() );
+	error_log( get_error_install_message() );// @vipcs - error_log() found. Debug code should not normally be used in production.
 }
 
 

@@ -54,7 +54,7 @@ class APIRequest {
 	 */
 	public function get( $url, $options = [] ) {
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_get( $url, $options ) );
+		return $this->get_result( wp_remote_get( $url, $options ) ); // @vipcs - wp_remote_get() is highly discouraged, please use vip_safe_wp_remote_get() instead.
 	}
 
 	/**

@@ -116,11 +116,11 @@ class ComputerVision extends Provider {
 		$image_scan = $this->scan_image( $image_url );
 		if ( ! is_wp_error( $image_scan ) ) {
 			// Are we updating the captions?
-			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) { // @vipcs - Missing third parameter for \filter_input\"."
 				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 			}
 			// Are we updating the tags?
-			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) { // @vipcs - Missing third parameter for \filter_input\"."
 				$this->generate_image_tags( $image_scan->tags, $attachment_id );
 			}
 		}

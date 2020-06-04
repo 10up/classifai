@@ -68,7 +68,7 @@ class Psr4AutoloaderClass {
 
 		// work backwards through the namespace names of the fully-qualified
 		// class name to find a mapped file name
-		while ( false !== $pos = strrpos( $prefix, '\\' ) ) {
+		while ( false !== $pos = strrpos( $prefix, '\\' ) ) { // @vipcs - Variable assignment found within a condition. Did you mean to do a comparison?
 
 			// retain the trailing namespace separator in the prefix
 			$prefix = substr( $class, 0, $pos + 1 );
@@ -134,7 +134,7 @@ class Psr4AutoloaderClass {
 	 */
 	protected function require_file( $file ) {
 		if ( file_exists( $file ) ) {
-			require $file;
+			require $file; // @vipcs - File inclusion using variable (`$file`). Probably needs manual inspection.
 			return true;
 		}
 		return false;

@@ -209,7 +209,7 @@ class SavePostHandler {
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
-			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) ) {
+			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) ) {// @vipcs - Detected usage of a non-sanitized input variable: $_SERVER['REQUEST_URI']
 				return true;
 			}
 		}
