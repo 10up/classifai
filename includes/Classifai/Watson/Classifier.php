@@ -122,7 +122,7 @@ class Classifier {
 			];
 		}
 
-		return json_encode( $options ); // @vipcs - json_encode() is discouraged. Use wp_json_encode() instead.
+		return wp_json_encode( $options );
 	}
 
 }

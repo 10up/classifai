@@ -197,7 +197,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$result = $classifier->classify( $plain_text, $options );
 
 			if ( ! is_wp_error( $result ) ) {
-				\WP_CLI::log( json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) ); // @vipcs - json_encode() is discouraged. Use wp_json_encode() instead.
+				\WP_CLI::log( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 			} else {
 				\WP_CLI::log( 'Failed to classify text.' );
 				\WP_CLI::error( $result->get_error_message() );
