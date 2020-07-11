@@ -73,7 +73,7 @@ class ComputerVision extends Provider {
 	public function setup_attachment_meta_box() {
 		add_meta_box(
 			'attachment_meta_box',
-			__( 'Azure Computer Vision Scan' ),
+			__( 'ClassifAI Image Processing' ),
 			[ $this, 'attachment_data_meta_box' ],
 			'attachment',
 			'side',
