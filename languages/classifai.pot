@@ -80,7 +80,7 @@ msgid "API Key"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:77
-msgid "Azure Computer Vision Scan"
+msgid "ClassifAI Image Processing"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:91
