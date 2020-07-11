@@ -48,5 +48,31 @@ class Settings extends \TestCaseBase {
 		$this->assertTrue( '' != $actor->getElementProperty( '#classifai-settings-url', 'value' ) );
 		$this->assertTrue( '' != $actor->getElementProperty( '#classifai-settings-api_key', 'value' ) );
 	}
+
+	/**
+	 * @testdox If the user enables the plugin, it should add the setting page in the WordPress Dashboard.
+	 */
+	public function testAdminMenuShows() {
+		$I = $this->openBrowserPage();
+
+		$I->login();
+
+		$I->seeText( 'ClassifAI' );
+	}
+
+	/**
+	 * @testdox If the user enables the plugin, it should add Language Processing and Image Processing as submenus.
+	 */
+	public function testAdminSubmenuShows() {
+		$I = $this->openBrowserPage();
+
+		$I->login();
+
+		$I->moveTo( 'wp-admin/admin.php?page=classifai_settings' );
+
+		$I->seeLink( 'Language Processing' );
+
+		$I->seeLink( 'Image Processing' );
+	}
 }
 
