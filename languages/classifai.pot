@@ -84,7 +84,7 @@ msgid "ClassifAI Image Processing"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:91
-msgid "Rescan Captions"
+msgid "Rescan Alt Text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:91
