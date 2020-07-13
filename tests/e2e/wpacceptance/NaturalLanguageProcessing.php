@@ -169,7 +169,7 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/admin.php?page=language_processing' );
 
-		$I->uncheckOptions( '#classifai-settings-post' );
+		$I->uncheckOptions( '#classifai-settings-page' );
 
 		$I->click( '#submit' );
 
