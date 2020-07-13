@@ -85,7 +85,7 @@ class Settings extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/admin.php?page=classifai_settings' );
 
-		$I->seeText( 'Registered Email ');
+		$I->seeText( 'Registered Email');
 
 		$I->seeText( 'Registration Key');
 	}
