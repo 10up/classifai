@@ -120,13 +120,13 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/edit.php' );
 
-		$I->seeLink( 'Watson Categories' );
+		$I->seeText( 'Watson Categories', '#taxonomy-watson-category' );
 
-		$I->seeLink( 'Watson Keywords' );
+		$I->seeText( 'Watson Keywords', '#taxonomy-watson-keyword' );
 
-		$I->seeLink( 'Watson Concepts' );
+		$I->seeText( 'Watson Concepts', '#taxonomy-watson-concept' );
 
-		$I->seeLink( 'Watson Entities' );
+		$I->seeText( 'Watson Entities', '#taxonomy-watson-entity' );
 
 		$I->moveTo( 'wp-admin/admin.php?page=language_processing' );
 
@@ -138,13 +138,14 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/edit.php' );
 
-		$I->dontSeeLink( 'Watson Categories' );
+		$I->dontSeeText( 'Watson Categories', '#taxonomy-watson-category' );
 
-		$I->dontSeeLink( 'Watson Keywords' );
+		$I->dontSeeText( 'Watson Keywords', '#taxonomy-watson-keyword' );
 
-		$I->dontSeeLink( 'Watson Concepts' );
+		$I->dontSeeText( 'Watson Concepts', '#taxonomy-watson-concept' );
 
-		$I->dontSeeLink( 'Watson Entities' );
+		$I->dontSeeText( 'Watson Entities', '#taxonomy-watson-entity' );
+
 	}
 
 	/**
@@ -158,13 +159,13 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/edit.php?post_type=page' );
 
-		$I->seeLink( 'Watson Categories' );
+		$I->seeText( 'Watson Categories', '#taxonomy-watson-category' );
 
-		$I->seeLink( 'Watson Keywords' );
+		$I->seeText( 'Watson Keywords', '#taxonomy-watson-keyword' );
 
-		$I->seeLink( 'Watson Concepts' );
+		$I->seeText( 'Watson Concepts', '#taxonomy-watson-concept' );
 
-		$I->seeLink( 'Watson Entities' );
+		$I->seeText( 'Watson Entities', '#taxonomy-watson-entity' );
 
 		$I->moveTo( 'wp-admin/admin.php?page=language_processing' );
 
@@ -176,13 +177,14 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/edit.php?post_type=page' );
 
-		$I->dontSeeLink( 'Watson Categories' );
+		$I->dontSeeText( 'Watson Categories', '#taxonomy-watson-category' );
 
-		$I->dontSeeLink( 'Watson Keywords' );
+		$I->dontSeeText( 'Watson Keywords', '#taxonomy-watson-keyword' );
 
-		$I->dontSeeLink( 'Watson Concepts' );
+		$I->dontSeeText( 'Watson Concepts', '#taxonomy-watson-concept' );
 
-		$I->dontSeeLink( 'Watson Entities' );
+		$I->dontSeeText( 'Watson Entities', '#taxonomy-watson-entity' );
+
 	}
 
 	/**
@@ -196,13 +198,13 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/upload.php' );
 
-		$I->dontSeeLink( 'Watson Categories' );
+		$I->dontSeeLink( 'Watson Categories', 'edit-tags.php?taxonomy=watson-category&post_type=attachment' );
 
-		$I->dontSeeLink( 'Watson Keywords' );
+		$I->dontSeeLink( 'Watson Keywords', 'edit-tags.php?taxonomy=watson-keyword&post_type=attachment' );
 
-		$I->dontSeeLink( 'Watson Concepts' );
+		$I->dontSeeLink( 'Watson Concepts', 'edit-tags.php?taxonomy=watson-concept&post_type=attachment' );
 
-		$I->dontSeeLink( 'Watson Entities' );
+		$I->dontSeeLink( 'Watson Entities', 'edit-tags.php?taxonomy=watson-entity&post_type=attachment' );
 
 		$I->moveTo( 'wp-admin/admin.php?page=language_processing' );
 
@@ -214,13 +216,13 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/upload.php' );
 
-		$I->seeLink( 'Watson Categories' );
+		$I->seeLink( 'Watson Categories', 'edit-tags.php?taxonomy=watson-category&post_type=attachment' );
 
-		$I->seeLink( 'Watson Keywords' );
+		$I->seeLink( 'Watson Keywords', 'edit-tags.php?taxonomy=watson-keyword&post_type=attachment' );
 
-		$I->seeLink( 'Watson Concepts' );
+		$I->seeLink( 'Watson Concepts', 'edit-tags.php?taxonomy=watson-concept&post_type=attachment' );
 
-		$I->seeLink( 'Watson Entities' );
+		$I->seeLink( 'Watson Entities', 'edit-tags.php?taxonomy=watson-entity&post_type=attachment' );
 	}
 
 	public function testWatsonWorks() {
