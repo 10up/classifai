@@ -15,7 +15,7 @@ class ImageProcessing extends \TestCaseBase {
 
 		$I->seeText( 'Generate', '#classifai-rescan-alt-tags' );
 
-		$I->seeText( 'Generate', 'classifai-rescan-image-tags' );
+		$I->seeText( 'Generate', '#classifai-rescan-image-tags' );
 	}
 
 	/**
@@ -50,6 +50,9 @@ class ImageProcessing extends \TestCaseBase {
 		$I->seeText( 'Generate Tags' );
 	}
 
+	/**
+	 * @testdox If the image has image tags and/or alt tag, it shows a metabox with Azure Computer Vision Scan as the title and two checkboxes for rescanning alt and image tags on the media edit page.
+	 */
 	public function testRescanCheckboxesShows() {
 		$I = $this->openBrowserPage();
 
