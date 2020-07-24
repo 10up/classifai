@@ -261,7 +261,7 @@ class NLU extends Provider {
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
 				'large'         => true,
-				'class'         => $this->use_usename_password() ? 'hidden' : '',
+				'class'         => $this->use_username_password() ? 'hidden' : '',
 			]
 		);
 		add_settings_field(
@@ -283,7 +283,7 @@ class NLU extends Provider {
 			function() {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
-					$this->use_usename_password()
+					$this->use_username_password()
 						? esc_html__( 'Use a username/password instead?', 'classifai' )
 						: esc_html__( 'Use an API Key instead?', 'classifai' )
 				);
@@ -294,10 +294,18 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Check if a username/password is using instead of API key.
+	 * Check if a username/password is used instead of API key.
+	 *
+	 * @return bool
 	 */
-	protected function use_usename_password() {
-		return 'apikey' === $this->get_settings( 'credentials' )['watson_username'];
+	protected function use_username_password() {
+		$settings = $this->get_settings( 'credentials' );
+
+		if ( empty( $settings['watson_username'] ) ) {
+			return false;
+		}
+
+		return 'apikey' === $settings['watson_username'];
 	}
 
 	/**
