@@ -73,7 +73,7 @@ class ComputerVision extends Provider {
 	public function setup_attachment_meta_box() {
 		add_meta_box(
 			'attachment_meta_box',
-			__( 'ClassifAI Image Processing' ),
+			__( 'ClassifAI Image Processing', 'classifai' ),
 			[ $this, 'attachment_data_meta_box' ],
 			'attachment',
 			'side',
