@@ -187,15 +187,20 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_tagging'] ||
 			'no' !== $settings['enable_image_captions']
 		) {
-			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-				$image_url = get_largest_acceptable_image_url(
-					get_attached_file( $attachment_id ),
-					wp_get_attachment_url( $attachment_id, 'full' ),
-					$metadata['sizes'],
-					computer_vision_max_filesize()
-				);
-			} else {
-				$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+
+			$image_url = apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $attachment_id );
+
+			if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+				if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+					$image_url = get_largest_acceptable_image_url(
+						get_attached_file( $attachment_id ),
+						wp_get_attachment_url( $attachment_id, 'full' ),
+						$metadata['sizes'],
+						computer_vision_max_filesize()
+					);
+				} else {
+					$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+				}
 			}
 
 			if ( ! empty( $image_url ) ) {
