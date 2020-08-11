@@ -73,7 +73,7 @@ class ComputerVision extends Provider {
 	public function setup_attachment_meta_box() {
 		add_meta_box(
 			'attachment_meta_box',
-			__( 'Azure Computer Vision Scan' ),
+			__( 'ClassifAI Image Processing', 'classifai' ),
 			[ $this, 'attachment_data_meta_box' ],
 			'attachment',
 			'side',
@@ -87,7 +87,7 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
-		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Captions', 'classifai' ) : __( 'Generate Captions', 'classifai' );
+		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
 		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
