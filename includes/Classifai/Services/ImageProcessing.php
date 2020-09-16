@@ -75,18 +75,20 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'alt-tags/(?P<id>\d+)',
 			[
-				'methods'  => 'GET',
-				'callback' => [ $this, 'provider_endpoint_callback' ],
-				'args'     => [ 'route' => 'alt-tags' ],
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'provider_endpoint_callback' ],
+				'args'                => [ 'route' => 'alt-tags' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 		register_rest_route(
 			'classifai/v1',
 			'image-tags/(?P<id>\d+)',
 			[
-				'methods'  => 'GET',
-				'callback' => [ $this, 'provider_endpoint_callback' ],
-				'args'     => [ 'route' => 'image-tags' ],
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'provider_endpoint_callback' ],
+				'args'                => [ 'route' => 'image-tags' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 	}
