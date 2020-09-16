@@ -14,12 +14,20 @@ branches:
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test travis ''  localhost $WP_VERSION
   - composer install
+  - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpsnapshots configure 10up --aws_key=$AWS_ACCESS_KEY --aws_secret=$AWS_SECRET_ACCESS_KEY --user_name=Travis --user_email=travis@10up.com; fi
 
 script:
-  - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
-  - ./vendor/bin/phpunit
-  - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpsnapshots configure 10up --aws_key=$AWS_ACCESS_KEY --aws_secret=$AWS_SECRET_ACCESS_KEY --user_name=Travis --user_email=travis@10up.com; fi
-  - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpacceptance run; fi
+
+jobs:
+  fast_finish: true
+  include:
+    - stage: "ClassifAI Tests"
+      name: "Unit Tests and Liniting"
+      script:
+        - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
+        - ./vendor/bin/phpunit
+    - name: "WP Acceptance Test"
+      script: if [ "$TRAVIS_PHP_VERSION" == "7.2" && -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpacceptance run; fi
 
 sudo: required
 
