@@ -19,7 +19,7 @@ before_script:
 script:
   - ./vendor/bin/phpcs . --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0
   - ./vendor/bin/phpunit
-  - if [ "$TRAVIS_PHP_VERSION" == "7.2" && -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpacceptance run; fi
+  - if [[ ${TRAVIS_PHP_VERSION:0:3} == "7.2" && -n "$AWS_ACCESS_KEY" ]]; then ./vendor/bin/wpacceptance run; fi
 
 sudo: required
 
