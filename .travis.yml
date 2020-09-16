@@ -16,8 +16,6 @@ before_script:
   - composer install
   - if [ -n "$AWS_ACCESS_KEY" ]; then ./vendor/bin/wpsnapshots configure 10up --aws_key=$AWS_ACCESS_KEY --aws_secret=$AWS_SECRET_ACCESS_KEY --user_name=Travis --user_email=travis@10up.com; fi
 
-script:
-
 jobs:
   fast_finish: true
   include:
