@@ -34,7 +34,7 @@ class ImageProcessing extends \TestCaseBase {
 	}
 
 	/**
-	 * @testdox With ClassifAI activated, it shows a metabox with Azure Computer Vision Scan as the title and two checkboxes for generating alt and image tags on the media edit page.
+	 * @testdox With ClassifAI activated, it shows a metabox with ClassifAI Image Processing as the title and two checkboxes for generating alt and image tags on the media edit page.
 	 */
 	public function testGenerateCheckboxesShows() {
 		$I = $this->openBrowserPage();
@@ -43,15 +43,15 @@ class ImageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/post.php?post=1692&action=edit' );
 
-		$I->seeText( 'Azure Computer Vision Scan' );
+		$I->seeText( 'ClassifAI Image Processing' );
 
-		$I->seeText( 'Generate Captions' );
+		$I->seeText( 'Scan Alt Text' );
 
 		$I->seeText( 'Generate Tags' );
 	}
 
 	/**
-	 * @testdox If the image has image tags and/or alt tag, it shows a metabox with Azure Computer Vision Scan as the title and two checkboxes for rescanning alt and image tags on the media edit page.
+	 * @testdox If the image has image tags and/or alt tag, it shows a metabox with ClassifAI Image Processing as the title and two checkboxes for rescanning alt and image tags on the media edit page.
 	 */
 	public function testRescanCheckboxesShows() {
 		$I = $this->openBrowserPage();
@@ -60,8 +60,8 @@ class ImageProcessing extends \TestCaseBase {
 
 		$I->moveTo( 'wp-admin/post.php?post=763&action=edit' );
 
-		$I->seeText( 'Azure Computer Vision Scan' );
+		$I->seeText( 'ClassifAI Image Processing' );
 
-		$I->seeText( 'Rescan Captions' );
+		$I->seeText( 'Rescan Alt Text' );
 	}
 }
