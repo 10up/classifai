@@ -41,12 +41,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: Set PHP version
-      uses: shivammathur/setup-php@v1
-      with:
-        php-version: '7.2'
-        coverage: none
-
     - name: Install dependencies
       run: composer install
 
@@ -57,6 +51,15 @@ jobs:
 
   phpunit:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
     - name: Checkout
@@ -70,6 +73,9 @@ jobs:
 
     - name: Install dependencies
       run: composer install
+
+    - name: Setup WP Tests
+      run: bash bin/install-wp-tests.sh wordpress_test travis ''  localhost $WP_VERSION
 
     - name: PHPUnit
       run: './vendor/bin/phpunit'
