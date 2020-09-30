@@ -500,17 +500,11 @@ class ComputerVision extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		// TODO: Implement sanitize_settings() method.
 		$new_settings = [];
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {
-				add_settings_error(
-					$this->get_option_name(),
-					'classifai-registration',
-					$auth_check->get_error_message(),
-					'error'
-				);
+				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
 				$new_settings['authenticated'] = false;
 			} else {
 				$new_settings['authenticated'] = true;
@@ -521,25 +515,30 @@ class ComputerVision extends Provider {
 			$new_settings['valid']   = false;
 			$new_settings['url']     = '';
 			$new_settings['api_key'] = '';
-			add_settings_error(
-				$this->get_option_name(),
-				'classifai-registration',
-				esc_html__( 'Please enter your credentials', 'classifai' ),
-				'error'
-			);
+
+			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
 
-		$caption_enabled                       = isset( $settings['enable_image_captions'] ) ? '1' : 'no';
-		$new_settings['enable_image_captions'] = $caption_enabled;
+		$checkbox_settings = [
+			'enable_image_captions',
+			'enable_image_tagging',
+			'enable_smart_cropping',
+		];
+
+		foreach ( $checkbox_settings as $checkbox_setting ) {
+
+			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
+				$new_settings[ $checkbox_setting ] = 'no';
+			} else {
+				$new_settings[ $checkbox_setting ] = '1';
+			}
+		}
 
 		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
 			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
 		} else {
 			$new_settings['caption_threshold'] = 75;
 		}
-
-		$tag_enabled                          = isset( $settings['enable_image_tagging'] ) ? '1' : 'no';
-		$new_settings['enable_image_tagging'] = $tag_enabled;
 
 		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
 			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
@@ -551,8 +550,22 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
-		$smart_cropping_enabled                = isset( $settings['enable_smart_cropping'] ) ? '1' : 'no';
-		$new_settings['enable_smart_cropping'] = $smart_cropping_enabled;
+		if ( ! empty( $settings_errors ) ) {
+
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+
+			foreach ( $settings_errors as $code => $message ) {
+
+				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
+					add_settings_error(
+						$this->get_option_name(),
+						$code,
+						esc_html( $message ),
+						'error'
+					);
+				}
+			}
+		}
 
 		return $new_settings;
 	}
