@@ -53,6 +53,7 @@ class ImageProcessing extends Service {
 		if ( ! $screen ) {
 			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+			$ocr_text        = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$form_fields['rescan_alt_tags'] = [
 				'label' => __( 'Classifai Alt Tags', 'classifai' ),
 				'input' => 'html',
@@ -62,6 +63,11 @@ class ImageProcessing extends Service {
 				'label' => __( 'Classifai Image Tags', 'classifai' ),
 				'input' => 'html',
 				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
+			];
+			$form_fields['rescan_ocr'] = [
+				'label' => __( 'OCR', 'classifai' ),
+				'input' => 'html',
+				'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
 			];
 		}
 		return $form_fields;
@@ -135,8 +141,7 @@ class ImageProcessing extends Service {
 		return $response;
 	}
 
-
-	/**s
+	/**
 	 * Register a common image tag taxonomy
 	 */
 	protected function register_image_tags_taxonomy() {
@@ -160,4 +165,5 @@ class ImageProcessing extends Service {
 		unset( $form_fields['watson-entity'] );
 		return $form_fields;
 	}
+
 }

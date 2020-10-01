@@ -90,6 +90,7 @@ class ComputerVision extends Provider {
 	public function attachment_data_meta_box( $post ) {
 		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
 		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		$ocr      = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan Text', 'classifai' ) : __( 'Scan Text', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">
@@ -102,6 +103,12 @@ class ComputerVision extends Provider {
 				<label for="rescan-tags">
 					<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
 					<?php echo esc_html( $tags ); ?>
+				</label>
+			</div>
+			<div class="misc-pub-section">
+				<label for="rescan-ocr">
+					<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
+					<?php echo esc_html( $ocr ); ?>
 				</label>
 			</div>
 		</div>
@@ -120,9 +127,15 @@ class ComputerVision extends Provider {
 			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
 				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 			}
+
 			// Are we updating the tags?
 			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
 				$this->generate_image_tags( $image_scan->tags, $attachment_id );
+			}
+
+			// Are we updating the OCR text?
+			if ( filter_input( INPUT_POST, 'rescan-ocr' ) ) {
+				$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 			}
 		}
 	}
@@ -232,18 +245,19 @@ class ComputerVision extends Provider {
 	 *
 	 * @filter wp_generate_attachment_metadata
 	 *
-	 * @param array $metadata Attachment metadata.
-	 * @param int   $attachment_id Attachment ID.
+	 * @param array   $metadata Attachment metadata.
+	 * @param int     $attachment_id Attachment ID.
+	 * @param boolean $force Whether to force processing or not. Default false.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
 		$settings = $this->get_settings();
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
 			return $metadata;
 		}
 
-		$should_ocr_scan = isset( $settings['enable_ocr_scanning'] ) && '1' === $settings['enable_ocr_scanning'];
+		$should_ocr_scan = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
 
 		/**
 		 * Filters whether to run OCR scanning on the current image.
@@ -261,8 +275,12 @@ class ComputerVision extends Provider {
 			return $metadata;
 		}
 
-		$ocr = new OCR( $settings );
-		$ocr->generate_ocr_data( $metadata, $attachment_id );
+		$ocr      = new OCR( $settings, $force );
+		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
+
+		if ( $force ) {
+			return $response;
+		}
 
 		return $metadata;
 	}
@@ -533,6 +551,23 @@ class ComputerVision extends Provider {
 				),
 			]
 		);
+
+		add_settings_field(
+			'enable-ocr',
+			esc_html__( 'Enable OCR', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_ocr',
+				'input_type'    => 'checkbox',
+				'default_value' => false,
+				'description'   => __(
+					'Detect text in an image and store that as post content',
+					'classifai'
+				),
+			]
+		);
 	}
 
 	/**
@@ -566,6 +601,7 @@ class ComputerVision extends Provider {
 			'enable_image_captions',
 			'enable_image_tagging',
 			'enable_smart_cropping',
+			'enable_ocr',
 		];
 
 		foreach ( $checkbox_settings as $checkbox_setting ) {
@@ -736,7 +772,7 @@ class ComputerVision extends Provider {
 		);
 
 		if ( 'ocr' === $route_to_call ) {
-			return $this->ocr_processing( $metadata, $post_id );
+			return $this->ocr_processing( $metadata, $post_id, true );
 		}
 
 		$image_scan_results = $this->scan_image( $image_url );

@@ -32,13 +32,22 @@ class OCR {
 	const API_PATH = 'vision/v3.0/ocr/';
 
 	/**
-	 * ComputerVisition settings.
+	 * ComputerVision settings.
 	 *
 	 * @since 1.6.0
 	 *
 	 * @var array
 	 */
 	private $settings;
+
+	/**
+	 * Force processing
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var array
+	 */
+	private $force;
 
 	/**
 	 * Media types to process.
@@ -56,10 +65,12 @@ class OCR {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param array $settings Computer Vision settings.
+	 * @param array   $settings Computer Vision settings.
+	 * @param boolean $force    Whether to force processing or not.
 	 */
-	public function __construct( array $settings ) {
+	public function __construct( array $settings, bool $force ) {
 		$this->settings = $settings;
+		$this->force     = $force;
 	}
 
 	/**
@@ -82,12 +93,30 @@ class OCR {
 	 * @return boolean
 	 */
 	public function should_process( int $attachment_id ) {
+		// Bypass check if this is a force request
+		if ( $this->force ) {
+			return true;
+		}
+
 		$mime_type          = get_post_mime_type( $attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
 
+		/**
+		 * Filters the media types that should be processed
+		 *
+		 * @since 1.6.0
+		 * @hook classifai_ocr_approved_media_types
+		 *
+		 * @param array $media_types   The media types to process. Default just PNG.
+		 * @param int   $attachment_id The attachment ID.
+		 *
+		 * @return array Filtered media types.
+		 */
+		$approved_media_types = apply_filters( 'classifai_ocr_approved_media_types', $this->media_to_process, $attachment_id );
+
 		foreach ( $matched_extensions as $ext ) {
-			if ( in_array( $ext, $this->media_to_process, true ) ) {
+			if ( in_array( $ext, $approved_media_types, true ) ) {
 				$process = true;
 			}
 		}
@@ -177,6 +206,8 @@ class OCR {
 
 			// Save all the results for later
 			update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
+		} else {
+			$rtn = $scan;
 		}
 
 		return $rtn;
@@ -191,6 +222,8 @@ class OCR {
 	 * @return object|WP_Error
 	 */
 	public function process( string $url ) {
+		$url = str_replace( '//oss.local', '//74b0304f68b2.ngrok.io', $url );
+
 		$response = wp_remote_post(
 			$this->get_api_url(),
 			[
