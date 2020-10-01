@@ -764,15 +764,20 @@ class ComputerVision extends Provider {
 	 * @return mixed
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
-		$metadata  = wp_get_attachment_metadata( $post_id );
+		$metadata = wp_get_attachment_metadata( $post_id );
+
+		if ( 'ocr' === $route_to_call ) {
+			return $this->ocr_processing( $metadata, $post_id, true );
+		}
+
 		$image_url = get_largest_acceptable_image_url(
 			get_attached_file( $post_id ),
 			wp_get_attachment_url( $post_id ),
 			$metadata['sizes']
 		);
 
-		if ( 'ocr' === $route_to_call ) {
-			return $this->ocr_processing( $metadata, $post_id, true );
+		if ( empty( $image_url ) ) {
+			return '';
 		}
 
 		$image_scan_results = $this->scan_image( $image_url );

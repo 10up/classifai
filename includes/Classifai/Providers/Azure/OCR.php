@@ -10,7 +10,7 @@ namespace Classifai\Providers\Azure;
 
 use WP_Error;
 use function Classifai\computer_vision_max_filesize;
-use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\get_largest_size_and_dimensions_image_url;
 
 /**
  * OCR class
@@ -57,6 +57,9 @@ class OCR {
 	 * @var array
 	 */
 	private $media_to_process = [
+		'bmp',
+		'gif',
+		'jpeg',
 		'png',
 	];
 
@@ -70,7 +73,7 @@ class OCR {
 	 */
 	public function __construct( array $settings, bool $force ) {
 		$this->settings = $settings;
-		$this->force     = $force;
+		$this->force    = $force;
 	}
 
 	/**
@@ -108,7 +111,7 @@ class OCR {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_approved_media_types
 		 *
-		 * @param array $media_types   The media types to process. Default just PNG.
+		 * @param array $media_types   The media types to process.
 		 * @param int   $attachment_id The attachment ID.
 		 *
 		 * @return array Filtered media types.
@@ -142,7 +145,7 @@ class OCR {
 	 *
 	 * @param array   $metadata      Attachment metadata.
 	 * @param integer $attachment_id Attachment ID.
-	 * @return string
+	 * @return string|WP_Error
 	 */
 	public function generate_ocr_data( array $metadata, int $attachment_id ) {
 		$rtn = '';
@@ -151,15 +154,18 @@ class OCR {
 			return $rtn;
 		}
 
-		$url = wp_get_attachment_url( $attachment_id, 'full' );
+		$url = get_largest_size_and_dimensions_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id, 'full' ),
+			$metadata,
+			[ 50, 4200 ],
+			[ 50, 4200 ],
+			computer_vision_max_filesize()
+		);
 
-		if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-			$url = get_largest_acceptable_image_url(
-				get_attached_file( $attachment_id ),
-				wp_get_attachment_url( $attachment_id, 'full' ),
-				$metadata['sizes'],
-				computer_vision_max_filesize()
-			);
+		// If a properly sized image isn't found, return
+		if ( ! $url ) {
+			return new WP_Error( 'sizeError', esc_html__( 'Image does not meet size requirements. Please ensure it is at least 50x50 but less than 4200x4200 and smaller than 4MB.', 'classifai' ), $metadata );
 		}
 
 		$scan = $this->process( $url );
