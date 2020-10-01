@@ -64,6 +64,7 @@ class ComputerVision extends Provider {
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'ocr_processing' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
@@ -220,6 +221,48 @@ class ComputerVision extends Provider {
 				}
 			}
 		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Runs text recognition on the attachment.
+	 *
+	 * @since 1.6.0
+	 *
+	 * @filter wp_generate_attachment_metadata
+	 *
+	 * @param array $metadata Attachment metadata.
+	 * @param int   $attachment_id Attachment ID.
+	 * @return array Filtered attachment metadata.
+	 */
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
+		$settings = $this->get_settings();
+
+		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
+			return $metadata;
+		}
+
+		$should_ocr_scan = isset( $settings['enable_ocr_scanning'] ) && '1' === $settings['enable_ocr_scanning'];
+
+		/**
+		 * Filters whether to run OCR scanning on the current image.
+		 *
+		 * @since 1.6.0
+		 * @hook classifai_should_ocr_scan_image
+		 *
+		 * @param bool  $should_ocr_scan Whether to run OCR scanning. The default value is set in ComputerVision settings.
+		 * @param array $metadata        Image metadata.
+		 * @param int   $attachment_id   The attachment ID.
+		 *
+		 * @return bool Whether to apply smart cropping.
+		 */
+		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
+			return $metadata;
+		}
+
+		$ocr = new OCR( $settings );
+		$ocr->generate_ocr_data( $metadata, $attachment_id );
 
 		return $metadata;
 	}
@@ -623,6 +666,7 @@ class ComputerVision extends Provider {
 			__( 'Caption threshold', 'classifai' )                => $settings['caption_threshold'] ?? null,
 			__( 'Latest response - Image Scan', 'classifai' )     => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_scan_latest_response' ) ),
 			__( 'Latest response - Smart Cropping', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ),
+			__( 'Latest response - OCR', 'classifai' )            => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_ocr_latest_response' ) ),
 		];
 	}
 
@@ -684,12 +728,17 @@ class ComputerVision extends Provider {
 	 * @return mixed
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
-		$metadata           = wp_get_attachment_metadata( $post_id );
-		$image_url          = get_largest_acceptable_image_url(
+		$metadata  = wp_get_attachment_metadata( $post_id );
+		$image_url = get_largest_acceptable_image_url(
 			get_attached_file( $post_id ),
 			wp_get_attachment_url( $post_id ),
 			$metadata['sizes']
 		);
+
+		if ( 'ocr' === $route_to_call ) {
+			return $this->ocr_processing( $metadata, $post_id );
+		}
+
 		$image_scan_results = $this->scan_image( $image_url );
 
 		if ( is_wp_error( $image_scan_results ) ) {

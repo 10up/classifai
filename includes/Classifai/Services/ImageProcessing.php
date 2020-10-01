@@ -81,6 +81,7 @@ class ImageProcessing extends Service {
 				'permission_callback' => '__return_true',
 			]
 		);
+
 		register_rest_route(
 			'classifai/v1',
 			'image-tags/(?P<id>\d+)',
@@ -88,6 +89,17 @@ class ImageProcessing extends Service {
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
 				'args'                => [ 'route' => 'image-tags' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1',
+			'ocr/(?P<id>\d+)',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'provider_endpoint_callback' ],
+				'args'                => [ 'route' => 'ocr' ],
 				'permission_callback' => '__return_true',
 			]
 		);
