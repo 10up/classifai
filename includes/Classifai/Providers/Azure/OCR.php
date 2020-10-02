@@ -228,8 +228,6 @@ class OCR {
 	 * @return object|WP_Error
 	 */
 	public function process( string $url ) {
-		$url = str_replace( '//oss.local', '//74b0304f68b2.ngrok.io', $url );
-
 		$response = wp_remote_post(
 			$this->get_api_url(),
 			[
