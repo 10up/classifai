@@ -45,7 +45,16 @@ class OCR {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @var array
+	 * @var bool|object
+	 */
+	private $scan;
+
+	/**
+	 * Force processing
+	 *
+	 * @since 1.6.0
+	 *
+	 * @var boolean
 	 */
 	private $force;
 
@@ -57,9 +66,9 @@ class OCR {
 	 * @var array
 	 */
 	private $media_to_process = [
-		// 'bmp',
-		// 'gif',
-		// 'jpeg',
+		'bmp',
+		'gif',
+		'jpeg',
 		'png',
 	];
 
@@ -68,11 +77,13 @@ class OCR {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param array   $settings Computer Vision settings.
-	 * @param boolean $force    Whether to force processing or not.
+	 * @param array       $settings Computer Vision settings.
+	 * @param bool|object $scan     Previously run image scan.
+	 * @param boolean     $force    Whether to force processing or not.
 	 */
-	public function __construct( array $settings, bool $force ) {
+	public function __construct( array $settings, $scan, bool $force ) {
 		$this->settings = $settings;
+		$this->scan     = $scan;
 		$this->force    = $force;
 	}
 
@@ -124,18 +135,59 @@ class OCR {
 			}
 		}
 
+		// If we have a proper image and a previous image scan, check
+		// to see if we have proper tags set, with a high confidence
+		if ( $process && $this->scan && ! empty( $this->scan->tags ) && is_array( $this->scan->tags ) ) {
+
+			/**
+			 * Filters the tags we check for OCR processing
+			 *
+			 * @since 1.6.0
+			 * @hook classifai_ocr_tags
+			 *
+			 * @param array       $tags    The mininum confidence level. Default 90.
+			 * @param int         $attachment_id The attachment ID.
+			 * @param bool|object $scan          Previosly run scan.
+			 *
+			 * @return int Confidence level.
+			 */
+			$tags = apply_filters( 'classifai_ocr_tags', [ 'handwriting', 'text' ], $attachment_id, $this->scan );
+
+			/**
+			 * Filters the tag confidence level for OCR processing
+			 *
+			 * @since 1.6.0
+			 * @hook classifai_ocr_tag_confidence
+			 *
+			 * @param int         $confidence    The mininum confidence level. Default 90.
+			 * @param int         $attachment_id The attachment ID.
+			 * @param bool|object $scan          Previosly run scan.
+			 *
+			 * @return int Confidence level.
+			 */
+			$tag_confidence = apply_filters( 'classifai_ocr_tag_confidence', 90, $attachment_id, $this->scan );
+
+			foreach ( $this->scan->tags as $tag ) {
+				if ( in_array( $tag->name, $tags, true ) && $tag->confidence * 100 >= $tag_confidence ) {
+					$process = true;
+					break;
+				}
+			}
+		}
+
 		/**
 		 * Filters whether to run OCR processing on this media item
 		 *
 		 * @since 1.6.0
 		 * @hook classifai_ocr_should_process
 		 *
-		 * @param bool $process       Whether to run OCR processing or not.
-		 * @param int  $attachment_id The attachment ID.
+		 * @param bool        $process       Whether to run OCR processing or not.
+		 * @param int         $attachment_id The attachment ID.
+		 * @param bool|object $scan          Previosly run scan.
 		 *
 		 * @return bool Whether this attachment should have OCR processing.
 		 */
-		return apply_filters( 'classifai_ocr_should_process', $process, $attachment_id );
+		return apply_filters( 'classifai_ocr_should_process', $process, $attachment_id, $this->scan );
 	}
 
 	/**
@@ -151,7 +203,7 @@ class OCR {
 		$rtn = '';
 
 		if ( ! $this->should_process( $attachment_id ) ) {
-			return $rtn;
+			return new WP_Error( 'processError', esc_html__( 'Image does not meet processing requirements.', 'classifai' ), $metadata );
 		}
 
 		$url = get_largest_size_and_dimensions_image_url(

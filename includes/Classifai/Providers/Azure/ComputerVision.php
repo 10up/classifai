@@ -64,7 +64,6 @@ class ComputerVision extends Provider {
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'ocr_processing' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
@@ -141,11 +140,11 @@ class ComputerVision extends Provider {
 			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
 				$this->generate_image_tags( $image_scan->tags, $attachment_id );
 			}
+		}
 
-			// Are we updating the OCR text?
-			if ( filter_input( INPUT_POST, 'rescan-ocr' ) ) {
-				$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
-			}
+		// Are we updating the OCR text?
+		if ( filter_input( INPUT_POST, 'rescan-ocr' ) ) {
+			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 	}
 
@@ -205,7 +204,8 @@ class ComputerVision extends Provider {
 	 */
 	public function generate_image_alt_tags( $metadata, $attachment_id ) {
 
-		$settings = $this->get_settings();
+		$image_scan = false;
+		$settings   = $this->get_settings();
 		if (
 			'no' !== $settings['enable_image_tagging'] ||
 			'no' !== $settings['enable_image_captions']
@@ -244,6 +244,9 @@ class ComputerVision extends Provider {
 			}
 		}
 
+		// OCR processing
+		$this->ocr_processing( $metadata, $attachment_id, false, is_wp_error( $image_scan ) ? false : $image_scan );
+
 		return $metadata;
 	}
 
@@ -254,12 +257,13 @@ class ComputerVision extends Provider {
 	 *
 	 * @filter wp_generate_attachment_metadata
 	 *
-	 * @param array   $metadata Attachment metadata.
-	 * @param int     $attachment_id Attachment ID.
-	 * @param boolean $force Whether to force processing or not. Default false.
+	 * @param array       $metadata Attachment metadata.
+	 * @param int         $attachment_id Attachment ID.
+	 * @param boolean     $force Whether to force processing or not. Default false.
+	 * @param bool|object $scan Previously run image scan. Default false.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false, $scan = false ) {
 		$settings = $this->get_settings();
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
@@ -284,7 +288,7 @@ class ComputerVision extends Provider {
 			return $metadata;
 		}
 
-		$ocr      = new OCR( $settings, $force );
+		$ocr      = new OCR( $settings, $scan, $force );
 		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
 
 		if ( $force ) {
