@@ -17,13 +17,21 @@
 		spinner.classList.add( 'is-active' );
 
 		const path = `${ endpoint }${ postID }`;
-		wp.apiRequest( { path } ).then( ( response ) => {
-			button.removeAttribute( 'disabled' );
-			spinner.style.display = 'none';
-			spinner.classList.remove( 'is-active' );
-			button.textContent = __( 'Rescan', 'classifai' );
-			callback && callback( response );
-		} );
+		wp.apiRequest( { path } )
+			.then(
+				( response ) => {
+					button.removeAttribute( 'disabled' );
+					spinner.style.display = 'none';
+					spinner.classList.remove( 'is-active' );
+					button.textContent = __( 'Rescan', 'classifai' );
+					callback && callback( response );
+				},
+				() => {
+					spinner.style.display = 'none';
+					spinner.classList.remove( 'is-active' );
+					button.textContent = __( 'Error', 'classifai' );
+				}
+			);
 	};
 
 	$( document ).ready( function() {
@@ -49,7 +57,18 @@
 
 				imageTagsButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/image-tags/' } ) );
 
-				ocrScanButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/ocr/' } ) );
+				ocrScanButton.addEventListener( 'click', e => handleClick(
+					{
+						button: e.target,
+						endpoint: '/classifai/v1/ocr/',
+						callback: resp => {
+							if ( resp ) {
+								const textField = document.getElementById( 'attachment-details-two-column-description' );
+								textField.value = resp;
+							}
+						}
+					}
+				) );
 			} );
 		}
 	} );
