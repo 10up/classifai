@@ -260,10 +260,10 @@ class OCR {
 				);
 
 				$rtn = $text;
-			}
 
-			// Save all the results for later
-			update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
+				// Save all the results for later
+				update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
+			}
 		} else {
 			$rtn = $scan;
 		}
