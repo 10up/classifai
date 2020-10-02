@@ -57,9 +57,9 @@ class OCR {
 	 * @var array
 	 */
 	private $media_to_process = [
-		'bmp',
-		'gif',
-		'jpeg',
+		// 'bmp',
+		// 'gif',
+		// 'jpeg',
 		'png',
 	];
 

@@ -88,6 +88,13 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
+		$settings        = $this->get_settings();
+		$should_ocr_scan = true;
+
+		if ( is_array( $settings ) ) {
+			$should_ocr_scan = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
+		}
+
 		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
 		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
 		$ocr      = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan Text', 'classifai' ) : __( 'Scan Text', 'classifai' );
@@ -105,12 +112,14 @@ class ComputerVision extends Provider {
 					<?php echo esc_html( $tags ); ?>
 				</label>
 			</div>
-			<div class="misc-pub-section">
-				<label for="rescan-ocr">
-					<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
-					<?php echo esc_html( $ocr ); ?>
-				</label>
-			</div>
+			<?php if ( $should_ocr_scan ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-ocr">
+						<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
+						<?php echo esc_html( $ocr ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
