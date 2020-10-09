@@ -302,7 +302,7 @@ class SmartCropping {
 			[
 				'height'        => $data['height'],
 				'width'         => $data['width'],
-				'smartCropping' => true,
+				'smartCropping' => 'true',
 			],
 			$this->get_api_url()
 		);
