@@ -51,16 +51,6 @@ class ImageProcessing extends Service {
 		$screen = get_current_screen();
 		// Screen returns null on the Media library page.
 		if ( ! $screen ) {
-			$should_ocr_scan = true;
-
-			if ( isset( $this->provider_classes[0] ) ) {
-				$settings = $this->provider_classes[0]->get_settings();
-
-				if ( is_array( $settings ) ) {
-					$should_ocr_scan = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
-				}
-			}
-
 			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$ocr_text        = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
@@ -74,14 +64,11 @@ class ImageProcessing extends Service {
 				'input' => 'html',
 				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
 			];
-
-			if ( $should_ocr_scan ) {
-				$form_fields['rescan_ocr'] = [
-					'label' => __( 'Detect Text', 'classifai' ),
-					'input' => 'html',
-					'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
-				];
-			}
+			$form_fields['rescan_ocr'] = [
+				'label' => __( 'Detect Text', 'classifai' ),
+				'input' => 'html',
+				'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
+			];
 		}
 		return $form_fields;
 	}
