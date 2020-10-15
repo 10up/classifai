@@ -145,11 +145,11 @@ class OCR {
 			 * @since 1.6.0
 			 * @hook classifai_ocr_tags
 			 *
-			 * @param array       $tags    The mininum confidence level. Default 90.
+			 * @param array       $tags          Tags to look for. Default handwriting and text.
 			 * @param int         $attachment_id The attachment ID.
 			 * @param bool|object $scan          Previosly run scan.
 			 *
-			 * @return int Confidence level.
+			 * @return array Filtered tags.
 			 */
 			$tags = apply_filters( 'classifai_ocr_tags', [ 'handwriting', 'text' ], $attachment_id, $this->scan );
 
@@ -246,9 +246,9 @@ class OCR {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_text
 				 *
-				 * @param {array} $captions The returned caption data.
+				 * @param string $text The returned text data.
 				 *
-				 * @return {array} The filtered caption data.
+				 * @return string The filtered text data.
 				 */
 				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ) );
 

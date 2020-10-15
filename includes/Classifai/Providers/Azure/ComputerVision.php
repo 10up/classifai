@@ -282,7 +282,7 @@ class ComputerVision extends Provider {
 		 * @param array $metadata        Image metadata.
 		 * @param int   $attachment_id   The attachment ID.
 		 *
-		 * @return bool Whether to apply smart cropping.
+		 * @return bool Whether to run OCR scanning.
 		 */
 		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
 			return $metadata;
