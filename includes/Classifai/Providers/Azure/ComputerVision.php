@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
@@ -229,7 +230,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string $image_url Path to the uploaded image.
 	 *
-	 * @return bool|object|\WP_Error
+	 * @return bool|object|WP_Error
 	 */
 	protected function scan_image( $image_url ) {
 		$settings = $this->get_settings();
@@ -247,11 +248,12 @@ class ComputerVision extends Provider {
 		);
 
 		if ( ! is_wp_error( $request ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( isset( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
+			$body = json_decode( wp_remote_retrieve_body( $request ) );
+
+			if ( 200 !== wp_remote_retrieve_response_code( $request ) && isset( $body->message ) ) {
+				$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
 			} else {
-				return $response;
+				$rtn = $body;
 			}
 		} else {
 			$rtn = $request;
@@ -283,9 +285,12 @@ class ComputerVision extends Provider {
 	 *
 	 * @param array $captions      Captions returned from the API
 	 * @param int   $attachment_id Post ID for the attachment.
+	 *
+	 * @return string
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
 		$rtn = '';
+
 		/**
 		 * Filter the captions returned from the API.
 		 *
@@ -297,9 +302,11 @@ class ComputerVision extends Provider {
 		 * @return {array} The filtered caption data.
 		 */
 		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
+
 		// If $captions isn't an array, don't save them.
 		if ( is_array( $captions ) && ! empty( $captions ) ) {
 			$threshold = $this->get_settings( 'caption_threshold' );
+
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
@@ -316,11 +323,13 @@ class ComputerVision extends Provider {
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
 			}
+
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
-			// return the caption or empty string
-			return $rtn;
 		}
+
+		// return the caption or empty string
+		return $rtn;
 	}
 
 	/**
@@ -329,9 +338,11 @@ class ComputerVision extends Provider {
 	 * @param array $tags          Array ot tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return mixed
+	 * @return string|array
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
+		$rtn = '';
+
 		/**
 		 * Filter the tags returned from the API.
 		 *
@@ -343,20 +354,24 @@ class ComputerVision extends Provider {
 		 * @return {array} The filtered image tags.
 		 */
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
+
 		// If $tags isn't an array, don't save them.
 		if ( is_array( $tags ) && ! empty( $tags ) ) {
-			$threshold = $this->get_settings( 'tag_threshold' );
-			$taxonomy  = $this->get_settings( 'image_tag_taxonomy' );
-			// Save the first caption as the alt text if it passes the threshold.
+			$threshold   = $this->get_settings( 'tag_threshold' );
+			$taxonomy    = $this->get_settings( 'image_tag_taxonomy' );
 			$custom_tags = [];
+
+			// Save the first caption as the alt text if it passes the threshold.
 			foreach ( $tags as $tag ) {
 				if ( $tag->confidence * 100 > $threshold ) {
 					$custom_tags[] = $tag->name;
 					wp_add_object_terms( $attachment_id, $tag->name, $taxonomy );
 				}
 			}
+
 			if ( ! empty( $custom_tags ) ) {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
+				$rtn = $custom_tags;
 			} else {
 				/**
 				 * Fires if there were no tags added.
@@ -373,6 +388,8 @@ class ComputerVision extends Provider {
 			// Save the tags for later
 			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
 		}
+
+		return $rtn;
 	}
 
 	/**
@@ -576,7 +593,7 @@ class ComputerVision extends Provider {
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( $url, $api_key ) {
 		$rtn     = false;
@@ -594,7 +611,7 @@ class ComputerVision extends Provider {
 		if ( ! is_wp_error( $request ) ) {
 			$response = json_decode( wp_remote_retrieve_body( $request ) );
 			if ( ! empty( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
+				$rtn = new WP_Error( 'auth', $response->error->message );
 			} else {
 				$rtn = true;
 			}
@@ -681,7 +698,7 @@ class ComputerVision extends Provider {
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
 	 *
-	 * @return mixed
+	 * @return array|string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
 		$metadata           = wp_get_attachment_metadata( $post_id );
