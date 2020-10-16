@@ -17,21 +17,13 @@
 		spinner.classList.add( 'is-active' );
 
 		const path = `${ endpoint }${ postID }`;
-		wp.apiRequest( { path } )
-			.then(
-				( response ) => {
-					button.removeAttribute( 'disabled' );
-					spinner.style.display = 'none';
-					spinner.classList.remove( 'is-active' );
-					button.textContent = __( 'Rescan', 'classifai' );
-					callback && callback( response );
-				},
-				() => {
-					spinner.style.display = 'none';
-					spinner.classList.remove( 'is-active' );
-					button.textContent = __( 'Error', 'classifai' );
-				}
-			);
+		wp.apiRequest( { path } ).then( ( response ) => {
+			button.removeAttribute( 'disabled' );
+			spinner.style.display = 'none';
+			spinner.classList.remove( 'is-active' );
+			button.textContent = __( 'Rescan', 'classifai' );
+			callback && callback( response );
+		} );
 	};
 
 	$( document ).ready( function() {

@@ -348,7 +348,6 @@ class ComputerVision extends Provider {
 	 *
 	 * @param array $captions      Captions returned from the API
 	 * @param int   $attachment_id Post ID for the attachment.
-	 * @return string
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
 		$rtn = '';
@@ -384,10 +383,9 @@ class ComputerVision extends Provider {
 			}
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+			// return the caption or empty string
+			return $rtn;
 		}
-
-		// return the caption or empty string
-		return $rtn;
 	}
 
 	/**
@@ -396,11 +394,9 @@ class ComputerVision extends Provider {
 	 * @param array $tags          Array ot tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return string|array
+	 * @return mixed
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
-		$rtn = '';
-
 		/**
 		 * Filter the tags returned from the API.
 		 *
@@ -426,7 +422,6 @@ class ComputerVision extends Provider {
 			}
 			if ( ! empty( $custom_tags ) ) {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
-				$rtn = $custom_tags;
 			} else {
 				/**
 				 * Fires if there were no tags added.
@@ -443,8 +438,6 @@ class ComputerVision extends Provider {
 			// Save the tags for later
 			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
 		}
-
-		return $rtn;
 	}
 
 	/**
