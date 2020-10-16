@@ -112,7 +112,12 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
-		$image_url  = wp_get_attachment_image_url( $attachment_id );
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$image_url  = get_largest_acceptable_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id ),
+			$metadata['sizes']
+		);
 		$image_scan = $this->scan_image( $image_url );
 		if ( ! is_wp_error( $image_scan ) ) {
 			// Are we updating the captions?
