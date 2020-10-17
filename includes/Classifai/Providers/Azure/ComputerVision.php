@@ -65,6 +65,20 @@ class ComputerVision extends Provider {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	}
+
+	/**
+	 * Enqueue the editor scripts.
+	 */
+	public function enqueue_editor_assets() {
+		wp_enqueue_script(
+			'ocr-editor-plugin',
+			CLASSIFAI_PLUGIN_URL . 'dist/js/ocr-editor-plugin.min.js',
+			array( 'wp-blocks', 'wp-api-fetch', 'loash' ),
+			time(),
+			true
+		);
 	}
 
 	/**
