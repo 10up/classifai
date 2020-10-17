@@ -3,23 +3,9 @@ const { createBlock } = wp.blocks;
 const apiFetch = wp.apiFetch;
 const { countBy } = lodash;
 
-const { getBlocks, getSelectedBlock, getBlockIndex } = select( 'core/block-editor');
-
-let currentBlocksState = getBlocks();
+const { getSelectedBlock, getBlock, getNextBlockClientId, getBlockIndex } = select( 'core/block-editor');
 
 subscribe( async () => {
-	// we are calling the getBlocks selector function to subscribe to all
-	// the changes in the block list
-	const newBlocksState = getBlocks();
-
-	// const count = countBy(newBlocksState, 'name');
-
-	if ( currentBlocksState.length === newBlocksState.length ) {
-		return;
-	}
-
-	currentBlocksState = newBlocksState;
-
 	// when a new block gets inserted it automatically gets selected
 	// also when an image gets selected the image block is the currently
 	// selected block in the editor
@@ -30,7 +16,6 @@ subscribe( async () => {
 		return
 	}
 
-
 	// we can get access to all the attributes of the image block
 	const imageId = currentBlock.attributes.id;
 
@@ -38,9 +23,19 @@ subscribe( async () => {
 		return;
 	}
 
+	const nextBlock = getBlock( getNextBlockClientId() );
+
+	if (
+		nextBlock.name === "core/paragraph"
+		&& nextBlock.attributes.hasOwnProperty( 'className' )
+		&& nextBlock.attributes.className.includes( 'classifai-ocr-text' )
+	) {
+		return;
+	}
+
 	const imageBlockIndex = getBlockIndex( currentBlock.clientId );
-	
-	const media = await apiFetch( { path: `/wp/v2/media/${imageId}` } );
+
+	const media = await apiFetch( { path: '/wp/v2/media/' + imageId } );
 
 	if (
 		! media.hasOwnProperty('caption')
@@ -52,6 +47,7 @@ subscribe( async () => {
 
 	const newBlock = createBlock( 'core/paragraph', {
 		content: media.caption.rendered,
+		className: 'classifai-ocr-text'
 	} );
 	dispatch( 'core/block-editor' ).insertBlock(
 		newBlock,

@@ -73,9 +73,9 @@ class ComputerVision extends Provider {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
-			'ocr-editor-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/js/ocr-editor-plugin.min.js',
-			array( 'wp-blocks', 'wp-api-fetch', 'loash' ),
+			'editor-ocr',
+			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.min.js',
+			array( 'wp-blocks', 'wp-api-fetch', 'lodash' ),
 			time(),
 			true
 		);
