@@ -182,7 +182,8 @@ class SmartCropping {
 			];
 
 			$better_thumb_filename = $this->get_cropped_thumbnail( $attachment_id, $data );
-			if ( ! empty( $better_thumb_filename ) ) {
+
+			if ( ! empty( $better_thumb_filename ) && ! is_wp_error( $better_thumb_filename ) ) {
 				$metadata['sizes'][ $size ]['file'] = basename( $better_thumb_filename );
 			}
 		}
@@ -235,6 +236,11 @@ class SmartCropping {
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
 		set_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $new_thumb_image ) ) {
+			return $new_thumb_image;
+		}
+
 		if ( empty( $new_thumb_image ) ) {
 			return false;
 		}
@@ -334,9 +340,13 @@ class SmartCropping {
 		 */
 		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
+		$response_body = wp_remote_retrieve_body( $response );
+
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-			return wp_remote_retrieve_body( $response );
+			return $response_body;
 		}
+
+		$response_json = json_decode( $response_body );
 
 		/**
 		 * Fires when the generateThumbnail smart-cropping API response did not have a 200 status code.
@@ -349,6 +359,14 @@ class SmartCropping {
 		 * @param array  Array containing the image height and width.
 		 */
 		do_action( 'classifai_smart_cropping_unsuccessful_response', $response, $url, $data );
+
+		if ( ! empty( $response_json->code ) ) {
+			return new \WP_Error( $response_json->code, $response_json->message );
+		}
+
+		if ( ! empty( $response_json->errors ) ) {
+			return new \WP_Error( 'classifai_smart_cropping_validation_errors', implode( ' ', $response_json->errors->smartCropping ) );
+		}
 
 		return false;
 	}
