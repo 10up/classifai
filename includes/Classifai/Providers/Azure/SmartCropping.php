@@ -365,7 +365,7 @@ class SmartCropping {
 		}
 
 		if ( ! empty( $response_json->errors ) ) {
-			return new \WP_Error( 'classifai_smart_cropping_validation_errors', implode( ' ', $response_json->errors->smartCropping ) );
+			return new \WP_Error( 'classifai_smart_cropping_api_validation_errors', implode( ' ', $response_json->errors->smartCropping ) );
 		}
 
 		return false;
