@@ -35,9 +35,10 @@
 					} );
 					spinner.style.display = 'none';
 					spinner.classList.remove( 'is-active' );
-					button.textContent = __( 'Error', 'classifai' );
+					button.removeAttribute( 'disabled' );
+					button.textContent = __( 'Rescan', 'classifai' );
 					errorContainer.style.display = 'inline-block';
-					errorContainer.textContent = errorObj.message;
+					errorContainer.textContent = `Error: ${errorObj.message}`;
 				}
 			);
 	};
