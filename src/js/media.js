@@ -18,6 +18,7 @@
 		button.setAttribute( 'disabled', 'disabled' );
 		spinner.style.display = 'inline-block';
 		spinner.classList.add( 'is-active' );
+		errorContainer.style.display = 'none';
 
 		wp.apiRequest( { path } )
 			.then(
