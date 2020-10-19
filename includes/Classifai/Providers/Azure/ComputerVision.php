@@ -112,8 +112,13 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
-		$routes    = [];
-		$image_url = wp_get_attachment_image_url( $attachment_id );
+		$routes     = [];
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$image_url  = get_largest_acceptable_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id ),
+			$metadata['sizes']
+		);
 
 		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
 			$routes[] = 'alt-tags';
