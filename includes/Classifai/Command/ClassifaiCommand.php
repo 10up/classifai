@@ -253,8 +253,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$limit_total = min( $total, intval( $opts['limit'] ) );
 		}
 
-		$errors       = [];
-		$message      = "Classifying $limit_total images ...";
+		$errors  = [];
+		$message = "Classifying $limit_total images ...";
+
+		if ( ! empty( $opts['crop_only'] ) ) {
+			$message = "Cropping $limit_total images ...";
+		}
+
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
 
 		for ( $index = 0; $index < $limit_total; $index++ ) {
@@ -263,8 +268,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$progress_bar->tick();
 
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
-			\WP_CLI::line( 'Processing ' . $attachment_id );
-			$classifier->generate_image_alt_tags( $current_meta, $attachment_id );
+			if ( empty( $opts['crop_only'] ) ) {
+				$classifier->generate_image_alt_tags( $current_meta, $attachment_id );
+			}
 			$classifier->smart_crop_image( $current_meta, $attachment_id );
 		}
 
@@ -273,11 +279,43 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$total_errors  = count( $errors );
 		$total_success = $total - $total_errors;
 
-		\WP_CLI::success( "Classified $total_success images, $total_errors errors." );
+		if ( empty( $opts['crop_only'] ) ) {
+			\WP_CLI::success( "Classified $total_success images, $total_errors errors." );
+		} else {
+			\WP_CLI::success( "Cropped $total_success images, $total_errors errors." );
+		}
 
 		foreach ( $errors as $attachment_id => $error ) {
 			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 		}
+	}
+
+	/**
+	 * Batch crop image(s).
+	 *
+	 * ## Options
+	 *
+	 * [<attachment_ids>]
+	 * : Comma delimeted Attachment IDs to crop.
+	 *
+	 * [--limit=<limit>]
+	 * : Limit classification to N attachments. Default 100.
+	 *
+	 * [--skip=<skip>]
+	 * : Skip first N attachments. Default false.
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function crop( $args = [], $opts = [] ) {
+		$opts = array_merge(
+			$opts,
+			[
+				'force'     => true,
+				'crop_only' => true,
+			]
+		);
+		$this->image( $args, $opts );
 	}
 
 	/**
@@ -391,12 +429,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			];
 		}
 
-		\WP_CLI::log( 'Fetching images to classify ...' );
+		\WP_CLI::log( 'Fetching images ...' );
 
 		$query = new \WP_Query( $query_params );
 		$images = $query->posts;
 
-		\WP_CLI::log( 'Fetching images to classify ... DONE (' . count( $images ) . ')' );
+		\WP_CLI::log( 'Fetching images ... DONE (' . count( $images ) . ')' );
 
 		return $images;
 	}
