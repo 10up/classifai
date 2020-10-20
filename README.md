@@ -58,9 +58,11 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-#### 2. Configure ClassifAI API Keys under admin area > ClassifAI
+#### 2. Configure ClassifAI Registration Key under ClassifAI > ClassifAI
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
+
+![Screenshot of registration settings](assets/img/screenshot-1.png "Example of an empty ClassifAI Settings registration screen.")
 
 ## Set Up Language Processing (via IBM Watson)
 
