@@ -38,7 +38,7 @@ class ImageProcessing extends Service {
 	 * Enqueue the script for the media modal.
 	 */
 	public function enqueue_media_scripts() {
-		wp_enqueue_script( 'media-script', CLASSIFAI_PLUGIN_URL . '/dist/js/media.min.js', array( 'jquery', 'media-editor' ), CLASSIFAI_PLUGIN_VERSION, true );
+		wp_enqueue_script( 'media-script', CLASSIFAI_PLUGIN_URL . '/dist/js/media.min.js', array( 'jquery', 'media-editor', 'lodash' ), CLASSIFAI_PLUGIN_VERSION, true );
 	}
 
 	/**
@@ -57,17 +57,17 @@ class ImageProcessing extends Service {
 			$form_fields['rescan_alt_tags'] = [
 				'label' => __( 'Classifai Alt Tags', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			];
 			$form_fields['rescan_captions'] = [
 				'label' => __( 'Classifai Image Tags', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			];
 			$form_fields['rescan_ocr'] = [
 				'label' => __( 'Detect Text', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			];
 		}
 		return $form_fields;
@@ -116,7 +116,7 @@ class ImageProcessing extends Service {
 	 *
 	 * @param \WP_REST_Request $request The full request object.
 	 *
-	 * @return mixed
+	 * @return array|bool|string|\WP_Error
 	 */
 	public function provider_endpoint_callback( $request ) {
 		$response          = true;
