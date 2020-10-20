@@ -15,7 +15,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = '/vision/v1.0/analyze';
+	protected $analyze_url = 'vision/v1.0/analyze';
 
 	/**
 	 * ComputerVision constructor.
@@ -112,8 +112,22 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
-		$image_url  = wp_get_attachment_image_url( $attachment_id );
-		$image_scan = $this->scan_image( $image_url );
+		$routes     = [];
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$image_url  = get_largest_acceptable_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id ),
+			$metadata['sizes']
+		);
+
+		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
+			$routes[] = 'alt-tags';
+		} else if ( filter_input( INPUT_POST, 'rescan-tags' ) ) {
+			$routes[] = 'image-tags';
+		}
+
+		$image_scan = $this->scan_image( $image_url, $routes );
+
 		if ( ! is_wp_error( $image_scan ) ) {
 			// Are we updating the captions?
 			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
@@ -228,12 +242,12 @@ class ComputerVision extends Provider {
 	 * Scan the image and return the captions.
 	 *
 	 * @param string $image_url Path to the uploaded image.
-	 *
+	 * @param array  $routes Routes we are calling.
 	 * @return bool|object|\WP_Error
 	 */
-	protected function scan_image( $image_url ) {
+	protected function scan_image( $image_url, array $routes = [] ) {
 		$settings = $this->get_settings();
-		$url      = $this->prep_api_url();
+		$url      = $this->prep_api_url( $routes );
 
 		$request = wp_remote_post(
 			$url,
@@ -263,15 +277,17 @@ class ComputerVision extends Provider {
 	/**
 	 * Build and return the API endpoint based on settings.
 	 *
+	 * @param array $routes The routes we are calling.
+	 *
 	 * @return string
 	 */
-	protected function prep_api_url() {
+	protected function prep_api_url( array $routes = [] ) {
 		$settings     = $this->get_settings();
 		$api_features = [];
-		if ( 'no' !== $settings['enable_image_captions'] ) {
+		if ( in_array( 'alt-tags', $routes, true ) || 'no' !== $settings['enable_image_captions'] ) {
 			$api_features[] = 'Description';
 		}
-		if ( 'no' !== $settings['enable_image_tagging'] ) {
+		if ( in_array( 'image-tags', $routes, true ) || 'no' !== $settings['enable_image_tagging'] ) {
 			$api_features[] = 'Tags';
 		}
 		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['url'] ) . $this->analyze_url );
@@ -690,7 +706,7 @@ class ComputerVision extends Provider {
 			wp_get_attachment_url( $post_id ),
 			$metadata['sizes']
 		);
-		$image_scan_results = $this->scan_image( $image_url );
+		$image_scan_results = $this->scan_image( $image_url, [ $route_to_call ] );
 
 		if ( is_wp_error( $image_scan_results ) ) {
 			return $image_scan_results;
