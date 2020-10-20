@@ -11,10 +11,6 @@
     {
       "snapshot_name": "WordPress Latest",
       "snapshot_id": "a21aca82bf1adcb4fd704a60c220ab64"
-    },
-    {
-      "snapshot_name": "WordPress Nightly",
-      "snapshot_id": "25b3b1deefef2f623d75601d3596e6f3"
     }
   ],
   "bootstrap": "tests\/e2e\/wpacceptance\/bootstrap.php",
