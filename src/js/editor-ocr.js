@@ -46,4 +46,4 @@ subscribe( debounce( async () => {
 	} );
 
 	dispatch( 'core/block-editor' ).insertBlock( newBlock, imageBlockIndex + 1 );
-} ), 100 );
+} ), 10 );
