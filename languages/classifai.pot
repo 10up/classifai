@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.5.1\n"
+"Project-Id-Version: ClassifAI 1.6.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
 "POT-Creation-Date: 2020-02-27 17:24:07+00:00\n"
 "MIME-Version: 1.0\n"
