@@ -5,11 +5,28 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [Unreleased] - TBD
 
 ## [1.6.0] - TBD
+### Added
+- Better error handling for manual scanning of alt text or image tags (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu) via [#231](https://github.com/10up/classifai/pull/231))
+- `classifai_generate_image_alt_tags_source_url` filter to allow overriding of the image URL within `generate_image_alt_tags()` (props [@petenelson](https://github.com/petenelson), [@dinhtungdu](https://github.com/dinhtungdu) via [#217](https://github.com/10up/classifai/pull/217))
+
 ### Changed
+- Image Processing metabox copy (props [@ActuallyConnor](https://github.com/ActuallyConnor), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#214](https://github.com/10up/classifai/pull/214))
 - Bump WordPress version "tested up to" 5.5.1 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#237](https://github.com/10up/classifai/pull/237))
+- Documentation, linting, and testing updates (props [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul), [@helen](https://github.com/helen), [@dinhtungdu](https://github.com/dinhtungdu) via [#204](https://github.com/10up/classifai/pull/204), [#215](https://github.com/10up/classifai/pull/215), [#226](https://github.com/10up/classifai/pull/226), [#239](https://github.com/10up/classifai/pull/239))
 
 ### Fixed
 - Smart cropping results not as expected (props [@dinhtungdu](https://github.com/dinhtungdu), [@oscarssanchez](https://github.com/oscarssanchez), [@ShahAaron](https://github.com/ShahAaron), [@jeffpaul](https://github.com/jeffpaul) via [@229](https://github.com/10up/classifai/pull/229))
+- Sending largest image size possible when initiating a scan from the single edit screen (props [@dkotter](https://github.com/dkotter) via [#235](https://github.com/10up/classifai/pull/235))
+- Manual image scanning functions if automatic scanning is disabled (props [@dkotter](https://github.com/dkotter) via [#233](https://github.com/10up/classifai/pull/233))
+- Prevent PHP notice if IBM Watson credentials are empty (props [@barryceelen](https://github.com/barryceelen), [@dinhtungdu](https://github.com/dinhtungdu), [@adamsilverstein](https://github.com/adamsilverstein) via [#206](https://github.com/10up/classifai/pull/206))
+- Azure Computer Vision credentials saving and notification (props [@barryceelen](https://github.com/barryceelen), [@dinhtungdu](https://github.com/dinhtungdu) via [#207](https://github.com/10up/classifai/pull/207))
+- `permission_callback` error on WordPress 5.5 (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#219](https://github.com/10up/classifai/pull/219))
+
+### Security
+- Bump `acorn` from 6.3.0 to 6.4.1 (props [@dependabot](https://github.com/dependabot) via [#203](https://github.com/10up/classifai/pull/203))
+- Bump `lodash` from 4.17.15 to 4.17.19 (props [@dependabot](https://github.com/dependabot) via [#216](https://github.com/10up/classifai/pull/216))
+- Bump `elliptic` from 6.5.1 to 6.5.3 (props [@dependabot](https://github.com/dependabot) via [#218](https://github.com/10up/classifai/pull/218))
+- Bump `yargs-parser` from 13.1.1 to 13.1.2 (props [@dependabot](https://github.com/dependabot) via [#223](https://github.com/10up/classifai/pull/223))
 
 ## [1.5.1] - 2020-03-06
 ### Added
@@ -116,7 +133,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [1.0.0] - 2018-07-24
 - Initial closed source release
 
-[Unreleased]: https://github.com/10up/classifai/compare/master...develop
+[Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.6.0]: https://github.com/10up/classifai/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/10up/classifai/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/10up/classifai/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/10up/classifai/compare/1.3.2...1.4.0
