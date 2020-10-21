@@ -26,9 +26,9 @@
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-Language Processing - Tagging | Podcast in editor | Podcast feed
-------------- | ----------------- | ------------
-![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.")
+| Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
+| :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.") |
 
 ## Requirements
 
