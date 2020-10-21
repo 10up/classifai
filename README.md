@@ -26,6 +26,10 @@
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
+Language Processing - Tagging | Podcast in editor | Podcast feed
+------------- | ----------------- | ------------
+![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.")
+
 ## Requirements
 
 * PHP 7.0+
@@ -82,14 +86,14 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 ##### If your credentials contain a username and password, then:
 - In the `API URL` field enter the URL
-- Enter the `username` value into the `API User field`.
-- Enter the `password` into the `API key` field.
+- Enter the `username` value into the `API Username`.
+- Enter the `password` into the `API Key` field.
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
-- Choose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
+- Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
 
-#### 4. Save Post or run WP CLI command to batch classify posts
+#### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
 
 ## Set Up Image Processing (via Microsoft Azure)
 
