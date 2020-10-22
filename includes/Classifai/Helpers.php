@@ -232,6 +232,30 @@ function get_feature_enabled( $feature ) {
 }
 
 /**
+ * Check if any language processing features are enabled
+ *
+ * @since 1.6.0
+ *
+ * @return true
+ */
+function language_processing_features_enabled() {
+	$features = [
+		'category',
+		'concept',
+		'entity',
+		'keyword',
+	];
+
+	foreach ( $features as $feature ) {
+		if ( get_feature_enabled( $feature ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Returns the feature threshold based on current configuration. Lookup
  * order is.
  *
