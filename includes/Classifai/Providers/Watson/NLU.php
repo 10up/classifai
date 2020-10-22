@@ -8,6 +8,7 @@ namespace Classifai\Providers\Watson;
 use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+use function Classifai\get_post_types_for_language_settings;
 
 class NLU extends Provider {
 
@@ -390,7 +391,7 @@ class NLU extends Provider {
 	 */
 	public function render_post_types_checkboxes( $args ) {
 		echo '<ul>';
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		$post_types = get_post_types_for_language_settings();
 		foreach ( $post_types as $post_type ) {
 			$args = [
 				'label_for'    => $post_type->name,

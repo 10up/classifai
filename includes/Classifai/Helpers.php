@@ -172,6 +172,34 @@ function get_watson_password() {
 }
 
 /**
+ * Get post types we want to show in the language processing settings
+ *
+ * @since 1.6.0
+ *
+ * @return array
+ */
+function get_post_types_for_language_settings() {
+	$post_types = get_post_types( [ 'public' => true ], 'objects' );
+
+	// Remove the attachment post type
+	unset( $post_types['attachment'] );
+
+	/**
+	 * Filter post types shown in language processing settings.
+	 *
+	 * @since 1.6.0
+	 * @hook classifai_language_settings_post_types
+	 *
+	 * @param {array} $post_types Array of post types to show in language processing settings.
+	 *
+	 * @return {array} Array of post types.
+	 */
+	$post_types = apply_filters( 'classifai_language_settings_post_types', $post_types );
+
+	return $post_types;
+}
+
+/**
  * The list of post types that get the ClassifAI taxonomies. Defaults
  * to 'post'.
  *
