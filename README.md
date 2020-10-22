@@ -12,7 +12,7 @@
 * [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [WP CLI Usage Instructions](#wp-cli-usage-instructions)
-* [Data Gathering](#data-gathering)
+* [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
 * [Changelog](#changelog)
 * [Contributing](#contributing)
@@ -20,11 +20,15 @@
 ## Features
 
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
-* Supports Watson's [Categories](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#categories), [Keywords](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#keywords), [Concepts](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#concepts) & [Entities](https://console.bluemix.net/docs/services/natural-language-understanding/index.html#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
+* Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Manually generate alt text and image tags for images
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
+
+| Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
+| :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.") |
 
 ## Requirements
 
@@ -58,9 +62,11 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-#### 2. Configure ClassifAI API Keys under admin area > ClassifAI
+#### 2. Configure ClassifAI Registration Key under ClassifAI > ClassifAI
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
+
+![Screenshot of registration settings](assets/img/screenshot-1.png "Example of an empty ClassifAI Settings registration screen.")
 
 ## Set Up Language Processing (via IBM Watson)
 
@@ -80,14 +86,14 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 ##### If your credentials contain a username and password, then:
 - In the `API URL` field enter the URL
-- Enter the `username` value into the `API User field`.
-- Enter the `password` into the `API key` field.
+- Enter the `username` value into the `API Username`.
+- Enter the `password` into the `API Key` field.
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
 - Choose which public post types to classify when saved.
-- Choose whether to assign category, keyword, entity, and concept as well as the taxonomies used for each.
+- Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
 
-#### 4. Save Post or run WP CLI command to batch classify posts
+#### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
 
 ## Set Up Image Processing (via Microsoft Azure)
 
@@ -217,9 +223,19 @@ Force classifying images regardless of their `alt`.
 
 default: `false`
 
-## Data Gathering
+## Frequently Asked Questions
+
+### What data does ClassifAI gather?
 
 ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
+
+### What are the Categories, Keywords, Concepts, and Entities within the Language Processing feature?
+
+[Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories) are five levels of hierarchies that IBM Watson can identify from your text.  [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords) are specific terms from your text that IBM Watson is able to identify.  [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) are high-level concepts that are not necessarily directly referenced in your text.  [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) are people, companies, locations, and classifications that are made by IBM Watson from your text.
+
+### How can I view the taxonomies that are generated from Language Processing?
+
+Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
 
 ## Support Level
 
