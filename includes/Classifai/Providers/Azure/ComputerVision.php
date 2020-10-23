@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use DOMDocument;
 use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
@@ -66,26 +67,63 @@ class ComputerVision extends Provider {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+
+		$settings   = $this->get_settings();
+		$enable_ocr = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
+
+		if ( $enable_ocr ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
+		}
 	}
 
 	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
-		$enable_ocr = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
-
-		if ( ! $enable_ocr ) {
-			return;
-		}
-
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.min.js',
-			array( 'wp-blocks', 'wp-api-fetch', 'lodash' ),
+			array( 'wp-blocks', 'wp-edit-post', 'wp-api-fetch', 'lodash' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
+	}
+
+	/**
+	 * Filter the post content to inject aria-describedby attribute.
+	 *
+	 * @param string $content Post content.
+	 *
+	 * @return string
+	 */
+	public function add_ocr_aria_describedby( $content ) {
+		if ( ! is_singular() ) {
+			return $content;
+		}
+
+		$dom = new DOMDocument();
+		$dom->loadHTML( $content, LIBXML_NOWARNING | LIBXML_NOERROR );
+		$images = $dom->getElementsByTagName( 'img' );
+		foreach ( $images as $image ) {
+			foreach ( $image->attributes as $attribute ) {
+				if ( 'aria-describedby' === $attribute->name ) {
+					break;
+				}
+				if ( 'class' !== $attribute->name ) {
+					continue;
+				}
+
+				$image_id = preg_match( '~wp-image-\K\d+~', $image->getAttribute( 'class' ), $out ) ? $out[0] : 0;
+				$description_id = "classifai-image-description-$image_id";
+				$description_element = $dom->getElementById( $description_id );
+				if ( ! empty( $description_element ) ) {
+					$image->setAttribute( 'aria-describedby', $description_id );
+				}
+			}
+		}
+
+		return $dom->saveHTML();
 	}
 
 	/**
