@@ -74,7 +74,23 @@ class ComputerVision extends Provider {
 		if ( $enable_ocr ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
+			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
 		}
+	}
+
+	/**
+	 * Include classifai_computer_vision_ocr in API response.
+	 */
+	public function add_ocr_data_to_api_response() {
+		register_post_meta(
+			'attachment',
+			'classifai_computer_vision_ocr',
+			[
+				'type'         => 'boolean',
+				'single'       => true,
+				'show_in_rest' => true,
+			]
+		);
 	}
 
 	/**
@@ -128,11 +144,11 @@ class ComputerVision extends Provider {
 				}
 
 				$image_id            = preg_match( '~wp-image-\K\d+~', $image->getAttribute( 'class' ), $out ) ? $out[0] : 0;
-				$description_id      = "classifai-image-description-$image_id";
-				$description_element = $dom->getElementById( $description_id );
+				$ocr_scanned_text_id = "classifai-ocr-$image_id";
+				$ocr_scanned_text    = $dom->getElementById( $ocr_scanned_text_id );
 
-				if ( ! empty( $description_element ) ) {
-					$image->setAttribute( 'aria-describedby', $description_id );
+				if ( ! empty( $ocr_scanned_text ) ) {
+					$image->setAttribute( 'aria-describedby', $ocr_scanned_text_id );
 					$modified = true;
 				}
 			}

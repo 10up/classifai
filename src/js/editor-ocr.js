@@ -1,5 +1,5 @@
 /* global lodash */
-const { useSelect, dispatch } = wp.data;
+const { select, useSelect, dispatch } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
 const { find, debounce } = lodash;
@@ -12,12 +12,20 @@ const { registerPlugin } = wp.plugins;
 const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
 
 /**
- * Get image description using media api.
+ * Get image scanned text using media api.
  *
  * @param {int} imageId - Image ID.
 */
-const getImageDescription = async ( imageId ) => {
+const getImageOcrScannedText = async ( imageId ) => {
 	const media = await apiFetch( { path: `/wp/v2/media/${imageId}` } );
+
+	if (
+		! Object.prototype.hasOwnProperty.call( media, 'meta' )
+		|| ! Object.prototype.hasOwnProperty.call( media.meta, 'classifai_computer_vision_ocr' )
+		|| ! media.meta.classifai_computer_vision_ocr
+	) {
+		return false;
+	}
 
 	if (
 		! Object.prototype.hasOwnProperty.call( media, 'description' )
@@ -27,43 +35,52 @@ const getImageDescription = async ( imageId ) => {
 		return false;
 	}
 
-	return media.description.rendered.replace( /(<([^>]+)>)/gi, '' );
+	return media.description.rendered
+		.replace( /(<([^>]+)>)/gi, '' )
+		.replace( /(\r\n|\n|\r)/gm,'' )
+		.trim();
 };
 
 /**
- * Insert description as a paragraph block to the editor.
+ * Insert scanned text as a paragraph block to the editor.
  *
- * @param {int} imageBlockIndex - Index of the image block in current editor.
+ * @param {int} clientId - Client ID of image block.
  * @param {int} imageId - Image ID.
+ * @param {string} scannedText - Text to insert to editor.
 */
-const insertDescription = async ( imageBlockIndex, imageId ) => {
-	const imageDescription = await getImageDescription( imageId );
+const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
+	const { getBlockIndex } = select( 'core/block-editor' );
 
-	if( !imageDescription ) {
+	if( ! scannedText ) {
+		scannedText = await getImageOcrScannedText( imageId );
+	}
+
+	if( ! scannedText ) {
 		return;
 	}
 
 	const newBlock = createBlock( 'core/paragraph', {
-		content: imageDescription,
-		anchor: `classifai-image-description-${imageId}`,
+		content: scannedText,
+		anchor: `classifai-ocr-${imageId}`,
 	} );
 
-	dispatch( 'core/block-editor' ).insertBlock( newBlock, imageBlockIndex + 1 );
+	dispatch( 'core/block-editor' ).insertBlock( newBlock, getBlockIndex( clientId ) + 1 );
 };
 
 /**
- * An Modal allows user to insert description to block if detected.
+ * An Modal allows user to insert scanned text to block if detected.
  */
 const imageOcrModal = () => {
 	const [ isOpen, setOpen ] = useState( false );
 	const [ imageId, setImageId ] = useState( 0 );
-	const [ blockIndex, setBlockIndex ] = useState( 0 );
+	const [ clientId, setClientId ] = useState( 0 );
+	const [ ocrScannedText, setOcrScannedText ] = useState( '' );
 	const openModal = () => setOpen( true ); // eslint-disable-line require-jsdoc
 	const closeModal = () => setOpen( false ); // eslint-disable-line require-jsdoc
 	let currentBlocks;
 
-	useSelect( debounce( ( select ) => {
-		const { getSelectedBlock, getBlocks, getBlockIndex } = select( 'core/block-editor' );
+	useSelect( debounce( async ( select ) => {
+		const { getSelectedBlock, getBlocks } = select( 'core/block-editor' );
 		const newBlocks = getBlocks();
 		const prevBlocks = currentBlocks;
 		currentBlocks = newBlocks;
@@ -84,8 +101,17 @@ const imageOcrModal = () => {
 			return;
 		}
 
-		setBlockIndex( getBlockIndex( currentBlock.clientId ) );
+		setClientId( currentBlock.clientId );
 		setImageId( currentBlock.attributes.id );
+
+		const _ocrText = await getImageOcrScannedText( currentBlock.attributes.id );
+
+		if ( ! _ocrText ) {
+			return;
+		}
+
+		setOcrScannedText( _ocrText );
+
 		openModal();
 	}, 10 ) );
 
@@ -94,7 +120,7 @@ const imageOcrModal = () => {
 		<Flex align='flex-end' justify='flex-end'>
 			<FlexItem>
 				<Button isPrimary onClick={() => {
-					insertDescription( blockIndex, imageId );
+					insertOcrScannedText( clientId, imageId, ocrScannedText );
 					return closeModal();
 				}}>
 					{__( 'Insert text', 'classifai' )}
@@ -130,7 +156,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 				<InspectorControls>
 					<PanelBody title={__( 'ClassifAI', 'classifai' )} initialOpen={true}>
 						<PanelRow>
-							<Button onClick={() => insertDescription( clientId, attributes.id )} isPrimary>
+							<Button onClick={() => insertOcrScannedText( clientId, attributes.id )} isSecondary>
 								{__( 'Insert scanned text into content', 'classifai' )}
 							</Button>
 						</PanelRow>
