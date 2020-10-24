@@ -89,20 +89,20 @@ const imageOcrModal = () => {
 		openModal();
 	}, 10 ) );
 
-	return isOpen && <Modal title={__( 'ClassifAI detected text in your image' )}>
-		<p>{__( 'Would you like you insert it as a paragraph under you image block?' )}</p>
+	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
+		<p>{__( 'Would you like you insert it as a paragraph under this image block?', 'classifai' )}</p>
 		<Flex align='flex-end' justify='flex-end'>
 			<FlexItem>
 				<Button isPrimary onClick={() => {
 					insertDescription( blockIndex, imageId );
 					return closeModal();
 				}}>
-					{__( 'Insert text' )}
+					{__( 'Insert text', 'classifai' )}
 				</Button>
 			</FlexItem>
 			<FlexItem>
 				<Button isSecondary onClick={ closeModal }>
-					{__( 'Dismiss' )}
+					{__( 'Dismiss', 'classifai' )}
 				</Button>
 			</FlexItem>
 		</Flex>
@@ -128,10 +128,10 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 			<Fragment>
 				<BlockEdit {...props} />
 				<InspectorControls>
-					<PanelBody title={__( 'ClassifAI' )} initialOpen={true}>
+					<PanelBody title={__( 'ClassifAI', 'classifai' )} initialOpen={true}>
 						<PanelRow>
 							<Button onClick={() => insertDescription( clientId, attributes.id )} isPrimary>
-								{__( 'Insert description' )}
+								{__( 'Insert scanned text into content', 'classifai' )}
 							</Button>
 						</PanelRow>
 					</PanelBody>
