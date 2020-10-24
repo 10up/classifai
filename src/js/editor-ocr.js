@@ -81,6 +81,7 @@ const imageOcrModal = () => {
 
 	useSelect( debounce( async ( select ) => {
 		const { getSelectedBlock, getBlocks } = select( 'core/block-editor' );
+		const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 		const newBlocks = getBlocks();
 		const prevBlocks = currentBlocks;
 		currentBlocks = newBlocks;
@@ -111,6 +112,10 @@ const imageOcrModal = () => {
 		}
 
 		setOcrScannedText( _ocrText );
+
+		updateBlockAttributes( currentBlock.clientId, {
+			ocrScannedText: _ocrText,
+		} );
 
 		openModal();
 	}, 10 ) );
@@ -146,7 +151,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 	return ( props ) => {
 		const { attributes, clientId, isSelected, name } = props;
 
-		if ( ! isSelected || 'core/image' != name ) {
+		if ( ! isSelected || 'core/image' != name || ! attributes.ocrScannedText ) {
 			return <BlockEdit {...props} />;
 		}
 
@@ -156,7 +161,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 				<InspectorControls>
 					<PanelBody title={__( 'ClassifAI', 'classifai' )} initialOpen={true}>
 						<PanelRow>
-							<Button onClick={() => insertOcrScannedText( clientId, attributes.id )} isSecondary>
+							<Button onClick={() => insertOcrScannedText( clientId, attributes.id, attributes.ocrScannedText )} isSecondary>
 								{__( 'Insert scanned text into content', 'classifai' )}
 							</Button>
 						</PanelRow>
@@ -169,6 +174,33 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 
 addFilter(
 	'editor.BlockEdit',
-	'classifai/image-ocr-control',
+	'classifai/image-processing-ocr',
 	imageOcrControl
+);
+
+/**
+ * Add custom attribute for OCR to image block.
+ *
+ * @param {object} settings - Block settings.
+ * @param {string} name - Block name.
+*/
+const modifyImageAttributes = ( settings, name ) => {
+	if ( 'core/image' !== name ) {
+		return settings;
+	}
+
+	if ( settings.attributes ) {
+
+		settings.attributes.ocrScannedText = {
+			type: 'string',
+			default: ''
+		};
+	}
+	return settings;
+};
+
+addFilter(
+	'blocks.registerBlockType',
+	'classifai/image-processing-ocr',
+	modifyImageAttributes
 );
