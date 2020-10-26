@@ -191,10 +191,6 @@ function get_supported_post_types() {
 		}
 	}
 
-	if ( empty( $post_types ) ) {
-		$post_types = [ 'post' ];
-	}
-
 	/**
 	 * Filter post types supported for language processing.
 	 *
@@ -225,6 +221,30 @@ function get_feature_enabled( $feature ) {
 				$settings['features'][ $feature ],
 				FILTER_VALIDATE_BOOLEAN
 			);
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Check if any language processing features are enabled
+ *
+ * @since 1.6.0
+ *
+ * @return true
+ */
+function language_processing_features_enabled() {
+	$features = [
+		'category',
+		'concept',
+		'entity',
+		'keyword',
+	];
+
+	foreach ( $features as $feature ) {
+		if ( get_feature_enabled( $feature ) ) {
+			return true;
 		}
 	}
 
