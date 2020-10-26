@@ -191,10 +191,6 @@ function get_supported_post_types() {
 		}
 	}
 
-	if ( empty( $post_types ) ) {
-		$post_types = [ 'post' ];
-	}
-
 	/**
 	 * Filter post types supported for language processing.
 	 *
