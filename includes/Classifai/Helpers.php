@@ -194,9 +194,7 @@ function get_post_types_for_language_settings() {
 	 *
 	 * @return {array} Array of post types.
 	 */
-	$post_types = apply_filters( 'classifai_language_settings_post_types', $post_types );
-
-	return $post_types;
+	return apply_filters( 'classifai_language_settings_post_types', $post_types );
 }
 
 /**
