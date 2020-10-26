@@ -188,7 +188,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 */
 	public function test_get_api_url() {
 		$this->assertEquals(
-			'my-api-url.com/vision/v2.0/generateThumbnail/',
+			'my-api-url.com/vision/v3.1/generateThumbnail/',
 			$this->get_smart_cropping()->get_api_url()
 		);
 	}
