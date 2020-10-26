@@ -26,7 +26,7 @@ class SmartCropping {
 	 *
 	 * @var string
 	 */
-	const API_PATH = 'vision/v2.0/generateThumbnail/';
+	const API_PATH = 'vision/v3.1/generateThumbnail/';
 
 	/**
 	 * ComputerVisition settings.
@@ -308,7 +308,7 @@ class SmartCropping {
 			[
 				'height'        => $data['height'],
 				'width'         => $data['width'],
-				'smartCropping' => true,
+				'smartCropping' => 'true',
 			],
 			$this->get_api_url()
 		);

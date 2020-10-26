@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
@@ -15,7 +16,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = '/vision/v1.0/analyze';
+	protected $analyze_url = 'vision/v3.1/analyze';
 
 	/**
 	 * ComputerVision constructor.
@@ -63,7 +64,7 @@ class ComputerVision extends Provider {
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 10, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 	}
 
@@ -112,8 +113,22 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
-		$image_url  = wp_get_attachment_image_url( $attachment_id );
-		$image_scan = $this->scan_image( $image_url );
+		$routes     = [];
+		$metadata   = wp_get_attachment_metadata( $attachment_id );
+		$image_url  = get_largest_acceptable_image_url(
+			get_attached_file( $attachment_id ),
+			wp_get_attachment_url( $attachment_id ),
+			$metadata['sizes']
+		);
+
+		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
+			$routes[] = 'alt-tags';
+		} else if ( filter_input( INPUT_POST, 'rescan-tags' ) ) {
+			$routes[] = 'image-tags';
+		}
+
+		$image_scan = $this->scan_image( $image_url, $routes );
+
 		if ( ! is_wp_error( $image_scan ) ) {
 			// Are we updating the captions?
 			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
@@ -228,12 +243,13 @@ class ComputerVision extends Provider {
 	 * Scan the image and return the captions.
 	 *
 	 * @param string $image_url Path to the uploaded image.
+	 * @param array  $routes    Routes we are calling.
 	 *
 	 * @return bool|object|\WP_Error
 	 */
-	protected function scan_image( $image_url ) {
+	protected function scan_image( $image_url, array $routes = [] ) {
 		$settings = $this->get_settings();
-		$url      = $this->prep_api_url();
+		$url      = $this->prep_api_url( $routes );
 
 		$request = wp_remote_post(
 			$url,
@@ -247,11 +263,12 @@ class ComputerVision extends Provider {
 		);
 
 		if ( ! is_wp_error( $request ) ) {
-			$response = json_decode( wp_remote_retrieve_body( $request ) );
-			if ( isset( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
+			$body = json_decode( wp_remote_retrieve_body( $request ) );
+
+			if ( 200 !== wp_remote_retrieve_response_code( $request ) && isset( $body->message ) ) {
+				$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
 			} else {
-				return $response;
+				$rtn = $body;
 			}
 		} else {
 			$rtn = $request;
@@ -263,15 +280,17 @@ class ComputerVision extends Provider {
 	/**
 	 * Build and return the API endpoint based on settings.
 	 *
+	 * @param array $routes The routes we are calling.
+	 *
 	 * @return string
 	 */
-	protected function prep_api_url() {
+	protected function prep_api_url( array $routes = [] ) {
 		$settings     = $this->get_settings();
 		$api_features = [];
-		if ( 'no' !== $settings['enable_image_captions'] ) {
+		if ( in_array( 'alt-tags', $routes, true ) || 'no' !== $settings['enable_image_captions'] ) {
 			$api_features[] = 'Description';
 		}
-		if ( 'no' !== $settings['enable_image_tagging'] ) {
+		if ( in_array( 'image-tags', $routes, true ) || 'no' !== $settings['enable_image_tagging'] ) {
 			$api_features[] = 'Tags';
 		}
 		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['url'] ) . $this->analyze_url );
@@ -283,9 +302,12 @@ class ComputerVision extends Provider {
 	 *
 	 * @param array $captions      Captions returned from the API
 	 * @param int   $attachment_id Post ID for the attachment.
+	 *
+	 * @return string
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
 		$rtn = '';
+
 		/**
 		 * Filter the captions returned from the API.
 		 *
@@ -297,9 +319,11 @@ class ComputerVision extends Provider {
 		 * @return {array} The filtered caption data.
 		 */
 		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
+
 		// If $captions isn't an array, don't save them.
 		if ( is_array( $captions ) && ! empty( $captions ) ) {
 			$threshold = $this->get_settings( 'caption_threshold' );
+
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
 				update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
@@ -316,11 +340,13 @@ class ComputerVision extends Provider {
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
 			}
+
 			// Save all the results for later.
 			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
-			// return the caption or empty string
-			return $rtn;
 		}
+
+		// return the caption or empty string
+		return $rtn;
 	}
 
 	/**
@@ -329,9 +355,11 @@ class ComputerVision extends Provider {
 	 * @param array $tags          Array ot tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return mixed
+	 * @return string|array
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
+		$rtn = '';
+
 		/**
 		 * Filter the tags returned from the API.
 		 *
@@ -343,20 +371,24 @@ class ComputerVision extends Provider {
 		 * @return {array} The filtered image tags.
 		 */
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
+
 		// If $tags isn't an array, don't save them.
 		if ( is_array( $tags ) && ! empty( $tags ) ) {
-			$threshold = $this->get_settings( 'tag_threshold' );
-			$taxonomy  = $this->get_settings( 'image_tag_taxonomy' );
-			// Save the first caption as the alt text if it passes the threshold.
+			$threshold   = $this->get_settings( 'tag_threshold' );
+			$taxonomy    = $this->get_settings( 'image_tag_taxonomy' );
 			$custom_tags = [];
+
+			// Save the first caption as the alt text if it passes the threshold.
 			foreach ( $tags as $tag ) {
 				if ( $tag->confidence * 100 > $threshold ) {
 					$custom_tags[] = $tag->name;
 					wp_add_object_terms( $attachment_id, $tag->name, $taxonomy );
 				}
 			}
+
 			if ( ! empty( $custom_tags ) ) {
 				wp_update_term_count_now( $custom_tags, $taxonomy );
+				$rtn = $custom_tags;
 			} else {
 				/**
 				 * Fires if there were no tags added.
@@ -373,6 +405,8 @@ class ComputerVision extends Provider {
 			// Save the tags for later
 			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
 		}
+
+		return $rtn;
 	}
 
 	/**
@@ -576,7 +610,7 @@ class ComputerVision extends Provider {
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( $url, $api_key ) {
 		$rtn     = false;
@@ -594,7 +628,7 @@ class ComputerVision extends Provider {
 		if ( ! is_wp_error( $request ) ) {
 			$response = json_decode( wp_remote_retrieve_body( $request ) );
 			if ( ! empty( $response->error ) ) {
-				$rtn = new \WP_Error( 'auth', $response->error->message );
+				$rtn = new WP_Error( 'auth', $response->error->message );
 			} else {
 				$rtn = true;
 			}
@@ -681,7 +715,7 @@ class ComputerVision extends Provider {
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
 	 *
-	 * @return mixed
+	 * @return array|string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
 		$metadata           = wp_get_attachment_metadata( $post_id );
@@ -690,7 +724,7 @@ class ComputerVision extends Provider {
 			wp_get_attachment_url( $post_id ),
 			$metadata['sizes']
 		);
-		$image_scan_results = $this->scan_image( $image_url );
+		$image_scan_results = $this->scan_image( $image_url, [ $route_to_call ] );
 
 		if ( is_wp_error( $image_scan_results ) ) {
 			return $image_scan_results;
