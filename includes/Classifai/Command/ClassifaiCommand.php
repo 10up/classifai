@@ -286,7 +286,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<attachment_ids>]
-	 * : Comma delimeted Attachment IDs to crop.
+	 * : Comma delimited Attachment IDs to crop.
 	 *
 	 * [--limit=<limit>]
 	 * : Limit classification to N attachments. Default 100.
