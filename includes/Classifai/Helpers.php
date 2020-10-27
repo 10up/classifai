@@ -172,6 +172,32 @@ function get_watson_password() {
 }
 
 /**
+ * Get post types we want to show in the language processing settings
+ *
+ * @since 1.6.0
+ *
+ * @return array
+ */
+function get_post_types_for_language_settings() {
+	$post_types = get_post_types( [ 'public' => true ], 'objects' );
+
+	// Remove the attachment post type
+	unset( $post_types['attachment'] );
+
+	/**
+	 * Filter post types shown in language processing settings.
+	 *
+	 * @since 1.6.0
+	 * @hook classifai_language_settings_post_types
+	 *
+	 * @param {array} $post_types Array of post types to show in language processing settings.
+	 *
+	 * @return {array} Array of post types.
+	 */
+	return apply_filters( 'classifai_language_settings_post_types', $post_types );
+}
+
+/**
  * The list of post types that get the ClassifAI taxonomies. Defaults
  * to 'post'.
  *
@@ -189,10 +215,6 @@ function get_supported_post_types() {
 				$post_types[] = $post_type;
 			}
 		}
-	}
-
-	if ( empty( $post_types ) ) {
-		$post_types = [ 'post' ];
 	}
 
 	/**
@@ -225,6 +247,30 @@ function get_feature_enabled( $feature ) {
 				$settings['features'][ $feature ],
 				FILTER_VALIDATE_BOOLEAN
 			);
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Check if any language processing features are enabled
+ *
+ * @since 1.6.0
+ *
+ * @return true
+ */
+function language_processing_features_enabled() {
+	$features = [
+		'category',
+		'concept',
+		'entity',
+		'keyword',
+	];
+
+	foreach ( $features as $feature ) {
+		if ( get_feature_enabled( $feature ) ) {
+			return true;
 		}
 	}
 

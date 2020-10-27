@@ -187,44 +187,6 @@ class NaturalLanguageProcessing extends \TestCaseBase {
 
 	}
 
-	/**
-	 * @testdox When the user enables/disables Media under Post Types to Classify, it shows/hides Watson Keywords and other submenus under Media menu.
-	 */
-	public function testToggleMedia() {
-
-		$I = $this->openBrowserPage();
-
-		$I->login();
-
-		$I->moveTo( 'wp-admin/upload.php' );
-
-		$I->dontSeeLink( 'Watson Categories', 'edit-tags.php?taxonomy=watson-category&post_type=attachment' );
-
-		$I->dontSeeLink( 'Watson Keywords', 'edit-tags.php?taxonomy=watson-keyword&post_type=attachment' );
-
-		$I->dontSeeLink( 'Watson Concepts', 'edit-tags.php?taxonomy=watson-concept&post_type=attachment' );
-
-		$I->dontSeeLink( 'Watson Entities', 'edit-tags.php?taxonomy=watson-entity&post_type=attachment' );
-
-		$I->moveTo( 'wp-admin/admin.php?page=language_processing' );
-
-		$I->checkOptions( '#classifai-settings-attachment' );
-
-		$I->click( '#submit' );
-
-		$I->waitUntilNavigation();
-
-		$I->moveTo( 'wp-admin/upload.php' );
-
-		$I->seeLink( 'Watson Categories', 'edit-tags.php?taxonomy=watson-category&post_type=attachment' );
-
-		$I->seeLink( 'Watson Keywords', 'edit-tags.php?taxonomy=watson-keyword&post_type=attachment' );
-
-		$I->seeLink( 'Watson Concepts', 'edit-tags.php?taxonomy=watson-concept&post_type=attachment' );
-
-		$I->seeLink( 'Watson Entities', 'edit-tags.php?taxonomy=watson-entity&post_type=attachment' );
-	}
-
 	public function testWatsonWorks() {
 		$I = $this->openBrowserPage();
 
