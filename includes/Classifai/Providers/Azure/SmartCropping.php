@@ -26,7 +26,7 @@ class SmartCropping {
 	 *
 	 * @var string
 	 */
-	const API_PATH = 'vision/v2.0/generateThumbnail/';
+	const API_PATH = 'vision/v3.1/generateThumbnail/';
 
 	/**
 	 * ComputerVisition settings.
