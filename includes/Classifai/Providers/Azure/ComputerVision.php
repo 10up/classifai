@@ -177,6 +177,10 @@ class ComputerVision extends Provider {
 		}
 
 		// Direct file system access is required for the current implementation of this feature.
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
 		$access_type = get_filesystem_method();
 		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
 			return $metadata;
@@ -741,6 +745,12 @@ class ComputerVision extends Provider {
 				if ( isset( $image_scan_results->tags ) ) {
 					// Process the tags.
 					return $this->generate_image_tags( $image_scan_results->tags, $post_id );
+				}
+				break;
+			case 'smart-crop':
+				if ( ! empty( $metadata ) ) {
+					// Process the smart crop.
+					return $this->smart_crop_image( $metadata, $post_id );
 				}
 				break;
 		}
