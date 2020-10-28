@@ -25,9 +25,8 @@ const getImageOcrScannedText = async ( imageId ) => {
 	const media = await apiFetch( { path: `/wp/v2/media/${imageId}` } );
 
 	if (
-		! Object.prototype.hasOwnProperty.call( media, 'meta' )
-		|| ! Object.prototype.hasOwnProperty.call( media.meta, 'classifai_computer_vision_ocr' )
-		|| ! media.meta.classifai_computer_vision_ocr
+		! Object.prototype.hasOwnProperty.call( media, 'classifai_has_ocr' )
+		|| ! media.classifai_has_ocr
 	) {
 		return false;
 	}

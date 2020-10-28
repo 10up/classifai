@@ -82,13 +82,17 @@ class ComputerVision extends Provider {
 	 * Include classifai_computer_vision_ocr in API response.
 	 */
 	public function add_ocr_data_to_api_response() {
-		register_post_meta(
+		register_rest_field(
 			'attachment',
-			'classifai_computer_vision_ocr',
+			'classifai_has_ocr',
 			[
-				'type'         => 'boolean',
-				'single'       => true,
-				'show_in_rest' => true,
+				'get_callback'    => function( $params ) {
+					return ! empty( get_post_meta( $params['id'], 'classifai_computer_vision_ocr', true ) );
+				},
+				'schema' => [
+					'type'    => 'boolean',
+					'context' => [ 'view' ],
+				],
 			]
 		);
 	}
