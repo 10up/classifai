@@ -16,7 +16,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = 'vision/v3.1/analyze';
+	protected $analyze_url = 'vision/v3.0/analyze';
 
 	/**
 	 * ComputerVision constructor.
