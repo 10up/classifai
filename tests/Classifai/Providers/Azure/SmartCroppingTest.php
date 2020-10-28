@@ -211,7 +211,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			);
 
 			// Test failed request.
-			$this->assertFalse(
+			$this->assertWPError(
 				$this->get_smart_cropping(
 					[
 						'url'     => 'my-bad-url.com',
