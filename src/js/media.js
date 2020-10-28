@@ -50,6 +50,7 @@
 
 				const altTagsButton = document.getElementById( 'classifai-rescan-alt-tags' );
 				const imageTagsButton = document.getElementById( 'classifai-rescan-image-tags' );
+				const smartCropButton = document.getElementById( 'classifai-rescan-smart-crop' );
 				altTagsButton.addEventListener( 'click', e => handleClick(
 					{
 						button: e.target,
@@ -64,6 +65,7 @@
 				) );
 
 				imageTagsButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/image-tags/' } ) );
+				smartCropButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/smart-crop/' } ) );
 			} );
 		}
 	} );

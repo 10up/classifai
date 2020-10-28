@@ -88,8 +88,10 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
-		$captions = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
-		$tags     = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		$settings   = get_option( 'classifai_computer_vision' );
+		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
+		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
+		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate Smart Thumbnail', 'classifai' ) : __( 'Generate Smart Thumbnail', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">
@@ -104,6 +106,14 @@ class ComputerVision extends Provider {
 					<?php echo esc_html( $tags ); ?>
 				</label>
 			</div>
+			<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-smart-crop">
+						<input type="checkbox" value="yes" id="rescan-smart-crop" name="rescan-smart-crop"/>
+						<?php echo esc_html( $smart_crop ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}
@@ -125,18 +135,27 @@ class ComputerVision extends Provider {
 			$routes[] = 'alt-tags';
 		} else if ( filter_input( INPUT_POST, 'rescan-tags' ) ) {
 			$routes[] = 'image-tags';
+		} else if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) ) {
+			$routes[] = 'smart-crop';
 		}
 
-		$image_scan = $this->scan_image( $image_url, $routes );
-
-		if ( ! is_wp_error( $image_scan ) ) {
-			// Are we updating the captions?
-			if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
-				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+		if ( in_array( 'smart-crop', $routes, true ) ) {
+			// Are we smart cropping the image?
+			if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) && ! empty( $metadata ) ) {
+				$this->smart_crop_image( $metadata, $attachment_id );
 			}
-			// Are we updating the tags?
-			if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
-				$this->generate_image_tags( $image_scan->tags, $attachment_id );
+		} else {
+			$image_scan = $this->scan_image( $image_url, $routes );
+
+			if ( ! is_wp_error( $image_scan ) ) {
+				// Are we updating the captions?
+				if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+				}
+				// Are we updating the tags?
+				if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+					$this->generate_image_tags( $image_scan->tags, $attachment_id );
+				}
 			}
 		}
 	}
@@ -177,6 +196,10 @@ class ComputerVision extends Provider {
 		}
 
 		// Direct file system access is required for the current implementation of this feature.
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
 		$access_type = get_filesystem_method();
 		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
 			return $metadata;
@@ -741,6 +764,12 @@ class ComputerVision extends Provider {
 				if ( isset( $image_scan_results->tags ) ) {
 					// Process the tags.
 					return $this->generate_image_tags( $image_scan_results->tags, $post_id );
+				}
+				break;
+			case 'smart-crop':
+				if ( ! empty( $metadata ) ) {
+					// Process the smart crop.
+					return $this->smart_crop_image( $metadata, $post_id );
 				}
 				break;
 		}
