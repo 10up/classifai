@@ -132,24 +132,42 @@ class BulkActions {
 	}
 
 	/**
-	 * Display an admin notice after classifying posts in bulk.
+	 * Display an admin notice after bulk updates.
 	 */
 	public function bulk_action_admin_notice() {
-		if ( empty( $_REQUEST['bulk_classified'] ) ) {
+		if ( empty( $_REQUEST['bulk_classified'] ) && empty( $_REQUEST['bulk_alt_tagged'] ) && empty( $_REQUEST['bulk_image_tagged'] ) && empty( $_REQUEST['bulk_smart_cropped'] ) ) {
 			return;
 		}
 
-		$classified_posts_count = intval( $_REQUEST['bulk_classified'] );
+		if ( ! empty( $_REQUEST['bulk_classified'] ) ) {
+			$classified_posts_count = intval( $_REQUEST['bulk_classified'] );
+			$post_type              = 'post';
+			$action                 = 'Classified';
+		} elseif ( ! empty( $_REQUEST['bulk_alt_tagged'] ) ) {
+			$classified_posts_count = intval( $_REQUEST['bulk_alt_tagged'] );
+			$post_type              = 'image';
+			$action                 = 'Alt tags generated for';
+		} elseif ( ! empty( $_REQUEST['bulk_image_tagged'] ) ) {
+			$classified_posts_count = intval( $_REQUEST['bulk_image_tagged'] );
+			$post_type              = 'image';
+			$action                 = 'Image tags generated for';
+		} elseif ( ! empty( $_REQUEST['bulk_smart_cropped'] ) ) {
+			$classified_posts_count = intval( $_REQUEST['bulk_smart_cropped'] );
+			$post_type              = 'image';
+			$action                 = 'Smart cropped';
+		}
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';
 		$output .= sprintf(
 			_n(
-				'Classified %s post.',
-				'Classified %s posts.',
+				'%1$s %2$s %3$s.',
+				'%1$s %2$s %3$ss.',
 				$classified_posts_count,
 				'classifai'
 			),
-			$classified_posts_count
+			$action,
+			$classified_posts_count,
+			$post_type
 		);
 		$output .= '</p></div>';
 		echo wp_kses(
