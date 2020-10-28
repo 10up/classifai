@@ -340,6 +340,10 @@ class SmartCropping {
 		 */
 		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
 		$response_body = wp_remote_retrieve_body( $response );
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
@@ -364,6 +368,10 @@ class SmartCropping {
 			return new \WP_Error( $response_json->code, $response_json->message );
 		}
 
+		if ( ! empty( $response_json->error ) ) {
+			return new \WP_Error( $response_json->error->code, $response_json->error->message );
+		}
+
 		if ( ! empty( $response_json->errors ) ) {
 			return new \WP_Error( 'classifai_smart_cropping_api_validation_errors', implode( ' ', $response_json->errors->smartCropping ) );
 		}
@@ -371,3 +379,4 @@ class SmartCropping {
 		return false;
 	}
 }
+
