@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - `classifai_generate_image_alt_tags_source_url` filter to allow overriding of the image URL within `generate_image_alt_tags()` (props [@petenelson](https://github.com/petenelson), [@dinhtungdu](https://github.com/dinhtungdu) via [#217](https://github.com/10up/classifai/pull/217))
 
 ### Changed
-- Updated to v3.1 of Azure Computer Vision Analyze API (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#244](https://github.com/10up/classifai/pull/244))
+- Updated to v3.0 of Azure Computer Vision Analyze API (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#244](https://github.com/10up/classifai/pull/244))
 - Don't default to the `post` post type, if no other post types are selected for Language Processing (props [@dkotter](https://github.com/dkotter) via [#247](https://github.com/10up/classifai/pull/247))
 - Don't process items if no Language Processing features are enabled (props [@dkotter](https://github.com/dkotter) via [#249](https://github.com/10up/classifai/pull/249))
 - Image Processing metabox copy (props [@ActuallyConnor](https://github.com/ActuallyConnor), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#214](https://github.com/10up/classifai/pull/214))
