@@ -48,31 +48,30 @@ class ImageProcessing extends Service {
 	 * @param \WP_post $post        Post object for the attachment being viewed.
 	 */
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
-		$screen   = get_current_screen();
-		$settings = get_option( 'classifai_computer_vision' );
-		// Screen returns null on the Media library page.
-		if ( ! $screen ) {
-			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
-			$form_fields['rescan_alt_tags'] = [
-				'label' => __( 'Classifai Alt Tags', 'classifai' ),
+		$settings        = get_option( 'classifai_computer_vision' );
+		$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+		$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+		$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
+
+		$form_fields['rescan_alt_tags'] = [
+			'label' => __( 'Classifai Alt Tags', 'classifai' ),
+			'input' => 'html',
+			'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		];
+		$form_fields['rescan_captions'] = [
+			'label' => __( 'Classifai Image Tags', 'classifai' ),
+			'input' => 'html',
+			'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		];
+
+		if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
+			$form_fields['rescan_smart_crop'] = [
+				'label' => __( 'Classifai Smart Crop', 'classifai' ),
 				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+				'html'  => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			];
-			$form_fields['rescan_captions'] = [
-				'label' => __( 'Classifai Image Tags', 'classifai' ),
-				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-			];
-			if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
-				$form_fields['rescan_smart_crop'] = [
-					'label' => __( 'Classifai Smart Crop', 'classifai' ),
-					'input' => 'html',
-					'html'  => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-				];
-			}
 		}
+
 		return $form_fields;
 	}
 
