@@ -63,12 +63,16 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 		return;
 	}
 
-	const newBlock = createBlock( 'core/paragraph', {
-		content: scannedText,
+	const groupBlock = createBlock( 'core/group', {
 		anchor: `classifai-ocr-${imageId}`,
 	} );
 
-	dispatch( 'core/block-editor' ).insertBlock( newBlock, getBlockIndex( clientId ) + 1 );
+	const textBlock = createBlock( 'core/paragraph', {
+		content: scannedText,
+	} );
+
+	dispatch( 'core/block-editor' ).insertBlock( groupBlock, getBlockIndex( clientId ) + 1 );
+	dispatch( 'core/block-editor' ).insertBlock( textBlock, 0, groupBlock.clientId );
 };
 
 /**
