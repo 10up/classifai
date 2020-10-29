@@ -46,9 +46,7 @@ const getImageOcrScannedText = async ( imageId ) => {
 };
 
 /**
- * Insert scanned text as a verse block to the editor.
- *
- * The verse block allows for line breaks without splitting into multiple blocks, important with the single ID referenced for ARIA.
+ * Insert scanned text as a paragraph block to the editor.
  *
  * @param {int} clientId - Client ID of image block.
  * @param {int} imageId - Image ID.
@@ -65,7 +63,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 		return;
 	}
 
-	const newBlock = createBlock( 'core/verse', {
+	const newBlock = createBlock( 'core/paragraph', {
 		content: scannedText,
 		anchor: `classifai-ocr-${imageId}`,
 	} );
