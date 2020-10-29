@@ -65,6 +65,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 
 	const groupBlock = createBlock( 'core/group', {
 		anchor: `classifai-ocr-${imageId}`,
+		className: 'is-style-classifai-ocr-text',
 	} );
 
 	const textBlock = createBlock( 'core/paragraph', {
@@ -169,7 +170,7 @@ registerPlugin( 'tenup-classifai-ocr-modal', {
 } );
 
 /**
- * Insert ClassifAI panel to image settings sidebar.
+ * Add insert button to toolbar.
 */
 const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint-disable-line no-unused-vars
 	return ( props ) => {
@@ -229,3 +230,8 @@ addFilter(
 	'classifai/image-processing-ocr',
 	modifyImageAttributes
 );
+
+wp.blocks.registerBlockStyle( 'core/group', {
+	name: 'classifai-ocr-text',
+	label: __( 'Scanned Text from Image', 'classifai' ),
+} );

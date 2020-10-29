@@ -104,9 +104,19 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.min.js',
-			array( 'wp-block-editor' ),
+			[
+				'wp-block-editor',
+				'wp-blocks'
+			],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
+		);
+
+		wp_enqueue_style(
+			'editor-style',
+			CLASSIFAI_PLUGIN_URL . 'src/css/editor-style.css',
+			[],
+			CLASSIFAI_PLUGIN_VERSION
 		);
 	}
 
