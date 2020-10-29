@@ -51,6 +51,7 @@
 				const altTagsButton = document.getElementById( 'classifai-rescan-alt-tags' );
 				const imageTagsButton = document.getElementById( 'classifai-rescan-image-tags' );
 				const ocrScanButton = document.getElementById( 'classifai-rescan-ocr' );
+				const smartCropButton = document.getElementById( 'classifai-rescan-smart-crop' );
 
 				altTagsButton.addEventListener( 'click', e => handleClick(
 					{
@@ -65,7 +66,12 @@
 					}
 				) );
 
-				imageTagsButton.addEventListener( 'click', e => handleClick( { button: e.target, endpoint: '/classifai/v1/image-tags/' } ) );
+				imageTagsButton.addEventListener( 'click', e => handleClick(
+					{
+						button: e.target,
+						endpoint: '/classifai/v1/image-tags/'
+					}
+				) );
 
 				ocrScanButton.addEventListener( 'click', e => handleClick(
 					{
@@ -77,6 +83,13 @@
 								textField.value = resp;
 							}
 						}
+					}
+				) );
+
+				smartCropButton.addEventListener( 'click', e => handleClick(
+					{
+						button: e.target,
+						endpoint: '/classifai/v1/smart-crop/'
 					}
 				) );
 			} );
