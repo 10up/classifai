@@ -106,7 +106,7 @@ class ComputerVision extends Provider {
 			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.min.js',
 			[
 				'wp-block-editor',
-				'wp-blocks'
+				'wp-blocks',
 			],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
