@@ -76,6 +76,20 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 };
 
 /**
+ * Check if current post has OCR block.
+ *
+ * @param {int} imageId - Image ID.
+ * @param {array} blocks - Current blocks of current post.
+ */
+const hasOcrBlock = ( imageId, blocks = [] ) => {
+	if ( 0 === blocks.length ) {
+		const { getBlocks } = select( 'core/block-editor' );
+		blocks = getBlocks();
+	}
+	return !! find( blocks, block => block.attributes.anchor === `classifai-ocr-${imageId}` );
+};
+
+/**
  * An Modal allows user to insert scanned text to block if detected.
  */
 const imageOcrModal = () => {
@@ -125,7 +139,9 @@ const imageOcrModal = () => {
 			ocrScannedText: _ocrText,
 		} );
 
-		openModal();
+		if ( ! hasOcrBlock( currentBlock.attributes.id, newBlocks ) ) {
+			openModal();
+		}
 	}, 10 ) );
 
 	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
@@ -172,6 +188,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 							label={__( 'Insert scanned text into content', 'classifai' )}
 							icon={insertIcon}
 							onClick={() => insertOcrScannedText( clientId, attributes.id, attributes.ocrScannedText )}
+							disabled={hasOcrBlock( attributes.id )}
 						/>
 					</ToolbarGroup>
 				</BlockControls>
