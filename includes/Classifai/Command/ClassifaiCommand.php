@@ -303,12 +303,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$classifier     = new ComputerVision( false );
 		$settings       = $classifier->get_settings();
 		$smart_cropping = new SmartCropping( $settings );
-
-		if ( ! isset( $settings['enable_smart_cropping'] ) || '1' !== $settings['enable_smart_cropping'] ) {
-			\WP_CLI::error( 'Smart Cropping is disabled. Enable it in Image settings to use this command.' );
-		}
-
-		$default_opts = [
+		$default_opts   = [
 			'limit' => false,
 		];
 
