@@ -71,12 +71,13 @@ class ImageProcessing extends Service {
 				'input' => 'html',
 				'html'  => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 			];
-			$form_fields['rescan_ocr'] = [
-				'label' => __( 'Detect Text', 'classifai' ),
-				'input' => 'html',
-				'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-			];
 		}
+
+		$form_fields['rescan_ocr'] = [
+			'label' => __( 'Detect Text', 'classifai' ),
+			'input' => 'html',
+			'html'  => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		];
 
 		return $form_fields;
 	}
