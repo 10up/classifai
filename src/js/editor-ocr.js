@@ -46,7 +46,9 @@ const getImageOcrScannedText = async ( imageId ) => {
 };
 
 /**
- * Insert scanned text as a paragraph block to the editor.
+ * Insert scanned text as a verse block to the editor.
+ *
+ * The verse block allows for line breaks without splitting into multiple blocks, important with the single ID referenced for ARIA.
  *
  * @param {int} clientId - Client ID of image block.
  * @param {int} imageId - Image ID.
@@ -63,7 +65,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 		return;
 	}
 
-	const newBlock = createBlock( 'core/paragraph', {
+	const newBlock = createBlock( 'core/verse', {
 		content: scannedText,
 		anchor: `classifai-ocr-${imageId}`,
 	} );
@@ -125,7 +127,7 @@ const imageOcrModal = () => {
 	}, 10 ) );
 
 	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
-		<p>{__( 'Would you like you insert it as a paragraph under this image block?', 'classifai' )}</p>
+		<p>{__( 'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.', 'classifai' )}</p>
 		<Flex align='flex-end' justify='flex-end'>
 			<FlexItem>
 				<Button isPrimary onClick={() => {
