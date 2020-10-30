@@ -1,8 +1,8 @@
 /* global lodash */
-const { select, useSelect, dispatch } = wp.data;
+const { select, useSelect, dispatch, subscribe } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
-const { find, debounce } = lodash;
+const { find, debounce, filter } = lodash;
 const { addFilter } = wp.hooks;
 const { createHigherOrderComponent } = wp.compose;
 const { BlockControls } = wp.blockEditor; // eslint-disable-line no-unused-vars
@@ -242,27 +242,43 @@ wp.blocks.registerBlockStyle( 'core/group', {
  * Hold contents of previously selected block to avoid firing too often.
  */
 let previousSelectedBlock;
+let removeClasses = false;
 
-wp.data.subscribe( () => {
-	const blockEditor = wp.data.select( 'core/block-editor' );
+subscribe( debounce( () => {
+	const blockEditor = select( 'core/block-editor' );
 	const selectedBlock = blockEditor.getSelectedBlock();
+	const blocks = blockEditor.getBlocks();
 
-	// Need to remove the classifai-ocr-related-block className on other actions,
-	// so probably the null case here should be split out to do that
-	// Definitely don't want to save the class into post data
-	if ( null === selectedBlock || selectedBlock === previousSelectedBlock ) {
+	// If the current selected block is the same as previously, return early
+	if ( selectedBlock === previousSelectedBlock ) {
 		return;
+	}
+
+	// If no selected block, return early and if needed, remove classes
+	if ( null === selectedBlock ) {
+		if ( removeClasses ) {
+			removeRelatedClass( blocks );
+			removeClasses = false;
+		}
+
+		return;
+	}
+
+	// If we have a selected block but our remove flag is set, remove classes first
+	if ( removeClasses ) {
+		removeRelatedClass( blocks );
+		removeClasses = false;
 	}
 
 	previousSelectedBlock = selectedBlock;
 
 	if ( 'core/image' === selectedBlock.name ) {
-		const blocks = blockEditor.getBlocks();
 		const ocrBlock = find( blocks, block => block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}` );
 
 		if ( undefined !== ocrBlock ) {
-			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: classnames( ocrBlock.attributes.className, 'classifai-ocr-related-block' ) } );
-			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: classnames( selectedBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+			dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: classnames( ocrBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+			dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: classnames( selectedBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+			removeClasses = true;
 		}
 	} else {
 		const rootBlock = blockEditor.getBlock( blockEditor.getBlockHierarchyRootClientId( selectedBlock.clientId ) );
@@ -270,16 +286,33 @@ wp.data.subscribe( () => {
 		if ( 'core/group' === rootBlock.name ) {
 			let imageId = /classifai-ocr-([0-9]+)/.exec( rootBlock.attributes.anchor );
 
-			if( null !== imageId ) {
+			if ( null !== imageId ) {
 				[ , imageId ] = imageId;
 
-				const blocks = blockEditor.getBlocks();
 				const imageBlock = find( blocks, block => block.attributes.id == imageId );
 
 				if ( undefined !== imageBlock ) {
-					wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: classnames( imageBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+					dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: classnames( imageBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+					removeClasses = true;
 				}
 			}
 		}
 	}
-} );
+}, 300 ) );
+
+/**
+ * Remove the ocr-related class
+ *
+ * @param {object} blocks Block data.
+ */
+const removeRelatedClass = ( blocks ) => {
+	if ( ! blocks ) {
+		return;
+	}
+
+	const blocksToEdit = filter( blocks, block => undefined !== block.attributes.className && block.attributes.className.includes( 'classifai-ocr-related-block' ) );
+
+	blocksToEdit.forEach( ( block ) => {
+		dispatch( 'core/block-editor' ).updateBlockAttributes( block.clientId, { className: classnames( block.attributes.className, { 'classifai-ocr-related-block': false } ) } );
+	} );
+};
