@@ -14,7 +14,7 @@ const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
 /**
  * Icon for insert button.
  */
-const insertIcon = <span class="dashicons dashicons-editor-paste-text"></span>;
+const insertIcon = <span className="dashicons dashicons-editor-paste-text"></span>;
 
 /**
  * Get image scanned text using media api.
@@ -234,4 +234,53 @@ addFilter(
 wp.blocks.registerBlockStyle( 'core/group', {
 	name: 'classifai-ocr-text',
 	label: __( 'Scanned Text from Image', 'classifai' ),
+} );
+
+/**
+ * Hold contents of previously selected block to avoid firing too often.
+ */
+let previousSelectedBlock;
+
+wp.data.subscribe( () => {
+	const blockEditor = wp.data.select( 'core/block-editor' );
+	const selectedBlock = blockEditor.getSelectedBlock();
+
+	// Need to remove the classifai-ocr-related-block className on other actions,
+	// so probably the null case here should be split out to do that
+	// Definitely don't want to save the class into post data
+	if ( null === selectedBlock || selectedBlock === previousSelectedBlock ) {
+		return;
+	}
+
+	previousSelectedBlock = selectedBlock;
+
+	if ( 'core/image' === selectedBlock.name ) {
+		const blocks = blockEditor.getBlocks();
+		const ocrBlock = find( blocks, block => block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}` );
+
+		if ( undefined !== ocrBlock ) {
+			// This needs to merge className in with anything that exists
+			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: 'classifai-ocr-related-block' } );
+			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: 'classifai-ocr-related-block' } );
+		}
+	} else {
+		const rootBlock = blockEditor.getBlock( blockEditor.getBlockHierarchyRootClientId( selectedBlock.clientId ) );
+
+		if ( 'core/group' === rootBlock.name ) {
+			let imageId = /classifai-ocr-([0-9]+)/.exec( rootBlock.attributes.anchor );
+
+			if( null !== imageId ) {
+				imageId = imageId[1];
+
+				const blocks = blockEditor.getBlocks();
+				console.log( blocks );
+				const imageBlock = find( blocks, block => block.attributes.id == imageId );
+
+				// This needs to merge className in with anything that exists
+				// Group block doesn't need the class because it's separately targeted in CSS
+				// Though we could look at changing that and avoiding the block-style part
+				wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: 'classifai-ocr-related-block' } );
+			}
+		}
+	}
 } );

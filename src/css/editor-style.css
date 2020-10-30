@@ -1,3 +1,4 @@
+.classifai-ocr-related-block::before,
 .wp-block-group.is-style-classifai-ocr-text.has-child-selected::before {
 	content: "";
     position: absolute;
