@@ -247,17 +247,37 @@ class OCR {
 				 * @hook classifai_ocr_text
 				 *
 				 * @param string $text The returned text data.
+				 * @param object $scan The full scan results from the API.
 				 *
 				 * @return string The filtered text data.
 				 */
-				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ) );
+				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $scan );
 
-				wp_update_post(
-					[
-						'ID'           => $attachment_id,
-						'post_content' => sanitize_text_field( $text ),
-					]
-				);
+				$post_args = [
+					'ID'           => $attachment_id,
+					'post_content' => sanitize_text_field( $text ),
+				];
+
+				/**
+				 * Filter the post arguments before saving the text to post_content.
+				 *
+				 * This enables text to be stored in a different post or post meta field,
+				 * or do other post data setting based on scan results.
+				 *
+				 * @since 1.6.0
+				 * @hook classifai_ocr_text_post_args
+				 *
+				 * @param string $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
+				 * @param int    $attachment_id ID of the attachment post.
+				 * @param object $scan          The full scan results from the API.
+				 * @param string $text          The text data to be saved.
+				 * @param object $scan          The full scan results from the API.
+				 *
+				 * @return string The filtered text data.
+				 */
+				$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $text, $scan );
+
+				wp_update_post( $post_args );
 
 				$rtn = $text;
 
