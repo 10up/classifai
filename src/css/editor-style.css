@@ -1,3 +1,9 @@
-.wp-block-group.is-style-classifai-ocr-text.has-child-selected {
-	box-shadow: -16px 0 white, -20px 0 #cfe7f3;
+.wp-block-group.is-style-classifai-ocr-text.has-child-selected::before {
+	content: "";
+    position: absolute;
+    display: block;
+    top: 0;
+    left: -15px;
+    bottom: 0;
+    border-left: 4px solid #cfe7f3;
 }
