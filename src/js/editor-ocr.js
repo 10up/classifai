@@ -11,6 +11,8 @@ const { __ } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
 
+import classnames from 'classnames/dedupe';
+
 /**
  * Icon for insert button.
  */
@@ -259,9 +261,8 @@ wp.data.subscribe( () => {
 		const ocrBlock = find( blocks, block => block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}` );
 
 		if ( undefined !== ocrBlock ) {
-			// This needs to merge className in with anything that exists
-			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: 'classifai-ocr-related-block' } );
-			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: 'classifai-ocr-related-block' } );
+			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: classnames( ocrBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+			wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: classnames( selectedBlock.attributes.className, 'classifai-ocr-related-block' ) } );
 		}
 	} else {
 		const rootBlock = blockEditor.getBlock( blockEditor.getBlockHierarchyRootClientId( selectedBlock.clientId ) );
@@ -270,16 +271,14 @@ wp.data.subscribe( () => {
 			let imageId = /classifai-ocr-([0-9]+)/.exec( rootBlock.attributes.anchor );
 
 			if( null !== imageId ) {
-				imageId = imageId[1];
+				[ , imageId ] = imageId;
 
 				const blocks = blockEditor.getBlocks();
-				console.log( blocks );
 				const imageBlock = find( blocks, block => block.attributes.id == imageId );
 
-				// This needs to merge className in with anything that exists
-				// Group block doesn't need the class because it's separately targeted in CSS
-				// Though we could look at changing that and avoiding the block-style part
-				wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: 'classifai-ocr-related-block' } );
+				if ( undefined !== imageBlock ) {
+					wp.data.dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: classnames( imageBlock.attributes.className, 'classifai-ocr-related-block' ) } );
+				}
 			}
 		}
 	}

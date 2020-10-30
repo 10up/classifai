@@ -46,6 +46,7 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
+    "classnames": "^2.2.6",
     "node-wp-i18n": "^1.2.3"
   }
 }
