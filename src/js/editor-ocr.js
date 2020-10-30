@@ -249,11 +249,6 @@ subscribe( debounce( () => {
 	const selectedBlock = blockEditor.getSelectedBlock();
 	const blocks = blockEditor.getBlocks();
 
-	// If the current selected block is the same as previously, return early
-	if ( selectedBlock === previousSelectedBlock ) {
-		return;
-	}
-
 	// If no selected block, return early and if needed, remove classes
 	if ( null === selectedBlock ) {
 		if ( removeClasses ) {
@@ -261,6 +256,11 @@ subscribe( debounce( () => {
 			removeClasses = false;
 		}
 
+		return;
+	}
+
+	// If the current selected block is the same as previously, return early
+	if ( selectedBlock === previousSelectedBlock || ( selectedBlock.attributes.className && selectedBlock.attributes.className.includes( 'classifai-ocr-related-block' ) ) ) {
 		return;
 	}
 
