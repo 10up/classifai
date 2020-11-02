@@ -182,7 +182,8 @@ class SmartCropping {
 			];
 
 			$better_thumb_filename = $this->get_cropped_thumbnail( $attachment_id, $data );
-			if ( ! empty( $better_thumb_filename ) ) {
+
+			if ( ! is_wp_error( $better_thumb_filename ) ) {
 				$metadata['sizes'][ $size ]['file'] = basename( $better_thumb_filename );
 			}
 		}
@@ -197,7 +198,7 @@ class SmartCropping {
 	 *
 	 * @param int   $attachment_id Attachment ID.
 	 * @param array $size_data Attachment metadata size data.
-	 * @return bool|mixed The thumbnail file name or false on failure.
+	 * @return string|\WP_Error The thumbnail file name or WP_Error on failure.
 	 */
 	public function get_cropped_thumbnail( $attachment_id, $size_data ) {
 		/**
@@ -224,7 +225,7 @@ class SmartCropping {
 		}
 
 		if ( empty( $url ) || empty( $size_data ) || ! is_array( $size_data ) ) {
-			return false;
+			return new \WP_Error( 'classifai_smart_cropping_invalid_args', 'Invalid arguments for API request.' );
 		}
 
 		$data = [
@@ -235,8 +236,13 @@ class SmartCropping {
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
 		set_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $new_thumb_image ) ) {
+			return $new_thumb_image;
+		}
+
 		if ( empty( $new_thumb_image ) ) {
-			return false;
+			return new \WP_Error( 'classifai_smart_cropping_empty_image', 'Empty cropped image.' );
 		}
 
 		$attached_file       = get_attached_file( $attachment_id );
@@ -275,7 +281,7 @@ class SmartCropping {
 			return $new_thumb_file_name;
 		}
 
-		return false;
+		return new \WP_Error( 'classifai_smart_cropping_filesystem_error', 'Filesystem error. Can not write cropped thumbnail file.' );
 	}
 
 	/**
@@ -295,7 +301,7 @@ class SmartCropping {
 	 * @since 1.5.0
 	 *
 	 * @param array $data Data for an attachment image size.
-	 * @return bool|string
+	 * @return string|\WP_Error
 	 */
 	public function request_cropped_thumbnail( $data ) {
 		$url = add_query_arg(
@@ -334,9 +340,17 @@ class SmartCropping {
 		 */
 		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
-		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
-			return wp_remote_retrieve_body( $response );
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
+
+		$response_body = wp_remote_retrieve_body( $response );
+
+		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
+			return $response_body;
+		}
+
+		$response_json = json_decode( $response_body );
 
 		/**
 		 * Fires when the generateThumbnail smart-cropping API response did not have a 200 status code.
@@ -350,6 +364,19 @@ class SmartCropping {
 		 */
 		do_action( 'classifai_smart_cropping_unsuccessful_response', $response, $url, $data );
 
-		return false;
+		if ( ! empty( $response_json->code ) ) {
+			return new \WP_Error( $response_json->code, $response_json->message );
+		}
+
+		if ( ! empty( $response_json->error ) ) {
+			return new \WP_Error( $response_json->error->code, $response_json->error->message );
+		}
+
+		if ( ! empty( $response_json->errors ) ) {
+			return new \WP_Error( 'classifai_smart_cropping_api_validation_errors', implode( ' ', $response_json->errors->smartCropping ) );
+		}
+
+		return new \WP_Error( 'classifai_smart_cropping_failed', 'A Smart Cropping error occurred.' );
 	}
 }
+

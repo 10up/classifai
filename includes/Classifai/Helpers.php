@@ -436,3 +436,50 @@ function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max 
 
 	return null;
 }
+
+/**
+ * Retrieves the URL of the largest image that matches filesize and dimensions.
+ *
+ * This will check that the filesize of an image matches our requirements and
+ * if so, will then check the dimensions match our requirements as well. If
+ * neither match, will move on to the next largest image size.
+ *
+ * @param string $full_image The path to the full-sized image source file.
+ * @param string $full_url   The URL of the full-sized image.
+ * @param array  $metadata   Attachment metadata, including intermediate sizes.
+ * @param array  $width      Array of minimimum and maximum width values. Default 0, 4200.
+ * @param array  $height     Array of minimimum and maximum height values. Default 0, 4200.
+ * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
+ * @return string|null The image URL, or null if no acceptable image found.
+ */
+function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $metadata, $width = [ 0, 4200 ], $height = [ 0, 4200 ], $max_size = MB_IN_BYTES ) {
+	// Check if the full size image meets our filesize and dimension requirements
+	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+	if (
+		( $file_size && $max_size >= $file_size )
+		&& ( $metadata['width'] >= $width[0] && $metadata['width'] <= $width[1] )
+		&& ( $metadata['height'] >= $height[0] && $metadata['height'] <= $height[1] )
+	) {
+		return $full_url;
+	}
+
+	// If the full size doesn't match, run the same checks on our resized images
+	if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+		usort( $metadata['sizes'], __NAMESPACE__ . '\sort_images_by_size_cb' );
+
+		foreach ( $metadata['sizes'] as $size ) {
+			$sized_file = str_replace( basename( $full_image ), $size['file'], $full_image );
+			$file_size  = @filesize( $sized_file ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+
+			if (
+				( $file_size && $max_size >= $file_size )
+				&& ( $size['width'] >= $width[0] && $size['width'] <= $width[1] )
+				&& ( $size['height'] >= $height[0] && $size['height'] <= $height[1] )
+			) {
+				return str_replace( basename( $full_url ), $size['file'], $full_url );
+			}
+		}
+	}
+
+	return null;
+}

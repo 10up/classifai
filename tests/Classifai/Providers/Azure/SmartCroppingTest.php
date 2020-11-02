@@ -136,12 +136,12 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 */
 	public function test_get_cropped_thumbnail() {
 		// Test invalid data returns false.
-		$this->assertFalse( $this->get_smart_cropping()->get_cropped_thumbnail( 999999999, [] ) );
+		$this->assertWPError( $this->get_smart_cropping()->get_cropped_thumbnail( 999999999, [] ) );
 
 		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' );
 
 		// Test bad request returns false.
-		$this->assertFalse(
+		$this->assertWPError(
 			$this->get_smart_cropping(
 				[
 					'url'     => 'my-bad-url.com',
@@ -171,7 +171,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 			// Test when file operations fail.
 			add_filter( 'classifai_smart_crop_wp_filesystem', '__return_false' );
-			$this->assertFalse(
+			$this->assertWPError(
 				$this->get_smart_cropping()->get_cropped_thumbnail(
 					$attachment,
 					wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
@@ -211,7 +211,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			);
 
 			// Test failed request.
-			$this->assertFalse(
+			$this->assertWPError(
 				$this->get_smart_cropping(
 					[
 						'url'     => 'my-bad-url.com',
