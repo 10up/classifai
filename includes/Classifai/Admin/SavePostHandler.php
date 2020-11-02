@@ -62,7 +62,8 @@ class SavePostHandler {
 		$post_type   = get_post_type( $post_id );
 		$post_status = get_post_status( $post_id );
 
-		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) ) {
+		// Only process published, supported items and only if features are enabled
+		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
 			$this->classify( $post_id );
 		}
 	}
