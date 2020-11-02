@@ -143,7 +143,7 @@ const imageOcrModal = () => {
 		if ( ! hasOcrBlock( currentBlock.attributes.id, newBlocks ) ) {
 			openModal();
 		}
-	}, 10 ) );
+	}, 100 ) );
 
 	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
 		<p>{__( 'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.', 'classifai' )}</p>
@@ -289,7 +289,7 @@ wp.blocks.registerBlockStyle( 'core/group', {
 				}
 			}
 		}
-	}, 300 ) );
+	}, 100 ) );
 
 	/**
 	 * Create internal style tag if needed.
