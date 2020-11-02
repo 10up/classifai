@@ -73,7 +73,6 @@ class ComputerVision extends Provider {
 
 		if ( $enable_ocr ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_action( 'wp_insert_post_data', [ $this, 'remove_ocr_class' ] );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
 		}
@@ -112,27 +111,6 @@ class ComputerVision extends Provider {
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
-
-		wp_enqueue_style(
-			'editor-style',
-			CLASSIFAI_PLUGIN_URL . 'src/css/editor-style.css',
-			[],
-			CLASSIFAI_PLUGIN_VERSION
-		);
-	}
-
-	/**
-	 * Remove any uses of the classifai-ocr-related-block class
-	 *
-	 * @param array $data An array of slashed, sanitized, and processed post data.
-	 * @return array
-	 */
-	public function remove_ocr_class( $data = [] ) {
-		if ( false !== strpos( $data['post_content'], 'classifai-ocr-related-block' ) ) {
-			$data['post_content'] = str_replace( 'classifai-ocr-related-block', '', $data['post_content'] );
-		}
-
-		return $data;
 	}
 
 	/**
