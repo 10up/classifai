@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [1.6.0] - TBD
 ### Added
+- Automated Optical Character Recognition (OCR) scanning of screenshots and other imagery with `aria-describedby` semantic markup (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#228](https://github.com/10up/classifai/pull/228))
 - Ability to smart crop existing images in WP Admin (props [@ShahAaron](https://github.com/ShahAaron), [@dinhtungdu](https://github.com/dinhtungdu), [@rickalee](https://github.com/rickalee) via [#252](https://github.com/10up/classifai/pull/252))
 - WP-CLI `crop` command to smart crop images (props [@dinhtungdu](https://github.com/dinhtungdu), [@dkotter](https://github.com/dkotter), [@johnwatkins0](https://github.com/johnwatkins0) via [#236](https://github.com/10up/classifai/pull/236), [#254](https://github.com/10up/classifai/pull/254))
 - Better error handling for manual scanning of alt text or image tags (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu) via [#231](https://github.com/10up/classifai/pull/231))
