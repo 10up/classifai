@@ -318,6 +318,8 @@ wp.blocks.registerBlockStyle( 'core/group', {
 			left: -15px;
 			bottom: 0;
 			border-left: 4px solid #cfe7f3;
+			mix-blend-mode: difference;
+			opacity: 0.25;
 		}`;
 
 		style.appendChild( document.createTextNode( css ) );
