@@ -3,6 +3,7 @@ const path = require('path');
 module.exports = {
 	entry: {
 		'editor': './src/js/editor.js',
+		'editor-ocr': './src/js/editor-ocr.js',
 		'media': './src/js/media.js',
 		'admin': './src/js/admin.js'
 	},
