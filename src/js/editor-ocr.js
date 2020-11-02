@@ -2,7 +2,7 @@
 const { select, useSelect, dispatch, subscribe } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
-const { find, debounce, filter } = lodash;
+const { find, debounce } = lodash;
 const { addFilter } = wp.hooks;
 const { createHigherOrderComponent } = wp.compose;
 const { BlockControls } = wp.blockEditor; // eslint-disable-line no-unused-vars
@@ -10,8 +10,6 @@ const { Button, Modal, Flex, FlexItem, ToolbarGroup, ToolbarButton } = wp.compon
 const { __ } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
-
-import classnames from 'classnames/dedupe';
 
 /**
  * Icon for insert button.
@@ -145,7 +143,7 @@ const imageOcrModal = () => {
 		if ( ! hasOcrBlock( currentBlock.attributes.id, newBlocks ) ) {
 			openModal();
 		}
-	}, 10 ) );
+	}, 100 ) );
 
 	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
 		<p>{__( 'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.', 'classifai' )}</p>
@@ -238,81 +236,110 @@ wp.blocks.registerBlockStyle( 'core/group', {
 	label: __( 'Scanned Text from Image', 'classifai' ),
 } );
 
-/**
- * Hold contents of previously selected block to avoid firing too often.
- */
-let previousSelectedBlock;
-let removeClasses = false;
+{
+	/**
+	 * Hold contents of previously selected block to avoid firing too often.
+	 */
+	let previousSelectedBlock;
+	let activeBlocks = [];
 
-subscribe( debounce( () => {
-	const blockEditor = select( 'core/block-editor' );
-	const selectedBlock = blockEditor.getSelectedBlock();
-	const blocks = blockEditor.getBlocks();
+	subscribe( debounce( () => {
+		const blockEditor = select( 'core/block-editor' );
+		const selectedBlock = blockEditor.getSelectedBlock();
+		const blocks = blockEditor.getBlocks();
 
-	// If no selected block, return early and if needed, remove classes
-	if ( null === selectedBlock ) {
-		if ( removeClasses ) {
-			removeRelatedClass( blocks );
-			removeClasses = false;
+		// If no selected block, return early and if needed, remove classes
+		if ( null === selectedBlock ) {
+
+			maybeClearCss();
+			previousSelectedBlock = selectedBlock;
+
+			return;
 		}
 
-		return;
-	}
-
-	// If the current selected block is the same as previously, return early
-	if ( selectedBlock === previousSelectedBlock || ( selectedBlock.attributes.className && selectedBlock.attributes.className.includes( 'classifai-ocr-related-block' ) ) ) {
-		return;
-	}
-
-	// If we have a selected block but our remove flag is set, remove classes first
-	if ( removeClasses ) {
-		removeRelatedClass( blocks );
-		removeClasses = false;
-	}
-
-	previousSelectedBlock = selectedBlock;
-
-	if ( 'core/image' === selectedBlock.name ) {
-		const ocrBlock = find( blocks, block => block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}` );
-
-		if ( undefined !== ocrBlock ) {
-			dispatch( 'core/block-editor' ).updateBlockAttributes( ocrBlock.clientId, { className: classnames( ocrBlock.attributes.className, 'classifai-ocr-related-block' ) } );
-			dispatch( 'core/block-editor' ).updateBlockAttributes( selectedBlock.clientId, { className: classnames( selectedBlock.attributes.className, 'classifai-ocr-related-block' ) } );
-			removeClasses = true;
+		// If the current selected block is the same as previously or the current block is styled, return early
+		if ( selectedBlock === previousSelectedBlock || activeBlocks.includes( selectedBlock.clientId ) ) {
+			return;
 		}
-	} else {
-		const rootBlock = blockEditor.getBlock( blockEditor.getBlockHierarchyRootClientId( selectedBlock.clientId ) );
 
-		if ( 'core/group' === rootBlock.name ) {
-			let imageId = /classifai-ocr-([0-9]+)/.exec( rootBlock.attributes.anchor );
+		maybeClearCss();
 
-			if ( null !== imageId ) {
-				[ , imageId ] = imageId;
+		previousSelectedBlock = selectedBlock;
 
-				const imageBlock = find( blocks, block => block.attributes.id == imageId );
+		if ( 'core/image' === selectedBlock.name ) {
+			const ocrBlock = find( blocks, block => block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}` );
 
-				if ( undefined !== imageBlock ) {
-					dispatch( 'core/block-editor' ).updateBlockAttributes( imageBlock.clientId, { className: classnames( imageBlock.attributes.className, 'classifai-ocr-related-block' ) } );
-					removeClasses = true;
+			if ( undefined !== ocrBlock ) {
+				generateCss( [ocrBlock.clientId, selectedBlock.clientId] );
+			}
+		} else {
+			const rootBlock = blockEditor.getBlock( blockEditor.getBlockHierarchyRootClientId( selectedBlock.clientId ) );
+
+			if ( 'core/group' === rootBlock.name ) {
+				let imageId = /classifai-ocr-([0-9]+)/.exec( rootBlock.attributes.anchor );
+
+				if ( null !== imageId ) {
+					[ , imageId ] = imageId;
+
+					const imageBlock = find( blocks, block => block.attributes.id == imageId );
+
+					if ( undefined !== imageBlock ) {
+						generateCss( [imageBlock.clientId, rootBlock.clientId] );
+					}
 				}
 			}
 		}
-	}
-}, 300 ) );
+	}, 100 ) );
 
-/**
- * Remove the ocr-related class
- *
- * @param {object} blocks Block data.
- */
-const removeRelatedClass = ( blocks ) => {
-	if ( ! blocks ) {
-		return;
-	}
+	/**
+	 * Create internal style tag if needed.
+	 */
+	const createStyle = () => {
+		const head = document.head || document.getElementsByTagName( 'head' )[0];
+		const style = document.createElement( 'style' );
+		style.setAttribute( 'id', 'classifai-ocr-style' );
+		head.appendChild( style );
+		return style;
+	};
 
-	const blocksToEdit = filter( blocks, block => undefined !== block.attributes.className && block.attributes.className.includes( 'classifai-ocr-related-block' ) );
+	/**
+	 * Generate CSS for current focused image/ocr block.
+	 *
+	 * @param {array} ids Array of id.
+	 */
+	const generateCss = ( ids ) => {
+		const style = document.getElementById( 'classifai-ocr-style' ) ?? createStyle();
+		const selectors = ids.map( id => `#block-${id}:before` ).join( ', ' );
+		const css = `${selectors} {
+			content: "";
+			position: absolute;
+			display: block;
+			top: 0;
+			left: -15px;
+			bottom: 0;
+			border-left: 4px solid #cfe7f3;
+			mix-blend-mode: difference;
+			opacity: 0.25;
+		}`;
 
-	blocksToEdit.forEach( ( block ) => {
-		dispatch( 'core/block-editor' ).updateBlockAttributes( block.clientId, { className: classnames( block.attributes.className, { 'classifai-ocr-related-block': false } ) } );
-	} );
-};
+		style.appendChild( document.createTextNode( css ) );
+		activeBlocks = ids;
+	};
+
+	/**
+	 * Clear generated CSS.
+	 */
+	const maybeClearCss = () => {
+		if ( 0 === activeBlocks.length ) {
+			return;
+		}
+
+		const style = document.getElementById( 'classifai-ocr-style' );
+
+		if ( style ) {
+			style.innerText = '';
+		}
+
+		activeBlocks = [];
+	};
+}
