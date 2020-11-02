@@ -15,6 +15,7 @@
 - .gitignore
 - CHANGELOG.md
 - CODE_OF_CONDUCT.md
+- composer.json
 - composer.lock
 - CONTRIBUTING.md
 - CREDITS.md
@@ -25,5 +26,6 @@
 - phpcs.xml.dist
 - phpunit.xml.dist
 - portkey.json
+- README.md
 - webpack.config.js
 - wpacceptance.json
