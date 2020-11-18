@@ -128,13 +128,13 @@ Batch post classification using IBM Watson NLU API.
 
 ##### Options
 
-###### `{post_ids}`
+**`{post_ids}`**
 
 A comma delimited list of post IDs to classify. Used if `post_type` is false or absent.
 
 default: `true`
 
-###### `--post_type=<post_type>`
+**`--post_type=<post_type>`**
 
 Batch classify posts belonging to this post type. If `false` or absent relies on `post_ids`.
 
@@ -143,7 +143,7 @@ options:
 - any post type name
 - `false`, if args contains `post_ids`
 
-###### `--limit=<limit>`
+**`--limit=<limit>`**
 
 Limit classification to N posts.
 
@@ -152,7 +152,7 @@ options:
 - `false`, no limit
 - `N`, max number of posts to classify
 
-###### `--link=<link>`
+**`--link=<link>`**
 
 Whether to link classification results to Taxonomy terms.
 
@@ -166,31 +166,31 @@ Directly classify text using IBM Watson NLU API.
 
 ##### Options
 
-###### `--category=<bool>`
+**`--category=<bool>`**
 
 Enables NLU category feature.
 
 default: `true`
 
-###### `--keyword=<bool>`
+**`--keyword=<bool>`**
 
 Enables NLU keyword feature.
 
 default: `true`
 
-###### `--concept=<bool>`
+**`--concept=<bool>`**
 
 Enables NLU concept feature.
 
 default: `true`
 
-###### `--entity=<bool>`
+**`--entity=<bool>`**
 
 Enables NLU entity feature.
 
 default: `true`
 
-###### `--input=<input>`
+**`--input=<input>`**
 
 Path to input file or URL.
 
@@ -200,7 +200,7 @@ options:
 - path to remote URL
 - `false`, uses args[0] instead
 
-###### `--only-normalize=<bool>`
+**`--only-normalize=<bool>`**
 
 Prints the normalized text that will be sent to the NLU API.
 
@@ -216,23 +216,23 @@ Directly add description "alt text"  and tags to attachment(s) using Azure AI Co
 
 ##### Options
 
-###### `{attachment_ids}`
+**`{attachment_ids}`**
 
 Comma delimeted list of Attachment IDs to classify.
 
-###### `--limit=<int>`
+**`--limit=<int>`**
 
 Limit number of attachments to classify.
 
 default: `100`.
 
-###### `--skip=<skip>`
+**`--skip=<skip>`**
 
 Skip first N attachments.
 
 default: `false`.
 
-###### `--force`
+**`--force`**
 
 Force classifying attachments regardless of their `alt`.
 
@@ -246,17 +246,17 @@ Batch crop image(s) using Azure AI Computer Vision API.
 
 ##### Options
 
-###### `{attachment_ids}`
+**`{attachment_ids}`**
 
 Comma delimeted list of Attachment IDs to crop.
 
-###### `--limit=<limit>`
+**`--limit=<limit>`**
 
 Limit number of images to crop.
 
 default: `100`.
 
-###### `--skip=<skip>`
+**`--skip=<skip>`**
 
 Skip first N images.
 
