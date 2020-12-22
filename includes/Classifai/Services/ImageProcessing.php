@@ -96,7 +96,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'alt-tags' ],
+				'args'                => [ 'route' => [ 'alt-tags' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -107,7 +107,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'image-tags' ],
+				'args'                => [ 'route' => [ 'image-tags' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -118,7 +118,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'ocr' ],
+				'args'                => [ 'route' => [ 'ocr' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -129,7 +129,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'smart-crop' ],
+				'args'                => [ 'route' => [ 'smart-crop' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
