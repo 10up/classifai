@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.6.0] - 2020-11-02
+### Added
+- Automated Optical Character Recognition (OCR) scanning of screenshots and other imagery with `aria-describedby` semantic markup (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#228](https://github.com/10up/classifai/pull/228))
+- Ability to smart crop existing images in WP Admin (props [@ShahAaron](https://github.com/ShahAaron), [@dinhtungdu](https://github.com/dinhtungdu), [@rickalee](https://github.com/rickalee) via [#252](https://github.com/10up/classifai/pull/252))
+- WP-CLI `crop` command to smart crop images (props [@dinhtungdu](https://github.com/dinhtungdu), [@dkotter](https://github.com/dkotter), [@johnwatkins0](https://github.com/johnwatkins0) via [#236](https://github.com/10up/classifai/pull/236), [#254](https://github.com/10up/classifai/pull/254))
+- Better error handling for manual scanning of alt text or image tags (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu) via [#231](https://github.com/10up/classifai/pull/231))
+- `classifai_generate_image_alt_tags_source_url` filter to allow overriding of the image URL within `generate_image_alt_tags()` (props [@petenelson](https://github.com/petenelson), [@dinhtungdu](https://github.com/dinhtungdu) via [#217](https://github.com/10up/classifai/pull/217))
+
+### Changed
+- Updated from v1.0 to v3.0 of Azure Computer Vision Analyze API (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#244](https://github.com/10up/classifai/pull/244), [#255](https://github.com/10up/classifai/pull/255))
+- Don't default to the `post` post type, if no other post types are selected for Language Processing (props [@dkotter](https://github.com/dkotter) via [#247](https://github.com/10up/classifai/pull/247))
+- Don't process items if no Language Processing features are enabled (props [@dkotter](https://github.com/dkotter) via [#249](https://github.com/10up/classifai/pull/249))
+- Image Processing metabox copy (props [@ActuallyConnor](https://github.com/ActuallyConnor), [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul) via [#214](https://github.com/10up/classifai/pull/214))
+- Update admin menu icon color (props [@helen](https://github.com/helen) via [#258](https://github.com/10up/classifai/pull/258))
+- Bump WordPress version "tested up to" 5.5.1 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#237](https://github.com/10up/classifai/pull/237))
+- Documentation, linting, and testing updates (props [@ryanwelcher](https://github.com/ryanwelcher), [@jeffpaul](https://github.com/jeffpaul), [@helen](https://github.com/helen), [@dinhtungdu](https://github.com/dinhtungdu) via [#204](https://github.com/10up/classifai/pull/204), [#215](https://github.com/10up/classifai/pull/215), [#226](https://github.com/10up/classifai/pull/226), [#239](https://github.com/10up/classifai/pull/239), [#251](https://github.com/10up/classifai/pull/251))
+
+### Removed
+- `Media` as option to select in Language Processing as Attachments are never processed (props [@dkotter](https://github.com/dkotter), [@ShahAaron](https://github.com/ShahAaron), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul) via [#245](https://github.com/10up/classifai/issues/245))
+
+### Fixed
+- Smart cropping results not as expected (props [@dinhtungdu](https://github.com/dinhtungdu), [@oscarssanchez](https://github.com/oscarssanchez), [@ShahAaron](https://github.com/ShahAaron), [@jeffpaul](https://github.com/jeffpaul) via [@229](https://github.com/10up/classifai/pull/229))
+- Sending largest image size possible when initiating a scan from the single edit screen (props [@dkotter](https://github.com/dkotter) via [#235](https://github.com/10up/classifai/pull/235))
+- CDN image storage compatibility issue (props [@ShahAaron](https://github.com/ShahAaron), [@jeffpaul](https://github.com/jeffpaul) via [#250](https://github.com/10up/classifai/pull/250))
+- Manual image scanning functions if automatic scanning is disabled (props [@dkotter](https://github.com/dkotter) via [#233](https://github.com/10up/classifai/pull/233))
+- Issue where scan/rescan buttons did not appear in image modal upon first load (props [@dkotter](https://github.com/dkotter) via [#256](https://github.com/10up/classifai/pull/256))
+- Prevent PHP notice if IBM Watson credentials are empty (props [@barryceelen](https://github.com/barryceelen), [@dinhtungdu](https://github.com/dinhtungdu), [@adamsilverstein](https://github.com/adamsilverstein) via [#206](https://github.com/10up/classifai/pull/206))
+- Azure Computer Vision credentials saving and notification (props [@barryceelen](https://github.com/barryceelen), [@dinhtungdu](https://github.com/dinhtungdu) via [#207](https://github.com/10up/classifai/pull/207))
+- `permission_callback` error on WordPress 5.5 (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#219](https://github.com/10up/classifai/pull/219))
+
+### Security
+- Bump `acorn` from 6.3.0 to 6.4.1 (props [@dependabot](https://github.com/dependabot) via [#203](https://github.com/10up/classifai/pull/203))
+- Bump `lodash` from 4.17.15 to 4.17.19 (props [@dependabot](https://github.com/dependabot) via [#216](https://github.com/10up/classifai/pull/216))
+- Bump `elliptic` from 6.5.1 to 6.5.3 (props [@dependabot](https://github.com/dependabot) via [#218](https://github.com/10up/classifai/pull/218))
+- Bump `yargs-parser` from 13.1.1 to 13.1.2 (props [@dependabot](https://github.com/dependabot) via [#223](https://github.com/10up/classifai/pull/223))
+
 ## [1.5.1] - 2020-03-06
 ### Added
 - Unit test coverage (props [@ryanwelcher](https://github.com/ryanwelcher) via [#198](https://github.com/10up/classifai/pull/198))
@@ -109,7 +145,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [1.0.0] - 2018-07-24
 - Initial closed source release
 
-[Unreleased]: https://github.com/10up/classifai/compare/master...develop
+[Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.6.0]: https://github.com/10up/classifai/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/10up/classifai/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/10up/classifai/compare/1.4.0...1.5.0
 [1.4.0]: https://github.com/10up/classifai/compare/1.3.2...1.4.0
