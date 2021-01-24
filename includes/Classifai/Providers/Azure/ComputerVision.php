@@ -37,7 +37,19 @@ class ComputerVision extends Provider {
 	 * Resets settings for the ComputerVision provider.
 	 */
 	public function reset_settings() {
-		// TODO: Implement reset_settings() method.
+		$settings = [
+			'valid' => false,
+			'url' => '',
+			'api_key' => '',
+			'enable_image_captions' => '1',
+			'enable_image_tagging' => '1',
+			'enable_smart_cropping' => 'no',
+			'enable_ocr' => 'no',
+			'caption_threshold' => 75,
+			'tag_threshold' => 70,
+			'image_tag_taxonomy' => 'classifai-image-tags',
+		];
+		update_option( $this->get_option_name(), $settings );
 	}
 
 	/**
