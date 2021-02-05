@@ -49,10 +49,10 @@ class ComputerVision extends Provider {
 			'valid' => false,
 			'url' => '',
 			'api_key' => '',
-			'enable_image_captions' => '1',
-			'enable_image_tagging' => '1',
-			'enable_smart_cropping' => 'no',
-			'enable_ocr' => 'no',
+			'enable_image_captions' => true,
+			'enable_image_tagging' => true,
+			'enable_smart_cropping' => false,
+			'enable_ocr' => false,
 			'caption_threshold' => 75,
 			'tag_threshold' => 70,
 			'image_tag_taxonomy' => 'classifai-image-tags',
@@ -622,124 +622,116 @@ class ComputerVision extends Provider {
 	 */
 	public function setup_fields_sections() {
 		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-		
 		$settings = $this->get_default_settings();
-		
 		add_settings_field(
 			'url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'url' ],
+			$this->get_option_name(),
 			[
-				'label_for'   => 'url',
-				'input_type'  => 'text',
-				'description' => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
+				'label_for'     => 'url',
+				'input_type'    => 'text',
+				'default_value' => $settings['url'],
+				'description'   => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
 			]
 		);
-		
 		add_settings_field(
 			'api-key',
 			esc_html__( 'API Key', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'api_key' ],
+			$this->get_option_name(),
 			[
-				'label_for'  => 'api_key',
-				'input_type' => 'password',
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key']
 			]
 		);
-		
 		add_settings_field(
 			'enable-image-captions',
 			esc_html__( 'Automatically Caption Images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'enable_image_captions' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
-				'default_value' => true,
+				'default_value' => $settings['enable_image_captions'],
 				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
 			]
 		);
-		
 		add_settings_field(
 			'enable-image-tagging',
 			esc_html__( 'Automatically Tag Images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'enable_image_captions' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
-				'default_value' => true,
+				'default_value' => $settings['enable_image_tagging'],
 				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
 			]
 		);
-		
 		add_settings_field(
 			'enable-smart-cropping',
 			esc_html__( 'Enable smart cropping', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'enable_smart_cropping' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'enable_smart_cropping',
 				'input_type'    => 'checkbox',
-				'default_value' => false,
+				'default_value' => $settings['enable_smart_cropping'],
 				'description'   => __(
 					'Crop images around a region of interest identified by ComputerVision',
 					'classifai'
 				),
 			]
 		);
-		
 		add_settings_field(
 			'enable-ocr',
 			esc_html__( 'Enable OCR', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'enable_ocr' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'enable_ocr',
 				'input_type'    => 'checkbox',
-				'default_value' => false,
+				'default_value' => $settings['enable_ocr'],
 				'description'   => __(
 					'Detect text in an image and store that as post content',
 					'classifai'
 				),
 			]
 		);
-		
 		add_settings_field(
 			'caption-threshold',
 			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'captions_threshold' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
-				'default_value' => 75,
+				'default_value' => $settings['caption_threshold'],
 				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
-		
 		add_settings_field(
 			'image-tag-threshold',
 			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$settings[ 'tag_threshold' ],
+			$this->get_option_name(),
 			[
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
-				'default_value' => 70,
+				'default_value' => $settings['tag_threshold'],
 				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
-
 		// What taxonomy should we tag images with?
 		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
 		$options               = [];
@@ -751,10 +743,11 @@ class ComputerVision extends Provider {
 			esc_html__( 'Tag Taxonomy', 'classifai' ),
 			[ $this, 'render_select' ],
 			$this->get_option_name(),
-			$settings[ 'image_tag_taxonomy' ],
+			$this->get_option_name(),
 			[
-				'label_for' => 'image_tag_taxonomy',
-				'options'   => $options,
+				'label_for'     => 'image_tag_taxonomy',
+				'options'       => $options,
+				'default_value' => $settings['image_tag_taxonomy']
 			]
 		);
 	}
