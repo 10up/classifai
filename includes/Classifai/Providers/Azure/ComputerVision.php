@@ -39,9 +39,10 @@ class ComputerVision extends Provider {
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
-	
+
 	/**
 	 * Default settings for ComputerVision
+	 *
 	 * @return array
 	 */
 	private function get_default_settings() {
@@ -645,7 +646,7 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
-				'default_value' => $settings['api_key']
+				'default_value' => $settings['api_key'],
 			]
 		);
 		add_settings_field(
@@ -747,7 +748,7 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'image_tag_taxonomy',
 				'options'       => $options,
-				'default_value' => $settings['image_tag_taxonomy']
+				'default_value' => $settings['image_tag_taxonomy'],
 			]
 		);
 	}
