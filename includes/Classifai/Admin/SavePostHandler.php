@@ -271,23 +271,57 @@ class SavePostHandler {
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 *
-	 * @return bool Did the classification run?
+	 * @return array Did the classification run?
 	 */
 	public function provider_endpoint_callback( $request ) {
 		$current_post_id = $request->get_param( 'id' );
+		$request_failed  = [
+			'success' => false,
+		];
 
 		// Only process content for published, supported items and only if features are enabled.
 		if ( ! $this->should_allow_language_processing( $current_post_id ) ) {
-			return false;
+			return $request_failed;
 		}
 
 		$result = $this->classify( $current_post_id );
 
-		if ( ! is_wp_error( $result ) ) {
-			return true;
+		if ( is_wp_error( $result ) ) {
+			return $request_failed;
 		}
 
-		return false;
+		$categories = [];
+		$keywords   = [];
+		$concepts   = [];
+		$entities   = [];
+
+		if ( \Classifai\get_feature_enabled( 'category' ) ) {
+			$categories = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			$categories = is_wp_error( $categories ) ? [] : wp_list_pluck( $categories, 'term_id' );
+		}
+
+		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
+			$keywords = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			$keywords = is_wp_error( $keywords ) ? [] : wp_list_pluck( $keywords, 'term_id' );
+		}
+
+		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
+			$concepts = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			$concepts = is_wp_error( $concepts ) ? [] : wp_list_pluck( $concepts, 'term_id' );
+		}
+
+		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
+			$entities = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			$entities = is_wp_error( $entities ) ? [] : wp_list_pluck( $entities, 'term_id' );
+		}
+
+		return [
+			'success'    => true,
+			'watson-category' => $categories,
+			'watson-keyword'   => $keywords,
+			'watson-concept'   => $concepts,
+			'watson-entity'   => $entities,
+		];
 	}
 
 	/**
@@ -306,7 +340,7 @@ class SavePostHandler {
 	 *
 	 * @return bool
 	 */
-	private function should_allow_language_processing( $post_id ) {
+	public static function should_allow_language_processing( $post_id ) {
 		if ( empty( $post_id ) ) {
 			return false;
 		}

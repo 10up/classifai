@@ -168,12 +168,22 @@ class NLU extends Provider {
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
+		global $post;
+
 		wp_enqueue_script(
 			'classifai-editor', // Handle.
 			CLASSIFAI_PLUGIN_URL . 'dist/js/editor.min.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-plugins' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
+		);
+
+		wp_localize_script(
+			'classifai-editor',
+			'classifyObj',
+			[
+				'show_generate_button' => SavePostHandler::should_allow_language_processing( $post->ID ) ? 'true' : 'false',
+			]
 		);
 	}
 

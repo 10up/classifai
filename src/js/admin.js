@@ -17,7 +17,7 @@ import { handleClick } from './helpers';
 					button: e.target,
 					endpoint: '/classifai/v1/generate-tags/',
 					callback: resp => {
-						if ( true === resp ) {
+						if ( true === resp.success ) {
 							location.reload();
 						}
 					}
