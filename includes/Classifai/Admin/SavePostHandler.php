@@ -18,6 +18,8 @@ class SavePostHandler {
 	public function register() {
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
+		add_action( 'post_submitbox_start', [ $this, 'add_generate_tags_button' ] );
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
@@ -210,7 +212,7 @@ class SavePostHandler {
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
-			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) ) {
+			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) || false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/classifai/' ) ) {
 				return true;
 			}
 		}
@@ -218,4 +220,106 @@ class SavePostHandler {
 		return false;
 	}
 
+	/**
+	 * Callback for adding Generate Tags button.
+	 *
+	 * @param \WP_Post $post The post being classified.
+	 *
+	 * @return void
+	 */
+	public function add_generate_tags_button( $post ) {
+		// Only show generate tag button for published, supported items and if features are enabled.
+		if ( $this->should_allow_language_processing( $post->ID ) ) {
+			?>
+			<div class="misc-pub-classifai-actions">
+				<button id="classifai-generate-tags" class="button" data-id="<?php echo esc_attr( $post->ID ); ?>"
+						style="margin-bottom: 15px;">
+					<?php esc_html_e( 'Generate Tags', 'classifai' ); ?>
+				</button>
+				<span class="spinner" style="display:none;float:none;"></span>
+				<span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>
+			</div>
+			<?php
+		}
+	}
+
+	/**
+	 * Create endpoints for Language Processing.
+	 */
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'generate-tags/(?P<id>\d+)',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'provider_endpoint_callback' ],
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => __( 'Post ID to generate tags.', 'classifai' ),
+					),
+				),
+				'permission_callback' => [ $this, 'can_edit_posts' ],
+			]
+		);
+	}
+
+	/**
+	 * Check if user can edit posts to handle permission for generating tags.
+	 *
+	 * @param \WP_REST_Request $request Full details about the request.
+	 *
+	 * @return bool Did the classification run?
+	 */
+	public function provider_endpoint_callback( $request ) {
+		$current_post_id = $request->get_param( 'id' );
+
+		// Only process content for published, supported items and only if features are enabled.
+		if ( ! $this->should_allow_language_processing( $current_post_id ) ) {
+			return false;
+		}
+
+		$result = $this->classify( $current_post_id );
+
+		if ( ! is_wp_error( $result ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if user can edit posts to handle permission for generating tags.
+	 *
+	 * @return bool
+	 */
+	public function can_edit_posts() {
+		return current_user_can( 'edit_posts' );
+	}
+
+	/**
+	 * Helper method to determine if post content should be processed.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return bool
+	 */
+	private function should_allow_language_processing( $post_id ) {
+		if ( empty( $post_id ) ) {
+			return false;
+		}
+
+		$supported   = \Classifai\get_supported_post_types();
+		$post_type   = get_post_type( $post_id );
+		$post_status = get_post_status( $post_id );
+
+		// Only process content for published, supported items and if features are enabled.
+		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
+			return true;
+		}
+
+		return false;
+	}
 }
