@@ -296,30 +296,42 @@ class SavePostHandler {
 		$entities   = [];
 
 		if ( \Classifai\get_feature_enabled( 'category' ) ) {
-			$categories = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'category' ) );
-			$categories = is_wp_error( $categories ) ? [] : wp_list_pluck( $categories, 'term_id' );
+			$categories_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			$categories_objs = is_wp_error( $categories_objs ) ? [] : $categories_objs;
+			foreach ( $categories_objs as $categories_obj ) {
+				$categories[ $categories_obj->term_id ] = $categories_obj->name;
+			}
 		}
 
 		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-			$keywords = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
-			$keywords = is_wp_error( $keywords ) ? [] : wp_list_pluck( $keywords, 'term_id' );
+			$keywords_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			$keywords_objs = is_wp_error( $keywords_objs ) ? [] : $keywords_objs;
+			foreach ( $keywords_objs as $keywords_obj ) {
+				$keywords[ $keywords_obj->term_id ] = $keywords_obj->name;
+			}
 		}
 
 		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-			$concepts = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
-			$concepts = is_wp_error( $concepts ) ? [] : wp_list_pluck( $concepts, 'term_id' );
+			$concepts_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			$concepts_objs = is_wp_error( $concepts_objs ) ? [] : $concepts_objs;
+			foreach ( $concepts_objs as $concepts_obj ) {
+				$concepts[ $concepts_obj->term_id ] = $concepts_obj->name;
+			}
 		}
 
 		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-			$entities = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
-			$entities = is_wp_error( $entities ) ? [] : wp_list_pluck( $entities, 'term_id' );
+			$entities_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			$entities_objs = is_wp_error( $entities_objs ) ? [] : $entities_objs;
+			foreach ( $entities_objs as $entities_obj ) {
+				$entities[ $entities_obj->term_id ] = $entities_obj->name;
+			}
 		}
 
 		return [
-			'success'    => true,
+			'success'         => true,
 			'watson-category' => $categories,
-			'watson-keyword'   => $keywords,
-			'watson-concept'   => $concepts,
+			'watson-keyword'  => $keywords,
+			'watson-concept'  => $concepts,
 			'watson-entity'   => $entities,
 		];
 	}

@@ -18,7 +18,20 @@ import { handleClick } from './helpers';
 					endpoint: '/classifai/v1/generate-tags/',
 					callback: resp => {
 						if ( true === resp.success ) {
-							location.reload();
+							const taxonomies = Object.keys( resp );
+							taxonomies.forEach( function( e ) {
+								if ( 'success' !== e ) {
+									const taxonomyWrapper = document.getElementById( e );
+									if ( taxonomyWrapper ) {
+										// eslint-disable-next-line prefer-destructuring
+										const taxonomyInput = taxonomyWrapper.querySelectorAll( 'input' )[0];
+										// eslint-disable-next-line prefer-destructuring
+										const taxonomyAdd = taxonomyWrapper.querySelectorAll( 'input' )[1];
+										taxonomyInput.value = Object.values( resp[e] ).join( ',' );
+										taxonomyAdd.click();
+									}
+								}
+							} );
 						}
 					}
 				}
