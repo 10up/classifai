@@ -48,7 +48,7 @@ if ( 'true' === classifyObj.show_generate_button ) {
 		<PluginPostStatusInfo>
 			<Fragment>
 				<Button
-					isPrimary={ true }
+					isSecondary={ true }
 					data-id= { select( 'core/editor' ).getCurrentPostId() }
 					onClick={ ( e ) => {
 						handleClick(
@@ -58,19 +58,10 @@ if ( 'true' === classifyObj.show_generate_button ) {
 								callback: resp => {
 									if ( true === resp.success ) {
 										showNotice();
-										const currentPost = select( 'core/editor' ).getCurrentPost();
-										const taxonomies = Object.keys( resp );
-
-										taxonomies.forEach( function( e ) {
-											if ( 'success' !== e ) {
-												wp.data.dispatch( 'core' ).editEntityRecord(
-													'postType',
-													currentPost.type,
-													currentPost.id,
-													{ [e]: resp[e] }
-												);
-											}
-										} );
+										const isPostSaved = select( 'core/editor' ).didPostSaveRequestSucceed();
+										if ( true === isPostSaved ) {
+											window.location.reload();
+										}
 									}
 								}
 							}
