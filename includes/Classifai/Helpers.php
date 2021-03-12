@@ -483,3 +483,29 @@ function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $met
 
 	return null;
 }
+
+/**
+ * Allows returning modified image URL for a given attachment.
+ *
+ * @param int $post_id Post ID.
+ *
+ * @return mixed
+ */
+function get_modified_image_source_url( $post_id ) {
+	/**
+	 * Filter to modify image source URL in order to allow scanning images,
+	 * stored on third party storages that cannot be used by
+	 * helper function `get_largest_acceptable_image_url()` to determine `filesize()` locally.
+	 *
+	 * Default is null, return filtered string to allow classifying image on external source.
+	 *
+	 * @since 1.6.0
+	 * @hook classifai_generate_image_alt_tags_source_url
+	 *
+	 * @param {mixed} $image_url New image path for given attachment ID.
+	 * @param {int}   $post_id   The ID of the attachment to be used in classification.
+	 *
+	 * @return {mixed} NULL or filtered URl for given attachment id.
+	 */
+	return apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $post_id );
+}
