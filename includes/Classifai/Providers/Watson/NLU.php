@@ -9,6 +9,7 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_post_types_for_language_settings;
+use function Classifai\allow_language_processing_for_published_content;
 
 class NLU extends Provider {
 
@@ -182,7 +183,7 @@ class NLU extends Provider {
 			'classifai-editor',
 			'classifyObj',
 			[
-				'show_generate_button' => SavePostHandler::should_allow_language_processing( $post->ID ) ? 'true' : 'false',
+				'show_generate_button' => allow_language_processing_for_published_content( $post->ID ) ? 'true' : 'false',
 			]
 		);
 	}

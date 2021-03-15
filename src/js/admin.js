@@ -33,6 +33,7 @@ import { handleClick } from './helpers';
 								}
 							} );
 						}
+						generateTags.focus();
 					}
 				}
 			);
