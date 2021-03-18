@@ -32,6 +32,10 @@ class ClassifierTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_can_classify_text() {
+		if ( ! defined( 'WATSON_USERNAME' ) && ! defined( 'WATSON_PASSWORD' ) ) {
+			$this->expectNotToPerformAssertions();
+		}
+
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
 			$text = 'The quick brown fox jumps over the lazy dog.';
 			$actual = $this->classifier->classify( $text );
