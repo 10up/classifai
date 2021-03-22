@@ -11,6 +11,7 @@ use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\get_modified_image_source_url;
 
 class ComputerVision extends Provider {
 
@@ -64,8 +65,8 @@ class ComputerVision extends Provider {
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 
 		$settings   = $this->get_settings();
@@ -233,12 +234,18 @@ class ComputerVision extends Provider {
 	public function maybe_rescan_image( $attachment_id ) {
 		$routes     = [];
 		$metadata   = wp_get_attachment_metadata( $attachment_id );
-		$image_url  = get_largest_acceptable_image_url(
-			get_attached_file( $attachment_id ),
-			wp_get_attachment_url( $attachment_id ),
-			$metadata['sizes'],
-			computer_vision_max_filesize()
-		);
+
+		// Allow rescanning image that are not stored in local storage.
+		$image_url = get_modified_image_source_url( $attachment_id );
+
+		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+			$image_url  = get_largest_acceptable_image_url(
+				get_attached_file( $attachment_id ),
+				wp_get_attachment_url( $attachment_id ),
+				$metadata['sizes'],
+				computer_vision_max_filesize()
+			);
+		}
 
 		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
 			$routes[] = 'alt-tags';
@@ -341,18 +348,19 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_captions']
 		) {
 
-			$image_url = apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $attachment_id );
+			// Allow scanning image that are not stored in local storage.
+			$image_url = get_modified_image_source_url( $attachment_id );
 
 			if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
 				if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
 					$image_url = get_largest_acceptable_image_url(
 						get_attached_file( $attachment_id ),
-						wp_get_attachment_url( $attachment_id, 'full' ),
+						wp_get_attachment_url( $attachment_id ),
 						$metadata['sizes'],
 						computer_vision_max_filesize()
 					);
 				} else {
-					$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+					$image_url = wp_get_attachment_url( $attachment_id );
 				}
 			}
 
@@ -932,12 +940,17 @@ class ComputerVision extends Provider {
 			return $this->ocr_processing( $metadata, $post_id, true );
 		}
 
-		$image_url = get_largest_acceptable_image_url(
-			get_attached_file( $post_id ),
-			wp_get_attachment_url( $post_id ),
-			$metadata['sizes'],
-			computer_vision_max_filesize()
-		);
+		// Allow rescanning image that are not stored in local storage.
+		$image_url = get_modified_image_source_url( $post_id );
+
+		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+			$image_url = get_largest_acceptable_image_url(
+				get_attached_file( $post_id ),
+				wp_get_attachment_url( $post_id ),
+				$metadata['sizes'],
+				computer_vision_max_filesize()
+			);
+		}
 
 		if ( empty( $image_url ) ) {
 			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is less than 4MB.' ) );
