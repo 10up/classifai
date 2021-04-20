@@ -1,5 +1,5 @@
 /* global lodash */
-const { select, useSelect, dispatch, subscribe } = wp.data;
+const { select, dispatch, subscribe } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
 const { find, debounce } = lodash;
@@ -8,7 +8,6 @@ const { createHigherOrderComponent } = wp.compose;
 const { BlockControls } = wp.blockEditor; // eslint-disable-line no-unused-vars
 const { Button, Modal, Flex, FlexItem, ToolbarGroup, ToolbarButton } = wp.components; // eslint-disable-line no-unused-vars
 const { __ } = wp.i18n;
-const { registerPlugin } = wp.plugins;
 const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
 
 /**
@@ -72,7 +71,7 @@ const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
 		content: scannedText,
 	} );
 
-	dispatch( 'core/block-editor' ).insertBlock( groupBlock, getBlockIndex( clientId ) + 1 );
+	await dispatch( 'core/block-editor' ).insertBlock( groupBlock, getBlockIndex( clientId ) + 1 );
 	dispatch( 'core/block-editor' ).insertBlock( textBlock, 0, groupBlock.clientId );
 };
 
@@ -91,99 +90,39 @@ const hasOcrBlock = ( imageId, blocks = [] ) => {
 };
 
 /**
- * An Modal allows user to insert scanned text to block if detected.
- */
-const imageOcrModal = () => {
-	const [ isOpen, setOpen ] = useState( false );
-	const [ imageId, setImageId ] = useState( 0 );
-	const [ clientId, setClientId ] = useState( 0 );
-	const [ ocrScannedText, setOcrScannedText ] = useState( '' );
-	const openModal = () => setOpen( true ); // eslint-disable-line require-jsdoc
-	const closeModal = () => setOpen( false ); // eslint-disable-line require-jsdoc
-	let currentBlocks;
-
-	useSelect( debounce( async ( select ) => {
-		const { getSelectedBlock, getBlocks } = select( 'core/block-editor' );
-		const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-		const newBlocks = getBlocks();
-		const prevBlocks = currentBlocks;
-		currentBlocks = newBlocks;
-
-		const currentBlock = getSelectedBlock();
-
-		if ( ! currentBlock || 'core/image' !== currentBlock.name ) {
-			return;
-		}
-
-		if ( ! currentBlock.attributes.id ) {
-			return;
-		}
-
-		const prevBlock = find( prevBlocks, block => block.clientId === currentBlock.clientId );
-
-		if ( ! prevBlock || prevBlock.attributes.id === currentBlock.attributes.id ) {
-			return;
-		}
-
-		setClientId( currentBlock.clientId );
-		setImageId( currentBlock.attributes.id );
-
-		const _ocrText = await getImageOcrScannedText( currentBlock.attributes.id );
-
-		if ( ! _ocrText ) {
-			return;
-		}
-
-		setOcrScannedText( _ocrText );
-
-		updateBlockAttributes( currentBlock.clientId, {
-			ocrScannedText: _ocrText,
-		} );
-
-		if ( ! hasOcrBlock( currentBlock.attributes.id, newBlocks ) ) {
-			openModal();
-		}
-	}, 100 ) );
-
-	return isOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
-		<p>{__( 'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.', 'classifai' )}</p>
-		<Flex align='flex-end' justify='flex-end'>
-			<FlexItem>
-				<Button isPrimary onClick={() => {
-					insertOcrScannedText( clientId, imageId, ocrScannedText );
-					return closeModal();
-				}}>
-					{__( 'Insert text', 'classifai' )}
-				</Button>
-			</FlexItem>
-			<FlexItem>
-				<Button isSecondary onClick={ closeModal }>
-					{__( 'Dismiss', 'classifai' )}
-				</Button>
-			</FlexItem>
-		</Flex>
-	</Modal>;
-};
-
-registerPlugin( 'tenup-classifai-ocr-modal', {
-	render: imageOcrModal,
-} );
-
-/**
  * Add insert button to toolbar.
 */
 const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint-disable-line no-unused-vars
 	return ( props ) => {
-		const { attributes, clientId, isSelected, name } = props;
+		const [ isModalOpen, setModalOpen ] = useState( false );
+		const { attributes, clientId, isSelected, name, setAttributes } = props;
 
-		if ( ! isSelected || 'core/image' != name || ! attributes.ocrScannedText ) {
+		if ( ! isSelected || 'core/image' != name ) {
 			return <BlockEdit {...props} />;
 		}
+
+		if ( ! attributes.orcChecked && attributes.id ) {
+			getImageOcrScannedText( attributes.id )
+				.then( data => {
+					if ( data ) {
+						setAttributes( {
+							ocrScannedText: data,
+							orcChecked: true,
+						} );
+						setModalOpen( true );
+					} else {
+						setAttributes( {
+							orcChecked: true,
+						} );
+					}
+				} );
+		}
+
 
 		return (
 			<Fragment>
 				<BlockEdit {...props} />
-				<BlockControls>
+				{attributes.ocrScannedText && <BlockControls>
 					<ToolbarGroup>
 						<ToolbarButton
 							label={__( 'Insert scanned text into content', 'classifai' )}
@@ -192,7 +131,25 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 							disabled={hasOcrBlock( attributes.id )}
 						/>
 					</ToolbarGroup>
-				</BlockControls>
+				</BlockControls>}
+				{isModalOpen && <Modal title={__( 'ClassifAI detected text in your image', 'classifai' )}>
+					<p>{__( 'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.', 'classifai' )}</p>
+					<Flex align='flex-end' justify='flex-end'>
+						<FlexItem>
+							<Button isPrimary onClick={() => {
+								insertOcrScannedText( clientId, attributes.id, attributes.ocrScannedText );
+								setModalOpen( false );
+							}}>
+								{__( 'Insert text', 'classifai' )}
+							</Button>
+						</FlexItem>
+						<FlexItem>
+							<Button isSecondary onClick={ () => setModalOpen( false ) }>
+								{__( 'Dismiss', 'classifai' )}
+							</Button>
+						</FlexItem>
+					</Flex>
+				</Modal> }
 			</Fragment>
 		);
 	};
@@ -220,6 +177,10 @@ const modifyImageAttributes = ( settings, name ) => {
 		settings.attributes.ocrScannedText = {
 			type: 'string',
 			default: ''
+		};
+		settings.attributes.orcChecked = {
+			type: 'boolean',
+			default: false,
 		};
 	}
 	return settings;
