@@ -51,12 +51,8 @@ const getImageOcrScannedText = async ( imageId ) => {
  * @param {int} imageId - Image ID.
  * @param {string} scannedText - Text to insert to editor.
 */
-const insertOcrScannedText = async ( clientId, imageId, scannedText = '' ) => {
+const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
 	const { getBlockIndex } = select( 'core/block-editor' );
-
-	if( ! scannedText ) {
-		scannedText = await getImageOcrScannedText( imageId );
-	}
 
 	if( ! scannedText ) {
 		return;
