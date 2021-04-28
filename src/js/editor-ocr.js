@@ -97,18 +97,18 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => { // eslint
 			return <BlockEdit {...props} />;
 		}
 
-		if ( ! attributes.orcChecked && attributes.id ) {
+		if ( ! attributes.ocrChecked && attributes.id ) {
 			getImageOcrScannedText( attributes.id )
 				.then( data => {
 					if ( data ) {
 						setAttributes( {
 							ocrScannedText: data,
-							orcChecked: true,
+							ocrChecked: true,
 						} );
 						setModalOpen( true );
 					} else {
 						setAttributes( {
-							orcChecked: true,
+							ocrChecked: true,
 						} );
 					}
 				} );
@@ -174,7 +174,7 @@ const modifyImageAttributes = ( settings, name ) => {
 			type: 'string',
 			default: ''
 		};
-		settings.attributes.orcChecked = {
+		settings.attributes.ocrChecked = {
 			type: 'boolean',
 			default: false,
 		};
