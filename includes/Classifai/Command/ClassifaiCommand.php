@@ -12,7 +12,8 @@ use Classifai\Providers\Azure\SmartCropping;
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
  * It provides subcommands to test classification results and batch
- * classify posts using the IBM Watson NLU API.
+ * classify posts using the IBM Watson NLU API and images using the
+ * Azure AI Computer Vision API.
  */
 class ClassifaiCommand extends \WP_CLI_Command {
 
@@ -291,7 +292,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * : Comma delimited Attachment IDs to crop.
 	 *
 	 * [--limit=<limit>]
-	 * : Limit classification to N attachments. Default 100.
+	 * : Limit cropping to N attachments. Default 100.
 	 *
 	 * [--skip=<skip>]
 	 * : Skip first N attachments. Default false.
