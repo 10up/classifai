@@ -671,6 +671,19 @@ class ComputerVision extends Provider {
 			]
 		);
 		add_settings_field(
+			'caption-threshold',
+			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'caption_threshold',
+				'input_type'    => 'number',
+				'default_value' => $settings['caption_threshold'],
+				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+			]
+		);
+		add_settings_field(
 			'enable-image-tagging',
 			esc_html__( 'Automatically Tag Images', 'classifai' ),
 			[ $this, 'render_input' ],
@@ -681,6 +694,37 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['enable_image_tagging'],
 				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
+			]
+		);
+		add_settings_field(
+			'image-tag-threshold',
+			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'tag_threshold',
+				'input_type'    => 'number',
+				'default_value' => $settings['tag_threshold'],
+				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
+			]
+		);
+		// What taxonomy should we tag images with?
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$options               = [];
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$options[ $name ] = $taxonomy->label;
+		}
+		add_settings_field(
+			'image-tag-taxonomy',
+			esc_html__( 'Tag Taxonomy', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'image_tag_taxonomy',
+				'options'       => $options,
+				'default_value' => $settings['image_tag_taxonomy'],
 			]
 		);
 		add_settings_field(
@@ -713,50 +757,6 @@ class ComputerVision extends Provider {
 					'Detect text in an image and store that as post content',
 					'classifai'
 				),
-			]
-		);
-		add_settings_field(
-			'caption-threshold',
-			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'caption_threshold',
-				'input_type'    => 'number',
-				'default_value' => $settings['caption_threshold'],
-				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
-			]
-		);
-		add_settings_field(
-			'image-tag-threshold',
-			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'tag_threshold',
-				'input_type'    => 'number',
-				'default_value' => $settings['tag_threshold'],
-				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
-			]
-		);
-		// What taxonomy should we tag images with?
-		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
-		$options               = [];
-		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
-			$options[ $name ] = $taxonomy->label;
-		}
-		add_settings_field(
-			'image-tag-taxonomy',
-			esc_html__( 'Tag Taxonomy', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'image_tag_taxonomy',
-				'options'       => $options,
-				'default_value' => $settings['image_tag_taxonomy'],
 			]
 		);
 	}
