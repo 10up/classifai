@@ -48,16 +48,16 @@ class ComputerVision extends Provider {
 	 */
 	private function get_default_settings() {
 		return [
-			'valid' => false,
-			'url' => '',
-			'api_key' => '',
+			'valid'                 => false,
+			'url'                   => '',
+			'api_key'               => '',
 			'enable_image_captions' => true,
-			'enable_image_tagging' => true,
+			'enable_image_tagging'  => true,
 			'enable_smart_cropping' => false,
-			'enable_ocr' => false,
-			'caption_threshold' => 75,
-			'tag_threshold' => 70,
-			'image_tag_taxonomy' => 'classifai-image-tags',
+			'enable_ocr'            => false,
+			'caption_threshold'     => 75,
+			'tag_threshold'         => 70,
+			'image_tag_taxonomy'    => 'classifai-image-tags',
 		];
 	}
 
