@@ -107,12 +107,12 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 #### 1. Sign up for Azure services
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
 - Log into your account and create a new [*Computer Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
-- Click `Quick start` in the left hand Resource Management menu to view the `API endpoint` credential for this resource in section `2b`.
-- Click `Keys` in the left hand Resource Management menu to view the `Key 1` credential for this resource.
+- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
 #### 2. Configure Microsoft Azure API and Key under ClassifAI > Image Processing
 - In the `Endpoint URL` field, enter your `API endpoint`.
-- In the `API Key` field, enter your `Key 1`.
+- In the `API Key` field, enter your `KEY 1`.
 
 #### 3. Save Image to classify image
 
