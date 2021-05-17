@@ -55,6 +55,7 @@ class ComputerVision extends Provider {
 			'enable_image_tagging'  => true,
 			'enable_smart_cropping' => false,
 			'enable_ocr'            => false,
+			'enable_read_pdf'       => false,
 			'caption_threshold'     => 75,
 			'tag_threshold'         => 70,
 			'image_tag_taxonomy'    => 'classifai-image-tags',
@@ -96,6 +97,12 @@ class ComputerVision extends Provider {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
+		}
+
+		$enable_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
+		if ( $enable_read_pdf ) {
+			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
+			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
 		}
 	}
 
@@ -567,6 +574,53 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Read PDF content and update the description of attachment.
+	 *
+	 * @param array $metadata Attachment metadata.
+	 * @param int   $attachment_id Attachment ID.
+	 */
+	public function read_pdf( $attachment_id ) {
+		$settings = $this->get_settings();
+
+		if ( ! is_array( $settings ) ) {
+			return new WP_Error( 'invalid_settings', 'Can not retrieve the plugin settings.');
+		}
+
+		$should_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
+
+		if ( ! $should_read_pdf ) {
+			return false;
+		}
+
+		// Direct file system access is required for the current implementation of this feature.
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
+		$access_type = get_filesystem_method();
+
+		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
+			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.');
+		}
+
+		$read = new Read( $settings );
+
+		$read->scan_document( intval( $attachment_id ) );
+	}
+
+	/**
+	 * Wrapper action callback for Read cron job.
+	 * 
+	 * @param string $operation_url Operation URL for checking the read status.
+	 * @param int    $attachment_id Attachment ID.
+	 */
+	public function do_read_cron( $operation_url, $attachment_id ) {
+		$settings = $this->get_settings();
+
+		( new Read( $settings ) )->check_read_result( $operation_url, $attachment_id );
+	}
+
+	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
 	 * @param array $tags          Array ot tags returned from the API.
@@ -759,6 +813,22 @@ class ComputerVision extends Provider {
 				),
 			]
 		);
+		add_settings_field(
+			'enable-read-pdf',
+			esc_html__( 'Enable Scanning PDF', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_read_pdf',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_read_pdf'],
+				'description'   => __(
+					'Extracting visible text from images, optimized for text-heavy images and multi-page, mixed language, and mixed type documents. Store the result as the attachment description.',
+					'classifai'
+				),
+			]
+		);
 	}
 
 	/**
@@ -793,6 +863,7 @@ class ComputerVision extends Provider {
 			'enable_image_tagging',
 			'enable_smart_cropping',
 			'enable_ocr',
+			'enable_read_pdf',
 		];
 
 		foreach ( $checkbox_settings as $checkbox_setting ) {
