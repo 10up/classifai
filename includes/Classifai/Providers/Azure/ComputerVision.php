@@ -576,14 +576,13 @@ class ComputerVision extends Provider {
 	/**
 	 * Read PDF content and update the description of attachment.
 	 *
-	 * @param array $metadata Attachment metadata.
-	 * @param int   $attachment_id Attachment ID.
+	 * @param int $attachment_id Attachment ID.
 	 */
 	public function read_pdf( $attachment_id ) {
 		$settings = $this->get_settings();
 
 		if ( ! is_array( $settings ) ) {
-			return new WP_Error( 'invalid_settings', 'Can not retrieve the plugin settings.');
+			return new WP_Error( 'invalid_settings', 'Can not retrieve the plugin settings.' );
 		}
 
 		$should_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
@@ -600,24 +599,24 @@ class ComputerVision extends Provider {
 		$access_type = get_filesystem_method();
 
 		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
-			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.');
+			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.' );
 		}
 
-		$read = new Read( $settings );
+		$read = new Read( $settings, intval( $attachment_id ) );
 
-		$read->scan_document( intval( $attachment_id ) );
+		$read->scan_document();
 	}
 
 	/**
 	 * Wrapper action callback for Read cron job.
-	 * 
+	 *
 	 * @param string $operation_url Operation URL for checking the read status.
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( $operation_url, $attachment_id ) {
 		$settings = $this->get_settings();
 
-		( new Read( $settings ) )->check_read_result( $operation_url, $attachment_id );
+		( new Read( $settings, intval( $attachment_id ) ) )->check_read_result( $operation_url );
 	}
 
 	/**

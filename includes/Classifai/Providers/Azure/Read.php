@@ -2,7 +2,7 @@
 /**
  * Provides OCR detection with the Computer Vision service.
  *
- * @since 1.6.0
+ * @since 1.6.1
  * @package Classifai
  */
 
@@ -17,14 +17,11 @@ use function Classifai\computer_vision_max_filesize;
  * Connects to Computer Vision's Read endpoint to detect text.
  *
  * @see https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/recognizeprintedtext/
- * @since 1.6.0
  */
 class Read {
 
 	/**
 	 * The Computer Vision API path to the Read service.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @var string
 	 */
@@ -33,16 +30,12 @@ class Read {
 	/**
 	 * ComputerVision settings.
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var array
 	 */
 	private $settings;
 
 	/**
 	 * Attachment ID to process.
-	 *
-	 * @since 1.6.0
 	 *
 	 * @var boolean
 	 */
@@ -51,8 +44,6 @@ class Read {
 	/**
 	 * Force processing
 	 *
-	 * @since 1.6.0
-	 *
 	 * @var boolean
 	 */
 	private $force;
@@ -60,20 +51,20 @@ class Read {
 	/**
 	 * Constructor
 	 *
-	 * @since 1.6.0
-	 *
-	 * @param array       $settings Computer Vision settings.
-	 * @param boolean     $force    Whether to force processing or not.
+	 * @param array   $settings      Computer Vision settings.
+	 * @param int     $attachment_id Attachment ID to process.
+	 * @param boolean $force         Whether to force processing or not.
 	 */
-	public function __construct( array $settings, bool $force = false ) {
-		$this->settings = $settings;
-		$this->force    = $force;
+	public function __construct( array $settings, $attachment_id, bool $force = false ) {
+		$this->settings      = $settings;
+		$this->attachment_id = $attachment_id;
+		$this->force         = $force;
 	}
 
 	/**
 	 * Builds the API url.
 	 *
-	 * @since 1.6.0
+	 * @param string $path Path to append to API URL.
 	 *
 	 * @return string
 	 */
@@ -84,18 +75,15 @@ class Read {
 	/**
 	 * Returns whether Read processing should be applied to the attachment
 	 *
-	 * @since 1.6.0
-	 *
-	 * @param int $attachment_id Attachment ID.
 	 * @return boolean
 	 */
-	public function should_process( int $attachment_id ) {
+	public function should_process() {
 		// Bypass check if this is a force request
 		if ( $this->force ) {
 			return true;
 		}
 
-		$mime_type          = get_post_mime_type( $attachment_id );
+		$mime_type          = get_post_mime_type( $this->attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
 
@@ -110,7 +98,6 @@ class Read {
 		/**
 		 * Filters whether to run Read processing on this attachment item
 		 *
-		 * @since 1.6.0
 		 * @hook classifai_read_should_process
 		 *
 		 * @param bool        $process       Whether to run OCR processing or not.
@@ -118,38 +105,45 @@ class Read {
 		 *
 		 * @return bool Whether this attachment should have OCR processing.
 		 */
-		return apply_filters( 'classifai_read_should_process', $process, $attachment_id );
+		return apply_filters( 'classifai_read_should_process', $process, $this->attachment_id );
 	}
 
 	/**
 	 * Run OCR processing using the Azure API
 	 *
-	 * @since 1.6.0
-	 *
-	 * @param int $attachment_id Attachment ID.
 	 * @return object|WP_Error
 	 */
-	public function scan_document( $attachment_id ) {
-		if ( ! $this->should_process( $attachment_id ) ) {
-			return $this->log( new WP_Error( 'processError', esc_html__( 'Document does not meet processing requirements.', 'classifai' ), $attachment_id ), $attachment_id );
+	public function scan_document() {
+		if ( ! $this->should_process( $this->attachment_id ) ) {
+			return $this->log( new WP_Error( 'processError', esc_html__( 'Document does not meet processing requirements.', 'classifai' ) ) );
 		}
 
-		$filesize = filesize( get_attached_file( $attachment_id ) );
+		$filesize = filesize( get_attached_file( $this->attachment_id ) );
 		if ( ! $filesize || $filesize > computer_vision_max_filesize() ) {
 			return $this->log( new WP_Error( 'sizeError', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (default to 4MB).', 'classifai' ), $metadata ), $attachment_id );
 		}
 
-		$request_args = apply_filters( 'classifai_read_request_args', [], $attachment_id );
+		/**
+		 * Filters the request arguments sent to Read endpoint.
+		 *
+		 * @hook classifai_read_should_process
+		 *
+		 * @param array $args       Whether to run OCR processing or not.
+		 * @param int   $attachment_id The attachment ID.
+		 *
+		 * @return array Filtered request arguments.
+		 */
+		$request_args = apply_filters( 'classifai_read_request_args', [], $this->attachment_id );
 
 		$url = add_query_arg(
 			$request_args,
 			$this->get_api_url( 'analyze' )
 		);
 
-		$document_url = wp_get_attachment_url( $attachment_id );
+		$document_url = wp_get_attachment_url( $this->attachment_id );
 
 		if ( ! $document_url ) {
-			return $this->log( new WP_Error( 'invalid_attachment', esc_html__( 'Document does not exist.', 'classifai' ), $attachment_id ), $attachment_id );
+			return $this->log( new WP_Error( 'invalid_attachment', esc_html__( 'Document does not exist.', 'classifai' ) ) );
 		}
 
 		$response = wp_remote_post(
@@ -178,31 +172,37 @@ class Read {
 		 * @param int The document ID.
 		 * @param string The document URL.
 		 */
-		do_action( 'classifai_read_after_request', $response, $url, $attachment_id, $document_url );
+		do_action( 'classifai_read_after_request', $response, $url, $this->attachment_id, $document_url );
 
 		if ( is_wp_error( $response ) ) {
-			return $response;
+			return $this->log( $response );
 		}
 
 		if ( 202 === wp_remote_retrieve_response_code( $response ) ) {
 			$operation_url = wp_remote_retrieve_header( $response, 'Operation-Location' );
 			if ( ! filter_var( $operation_url, FILTER_VALIDATE_URL ) ) {
-				return $this->log( new WP_Error( 'invalid_read_operation_url', esc_html__( 'Operation URL is invalid.', 'classifai' ), $attachment_id ), $attachment_id );
+				return $this->log( new WP_Error( 'invalid_read_operation_url', esc_html__( 'Operation URL is invalid.', 'classifai' ) ) );
 			}
-			return $this->check_read_result( $operation_url, $attachment_id );
+			return $this->check_read_result( $operation_url );
 		}
 
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		if ( empty( $body['error'] ) || empty( $body['error']['code'] ) || empty( $body['error']['message'] ) ) {
+			return $this->log( new WP_Error( 'unknown_read_error', esc_html__( 'Unknow Read error.', 'classifai' ) ) );
+		}
+
+		return $this->log( new WP_Error( $body['error']['code'], $body['error']['message'] ) );
 	}
 
 	/**
 	 * Use WP Cron to preodically check the status of the read operation.
-	 * 
+	 *
 	 * @param string $operation_url Operation URL for checking the read status.
-	 * @param int    $attachment_id Attachment ID.
-	 * 
+	 *
 	 * @return WP_Error|null|array
 	 */
-	public function check_read_result( $operation_url, $attachment_id ) {
+	public function check_read_result( $operation_url ) {
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( $operation_url );
 		} else {
@@ -224,23 +224,23 @@ class Read {
 			$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 			if ( empty( $body['status'] ) ) {
-				return $this->log( new WP_Error( 'invalid_read_result', esc_html__( 'Invalid read result.', 'classifai' ), $attachment_id ), $attachment_id );
+				return $this->log( new WP_Error( 'invalid_read_result', esc_html__( 'Invalid read result.', 'classifai' ) ) );
 			}
 
-			switch( $body['status'] ) {
+			switch ( $body['status'] ) {
 				case 'notStarted':
 				case 'running':
 					$retry_interval = apply_filters( 'classifai_read_retry_interval', MINUTE_IN_SECONDS );
-					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $attachment_id ] );
+					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $this->attachment_id ] );
 					break;
 				case 'failed':
-					return $this->log( new WP_Error( 'failed_read_request', esc_html__( 'The read operation has failed.', 'classifai' ), $attachment_id ), $attachment_id );
+					return $this->log( new WP_Error( 'failed_read_request', esc_html__( 'The read operation has failed.', 'classifai' ) ) );
 					break;
 				case 'succeeded':
-					return $this->update_document_description( $attachment_id, $body );
+					return $this->update_document_description( $body );
 					break;
 				default:
-					return $this->log( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid result status.', 'classifai' ), $attachment_id ), $attachment_id );
+					return $this->log( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid result status.', 'classifai' ) ) );
 					break;
 			}
 		}
@@ -248,32 +248,51 @@ class Read {
 
 	/**
 	 * Update document desctiption using text received from Read API.
-	 * 
-	 * @param int   $attachment_id Attachment ID.
+	 *
 	 * @param array $data          Read result.
-	 * 
+	 *
 	 * @return WP_Error|array
 	 */
-	public function update_document_description( $attachment_id, $data ) {
+	public function update_document_description( $data ) {
 		if ( empty( $data['analyzeResult'] ) || empty( $data['analyzeResult']['readResults'] ) ) {
-			return $this->log( new WP_Error( 'invalid_read_result', esc_html__( 'The Read result is invalid.', 'classifai' ), $attachment_id ), $attachment_id );
+			return $this->log( new WP_Error( 'invalid_read_result', esc_html__( 'The Read result is invalid.', 'classifai' ) ) );
 		}
 
+		/**
+		 * Filter the text max pages can be processed.
+		 *
+		 * @hook classifai_read_result_max_page
+		 *
+		 * @param int $max_page The attachment ID.
+		 *
+		 * @return int
+		 */
 		$max_page = min( apply_filters( 'classifai_read_result_max_page', 2 ), count( $data['analyzeResult']['readResults'] ) );
 
 		$lines_of_text = [];
 
 		for ( $page = 0; $page < $max_page; $page++ ) {
-			foreach( $data['analyzeResult']['readResults'][$page]['lines'] as $line ) {
+			foreach ( $data['analyzeResult']['readResults'][ $page ]['lines'] as $line ) {
 				$lines_of_text[] = $line['text'];
 			}
 		}
 
-		$lines_of_text = apply_filters( 'classifai_read_text_result', $lines_of_text, $attachment_id, $data );
+		/**
+		 * Filter the text result returned from Read API.
+		 *
+		 * @hook classifai_read_text_result
+		 *
+		 * @param array       $lines_of_text Array of text extracted from the response.
+		 * @param int         $attachment_id The attachment ID.
+		 * @param array       $data          Read result.
+		 *
+		 * @return array
+		 */
+		$lines_of_text = apply_filters( 'classifai_read_text_result', $lines_of_text, $this->attachment_id, $data );
 
 		$update = wp_update_post(
 			[
-				'ID'           => $attachment_id,
+				'ID'           => $this->attachment_id,
 				'post_content' => implode( ' ', $lines_of_text ),
 			]
 		);
@@ -287,11 +306,12 @@ class Read {
 
 	/**
 	 * Log error to metadata for troubleshooting.
-	 * 
-	 * @param WP_Error $error         WP_Error object.
-	 * @param int      $attachment_id Attachment ID.
+	 *
+	 * @param WP_Error $error WP_Error object.
 	 */
-	private function log( $error, $attachment_id ) {
-		update_post_meta( $attachment_id, '_classifai_read_pdf_log', $error->get_error_message() );
+	private function log( $error ) {
+		update_post_meta( $this->attachment_id, '_classifai_read_error', $error->get_error_message() );
+
+		return $error;
 	}
 }
