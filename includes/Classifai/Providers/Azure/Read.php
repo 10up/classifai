@@ -98,14 +98,14 @@ class Read {
 		/**
 		 * Filters whether to run Read processing on this attachment item
 		 *
-		 * @hook classifai_read_should_process
+		 * @hook classifai_azure_read_should_process
 		 *
 		 * @param bool        $process       Whether to run OCR processing or not.
 		 * @param int         $attachment_id The attachment ID.
 		 *
 		 * @return bool Whether this attachment should have OCR processing.
 		 */
-		return apply_filters( 'classifai_read_should_process', $process, $this->attachment_id );
+		return apply_filters( 'classifai_azure_read_should_process', $process, $this->attachment_id );
 	}
 
 	/**
@@ -126,14 +126,14 @@ class Read {
 		/**
 		 * Filters the request arguments sent to Read endpoint.
 		 *
-		 * @hook classifai_read_should_process
+		 * @hook classifai_azure_read_should_process
 		 *
 		 * @param array $args       Whether to run OCR processing or not.
 		 * @param int   $attachment_id The attachment ID.
 		 *
 		 * @return array Filtered request arguments.
 		 */
-		$request_args = apply_filters( 'classifai_read_request_args', [], $this->attachment_id );
+		$request_args = apply_filters( 'classifai_azure_read_request_args', [], $this->attachment_id );
 
 		$url = add_query_arg(
 			$request_args,
@@ -165,14 +165,14 @@ class Read {
 		 * Fires after the request to the read endpoint has run.
 		 *
 		 * @since 1.5.0
-		 * @hook classifai_read_after_request
+		 * @hook classifai_azure_read_after_request
 		 *
 		 * @param array|WP_Error Response data or a WP_Error if the request failed.
 		 * @param string The request URL with query args added.
 		 * @param int The document ID.
 		 * @param string The document URL.
 		 */
-		do_action( 'classifai_read_after_request', $response, $url, $this->attachment_id, $document_url );
+		do_action( 'classifai_azure_read_after_request', $response, $url, $this->attachment_id, $document_url );
 
 		if ( is_wp_error( $response ) ) {
 			return $this->log_error( $response );
@@ -230,7 +230,8 @@ class Read {
 			switch ( $body['status'] ) {
 				case 'notStarted':
 				case 'running':
-					$retry_interval = apply_filters( 'classifai_read_retry_interval', MINUTE_IN_SECONDS );
+					$this->update_status( $body );
+					$retry_interval = apply_filters( 'classifai_azure_read_retry_interval', MINUTE_IN_SECONDS );
 					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $this->attachment_id ] );
 					break;
 				case 'failed':
@@ -261,13 +262,13 @@ class Read {
 		/**
 		 * Filter the text max pages can be processed.
 		 *
-		 * @hook classifai_read_result_max_page
+		 * @hook classifai_azure_read_result_max_page
 		 *
 		 * @param int $max_page The attachment ID.
 		 *
 		 * @return int
 		 */
-		$max_page = min( apply_filters( 'classifai_read_result_max_page', 2 ), count( $data['analyzeResult']['readResults'] ) );
+		$max_page = min( apply_filters( 'classifai_azure_read_result_max_page', 2 ), count( $data['analyzeResult']['readResults'] ) );
 
 		$lines_of_text = [];
 
@@ -280,7 +281,7 @@ class Read {
 		/**
 		 * Filter the text result returned from Read API.
 		 *
-		 * @hook classifai_read_text_result
+		 * @hook classifai_azure_read_text_result
 		 *
 		 * @param array       $lines_of_text Array of text extracted from the response.
 		 * @param int         $attachment_id The attachment ID.
@@ -288,7 +289,7 @@ class Read {
 		 *
 		 * @return array
 		 */
-		$lines_of_text = apply_filters( 'classifai_read_text_result', $lines_of_text, $this->attachment_id, $data );
+		$lines_of_text = apply_filters( 'classifai_azure_read_text_result', $lines_of_text, $this->attachment_id, $data );
 
 		$update = wp_update_post(
 			[
@@ -301,7 +302,7 @@ class Read {
 			return $this->log_error( $update );
 		}
 
-		update_post_meta( $this->attachment_id, '_classifai_read_status', $data );
+		$this->update_status( $data );
 	}
 
 	/**
@@ -310,8 +311,21 @@ class Read {
 	 * @param WP_Error $error WP_Error object.
 	 */
 	private function log_error( $error ) {
-		update_post_meta( $this->attachment_id, '_classifai_read_error', $error->get_error_message() );
+		update_post_meta( $this->attachment_id, '_classifai_azure_read_error', $error->get_error_message() );
 
 		return $error;
+	}
+
+	/**
+	 * Log the status of read process to database.
+	 *
+	 * @param array $data Response body of the read result.
+	 *
+	 * @see https://centraluseuap.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-2/operations/5d9869604be85dee480c8750
+	 */
+	private function update_status( $data ) {
+		update_post_meta( $this->attachment_id, '_classifai_azure_read_status', $data );
+
+		return $data;
 	}
 }
