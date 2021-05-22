@@ -109,7 +109,7 @@ class Read {
 	}
 
 	/**
-	 * Run OCR processing using the Azure API
+	 * Scan the document using the Azure Read API
 	 *
 	 * @return object|WP_Error
 	 */

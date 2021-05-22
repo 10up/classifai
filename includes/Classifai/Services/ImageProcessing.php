@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use Classifai\Taxonomy\ImageTagTaxonomy;
+use function Classifai\attachment_is_pdf;
 
 class ImageProcessing extends Service {
 
@@ -48,7 +49,25 @@ class ImageProcessing extends Service {
 	 * @param \WP_post $post        Post object for the attachment being viewed.
 	 */
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
-		$settings        = get_option( 'classifai_computer_vision' );
+		$settings = get_option( 'classifai_computer_vision' );
+
+		if ( attachment_is_pdf( $post ) ) {
+			$read_text   = empty( get_the_content( null, false, $post ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+			$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
+			if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
+				$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
+			} else {
+				$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
+			}
+
+			$form_fields['rescan_pdf'] = [
+				'label'        => __( 'Classifai Read PDF', 'classifai' ),
+				'input'        => 'html',
+				'html'         => $html,
+				'show_in_edit' => false,
+			];
+		}
+
 		if ( wp_attachment_is_image( $post ) ) {
 			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
@@ -132,6 +151,17 @@ class ImageProcessing extends Service {
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
 				'args'                => [ 'route' => 'smart-crop' ],
+				'permission_callback' => '__return_true',
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1',
+			'read-pdf/(?P<id>\d+)',
+			[
+				'methods'             => 'GET',
+				'callback'            => [ $this, 'provider_endpoint_callback' ],
+				'args'                => [ 'route' => 'read-pdf' ],
 				'permission_callback' => '__return_true',
 			]
 		);
