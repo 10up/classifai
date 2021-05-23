@@ -874,7 +874,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_read_pdf'],
 				'description'   => __(
-					'Extracting visible text multi-page PDF documents. Store the result as the attachment description.',
+					'Extract visible text from multi-pages PDF documents. Store the result as the attachment description.',
 					'classifai'
 				),
 			]
