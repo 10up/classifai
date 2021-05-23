@@ -109,11 +109,11 @@ class Read {
 	}
 
 	/**
-	 * Scan the document using the Azure Read API
+	 * Call the Azure Read API.
 	 *
 	 * @return object|WP_Error
 	 */
-	public function scan_document() {
+	public function read_document() {
 		if ( ! $this->should_process( $this->attachment_id ) ) {
 			return $this->log_error( new WP_Error( 'processError', esc_html__( 'Document does not meet processing requirements.', 'classifai' ) ) );
 		}

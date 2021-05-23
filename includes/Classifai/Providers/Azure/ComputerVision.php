@@ -655,7 +655,7 @@ class ComputerVision extends Provider {
 
 		$read = new Read( $settings, intval( $attachment_id ) );
 
-		return $read->scan_document();
+		return $read->read_document();
 	}
 
 	/**

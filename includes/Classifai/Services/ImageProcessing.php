@@ -51,8 +51,8 @@ class ImageProcessing extends Service {
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
 		$settings = get_option( 'classifai_computer_vision' );
 
-		if ( attachment_is_pdf( $post ) ) {
-			$read_text   = empty( get_the_content( null, false, $post ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+		if ( attachment_is_pdf( $post ) && $settings && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+			$read_text   = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
 			if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
 				$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
