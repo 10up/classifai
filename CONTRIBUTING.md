@@ -24,21 +24,22 @@ For more on how 10up writes and manages code, check out our [10up Engineering Be
 
 ## Workflow
 
-The `develop` branch is the development branch which means it contains the next version to be released. `stable` contains the current latest release and `master` contains the corresponding stable development version. Always work on the `develop` branch and open up PRs against `develop`.
+The `develop` branch is the development branch which means it contains the next version to be released. `stable` contains the current latest release and `trunk` contains the corresponding stable development version. Always work on the `develop` branch and open up PRs against `develop`.
 
 ## Release instructions
 
 1. Branch: Starting from `develop`, cut a release branch named `release/X.Y.Z` for your changes.
-2. Version bump: Bump the version number in `classifai.php`, `config.php`, `package-lock.json`, `package.json`, and `classifai.pot` if it does not already reflect the version being released.
-3. Changelog: Add/update the changelog in `CHANGELOG.md`.
-4. Translations: Update the `.pot` file by running `npm run makepot`.
-5. Props: update `CREDITS.md` file with any new contributors, confirm maintainers are accurate.
-6. New files: Check to be sure any new files/paths that are unnecessary in the production version are included in `.github/action-release/rsync-filter.txt`.
-7. Readme updates: Make any other readme changes as necessary in `CHANGELOG.md` and `README.md`.
-8. Merge: Make a non-fast-forward merge from your release branch to `develop` (or merge the pull request), then do the same for `develop` into `master` (`git checkout master && git merge --no-ff develop`). `master` contains the stable development version.
-9. Push: Push your master branch to GitHub (e.g. `git push origin master`).
-10. [Wait for build](https://xkcd.com/303/): Head to the [Actions](https://github.com/10up/classifai/actions) tab in the repo and wait for it to finish if it hasn't already. If it doesn't succeed, figure out why and start over.
-11. Check the build: Check out the `stable` branch and test for functionality locally.
-12. Release: Create a [new release](https://github.com/10up/classifai/releases/new), naming the tag and the release with the new version number, and targeting the `stable` branch. Paste the changelog from `CHANGELOG.md` into the body of the release and include a link to the closed issues on the [X.Y.Z milestone](https://github.com/10up/classifai/milestone/#?closed=1).  The release should now appear under [releases](https://github.com/10up/classifai/releases) and in the WordPress admin as an update as well.
-13. Close milestone: Edit the [X.Y.Z milestone](https://github.com/10up/classifai/milestone/#) with release date (in the `Due date (optional)` field) and link to GitHub release (in the `Description field`), then close the milestone.
-14. Punt incomplete items: If any open issues or PRs which were milestoned for `X.Y.Z` do not make it into the release, update their milestone to `X.Y.Z+1`, `X.Y+1.0`, `X+1.0.0` or `Future Release`.
+1. Version bump: Bump the version number in `classifai.php`, `config.php`, `package-lock.json`, `package.json`, and `classifai.pot` if it does not already reflect the version being released.
+1. Changelog: Add/update the changelog in `CHANGELOG.md`.
+1. Translations: Update the `.pot` file by running `npm run makepot`.
+1. Props: update `CREDITS.md` file with any new contributors, confirm maintainers are accurate.
+1. New files: Check to be sure any new files/paths that are unnecessary in the production version are included in `.github/action-release/rsync-filter.txt`.
+1. Readme updates: Make any other readme changes as necessary in `CHANGELOG.md` and `README.md`.
+1. Merge: Make a non-fast-forward merge from your release branch to `develop` (or merge the pull request), then do the same for `develop` into `trunk` (`git checkout trunk && git merge --no-ff develop`). `trunk` contains the stable development version.
+1. Push: Push your trunk branch to GitHub (e.g. `git push origin trunk`).
+1. [Wait for build](https://xkcd.com/303/): Head to the [Actions](https://github.com/10up/classifai/actions) tab in the repo and wait for it to finish if it hasn't already. If it doesn't succeed, figure out why and start over.
+1. Check the build: Check out the `stable` branch and test for functionality locally.
+1. Release: Create a [new release](https://github.com/10up/classifai/releases/new), naming the tag and the release with the new version number, and targeting the `stable` branch. Paste the changelog from `CHANGELOG.md` into the body of the release and include a link to the closed issues on the [X.Y.Z milestone](https://github.com/10up/classifai/milestone/#?closed=1).  The release should now appear under [releases](https://github.com/10up/classifai/releases) and in the WordPress admin as an update as well.
+1. Close milestone: Edit the [X.Y.Z milestone](https://github.com/10up/classifai/milestone/#) with release date (in the `Due date (optional)` field) and link to GitHub release (in the `Description field`), then close the milestone.
+1. Punt incomplete items: If any open issues or PRs which were milestoned for `X.Y.Z` do not make it into the release, update their milestone to `X.Y.Z+1`, `X.Y+1.0`, `X+1.0.0` or `Future Release`.
+1. Version bump (again): In the `develop` branch (`cd ../ && git checkout develop`) bump the version number in `classifai.php` to `X.Y.(Z+1)-dev`. It's okay if the next release might be a different version number; that change can be handled right before release in the first step, as might also be the case with `@since` annotations.

@@ -52,6 +52,10 @@ class TaxonomyFactoryTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_connects_watson_taxonomies_to_post_type() {
+		add_filter( 'classifai_post_types', function() {
+			return [ 'post' ];
+		} );
+
 		$this->factory->build_all();
 
 		$actual = get_object_taxonomies( 'post' );

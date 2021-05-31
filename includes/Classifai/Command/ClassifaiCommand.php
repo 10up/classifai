@@ -7,11 +7,13 @@ use Classifai\Watson\Classifier;
 use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\Azure\SmartCropping;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
  * It provides subcommands to test classification results and batch
- * classify posts using the IBM Watson NLU API.
+ * classify posts using the IBM Watson NLU API and images using the
+ * Azure AI Computer Vision API.
  */
 class ClassifaiCommand extends \WP_CLI_Command {
 	// @vipcs - We recommend extending `WPCOM_VIP_CLI_Command` instead of `WP_CLI_Command` and using the helper functions available in it (such as `stop_the_insanity()`), see https://vip.wordpress.com/documentation/writing-bin-scripts/ for more information.
@@ -254,8 +256,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$limit_total = min( $total, intval( $opts['limit'] ) );
 		}
 
-		$errors       = [];
-		$message      = "Classifying $limit_total images ...";
+		$errors  = [];
+		$message = "Classifying $limit_total images ...";
+
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
 
 		for ( $index = 0; $index < $limit_total; $index++ ) {
@@ -279,6 +282,104 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		foreach ( $errors as $attachment_id => $error ) {
 			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 		}
+	}
+
+	/**
+	 * Batch crop image(s).
+	 *
+	 * ## Options
+	 *
+	 * [<attachment_ids>]
+	 * : Comma delimited Attachment IDs to crop.
+	 *
+	 * [--limit=<limit>]
+	 * : Limit cropping to N attachments. Default 100.
+	 *
+	 * [--skip=<skip>]
+	 * : Skip first N attachments. Default false.
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function crop( $args = [], $opts = [] ) {
+		$classifier     = new ComputerVision( false );
+		$settings       = $classifier->get_settings();
+		$smart_cropping = new SmartCropping( $settings );
+		$default_opts   = [
+			'limit' => false,
+		];
+
+		$opts = wp_parse_args( $opts, $default_opts );
+
+		if ( ! empty( $args[0] ) ) {
+			$attachment_ids = explode( ',', $args[0] );
+		} else {
+			$attachment_ids = $this->get_attachment_to_classify( array_merge( $opts, [ 'force' => true ] ) );
+		}
+
+		$total = count( $attachment_ids );
+
+		if ( empty( $total ) ) {
+			return \WP_CLI::log( 'No images to crop.' );
+		}
+
+		$limit_total = $total;
+		if ( $opts['limit'] ) {
+			$limit_total = min( $total, intval( $opts['limit'] ) );
+		}
+
+		$errors  = [];
+		$message = "Cropping $limit_total images ...";
+
+		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
+
+		for ( $index = 0; $index < $limit_total; $index++ ) {
+			$attachment_id = $attachment_ids[ $index ];
+
+			$progress_bar->tick();
+
+			$current_meta = wp_get_attachment_metadata( $attachment_id );
+
+			foreach ( $current_meta['sizes'] as $size => $size_data ) {
+				if ( ! $smart_cropping->should_crop( $size ) ) {
+					continue;
+				}
+
+				$data = [
+					'width'  => $size_data['width'],
+					'height' => $size_data['height'],
+				];
+
+				$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
+
+				if ( is_wp_error( $smart_thumbnail ) ) {
+					$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
+				}
+			}
+		}
+
+		$progress_bar->finish();
+
+		$total_errors  = count( $errors );
+		$total_success = $total - $total_errors;
+
+		foreach ( $errors as $attachment_id => $error ) {
+			\WP_CLI::log(
+				sprintf(
+					'%1$s: %2$s (%3$s).',
+					$attachment_id,
+					$error->get_error_message(),
+					$error->get_error_code()
+				)
+			);
+		}
+
+		if ( $total_success > 0 ) {
+			\WP_CLI::success( "Cropped $total_success images, $total_errors errors." );
+		} else {
+			\WP_CLI::error( "Cropped $total_success images, $total_errors errors." );
+		}
+
 	}
 
 	/**
@@ -392,12 +493,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			];
 		}
 
-		\WP_CLI::log( 'Fetching images to classify ...' );
+		\WP_CLI::log( 'Fetching images ...' );
 
 		$query = new \WP_Query( $query_params );
 		$images = $query->posts;
 
-		\WP_CLI::log( 'Fetching images to classify ... DONE (' . count( $images ) . ')' );
+		\WP_CLI::log( 'Fetching images ... DONE (' . count( $images ) . ')' );
 
 		return $images;
 	}
