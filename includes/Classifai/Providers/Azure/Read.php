@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides OCR detection with the Computer Vision service.
+ * Scan PDF files to extract visible text with the Computer Vision Read service.
  *
  * @since 1.6.1
  * @package Classifai
@@ -196,7 +196,7 @@ class Read {
 	}
 
 	/**
-	 * Use WP Cron to preodically check the status of the read operation.
+	 * Use WP Cron to periodically check the status of the read operation.
 	 *
 	 * @param string $operation_url Operation URL for checking the read status.
 	 *
