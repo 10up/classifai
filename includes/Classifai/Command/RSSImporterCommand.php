@@ -12,6 +12,7 @@ require_once ABSPATH . 'wp-admin/includes/image.php';
  *
  * For development use only.
  */
+// phpcs:ignore WordPressVIPMinimum.Classes.RestrictedExtendClasses.wp_cli
 class RSSImporterCommand extends \WP_CLI_Command {
 
 	/**
@@ -200,10 +201,10 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		}
 
 		$options['headers']['x-api-key'] = MERCURY_PARSER_API_KEY;
-		$options['timeout']              = 60;
+		$options['timeout']              = 60; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 
 		$request_url = 'https://mercury.postlight.com/parser?url=' . urlencode( $url );
-		$response    = wp_remote_get( $request_url, $options );
+		$response    = wp_remote_get( $request_url, $options ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
