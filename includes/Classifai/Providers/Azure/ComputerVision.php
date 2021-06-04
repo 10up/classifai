@@ -267,17 +267,17 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
+		if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'alt-tags';
-		} else if ( filter_input( INPUT_POST, 'rescan-tags' ) ) {
+		} else if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'image-tags';
-		} else if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) ) {
+		} else if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'smart-crop';
 		}
 
 		if ( in_array( 'smart-crop', $routes, true ) ) {
 			// Are we smart cropping the image?
-			if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) && ! empty( $metadata ) ) {
+			if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) && ! empty( $metadata ) ) {
 				$this->smart_crop_image( $metadata, $attachment_id );
 			}
 		} else {
@@ -285,18 +285,18 @@ class ComputerVision extends Provider {
 
 			if ( ! is_wp_error( $image_scan ) ) {
 				// Are we updating the captions?
-				if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+				if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) && isset( $image_scan->description->captions ) ) {
 					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 				}
 				// Are we updating the tags?
-				if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+				if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) && isset( $image_scan->tags ) ) {
 					$this->generate_image_tags( $image_scan->tags, $attachment_id );
 				}
 			}
 		}
 
 		// Are we updating the OCR text?
-		if ( filter_input( INPUT_POST, 'rescan-ocr' ) ) {
+		if ( filter_input( INPUT_POST, 'rescan-ocr', FILTER_SANITIZE_STRING ) ) {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 	}
