@@ -104,7 +104,7 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : $this->provider_classes[0]->get_settings_section();
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="wrap">
 			<h2><?php echo esc_html( $this->display_name ); ?></h2>

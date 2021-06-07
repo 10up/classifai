@@ -328,7 +328,7 @@ class ServicesManager {
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
-				'timeout' => 10,
+				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'    => [
 					'license_key' => $license_key,
 					'email'       => $email,

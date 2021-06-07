@@ -122,7 +122,7 @@ class Classifier {
 			];
 		}
 
-		return json_encode( $options );
+		return wp_json_encode( $options );
 	}
 
 }

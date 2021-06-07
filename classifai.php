@@ -87,7 +87,7 @@ function classifai_can_autoload() {
 	if ( file_exists( classifai_autoloader() ) ) {
 		return true;
 	} else {
-		error_log(
+		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			sprintf( esc_html__( 'Fatal Error: Composer not setup in %', 'classifai' ), CLASSIFAI_PLUGIN_DIR )
 		);
 
@@ -138,7 +138,7 @@ function classifai_autorun() {
 			try {
 				\WP_CLI::error( get_error_install_message() );
 			} catch ( \WP_CLI\ExitException $e ) {
-				error_log( $e->getMessage() );
+				error_log( $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 		}
 
@@ -152,7 +152,7 @@ function classifai_autorun() {
  */
 function classifai_autoload_notice() {
 	printf( '<div class="%1$s"><p>%2$s</p></div>', 'notice notice-error', get_error_install_message() ); // @codingStandardsIgnoreLine Text is escaped in calling function already.
-	error_log( get_error_install_message() );
+	error_log( get_error_install_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 }
 
 
