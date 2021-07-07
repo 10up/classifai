@@ -2,6 +2,7 @@
 /**
  * Plugin Name:     ClassifAI
  * Plugin URI:      https://github.com/10up/classifai
+ * Update URI:      https://classifaiplugin.com
  * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
  * Version:         1.6.0
  * Author:          10up
