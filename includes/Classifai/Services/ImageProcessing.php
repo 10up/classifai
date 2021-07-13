@@ -96,7 +96,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'alt-tags' ],
+				'args'                => [ 'route' => [ 'alt-tags' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -107,7 +107,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'image-tags' ],
+				'args'                => [ 'route' => [ 'image-tags' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -118,7 +118,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'ocr' ],
+				'args'                => [ 'route' => [ 'ocr' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -129,7 +129,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'smart-crop' ],
+				'args'                => [ 'route' => [ 'smart-crop' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
@@ -146,7 +146,7 @@ class ImageProcessing extends Service {
 		$response          = true;
 		$attachment_id     = $request->get_param( 'id' );
 		$custom_attributes = $request->get_attributes();
-		$route_to_call     = isset( $custom_attributes['args'] ) && isset( $custom_attributes['args']['route'] ) ? $custom_attributes['args']['route'] : false;
+		$route_to_call     = empty( $custom_attributes['args']['route'] ) ? false : $custom_attributes['args']['route'][0];
 
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
