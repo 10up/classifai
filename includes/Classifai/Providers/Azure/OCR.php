@@ -29,7 +29,7 @@ class OCR {
 	 *
 	 * @var string
 	 */
-	const API_PATH = 'vision/v3.1/ocr/';
+	const API_PATH = 'vision/v3.2/ocr/';
 
 	/**
 	 * ComputerVision settings.
