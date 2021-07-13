@@ -146,7 +146,7 @@ class ImageProcessing extends Service {
 		$response          = true;
 		$attachment_id     = $request->get_param( 'id' );
 		$custom_attributes = $request->get_attributes();
-		$route_to_call     = isset( $custom_attributes['args'] ) && isset( $custom_attributes['args']['route'] ) ? $custom_attributes['args']['route'] : false;
+		$route_to_call     = empty( $custom_attributes['args']['route'] ) ? false : $custom_attributes['args']['route'][0];
 
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
