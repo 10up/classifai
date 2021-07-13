@@ -292,58 +292,50 @@ class SavePostHandler {
 			return $request_failed;
 		}
 
-		// Setup result for successful processing.
-		$result = [
-			'success' => true,
-		];
-
 		$categories = [];
 		$keywords   = [];
 		$concepts   = [];
 		$entities   = [];
 
 		if ( \Classifai\get_feature_enabled( 'category' ) ) {
-			$category_taxonomy = \Classifai\get_feature_taxonomy( 'category' );
-			$categories_objs   = wp_get_object_terms( $current_post_id, $category_taxonomy );
-			$categories_objs   = is_wp_error( $categories_objs ) ? [] : $categories_objs;
+			$categories_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			$categories_objs = is_wp_error( $categories_objs ) ? [] : $categories_objs;
 			foreach ( $categories_objs as $categories_obj ) {
 				$categories[ $categories_obj->term_id ] = $categories_obj->name;
 			}
-
-			$result[ $category_taxonomy ] = $categories;
 		}
 
 		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-			$keyword_taxonomy = \Classifai\get_feature_taxonomy( 'keyword' );
-			$keywords_objs    = wp_get_object_terms( $current_post_id, $keyword_taxonomy );
-			$keywords_objs    = is_wp_error( $keywords_objs ) ? [] : $keywords_objs;
+			$keywords_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			$keywords_objs = is_wp_error( $keywords_objs ) ? [] : $keywords_objs;
 			foreach ( $keywords_objs as $keywords_obj ) {
 				$keywords[ $keywords_obj->term_id ] = $keywords_obj->name;
 			}
-			$result[ $keyword_taxonomy ] = $keywords;
 		}
 
 		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-			$concept_taxonomy = \Classifai\get_feature_taxonomy( 'concept' );
-			$concepts_objs    = wp_get_object_terms( $current_post_id, $concept_taxonomy );
-			$concepts_objs    = is_wp_error( $concepts_objs ) ? [] : $concepts_objs;
+			$concepts_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			$concepts_objs = is_wp_error( $concepts_objs ) ? [] : $concepts_objs;
 			foreach ( $concepts_objs as $concepts_obj ) {
 				$concepts[ $concepts_obj->term_id ] = $concepts_obj->name;
 			}
-			$result[ $concept_taxonomy ] = $concepts;
 		}
 
 		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-			$entity_taxonomy = \Classifai\get_feature_taxonomy( 'entity' );
-			$entities_objs   = wp_get_object_terms( $current_post_id, $entity_taxonomy );
-			$entities_objs   = is_wp_error( $entities_objs ) ? [] : $entities_objs;
+			$entities_objs = wp_get_object_terms( $current_post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			$entities_objs = is_wp_error( $entities_objs ) ? [] : $entities_objs;
 			foreach ( $entities_objs as $entities_obj ) {
 				$entities[ $entities_obj->term_id ] = $entities_obj->name;
 			}
-			$result[ $entity_taxonomy ] = $entities;
 		}
 
-		return $result;
+		return [
+			'success'         => true,
+			'watson-category' => $categories,
+			'watson-keyword'  => $keywords,
+			'watson-concept'  => $concepts,
+			'watson-entity'   => $entities,
+		];
 	}
 
 	/**
