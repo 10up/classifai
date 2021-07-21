@@ -44,9 +44,10 @@
 			);
 	};
 
-	$( document ).ready( function() {
+	$( window ).load( function() {
+
 		if ( wp.media.frame ) {
-			wp.media.frame.on( 'edit:attachment', () => {
+			wp.media.frame.on( 'selection:toggle', () => {
 
 				const altTagsButton = document.getElementById( 'classifai-rescan-alt-tags' );
 				const imageTagsButton = document.getElementById( 'classifai-rescan-image-tags' );
@@ -60,8 +61,10 @@
 							endpoint: '/classifai/v1/alt-tags/',
 							callback: resp => {
 								if ( resp ) {
-									const textField = document.getElementById( 'attachment-details-two-column-alt-text' );
-									textField.value = resp;
+									const textField = document.getElementById( 'attachment-details-two-column-alt-text' ) ?? document.getElementById( 'attachment-details-alt-text' );
+									if ( textField ) {
+										textField.value = resp;
+									}
 								}
 							}
 						}
@@ -84,8 +87,10 @@
 							endpoint: '/classifai/v1/ocr/',
 							callback: resp => {
 								if ( resp ) {
-									const textField = document.getElementById( 'attachment-details-two-column-description' );
-									textField.value = resp;
+									const textField = document.getElementById( 'attachment-details-two-column-description' ) ?? document.getElementById( 'attachment-details-description' );
+									if ( textField ) {
+										textField.value = resp;
+									}
 								}
 							}
 						}
