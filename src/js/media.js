@@ -44,6 +44,9 @@
 			);
 	};
 
+	/**
+	 * Handle click events for Image Processing buttons added to media modal.
+	 */
 	const handleButtonsClick = () => {
 		const altTagsButton = document.getElementById( 'classifai-rescan-alt-tags' );
 		const imageTagsButton = document.getElementById( 'classifai-rescan-image-tags' );
@@ -101,11 +104,16 @@
 				}
 			) );
 		}
-	}
+	};
 
-	$( window ).load( function() {
+	$( document ).ready( function() {
+		if ( wp.media ) {
+			wp.media.view.Modal.prototype.on( 'open', function() {
+				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
+			} );
+		}
+
 		if ( wp.media.frame ) {
-			wp.media.frame.on( 'selection:toggle', handleButtonsClick );
 			wp.media.frame.on( 'edit:attachment', handleButtonsClick );
 		}
 	} );
