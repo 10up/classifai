@@ -329,8 +329,15 @@ class OCR {
 		if ( ! is_wp_error( $response ) ) {
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-			if ( 200 !== wp_remote_retrieve_response_code( $response ) && isset( $body->message ) ) {
+			if ( isset( $body->message ) ) {
+				$error_message = $body->message;
+			} else if ( isset( $body->error->message ) ) {
+				$error_message = $body->error->message;
+			} else {
+				$error_message = false;
+			}
 
+			if ( 200 !== wp_remote_retrieve_response_code( $response ) && $error_message ) {
 				/**
 				 * Fires when the ocr API response did not succeed.
 				 *
@@ -342,7 +349,7 @@ class OCR {
 				 */
 				do_action( 'classifai_ocr_unsuccessful_response', $response, $url );
 
-				$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
+				$rtn = new WP_Error( $body->code ?? 'error', $error_message, $body );
 			} else {
 				$rtn = $body;
 			}
