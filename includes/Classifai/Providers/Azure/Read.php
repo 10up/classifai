@@ -120,7 +120,7 @@ class Read {
 
 		$filesize = filesize( get_attached_file( $this->attachment_id ) );
 		if ( ! $filesize || $filesize > computer_vision_max_filesize() ) {
-			return $this->log_error( new WP_Error( 'sizeError', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (default to 4MB).', 'classifai' ), $metadata ), $attachment_id );
+			return $this->log_error( new WP_Error( 'sizeError', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (defaults to 4MB).', 'classifai' ), $metadata ), $attachment_id );
 		}
 
 		/**
@@ -189,7 +189,7 @@ class Read {
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( empty( $body['error'] ) || empty( $body['error']['code'] ) || empty( $body['error']['message'] ) ) {
-			return $this->log_error( new WP_Error( 'unknown_read_error', esc_html__( 'Unknow Read error.', 'classifai' ) ) );
+			return $this->log_error( new WP_Error( 'unknown_read_error', esc_html__( 'Unknown Read error.', 'classifai' ) ) );
 		}
 
 		return $this->log_error( new WP_Error( $body['error']['code'], $body['error']['message'] ) );
@@ -224,7 +224,7 @@ class Read {
 			$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 			if ( empty( $body['status'] ) ) {
-				return $this->log_error( new WP_Error( 'invalid_read_result', esc_html__( 'Invalid read result.', 'classifai' ) ) );
+				return $this->log_error( new WP_Error( 'invalid_read_result', esc_html__( 'Invalid Read result.', 'classifai' ) ) );
 			}
 
 			switch ( $body['status'] ) {
@@ -235,13 +235,13 @@ class Read {
 					wp_schedule_single_event( time() + $retry_interval, 'classifai_retry_get_read_result', [ $operation_url, $this->attachment_id ] );
 					break;
 				case 'failed':
-					return $this->log_error( new WP_Error( 'failed_read_request', esc_html__( 'The read operation has failed.', 'classifai' ) ) );
+					return $this->log_error( new WP_Error( 'failed_read_request', esc_html__( 'The Read operation has failed.', 'classifai' ) ) );
 					break;
 				case 'succeeded':
 					return $this->update_document_description( $body );
 					break;
 				default:
-					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid result status.', 'classifai' ) ) );
+					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid Read result status.', 'classifai' ) ) );
 					break;
 			}
 		}

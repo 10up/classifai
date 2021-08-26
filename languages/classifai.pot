@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClassifAI 1.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2021-08-26 23:13:00+00:00\n"
+"POT-Creation-Date: 2021-08-26 23:15:21+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -270,7 +270,7 @@ msgstr ""
 #: includes/Classifai/Providers/Azure/Read.php:123
 msgid ""
 "Document does not meet size requirements. Please ensure it is smaller than "
-"the maximum threshold (default to 4MB)."
+"the maximum threshold (defaults to 4MB)."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:146
@@ -282,19 +282,19 @@ msgid "Operation URL is invalid."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:192
-msgid "Unknow Read error."
+msgid "Unknown Read error."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:227
-msgid "Invalid read result."
+msgid "Invalid Read result."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:238
-msgid "The read operation has failed."
+msgid "The Read operation has failed."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:244
-msgid "Invalid result status."
+msgid "Invalid Read result status."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Read.php:259
