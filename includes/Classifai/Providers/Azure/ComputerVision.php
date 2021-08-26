@@ -229,12 +229,14 @@ class ComputerVision extends Provider {
 					<?php echo esc_html( $tags ); ?>
 				</label>
 			</div>
+		<?php if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
 			<div class="misc-pub-section">
 				<label for="rescan-ocr">
 					<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
 					<?php echo esc_html( $ocr ); ?>
 				</label>
 			</div>
+		<?php endif; ?>
 		<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
 			<div class="misc-pub-section">
 				<label for="rescan-smart-crop">
