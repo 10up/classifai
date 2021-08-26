@@ -68,7 +68,7 @@ class Psr4AutoloaderClass {
 
 		// work backwards through the namespace names of the fully-qualified
 		// class name to find a mapped file name
-		while ( false !== $pos = strrpos( $prefix, '\\' ) ) {
+		while ( false !== $pos = strrpos( $prefix, '\\' ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 
 			// retain the trailing namespace separator in the prefix
 			$prefix = substr( $class, 0, $pos + 1 );
