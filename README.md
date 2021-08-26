@@ -23,7 +23,7 @@
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
-* Automatically scan images for embedded text and save for use in WordPress
+* Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
@@ -114,7 +114,11 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - In the `Endpoint URL` field, enter your `API endpoint`.
 - In the `API Key` field, enter your `KEY 1`.
 
-#### 3. Save Image to classify image
+#### 3. Enable specific Image Processing features
+- Choose to `Automatically Caption Images`, `Automatically Tag Images`, `Enable smart cropping`, and/or `Enable OCR`.
+- For features that have thresholds or taxonomy settings, set those as well.
+
+#### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
 ## WP CLI Commands
 
