@@ -12,8 +12,10 @@ use Classifai\Providers\Azure\SmartCropping;
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
  * It provides subcommands to test classification results and batch
- * classify posts using the IBM Watson NLU API.
+ * classify posts using the IBM Watson NLU API and images using the
+ * Azure AI Computer Vision API.
  */
+// phpcs:ignore WordPressVIPMinimum.Classes.RestrictedExtendClasses.wp_cli
 class ClassifaiCommand extends \WP_CLI_Command {
 
 
@@ -197,7 +199,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$result = $classifier->classify( $plain_text, $options );
 
 			if ( ! is_wp_error( $result ) ) {
-				\WP_CLI::log( json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+				\WP_CLI::log( wp_json_encode( $result, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 			} else {
 				\WP_CLI::log( 'Failed to classify text.' );
 				\WP_CLI::error( $result->get_error_message() );
@@ -291,7 +293,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * : Comma delimited Attachment IDs to crop.
 	 *
 	 * [--limit=<limit>]
-	 * : Limit classification to N attachments. Default 100.
+	 * : Limit cropping to N attachments. Default 100.
 	 *
 	 * [--skip=<skip>]
 	 * : Skip first N attachments. Default false.
@@ -476,7 +478,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! $opts['force'] ) {
-			$query_params['meta_query'] = [
+			$query_params['meta_query'] = [ // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				'relation' => 'OR',
 				[
 					'key'     => '_wp_attachment_image_alt',
@@ -493,7 +495,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		\WP_CLI::log( 'Fetching images ...' );
 
-		$query = new \WP_Query( $query_params );
+		$query  = new \WP_Query( $query_params );
 		$images = $query->posts;
 
 		\WP_CLI::log( 'Fetching images ... DONE (' . count( $images ) . ')' );
@@ -523,7 +525,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 */
 	private function print( $output, $post_id ) {
 		if ( ! is_wp_error( $output ) ) {
-			\WP_CLI::log( var_export( $output, true ) );
+			\WP_CLI::log( var_export( $output, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 		} else {
 			\WP_CLI::warning( "Failed to classify $post_id: " . $output->get_error_message() );
 		}
@@ -534,5 +536,5 @@ class ClassifaiCommand extends \WP_CLI_Command {
 try {
 	\WP_CLI::add_command( 'classifai', __NAMESPACE__ . '\\ClassifaiCommand' );
 } catch ( \Exception $e ) {
-	error_log( $e->getMessage() );
+	error_log( $e->getMessage() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 }

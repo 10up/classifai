@@ -83,11 +83,11 @@ class BulkActions {
 	 * Display an admin notice after classifying posts in bulk.
 	 */
 	public function bulk_action_admin_notice() {
-		if ( empty( $_REQUEST['bulk_classified'] ) ) {
+		if ( empty( $_REQUEST['bulk_classified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		$classified_posts_count = intval( $_REQUEST['bulk_classified'] );
+		$classified_posts_count = intval( $_REQUEST['bulk_classified'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';
 		$output .= sprintf(

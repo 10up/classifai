@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.7.0] - 2021-08-26
+### Added
+- Automated Optical Character Recognition (OCR) scanning of multi-page PDF files adding text content to media description field (props [@dinhtungdu](https://github.com/dinhtungdu), [@dkotter](https://github.com/dkotter), [@phpbits](https://github.com/phpbits) via [#282](https://github.com/10up/classifai/pull/282)).
+- ComputerVision::reset_settings() method (props [@ActuallyConnor](https://github.com/ActuallyConnor), [@dinhtungdu](https://github.com/dinhtungdu) via [#264](https://github.com/10up/classifai/pull/264)).
+- `Update URI` header to ensure only legitimate ClassifAI updates are applied to this install (props [@jeffpaul](https://github.com/jeffpaul) via [#290](https://github.com/10up/classifai/pull/290)).
+- Issue management automation via GitHub Actions (props [@jeffpaul](https://github.com/jeffpaul) via [#294](https://github.com/10up/classifai/pull/294)).
+
+### Changed
+- Update WP CLI command docs (props [@jeffpaul](https://github.com/jeffpaul) via [#259](https://github.com/10up/classifai/pull/259)).
+- Update WPCS configuration from 1.3.1 to 1.3.2 (props [@dinhtungdu](https://github.com/dinhtungdu) via [#291](https://github.com/10up/classifai/pull/291)).
+- Updated plugin icon, added banner (props [@blancahong](https://profiles.wordpress.org/blancahong/) via [#293](https://github.com/10up/classifai/pull/293)).
+- Bump WordPress version "tested up to" 5.8 (props [@phpbits](https://github.com/phpbits), [@barneyjeffries](https://github.com/barneyjeffries) via [#302](https://github.com/10up/classifai/pull/302)).
+
+### Fixed
+- WordPress 5.6 `array_intersect_key` error (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu) via [#263](https://github.com/10up/classifai/pull/263)).
+- WordPress 5.7 OCR block compatibility issue (props [@dinhtungdu](https://github.com/dinhtungdu), [@helen](https://github.com/helen) via [#275](https://github.com/10up/classifai/pull/275)).
+- Update hooks priority for `wp_generate_attachment_metadata` to work with cloud storage providers (props [@thrijith](https://github.com/thrijith) via [#271](https://github.com/10up/classifai/pull/271)).
+- Move `classifai_generate_image_alt_tags_source_url` filter to helper function (props [@thrijith](https://github.com/thrijith) via [#271](https://github.com/10up/classifai/pull/271)).
+- Use `get_modified_image_source_url` where rescanning is done local file (props [@thrijith](https://github.com/thrijith) via [#271](https://github.com/10up/classifai/pull/271)).
+- Updates to pass VIPCS check (props [@dinhtungdu](https://github.com/dinhtungdu), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#287](https://github.com/10up/classifai/pull/287)).
+- JavaScript error in Block Editor when ClassifAI has not been set up correctly (props [@junaidbhura](https://github.com/junaidbhura), [@dinhtungdu](https://github.com/dinhtungdu) via [#286](https://github.com/10up/classifai/pull/286)).
+- Ensure Image Processing buttons in the media modal work when editing posts (props [@dinhtungdu](https://github.com/dinhtungdu), [@helen](https://github.com/helen) via [#295](https://github.com/10up/classifai/pull/295)).
+- Hides the Scan Text checkbox field on the media edit page when OCR is disabled (props [@Sidsector9](https://github.com/Sidsector9), [@myBCN](https://github.com/myBCN), [@jeffpaul](https://github.com/jeffpaul) via [#299](https://github.com/10up/classifai/pull/299)).
+- Issues with error messages not being displayed for 'Detect Text' feature (props [@Sidsector9](https://github.com/Sidsector9) via [#300](https://github.com/10up/classifai/pull/300)).
+
+### Security
+- Bump `ini` from 1.3.5 to 1.3.7 (props [@dependabot](https://github.com/dependabot) via [#262](https://github.com/10up/classifai/pull/262)).
+- Bump `elliptic` from 6.5.3 to 6.5.4 (props [@dependabot](https://github.com/dependabot) via [#269](https://github.com/10up/classifai/pull/269)).
+- Bump `y18n` from 4.0.0 to 4.0.1 (props [@dependabot](https://github.com/dependabot) via [#273](https://github.com/10up/classifai/pull/273)).
+- Bump `ssri` from 6.0.1 to 6.0.2 (props [@dependabot](https://github.com/dependabot) via [#274](https://github.com/10up/classifai/pull/274)).
+- Bump `lodash` from 4.17.20 to 4.17.21 (props [@dependabot](https://github.com/dependabot) via [#276](https://github.com/10up/classifai/pull/276)).
+- Bump `hosted-git-info` from 2.8.8 to 2.8.9 (props [@dependabot](https://github.com/dependabot) via [#277](https://github.com/10up/classifai/pull/277)).
+- Bump `browserslist` from 4.14.5 to 4.16.6 (props [@dependabot](https://github.com/dependabot) via [#283](https://github.com/10up/classifai/pull/283)).
+- Bump `path-parse` from 1.0.6 to 1.0.7 (props [@dependabot](https://github.com/dependabot) via [#301](https://github.com/10up/classifai/pull/301)).
+
 ## [1.6.0] - 2020-11-02
 ### Added
 - Automated Optical Character Recognition (OCR) scanning of screenshots and other imagery with `aria-describedby` semantic markup (props [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@helen](https://github.com/helen), [@jeffpaul](https://github.com/jeffpaul) via [#228](https://github.com/10up/classifai/pull/228))
