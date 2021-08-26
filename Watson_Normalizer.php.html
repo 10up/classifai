@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source: Watson/Normalizer.php - 10up ClassifAI Hook Docs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+	<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans:300,400|Playfair+Display:900&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles-10up.css">
+</head>
+
+<body>
+
+<div id="main">
+
+	
+    <h1 class="page-title">Source: Watson/Normalizer.php</h1>
+	
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+
+namespace Classifai\Watson;
+
+/**
+ * Normalize takes the post_content within a post and cleans it up for
+ * sending to the Watson NLU API. Shortcodes, appreviations, HTML tags
+ * are all stripped out here.
+ *
+ * A 'classifai_normalize' filter is provided to extend this to add
+ * metadata or to perform additional cleanup.
+ */
+class Normalizer {
+
+	/**
+	 * Creates a plain text normalized version of the post's content.
+	 * The post title is also included in the content to improve
+	 * accuracy.
+	 *
+	 * @param int $post_id The post to normalize
+	 * @return string
+	 */
+	public function normalize( $post_id ) {
+		$post         = get_post( $post_id );
+		$post_content = apply_filters( 'the_content', $post->post_content );
+		$post_title   = apply_filters( 'the_title', $post->post_title );
+
+		/* Strip shortcodes but keep internal caption text */
+		$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
+
+		$post_content = $this->normalize_content( $post_content, $post_title, $post_id );
+
+		return $post_content;
+	}
+
+	/**
+	 * Normalizes post_content into plain text.
+	 *
+	 * @param string $post_content The post content.
+	 * @param string $post_title   The post title. Optional: append to content to improve accuracy.
+	 * @param int    $post_id      The post id. Optional.
+	 */
+	public function normalize_content( $post_content, $post_title = '', $post_id = false ) {
+		/* Strip HTML entities */
+		$post_content = preg_replace( '/&amp;#?[a-z0-9]{2,8};/i', '', $post_content );
+
+		/* Strip abbreviations */
+		$post_content = preg_replace( '/[A-Z][A-Z]+/', '', $post_content );
+
+		/* Replace HTML linebreaks with newlines */
+		$post_content = preg_replace( '#&lt;br\s?/?>#', "\n\n", $post_content );
+
+		/* Strip all HTML tags */
+		$post_content = wp_strip_all_tags( $post_content );
+
+		if ( ! empty( $post_title ) ) {
+			/* Include title to improve relevancy */
+			$post_content = $post_title . ".\n\n" . $post_content;
+		}
+
+		/**
+		 * Filters the normalized content to allow for additional cleanup.
+		 *
+		 * @since 0.1.0
+		 * @hook classifai_normalize
+		 *
+		 * @param {string} $post_content The normalized post content.
+		 * @param {int}    $post_id      The ID of the post whose content is being normalized.
+		 *
+		 * @return {string} The filtered normalized post content.
+		 */
+		$post_content = apply_filters( 'classifai_normalize', $post_content, $post_id );
+
+		return $post_content;
+	}
+
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+    <footer>
+		<a href="https://classifaiplugin.com/">ClassifAI Plugin</a> &bull;
+		<a href="https://github.com/10up/classifai/">ClassifAI on GitHub</a> &bull;
+		<a href="https://10up.com/careers">Careers at 10up</a>
+	</footer>
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

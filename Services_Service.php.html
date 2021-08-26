@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source: Services/Service.php - 10up ClassifAI Hook Docs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+	<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans:300,400|Playfair+Display:900&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles-10up.css">
+</head>
+
+<body>
+
+<div id="main">
+
+	
+    <h1 class="page-title">Source: Services/Service.php</h1>
+	
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ * Abstract class for all services
+ */
+
+namespace Classifai\Services;
+
+abstract class Service {
+
+	/**
+	 * @var string The settings page slug
+	 */
+	protected $menu_slug;
+
+	/**
+	 * @var string The display name for the service.
+	 */
+	protected $display_name;
+
+	/**
+	 * @var array Array of provider classes for this service
+	 */
+	protected $providers;
+
+	/**
+	 * @var array Array of class instances.
+	 */
+	public $provider_classes;
+
+	/**
+	 * Service constructor.
+	 *
+	 * @param string $display_name Name that appears in menu item and page title.
+	 * @param string $menu_slug    Slug for the settings page.
+	 * @param array  $providers    Array of provider classes for this service
+	 */
+	public function __construct( $display_name, $menu_slug, $providers ) {
+		$this->menu_slug    = $menu_slug;
+		$this->display_name = $display_name;
+		$this->providers    = $providers;
+	}
+
+	/**
+	 * Init the Providers for this service.
+	 */
+	public function init() {
+		/**
+		 * Filter the list of providers for the service.
+		 *
+		 * @since 1.3.0
+		 * @hook {$this->menu_slug}_providers
+		 *
+		 * @param {array} $this->providers Array of available providers for the service.
+		 *
+		 * @return {array} The filtered available providers.
+		 */
+		$this->providers = apply_filters( "{$this->menu_slug}_providers", $this->providers );
+
+		if ( ! empty( $this->providers ) &amp;&amp; is_array( $this->providers ) ) {
+			foreach ( $this->providers as $provider ) {
+				if ( class_exists( $provider ) ) {
+					$this->provider_classes[] = new $provider( $this->menu_slug );
+				}
+			}
+			$this->register_providers();
+		}
+
+		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
+	}
+
+	/**
+	 * Initializes the functionality for this services providers
+	 */
+	public function register_providers() {
+		if ( ! empty( $this->provider_classes ) ) {
+			foreach ( $this->provider_classes as $provider ) {
+				$provider->register_admin();
+				if ( $provider->can_register() ) {
+					$provider->register();
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the menu slug
+	 *
+	 * @return string
+	 */
+	public function get_menu_slug() {
+		return $this->menu_slug;
+	}
+
+	/**
+	 * Get the display name
+	 *
+	 * @return string
+	 */
+	public function get_display_name() {
+		return $this->display_name;
+	}
+
+	/**
+	 * Render the start of a settings page. The rest is added by the providers
+	 */
+	public function render_settings_page() {
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		?>
+		&lt;div class="wrap">
+			&lt;h2>&lt;?php echo esc_html( $this->display_name ); ?>&lt;/h2>
+			&lt;?php if ( ! empty( $this->provider_classes ) ) : ?>
+			&lt;h2 class="nav-tab-wrapper">
+				&lt;?php foreach ( $this->provider_classes as $provider_class ) : ?>
+					&lt;a href="?page=&lt;?php echo esc_attr( $this->get_menu_slug() ); ?>&amp;tab=&lt;?php echo esc_attr( $provider_class->get_settings_section() ); ?>" class="nav-tab &lt;?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>">&lt;?php echo esc_html( $provider_class->provider_name ); ?>&lt;/a>
+				&lt;?php endforeach; ?>
+			&lt;/h2>
+			&lt;?php endif; ?>
+			&lt;?php settings_errors(); ?>
+			&lt;form method="post" action="options.php">
+			&lt;?php
+				settings_fields( 'classifai_' . $active_tab );
+				do_settings_sections( 'classifai_' . $active_tab );
+				submit_button();
+			?>
+			&lt;/form>
+		&lt;/div>
+		&lt;?php
+	}
+
+	/**
+	 * Adds plugin debug information to be printed on the Site Health screen.
+	 *
+	 * @param array $debug_information Array of associative arrays corresponding to lines of debug information.
+	 * @return array Array with lines added.
+	 * @since 1.4.0
+	 */
+	public function add_service_debug_information( $debug_information ) {
+		return array_merge( $debug_information, $this->get_service_debug_information() );
+	}
+
+	/**
+	 * Provides debug information for the service.
+	 *
+	 * @return array Array of associative arrays respresenting lines of debug information.
+	 * @since 1.4.0
+	 */
+	public function get_service_debug_information() {
+		$make_line = function( $provider ) {
+			return [
+				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
+				'value' => $provider->get_provider_debug_information(),
+			];
+		};
+
+		return array_map( $make_line, $this->provider_classes );
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+    <footer>
+		<a href="https://classifaiplugin.com/">ClassifAI Plugin</a> &bull;
+		<a href="https://github.com/10up/classifai/">ClassifAI on GitHub</a> &bull;
+		<a href="https://10up.com/careers">Careers at 10up</a>
+	</footer>
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
