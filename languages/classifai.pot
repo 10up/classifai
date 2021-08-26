@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClassifAI 1.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2021-08-26 23:04:27+00:00\n"
+"POT-Creation-Date: 2021-08-26 23:13:00+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -68,161 +68,188 @@ msgid "ClassifAI requires setup"
 msgstr ""
 
 #: includes/Classifai/Providers/AWS/Comprehend.php:50
-#: includes/Classifai/Providers/Azure/ComputerVision.php:639
+#: includes/Classifai/Providers/Azure/ComputerVision.php:743
 msgid "Endpoint URL"
 msgstr ""
 
 #: includes/Classifai/Providers/AWS/Comprehend.php:61
-#: includes/Classifai/Providers/Azure/ComputerVision.php:652
+#: includes/Classifai/Providers/Azure/ComputerVision.php:756
 #: includes/Classifai/Providers/Watson/NLU.php:196
 #: includes/Classifai/Providers/Watson/NLU.php:270
 msgid "API Key"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:199
+#: includes/Classifai/Providers/Azure/ComputerVision.php:212
 msgid "ClassifAI Image Processing"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:214
+#: includes/Classifai/Providers/Azure/ComputerVision.php:223
+msgid "ClassifAI PDF Processing"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:239
 msgid "Rescan Alt Text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:214
+#: includes/Classifai/Providers/Azure/ComputerVision.php:239
 msgid "Scan Alt Text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:215
+#: includes/Classifai/Providers/Azure/ComputerVision.php:240
 msgid "Rescan Tags"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:215
+#: includes/Classifai/Providers/Azure/ComputerVision.php:240
 msgid "Generate Tags"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:216
+#: includes/Classifai/Providers/Azure/ComputerVision.php:241
 msgid "Rescan Text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:216
+#: includes/Classifai/Providers/Azure/ComputerVision.php:241
 msgid "Scan Text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:217
+#: includes/Classifai/Providers/Azure/ComputerVision.php:242
 msgid "Regenerate Smart Thumbnail"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:217
+#: includes/Classifai/Providers/Azure/ComputerVision.php:242
 msgid "Generate Smart Thumbnail"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:647
+#: includes/Classifai/Providers/Azure/ComputerVision.php:283
+msgid "Scan PDF content"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:283
+msgid "Rescan PDF content"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:297
+#: includes/Classifai/Services/ImageProcessing.php:58
+msgid "In progress!"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:751
 msgid "e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:664
+#: includes/Classifai/Providers/Azure/ComputerVision.php:768
 msgid "Automatically Caption Images"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:672
+#: includes/Classifai/Providers/Azure/ComputerVision.php:776
 msgid "Images will be captioned with alt text upon upload"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:677
+#: includes/Classifai/Providers/Azure/ComputerVision.php:781
 msgid "Caption Confidence Threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:685
+#: includes/Classifai/Providers/Azure/ComputerVision.php:789
 msgid ""
 "Minimum confidence score for automatically applied image captions, numeric "
 "value from 0-100. Recommended to be set to at least 75."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:690
+#: includes/Classifai/Providers/Azure/ComputerVision.php:794
 msgid "Automatically Tag Images"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:698
+#: includes/Classifai/Providers/Azure/ComputerVision.php:802
 msgid "Images will be tagged upon upload"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:703
+#: includes/Classifai/Providers/Azure/ComputerVision.php:807
 msgid "Tag Confidence Threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:711
+#: includes/Classifai/Providers/Azure/ComputerVision.php:815
 msgid ""
 "Minimum confidence score for automatically applied image tags, numeric "
 "value from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:722
+#: includes/Classifai/Providers/Azure/ComputerVision.php:826
 msgid "Tag Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:734
+#: includes/Classifai/Providers/Azure/ComputerVision.php:838
 msgid "Enable smart cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:742
+#: includes/Classifai/Providers/Azure/ComputerVision.php:846
 msgid "Crop images around a region of interest identified by ComputerVision"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:750
+#: includes/Classifai/Providers/Azure/ComputerVision.php:854
 msgid "Enable OCR"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:758
+#: includes/Classifai/Providers/Azure/ComputerVision.php:862
 msgid "Detect text in an image and store that as post content"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:790
+#: includes/Classifai/Providers/Azure/ComputerVision.php:870
+msgid "Enable Scanning PDF"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:878
+msgid ""
+"Extract visible text from multi-pages PDF documents. Store the result as "
+"the attachment description."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:910
 msgid "Please enter your credentials"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:893
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
 msgid "Authenticated"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:893
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
 #: includes/Classifai/Providers/Watson/NLU.php:662
 #: includes/Classifai/Services/ServicesManager.php:364
 msgid "yes"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:893
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
 #: includes/Classifai/Providers/Watson/NLU.php:662
 #: includes/Classifai/Services/ServicesManager.php:364
 msgid "no"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:894
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1015
 #: includes/Classifai/Providers/Watson/NLU.php:242
 #: includes/Classifai/Providers/Watson/NLU.php:663
 msgid "API URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:895
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1016
 msgid "Caption threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:896
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1017
 msgid "Latest response - Image Scan"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:897
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1018
 msgid "Latest response - Smart Cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:898
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1019
 msgid "Latest response - OCR"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:911
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1032
 #: includes/Classifai/Providers/Watson/NLU.php:680
 msgid "N/A"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:979
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1104
 msgid "Valid image size not found. Make sure the image is less than 4MB."
 msgstr ""
 
@@ -234,6 +261,44 @@ msgstr ""
 msgid ""
 "Image does not meet size requirements. Please ensure it is at least 50x50 "
 "but less than 4200x4200 and smaller than 4MB."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:118
+msgid "Document does not meet processing requirements."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:123
+msgid ""
+"Document does not meet size requirements. Please ensure it is smaller than "
+"the maximum threshold (default to 4MB)."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:146
+msgid "Document does not exist."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:184
+msgid "Operation URL is invalid."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:192
+msgid "Unknow Read error."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:227
+msgid "Invalid read result."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:238
+msgid "The read operation has failed."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:244
+msgid "Invalid result status."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/Read.php:259
+msgid "The Read result is invalid."
 msgstr ""
 
 #: includes/Classifai/Providers/Provider.php:185
@@ -350,36 +415,45 @@ msgstr ""
 msgid "Latest response"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:52
-#: includes/Classifai/Services/ImageProcessing.php:53
-#: includes/Classifai/Services/ImageProcessing.php:54
 #: includes/Classifai/Services/ImageProcessing.php:55
-msgid "Generate"
+msgid "Scan"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:52
-#: includes/Classifai/Services/ImageProcessing.php:53
-#: includes/Classifai/Services/ImageProcessing.php:54
+#: includes/Classifai/Services/ImageProcessing.php:55
+#: includes/Classifai/Services/ImageProcessing.php:72
+#: includes/Classifai/Services/ImageProcessing.php:73
+#: includes/Classifai/Services/ImageProcessing.php:74
 msgid "Rescan"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:55
-msgid "Regenerate"
-msgstr ""
-
-#: includes/Classifai/Services/ImageProcessing.php:58
-msgid "Classifai Alt Tags"
-msgstr ""
-
 #: includes/Classifai/Services/ImageProcessing.php:64
-msgid "Classifai Image Tags"
+msgid "Classifai Read PDF"
 msgstr ""
 
 #: includes/Classifai/Services/ImageProcessing.php:72
+#: includes/Classifai/Services/ImageProcessing.php:73
+#: includes/Classifai/Services/ImageProcessing.php:74
+#: includes/Classifai/Services/ImageProcessing.php:75
+msgid "Generate"
+msgstr ""
+
+#: includes/Classifai/Services/ImageProcessing.php:75
+msgid "Regenerate"
+msgstr ""
+
+#: includes/Classifai/Services/ImageProcessing.php:78
+msgid "Classifai Alt Tags"
+msgstr ""
+
+#: includes/Classifai/Services/ImageProcessing.php:84
+msgid "Classifai Image Tags"
+msgstr ""
+
+#: includes/Classifai/Services/ImageProcessing.php:92
 msgid "Classifai Smart Crop"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:80
+#: includes/Classifai/Services/ImageProcessing.php:100
 msgid "Detect Text"
 msgstr ""
 
