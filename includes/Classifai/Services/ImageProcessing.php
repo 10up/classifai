@@ -161,7 +161,7 @@ class ImageProcessing extends Service {
 			[
 				'methods'             => 'GET',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => 'read-pdf' ],
+				'args'                => [ 'route' => [ 'read-pdf' ] ],
 				'permission_callback' => '__return_true',
 			]
 		);
