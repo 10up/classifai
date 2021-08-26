@@ -4,7 +4,7 @@ Tags: AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Wat
 Requires at least: 5.0
 Tested up to: 5.8
 Requires PHP: 7.0
-Stable tag: 1.6.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,7 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities)
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
-* Automatically scan images for embedded text and save for use in WordPress
+* Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
