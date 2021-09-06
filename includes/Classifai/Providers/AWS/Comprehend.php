@@ -27,7 +27,19 @@ class Comprehend extends Provider {
 	 * Resets the settings for the Comprehend provider.
 	 */
 	public function reset_settings() {
-		// TODO: Implement reset_settings() method.
+		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Default settings
+	 *
+	 * @return array
+	 */
+	protected function get_default_settings() {
+		return [
+			'url'     => '',
+			'api_key' => '',
+		];
 	}
 
 	/**
@@ -77,7 +89,39 @@ class Comprehend extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		// TODO: Implement sanitize_settings() method.
-		return $settings;
+		$new_settings    = [];
+		$settings_errors = [];
+
+		if ( ! empty( $settings['url'] ) ) {
+			$new_settings['url'] = esc_url_raw( $settings['url'] );
+		}
+
+		if ( ! empty( $settings['api_key'] ) ) {
+			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
+		}
+
+		if ( empty( $settings['url'] ) || empty( $settings['api-key'] ) ) {
+			$settings_errors['classifai-aws-comprehend-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
+		}
+
+		if ( ! empty( $settings_errors ) ) {
+
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+
+			foreach ( $settings_errors as $code => $message ) {
+
+				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
+					add_settings_error(
+						$this->get_option_name(),
+						$code,
+						esc_html( $message ),
+						'error'
+					);
+				}
+			}
+		}
+
+		return $new_settings;
+
 	}
 }
