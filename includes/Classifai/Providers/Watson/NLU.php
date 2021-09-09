@@ -104,8 +104,16 @@ class NLU extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		// TODO: Implement can_register() method.
-		return true;
+		$options = get_option( $this->get_option_name() );
+
+		$can_register = true;
+
+		// False where required options do not have a value saved.
+		if ( empty( $options ) || empty( $options['credentials'] ) || empty( $options['credentials']['watson_url'] ) || empty( $options['credentials']['watson_password'] ) ) {
+			$can_register = false;
+		}
+
+		return $can_register;
 	}
 
 	/**
