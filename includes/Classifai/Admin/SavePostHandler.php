@@ -61,7 +61,7 @@ class SavePostHandler {
 		$supported     = \Classifai\get_supported_post_types();
 		$post_type     = get_post_type( $post_id );
 		$post_status   = get_post_status( $post_id );
-		$post_statuses = $this->get_post_statuses( $post_type, $post_id );
+		$post_statuses = \Classifai\get_supported_post_statuses();
 
 		// Process posts in allowed post statuses, supported items and only if features are enabled
 		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
@@ -185,26 +185,6 @@ class SavePostHandler {
 			</div>
 			<?php
 		}
-	}
-
-	/**
-	 * Get the post statuses allowed to classify content
-	 *
-	 * @since 1.7.1 @TODO: Ensure this is updated to the version
-	 * @hook classifai_post_statuses
-	 *
-	 * @param string $post_type     The current post type.
-	 * @param int    $post_id       The current post ID.
-	 *
-	 * @return array $post_statuses The filtered array of post statuses.
-	 */
-	public function get_post_statuses( $post_type, $post_id ) {
-		// Defaults to published content only
-		$post_statuses = [ 'publish' ];
-
-		$post_statuses = apply_filters( 'classifai_post_statuses', $post_statuses, $post_type, $post_id );
-
-		return $post_statuses;
 	}
 
 	/**
