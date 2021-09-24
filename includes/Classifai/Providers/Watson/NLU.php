@@ -614,6 +614,16 @@ class NLU extends Provider {
 			}
 		}
 
+		// Sanitize the post statuses checkboxes
+		$post_statuses = get_post_statuses_for_language_settings();
+		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
+			if ( isset( $settings['post_statuses'][ $post_status_key ] ) ) {
+				$new_settings['post_statuses'][ $post_status_key ] = absint( $settings['post_statuses'][ $post_status_key ] );
+			} else {
+				$new_settings['post_statuses'][ $post_status_key ] = null;
+			}
+		}
+
 		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
