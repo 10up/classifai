@@ -26,6 +26,42 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 		$this->save_post_handler = new SavePostHandler();
 	}
 
+	function test_get_post_statuses() {
+		global $wp_filter;
+
+		$saved_filters = $wp_filter['classifai_post_statuses'] ?? null;
+		unset( $wp_filter['classifai_post_statuses'] );
+
+		$default_post_statuses_array = array(
+			'publish',
+		);
+
+		$post_type = 'post';
+		$post_id   = 1;
+
+		$this->assertEqualSets( $default_post_statuses_array, $this->save_post_handler->get_post_statuses( $post_type, $post_id ) );
+
+		$filtered_post_statuses_array = array(
+			'publish',
+			'draft',
+			'future',
+		);
+
+		add_filter(
+			'classifai_post_statuses',
+			function( $post_statuses, $post_type, $post_id ) use ( $filtered_post_statuses_array ) {
+				return $filteredpost_statuses_array;
+			},
+			10,
+			3
+		);
+		$this->assertEqualSets( $post_statuses_array, $this->save_post_handler->get_post_statuses( $post_type, $post_id ) );
+
+		if ( ! is_null( $saved_filters ) ) {
+			$wp_filter['classifai_post_statuses'] = $saved_filters;
+		}
+	}
+
 	function test_is_rest_route() {
 		global $wp_filter;
 
