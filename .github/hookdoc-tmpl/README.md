@@ -1,4 +1,4 @@
-# Welcome to the ClassifAI Plugin Hook Documentation
+# ClassifAI Developer Documentation
 
 This resource is generated documentation on actions and filters found in the ClassifAI plugin. Use the sidebar to browse and navigate.
 
