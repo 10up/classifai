@@ -17,7 +17,7 @@
 * [Changelog](#changelog)
 * [Contributing](#contributing)
 
-- Check out the [ClassifAI docs](https://10up.github.io/ElasticPress/)
+- Check out the [ClassifAI docs](https://10up.github.io/ClassifAI/).
 
 ## Features
 
@@ -124,7 +124,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/ElasticPress/)
+- Check out the [ClassifAI docs](https://10up.github.io/ClassifAI/).
 
 ### ClassifAI Settings Commands
 
