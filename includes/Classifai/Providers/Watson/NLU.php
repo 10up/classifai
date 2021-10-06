@@ -9,6 +9,7 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_post_types_for_language_settings;
+use function Classifai\get_post_statuses_for_language_settings;
 
 class NLU extends Provider {
 
@@ -324,6 +325,17 @@ class NLU extends Provider {
 			]
 		);
 
+		add_settings_field(
+			'post-statuses',
+			esc_html__( 'Post Statuses to Classify', 'classifai' ),
+			[ $this, 'render_post_statuses_checkboxes' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'option_index' => 'post_statuses',
+			]
+		);
+
 		foreach ( $this->nlu_features as $feature => $labels ) {
 			add_settings_field(
 				$feature,
@@ -402,6 +414,33 @@ class NLU extends Provider {
 			echo '<li>';
 			$this->render_input( $args );
 			echo '<label for="classifai-settings-' . esc_attr( $post_type->name ) . '">' . esc_html( $post_type->label ) . '</label>';
+			echo '</li>';
+		}
+
+		echo '</ul>';
+	}
+
+
+	/**
+	 * Render the post statuses checkbox array.
+	 *
+	 * @param array $args Settings for the input
+	 *
+	 * @return void
+	 */
+	public function render_post_statuses_checkboxes( $args ) {
+		echo '<ul>';
+		$post_statuses = get_post_statuses_for_language_settings();
+		foreach ( $post_statuses as $post_status_key => $post_status_label ) {
+			$args = [
+				'label_for'    => $post_status_key,
+				'option_index' => 'post_statuses',
+				'input_type'   => 'checkbox',
+			];
+
+			echo '<li>';
+			$this->render_input( $args );
+			echo '<label for="classifai-settings-' . esc_attr( $post_status_key ) . '">' . esc_html( $post_status_label ) . '</label>';
 			echo '</li>';
 		}
 
@@ -575,6 +614,16 @@ class NLU extends Provider {
 			}
 		}
 
+		// Sanitize the post statuses checkboxes
+		$post_statuses = get_post_statuses_for_language_settings();
+		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
+			if ( isset( $settings['post_statuses'][ $post_status_key ] ) ) {
+				$new_settings['post_statuses'][ $post_status_key ] = absint( $settings['post_statuses'][ $post_status_key ] );
+			} else {
+				$new_settings['post_statuses'][ $post_status_key ] = null;
+			}
+		}
+
 		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
@@ -612,7 +661,7 @@ class NLU extends Provider {
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
-				'timeout' => 10,
+				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'    => [
 					'license_key' => $license_key,
 					'email'       => $email,
