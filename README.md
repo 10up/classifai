@@ -17,6 +17,8 @@
 * [Changelog](#changelog)
 * [Contributing](#contributing)
 
+- Check out the [ClassifAI docs](https://10up.github.io/ElasticPress/)
+
 ## Features
 
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
