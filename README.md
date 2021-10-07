@@ -17,8 +17,6 @@
 * [Changelog](#changelog)
 * [Contributing](#contributing)
 
-- Check out the [ClassifAI docs](https://10up.github.io/ClassifAI/).
-
 ## Features
 
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -124,21 +122,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/ClassifAI/).
-
-### ClassifAI Settings Commands
-
-#### Basic Authentication
-
-`$ wp classifai auth`
-
-Prints the Basic Auth header based on credentials configured in the plugin.
-
-#### Reset ClassifAI to Defaults
-
-`$ wp classifai reset`
-
-Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
 
 ## Frequently Asked Questions
 
