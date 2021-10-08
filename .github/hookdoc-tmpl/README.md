@@ -1,6 +1,6 @@
-# Welcome to the ClassifAI Plugin Hook Documentation
+# ClassifAI Developer Documentation
 
-This resource is generated documentation on actions and filters found in the ClassifAI plugin. Use the sidebar to browse and navigate.
+This resource is generated documentation on actions, filters, and WP-CLI commands found in the ClassifAI plugin. Use the sidebar to browse and navigate.
 
 For more information about using ClassifAI with WordPress, please see the [ClassifAI website](https://classifaiplugin.com/).
 
