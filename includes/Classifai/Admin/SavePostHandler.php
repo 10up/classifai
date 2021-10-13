@@ -58,12 +58,28 @@ class SavePostHandler {
 			return;
 		}
 
-		$supported   = \Classifai\get_supported_post_types();
-		$post_type   = get_post_type( $post_id );
-		$post_status = get_post_status( $post_id );
+		$supported     = \Classifai\get_supported_post_types();
+		$post_type     = get_post_type( $post_id );
+		$post_status   = get_post_status( $post_id );
+		$post_statuses = \Classifai\get_supported_post_statuses();
 
-		// Only process published, supported items and only if features are enabled
-		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
+
+		/**
+		 * Filter post statuses for post type or ID.
+		 *
+		 * @since 1.0.0
+		 * @hook classifai_post_statuses_for_post_type_or_id
+		 *
+		 * @param {array} $post_statuses Array of post statuses to be classified with language processing.
+		 * @param {string} $post_type The post type.
+		 * @param {int} $post_id The post ID.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		$post_statuses = apply_filters( 'classifai_post_statuses_for_post_type_or_id', $post_statuses, $post_type, $post_id );
+
+		// Process posts in allowed post statuses, supported items and only if features are enabled
+		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
 			$this->classify( $post_id );
 		}
 	}
