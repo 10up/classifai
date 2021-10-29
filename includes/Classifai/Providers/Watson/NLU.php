@@ -105,7 +105,10 @@ class NLU extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		// TODO: Implement can_register() method.
+		if ( $this->nlu_authentication_check_failed( $this->get_settings() ) ) {
+			return false;
+		}
+
 		return true;
 	}
 
