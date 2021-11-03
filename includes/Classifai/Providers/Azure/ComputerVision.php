@@ -355,7 +355,7 @@ class ComputerVision extends Provider {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 
-		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_DEFAULT ) ) {
+		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
 			$this->read_pdf( $attachment_id );
 		}
 
