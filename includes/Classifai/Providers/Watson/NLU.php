@@ -105,7 +105,10 @@ class NLU extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		// TODO: Implement can_register() method.
+		if ( $this->nlu_authentication_check_failed( $this->get_settings() ) ) {
+			return false;
+		}
+
 		return true;
 	}
 
@@ -643,41 +646,6 @@ class NLU extends Provider {
 		}
 
 		return $new_settings;
-	}
-
-	/**
-	 * Hit license API to see if key/email is valid
-	 *
-	 * @param string $email Email address.
-	 * @param string $license_key License key.
-	 *
-	 * @return bool
-	 * @since  1.2
-	 *
-	 * @todo Is this function supposed to be here?
-	 */
-	public function check_license_key( $email, $license_key ) {
-
-		$request = wp_remote_post(
-			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
-			[
-				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-				'body'    => [
-					'license_key' => $license_key,
-					'email'       => $email,
-				],
-			]
-		);
-
-		if ( is_wp_error( $request ) ) {
-			return false;
-		}
-
-		if ( 200 === wp_remote_retrieve_response_code( $request ) ) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

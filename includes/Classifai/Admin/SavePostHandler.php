@@ -63,7 +63,6 @@ class SavePostHandler {
 		$post_status   = get_post_status( $post_id );
 		$post_statuses = \Classifai\get_supported_post_statuses();
 
-
 		/**
 		 * Filter post statuses for post type or ID.
 		 *
