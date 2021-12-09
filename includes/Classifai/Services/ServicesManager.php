@@ -39,16 +39,6 @@ class ServicesManager {
 	}
 
 	/**
-	 * The admin_support items require this method.
-	 *
-	 * @todo remove this requirement.
-	 * @return bool
-	 */
-	public function can_register() {
-		return true;
-	}
-
-	/**
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
