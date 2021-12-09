@@ -96,6 +96,12 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 #### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
 
+### ⚠️  Note: Deprecated Endpoint URLs: `watsonplatform.net`
+
+IBM Watson endpoint urls with `watsonplatform.net` were deprecated on 26 May 2021. The pattern for the new endpoint URLs is `api.{location}.{offering}.watson.cloud.ibm.com`. For example, Watson's NLU service offering endpoint will be like: `api.{location}.natural-language-understanding.watson.cloud.ibm.com`
+
+For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change.
+
 ## Set Up Image Processing (via Microsoft Azure)
 
 Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
