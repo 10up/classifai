@@ -86,8 +86,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					$output = $classifier->classify( $post_id, $opts );
 					$this->print( $output, $post_id );
 				}
-
-				$this->gc( $index );
 			}
 
 			$progress_bar->finish();
@@ -501,20 +499,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		\WP_CLI::log( 'Fetching images ... DONE (' . count( $images ) . ')' );
 
 		return $images;
-	}
-
-	/**
-	 * TODO: gc
-	 *
-	 * @param int $index The index.
-	 */
-	private function gc( $index ) {
-		if ( 0 === $index % 10 ) {
-			// TODO
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	/**
