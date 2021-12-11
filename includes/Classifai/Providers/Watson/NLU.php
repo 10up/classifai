@@ -226,6 +226,27 @@ class NLU extends Provider {
 					esc_url( 'https://cloud.ibm.com/registration' ),
 					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
 				);
+
+				$credentials = $this->get_settings( 'credentials' );
+				$watson_url  = $credentials['watson_url'] ?? '';
+
+				if ( ! empty( $watson_url ) && strpos( $watson_url, 'watsonplatform.net' ) !== false ) {
+					echo '<div class="notice notice-error"><p><strong>';
+						printf(
+							wp_kses(
+								__( 'The `watsonplatform.net` endpoint URLs were retired on 26 May 2021. Please update the endpoint url. Check <a title="Deprecated Endpoint: watsonplatform.net" href="%s">here</a> for details.', 'classifai' ),
+								[
+									'a' => [
+										'href'  => [],
+										'title' => [],
+									],
+								]
+							),
+							esc_url( 'https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change' )
+						);
+					echo '</strong></p></div>';
+				}
+
 			},
 			$this->get_option_name()
 		);
