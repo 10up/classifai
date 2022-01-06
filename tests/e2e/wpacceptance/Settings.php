@@ -117,7 +117,7 @@ class Settings extends \TestCaseBase {
 
 		$I->seeText( 'Computer Vision' );
 
-		$I->seeText( 'Automatically Caption Images' );
+		$I->seeText( 'Automatically Tag Images' );
 	}
 }
 

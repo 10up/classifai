@@ -236,7 +236,7 @@ class ComputerVision extends Provider {
 	 */
 	public function attachment_data_meta_box( $post ) {
 		$settings   = get_option( 'classifai_computer_vision' );
-		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
+		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'ReGenerate Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
 		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan Text', 'classifai' ) : __( 'Scan Text', 'classifai' );
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate Smart Thumbnail', 'classifai' ) : __( 'Generate Smart Thumbnail', 'classifai' );
@@ -748,7 +748,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['url'],
-				'description'   => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
+				'description'   => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -765,7 +765,7 @@ class ComputerVision extends Provider {
 		);
 		add_settings_field(
 			'enable-image-captions',
-			esc_html__( 'Automatically Caption Images', 'classifai' ),
+			esc_html__( 'Automatically Tag Images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -773,12 +773,12 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_captions'],
-				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
+				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
 			]
 		);
 		add_settings_field(
 			'caption-threshold',
-			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
+			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -786,7 +786,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
 				'default_value' => $default_settings['caption_threshold'],
-				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
 		add_settings_field(
