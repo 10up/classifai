@@ -11,6 +11,8 @@ use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\get_modified_image_source_url;
+use function Classifai\attachment_is_pdf;
 
 class ComputerVision extends Provider {
 
@@ -37,7 +39,28 @@ class ComputerVision extends Provider {
 	 * Resets settings for the ComputerVision provider.
 	 */
 	public function reset_settings() {
-		// TODO: Implement reset_settings() method.
+		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Default settings for ComputerVision
+	 *
+	 * @return array
+	 */
+	private function get_default_settings() {
+		return [
+			'valid'                 => false,
+			'url'                   => '',
+			'api_key'               => '',
+			'enable_image_captions' => true,
+			'enable_image_tagging'  => true,
+			'enable_smart_cropping' => false,
+			'enable_ocr'            => false,
+			'enable_read_pdf'       => false,
+			'caption_threshold'     => 75,
+			'tag_threshold'         => 70,
+			'image_tag_taxonomy'    => 'classifai-image-tags',
+		];
 	}
 
 	/**
@@ -64,8 +87,8 @@ class ComputerVision extends Provider {
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 8, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 
 		$settings   = $this->get_settings();
@@ -75,6 +98,12 @@ class ComputerVision extends Provider {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
+		}
+
+		$enable_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
+		if ( $enable_read_pdf ) {
+			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
+			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
 		}
 	}
 
@@ -171,16 +200,33 @@ class ComputerVision extends Provider {
 
 	/**
 	 * Adds a meta box for rescanning options if the settings are configured
+	 *
+	 * @param \WP_Post $post The post object.
 	 */
-	public function setup_attachment_meta_box() {
-		add_meta_box(
-			'attachment_meta_box',
-			__( 'ClassifAI Image Processing', 'classifai' ),
-			[ $this, 'attachment_data_meta_box' ],
-			'attachment',
-			'side',
-			'high'
-		);
+	public function setup_attachment_meta_box( $post ) {
+		$settings = get_option( 'classifai_computer_vision' );
+
+		if ( wp_attachment_is_image( $post ) ) {
+			add_meta_box(
+				'attachment_meta_box',
+				__( 'ClassifAI Image Processing', 'classifai' ),
+				[ $this, 'attachment_data_meta_box' ],
+				'attachment',
+				'side',
+				'high'
+			);
+		}
+
+		if ( attachment_is_pdf( $post ) && $settings && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+			add_meta_box(
+				'attachment_meta_box',
+				__( 'ClassifAI PDF Processing', 'classifai' ),
+				[ $this, 'attachment_pdf_data_meta_box' ],
+				'attachment',
+				'side',
+				'high'
+			);
+		}
 	}
 
 	/**
@@ -208,12 +254,14 @@ class ComputerVision extends Provider {
 					<?php echo esc_html( $tags ); ?>
 				</label>
 			</div>
+		<?php if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
 			<div class="misc-pub-section">
 				<label for="rescan-ocr">
 					<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
 					<?php echo esc_html( $ocr ); ?>
 				</label>
 			</div>
+		<?php endif; ?>
 		<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
 			<div class="misc-pub-section">
 				<label for="rescan-smart-crop">
@@ -227,30 +275,64 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Display PDF scanning actions.
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function attachment_pdf_data_meta_box( $post ) {
+		$read = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF content', 'classifai' ) : __( 'Rescan PDF content', 'classifai' );
+		$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
+		if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
+			$running = true;
+		} else {
+			$running = false;
+		}
+		?>
+		<div class="misc-publishing-actions">
+			<div class="misc-pub-section">
+				<label for="rescan-pdf">
+					<input type="checkbox" value="yes" id="rescan-pdf" name="rescan-pdf" <?php disabled( $running ); ?>/>
+					<?php echo esc_html( $read ); ?>
+					<?php if ( $running ) : ?>
+						<?php echo ' - ' . esc_html__( 'In progress!', 'classifai' ); ?>
+					<?php endif; ?>
+				</label>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 *
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
 		$routes     = [];
 		$metadata   = wp_get_attachment_metadata( $attachment_id );
-		$image_url  = get_largest_acceptable_image_url(
-			get_attached_file( $attachment_id ),
-			wp_get_attachment_url( $attachment_id ),
-			$metadata['sizes'],
-			computer_vision_max_filesize()
-		);
 
-		if ( filter_input( INPUT_POST, 'rescan-captions' ) ) {
+		// Allow rescanning image that are not stored in local storage.
+		$image_url = get_modified_image_source_url( $attachment_id );
+
+		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+			$image_url  = get_largest_acceptable_image_url(
+				get_attached_file( $attachment_id ),
+				wp_get_attachment_url( $attachment_id ),
+				$metadata['sizes'],
+				computer_vision_max_filesize()
+			);
+		}
+
+		if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'alt-tags';
-		} else if ( filter_input( INPUT_POST, 'rescan-tags' ) ) {
+		} else if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'image-tags';
-		} else if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) ) {
+		} else if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) ) {
 			$routes[] = 'smart-crop';
 		}
 
 		if ( in_array( 'smart-crop', $routes, true ) ) {
 			// Are we smart cropping the image?
-			if ( filter_input( INPUT_POST, 'rescan-smart-crop' ) && ! empty( $metadata ) ) {
+			if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) && ! empty( $metadata ) ) {
 				$this->smart_crop_image( $metadata, $attachment_id );
 			}
 		} else {
@@ -258,20 +340,25 @@ class ComputerVision extends Provider {
 
 			if ( ! is_wp_error( $image_scan ) ) {
 				// Are we updating the captions?
-				if ( filter_input( INPUT_POST, 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
+				if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) && isset( $image_scan->description->captions ) ) {
 					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 				}
 				// Are we updating the tags?
-				if ( filter_input( INPUT_POST, 'rescan-tags' ) && isset( $image_scan->tags ) ) {
+				if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) && isset( $image_scan->tags ) ) {
 					$this->generate_image_tags( $image_scan->tags, $attachment_id );
 				}
 			}
 		}
 
 		// Are we updating the OCR text?
-		if ( filter_input( INPUT_POST, 'rescan-ocr' ) ) {
+		if ( filter_input( INPUT_POST, 'rescan-ocr', FILTER_SANITIZE_STRING ) ) {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
+
+		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
+			$this->read_pdf( $attachment_id );
+		}
+
 	}
 
 	/**
@@ -341,18 +428,19 @@ class ComputerVision extends Provider {
 			'no' !== $settings['enable_image_captions']
 		) {
 
-			$image_url = apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $attachment_id );
+			// Allow scanning image that are not stored in local storage.
+			$image_url = get_modified_image_source_url( $attachment_id );
 
 			if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
 				if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
 					$image_url = get_largest_acceptable_image_url(
 						get_attached_file( $attachment_id ),
-						wp_get_attachment_url( $attachment_id, 'full' ),
+						wp_get_attachment_url( $attachment_id ),
 						$metadata['sizes'],
 						computer_vision_max_filesize()
 					);
 				} else {
-					$image_url = wp_get_attachment_url( $attachment_id, 'full' );
+					$image_url = wp_get_attachment_url( $attachment_id );
 				}
 			}
 
@@ -539,6 +627,52 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Read PDF content and update the description of attachment.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function read_pdf( $attachment_id ) {
+		$settings = $this->get_settings();
+
+		if ( ! is_array( $settings ) ) {
+			return new WP_Error( 'invalid_settings', 'Can not retrieve the plugin settings.' );
+		}
+
+		$should_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
+
+		if ( ! $should_read_pdf ) {
+			return false;
+		}
+
+		// Direct file system access is required for the current implementation of this feature.
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/file.php' );
+		}
+
+		$access_type = get_filesystem_method();
+
+		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
+			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.' );
+		}
+
+		$read = new Read( $settings, intval( $attachment_id ) );
+
+		return $read->read_document();
+	}
+
+	/**
+	 * Wrapper action callback for Read cron job.
+	 *
+	 * @param string $operation_url Operation URL for checking the read status.
+	 * @param int    $attachment_id Attachment ID.
+	 */
+	public function do_read_cron( $operation_url, $attachment_id ) {
+		$settings = $this->get_settings();
+
+		( new Read( $settings, intval( $attachment_id ) ) )->check_read_result( $operation_url );
+	}
+
+	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
 	 * @param array $tags          Array ot tags returned from the API.
@@ -603,6 +737,7 @@ class ComputerVision extends Provider {
 	 */
 	public function setup_fields_sections() {
 		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
+		$default_settings = $this->get_default_settings();
 		add_settings_field(
 			'url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
@@ -610,9 +745,10 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'   => 'url',
-				'input_type'  => 'text',
-				'description' => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
+				'label_for'     => 'url',
+				'input_type'    => 'text',
+				'default_value' => $default_settings['url'],
+				'description'   => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -622,8 +758,9 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'  => 'api_key',
-				'input_type' => 'password',
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $default_settings['api_key'],
 			]
 		);
 		add_settings_field(
@@ -635,7 +772,7 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
-				'default_value' => true,
+				'default_value' => $default_settings['enable_image_captions'],
 				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
 			]
 		);
@@ -648,7 +785,7 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
-				'default_value' => 75,
+				'default_value' => $default_settings['caption_threshold'],
 				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
@@ -661,7 +798,7 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
-				'default_value' => true,
+				'default_value' => $default_settings['enable_image_tagging'],
 				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
 			]
 		);
@@ -674,11 +811,10 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
-				'default_value' => 70,
+				'default_value' => $default_settings['tag_threshold'],
 				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
-
 		// What taxonomy should we tag images with?
 		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
 		$options               = [];
@@ -692,11 +828,11 @@ class ComputerVision extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for' => 'image_tag_taxonomy',
-				'options'   => $options,
+				'label_for'     => 'image_tag_taxonomy',
+				'options'       => $options,
+				'default_value' => $default_settings['image_tag_taxonomy'],
 			]
 		);
-
 		add_settings_field(
 			'enable-smart-cropping',
 			esc_html__( 'Enable smart cropping', 'classifai' ),
@@ -706,14 +842,13 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'enable_smart_cropping',
 				'input_type'    => 'checkbox',
-				'default_value' => false,
+				'default_value' => $default_settings['enable_smart_cropping'],
 				'description'   => __(
 					'Crop images around a region of interest identified by ComputerVision',
 					'classifai'
 				),
 			]
 		);
-
 		add_settings_field(
 			'enable-ocr',
 			esc_html__( 'Enable OCR', 'classifai' ),
@@ -723,9 +858,25 @@ class ComputerVision extends Provider {
 			[
 				'label_for'     => 'enable_ocr',
 				'input_type'    => 'checkbox',
-				'default_value' => false,
+				'default_value' => $default_settings['enable_ocr'],
 				'description'   => __(
 					'Detect text in an image and store that as post content',
+					'classifai'
+				),
+			]
+		);
+		add_settings_field(
+			'enable-read-pdf',
+			esc_html__( 'Enable Scanning PDF', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_read_pdf',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_read_pdf'],
+				'description'   => __(
+					'Extract visible text from multi-pages PDF documents. Store the result as the attachment description.',
 					'classifai'
 				),
 			]
@@ -764,6 +915,7 @@ class ComputerVision extends Provider {
 			'enable_image_tagging',
 			'enable_smart_cropping',
 			'enable_ocr',
+			'enable_read_pdf',
 		];
 
 		foreach ( $checkbox_settings as $checkbox_setting ) {
@@ -932,12 +1084,21 @@ class ComputerVision extends Provider {
 			return $this->ocr_processing( $metadata, $post_id, true );
 		}
 
-		$image_url = get_largest_acceptable_image_url(
-			get_attached_file( $post_id ),
-			wp_get_attachment_url( $post_id ),
-			$metadata['sizes'],
-			computer_vision_max_filesize()
-		);
+		if ( 'read-pdf' === $route_to_call ) {
+			return $this->read_pdf( $post_id );
+		}
+
+		// Allow rescanning image that are not stored in local storage.
+		$image_url = get_modified_image_source_url( $post_id );
+
+		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+			$image_url = get_largest_acceptable_image_url(
+				get_attached_file( $post_id ),
+				wp_get_attachment_url( $post_id ),
+				$metadata['sizes'],
+				computer_vision_max_filesize()
+			);
+		}
 
 		if ( empty( $image_url ) ) {
 			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is less than 4MB.' ) );

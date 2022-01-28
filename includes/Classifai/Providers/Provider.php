@@ -204,13 +204,8 @@ abstract class Provider {
 	 * Sanitization
 	 *
 	 * @param array $settings The settings being saved.
-	 *
-	 * @return array|mixed
 	 */
-	public function sanitize_settings( $settings ) {
-		// TODO: Implement sanitize_settings() method.
-		return $settings;
-	}
+	abstract public function sanitize_settings( $settings );
 
 	/**
 	 * Provides debug information related to the provider.

@@ -109,9 +109,7 @@ class Plugin {
 		];
 
 		foreach ( $this->services as $service ) {
-			if ( $service->can_register() ) {
-				$service->register();
-			}
+			$service->register();
 		}
 	}
 

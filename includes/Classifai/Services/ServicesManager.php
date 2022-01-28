@@ -39,16 +39,6 @@ class ServicesManager {
 	}
 
 	/**
-	 * The admin_support items require this method.
-	 *
-	 * @todo remove this requirement.
-	 * @return bool
-	 */
-	public function can_register() {
-		return true;
-	}
-
-	/**
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
@@ -328,7 +318,7 @@ class ServicesManager {
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
-				'timeout' => 10,
+				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				'body'    => [
 					'license_key' => $license_key,
 					'email'       => $email,
