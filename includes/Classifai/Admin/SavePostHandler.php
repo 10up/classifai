@@ -229,7 +229,7 @@ class SavePostHandler {
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
-			if ( false !== strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-json/wp/v2/' . $rest_base ) || false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/classifai/' ) ) {
+			if ( false !== strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-json/wp/v2/' . $rest_base ) || false !== strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-json/classifai/' ) ) {
 				return true;
 			}
 		}
