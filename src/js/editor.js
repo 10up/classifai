@@ -58,10 +58,19 @@ if ( 'true' === classifyObj.show_generate_button ) {
 								callback: resp => {
 									if ( true === resp.success ) {
 										showNotice();
-										const isPostSaved = select( 'core/editor' ).didPostSaveRequestSucceed();
-										if ( true === isPostSaved ) {
-											window.location.reload();
-										}
+										const taxonomies = Object.keys( resp );
+										taxonomies.forEach( function( e ) {
+											if ( 'success' !== e ) {
+												const termIds = Object.keys( resp[e] ).map( Number );
+
+												//Get Current Selected Categories and merge with new.
+												const currentTerms = select( 'core/editor' ).getEditedPostAttribute( e );
+												const newCategories = currentTerms.concat( termIds );
+
+												//Update Post with new categories
+												dispatch( 'core/editor' ).editPost( { e: newCategories } );
+											}
+										} );
 									}
 								}
 							}
