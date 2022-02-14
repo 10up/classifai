@@ -748,7 +748,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['url'],
-				'description'   => __( 'e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>', 'classifai' ),
+				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
 			]
 		);
 		add_settings_field(
@@ -765,7 +765,7 @@ class ComputerVision extends Provider {
 		);
 		add_settings_field(
 			'enable-image-captions',
-			esc_html__( 'Automatically Caption Images', 'classifai' ),
+			esc_html__( 'Generate alt text', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -773,12 +773,12 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_captions'],
-				'description'   => __( 'Images will be captioned with alt text upon upload', 'classifai' ),
+				'description'   => __( 'The alt text field will be filled out automatically.', 'classifai' ),
 			]
 		);
 		add_settings_field(
 			'caption-threshold',
-			esc_html__( 'Caption Confidence Threshold', 'classifai' ),
+			esc_html__( 'Alt text confidence threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -786,12 +786,12 @@ class ComputerVision extends Provider {
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
 				'default_value' => $default_settings['caption_threshold'],
-				'description'   => __( 'Minimum confidence score for automatically applied image captions, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'description'   => __( 'Minimum confidence score for automatically added alt text, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
 		add_settings_field(
 			'enable-image-tagging',
-			esc_html__( 'Automatically Tag Images', 'classifai' ),
+			esc_html__( 'Tag images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -799,12 +799,12 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_tagging'],
-				'description'   => __( 'Images will be tagged upon upload', 'classifai' ),
+				'description'   => __( 'Image tags will be added automatically.', 'classifai' ),
 			]
 		);
 		add_settings_field(
 			'image-tag-threshold',
-			esc_html__( 'Tag Confidence Threshold', 'classifai' ),
+			esc_html__( 'Tag confidence threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -812,7 +812,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
 				'default_value' => $default_settings['tag_threshold'],
-				'description'   => __( 'Minimum confidence score for automatically applied image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
+				'description'   => __( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 			]
 		);
 		// What taxonomy should we tag images with?
@@ -823,7 +823,7 @@ class ComputerVision extends Provider {
 		}
 		add_settings_field(
 			'image-tag-taxonomy',
-			esc_html__( 'Tag Taxonomy', 'classifai' ),
+			esc_html__( 'Tag taxonomy', 'classifai' ),
 			[ $this, 'render_select' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -844,14 +844,14 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_smart_cropping'],
 				'description'   => __(
-					'Crop images around a region of interest identified by ComputerVision',
+					'ComputerVision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
 					'classifai'
 				),
 			]
 		);
 		add_settings_field(
 			'enable-ocr',
-			esc_html__( 'Enable OCR', 'classifai' ),
+			esc_html__( 'Scan image or PDF for text', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -860,14 +860,14 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_ocr'],
 				'description'   => __(
-					'Detect text in an image and store that as post content',
+					'OCR detects text in images (i.e., handwritten notes) or PDF files and saves that as post content.',
 					'classifai'
 				),
 			]
 		);
 		add_settings_field(
 			'enable-read-pdf',
-			esc_html__( 'Enable Scanning PDF', 'classifai' ),
+			esc_html__( 'Enable scanning PDF', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
