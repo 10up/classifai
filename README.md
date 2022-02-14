@@ -121,7 +121,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - In the `API Key` field, enter your `KEY 1`.
 
 #### 3. Enable specific Image Processing features
-- Choose to `Automatically Tag Images`, `Automatically Tag Images`, `Enable smart cropping`, and/or `Enable OCR`.
+- Choose to `Automatically Caption Images`, `Automatically Tag Images`, `Enable smart cropping`, and/or `Enable OCR`.
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content

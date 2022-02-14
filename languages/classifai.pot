@@ -88,11 +88,11 @@ msgid "ClassifAI PDF Processing"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:239
-msgid "ReGenerate Tags"
+msgid "Rescan Alt Text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:239
-msgid "Generate Tags"
+msgid "Scan Alt Text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:240
@@ -133,19 +133,19 @@ msgid "In progress!"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:751
-msgid "e.g. <code>https://REGION.api.cognitive.microsoft.com/</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>"
+msgid "e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:768
-msgid "Automatically Tag Images"
+msgid "Automatically Caption Images"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:776
-msgid "Images will be tagged upon upload"
+msgid "Images will be captioned with alt text upon upload"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:781
-msgid "Tag Confidence Threshold"
+msgid "Caption Confidence Threshold"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:789
