@@ -236,10 +236,10 @@ class ComputerVision extends Provider {
 	 */
 	public function attachment_data_meta_box( $post ) {
 		$settings   = get_option( 'classifai_computer_vision' );
-		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'Rescan Alt Text', 'classifai' ) : __( 'Scan Alt Text', 'classifai' );
-		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan Tags', 'classifai' ) : __( 'Generate Tags', 'classifai' );
-		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan Text', 'classifai' ) : __( 'Scan Text', 'classifai' );
-		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate Smart Thumbnail', 'classifai' ) : __( 'Generate Smart Thumbnail', 'classifai' );
+		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No alt text? Rescan image', 'classifai' ) : __( 'Generate alt text', 'classifai' );
+		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
+		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan for text', 'classifai' ) : __( 'Scan image for text', 'classifai' );
+		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">
@@ -280,7 +280,7 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_pdf_data_meta_box( $post ) {
-		$read = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF content', 'classifai' ) : __( 'Rescan PDF content', 'classifai' );
+		$read   = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF for text', 'classifai' ) : __( 'Rescan PDF for text', 'classifai' );
 		$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
 		if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
 			$running = true;
