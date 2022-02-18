@@ -79,6 +79,11 @@ class SavePostHandler {
 
 		// Process posts in allowed post statuses, supported items and only if features are enabled
 		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
+			// Check if process content on save is disabled for specific post.
+			$classifai_process_content = get_post_meta( $post_id, '_classifai_process_content', true );
+			if ( 'no' === $classifai_process_content ) {
+				return;
+			}
 			$this->classify( $post_id );
 		}
 	}
