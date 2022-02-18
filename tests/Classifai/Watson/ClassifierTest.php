@@ -15,7 +15,7 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	function test_it_has_an_endpoint() {
 		$actual = $this->classifier->endpoint;
-		$this->assertContains( 'watsonplatform.net', $actual );
+		$this->assertStringContainsString( 'watsonplatform.net', $actual );
 	}
 
 	function test_it_has_a_request_object() {
