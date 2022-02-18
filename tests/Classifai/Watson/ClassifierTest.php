@@ -33,7 +33,10 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	function test_it_can_classify_text() {
 		if ( ! defined( 'WATSON_USERNAME' ) && ! defined( 'WATSON_PASSWORD' ) ) {
-			$this->expectNotToPerformAssertions();
+			/** @doesNotPerformAssertions */
+			if ( method_exists( $this, 'expectNotToPerformAssertions' ) ) {
+				$this->expectNotToPerformAssertions();
+			}
 		}
 
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
