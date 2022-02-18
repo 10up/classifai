@@ -10,7 +10,7 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "php": ">=7.4",
+    "php": ">=7.0",
     "yahnis-elsts/plugin-update-checker": "4.6"
   },
   "autoload": {
@@ -23,7 +23,6 @@
   },
   "require-dev": {
     "10up/phpcs-composer": "dev-master",
-    "10up/wpacceptance": "dev-master",
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
