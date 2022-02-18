@@ -30,19 +30,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.4.0
     - name: Set PHP version
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '7.0'
         coverage: none
-        tools: composer:v1
     - name: composer install
       run: composer install
     - name: PHPCS check
       uses: chekalsky/phpcs-action@v1
       with:
-        phpcs_bin_path: './vendor/bin/phpcs .'
+        phpcs_bin_path: './vendor/bin/phpcs . --runtime-set testVersion 7.0-'
   vipcs:
     name: vipcs
     runs-on: ubuntu-latest
