@@ -21,8 +21,8 @@ class DebugInfoTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->debug_info = new DebugInfo();
 	}

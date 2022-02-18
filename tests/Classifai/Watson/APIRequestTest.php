@@ -6,8 +6,8 @@ class APIRequestTest extends \WP_UnitTestCase {
 
 	public $request;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->request = new APIRequest();
 	}

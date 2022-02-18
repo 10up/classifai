@@ -20,8 +20,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->provider = new ComputerVision( 'service_name' );
 	}

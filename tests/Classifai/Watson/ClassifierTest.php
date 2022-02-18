@@ -6,8 +6,8 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->classifier = new Classifier();
 		$this->classifier->endpoint = 'http://watsonplatform.net';

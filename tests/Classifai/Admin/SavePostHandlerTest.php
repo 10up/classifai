@@ -20,8 +20,8 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->save_post_handler = new SavePostHandler();
 	}

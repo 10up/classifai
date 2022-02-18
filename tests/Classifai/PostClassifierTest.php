@@ -8,8 +8,8 @@ class PostClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->classifier = new PostClassifier();
 		$this->taxonomy_factory = new TaxonomyFactory();

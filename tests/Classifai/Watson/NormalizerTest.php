@@ -6,8 +6,8 @@ class NormalizeTest extends \WP_UnitTestCase {
 
 	public $normalizer;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->normalizer = new Normalizer();
 	}
