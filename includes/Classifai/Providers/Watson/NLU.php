@@ -824,7 +824,7 @@ class NLU extends Provider {
 			return;
 		}
 
-		if ( empty( $_POST['classifai_language_processing_meta'] ) || ! wp_verify_nonce( $_POST['classifai_language_processing_meta'], 'classifai_language_processing_meta_action' ) ) {
+		if ( empty( $_POST['classifai_language_processing_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), 'classifai_language_processing_meta_action' ) ) {
 			return;
 		}
 
@@ -833,7 +833,7 @@ class NLU extends Provider {
 			return;
 		}
 
-		if ( isset( $_POST['_classifai_process_content'] ) && 'yes' === sanitize_text_field( $_POST['_classifai_process_content'] ) ) {
+		if ( isset( $_POST['_classifai_process_content'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['_classifai_process_content'] ) ) ) {
 			$classifai_process_content = 'yes';
 		} else {
 			$classifai_process_content = 'no';
