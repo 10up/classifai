@@ -64,19 +64,6 @@ class Plugin {
 					'auth_callback' => '__return_true',
 				]
 			);
-			register_meta(
-				$post_type,
-				'_classifai_process_content',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'default'       => 'yes',
-					'type'          => 'string',
-					'auth_callback' => function() {
-						return current_user_can( 'edit_posts' );
-					},
-				]
-			);
 		}
 
 		/**

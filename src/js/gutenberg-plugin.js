@@ -26,23 +26,23 @@ const ClassifAIIcon = () => (
  */
 const ClassifAIToggle = () => {
 	// Use the datastore to retrieve the all the meta for this post.
-	const meta = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'meta' ) );
+	const processContent = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_process_content' ) );
 
 	// Use the datastore to tell the post to update the meta.
 	const { editPost } = useDispatch( 'core/editor' );
-	const enabled = ( 'no' === meta._classifai_process_content ) ? 'no' : 'yes';
+	const enabled = ( 'no' === processContent ) ? 'no' : 'yes';
 
 	return (
 		<ToggleControl
 			label={ __( 'Process content on save', 'classifai' ) }
 			help={
 				'yes' === enabled
-					? __( 'Language Processing is enabled', 'classifai' )
-					: __( 'Language Processing is disabled', 'classifai' )
+					? __( 'Classifai language processing on save is enabled', 'classifai' )
+					: __( 'Classifai language processing on save is disabled', 'classifai' )
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
-				editPost( { meta: { ...meta, '_classifai_process_content': ( value ? 'yes' : 'no' ) } } );
+				editPost( { 'classifai_process_content': ( value ? 'yes' : 'no' ) } );
 			}}
 		/>
 	);

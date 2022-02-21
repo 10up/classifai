@@ -123,6 +123,8 @@ class NLU extends Provider {
 		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
 		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
 
+		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -779,7 +781,7 @@ class NLU extends Provider {
 		if ( in_array( $post_type, $supported_post_types, true ) ) {
 			add_meta_box(
 				'classifai-nlu-meta-box',
-				__( 'ClassifAI', 'classifai' ),
+				__( 'ClassifAI Language Processing', 'classifai' ),
 				[ $this, 'render_classifai_meta_box' ],
 				null,
 				'side',
@@ -838,5 +840,30 @@ class NLU extends Provider {
 		}
 
 		update_post_meta( $post_id, '_classifai_process_content', $classifai_process_content );
+	}
+
+	/**
+	 * Add `classifai_process_content` to rest API for view/edit.
+	 */
+	public function add_process_content_meta_to_rest_api() {
+		$supported_post_types = \Classifai\get_supported_post_types();
+		register_rest_field(
+			$supported_post_types,
+			'classifai_process_content',
+			array(
+				'get_callback'    => function( $object ) {
+					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+					return ( 'no' === $process_content ) ? 'no' : 'yes';
+				},
+				'update_callback' => function ( $value, $object ) {
+					$value = ( 'no' === $value ) ? 'no' : 'yes';
+					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+				},
+				'schema'          => [
+					'type'    => 'string',
+					'context' => [ 'view', 'edit' ],
+				],
+			)
+		);
 	}
 }
