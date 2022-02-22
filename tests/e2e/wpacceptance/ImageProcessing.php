@@ -45,9 +45,9 @@ class ImageProcessing extends \TestCaseBase {
 
 		$I->seeText( 'ClassifAI Image Processing' );
 
-		$I->seeText( 'Scan Alt Text' );
+		$I->seeText( 'Generate alt text' );
 
-		$I->seeText( 'Generate Tags' );
+		$I->seeText( 'Generate image tags' );
 	}
 
 	/**
@@ -62,6 +62,6 @@ class ImageProcessing extends \TestCaseBase {
 
 		$I->seeText( 'ClassifAI Image Processing' );
 
-		$I->seeText( 'Rescan Alt Text' );
+		$I->seeText( 'No alt text? Rescan image' );
 	}
 }
