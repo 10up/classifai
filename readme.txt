@@ -2,7 +2,7 @@
 Contributors: 10up
 Tags: AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
 Requires at least: 5.0
-Tested up to: 5.8
+Tested up to: 5.9
 Requires PHP: 7.0
 Stable tag: 1.7.0
 License: GPLv2 or later
