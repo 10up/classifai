@@ -34,7 +34,7 @@ const ClassifAIToggle = () => {
 
 	return (
 		<ToggleControl
-			label={ __( 'Process content for on update', 'classifai' ) }
+			label={ __( 'Process content on update', 'classifai' ) }
 			help={
 				'yes' === enabled
 					? __( 'ClassifAI language processing is enabled', 'classifai' )

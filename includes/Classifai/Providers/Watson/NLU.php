@@ -806,7 +806,7 @@ class NLU extends Provider {
 		<p>
 			<label for="_classifai_process_content">
 				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?>/>
-				<?php esc_html_e( 'Process content for on update', 'classifai' ); ?>
+				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
 			</label>
 		</p>
 		<?php
