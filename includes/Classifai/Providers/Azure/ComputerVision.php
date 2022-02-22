@@ -851,7 +851,7 @@ class ComputerVision extends Provider {
 		);
 		add_settings_field(
 			'enable-ocr',
-			esc_html__( 'Scan image or PDF for text', 'classifai' ),
+			esc_html__( 'Scan images for text', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -860,7 +860,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_ocr'],
 				'description'   => __(
-					'OCR detects text in images (i.e., handwritten notes) or PDF files and saves that as post content.',
+					'OCR detects text in images (e.g., handwritten notes) and saves that as post content.',
 					'classifai'
 				),
 			]
