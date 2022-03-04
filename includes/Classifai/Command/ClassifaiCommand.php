@@ -437,9 +437,22 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @return array
 	 */
 	private function get_posts_to_classify( $opts = [] ) {
+		/**
+		 * Filter post statuses when classifying with Watson.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_post_statuses_for_watson
+		 *
+		 * @param array $post_statuses Array of post statuses to be classified with language processing.
+		 * @param array $opts Options from WP CLI.
+		 *
+		 * @return array Array of post statuses.
+		 */
+		$post_statuses = apply_filters( 'classifai_post_statuses_for_watson', array( 'publish' ), $opts );
+
 		$query_params = [
 			'post_type'      => ! empty( $opts['post_type'] ) ? $opts['post_type'] : 'any',
-			'post_status'    => 'publish',
+			'post_status'    => $post_statuses,
 			'fields'         => 'ids',
 			'posts_per_page' => -1,
 		];
