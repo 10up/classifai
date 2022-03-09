@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClassifAI 1.7.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2022-01-28 19:27:29+00:00\n"
+"POT-Creation-Date: 2022-03-09 13:24:33+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -68,7 +68,6 @@ msgid "ClassifAI requires setup"
 msgstr ""
 
 #: includes/Classifai/Admin/SavePostHandler.php:254
-#: includes/Classifai/Providers/Azure/ComputerVision.php:240
 msgid "Generate Tags"
 msgstr ""
 
@@ -85,39 +84,46 @@ msgid "ClassifAI PDF Processing"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:239
-msgid "Rescan Alt Text"
+msgid "No alt text? Rescan image"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:239
-msgid "Scan Alt Text"
+#: includes/Classifai/Providers/Azure/ComputerVision.php:768
+msgid "Generate alt text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:240
-msgid "Rescan Tags"
+msgid "Rescan image for new tags"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:240
+msgid "Generate image tags"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:241
-msgid "Rescan Text"
+msgid "Rescan for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:241
-msgid "Scan Text"
+#: includes/Classifai/Services/ImageProcessing.php:101
+msgid "Scan image for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:242
-msgid "Regenerate Smart Thumbnail"
+msgid "Regenerate smart thumbnail"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:242
-msgid "Generate Smart Thumbnail"
+msgid "Create smart thumbnail"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:283
-msgid "Scan PDF content"
+#: includes/Classifai/Services/ImageProcessing.php:64
+msgid "Scan PDF for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:283
-msgid "Rescan PDF content"
+msgid "Rescan PDF for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:297
@@ -130,7 +136,11 @@ msgid "Endpoint URL"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:751
-msgid "e.g. <code>https://REGION.api.cognitive.microsoft.com/</code>"
+msgid ""
+"Supported protocol and hostname endpoints, e.g., "
+"<code>https://REGION.api.cognitive.microsoft.com</code> or "
+"<code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look "
+"different based on your setting choices in Azure."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:756
@@ -139,44 +149,40 @@ msgstr ""
 msgid "API Key"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:768
-msgid "Automatically Caption Images"
-msgstr ""
-
 #: includes/Classifai/Providers/Azure/ComputerVision.php:776
-msgid "Images will be captioned with alt text upon upload"
+msgid "The alt text field will be filled out automatically."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:781
-msgid "Caption Confidence Threshold"
+msgid "Alt text confidence threshold"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:789
 msgid ""
-"Minimum confidence score for automatically applied image captions, numeric "
-"value from 0-100. Recommended to be set to at least 75."
+"Minimum confidence score for automatically added alt text, numeric value "
+"from 0-100. Recommended to be set to at least 75."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:794
-msgid "Automatically Tag Images"
+msgid "Tag images"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:802
-msgid "Images will be tagged upon upload"
+msgid "Image tags will be added automatically."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:807
-msgid "Tag Confidence Threshold"
+msgid "Tag confidence threshold"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:815
 msgid ""
-"Minimum confidence score for automatically applied image tags, numeric "
-"value from 0-100. Recommended to be set to at least 70."
+"Minimum confidence score for automatically added image tags, numeric value "
+"from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:826
-msgid "Tag Taxonomy"
+msgid "Tag taxonomy"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:838
@@ -184,19 +190,23 @@ msgid "Enable smart cropping"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:846
-msgid "Crop images around a region of interest identified by ComputerVision"
+msgid ""
+"ComputerVision detects and saves the most visually interesting part of your "
+"image (i.e., faces, animals, notable text)."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:854
-msgid "Enable OCR"
+msgid "Scan images for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:862
-msgid "Detect text in an image and store that as post content"
+msgid ""
+"OCR detects text in images (e.g., handwritten notes) and saves that as post "
+"content."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:870
-msgid "Enable Scanning PDF"
+msgid "Enable scanning PDF"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:878
@@ -430,6 +440,7 @@ msgid "Latest response"
 msgstr ""
 
 #: includes/Classifai/Services/ImageProcessing.php:55
+#: includes/Classifai/Services/ImageProcessing.php:74
 msgid "Scan"
 msgstr ""
 
@@ -440,13 +451,8 @@ msgstr ""
 msgid "Rescan"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:64
-msgid "Classifai Read PDF"
-msgstr ""
-
 #: includes/Classifai/Services/ImageProcessing.php:72
 #: includes/Classifai/Services/ImageProcessing.php:73
-#: includes/Classifai/Services/ImageProcessing.php:74
 #: includes/Classifai/Services/ImageProcessing.php:75
 msgid "Generate"
 msgstr ""
@@ -456,19 +462,15 @@ msgid "Regenerate"
 msgstr ""
 
 #: includes/Classifai/Services/ImageProcessing.php:78
-msgid "Classifai Alt Tags"
+msgid "Alt text"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:84
-msgid "Classifai Image Tags"
+#: includes/Classifai/Services/ImageProcessing.php:85
+msgid "Image tags"
 msgstr ""
 
-#: includes/Classifai/Services/ImageProcessing.php:92
-msgid "Classifai Smart Crop"
-msgstr ""
-
-#: includes/Classifai/Services/ImageProcessing.php:100
-msgid "Detect Text"
+#: includes/Classifai/Services/ImageProcessing.php:93
+msgid "Smart thumbnail"
 msgstr ""
 
 #: includes/Classifai/Services/LanguageProcessing.php:14
