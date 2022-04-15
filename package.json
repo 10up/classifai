@@ -45,6 +45,7 @@
     "babel-eslint": "10.0.3",
     "babel-loader": "^8.0.6",
     "cypress": "^9.5.4",
+    "cypress-file-upload": "^5.0.8",
     "eslint": "^6.3.0",
     "eslint-loader": "^3.0.0",
     "husky": "^3.0.5",

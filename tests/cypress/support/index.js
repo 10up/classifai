@@ -12,11 +12,11 @@
 // You can read more here:
 // https://on.cypress.io/configuration
 // ***********************************************************
-
-import "@10up/cypress-wp-utils";
+import 'cypress-file-upload';
+import '@10up/cypress-wp-utils';
 
 // Import commands.js using ES2015 syntax:
-import "./commands";
+import './commands';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
