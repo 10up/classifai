@@ -18,10 +18,8 @@ import '@10up/cypress-wp-utils';
 // Import commands.js using ES2015 syntax:
 import './commands';
 
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
-beforeEach(() => {
-  Cypress.Cookies.defaults({
-    preserve: /^wordpress.*?/,
-  });
-});
+beforeEach( () => {
+	Cypress.Cookies.defaults( {
+		preserve: /^wordpress.*?/,
+	} );
+} );

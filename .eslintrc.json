@@ -1,7 +1,13 @@
 {
   "globals": {
-	"wp": "readable",
-	"jQuery": "readable"
+	  "wp": "readable",
+	  "jQuery": "readable",
+    "describe": "readonly",
+    "before": "readonly",
+    "beforeEach": "readonly",
+    "it": "readonly",
+    "Cypress": "readonly",
+    "cy": "readonly"
   },
   "extends": "@10up/eslint-config"
 }
