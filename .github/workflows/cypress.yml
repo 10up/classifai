@@ -24,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: npm install
     - name: Composer (optional)
-      run: composer install
+      run: composer update -W
       continue-on-error: true
     - name: Build (optional)
       run: npm run build
