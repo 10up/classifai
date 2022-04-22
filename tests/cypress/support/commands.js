@@ -45,8 +45,8 @@ Cypress.Commands.add( 'verifyPostTaxonomyTerms', ( taxonomy, threshold ) => {
 		// Compare taxonomy terms with test data terms.
 		cy.wrap( $panel ).find( taxonomySelector ).should( 'exist' );
 		cy.wrap( $panel ).find( taxonomySelector )
-			.each( ( term, index ) => {
-				return cy.wrap( term ).should( 'have.text', terms[index] );
+			.each( ( term ) => {
+				return expect( term.text() ).to.be.oneOf( terms );
 			} )
 			.then( postTerms => {
 				expect( postTerms ).to.have.length( terms.length );

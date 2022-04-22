@@ -29,7 +29,7 @@ describe( 'Image processing Tests', () => {
 		} );
 
 		// Verify Metabox with Image processing actions.
-		cy.get( '.postbox-header h2' ).first().contains( 'ClassifAI Image Processing' );
+		cy.get( '.postbox-header h2, #attachment_meta_box h2' ).first().contains( 'ClassifAI Image Processing' );
 		cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).contains( 'Generate alt text' );
 		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).contains( 'Generate image tags' );
 		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).contains( 'Scan image for text' );
