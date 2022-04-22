@@ -15,6 +15,8 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 		// Check Heading
 		cy.visit( '/wp-admin/admin.php?page=classifai_settings' );
 		cy.get( '#wpbody h2' ).contains( 'ClassifAI Settings' );
+		cy.get( 'label[for="email"]' ).contains( 'Registered Email' );
+		cy.get( 'label[for="license_key"]' ).contains( 'Registration Key' );
 	} );
 
 	it( 'Can see "Language Processing" menu and Can visit "Language Processing" settings page.', () => {
