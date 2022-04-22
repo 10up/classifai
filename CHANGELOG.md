@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.7.1] - 2022-04-22
+### Added
+- `classifai_post_statuses` filter; allows post statuses for content classification to be changed as required but would apply to all post types (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
+- `classifai_post_statuses_for_post_type_or_id` filter; allows post statuses for content classification to be changed as required based on post type / post ID (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
+- Implement `can_register()` method for `Classifai/Providers/Watson/NLU.php` (props [@thrijith](https://github.com/thrijith) via [#313](https://github.com/10up/classifai/pull/313)).
+- Notice for deprecated IBM Watson `watsonplatform.net` NLU API endpoint (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jeffpaul](https://github.com/jeffpaul) via [#320](https://github.com/10up/classifai/pull/320)).
+- CodeQL Analaysis code scanning and Dependency security scanning actions (props [@jeffpaul](https://github.com/jeffpaul) via [#314](https://github.com/10up/classifai/pull/314), [#336](https://github.com/10up/classifai/pull/336)).
+
+### Changed
+- Bump WordPress "tested up to" version 5.9 (props [@s3rgiosan](https://github.com/s3rgiosan), [@jeffpaul](https://github.com/jeffpaul) via [#327](https://github.com/10up/classifai/pull/327)).
+- Normalize copy around Image Processing functions (props [@s3rgiosan](https://github.com/s3rgiosan), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [Delfina Hoxha](https://www.linkedin.com/in/delfina-hoxha/), [@myBCN](https://github.com/myBCN), [@ajmaurya99](https://github.com/ajmaurya99) via [#325](https://github.com/10up/classifai/pull/325)).
+- Port WP-CLI commands documentation into the [ClassifAI Developer Documentation site](https://10up.github.io/classifai/) (props [@ActuallyConnor](https://github.com/ActuallyConnor), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi) via [](https://github.com/10up/classifai/pull/312)).
+
+### Removed
+- Unused `check_license_key` method from `Classifai/Providers/Watson/NLU.php` (props [@thrijith](https://github.com/thrijith) via [#313](https://github.com/10up/classifai/pull/313)).
+- Remove unused `ClassifaiCommand->gc()` method, `ServicesManager->can_register()` method, and AWS Provider `Comprehend` class (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jamesmorrison](https://github.com/jamesmorrison), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#317](https://github.com/10up/classifai/pull/317)).
+
+### Fixed
+- Individual "Classify" action per post type (props [@mustafauysal](https://github.com/mustafauysal), [@cadic](https://github.com/cadic) via [#311](https://github.com/10up/classifai/pull/311)).
+- Missing PHPUnit Polyfills library by adding `yoast/phpunit-polyfills:^1.0.0` dev package (props [@rahulsprajapati](https://github.com/rahulsprajapati) via [#319](https://github.com/10up/classifai/pull/319)).
+
+### Security
+- Bump `minimist` from 1.2.5 to 1.2.6 (props [@dependabot](https://github.com/apps/dependabot) via [#332](https://github.com/10up/classifai/pull/332)).
+
 ## [1.7.0] - 2021-08-26
 ### Added
 - Automated Optical Character Recognition (OCR) scanning of multi-page PDF files adding text content to media description field (props [@dinhtungdu](https://github.com/dinhtungdu), [@dkotter](https://github.com/dkotter), [@phpbits](https://github.com/phpbits) via [#282](https://github.com/10up/classifai/pull/282)).
@@ -181,6 +205,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.7.1]: https://github.com/10up/classifai/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/10up/classifai/compare/1.6.0...1.7.0
 [1.6.0]: https://github.com/10up/classifai/compare/1.5.1...1.6.0
 [1.5.1]: https://github.com/10up/classifai/compare/1.5.0...1.5.1
