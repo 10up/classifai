@@ -5,6 +5,7 @@
     "describe": "readonly",
     "before": "readonly",
     "beforeEach": "readonly",
+    "expect": "readonly",
     "it": "readonly",
     "Cypress": "readonly",
     "cy": "readonly"
