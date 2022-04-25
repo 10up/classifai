@@ -198,6 +198,29 @@ function get_post_types_for_language_settings() {
 }
 
 /**
+ * Get post types we want to show in the language processing settings
+ *
+ * @since 1.6.0
+ *
+ * @return array
+ */
+function get_post_statuses_for_language_settings() {
+	$post_statuses = get_post_statuses();
+
+	/**
+	 * Filter post statuses shown in language processing settings.
+	 *
+	 * @since 1.7.1 @TODO: Ensure this is updated to the correct version
+	 * @hook classifai_language_settings_post_statuses
+	 *
+	 * @param {array} $post_statuses Array of post statuses to show in language processing settings.
+	 *
+	 * @return {array} Array of post statuses.
+	 */
+	return apply_filters( 'classifai_language_settings_post_statuses', $post_statuses );
+}
+
+/**
  * The list of post types that get the ClassifAI taxonomies. Defaults
  * to 'post'.
  *
@@ -230,6 +253,41 @@ function get_supported_post_types() {
 	$post_types = apply_filters( 'classifai_post_types', $post_types );
 
 	return $post_types;
+}
+
+/**
+ * The list of post statuses that get the ClassifAI taxonomies. Defaults
+ * to 'publish'.
+ *
+ * return array
+ */
+function get_supported_post_statuses() {
+	$classifai_settings = get_plugin_settings( 'language_processing' );
+
+	if ( empty( $classifai_settings ) ) {
+		$post_statuses = [ 'publish' ];
+	} else {
+		$post_statuses = [];
+		foreach ( $classifai_settings['post_statuses'] as $post_status => $enabled ) {
+			if ( ! empty( $enabled ) ) {
+				$post_statuses[] = $post_status;
+			}
+		}
+	}
+
+	/**
+	 * Filter post statuses supported for language processing.
+	 *
+	 * @since 1.0.0
+	 * @hook classifai_post_statuses
+	 *
+	 * @param {array} $post_types Array of post statuses to be classified with language processing.
+	 *
+	 * @return {array} Array of post statuses.
+	 */
+	$post_statuses = apply_filters( 'classifai_post_statuses', $post_statuses );
+
+	return $post_statuses;
 }
 
 /**
