@@ -1,6 +1,7 @@
 - /.git/
 - /.github/
 - /bin/
+- /hookdocs/
 - /docs/
 - /node_modules/
 - /release/
