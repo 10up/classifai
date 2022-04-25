@@ -206,6 +206,7 @@ class Read {
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( $operation_url );
 		} else {
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
 			$response = wp_remote_get(
 				$operation_url,
 				[

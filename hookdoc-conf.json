@@ -3,7 +3,8 @@
       "destination": "docs",
       "template": "node_modules/wp-hookdoc/template",
       "recurse": true,
-      "readme": "./.github/hookdoc-tmpl/README.md"
+      "readme": "./.github/hookdoc-tmpl/README.md",
+      "tutorials": "./hookdocs"
   },
   "source": {
       "includePattern": ".+\\.(php|inc)?$"

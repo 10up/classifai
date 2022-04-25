@@ -1,7 +1,8 @@
 # ![ClassifAI](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/logo.svg "ClassifAI")
+
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Build Status](https://travis-ci.com/10up/classifai.svg?token=Jy6DFK4YVZbgtyNHcjm5&branch=develop)](https://travis-ci.com/10up/classifai) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.8%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v5.9%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 ## Table of Contents
 * [Features](#features)
@@ -24,7 +25,7 @@
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
 * Automatically scan images and PDF files for embedded text and save for use in WordPress
-* [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
+* [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/computervision/3.1/generate-thumbnail/generate-thumbnail) around a region of interest identified by Computer Vision
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 | Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
@@ -49,6 +50,7 @@ The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer
 ## Installation
 
 #### 1. Download or Clone this repo, install dependencies and build.
+
 - `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
 
@@ -59,11 +61,13 @@ The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer
 ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
 
 #### 1. Register for a ClassifAI account
+
 - Register for a free ClassifAI account [here](https://classifaiplugin.com/#cta).
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
 #### 2. Configure ClassifAI Registration Key under ClassifAI > ClassifAI
+
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
@@ -72,6 +76,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 ## Set Up Language Processing (via IBM Watson)
 
 #### 1. Sign up for Watson services
+
 - [Register for an IBM Cloud account](https://cloud.ibm.com/registration) or sign into your existing one.
 - Check for an email from `IBM Cloud` and click the `Confirm Account` link.
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
@@ -82,19 +87,28 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 **The credentials screen will show either an API key or a username/password combination.**
 
 ##### If your credentials contain an API Key, then:
+
 - In the `API URL` field enter the URL
 - Enter your API Key in the `API Key` field.
 
 ##### If your credentials contain a username and password, then:
+
 - In the `API URL` field enter the URL
 - Enter the `username` value into the `API Username`.
 - Enter the `password` into the `API Key` field.
 
 #### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
+
 - Choose which public post types to classify when saved.
 - Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
 
 #### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
+
+### ⚠️  Note: Deprecated Endpoint URLs: `watsonplatform.net`
+
+IBM Watson endpoint urls with `watsonplatform.net` were deprecated on 26 May 2021. The pattern for the new endpoint URLs is `api.{location}.{offering}.watson.cloud.ibm.com`. For example, Watson's NLU service offering endpoint will be like: `api.{location}.natural-language-understanding.watson.cloud.ibm.com`
+
+For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change.
 
 ## Set Up Image Processing (via Microsoft Azure)
 
@@ -105,180 +119,27 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - The file must be externally accessible via URL (i.e. local sites and setups that block direct file access will not work out of the box)
 
 #### 1. Sign up for Azure services
+
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
 - Log into your account and create a new [*Computer Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
 #### 2. Configure Microsoft Azure API and Key under ClassifAI > Image Processing
+
 - In the `Endpoint URL` field, enter your `API endpoint`.
 - In the `API Key` field, enter your `KEY 1`.
 
 #### 3. Enable specific Image Processing features
-- Choose to `Automatically Caption Images`, `Automatically Tag Images`, `Enable smart cropping`, and/or `Enable OCR`.
+
+- Choose to `Generate alt text`, `Tag images`, `Enable smart cropping`, and/or `Scan image or PDF for text`.
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
 ## WP CLI Commands
 
-### Language Processing Commands
-
-#### Batch Classify Posts
-
-`$ wp classifai post {post_ids} [--post_type=<post_type>] [--limit=<limit>] [--link=<link>]`
-
-Batch post classification using IBM Watson NLU API.
-
-##### Options
-
-**`{post_ids}`**
-
-A comma delimited list of post IDs to classify. Used if `post_type` is false or absent.
-
-default: `true`
-
-**`--post_type=<post_type>`**
-
-Batch classify posts belonging to this post type. If `false` or absent relies on `post_ids`.
-
-default: `false`
-options:
-- any post type name
-- `false`, if args contains `post_ids`
-
-**`--limit=<limit>`**
-
-Limit classification to N posts.
-
-default: `false`
-options:
-- `false`, no limit
-- `N`, max number of posts to classify
-
-**`--link=<link>`**
-
-Whether to link classification results to Taxonomy terms.
-
-default: `true`
-
-#### Classify Text
-
-`$ wp classifai text {text} [--category=<bool>] [--keyword=<bool>] [--concept=<bool>] [--entity=<bool>] [--input=<input>] [--only-normalize=<bool>]`
-
-Directly classify text using IBM Watson NLU API.
-
-##### Options
-
-**`--category=<bool>`**
-
-Enables NLU category feature.
-
-default: `true`
-
-**`--keyword=<bool>`**
-
-Enables NLU keyword feature.
-
-default: `true`
-
-**`--concept=<bool>`**
-
-Enables NLU concept feature.
-
-default: `true`
-
-**`--entity=<bool>`**
-
-Enables NLU entity feature.
-
-default: `true`
-
-**`--input=<input>`**
-
-Path to input file or URL.
-
-default: `false`
-options:
-- path to local file
-- path to remote URL
-- `false`, uses args[0] instead
-
-**`--only-normalize=<bool>`**
-
-Prints the normalized text that will be sent to the NLU API.
-
-default: `false`
-
-### Image Processing Commands
-
-#### Classify Attachments
-
-`$ wp classifai image {attachment_ids} [--limit=<int>] [--skip=<skip>] [--force]`
-
-Directly add description "alt text"  and tags to attachment(s) using Azure AI Computer Vision API.
-
-##### Options
-
-**`{attachment_ids}`**
-
-Comma delimeted list of Attachment IDs to classify.
-
-**`--limit=<int>`**
-
-Limit number of attachments to classify.
-
-default: `100`.
-
-**`--skip=<skip>`**
-
-Skip first N attachments.
-
-default: `false`.
-
-**`--force`**
-
-Force classifying attachments regardless of their `alt`.
-
-default: `false`.
-
-#### Image Cropping
-
-`$ wp classifai crop {attachment_ids} [--limit=<limit>] [--skip=<skip>]`
-
-Batch crop image(s) using Azure AI Computer Vision API.
-
-##### Options
-
-**`{attachment_ids}`**
-
-Comma delimeted list of Attachment IDs to crop.
-
-**`--limit=<limit>`**
-
-Limit number of images to crop.
-
-default: `100`.
-
-**`--skip=<skip>`**
-
-Skip first N images.
-
-default: `false`.
-
-### ClassifAI Settings Commands
-
-#### Basic Authentication
-
-`$ wp classifai auth`
-
-Prints the Basic Auth header based on credentials configured in the plugin.
-
-#### Reset ClassifAI to Defaults
-
-`$ wp classifai reset`
-
-Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
 
 ## Frequently Asked Questions
 

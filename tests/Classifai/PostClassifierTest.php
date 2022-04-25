@@ -2,6 +2,8 @@
 
 namespace Classifai;
 
+use Classifai\Taxonomy\TaxonomyFactory;
+
 class PostClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
@@ -10,6 +12,8 @@ class PostClassifierTest extends \WP_UnitTestCase {
 		parent::setUp();
 
 		$this->classifier = new PostClassifier();
+		$this->taxonomy_factory = new TaxonomyFactory();
+		$this->taxonomy_factory->build_all();
 	}
 
 	function test_it_has_an_api_request() {
