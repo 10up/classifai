@@ -1,5 +1,6 @@
 describe( 'Image processing Tests', () => {
 	let imageEditLink = '';
+	let mediaModelLink = '';
 	before( () => {
 		cy.login();
 	} );
@@ -36,6 +37,20 @@ describe( 'Image processing Tests', () => {
 		cy.get( '.misc-publishing-actions label[for=rescan-smart-crop]' ).contains( 'Regenerate smart thumbnail' );
 	} );
 
+	it( 'Can see Image processing actions on media model', () => {
+		const imageId  = imageEditLink.split( 'post=' )[1]?.split( '&' )[0];
+		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
+		cy.visit( mediaModelLink );
+		cy.get( '.media-modal' ).should( 'exist' );
+
+		// Verify Image processing actions.
+		cy.get( '#classifai-rescan-alt-tags' ).contains( 'Generate' );
+		cy.get( '#classifai-rescan-image-tags' ).contains( 'Generate' );
+		cy.get( '#classifai-rescan-smart-crop' ).contains( 'Regenerate' );
+		cy.get( '#classifai-rescan-ocr' ).contains( 'Scan' );
+	} );
+
+
 	it( 'Can disable Image processing features', () => {
 		cy.visit( '/wp-admin/admin.php?page=image_processing' );
 
@@ -48,5 +63,11 @@ describe( 'Image processing Tests', () => {
 		cy.visit( imageEditLink );
 		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).should( 'not.exist' );
 		cy.get( '.misc-publishing-actions label[for=rescan-smart-crop]' ).should( 'not.exist' );
+
+		// Verify with Image processing features are not present in media model.
+		cy.visit( mediaModelLink );
+		cy.get( '.media-modal' ).should( 'exist' );
+		cy.get( '#classifai-rescan-smart-crop' ).should( 'not.exist' );
+		cy.get( '#classifai-rescan-ocr' ).should( 'not.exist' );
 	} );
 } );
