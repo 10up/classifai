@@ -1,6 +1,13 @@
 describe( 'Language processing Tests', () => {
 	before( () => {
 		cy.login();
+
+		// Ignore WP 5.2 Synchronous XHR error.
+		Cypress.on( 'uncaught:exception', ( err ) => {
+			if ( err.message.includes( 'Failed to execute \'send\' on \'XMLHttpRequest\': Failed to load \'http://localhost:8889/wp-admin/admin-ajax.php\': Synchronous XHR in page dismissal' ) ) {
+				return false;
+			}
+		} );
 	} );
 
 	it( 'Can save "Language Processing" settings', () => {
@@ -51,7 +58,7 @@ describe( 'Language processing Tests', () => {
 			.should( 'have.length', 1 );
 	} );
 
-	it( 'Can create post with texonomies terms get created by ClassifAI', () => {
+	it( 'Can create post and taxonomy terms get created by ClassifAI (with default threshold)', () => {
 		const threshold = 0.70;
 		// Create Test Post
 		cy.createPost( {
@@ -76,4 +83,73 @@ describe( 'Language processing Tests', () => {
 		} );
 
 	} );
+
+	it( 'Can create post and taxonomy terms get created by ClassifAI (with 75 threshold)', () => {
+		const threshold = 75;
+
+		// Update Threshold to 75.
+		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+
+		cy.get( '#classifai-settings-category_threshold' ).clear().type( threshold );
+		cy.get( '#classifai-settings-keyword_threshold' ).clear().type( threshold );
+		cy.get( '#classifai-settings-entity_threshold' ).clear().type( threshold );
+		cy.get( '#classifai-settings-concept_threshold' ).clear().type( threshold );
+		cy.get( '#submit' ).click();
+
+		// Create Test Post
+		cy.createPost( {
+			title: 'Test NLU post with 75 Threshold',
+			content: 'Test NLU Content with 75 Threshold'
+		} );
+
+		// Close post publish panel
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( $body => {
+			if ( 0 < $body.find( closePanelSelector ).length ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Verify Each Created taxonomies.
+		['categories', 'keywords', 'concepts', 'entities'].forEach( taxonomy => {
+			cy.verifyPostTaxonomyTerms( taxonomy, threshold / 100 );
+		} );
+
+	} );
+
+	// Skiping this until issue get fixed.
+	it.skip( 'Can create post and tags get created by ClassifAI', () => {
+		const threshold = 75;
+		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+
+		cy.get( '#classifai-settings-category_taxonomy' ).select( 'post_tag' );
+		cy.get( '#classifai-settings-keyword_taxonomy' ).select( 'post_tag' );
+		cy.get( '#classifai-settings-entity_taxonomy' ).select( 'post_tag' );
+		cy.get( '#classifai-settings-concept_taxonomy' ).select( 'post_tag' );
+		cy.get( '#submit' ).click();
+
+		// Create Test Post
+		cy.createPost( {
+			title: 'Test NLU post for tags',
+			content: 'Test NLU Content for tags'
+		} );
+
+		// Close post publish panel
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( $body => {
+			if ( 0 < $body.find( closePanelSelector ).length ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Verify Each Created taxonomies.
+		cy.verifyPostTaxonomyTerms( 'tags', threshold / 100 );
+	} );
+
 } );

@@ -32,11 +32,6 @@
       "count": 1
     },
     {
-      "text": "overwhelming field.Many people",
-      "relevance": 0.608621,
-      "count": 1
-    },
-    {
       "text": "linear algebra",
       "relevance": 0.607641,
       "count": 1
@@ -61,7 +56,7 @@
     {
       "type": "JobTitle",
       "text": "scientist",
-      "relevance": 0.715857,
+      "relevance": 0.755857,
       "count": 1
     },
     {
@@ -73,14 +68,14 @@
   ],
   "concepts": [
     {
-      "text": "Mathematics",
+      "text": "Programming language",
       "relevance": 0.967532,
-      "dbpedia_resource": "http://dbpedia.org/resource/Mathematics"
+      "dbpedia_resource": "http://dbpedia.org/resource/Programming_language"
     },
     {
-      "text": "Programming language",
+      "text": "Mathematics",
       "relevance": 0.670588,
-      "dbpedia_resource": "http://dbpedia.org/resource/Programming_language"
+      "dbpedia_resource": "http://dbpedia.org/resource/Mathematics"
     },
     {
       "text": "Language",

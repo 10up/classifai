@@ -26,10 +26,18 @@
 import { getNLUData } from '../plugins/functions';
 
 Cypress.Commands.add( 'verifyPostTaxonomyTerms', ( taxonomy, threshold ) => {
-
-	const panelTitle = `Watson ${taxonomy.charAt( 0 ).toUpperCase() + taxonomy.slice( 1 ) }`;
+	const taxonomyTitle       = taxonomy.charAt( 0 ).toUpperCase() + taxonomy.slice( 1 );
+	const panelTitle          = ( 'tags' === taxonomy ) ? taxonomyTitle : `Watson ${ taxonomyTitle }`;
 	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("${panelTitle}")`;
-	const terms = getNLUData( taxonomy, threshold );
+	let terms = [];
+	if ( 'tags' === taxonomy ) {
+		['categories', 'keywords', 'concepts', 'entities'].forEach( taxo => {
+			terms.push( ...getNLUData( taxo, threshold ) );
+		} );
+	} else {
+		terms = getNLUData( taxonomy, threshold );
+	}
+
 	const taxonomySelector = 'span.components-form-token-field__token-text span[aria-hidden="true"]';
 
 	// Open Panel
