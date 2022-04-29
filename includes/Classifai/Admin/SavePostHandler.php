@@ -66,7 +66,7 @@ class SavePostHandler {
 		/**
 		 * Filter post statuses for post type or ID.
 		 *
-		 * @since 1.0.0
+		 * @since 1.7.1
 		 * @hook classifai_post_statuses_for_post_type_or_id
 		 *
 		 * @param {array} $post_statuses Array of post statuses to be classified with language processing.
