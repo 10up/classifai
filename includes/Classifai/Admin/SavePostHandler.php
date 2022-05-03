@@ -21,26 +21,18 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Save Post handler only runs on admin or REST requests
+	 * Check to see if we can register this class.
 	 */
 	public function can_register() {
-		if ( ! get_option( 'classifai_configured', false ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
-			return false;
-		} elseif ( is_admin() ) {
+
+		if (
+			is_admin()
+			|| $this->is_rest_route()
+		) {
 			return true;
-		} elseif ( $this->is_rest_route() ) {
-			return true;
-		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
-			return false;
-		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return false;
-		} else {
-			return false;
 		}
+
+		return false;
 	}
 
 	/**
@@ -101,7 +93,7 @@ class SavePostHandler {
 		 * @hook classifai_should_classify_post
 		 *
 		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
-		 *                              classification for this post.
+		 *                                classification for this post.
 		 * @param {int}  $post_id         The ID of the post to be considered for classification.
 		 *
 		 * @return {bool} Whether the post should be classified.
