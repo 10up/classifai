@@ -59,4 +59,30 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 		);
 		$this->assertEquals( true, $this->save_post_handler->is_rest_route() );
 	}
+
+	function test_is_admin() {
+
+		set_current_screen( 'edit.php' );
+
+		$this->assertEquals( true, $this->save_post_handler->can_register() );
+	}
+
+	function test_is_custom_register() {
+
+		define( 'DOING_CRON', true );
+
+		$this->assertEquals( false, $this->save_post_handler->can_register() );
+
+		add_filter(
+			'classifai_should_register_save_post_handler',
+			function( $should_register ) {
+				if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+					return true;
+				}
+				return $should_register;
+			}
+		);
+
+		$this->assertEquals( true, $this->save_post_handler->can_register() );
+	}
 }
