@@ -25,14 +25,23 @@ class SavePostHandler {
 	 */
 	public function can_register() {
 
-		if (
-			is_admin()
-			|| $this->is_rest_route()
-		) {
-			return true;
+		$should_register = false;
+		if ( is_admin() || $this->is_rest_route() ) {
+			$should_register = true;
 		}
 
-		return false;
+		/**
+		 * Filter whether ClassifAI should register this class.
+		 *
+		 * @since 1.8.0
+		 * @hook classifai_should_register_save_post_handler
+		 *
+		 * @param  {bool} $should_register Whether the class should be registered.
+		 * @return {bool} Whether the class should be registered.
+		 */
+		$should_register = apply_filters( 'classifai_should_register_save_post_handler', $should_register );
+
+		return $should_register;
 	}
 
 	/**
