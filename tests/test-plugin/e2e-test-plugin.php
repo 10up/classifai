@@ -65,3 +65,8 @@ function classifai_test_prepare_response( $response ) {
 		'body'        => $response,
 	);
 }
+
+// Enable PDF scan on upload.
+if( ! defined( 'FS_METHOD' ) ) {
+	define( 'FS_METHOD', 'direct' );
+}
