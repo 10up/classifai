@@ -36,7 +36,7 @@ describe( 'Image processing Tests', () => {
 		cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).contains( 'No alt text? Rescan image' );
 		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).contains( 'Rescan image for new tags' );
 		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).contains( 'Rescan for text' );
-		cy.get( '.misc-publishing-actions label[for=rescan-smart-crop]' ).contains( 'Regenerate smart thumbnail' );
+		cy.get( '.misc-publishing-actions label[for=rescan-smart-crop]' ).should( 'exist' );
 
 		// Verify generated Data.
 		const imageData = getImageData();
@@ -60,8 +60,8 @@ describe( 'Image processing Tests', () => {
 		// Verify Image processing actions.
 		cy.get( '#classifai-rescan-alt-tags' ).contains( 'Rescan' );
 		cy.get( '#classifai-rescan-image-tags' ).contains( 'Rescan' );
-		cy.get( '#classifai-rescan-smart-crop' ).contains( 'Regenerate' );
 		cy.get( '#classifai-rescan-ocr' ).contains( 'Rescan' );
+		cy.get( '#classifai-rescan-smart-crop' ).should( 'exist' );
 	} );
 
 
