@@ -1,4 +1,6 @@
 import * as nluData from '../../test-plugin/nlu.json';
+import * as ocrData from '../../test-plugin/ocr.json';
+import * as imageData from '../../test-plugin/image_analyze.json';
 
 /**
  * Get Taxonomy data from test NLU json file.
@@ -19,4 +21,32 @@ export const getNLUData = ( taxonomy = 'categories', threshold = 0.70 ) => {
 			.map( el => el.text );
 	}
 	return taxonomies;
+};
+
+/**
+ * Get Image OCR data
+ */
+export const getOCRData = () => {
+	const words = [];
+	ocrData.regions.forEach( el => {
+		el.lines.forEach( el2 => {
+			el2.words.forEach( el3  => {
+				words.push( el3.text );
+			} );
+		} );
+	} );
+	return words.join( ' ' );
+};
+
+/**
+ * Get image analysis data
+ *
+ * @returns Object data image data
+ */
+export const getImageData = () => {
+	const data = {
+		altText: imageData.description.captions.filter( el => 0.75 < el.confidence )[0].text,
+		tags: imageData.tags.filter( el => 0.70 < el.confidence ).map( el => el.name ),
+	};
+	return data;
 };
