@@ -4,7 +4,7 @@
  */
 
 // Mock the ClassifAI HTTP request calls and provide known response.
-add_filter( 'pre_http_request', 'classifai_test_mock_http_requests',  10, 3 );
+add_filter( 'pre_http_request', 'classifai_test_mock_http_requests', 10, 3 );
 
 /**
  * Mock ClassifAI's HTTP requests.
@@ -17,14 +17,30 @@ add_filter( 'pre_http_request', 'classifai_test_mock_http_requests',  10, 3 );
 function classifai_test_mock_http_requests ( $preempt, $parsed_args, $url ) {
 	$response = '';
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
-		$response = file_get_contents( __DIR__ .  '/nlu.json' );
+		$response = file_get_contents( __DIR__ . '/nlu.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
-		$response = file_get_contents( __DIR__ .  '/image_analyze.json' );
+		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
-		$response = file_get_contents( __DIR__ .  '/ocr.json' );
+		$response = file_get_contents( __DIR__ . '/ocr.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.1/generateThumbnail' ) !== false ) {
-		$response = file_get_contents( __DIR__ .  '/classifai_thumbnail.png' );
+		$response = file_get_contents( __DIR__ . '/classifai_thumbnail.png' );
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/pdf.json' );
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/read' ) !== false ) {
+		return array(
+			'headers'     => array(
+				'Operation-Location' => 'http://e2e-test-image-processing.test/pdf-read-result',
+			),
+			'response'    => array(
+				'code' => 202,
+			),
+			'status_code' => 200,
+			'success'     => 1,
+			'body'        => '',
+		);
 	}
+
+
 	if ( ! empty( $response ) ) {
 		return classifai_test_prepare_response( $response );
 	}
@@ -34,8 +50,7 @@ function classifai_test_mock_http_requests ( $preempt, $parsed_args, $url ) {
 /**
  * Prepare mock response for given request.
  *
- * @param string $response
- * @return void
+ * @param string $response Response.
  */
 function classifai_test_prepare_response( $response ) {
 	return array(
@@ -43,7 +58,7 @@ function classifai_test_prepare_response( $response ) {
 		'cookies'     => array(),
 		'filename'    => null,
 		'response'    => array(
-			'code'        => 200,
+			'code' => 200,
 		),
 		'status_code' => 200,
 		'success'     => 1,

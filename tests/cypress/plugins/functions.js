@@ -1,6 +1,7 @@
 import * as nluData from '../../test-plugin/nlu.json';
 import * as ocrData from '../../test-plugin/ocr.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
+import * as pdfData from '../../test-plugin/pdf.json';
 
 /**
  * Get Taxonomy data from test NLU json file.
@@ -50,3 +51,11 @@ export const getImageData = () => {
 	};
 	return data;
 };
+
+
+/**
+ * Get PDF read data
+ *
+ * @returns string data pdf data
+ */
+export const getPDFData = () => pdfData.analyzeResult.readResults[0].lines[0].text;
