@@ -23,7 +23,7 @@ function classifai_test_mock_http_requests ( $preempt, $parsed_args, $url ) {
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/ocr.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.1/generateThumbnail' ) !== false ) {
-		$response = file_get_contents( __DIR__ . '/classifai_thumbnail.png' );
+		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/pdf.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/read' ) !== false ) {
