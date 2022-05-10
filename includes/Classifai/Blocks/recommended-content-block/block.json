@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+	"title": "Recommended Content",
+	"description": "Display Recommended content by Azure Personalizer",
+	"textdomain": "classifai",
+	"name": "classifai/recommended-content-block",
+  "category": "classifai-blocks",
+	"attributes":{
+		"title": {
+			"type" : "string"
+		}
+  },
+  "example": {
+    "attributes":{
+      "title": "Recommended Content"
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "file:../../../../dist/js/recommended-content-block.js",
+  "editorStyle": "file:../../../../dist/blocks/recommended-content-block/editor.css"
+}

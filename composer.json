@@ -18,7 +18,8 @@
       "Classifai\\": "includes/Classifai/"
     },
     "files": [
-      "includes/Classifai/Helpers.php"
+      "includes/Classifai/Helpers.php",
+      "includes/Classifai/Blocks.php"
     ]
   },
   "require-dev": {
@@ -27,5 +28,10 @@
     "10up/wpacceptance": "dev-master",
     "yoast/phpunit-polyfills": "^1.0.0"
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "dev",
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
 }

@@ -66,6 +66,9 @@ class Plugin {
 			);
 		}
 
+		// Setup Blocks
+		Blocks\setup();
+
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
