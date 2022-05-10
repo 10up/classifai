@@ -94,9 +94,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		// Instantiate the hooks
 		$this->get_computer_vision()->register();
 
-		$attachment = $this->factory->attachment->create_and_get();
-		wp_generate_attachment_metadata( $attachment->ID, DIR_TESTDATA .'/images/33772.jpg' );
-		$meta = wp_get_attachment_metadata( $attachment->ID );
+		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/33772.jpg' );
+		$meta       = wp_get_attachment_metadata( $attachment );
 		$this->assertNotFalse( $meta );
 	}
 }
