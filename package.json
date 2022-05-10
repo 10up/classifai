@@ -5,8 +5,11 @@
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack --watch --mode=development",
+    "start": "10up-toolkit build --watch",
+    "build": "10up-toolkit build",
+    "format-js": "10up-toolkit format-js",
+    "lint-js": "10up-toolkit lint-js",
+    "lint-style": "10up-toolkit lint-style",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
@@ -30,20 +33,26 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@10up/eslint-config": "^1.0.9",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "babel-eslint": "10.0.3",
-    "babel-loader": "^8.0.6",
-    "eslint": "^6.3.0",
-    "eslint-loader": "^3.0.0",
+    "@10up/babel-preset-default": "^2.0.2",
+    "@10up/eslint-config": "^2.4.5",
+    "@10up/stylelint-config": "^2.0.0",
+    "10up-toolkit": "^4.0.0",
+    "eslint": "^8.15.0",
+    "eslint-config-airbnb-base": "^15.0.0",
     "husky": "^3.0.5",
     "jsdoc": "^3.6.3",
     "lint-staged": "^9.2.5",
     "node-wp-i18n": "^1.2.3",
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7",
+    "stylelint": "^14.8.2",
     "wp-hookdoc": "^0.2.0"
+  },
+  "10up-toolkit": {
+    "entry": {
+      "editor": "./src/js/editor.js",
+      "editor-ocr": "./src/js/editor-ocr.js",
+      "media": "./src/js/media.js",
+      "admin": "./src/js/admin.js",
+      "recommended-content-block": "./includes/Classifai/Blocks/recommended-content-block/index.js"
+    }
   }
 }
