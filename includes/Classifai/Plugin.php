@@ -66,9 +66,6 @@ class Plugin {
 			);
 		}
 
-		// Setup Blocks
-		Blocks\setup();
-
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
@@ -104,6 +101,7 @@ class Plugin {
 			[
 				'language_processing' => 'Classifai\Services\LanguageProcessing',
 				'image_processing'    => 'Classifai\Services\ImageProcessing',
+				'personalizer'        => 'Classifai\Services\Personalizer',
 			]
 		);
 

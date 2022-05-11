@@ -52,7 +52,8 @@
       "editor-ocr": "./src/js/editor-ocr.js",
       "media": "./src/js/media.js",
       "admin": "./src/js/admin.js",
-      "recommended-content-block": "./includes/Classifai/Blocks/recommended-content-block/index.js"
+      "recommended-content-block": "./includes/Classifai/Blocks/recommended-content-block/index.js",
+      "recommended-content-block-style": "./includes/Classifai/Blocks/recommended-content-block/style.scss"
     }
   }
 }

@@ -7,6 +7,8 @@
 
 namespace Classifai\Blocks\RecommendedContentBlock;
 
+use Classifai\Providers\Azure\Personalizer;
+
 /**
  * Register the block
  */
@@ -33,6 +35,8 @@ function register() {
  * @return string The rendered block markup.
  */
 function render_block_callback( $attributes, $content, $block ) {
+	$personalizer = new Personalizer( false );
+	$response     = $personalizer->get_recommended_content( $attributes );
 	ob_start();
 	include __DIR__ . '/markup.php';
 	return ob_get_clean();

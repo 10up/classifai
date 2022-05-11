@@ -1,0 +1,35 @@
+.wp-block-classifai-recommended-content{
+	list-style: none;
+	padding-left: 0;
+	display: flex;
+	flex-wrap: wrap;
+	padding: 0;
+
+	li {
+		margin: 0 1.25em 1.25em 0;
+		width: 100%;
+		clear: both;
+	}
+}
+
+.wp-block-classifai-recommended-content__post-date,
+.wp-block-classifai-recommended-content__post-author {
+	display: block;
+	font-size: 0.8125em;
+}
+
+.wp-block-classifai-recommended-content__post-excerpt {
+	margin-top: 0.5em;
+	margin-bottom: 1em;
+}
+
+.wp-block-classifai-recommended-content__featured-image {
+	a {
+		display: inline-block;
+	}
+	img {
+		height: auto;
+		width: auto;
+		max-width: 100%;
+	}
+}

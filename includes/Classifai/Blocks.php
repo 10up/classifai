@@ -17,6 +17,7 @@ function setup() {
 		return __NAMESPACE__ . "\\$function";
 	};
 
+	add_action( 'enqueue_block_assets', $n( 'blocks_styles' ) );
 	add_filter( 'block_categories_all', $n( 'blocks_categories' ), 10, 2 );
 
 	register_blocks();
@@ -33,6 +34,20 @@ function register_blocks() {
 
 	// Call block Register function for each block.
 	RecommendedContentBlock\register();
+}
+
+/**
+ * Enqueue JavaScript/CSS for blocks.
+ *
+ * @return void
+ */
+function blocks_styles() {
+	wp_enqueue_style(
+		'recommended-content-block-style',
+		CLASSIFAI_PLUGIN_URL . '/dist/css/recommended-content-block-style.css',
+		[],
+		CLASSIFAI_PLUGIN_VERSION
+	);
 }
 
 /**

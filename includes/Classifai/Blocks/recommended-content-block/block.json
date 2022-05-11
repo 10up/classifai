@@ -7,18 +7,29 @@
 	"name": "classifai/recommended-content-block",
   "category": "classifai-blocks",
 	"attributes":{
-		"title": {
-			"type" : "string"
-		}
-  },
-  "example": {
-    "attributes":{
-      "title": "Recommended Content"
+		"contentPostType": {
+      "type" : "string"
+    },
+    "displayPostExcept": {
+        "type" : "boolean"
+    },
+    "displayAuthor": {
+        "type" : "boolean"
+    },
+    "displayPostDate": {
+        "type" : "boolean"
+    },
+    "displayFeaturedImage": {
+        "type" : "boolean"
+    },
+    "addLinkToFeaturedImage": {
+      "type" : "boolean"
     }
   },
   "supports": {
     "html": false
   },
   "editorScript": "file:../../../../dist/js/recommended-content-block.js",
-  "editorStyle": "file:../../../../dist/blocks/recommended-content-block/editor.css"
+  "editorStyle": "file:../../../../dist/blocks/recommended-content-block/editor.css",
+  "style": "recommended-content-block-style"
 }
