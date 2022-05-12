@@ -33,12 +33,7 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@10up/babel-preset-default": "^2.0.2",
-    "@10up/eslint-config": "^2.4.5",
-    "@10up/stylelint-config": "^2.0.0",
     "10up-toolkit": "^4.0.0",
-    "eslint": "^8.15.0",
-    "eslint-config-airbnb-base": "^15.0.0",
     "husky": "^3.0.5",
     "jsdoc": "^3.6.3",
     "lint-staged": "^9.2.5",
