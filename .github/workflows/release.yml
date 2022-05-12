@@ -3,9 +3,6 @@ on:
   push:
     branches:
     - trunk
-  pull_request:
-    branches:
-    - develop
 jobs:
   release:
     name: Push (merge) to trunk
@@ -23,10 +20,10 @@ jobs:
         npm run build
         npm run makepot
         composer install --no-dev
-    # - name: Release to Stable
-    #   uses: ./.github/action-release/
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release to Stable
+      uses: ./.github/action-release/
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build docs
       run: npm run build:docs
     - name: Deploy docs update
