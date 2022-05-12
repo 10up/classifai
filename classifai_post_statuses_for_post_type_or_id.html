@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_should_crop_size - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_post_statuses_for_post_type_or_id - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_should_crop_size</h1>
+    <h1 class="page-title">Filter: classifai_post_statuses_for_post_type_or_id</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_should_crop_size">apply_filters( 'classifai_should_crop_size', <span class="signature">$return, $size )</span><span class="type-signature"> &rarr; {bool}</span></h4>
+    <h4 class="name" id="classifai_post_statuses_for_post_type_or_id">apply_filters( 'classifai_post_statuses_for_post_type_or_id', <span class="signature">$post_statuses, $post_type, $post_id )</span><span class="type-signature"> &rarr; {array}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filters whether to smart crop images of a given size.</p>
+    <p>Filter post statuses for post type or ID.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$return</code></td>
+                <td class="name"><code>$post_statuses</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">bool</span>
+<span class="param-type">array</span>
 
 
             
@@ -100,14 +100,14 @@
 
             
 
-            <td class="description last"><p>Whether non-position-based cropping was opted into when registering the image size.</p></td>
+            <td class="description last"><p>Array of post statuses to be classified with language processing.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>$size</code></td>
+                <td class="name"><code>$post_type</code></td>
             
 
             <td class="type">
@@ -123,7 +123,30 @@
 
             
 
-            <td class="description last"><p>The image size.</p></td>
+            <td class="description last"><p>The post type.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$post_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The post ID.</p></td>
         </tr>
 
     
@@ -141,7 +164,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>1.7.1</li></ul></dd>
     
 
     
@@ -167,7 +190,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line146">line 146</a>
+        <a href="Admin_SavePostHandler.php.html">Admin/SavePostHandler.php</a>, <a href="Admin_SavePostHandler.php.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -194,7 +217,7 @@
 
         
 <div class="param-desc">
-    <p>Whether this image size should be smart cropped.</p>
+    <p>Array of post statuses.</p>
 </div>
 
 
@@ -205,7 +228,7 @@
     </dt>
     <dd>
         
-<span class="param-type">bool</span>
+<span class="param-type">array</span>
 
 
     </dd>

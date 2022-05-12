@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_should_crop_size - 10up ClassifAI Hook Docs</title>
+    <title>Tutorial: WP-CLI Commands - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,210 +21,148 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_should_crop_size</h1>
+    <h1 class="page-title">Tutorial: WP-CLI Commands</h1>
 	
 
-    
-
-
-
-
-<section>
+    <section>
 
 <header>
-    <h2></h2>
     
+
+    <h2>WP-CLI Commands</h2>
 </header>
 
 <article>
-    <div class="container-overview">
-    
-        
-
-    
-
-    <h4 class="name" id="classifai_should_crop_size">apply_filters( 'classifai_should_crop_size', <span class="signature">$return, $size )</span><span class="type-signature"> &rarr; {bool}</span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>Filters whether to smart crop images of a given size.</p>
-</div>
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>$return</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">bool</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Whether non-position-based cropping was opted into when registering the image size.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>$size</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The image size.</p></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-    <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line146">line 146</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    <p>Whether this image size should be smart cropped.</p>
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">bool</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-    
-    </div>
-
-    
+    <p>The following WP-CLI commands are supported by ClassifAI:</p>
+<h3>Language Processing Commands</h3>
+<ul>
+<li>
+<p><code>wp classifai post &lt;post_ids&gt; [--post_type=&lt;post_type&gt;] [--limit=&lt;limit&gt;] [--link=&lt;link&gt;]</code></p>
+<p>Batch post classification using IBM Watson NLU API.</p>
+<ul>
+<li>
+<p><code>&lt;post_ids&gt;</code>: A comma delimited list of post IDs to classify. Used if post_type is false or absent.</p>
+<p>default: <code>true</code></p>
+</li>
+<li>
+<p><code>[--post_type=&lt;post_type&gt;]</code>: Batch classify posts belonging to this post type. If false or absent relies on post_ids.</p>
+<p>default: <code>false</code></p>
+<p>options:</p>
+<ul>
+<li>any post type name</li>
+<li><code>false</code>, if args contains post_ids</li>
+</ul>
+</li>
+<li>
+<p><code>[--limit=&lt;limit&gt;]</code>: Limit classification to N posts.</p>
+<p>default: <code>false</code></p>
+<p>options:</p>
+<ul>
+<li><code>false</code>, no limit</li>
+<li>N, max number of posts to classify</li>
+</ul>
+</li>
+<li>
+<p><code>[--link=&lt;link&gt;]</code>: Whether to link classification results to Taxonomy terms.</p>
+<p>default: <code>true</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>wp classifai text &lt;text&gt; [--category=&lt;bool&gt;] [--keyword=&lt;bool&gt;] [--concept=&lt;bool&gt;] [--entity=&lt;bool&gt;] [--input=&lt;input&gt;] [--only-normalize=&lt;bool&gt;]</code></p>
+<p>Directly classify text using IBM Watson NLU API.</p>
+<ul>
+<li>
+<p><code>&lt;text&gt;</code>: A string of text to classify.</p>
+</li>
+<li>
+<p><code>[--category=&lt;bool&gt;]</code>: Enables NLU category feature.</p>
+<p>default: <code>true</code></p>
+</li>
+<li>
+<p><code>[--keyword=&lt;bool&gt;]</code>: Enables NLU keyword feature.</p>
+<p>default: <code>true</code></p>
+</li>
+<li>
+<p><code>[--concept=&lt;bool&gt;]</code>: Enables NLU concept feature.</p>
+<p>default: <code>true</code></p>
+</li>
+<li>
+<p><code>[--entity=&lt;bool&gt;]</code>: Enables NLU entity feature.</p>
+<p>default: <code>true</code></p>
+</li>
+<li>
+<p><code>[--input=&lt;input&gt;]</code>: Path to input file or URL.</p>
+<p>default: <code>false</code></p>
+<p>options:</p>
+<ul>
+<li>path to local file</li>
+<li>path to remote URL</li>
+<li><code>false</code>, uses <code>args[0]</code> instead</li>
+</ul>
+</li>
+<li>
+<p><code>[--only-normalize=&lt;bool&gt;]</code>: Prints the normalized text that will be sent to the NLU API.</p>
+<p>default: <code>false</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>Image Processing Commands</h3>
+<ul>
+<li>
+<p><code>wp classifai image &lt;attachment_ids&gt; [--limit=&lt;int&gt;] [--skip=&lt;skip&gt;] [--force]</code></p>
+<p>Directly add description &quot;alt text&quot; and tags to attachment(s) using Azure AI Computer Vision API.</p>
+<ul>
+<li>
+<p><code>&lt;attachment_ids&gt;</code>: Comma delimited list of Attachment IDs to classify.</p>
+</li>
+<li>
+<p><code>[--limit=&lt;int&gt;]</code>: Limit number of attachments to classify.</p>
+<p>default: <code>100</code></p>
+</li>
+<li>
+<p><code>[--skip=&lt;skip&gt;]</code>: Skip first N attachments.</p>
+<p>default: <code>false</code></p>
+</li>
+<li>
+<p><code>[--force]</code>: Force classifying attachments regardless of their alt.</p>
+<p>default: <code>false</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>wp classifai crop &lt;attachment_ids&gt; [--limit=&lt;limit&gt;] [--skip=&lt;skip&gt;]</code></p>
+<p>Batch crop image(s) using Azure AI Computer Vision API.</p>
+<ul>
+<li>
+<p><code>&lt;attachment_ids&gt;</code>: Comma delimited list of Attachment IDs to crop.</p>
+</li>
+<li>
+<p><code>[--limit=&lt;int&gt;]</code>: Limit number of attachments to crop.</p>
+<p>default: <code>100</code></p>
+</li>
+<li>
+<p><code>[--skip=&lt;skip&gt;]</code>: Skip first N attachments.</p>
+<p>default: <code>false</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3>ClassifAI Settings Commands</h3>
+<ul>
+<li>
+<p><code>wp classifai auth</code></p>
+<p>Prints the Basic Auth header based on credentials configured in the plugin.</p>
+</li>
+<li>
+<p><code>wp classifai reset</code></p>
+<p>Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.</p>
+</li>
+</ul>
 </article>
 
 </section>
-
-
-
 
 
     <footer>
