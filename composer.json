@@ -11,7 +11,8 @@
   "license": "GPLv2",
   "require": {
     "php": ">=7.4",
-    "yahnis-elsts/plugin-update-checker": "4.6"
+    "yahnis-elsts/plugin-update-checker": "4.6",
+    "ua-parser/uap-php": "dev-master"
   },
   "autoload": {
     "psr-4": {

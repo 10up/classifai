@@ -8,6 +8,7 @@ namespace Classifai\Providers\Azure;
 use Classifai\Providers\Provider;
 use Classifai\Blocks;
 use WP_Error;
+use UAParser\Parser;
 
 class Personalizer extends Provider {
 
@@ -222,9 +223,17 @@ class Personalizer extends Provider {
 	public function get_recommended_content( $attributes ) {
 		$actions = $this->get_recent_actions( $attributes );
 
-		// TODO: Add contextFeatures.
+		// TODO: Add Location contextFeatures.
 		$rank_request = array(
-			'contextFeatures' => [],
+			'contextFeatures' => [
+				[
+					'userAgent' => $this->get_user_agent_features(),
+				],
+				[
+					'weekDay'   => ( wp_date( 'N' ) >= 6 ) ? 'weekend' : 'workweek',
+					'timeOfDay' => wp_date( 'a' ),
+				],
+			],
 			'actions'         => $actions,
 			'deferActivation' => false,
 		);
@@ -374,6 +383,23 @@ class Personalizer extends Provider {
 		}
 
 		return $features;
+	}
+
+	/**
+	 * Get user agent for personilizer contextFeatures.
+	 */
+	protected function get_user_agent_features() {
+		// User Agent Parsing
+		$parser    = Parser::create();
+		$ua_result = $parser->parse( $_SERVER['HTTP_USER_AGENT'] );
+
+		return array(
+			'_ua'           => $ua_result->originalUserAgent, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			'_DeviceFamily' => $ua_result->device->family,
+			'_OSFamily'     => $ua_result->os->family,
+			'DeviceBrand'   => $ua_result->device->brand,
+			'DeviceModel'   => $ua_result->device->model,
+		);
 	}
 
 	/**
