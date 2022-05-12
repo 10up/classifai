@@ -409,7 +409,7 @@ class Personalizer extends Provider {
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 					'Content-Type'              => 'application/json',
 				],
-				'body'     => json_encode( $rank_request ),
+				'body'     => wp_json_encode( $rank_request ),
 			]
 		);
 
