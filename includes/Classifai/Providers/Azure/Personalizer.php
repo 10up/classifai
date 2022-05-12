@@ -403,13 +403,11 @@ class Personalizer extends Provider {
 		$result   = wp_remote_post(
 			trailingslashit( $settings['url'] ) . $this->rank_endpoint,
 			[
-				'timeout'  => 30,
-				'blocking' => true,
-				'headers'  => [
+				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 					'Content-Type'              => 'application/json',
 				],
-				'body'     => wp_json_encode( $rank_request ),
+				'body'    => wp_json_encode( $rank_request ),
 			]
 		);
 
@@ -420,6 +418,38 @@ class Personalizer extends Provider {
 				return new WP_Error( 'error', $response->error->message );
 			}
 			return $response;
+		}
+		return $result;
+	}
+
+	/**
+	 * Report reward to allocate to the top ranked action for the specified event.
+	 *
+	 * @param string $event_id Personalizer event ID.
+	 * @return object|string
+	 */
+	public function personalizer_send_reward( $event_id ) {
+		$settings        = $this->get_settings();
+		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
+		$result          = wp_remote_post(
+			trailingslashit( $settings['url'] ) . $reward_endpoint,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+					'Content-Type'              => 'application/json',
+				],
+				'body'    => wp_json_encode( array( 'value' => 1 ) ),
+			]
+		);
+
+		if ( ! is_wp_error( $result ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $result ) );
+			if ( ! empty( $response->error ) ) {
+				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( __( 'Error in send reward to personalizer: ', 'classifai' ) . $response->error->message );
+				return new WP_Error( 'error', $response->error->message );
+			}
+			return true;
 		}
 		return $result;
 	}

@@ -48,6 +48,20 @@ function blocks_styles() {
 		[],
 		CLASSIFAI_PLUGIN_VERSION
 	);
+	wp_enqueue_script(
+		'recommended-content-block-script',
+		CLASSIFAI_PLUGIN_URL . '/dist/js/recommended-content-block-script.js',
+		[],
+		CLASSIFAI_PLUGIN_VERSION,
+		true
+	);
+	wp_localize_script(
+		'recommended-content-block-script',
+		'classifai_personalizer_params',
+		array(
+			'reward_endpoint' => get_rest_url( null, 'classifai/v1/personalizer/reward/{eventId}' ),
+		)
+	);
 }
 
 /**

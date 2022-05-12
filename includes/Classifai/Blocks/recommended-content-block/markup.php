@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 /**
  * Recommended Content block markup
  *
@@ -10,12 +11,12 @@
  * @var array    $context            BLock context.
  */
 
-if ( empty( $response ) || empty( $response->rewardActionId ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+if ( empty( $response ) || empty( $response->rewardActionId ) ) {
 	return $response;
 }
 
-// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 $rewarded_id   = $response->rewardActionId;
+$event_id      = $response->eventId;
 $rewarded_post = get_post( $rewarded_id );
 $post_link     = esc_url( get_permalink( $rewarded_post ) );
 $post_title         = get_the_title( $rewarded_post );
@@ -42,7 +43,7 @@ if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
 			<?php
 			if ( $attributes['addLinkToFeaturedImage'] ) {
 				?>
-				<a href="<?php echo esc_url( $post_link ); ?>" aria-label="<?php echo esc_attr( $post_title ); ?>">
+				<a class="classifai-send-reward" data-eventid="<?php echo esc_attr( $event_id ); ?>" href="<?php echo esc_url( $post_link ); ?>" aria-label="<?php echo esc_attr( $post_title ); ?>">
 					<?php echo get_the_post_thumbnail( $rewarded_post ); ?>
 				</a>
 				<?php
@@ -54,7 +55,7 @@ if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
 		<?php
 	}
 	?>
-	<a href="<?php echo esc_url( $post_link ); ?>">
+	<a class="classifai-send-reward" data-eventid="<?php echo esc_attr( $event_id ); ?>" href="<?php echo esc_url( $post_link ); ?>">
 		<?php echo esc_html( $post_title ); ?>
 	</a>
 	<?php
