@@ -1,4 +1,3 @@
-/* global lodash */
 const { select, dispatch, subscribe } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
@@ -18,7 +17,7 @@ const insertIcon = <span className="dashicons dashicons-editor-paste-text" />;
 /**
  * Get image scanned text using media api.
  *
- * @param {int} imageId - Image ID.
+ * @param {number} imageId - Image ID.
  */
 const getImageOcrScannedText = async (imageId) => {
 	const media = await apiFetch({ path: `/wp/v2/media/${imageId}` });
@@ -47,17 +46,16 @@ const getImageOcrScannedText = async (imageId) => {
 /**
  * Insert scanned text as a paragraph block to the editor.
  *
- * @param {int} clientId - Client ID of image block.
- * @param {int} imageId - Image ID.
+ * @param {number} clientId - Client ID of image block.
+ * @param {number} imageId - Image ID.
  * @param {string} scannedText - Text to insert to editor.
  */
 const insertOcrScannedText = async (clientId, imageId, scannedText) => {
-	const { getBlockIndex } = select('core/block-editor');
-
 	if (!scannedText) {
 		return;
 	}
 
+	const { getBlockIndex } = select('core/block-editor');
 	const groupBlock = createBlock('core/group', {
 		anchor: `classifai-ocr-${imageId}`,
 		className: 'is-style-classifai-ocr-text',
@@ -74,8 +72,9 @@ const insertOcrScannedText = async (clientId, imageId, scannedText) => {
 /**
  * Check if current post has OCR block.
  *
- * @param {int} imageId - Image ID.
+ * @param {number} imageId - Image ID.
  * @param {Array} blocks - Current blocks of current post.
+ * @returns {boolean}
  */
 const hasOcrBlock = (imageId, blocks = []) => {
 	if (blocks.length === 0) {
@@ -179,6 +178,7 @@ addFilter('editor.BlockEdit', 'classifai/image-processing-ocr', imageOcrControl)
  *
  * @param {object} settings - Block settings.
  * @param {string} name - Block name.
+ * @returns {object}
  */
 const modifyImageAttributes = (settings, name) => {
 	if (name !== 'core/image') {

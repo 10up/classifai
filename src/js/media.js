@@ -3,10 +3,11 @@
 	const { get } = window.lodash;
 
 	/**
+	 * Handle Click for given button.
 	 *
-	 * @param {Element} The button being clicked
-	 * @param {string} Which endpoint to query
-	 * @param {Function|bool} Optional callback to run after the request completes.
+	 * @param {Element} button The button being clicked
+	 * @param {string} endpoint Which endpoint to query
+	 * @param {Function|boolean} callback Optional callback to run after the request completes.
 	 *
 	 */
 	const handleClick = ({ button, endpoint, callback = false }) => {
