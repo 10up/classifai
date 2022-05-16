@@ -1,7 +1,7 @@
 {
   "globals": {
-	  "wp": "readable",
-	  "jQuery": "readable",
+	  "wp": "readonly",
+	  "jQuery": "readonly",
     "describe": "readonly",
     "before": "readonly",
     "beforeEach": "readonly",

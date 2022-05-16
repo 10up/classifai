@@ -23,7 +23,6 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#classifai-settings-private' ).check();
 		cy.get( '#classifai-settings-publish' ).check();
 
-
 		cy.get( '#classifai-settings-category' ).check();
 		cy.get( '#classifai-settings-keyword' ).check();
 		cy.get( '#classifai-settings-entity' ).check();
