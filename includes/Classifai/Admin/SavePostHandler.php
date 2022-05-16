@@ -26,7 +26,7 @@ class SavePostHandler {
 	public function can_register() {
 
 		$should_register = false;
-		if ( is_admin() || $this->is_rest_route() ) {
+		if ( $this->is_configured() && ( is_admin() || $this->is_rest_route() ) ) {
 			$should_register = true;
 		}
 
@@ -42,6 +42,15 @@ class SavePostHandler {
 		$should_register = apply_filters( 'classifai_should_register_save_post_handler', $should_register );
 
 		return $should_register;
+	}
+
+	/**
+	 * Check if ClassifAI is properly configured.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		return get_option( 'classifai_configured' ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
 	}
 
 	/**
