@@ -10,12 +10,21 @@ use Classifai\Admin\SavePostHandler;
 
 /**
  * Class SavePostHandlerTest
+ *
  * @package Classifai\Tests\Admin
  *
  * @group admin
  */
 class SavePostHandlerTest extends WP_UnitTestCase {
+
 	protected $save_post_handler;
+	protected $settings = [
+		'credentials' => [
+			'watson_url'      => 'url',
+			'watson_username' => 'username',
+			'watson_password' => 'password',
+		],
+	];
 
 	/**
 	 * setup method
@@ -24,6 +33,11 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 		parent::setUp();
 
 		$this->save_post_handler = new SavePostHandler();
+	}
+
+	function add_options() {
+		update_option( 'classifai_configured', true );
+		update_option( 'classifai_watson_nlu', $this->settings );
 	}
 
 	function test_is_rest_route() {
@@ -60,14 +74,29 @@ class SavePostHandlerTest extends WP_UnitTestCase {
 		$this->assertEquals( true, $this->save_post_handler->is_rest_route() );
 	}
 
-	function test_is_admin() {
+	function test_rest_route_register() {
 
-		set_current_screen( 'edit.php' );
+		$_SERVER['REQUEST_URI'] = '/wp-json/wp/v2/posts/1';
+
+		$this->assertEquals( false, $this->save_post_handler->can_register() );
+
+		$this->add_options();
 
 		$this->assertEquals( true, $this->save_post_handler->can_register() );
 	}
 
-	function test_is_custom_register() {
+	function test_is_admin_register() {
+
+		set_current_screen( 'edit.php' );
+
+		$this->assertEquals( false, $this->save_post_handler->can_register() );
+
+		$this->add_options();
+
+		$this->assertEquals( true, $this->save_post_handler->can_register() );
+	}
+
+	function test_custom_register() {
 
 		define( 'DOING_CRON', true );
 

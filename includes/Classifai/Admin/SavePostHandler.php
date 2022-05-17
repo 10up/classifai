@@ -50,7 +50,7 @@ class SavePostHandler {
 	 * @return bool
 	 */
 	public function is_configured() {
-		return get_option( 'classifai_configured' ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
+		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
 	}
 
 	/**
