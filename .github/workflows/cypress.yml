@@ -1,0 +1,54 @@
+name: E2E test
+
+on:
+  push:
+    branches:
+      - develop
+      - trunk
+  pull_request:
+    branches:
+      - develop
+jobs:
+  cypress:
+    name: ${{ matrix.core.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        core:
+          - {name: 'WP latest', version: 'latest'}
+          - {name: 'WP minimum', version: 'WordPress/WordPress#5.2'}
+          - {name: 'WP trunk', version: 'WordPress/WordPress#master'}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Composer (optional)
+      run: composer update -W
+      continue-on-error: true
+
+    - name: Build (optional)
+      run: npm run build
+      continue-on-error: true
+
+    - name: Set the core version
+      run: ./tests/bin/set-core-version.js ${{ matrix.core.version }}
+
+    - name: Set up WP environment
+      run: npm run env:start
+
+    - name: Test
+      run: npm run cypress:run
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: cypress-artifact-classifai
+        retention-days: 7
+        path: |
+          ${{ github.workspace }}/tests/cypress/screenshots/
+          ${{ github.workspace }}/tests/cypress/videos/
+          ${{ github.workspace }}/tests/cypress/logs/
