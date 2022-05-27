@@ -4,6 +4,7 @@ phpunit.xml
 /dist
 coverage
 /docs
+languages
 
 debug.log
 
@@ -42,5 +43,8 @@ Desktop.ini
 
 config.local.php
 
-# Don't ignore
-!/vendor/yahnis-elsts
+# cypress.
+tests/cypress/downloads
+tests/cypress/screenshots
+tests/cypress/videos
+.wp-env.override.json

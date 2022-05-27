@@ -1,0 +1,125 @@
+{
+  "usage": {
+    "text_units": 1,
+    "text_characters": 1492,
+    "features": 4
+  },
+  "language": "en",
+  "keywords": [
+    {
+      "text": "Data science",
+      "relevance": 0.937213,
+      "count": 4
+    },
+    {
+      "text": "data scientist",
+      "relevance": 0.710509,
+      "count": 1
+    },
+    {
+      "text": "machine learning",
+      "relevance": 0.664918,
+      "count": 1
+    },
+    {
+      "text": "data science workflow",
+      "relevance": 0.65492,
+      "count": 1
+    },
+    {
+      "text": "deep learning",
+      "relevance": 0.626494,
+      "count": 1
+    },
+    {
+      "text": "linear algebra",
+      "relevance": 0.607641,
+      "count": 1
+    },
+    {
+      "text": "advanced mathematics",
+      "relevance": 0.591224,
+      "count": 1
+    },
+    {
+      "text": "mathematical fluency",
+      "relevance": 0.589437,
+      "count": 1
+    },
+    {
+      "text": "experimental design",
+      "relevance": 0.587877,
+      "count": 1
+    }
+  ],
+  "entities": [
+    {
+      "type": "JobTitle",
+      "text": "scientist",
+      "relevance": 0.755857,
+      "count": 1
+    },
+    {
+      "type": "Quantity",
+      "text": "one day",
+      "relevance": 0.715857,
+      "count": 1
+    }
+  ],
+  "concepts": [
+    {
+      "text": "Programming language",
+      "relevance": 0.967532,
+      "dbpedia_resource": "http://dbpedia.org/resource/Programming_language"
+    },
+    {
+      "text": "Mathematics",
+      "relevance": 0.670588,
+      "dbpedia_resource": "http://dbpedia.org/resource/Mathematics"
+    },
+    {
+      "text": "Language",
+      "relevance": 0.64562,
+      "dbpedia_resource": "http://dbpedia.org/resource/Language"
+    },
+    {
+      "text": "Skill",
+      "relevance": 0.58466,
+      "dbpedia_resource": "http://dbpedia.org/resource/Skill"
+    },
+    {
+      "text": "Answer",
+      "relevance": 0.580036,
+      "dbpedia_resource": "http://dbpedia.org/resource/Answer"
+    },
+    {
+      "text": "Learning",
+      "relevance": 0.5773,
+      "dbpedia_resource": "http://dbpedia.org/resource/Learning"
+    },
+    {
+      "text": "Natural language processing",
+      "relevance": 0.550117,
+      "dbpedia_resource": "http://dbpedia.org/resource/Natural_language_processing"
+    },
+    {
+      "text": "Question",
+      "relevance": 0.549164,
+      "dbpedia_resource": "http://dbpedia.org/resource/Question"
+    }
+  ],
+  "categories": [
+    {
+      "score": 0.969457,
+      "label": "/education/homework and study tips"
+    },
+    {
+      "score": 0.936249,
+      "label": "/science/mathematics"
+    },
+    {
+      "score": 0.714753,
+      "label": "/technology and computing"
+    }
+  ]
+}

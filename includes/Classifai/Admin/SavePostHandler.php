@@ -21,26 +21,36 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Save Post handler only runs on admin or REST requests
+	 * Check to see if we can register this class.
 	 */
 	public function can_register() {
-		if ( ! get_option( 'classifai_configured', false ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
-			return false;
-		} elseif ( is_admin() ) {
-			return true;
-		} elseif ( $this->is_rest_route() ) {
-			return true;
-		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
-			return false;
-		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return false;
-		} else {
-			return false;
+
+		$should_register = false;
+		if ( $this->is_configured() && ( is_admin() || $this->is_rest_route() ) ) {
+			$should_register = true;
 		}
+
+		/**
+		 * Filter whether ClassifAI should register this class.
+		 *
+		 * @since 1.8.0
+		 * @hook classifai_should_register_save_post_handler
+		 *
+		 * @param  {bool} $should_register Whether the class should be registered.
+		 * @return {bool} Whether the class should be registered.
+		 */
+		$should_register = apply_filters( 'classifai_should_register_save_post_handler', $should_register );
+
+		return $should_register;
+	}
+
+	/**
+	 * Check if ClassifAI is properly configured.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
 	}
 
 	/**
@@ -66,7 +76,7 @@ class SavePostHandler {
 		/**
 		 * Filter post statuses for post type or ID.
 		 *
-		 * @since 1.0.0
+		 * @since 1.7.1
 		 * @hook classifai_post_statuses_for_post_type_or_id
 		 *
 		 * @param {array} $post_statuses Array of post statuses to be classified with language processing.
@@ -106,7 +116,7 @@ class SavePostHandler {
 		 * @hook classifai_should_classify_post
 		 *
 		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
-		 *                              classification for this post.
+		 *                                classification for this post.
 		 * @param {int}  $post_id         The ID of the post to be considered for classification.
 		 *
 		 * @return {bool} Whether the post should be classified.
