@@ -1,3 +1,6 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable no-use-before-define */
+/* eslint-disable @wordpress/no-unused-vars-before-return */
 const { select, dispatch, subscribe } = wp.data;
 const { createBlock } = wp.blocks;
 const { apiFetch } = wp;
@@ -79,6 +82,7 @@ const insertOcrScannedText = async (clientId, imageId, scannedText) => {
 const hasOcrBlock = (imageId, blocks = []) => {
 	if (blocks.length === 0) {
 		const { getBlocks } = select('core/block-editor');
+		// eslint-disable-next-line no-param-reassign
 		blocks = getBlocks();
 	}
 	return !!find(blocks, (block) => block.attributes.anchor === `classifai-ocr-${imageId}`);
@@ -272,6 +276,8 @@ wp.blocks.registerBlockStyle('core/group', {
 
 	/**
 	 * Create internal style tag if needed.
+	 *
+	 * @returns {HTMLStyleElement} style.
 	 */
 	const createStyle = () => {
 		const head = document.head || document.getElementsByTagName('head')[0];

@@ -3,6 +3,7 @@ describe('Language processing Tests', () => {
 		cy.login();
 
 		// Ignore WP 5.2 Synchronous XHR error.
+		// eslint-disable-next-line consistent-return
 		Cypress.on('uncaught:exception', (err) => {
 			if (
 				err.message.includes(

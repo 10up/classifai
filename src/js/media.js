@@ -5,9 +5,10 @@
 	/**
 	 * Handle Click for given button.
 	 *
-	 * @param {Element} button The button being clicked
-	 * @param {string} endpoint Which endpoint to query
-	 * @param {Function|boolean} callback Optional callback to run after the request completes.
+	 * @param {object} root Option for handle click.
+	 * @param {Element} root.button The button being clicked
+	 * @param {string} root.endpoint Which endpoint to query
+	 * @param {Function|boolean} root.callback Optional callback to run after the request completes.
 	 *
 	 */
 	const handleClick = ({ button, endpoint, callback = false }) => {
@@ -27,6 +28,7 @@
 				spinner.style.display = 'none';
 				spinner.classList.remove('is-active');
 				button.textContent = __('Rescan', 'classifai');
+				// eslint-disable-next-line no-unused-expressions
 				callback && callback(response);
 			},
 			(error) => {

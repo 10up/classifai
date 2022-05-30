@@ -6,9 +6,9 @@ import * as pdfData from '../../test-plugin/pdf.json';
 /**
  * Get Taxonomy data from test NLU json file.
  *
- * @param {string} taxonomy
- * @param {number} threshold
- * @returns string[]
+ * @param {string} taxonomy Taxonomy.
+ * @param {number} threshold Thresold to select terms.
+ * @returns {string[]}
  */
 export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 	const taxonomies = [];
@@ -24,6 +24,8 @@ export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 
 /**
  * Get Image OCR data
+ *
+ * @returns {string} data Image OCR data
  */
 export const getOCRData = () => {
 	const words = [];
@@ -40,7 +42,7 @@ export const getOCRData = () => {
 /**
  * Get image analysis data
  *
- * @returns Object data image data
+ * @returns {object} data image data
  */
 export const getImageData = () => {
 	const data = {
@@ -53,6 +55,6 @@ export const getImageData = () => {
 /**
  * Get PDF read data
  *
- * @returns string data pdf data
+ * @returns {string} data pdf data
  */
 export const getPDFData = () => pdfData.analyzeResult.readResults[0].lines[0].text;

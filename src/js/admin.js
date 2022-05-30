@@ -11,8 +11,6 @@
 		.closest('tr')
 		.getElementsByTagName('label');
 
-	if ($toggler === null) return;
-
 	$toggler.addEventListener('click', (e) => {
 		e.preventDefault();
 		$userFieldWrapper.classList.toggle('hidden');
