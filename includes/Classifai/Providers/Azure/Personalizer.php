@@ -414,7 +414,7 @@ class Personalizer extends Provider {
 	 */
 	protected function get_user_agent_features() {
 		// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
-		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : '';
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
 
 		// User Agent Parsing
 		$parser    = Parser::create();
@@ -517,6 +517,7 @@ class Personalizer extends Provider {
 	 */
 	protected function authenticate_credentials( $url, $api_key ) {
 		$rtn    = false;
+		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		$result = wp_remote_get(
 			trailingslashit( $url ) . $this->status_endpoint,
 			[
