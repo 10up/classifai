@@ -185,13 +185,15 @@ class Personalizer extends Provider {
 		// Handle Taxonomy filters.
 		if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
 			foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
-				$query_args['tax_query'][] = array(
-					'taxonomy' => $taxonomy,
-					'field'    => 'term_id',
-					'terms'    => $terms,
-				);
+				if ( ! empty( $terms ) ) {
+					$query_args['tax_query'][] = array(
+						'taxonomy' => $taxonomy,
+						'field'    => 'term_id',
+						'terms'    => $terms,
+					);
+				}
 			}
-			if ( count( $query_args['tax_query'] ) > 1 ) {
+			if ( isset( $query_args['tax_query'] ) && count( $query_args['tax_query'] ) > 1 ) {
 				$query_args['tax_query']['relation'] = 'AND';
 			}
 		}
