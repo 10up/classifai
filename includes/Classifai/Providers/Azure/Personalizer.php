@@ -171,7 +171,7 @@ class Personalizer extends Provider {
 	 * Get Recent posts based on given arguments
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return object WP_Query object.
+	 * @return array recent actions based on block attributes.
 	 */
 	protected function get_recent_actions( $attributes ) {
 		$query_args = array(
@@ -181,6 +181,20 @@ class Personalizer extends Provider {
 			'ignore_sticky_posts' => true,
 			'post_type'           => $attributes['contentPostType'],
 		);
+
+		// Handle Taxonomy filters.
+		if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
+			foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
+				$query_args['tax_query'][] = array(
+					'taxonomy' => $taxonomy,
+					'field'    => 'term_id',
+					'terms'    => $terms,
+				);
+			}
+			if ( count( $query_args['tax_query'] ) > 1 ) {
+				$query_args['tax_query']['relation'] = 'AND';
+			}
+		}
 
 		/**
 		 * Filters Recommended content post arguments.
@@ -200,16 +214,21 @@ class Personalizer extends Provider {
 		);
 
 		$actions = array();
-		$posts   = get_posts( $query_args );
-		foreach ( $posts as $post ) {
-			array_push(
-				$actions,
-				array(
-					'id'       => $post->ID,
-					'features' => array( $this->get_post_features( $post->ID ) ),
-				)
-			);
+		$query = new \WP_Query( $query_args );
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				$post_id = get_the_ID();
+				array_push(
+					$actions,
+					array(
+						'id'       => $post_id,
+						'features' => array( $this->get_post_features( $post_id ) ),
+					)
+				);
+			}
 		}
+		wp_reset_postdata();
 
 		return $actions;
 	}
@@ -222,6 +241,9 @@ class Personalizer extends Provider {
 	 */
 	public function get_recommended_content( $attributes ) {
 		$actions = $this->get_recent_actions( $attributes );
+		if ( empty( $actions ) ) {
+			return __( 'No results found.', 'classifai' );
+		}
 
 		// TODO: Add Location contextFeatures.
 		$rank_request = array(

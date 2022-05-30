@@ -134,6 +134,7 @@ const RecommendedContentBlockEdit = (props) => {
 					block="classifai/recommended-content-block"
 					attributes={{
 						contentPostType,
+						taxQuery,
 						displayAuthor,
 						displayFeaturedImage,
 						displayPostDate,

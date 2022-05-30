@@ -12,7 +12,8 @@
  */
 
 if ( empty( $response ) || empty( $response->rewardActionId ) ) {
-	return $response;
+	echo $response;
+	return;
 }
 
 $rewarded_id   = $response->rewardActionId;
