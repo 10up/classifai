@@ -57,7 +57,7 @@ class Personalizer extends Service {
 		$attributes = $request->get_attributes();
 		$route      = empty( $attributes['args']['route'] ) ? false : $attributes['args']['route'][0];
 
-		// If no args, return 404
+		// If no args, respond 404
 		if ( false === $route ) {
 			return new \WP_Error( 'no route', 'No route indicated for the provider class to use.', array( 'status' => 404 ) );
 		}
