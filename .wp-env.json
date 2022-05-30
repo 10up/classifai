@@ -1,0 +1,10 @@
+{
+  "plugins": [".", "./tests/test-plugin"],
+  "env": {
+    "tests": {
+      "mappings": {
+        "wp-cli.yml": "./tests/bin/wp-cli.yml"
+      }
+    }
+  }
+}

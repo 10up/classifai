@@ -14,7 +14,13 @@
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
     "makepot": "wpi18n makepot && echo '.pot file updated'",
-    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes"
+    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes",
+    "cypress:open": "cypress open --config-file tests/cypress/config.json",
+    "cypress:run": "cypress run --config-file tests/cypress/config.json",
+    "env": "wp-env",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "postenv:start": "./tests/bin/initialize.sh"
   },
   "husky": {
     "hooks": {
@@ -33,12 +39,15 @@
     "role": "developer"
   },
   "devDependencies": {
+    "@10up/cypress-wp-utils": "github:10up/cypress-wp-utils#build",
+    "@wordpress/env": "^4.5.0",
     "10up-toolkit": "^4.0.0",
-    "husky": "^3.0.5",
+    "cypress": "^9.5.4",
+    "cypress-file-upload": "^5.0.8",
+    "husky": "^3.1.0",
     "jsdoc": "^3.6.3",
-    "lint-staged": "^9.2.5",
+    "lint-staged": "^9.5.0",
     "node-wp-i18n": "^1.2.3",
-    "stylelint": "^14.8.2",
     "wp-hookdoc": "^0.2.0"
   },
   "10up-toolkit": {

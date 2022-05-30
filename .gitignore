@@ -42,3 +42,9 @@ Thumbs.db
 Desktop.ini
 
 config.local.php
+
+# cypress.
+tests/cypress/downloads
+tests/cypress/screenshots
+tests/cypress/videos
+.wp-env.override.json

@@ -1,7 +1,14 @@
 {
   "globals": {
-	  "wp": "readonly",
-	  "jQuery": "readonly"
+    "wp": "readonly",
+    "jQuery": "readonly",
+    "describe": "readonly",
+    "before": "readonly",
+    "beforeEach": "readonly",
+    "expect": "readonly",
+    "it": "readonly",
+    "Cypress": "readonly",
+    "cy": "readonly"
   },
   "extends": ["@10up/eslint-config/wordpress"]
 }
