@@ -411,9 +411,12 @@ class Personalizer extends Provider {
 	 * Get user agent for personilizer contextFeatures.
 	 */
 	protected function get_user_agent_features() {
+		// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__
+		$user_agent = isset( $_SERVER['HTTP_USER_AGENT'] ) ? wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) : '';
+
 		// User Agent Parsing
 		$parser    = Parser::create();
-		$ua_result = $parser->parse( $_SERVER['HTTP_USER_AGENT'] );
+		$ua_result = $parser->parse( $user_agent );
 
 		return array(
 			'_ua'           => $ua_result->originalUserAgent, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
