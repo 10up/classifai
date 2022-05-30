@@ -1,29 +1,38 @@
 {
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
-	"title": "Recommended Content",
-	"description": "Display Recommended content by Azure Personalizer",
-	"textdomain": "classifai",
-	"name": "classifai/recommended-content-block",
+  "title": "Recommended Content",
+  "description": "Display Recommended content by Azure Personalizer",
+  "textdomain": "classifai",
+  "name": "classifai/recommended-content-block",
   "category": "classifai-blocks",
-	"attributes":{
-		"contentPostType": {
-      "type" : "string"
+  "attributes": {
+    "contentPostType": {
+      "type": "string",
+      "default": "post"
+    },
+    "taxQuery": {
+      "type": "object"
     },
     "displayPostExcept": {
-        "type" : "boolean"
+      "type": "boolean",
+      "default": false
     },
     "displayAuthor": {
-        "type" : "boolean"
+      "type": "boolean",
+      "default": false
     },
     "displayPostDate": {
-        "type" : "boolean"
+      "type": "boolean",
+      "default": false
     },
     "displayFeaturedImage": {
-        "type" : "boolean"
+      "type": "boolean",
+      "default": true
     },
     "addLinkToFeaturedImage": {
-      "type" : "boolean"
+      "type": "boolean",
+      "default": false
     }
   },
   "supports": {
