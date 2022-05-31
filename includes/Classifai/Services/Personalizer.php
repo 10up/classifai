@@ -26,6 +26,28 @@ class Personalizer extends Service {
 	public function init() {
 		parent::init();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action( 'wp_ajax_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+		add_action( 'wp_ajax_nopriv_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+	}
+
+	/**
+	 * Render Recommended content over AJAX.
+	 *
+	 * @return void
+	 */
+	public function ajax_render_recommended_content() {
+		check_ajax_referer( 'classifai-recommended-block', 'security' );
+		$attributes = array(
+			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
+			'displayPostExcept'      => filter_var( $_POST['displayPostExcept'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+			'displayAuthor'          => filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+			'displayPostDate'        => filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+			'displayFeaturedImage'   => filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+			'addLinkToFeaturedImage' => filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+		);
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo $this->provider_classes[0]->render_recommended_content( $attributes );
+		exit();
 	}
 
 	/**

@@ -287,6 +287,7 @@ class Personalizer extends Provider {
 
 		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$post_id   = $content->rewardActionId;
+		$event_id  = $content->eventId; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$post      = get_post( $post_id );
 		$post_link = esc_url( get_permalink( $post ) );
 		$title     = get_the_title( $post );
@@ -303,9 +304,10 @@ class Personalizer extends Provider {
 			$featured_image = get_the_post_thumbnail( $post );
 			if ( $attributes['addLinkToFeaturedImage'] ) {
 				$featured_image = sprintf(
-					'<a href="%1$s" aria-label="%2$s">%3$s</a>',
+					'<a href="%1$s" aria-label="%2$s" class="classifai-send-reward" data-eventid="%3$s">%4$s</a>',
 					esc_url( $post_link ),
 					esc_attr( $title ),
+					esc_attr( $event_id ),
 					$featured_image
 				);
 			}
@@ -317,8 +319,9 @@ class Personalizer extends Provider {
 		}
 
 		$markup .= sprintf(
-			'<a href="%1$s">%2$s</a>',
+			'<a href="%1$s" class="classifai-send-reward" data-eventid="%2$s">%3$s</a>',
 			esc_url( $post_link ),
+			esc_attr( $event_id ),
 			esc_html( $title )
 		);
 

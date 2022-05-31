@@ -35,8 +35,13 @@ function register() {
  * @return string The rendered block markup.
  */
 function render_block_callback( $attributes, $content, $block ) {
-	$personalizer = new Personalizer( false );
-	$response     = $personalizer->get_recommended_content( $attributes );
+	// Render block in Gutenberg Editor
+	if ( defined( 'REST_REQUEST' ) && \REST_REQUEST ) {
+		$personalizer = new Personalizer( false );
+		return $personalizer->render_recommended_content( $attributes );
+	}
+
+	// Render block in Front-end.
 	ob_start();
 	include __DIR__ . '/markup.php';
 	return ob_get_clean();

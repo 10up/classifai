@@ -1,7 +1,6 @@
 /* global classifai_personalizer_params */
-const contentLinks = document.querySelectorAll('.classifai-send-reward');
-contentLinks.forEach(function (contentLink) {
-	contentLink.addEventListener('click', function (event) {
+jQuery(document).ready(function () {
+	jQuery(document).on('click', '.classifai-send-reward', function (event) {
 		event.preventDefault();
 		const restURL = classifai_personalizer_params?.reward_endpoint;
 		const eventId = this.getAttribute('data-eventid');

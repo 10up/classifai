@@ -50,8 +50,8 @@ function blocks_styles() {
 	);
 	wp_enqueue_script(
 		'recommended-content-block-script',
-		CLASSIFAI_PLUGIN_URL . '/dist/js/recommended-content-block-script.js',
-		[],
+		CLASSIFAI_PLUGIN_URL . 'dist/js/recommended-content-block-script.js',
+		[ 'jquery' ],
 		CLASSIFAI_PLUGIN_VERSION,
 		true
 	);

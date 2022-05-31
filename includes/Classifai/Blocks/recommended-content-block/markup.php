@@ -10,90 +10,23 @@
  * @var WP_Block $block              Block instance.
  * @var array    $context            BLock context.
  */
-
-if ( empty( $response ) || empty( $response->rewardActionId ) ) {
-	echo $response;
-	return;
-}
-
-$rewarded_id   = $response->rewardActionId;
-$event_id      = $response->eventId;
-$rewarded_post = get_post( $rewarded_id );
-$post_link     = esc_url( get_permalink( $rewarded_post ) );
-$post_title         = get_the_title( $rewarded_post );
-if ( ! $post_title ) {
-	$post_title = __( '(no title)', 'classifai' );
-}
-
-$class = 'wp-block-classifai-recommended-content';
-if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
-	$class .= ' has-dates';
-}
-
-if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
-	$class .= ' has-author';
-}
+$block_id   = 'classifai-recommended-block-' . md5( maybe_serialize( $attributes ) );
+$ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 ?>
-<ul <?php echo get_block_wrapper_attributes( array( 'class' => $class ) ); // phpcs:ignore> ?>>
-	<li>
-	<?php
-	if ( $attributes['displayFeaturedImage'] && has_post_thumbnail( $rewarded_post ) ) {
-		$image_classes = 'wp-block-classifai-recommended-content__featured-image';
-		?>
-		<div class="<?php echo esc_attr( $image_classes ); ?>">
-			<?php
-			if ( $attributes['addLinkToFeaturedImage'] ) {
-				?>
-				<a class="classifai-send-reward" data-eventid="<?php echo esc_attr( $event_id ); ?>" href="<?php echo esc_url( $post_link ); ?>" aria-label="<?php echo esc_attr( $post_title ); ?>">
-					<?php echo get_the_post_thumbnail( $rewarded_post ); ?>
-				</a>
-				<?php
-			} else {
-				echo get_the_post_thumbnail( $rewarded_post );
-			}
-			?>
-		</div>
-		<?php
-	}
-	?>
-	<a class="classifai-send-reward" data-eventid="<?php echo esc_attr( $event_id ); ?>" href="<?php echo esc_url( $post_link ); ?>">
-		<?php echo esc_html( $post_title ); ?>
-	</a>
-	<?php
-	if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
-		$author_display_name = get_the_author_meta( 'display_name', $rewarded_post->post_author );
-
-		/* translators: byline. %s: current author. */
-		$byline = sprintf( __( 'by %s', 'classifai' ), $author_display_name );
-		if ( ! empty( $author_display_name ) ) {
-			?>
-			<div class="wp-block-classifai-recommended-content__post-author">
-				<?php echo esc_html( $byline ); ?>
-			</div>
-			<?php
-		}
-	}
-
-	if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
-		?>
-		<time datetime="<?php echo esc_attr( get_the_date( 'c', $rewarded_post ) ); ?>" class="wp-block-classifai-recommended-content__post-date">
-			<?php echo esc_html( get_the_date( '', $rewarded_post ) ); ?>
-		</time>
-		<?php
-	}
-
-	if ( isset( $attributes['displayPostExcept'] ) && $attributes['displayPostExcept'] ) {
-		$trimmed_excerpt = get_the_excerpt( $rewarded_post );
-
-		if ( post_password_required( $rewarded_post ) ) {
-			$trimmed_excerpt = __( 'This content is password protected.', 'classifai' );
-		}
-		?>
-		<div class="wp-block-classifai-recommended-content__post-excerpt">
-		<?php echo esc_html( $trimmed_excerpt ); ?>
-		</div>
-		<?php
-	}
-	?>
-	</li>
-</ul>
+<div id="<?php echo $block_id;?>"></div>
+<script>
+	const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
+	const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
+	data.action   = 'render_recommended_content';
+	data.security = '<?php echo $ajax_nonce;?>';
+	jQuery(document).ready(function() {
+		jQuery.post(ajaxURL, data)
+		.done(function(response) {
+			jQuery('#<?php echo $block_id;?>').html(response);
+		})
+		.fail(function(error) {
+			console.log(error);
+		});
+	});
+</script>
+<?php
