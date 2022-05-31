@@ -17,11 +17,11 @@ $ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 <?php esc_html_e( 'Loading...', 'classifai' ); ?>
 </div>
 <script>
-	const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
-	const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
-	data.action   = 'render_recommended_content';
-	data.security = '<?php echo $ajax_nonce;?>';
 	jQuery(document).ready(function() {
+		const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
+		const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
+		data.action   = 'render_recommended_content';
+		data.security = '<?php echo $ajax_nonce;?>';
 		jQuery.post(ajaxURL, data)
 		.done(function(response) {
 			jQuery('#<?php echo $block_id;?>').html(response);

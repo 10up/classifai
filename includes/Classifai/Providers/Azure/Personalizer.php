@@ -174,8 +174,12 @@ class Personalizer extends Provider {
 	 * @return array recent actions based on block attributes.
 	 */
 	protected function get_recent_actions( $attributes ) {
-		$post_type     = $attributes['contentPostType'];
-		$transient_key = 'classifai_actions_' . $post_type . md5( maybe_serialize( $attributes ) );
+		$post_type      = $attributes['contentPostType'];
+		$key_attributes = array(
+			'post_type' => $attributes['contentPostType'],
+			'tax_query' => isset( $attributes['taxQuery'] ) ? $attributes['taxQuery'] : array(),
+		);
+		$transient_key = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
 		$actions       = get_transient( $transient_key );
 		if ( false === $actions ) {
 			$query_args = array(

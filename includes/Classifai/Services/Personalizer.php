@@ -54,6 +54,7 @@ class Personalizer extends Service {
 		);
 
 		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			foreach ( $_POST['taxQuery'] as $key => $value ) {
 				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
 			}
