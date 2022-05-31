@@ -44,17 +44,21 @@ class Personalizer extends Service {
 			exit();
 		}
 
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$attributes = array(
 			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
-			'taxQuery'               => isset( $_POST['taxQuery'] ) ? $_POST['taxQuery'] : array(),
-			'displayPostExcept'      => filter_var( $_POST['displayPostExcept'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
-			'displayAuthor'          => filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
-			'displayPostDate'        => filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
-			'displayFeaturedImage'   => filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
-			'addLinkToFeaturedImage' => filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
+			'displayPostExcept'      => isset( $_POST['displayPostExcept'] ) ? filter_var( $_POST['displayPostExcept'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
+			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 		);
-		// phpcs:enable
+
+		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
+			foreach ( $_POST['taxQuery'] as $key => $value ) {
+				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
+			}
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $this->provider_classes[0]->render_recommended_content( $attributes );
 		exit();
@@ -117,6 +121,7 @@ class Personalizer extends Service {
 	public function maybe_clear_transient( $post_id ) {
 		global $wpdb;
 		$post_type = get_post_type( $post_id );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$transients = $wpdb->get_col( $wpdb->prepare( "SELECT `option_name` FROM {$wpdb->options} WHERE  option_name LIKE %s", '_transient_classifai_actions_' . $post_type . '%' ) );
 		// Delete all transients
 		if ( ! empty( $transients ) ) {

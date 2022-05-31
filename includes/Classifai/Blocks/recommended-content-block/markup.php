@@ -13,7 +13,9 @@
 $block_id   = 'classifai-recommended-block-' . md5( maybe_serialize( $attributes ) );
 $ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 ?>
-<div id="<?php echo $block_id;?>"></div>
+<div id="<?php echo $block_id;?>">
+<?php esc_html_e( 'Loading...', 'classifai' ); ?>
+</div>
 <script>
 	const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
 	const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
@@ -25,6 +27,7 @@ $ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 			jQuery('#<?php echo $block_id;?>').html(response);
 		})
 		.fail(function(error) {
+			jQuery('#<?php echo $block_id;?>').html('');
 			console.log(error);
 		});
 	});
