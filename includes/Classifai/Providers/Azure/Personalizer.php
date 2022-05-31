@@ -102,7 +102,18 @@ class Personalizer extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['url'],
-				'description'   => __( 'Azure Cognitive Service Personalizer Endpoint, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'description'   => sprintf(
+					wp_kses(
+						__( 'Azure Cognitive Service Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
+						array(
+							'a' => array(
+								'href'   => array(),
+								'target' => array(),
+							),
+						)
+					),
+					esc_url( 'https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer' )
+				),
 			]
 		);
 		add_settings_field(
