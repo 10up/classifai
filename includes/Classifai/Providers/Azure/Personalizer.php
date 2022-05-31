@@ -174,63 +174,72 @@ class Personalizer extends Provider {
 	 * @return array recent actions based on block attributes.
 	 */
 	protected function get_recent_actions( $attributes ) {
-		$query_args = array(
-			'posts_per_page'      => 50, // we have maximum 50 actions limit
-			'post_status'         => 'publish',
-			'no_found_rows'       => true,
-			'ignore_sticky_posts' => true,
-			'post_type'           => $attributes['contentPostType'],
-		);
+		$post_type     = $attributes['contentPostType'];
+		$transient_key = 'classifai_actions_' . $post_type . md5( maybe_serialize( $attributes ) );
+		$actions       = get_transient( $transient_key );
+		if ( false === $actions ) {
+			$query_args = array(
+				'posts_per_page'      => 50, // we have maximum 50 actions limit
+				'post_status'         => 'publish',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => true,
+				'post_type'           => $post_type,
+			);
 
-		// Handle Taxonomy filters.
-		if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
-			foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
-				if ( ! empty( $terms ) ) {
-					$query_args['tax_query'][] = array(
-						'taxonomy' => $taxonomy,
-						'field'    => 'term_id',
-						'terms'    => $terms,
+			// Handle Taxonomy filters.
+			if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
+				foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
+					if ( ! empty( $terms ) ) {
+						$query_args['tax_query'][] = array(
+							'taxonomy' => $taxonomy,
+							'field'    => 'term_id',
+							'terms'    => $terms,
+						);
+					}
+				}
+				if ( isset( $query_args['tax_query'] ) && count( $query_args['tax_query'] ) > 1 ) {
+					$query_args['tax_query']['relation'] = 'AND';
+				}
+			}
+
+			/**
+			 * Filters Recommended content post arguments.
+			 *
+			 * @since 1.8.0
+			 * @hook classifai_recommended_content_post_args
+			 *
+			 * @param {array} $query_args Array of query args to get posts
+			 * @param {array} $attributes The block attributes.
+			 *
+			 * @return {array} Array of query args to get posts
+			 */
+			$query_args = apply_filters(
+				'classifai_recommended_content_post_args',
+				$query_args,
+				$attributes
+			);
+
+			$actions = array();
+			$query = new \WP_Query( $query_args );
+			if ( $query->have_posts() ) {
+				while ( $query->have_posts() ) {
+					$query->the_post();
+					$post_id = get_the_ID();
+					array_push(
+						$actions,
+						array(
+							'id'       => $post_id,
+							'features' => array( $this->get_post_features( $post_id ) ),
+						)
 					);
 				}
 			}
-			if ( isset( $query_args['tax_query'] ) && count( $query_args['tax_query'] ) > 1 ) {
-				$query_args['tax_query']['relation'] = 'AND';
+			wp_reset_postdata();
+
+			if ( ! empty( $actions ) ) {
+				set_transient( $transient_key, $actions, 6 * \HOUR_IN_SECONDS );
 			}
 		}
-
-		/**
-		 * Filters Recommended content post arguments.
-		 *
-		 * @since 1.8.0
-		 * @hook classifai_recommended_content_post_args
-		 *
-		 * @param {array} $query_args Array of query args to get posts
-		 * @param {array} $attributes The block attributes.
-		 *
-		 * @return {array} Array of query args to get posts
-		 */
-		$query_args = apply_filters(
-			'classifai_recommended_content_post_args',
-			$query_args,
-			$attributes
-		);
-
-		$actions = array();
-		$query = new \WP_Query( $query_args );
-		if ( $query->have_posts() ) {
-			while ( $query->have_posts() ) {
-				$query->the_post();
-				$post_id = get_the_ID();
-				array_push(
-					$actions,
-					array(
-						'id'       => $post_id,
-						'features' => array( $this->get_post_features( $post_id ) ),
-					)
-				);
-			}
-		}
-		wp_reset_postdata();
 
 		return $actions;
 	}

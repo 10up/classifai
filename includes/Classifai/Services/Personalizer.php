@@ -28,6 +28,7 @@ class Personalizer extends Service {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		add_action( 'wp_ajax_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 		add_action( 'wp_ajax_nopriv_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+		add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
 	}
 
 	/**
@@ -37,14 +38,23 @@ class Personalizer extends Service {
 	 */
 	public function ajax_render_recommended_content() {
 		check_ajax_referer( 'classifai-recommended-block', 'security' );
+
+		if ( ! isset( $_POST['contentPostType'] ) || empty( $_POST['contentPostType'] ) ) {
+			esc_html_e( 'No Results found.', 'classifai' );
+			exit();
+		}
+
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotValidated
 		$attributes = array(
 			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
+			'taxQuery'               => isset( $_POST['taxQuery'] ) ? $_POST['taxQuery'] : array(),
 			'displayPostExcept'      => filter_var( $_POST['displayPostExcept'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
 			'displayAuthor'          => filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
 			'displayPostDate'        => filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
 			'displayFeaturedImage'   => filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
 			'addLinkToFeaturedImage' => filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ),
 		);
+		// phpcs:enable
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo $this->provider_classes[0]->render_recommended_content( $attributes );
 		exit();
@@ -96,5 +106,23 @@ class Personalizer extends Service {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Maybe Clear save transient for recent actions.
+	 *
+	 * @param int $post_id Post Id.
+	 * @return void
+	 */
+	public function maybe_clear_transient( $post_id ) {
+		global $wpdb;
+		$post_type = get_post_type( $post_id );
+		$transients = $wpdb->get_col( $wpdb->prepare( "SELECT `option_name` FROM {$wpdb->options} WHERE  option_name LIKE %s", '_transient_classifai_actions_' . $post_type . '%' ) );
+		// Delete all transients
+		if ( ! empty( $transients ) ) {
+			foreach ( $transients as $transient ) {
+				delete_transient( str_replace( '_transient_', '', $transient ) );
+			}
+		}
 	}
 }
