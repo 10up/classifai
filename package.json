@@ -57,8 +57,7 @@
       "media": "./src/js/media.js",
       "admin": "./src/js/admin.js",
       "recommended-content-block": "./includes/Classifai/Blocks/recommended-content-block/index.js",
-      "recommended-content-block-style": "./includes/Classifai/Blocks/recommended-content-block/style.scss",
-      "recommended-content-block-script": "./includes/Classifai/Blocks/recommended-content-block/front-end.js"
+      "recommended-content-block-frontend": "./includes/Classifai/Blocks/recommended-content-block/frontend.js"
     }
   }
 }

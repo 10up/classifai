@@ -1,3 +1,5 @@
+import './frontend.scss';
+
 /* global classifai_personalizer_params */
 jQuery(document).ready(function () {
 	jQuery(document).on('click', '.classifai-send-reward', function (event) {

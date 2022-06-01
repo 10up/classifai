@@ -17,19 +17,34 @@ $ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 <?php esc_html_e( 'Loading...', 'classifai' ); ?>
 </div>
 <script>
-	jQuery(document).ready(function() {
-		const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
-		const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
-		data.action   = 'render_recommended_content';
-		data.security = '<?php echo $ajax_nonce;?>';
-		jQuery.post(ajaxURL, data)
-		.done(function(response) {
-			jQuery('#<?php echo $block_id;?>').html(response);
-		})
-		.fail(function(error) {
-			jQuery('#<?php echo $block_id;?>').html('');
-			console.log(error);
-		});
+jQuery(document).ready(function() {
+	const blockId = '<?php echo $block_id;?>';
+	const cached  = sessionStorage.getItem(blockId);
+	if( cached !== null ) {
+		const cacheStorage = JSON.parse(cached);
+		if (new Date(cacheStorage.expiresAt) > new Date()) {
+			jQuery(`#${blockId}`).html(cacheStorage.response);
+			return;
+		}
+	}
+	const ajaxURL = '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>';
+	const data = JSON.parse('<?php echo wp_json_encode( $attributes ); ?>');
+	data.action   = 'render_recommended_content';
+	data.security = '<?php echo $ajax_nonce;?>';
+	jQuery.post(ajaxURL, data)
+	.done(function(response) {
+		if(response) {
+			window.sessionStorage.setItem(blockId, JSON.stringify({
+				expiresAt: new Date(new Date().getTime() + 60000 * 60), // 1 hour expiry time.
+				response,
+			}));
+		}
+		jQuery(`#${blockId}`).html(response);
+	})
+	.fail(function(error) {
+		jQuery(`#${blockId}`).html('');
+		console.log(error);
 	});
+});
 </script>
 <?php

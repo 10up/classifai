@@ -44,13 +44,13 @@ function register_blocks() {
 function blocks_styles() {
 	wp_enqueue_style(
 		'recommended-content-block-style',
-		CLASSIFAI_PLUGIN_URL . '/dist/css/recommended-content-block-style.css',
+		CLASSIFAI_PLUGIN_URL . '/dist/css/recommended-content-block-frontend.css',
 		[],
 		CLASSIFAI_PLUGIN_VERSION
 	);
 	wp_enqueue_script(
 		'recommended-content-block-script',
-		CLASSIFAI_PLUGIN_URL . 'dist/js/recommended-content-block-script.js',
+		CLASSIFAI_PLUGIN_URL . 'dist/js/recommended-content-block-frontend.js',
 		[ 'jquery' ],
 		CLASSIFAI_PLUGIN_VERSION,
 		true
