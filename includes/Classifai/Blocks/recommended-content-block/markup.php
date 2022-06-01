@@ -19,7 +19,7 @@ $ajax_nonce = wp_create_nonce( 'classifai-recommended-block' );
 <script>
 jQuery(document).ready(function() {
 	const blockId = '<?php echo $block_id;?>';
-	const cached  = sessionStorage.getItem(blockId);
+	const cached  = window.sessionStorage.getItem(blockId);
 	if( cached !== null ) {
 		const cacheStorage = JSON.parse(cached);
 		if (new Date(cacheStorage.expiresAt) > new Date()) {
