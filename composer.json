@@ -31,5 +31,10 @@
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
+  },
+  "archive": {
+    "exclude": [
+      "!/vendor/yahnis-elsts"
+    ]
   }
 }
