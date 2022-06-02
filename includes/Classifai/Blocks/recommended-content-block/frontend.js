@@ -60,6 +60,7 @@ jQuery(document).ready(function () {
 			})
 			.fail(function (error) {
 				jQuery(`#${blockId}`).html('');
+				// eslint-disable-next-line no-console
 				console.error(error);
 			});
 	});
