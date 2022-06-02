@@ -48,13 +48,17 @@ function blocks_styles() {
 		[],
 		CLASSIFAI_PLUGIN_VERSION
 	);
+
+	$fe_file_name          = 'recommended-content-block-frontend';
+	$frontend_dependencies = ( include CLASSIFAI_PLUGIN_DIR . "/dist/js/$fe_file_name.asset.php" );
 	wp_enqueue_script(
 		'recommended-content-block-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/js/recommended-content-block-frontend.js',
-		[ 'jquery' ],
-		CLASSIFAI_PLUGIN_VERSION,
+		array_merge( $frontend_dependencies['dependencies'], [ 'jquery' ] ),
+		$frontend_dependencies['version'],
 		true
 	);
+
 	wp_localize_script(
 		'recommended-content-block-script',
 		'classifai_personalizer_params',
