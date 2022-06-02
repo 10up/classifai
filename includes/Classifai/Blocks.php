@@ -60,6 +60,8 @@ function blocks_styles() {
 		'classifai_personalizer_params',
 		array(
 			'reward_endpoint' => get_rest_url( null, 'classifai/v1/personalizer/reward/{eventId}' ),
+			'ajax_url'        => esc_url( admin_url( 'admin-ajax.php' ) ),
+			'ajax_nonce'      => wp_create_nonce( 'classifai-recommended-block' ),
 		)
 	);
 }
