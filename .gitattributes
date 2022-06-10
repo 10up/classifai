@@ -31,4 +31,3 @@ phpunit.xml.dist export-ignore
 portkey.json export-ignore
 README.md export-ignore
 webpack.config.js export-ignore
-wpacceptance.json
