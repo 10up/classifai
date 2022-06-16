@@ -18,7 +18,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 
 	protected $provider;
 	protected $settings = [
-		'crendentials' => [
+		'credentials' => [
 			'watson_url' => 'url',
 			'watson_username' => 'username',
 			'watson_password' => 'password',

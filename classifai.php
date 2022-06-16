@@ -4,7 +4,7 @@
  * Plugin URI:      https://github.com/10up/classifai
  * Update URI:      https://classifaiplugin.com
  * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:         1.7.0
+ * Version:         1.7.2-dev
  * Author:          10up
  * Author URI:      https://10up.com
  * License:         GPLv2

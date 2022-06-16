@@ -1,0 +1,83 @@
+{
+  "status": "succeeded",
+  "createdDateTime": "2022-05-09T12:18:07Z",
+  "lastUpdatedDateTime": "2022-05-09T12:18:08Z",
+  "analyzeResult": {
+    "version": "3.2.0",
+    "modelVersion": "2022-04-30",
+    "readResults": [
+      {
+        "page": 1,
+        "angle": 0,
+        "width": 8.2639,
+        "height": 11.6944,
+        "unit": "inch",
+        "lines": [
+          {
+            "boundingBox": [
+              0.805,
+              1.0025,
+              2.4947,
+              1.0025,
+              2.4947,
+              1.212,
+              0.805,
+              1.212
+            ],
+            "text": "Dummy PDF file",
+            "appearance": {
+              "style": {
+                "name": "other",
+                "confidence": 1
+              }
+            },
+            "words": [
+              {
+                "boundingBox": [
+                  0.805,
+                  1.0052,
+                  1.6055,
+                  1.0052,
+                  1.6055,
+                  1.212,
+                  0.805,
+                  1.212
+                ],
+                "text": "Dummy",
+                "confidence": 1
+              },
+              {
+                "boundingBox": [
+                  1.6872,
+                  1.0052,
+                  2.1073,
+                  1.0052,
+                  2.1073,
+                  1.1653,
+                  1.6872,
+                  1.1653
+                ],
+                "text": "PDF",
+                "confidence": 1
+              },
+              {
+                "boundingBox": [
+                  2.1827,
+                  1.0025,
+                  2.4947,
+                  1.0025,
+                  2.4947,
+                  1.1677,
+                  2.1827,
+                  1.1677
+                ],
+                "text": "file",
+                "confidence": 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
