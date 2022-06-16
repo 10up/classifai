@@ -1,6 +1,7 @@
 release
 /vendor/*
 phpunit.xml
+.phpunit.result.cache
 /dist
 coverage
 /docs

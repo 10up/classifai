@@ -1,5 +1,9 @@
 name: PHPUnit Tests
 
+env:
+  COMPOSER_VERSION: "2"
+  COMPOSER_CACHE: "${{ github.workspace }}/.composer-cache"
+
 on:
   schedule:
     - cron:  '0 0 * * *'
@@ -25,6 +29,18 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.4.0
 
+    - name: Set standard 10up cache directories
+      run: |
+        composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
+
+    - name: Prepare composer cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.COMPOSER_CACHE }}
+        key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          composer-${{ env.COMPOSER_VERSION }}-
+
     - uses: getong/mariadb-action@v1.1
 
     - name: Set PHP version
@@ -32,7 +48,7 @@ jobs:
       with:
         php-version: ${{ matrix.php }}
         coverage: none
-        tools: phpunit-polyfills
+        tools: phpunit-polyfills, composer:v2
 
     - name: Install dependencies
       run: composer update -W
