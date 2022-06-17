@@ -6,8 +6,8 @@ class LinkerTest extends \WP_UnitTestCase {
 
 	public $linker;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->linker = new Linker();
 	}

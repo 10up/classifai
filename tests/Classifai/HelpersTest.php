@@ -9,9 +9,9 @@ class HelpersTest extends \WP_UnitTestCase {
 	/**
 	 * Tear down method.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		$this->remove_added_uploads();
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	function test_it_has_a_plugin_instance() {

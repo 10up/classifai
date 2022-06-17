@@ -16,15 +16,15 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	/**
 	 * Setup method.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 	}
 
 	/**
 	 * Tear down method.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		$this->remove_added_uploads();
 	}
@@ -163,7 +163,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			// Strip out everything before /wp-content/ because it won't match.
 			$prepped_url = substr( $cropped_thumbnail_url,  strpos( $cropped_thumbnail_url , '/wp-content/' ) );
 
-			
+
 			$this->assertEquals(
 				sprintf( '/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
 				$prepped_url

@@ -21,8 +21,8 @@ class ServicesManagerTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->services_manager = new ServicesManager();
 	}
