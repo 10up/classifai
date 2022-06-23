@@ -1,5 +1,7 @@
+# Directories
 .git export-ignore
 .github export-ignore
+.vscode export-ignore
 bin export-ignore
 docs export-ignore
 hookdocs export-ignore
@@ -8,6 +10,8 @@ release export-ignore
 src export-ignore
 tests export-ignore
 vendor export-ignore
+
+# Files
 .babelrc export-ignore
 .DS_Store export-ignore
 .editorconfig export-ignore
