@@ -6,8 +6,8 @@ class AbstractTaxonomyTest extends \WP_UnitTestCase {
 
 	public $taxonomy;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->taxonomy = new ThingTaxonomy();
 	}
