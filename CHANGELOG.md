@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.7.2] - 2022-06-27
+
+### Added
+
+- More robust PHP testing (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#328](https://github.com/10up/classifai/pull/328)).
+- End-to-end testing with Cypress (props [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi) via [#334](https://github.com/10up/classifai/pull/334)).
+- `classifai_should_register_save_post_handler` filter; allows modifying the registration conditions for the `SavePostHandler` class (props [@s3rgiosan](https://github.com/s3rgiosan), [@dkotter](https://github.com/dkotter) via [#341](https://github.com/10up/classifai/pull/341)).
+
+### Changed
+
+- Bump WordPress version "tested up to" 6.0 (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@jeffpaul](https://github.com/jeffpaul) via [#346](https://github.com/10up/classifai/pull/346)).
+- Updates in `Build Release` GH action (props [@iamdharmesh](https://github.com/iamdharmesh), [@dinhtungdu](https://github.com/dinhtungdu) via [#347](https://github.com/10up/classifai/pull/347)).
+
+### Removed
+
+- Removed the `pot` file and `vendor` directory from being version controlled (props [@dinhtungdu](https://github.com/dinhtungdu), [@iamdharmesh](https://github.com/iamdharmesh) via [#212](https://github.com/10up/classifai/pull/212)).
+
+### Fixed
+
+- Hook docs deployment (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9) via [#345](https://github.com/10up/classifai/pull/345)).
+
 ## [1.7.1] - 2022-04-25
 ### Added
 - `classifai_post_statuses` filter; allows post statuses for content classification to be changed as required but would apply to all post types (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
