@@ -32,6 +32,5 @@ package-lock.json export-ignore
 package.json export-ignore
 phpcs.xml.dist export-ignore
 phpunit.xml.dist export-ignore
-portkey.json export-ignore
 README.md export-ignore
 webpack.config.js export-ignore
