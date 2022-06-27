@@ -1,6 +1,6 @@
 {
   "name": "classifai",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "license": "GPLv2",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
@@ -11,7 +11,15 @@
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
     "makepot": "wpi18n makepot && echo '.pot file updated'",
-    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes"
+    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes",
+    "cypress:open": "cypress open --config-file tests/cypress/config.json",
+    "cypress:run": "cypress run --config-file tests/cypress/config.json",
+    "env": "wp-env",
+    "env:start": "wp-env start",
+    "env:stop": "wp-env stop",
+    "postenv:start": "./tests/bin/initialize.sh",
+    "archive": "composer archive --file=$npm_package_name --format=zip",
+    "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release"
   },
   "husky": {
     "hooks": {
@@ -30,12 +38,16 @@
     "role": "developer"
   },
   "devDependencies": {
+    "@10up/cypress-wp-utils": "github:10up/cypress-wp-utils#build",
     "@10up/eslint-config": "^1.0.9",
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.0.0",
+    "@wordpress/env": "^4.5.0",
     "babel-eslint": "10.0.3",
     "babel-loader": "^8.0.6",
+    "cypress": "^9.5.4",
+    "cypress-file-upload": "^5.0.8",
     "eslint": "^6.3.0",
     "eslint-loader": "^3.0.0",
     "husky": "^3.0.5",

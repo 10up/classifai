@@ -6,8 +6,8 @@ class TaxonomyFactoryTest extends \WP_UnitTestCase {
 
 	public $factory;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->factory = new TaxonomyFactory();
 	}

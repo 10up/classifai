@@ -6,8 +6,8 @@ class NormalizeTest extends \WP_UnitTestCase {
 
 	public $normalizer;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->normalizer = new Normalizer();
 	}
@@ -18,7 +18,7 @@ class NormalizeTest extends \WP_UnitTestCase {
 		] );
 
 		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertContains( 'lorem ipsum', $actual );
+		$this->assertStringContainsString( 'lorem ipsum', $actual );
 	}
 
 	function test_it_includes_post_title() {
@@ -27,7 +27,7 @@ class NormalizeTest extends \WP_UnitTestCase {
 		] );
 
 		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertContains( 'foo title', $actual );
+		$this->assertStringContainsString( 'foo title', $actual );
 	}
 
 	function test_it_strips_out_tags() {
@@ -36,9 +36,9 @@ class NormalizeTest extends \WP_UnitTestCase {
 		] );
 
 		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertNotContains( '<b>', $actual );
-		$this->assertNotContains( '<i>', $actual );
-		$this->assertContains( 'lorem ipsum', $actual );
+		$this->assertStringNotContainsString( '<b>', $actual );
+		$this->assertStringNotContainsString( '<i>', $actual );
+		$this->assertStringContainsString( 'lorem ipsum', $actual );
 	}
 
 	function test_it_keeps_caption_text() {
@@ -47,8 +47,8 @@ class NormalizeTest extends \WP_UnitTestCase {
 		] );
 
 		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertNotContains( '[caption]', $actual );
-		$this->assertContains( 'foo bar', $actual );
+		$this->assertStringNotContainsString( '[caption]', $actual );
+		$this->assertStringContainsString( 'foo bar', $actual );
 	}
 
 	function test_it_removes_abbreviations() {
@@ -57,8 +57,8 @@ class NormalizeTest extends \WP_UnitTestCase {
 		] );
 
 		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertNotContains( 'VIM', $actual );
-		$this->assertContains( 'rocks', $actual );
+		$this->assertStringNotContainsString( 'VIM', $actual );
+		$this->assertStringContainsString( 'rocks', $actual );
 	}
 
 	function test_it_allows_custom_normalizations() {

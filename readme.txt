@@ -1,12 +1,12 @@
 === ClassifAI ===
-Contributors: 10up
-Tags: AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
+Contributors:      10up
+Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
 Requires at least: 5.0
-Tested up to: 5.9
-Requires PHP: 7.0
-Stable tag: 1.7.1
-License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Tested up to:      6.0
+Requires PHP:      7.0
+Stable tag:        1.7.2
+License:           GPLv2 or later
+License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
 Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 

@@ -4,7 +4,23 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.7.1] - 2022-04-22
+## [1.7.2] - 2022-06-27
+### Added
+- `classifai_should_register_save_post_handler` filter; allows modifying the registration conditions for the `SavePostHandler` class (props [@s3rgiosan](https://github.com/s3rgiosan), [@dkotter](https://github.com/dkotter) via [#341](https://github.com/10up/classifai/pull/341)).
+- More robust PHP testing, including PHP 8 compatibility (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#328](https://github.com/10up/classifai/pull/328)).
+- End-to-end testing with Cypress (props [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi) via [#334](https://github.com/10up/classifai/pull/334)).
+
+### Changed
+- Bump WordPress version "tested up to" 6.0 (props [@peterwilsoncc](https://github.com/peterwilsoncc), [@jeffpaul](https://github.com/jeffpaul) via [#346](https://github.com/10up/classifai/pull/346)).
+- Updates in `Build Release` GitHub action (props [@iamdharmesh](https://github.com/iamdharmesh), [@dinhtungdu](https://github.com/dinhtungdu) via [#347](https://github.com/10up/classifai/pull/347)).
+
+### Removed
+- Removed the `pot` file and `vendor` directory from being version controlled (props [@dinhtungdu](https://github.com/dinhtungdu), [@iamdharmesh](https://github.com/iamdharmesh) via [#212](https://github.com/10up/classifai/pull/212)).
+
+### Fixed
+- Hook docs deployment (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9) via [#345](https://github.com/10up/classifai/pull/345)).
+
+## [1.7.1] - 2022-04-25
 ### Added
 - `classifai_post_statuses` filter; allows post statuses for content classification to be changed as required but would apply to all post types (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
 - `classifai_post_statuses_for_post_type_or_id` filter; allows post statuses for content classification to be changed as required based on post type / post ID (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
@@ -205,6 +221,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.7.2]: https://github.com/10up/classifai/compare/1.7.1...1.7.2
 [1.7.1]: https://github.com/10up/classifai/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/10up/classifai/compare/1.6.0...1.7.0
 [1.6.0]: https://github.com/10up/classifai/compare/1.5.1...1.6.0
