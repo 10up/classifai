@@ -2,16 +2,16 @@
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.7.1\n"
+"Project-Id-Version: ClassifAI 1.7.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2022-02-16 00:06:04+00:00\n"
+"POT-Creation-Date: 2022-06-27 21:23:16+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2022-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"X-Generator: node-wp-i18n 1.2.3\n"
+"X-Generator: node-wp-i18n 1.2.6\n"
 
 #: classifai.php:29
 #. translators: PHP Update guide URL
@@ -97,7 +97,7 @@ msgid "Rescan for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:241
-#: includes/Classifai/Services/ImageProcessing.php:101
+#: includes/Classifai/Services/ImageProcessing.php:102
 msgid "Scan image for text"
 msgstr ""
 
@@ -188,13 +188,13 @@ msgid ""
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:854
-msgid "Scan image or PDF for text"
+msgid "Scan images for text"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:862
 msgid ""
-"OCR detects text in images (i.e., handwritten notes) or PDF files and saves "
-"that as post content."
+"OCR detects text in images (e.g., handwritten notes) and saves that as post "
+"content."
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:870
@@ -593,26 +593,6 @@ msgstr ""
 msgid "Watson Keywords"
 msgstr ""
 
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:54
-msgid "View details"
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:77
-msgid "More information about %s"
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:128
-msgid "Check for updates"
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:223
-msgid "Unknown update checker status \"%s\""
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Vcs/PluginUpdateChecker.php:98
-msgid "There is no changelog available."
-msgstr ""
-
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/10up/classifai"
 msgstr ""
@@ -629,19 +609,4 @@ msgstr ""
 
 #. Author URI of the plugin/theme
 msgid "https://10up.com"
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:213
-msgctxt "the plugin title"
-msgid "The %s plugin is up to date."
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:215
-msgctxt "the plugin title"
-msgid "A new version of the %s plugin is available."
-msgstr ""
-
-#: vendor/yahnis-elsts/plugin-update-checker/Puc/v4p6/Plugin/Ui.php:217
-msgctxt "the plugin title"
-msgid "Could not determine if updates are available for %s."
 msgstr ""

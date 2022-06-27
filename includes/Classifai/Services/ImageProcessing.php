@@ -39,7 +39,7 @@ class ImageProcessing extends Service {
 	 * Enqueue the script for the media modal.
 	 */
 	public function enqueue_media_scripts() {
-		wp_enqueue_script( 'media-script', CLASSIFAI_PLUGIN_URL . '/dist/js/media.min.js', array( 'jquery', 'media-editor', 'lodash' ), CLASSIFAI_PLUGIN_VERSION, true );
+		wp_enqueue_script( 'media-script', CLASSIFAI_PLUGIN_URL . '/dist/js/media.min.js', array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ), CLASSIFAI_PLUGIN_VERSION, true );
 	}
 
 	/**
@@ -97,12 +97,14 @@ class ImageProcessing extends Service {
 				];
 			}
 
-			$form_fields['rescan_ocr'] = [
-				'label'        => __( 'Scan image for text', 'classifai' ),
-				'input'        => 'html',
-				'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-				'show_in_edit' => false,
-			];
+			if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) {
+				$form_fields['rescan_ocr'] = [
+					'label'        => __( 'Scan image for text', 'classifai' ),
+					'input'        => 'html',
+					'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+					'show_in_edit' => false,
+				];
+			}
 		}
 
 		return $form_fields;
