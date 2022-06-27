@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_azure_read_text_result - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_should_register_save_post_handler - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_azure_read_text_result</h1>
+    <h1 class="page-title">Filter: classifai_should_register_save_post_handler</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_azure_read_text_result">apply_filters( 'classifai_azure_read_text_result', <span class="signature">array, int, array )</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="classifai_should_register_save_post_handler">apply_filters( 'classifai_should_register_save_post_handler', <span class="signature">$should_register )</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter the text result returned from Read API.</p>
+    <p>Filter whether ClassifAI should register this class.</p>
 </div>
 
 
@@ -84,10 +84,15 @@
 
         <tr>
             
-                <td class="name"><code>array</code></td>
+                <td class="name"><code>$should_register</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">bool</span>
+
+
             
             </td>
 
@@ -95,43 +100,7 @@
 
             
 
-            <td class="description last"><p>$lines_of_text Array of text extracted from the response.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>int</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>$attachment_id The attachment ID.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>array</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>$data          Read result.</p></td>
+            <td class="description last"><p>Whether the class should be registered.</p></td>
         </tr>
 
     
@@ -147,6 +116,9 @@
 
     
 
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>1.8.0</li></ul></dd>
     
 
     
@@ -172,7 +144,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_Read.php.html">Providers/Azure/Read.php</a>, <a href="Providers_Azure_Read.php.html#line282">line 282</a>
+        <a href="Admin_SavePostHandler.php.html">Admin/SavePostHandler.php</a>, <a href="Admin_SavePostHandler.php.html#line33">line 33</a>
     </li></ul></dd>
     
 
@@ -199,10 +171,22 @@
 
         
 <div class="param-desc">
-    <p>array</p>
+    <p>Whether the class should be registered.</p>
 </div>
 
 
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">bool</span>
+
+
+    </dd>
+</dl>
 
     
 
