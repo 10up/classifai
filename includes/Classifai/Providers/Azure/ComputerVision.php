@@ -528,6 +528,14 @@ class ComputerVision extends Provider {
 		$settings = $this->get_settings();
 		$url      = $this->prep_api_url( $routes );
 
+		/*
+		 * MS Comuter Vision requires full image URL. So, if the file URL is relative,
+		 * then we transform it into a full URL.
+		 */
+		if ( '/' === substr( $image_url, 0, 1 ) ) {
+			$image_url = get_site_url() . $image_url;
+		}
+
 		$request = wp_remote_post(
 			$url,
 			[
