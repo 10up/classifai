@@ -123,6 +123,27 @@ abstract class Service {
 				submit_button();
 			?>
 			</form>
+			<div id="classifai-post-preview-wrapper">
+				<?php
+					$supported_post_statuses = \Classifai\get_supported_post_statuses();
+					$supported_post_types = \Classifai\get_supported_post_types();
+
+					$posts_to_preview = get_posts(
+						array(
+							'post_type'   => $supported_post_types,
+							'post_status' => $supported_post_statuses,
+						)
+					);
+				?>
+				<select>
+					<?php foreach ( $posts_to_preview as $post ) : ?>
+						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<button type="button" class="button" id="get-classifier-preview-data-btn">
+					<?php esc_html_e( 'Preview', 'classifai' ); ?>
+				</button>
+			</div>
 		</div>
 		<?php
 	}

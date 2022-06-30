@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Watson;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_post_types_for_language_settings;
@@ -126,6 +127,8 @@ class NLU extends Provider {
 		if ( $this->save_post_handler->can_register() ) {
 			$this->save_post_handler->register();
 		}
+
+		new PreviewClassifierData();
 	}
 
 	/**
