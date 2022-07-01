@@ -25,7 +25,7 @@ const ClassifAIIcon = () => (
  *
  */
 const ClassifAIToggle = () => {
-	// Use the datastore to retrieve the all the meta for this post.
+	// Use the datastore to retrieve all the meta for this post.
 	const processContent = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_process_content' ) );
 
 	// Use the datastore to tell the post to update the meta.

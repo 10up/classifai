@@ -193,7 +193,7 @@ class NLU extends Provider {
 		}
 
 		wp_enqueue_script(
-			'classifai-gutenberg-plugin', // Handle.
+			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/js/gutenberg-plugin.min.js',
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
 			CLASSIFAI_PLUGIN_VERSION,
@@ -792,7 +792,7 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Render Metabox content.
+	 * Render metabox content.
 	 *
 	 * @param WP_Post $post WP_Post object.
 	 *
