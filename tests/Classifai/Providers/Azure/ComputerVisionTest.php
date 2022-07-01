@@ -19,9 +19,9 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	/**
 	 * Tear down method.
 	 */
-	public function tearDown() {
+	public function tear_down() {
 		$this->remove_added_uploads();
-		parent::tearDown();
+		parent::tear_down();
 	}
 
 	/**

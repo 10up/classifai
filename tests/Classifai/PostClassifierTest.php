@@ -8,8 +8,8 @@ class PostClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->classifier = new PostClassifier();
 		$this->taxonomy_factory = new TaxonomyFactory();
@@ -231,10 +231,14 @@ TEXT;
 
 	/**
 	 * Set test to not perform assertion to fix risky tests.
+	 *
+	 * @doesNotPerformAssertions
 	 */
 	public function test_can_have_empty_assertion() {
 		if ( ! defined( 'WATSON_USERNAME' ) && ! defined( 'WATSON_PASSWORD' ) ) {
-			$this->expectNotToPerformAssertions();
+			if ( method_exists( $this, 'expectNotToPerformAssertions' ) ) {
+				$this->expectNotToPerformAssertions();
+			}
 		}
 	}
 }
