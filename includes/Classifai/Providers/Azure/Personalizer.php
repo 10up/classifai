@@ -87,7 +87,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Setup fields
+	 * Setup fields.
 	 */
 	public function setup_fields_sections() {
 		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
@@ -132,7 +132,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Sanitization
+	 * Sanitize settings.
 	 *
 	 * @param array $settings The settings being saved.
 	 *
@@ -179,7 +179,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Get Recent posts based on given arguments
+	 * Get Recent posts based on given arguments.
 	 *
 	 * @param array $attributes The block attributes.
 	 * @return array recent actions based on block attributes.
