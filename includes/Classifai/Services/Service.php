@@ -106,7 +106,7 @@ abstract class Service {
 	public function render_settings_page() {
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
-		<div class="wrap">
+		<div class="wrap wrap--nlu">
 			<h2><?php echo esc_html( $this->display_name ); ?></h2>
 			<?php if ( ! empty( $this->provider_classes ) ) : ?>
 			<h2 class="nav-tab-wrapper">
@@ -116,33 +116,39 @@ abstract class Service {
 			</h2>
 			<?php endif; ?>
 			<?php settings_errors(); ?>
-			<form method="post" action="options.php">
-			<?php
-				settings_fields( 'classifai_' . $active_tab );
-				do_settings_sections( 'classifai_' . $active_tab );
-				submit_button();
-			?>
-			</form>
-			<div id="classifai-post-preview-wrapper">
+			<div class="classifai-nlu-sections">
+				<form method="post" action="options.php">
 				<?php
-					$supported_post_statuses = \Classifai\get_supported_post_statuses();
-					$supported_post_types = \Classifai\get_supported_post_types();
-
-					$posts_to_preview = get_posts(
-						array(
-							'post_type'   => $supported_post_types,
-							'post_status' => $supported_post_statuses,
-						)
-					);
+					settings_fields( 'classifai_' . $active_tab );
+					do_settings_sections( 'classifai_' . $active_tab );
+					submit_button();
 				?>
-				<select>
-					<?php foreach ( $posts_to_preview as $post ) : ?>
-						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<button type="button" class="button" id="get-classifier-preview-data-btn">
-					<?php esc_html_e( 'Preview', 'classifai' ); ?>
-				</button>
+				</form>
+				<div id="classifai-post-preview-app">
+					<?php
+						$supported_post_statuses = \Classifai\get_supported_post_statuses();
+						$supported_post_types    = \Classifai\get_supported_post_types();
+
+						$posts_to_preview = get_posts(
+							array(
+								'post_type'      => $supported_post_types,
+								'post_status'    => $supported_post_statuses,
+								'posts_per_page' => 10,
+							)
+						);
+					?>
+					<div id="classifai-post-preview-controls">
+						<select id="classifai-preview-post-selector">
+							<?php foreach ( $posts_to_preview as $post ) : ?>
+								<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<button type="button" class="button" id="get-classifier-preview-data-btn">
+							<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
+						</button>
+					</div>
+					<div id="classifai-post-preview-wrapper"></div>
+				</div>
 			</div>
 		</div>
 		<?php

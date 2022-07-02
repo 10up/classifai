@@ -199,10 +199,11 @@ class NLU extends Provider {
 			'classifai-admin',
 			'ClassifAI',
 			[
-				'api_password' => __( 'API Password', 'classifai' ),
-				'api_key'      => __( 'API Key', 'classifai' ),
-				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+				'api_password'    => __( 'API Password', 'classifai' ),
+				'api_key'         => __( 'API Key', 'classifai' ),
+				'use_key'         => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password'    => __( 'Use a username/password instead?', 'classifai' ),
+				'loading_preview' => __( 'Loading Preview', 'classifai' ),
 			]
 		);
 	}

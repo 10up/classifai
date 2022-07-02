@@ -11,14 +11,14 @@ class PreviewClassifierData {
 	 */
 	public function __construct() {
 		add_action( 'wp_ajax_get_post_classifier_preview_data', array( $this, 'get_post_classifier_preview_data' ) );
+		add_action( 'wp_ajax_get_post_search_results', array( $this, 'get_post_search_results' ) );
 	}
 
 	/**
 	 * Returns classifier data for previewing.
 	 */
 	public function get_post_classifier_preview_data() {
-		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
-
+		$post_id         = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 		$classifier      = new \Classifai\Watson\Classifier();
 		$post_classifier = new \Classifai\PostClassifier();
 		$normalizer      = new \Classifai\Watson\Normalizer();
@@ -36,6 +36,25 @@ class PreviewClassifierData {
 
 		echo wp_json_encode( $classified_data );
 		die;
+	}
+
+	/**
+	 * Searches and returns posts.
+	 */
+	public function get_post_search_results() {
+		$search_term   = sanitize_text_field( $_POST['search'] );
+		$post_types    = explode( '/', sanitize_text_field( $_POST['post_types'] ) );
+		$post_statuses = explode( '/', sanitize_text_field( $_POST['post_statuses'] ) );
+
+		$posts = get_posts(
+			array(
+				'post_type'   => $post_types,
+				'post_status' => $post_statuses,
+				's'           => $search_term,
+			)
+		);
+
+		wp_send_json_success( $posts );
 	}
 }
 
