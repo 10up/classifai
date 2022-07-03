@@ -29,6 +29,9 @@ import '../scss/admin.scss';
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
 
+	/** Previewer nonce. */
+	const previewerNonce = document.getElementById( 'classifai-previewer-nonce' ).value;
+
 	/**
 	 * Live preview features.
 	 */
@@ -75,6 +78,7 @@ import '../scss/admin.scss';
 		const formData = new FormData();
 		formData.append( 'action', 'get_post_classifier_preview_data' );
 		formData.append( 'post_id', postId );
+		formData.append( 'nonce', previewerNonce );
 
 		fetch( `${ ajaxurl }`, {
 			method: 'POST',
@@ -82,7 +86,14 @@ import '../scss/admin.scss';
 		} ).then( response => {
 			return response.json();
 		} ).then( data => {
-			const { categories = [], concepts = [], entities = [], keywords = [] } = data;
+			if ( ! data.success ) {
+				previewWrapper.style.display = 'block';
+				previewWrapper.innerHTML = data.data;
+				e.target.closest( '.button' ).classList.remove( 'get-classifier-preview-data-btn--loading' );
+				return;
+			}
+
+			const { data: { categories = [], concepts = [], entities = [], keywords = [] } } = data;
 			const dataToFilter = {};
 
 			if ( categoryStatus ) {
@@ -212,6 +223,7 @@ import '../scss/admin.scss';
 		formData.append( 'post_status', postStatuses );
 		formData.append( 'search', event.detail.value );
 		formData.append( 'action', 'get_post_search_results' );
+		formData.append( 'nonce', previewerNonce );
 
 		fetch( `${ ajaxurl }`, {
 			method: 'POST',

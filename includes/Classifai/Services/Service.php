@@ -143,6 +143,7 @@ abstract class Service {
 								<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
 							<?php endforeach; ?>
 						</select>
+						<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
 						<button type="button" class="button" id="get-classifier-preview-data-btn">
 							<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
 						</button>
