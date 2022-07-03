@@ -116,6 +116,9 @@
     #classifai-post-preview-app {
         flex: 1;
         margin-top: 250px;
+        align-self: flex-start;
+        position: sticky;
+        top: 3rem;
 
         .choices__inner {
             display: block;
