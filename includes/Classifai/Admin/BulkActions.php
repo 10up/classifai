@@ -91,6 +91,7 @@ class BulkActions {
 		if ( 'classify' !== $doaction ) {
 			return $redirect_to;
 		}
+
 		foreach ( $post_ids as $post_id ) {
 			$this->save_post_handler->classify( $post_id );
 		}
@@ -136,9 +137,9 @@ class BulkActions {
 	 */
 	public function bulk_action_admin_notice() {
 		if (
-			empty( $_REQUEST['bulk_classified'] ) && 
-			empty( $_REQUEST['bulk_alt_tagged'] ) && 
-			empty( $_REQUEST['bulk_image_tagged'] ) && 
+			empty( $_REQUEST['bulk_classified'] ) &&
+			empty( $_REQUEST['bulk_alt_tagged'] ) &&
+			empty( $_REQUEST['bulk_image_tagged'] ) &&
 			empty( $_REQUEST['bulk_smart_cropped'] )
 		) {
 			return;
@@ -196,9 +197,15 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_row_action( $actions, $post ) {
+		$post_types = get_supported_post_types();
+
+		if ( ! in_array( $post->post_type, $post_types, true ) ) {
+			return $actions;
+		}
+
 		$actions['classify'] = sprintf(
 			'<a href="%s">%s</a>',
-			esc_url( wp_nonce_url( admin_url( 'edit.php?action=classify&ids=' . $post->ID ), 'bulk-posts' ) ),
+			esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=classify&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
 			esc_html__( 'Classify', 'classifai' )
 		);
 

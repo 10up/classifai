@@ -16,15 +16,15 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	/**
 	 * Setup method.
 	 */
-	public function setUp() {
-		parent::setUp();
+	public function set_up() {
+		parent::set_up();
 	}
 
 	/**
 	 * Tear down method.
 	 */
-	public function tearDown() {
-		parent::tearDown();
+	public function tear_down() {
+		parent::tear_down();
 
 		$this->remove_added_uploads();
 	}
@@ -136,12 +136,12 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 */
 	public function test_get_cropped_thumbnail() {
 		// Test invalid data returns false.
-		$this->assertFalse( $this->get_smart_cropping()->get_cropped_thumbnail( 999999999, [] ) );
+		$this->assertWPError( $this->get_smart_cropping()->get_cropped_thumbnail( 999999999, [] ) );
 
 		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/33772.jpg' );
 
 		// Test bad request returns false.
-		$this->assertFalse(
+		$this->assertWPError(
 			$this->get_smart_cropping(
 				[
 					'url'     => 'my-bad-url.com',
@@ -163,7 +163,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			// Strip out everything before /wp-content/ because it won't match.
 			$prepped_url = substr( $cropped_thumbnail_url,  strpos( $cropped_thumbnail_url , '/wp-content/' ) );
 
-			
+
 			$this->assertEquals(
 				sprintf( '/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
 				$prepped_url
@@ -171,7 +171,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 			// Test when file operations fail.
 			add_filter( 'classifai_smart_crop_wp_filesystem', '__return_false' );
-			$this->assertFalse(
+			$this->assertWPError(
 				$this->get_smart_cropping()->get_cropped_thumbnail(
 					$attachment,
 					wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
@@ -211,7 +211,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			);
 
 			// Test failed request.
-			$this->assertFalse(
+			$this->assertWPError(
 				$this->get_smart_cropping(
 					[
 						'url'     => 'my-bad-url.com',

@@ -1,4 +1,8 @@
-name: Test
+name: PHPUnit Tests
+
+env:
+  COMPOSER_VERSION: "2"
+  COMPOSER_CACHE: "${{ github.workspace }}/.composer-cache"
 
 on:
   schedule:
@@ -6,53 +10,48 @@ on:
   push:
     branches:
       - develop
-      - master
+      - trunk
   pull_request:
     branches:
       - develop
 
 jobs:
-  wpa:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: Set PHP version
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '7.2'
-        coverage: none
-        tools: composer:v1
-
-    - name: Install dependencies
-      run: composer install
-
-    - name: Setup WP Snapshots
-      run: ./vendor/bin/wpsnapshots configure 10up --aws_key=${{ secrets.AWS_ACCESS_KEY_ID }} --aws_secret=${{ secrets.AWS_SECRET_ACCESS_KEY }} --user_name=wp-acceptance --user_email=travis@10up.com
-
-    - name: Test
-      run: ./vendor/bin/wpacceptance run
-
   phpunit:
-    runs-on: ubuntu-latest
+    name: ${{ matrix.php }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: [ '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1' ]
+        os: [ ubuntu-latest ]
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2.4.0
+
+    - name: Set standard 10up cache directories
+      run: |
+        composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
+
+    - name: Prepare composer cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.COMPOSER_CACHE }}
+        key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          composer-${{ env.COMPOSER_VERSION }}-
 
     - uses: getong/mariadb-action@v1.1
 
     - name: Set PHP version
-      uses: shivammathur/setup-php@v2
+      uses: shivammathur/setup-php@2.17.0
       with:
-        php-version: '7.2'
+        php-version: ${{ matrix.php }}
         coverage: none
-        tools: composer:v1
+        tools: phpunit-polyfills, composer:v2
 
     - name: Install dependencies
-      run: composer install
+      run: composer update -W
 
     - name: Setup WP Tests
       run: bash bin/install-wp-tests.sh wordpress_test root '' 127.0.0.1

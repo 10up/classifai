@@ -21,26 +21,36 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Save Post handler only runs on admin or REST requests
+	 * Check to see if we can register this class.
 	 */
 	public function can_register() {
-		if ( ! get_option( 'classifai_configured', false ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' ) ) ) {
-			return false;
-		} elseif ( empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] ) ) {
-			return false;
-		} elseif ( is_admin() ) {
-			return true;
-		} elseif ( $this->is_rest_route() ) {
-			return true;
-		} elseif ( defined( 'PHPUNIT_RUNNER' ) && PHPUNIT_RUNNER ) {
-			return false;
-		} elseif ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return false;
-		} else {
-			return false;
+
+		$should_register = false;
+		if ( $this->is_configured() && ( is_admin() || $this->is_rest_route() ) ) {
+			$should_register = true;
 		}
+
+		/**
+		 * Filter whether ClassifAI should register this class.
+		 *
+		 * @since 1.8.0
+		 * @hook classifai_should_register_save_post_handler
+		 *
+		 * @param  {bool} $should_register Whether the class should be registered.
+		 * @return {bool} Whether the class should be registered.
+		 */
+		$should_register = apply_filters( 'classifai_should_register_save_post_handler', $should_register );
+
+		return $should_register;
+	}
+
+	/**
+	 * Check if ClassifAI is properly configured.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
 	}
 
 	/**
@@ -58,12 +68,27 @@ class SavePostHandler {
 			return;
 		}
 
-		$supported   = \Classifai\get_supported_post_types();
-		$post_type   = get_post_type( $post_id );
-		$post_status = get_post_status( $post_id );
+		$supported     = \Classifai\get_supported_post_types();
+		$post_type     = get_post_type( $post_id );
+		$post_status   = get_post_status( $post_id );
+		$post_statuses = \Classifai\get_supported_post_statuses();
 
-		// Only process published, supported items and only if features are enabled
-		if ( 'publish' === $post_status && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
+		/**
+		 * Filter post statuses for post type or ID.
+		 *
+		 * @since 1.7.1
+		 * @hook classifai_post_statuses_for_post_type_or_id
+		 *
+		 * @param {array} $post_statuses Array of post statuses to be classified with language processing.
+		 * @param {string} $post_type The post type.
+		 * @param {int} $post_id The post ID.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		$post_statuses = apply_filters( 'classifai_post_statuses_for_post_type_or_id', $post_statuses, $post_type, $post_id );
+
+		// Process posts in allowed post statuses, supported items and only if features are enabled
+		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
 			$this->classify( $post_id );
 		}
 	}
@@ -86,7 +111,7 @@ class SavePostHandler {
 		 * @hook classifai_should_classify_post
 		 *
 		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
-		 *                              classification for this post.
+		 *                                classification for this post.
 		 * @param {int}  $post_id         The ID of the post to be considered for classification.
 		 *
 		 * @return {bool} Whether the post should be classified.
@@ -210,7 +235,7 @@ class SavePostHandler {
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
-			if ( false !== strpos( $_SERVER['REQUEST_URI'], 'wp-json/wp/v2/' . $rest_base ) ) {
+			if ( false !== strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-json/wp/v2/' . $rest_base ) ) {
 				return true;
 			}
 		}

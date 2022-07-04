@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "types": ["cypress", "cypress-file-upload"]
+  },
+  "include": ["**/*.*"]
+}

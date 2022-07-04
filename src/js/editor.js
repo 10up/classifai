@@ -12,7 +12,7 @@ subscribe( () => {
 
 	if ( saveHappened && false === wp.data.select( 'core/editor' ).isSavingPost() && false === showingNotice ) {
 		const meta = select( 'core/editor' ).getCurrentPostAttribute( 'meta' );
-		if ( meta._classifai_error ) {
+		if ( meta && meta._classifai_error ) {
 			showingNotice = true;
 			const error = JSON.parse( meta._classifai_error );
 			dispatch( 'core/notices' ).createErrorNotice( `Failed to classify content with the IBM Watson NLU API. Error: ${ error.code } - ${ error.message }` );

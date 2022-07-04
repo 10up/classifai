@@ -2,14 +2,18 @@
 
 namespace Classifai;
 
+use Classifai\Taxonomy\TaxonomyFactory;
+
 class PostClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->classifier = new PostClassifier();
+		$this->taxonomy_factory = new TaxonomyFactory();
+		$this->taxonomy_factory->build_all();
 	}
 
 	function test_it_has_an_api_request() {
@@ -125,6 +129,8 @@ class PostClassifierTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_can_classify_post() {
+		$this->test_can_have_empty_assertion();
+
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
 			$text = 'The quick brown fox jumps over the lazy dog.';
 			$post_id = $this->factory->post->create( [
@@ -139,6 +145,8 @@ class PostClassifierTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_can_classify_and_link_post() {
+		$this->test_can_have_empty_assertion();
+
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
 			$text = <<<TEXT
     Albert Einstein (/ˈaɪnstaɪn/; German: [ˈalbɛɐ̯t
@@ -175,6 +183,8 @@ TEXT;
 	}
 
 	function test_it_only_classifies_configured_features() {
+		$this->test_can_have_empty_assertion();
+
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
 			$text = <<<TEXT
     Albert Einstein (/ˈaɪnstaɪn/; German: [ˈalbɛɐ̯t
@@ -216,6 +226,19 @@ TEXT;
 
 			$actual = wp_get_object_terms( $post_id, [ WATSON_ENTITY_TAXONOMY ] );
 			$this->assertEmpty( $actual );
+		}
+	}
+
+	/**
+	 * Set test to not perform assertion to fix risky tests.
+	 *
+	 * @doesNotPerformAssertions
+	 */
+	public function test_can_have_empty_assertion() {
+		if ( ! defined( 'WATSON_USERNAME' ) && ! defined( 'WATSON_PASSWORD' ) ) {
+			if ( method_exists( $this, 'expectNotToPerformAssertions' ) ) {
+				$this->expectNotToPerformAssertions();
+			}
 		}
 	}
 }

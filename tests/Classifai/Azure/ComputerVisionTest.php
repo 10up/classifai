@@ -20,8 +20,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->provider = new ComputerVision( 'service_name' );
 	}
@@ -37,6 +37,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Caption threshold',
 				'Latest response - Image Scan',
 				'Latest response - Smart Cropping',
+				'Latest response - OCR',
 			],
 			array_keys( $this->provider->get_provider_debug_information() )
 		);
@@ -48,6 +49,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Caption threshold'                => 77,
 				'Latest response - Image Scan'     => 'N/A',
 				'Latest response - Smart Cropping' => 'N/A',
+				'Latest response - OCR'            => 'N/A',
 			],
 			$this->provider->get_provider_debug_information(
 				[
