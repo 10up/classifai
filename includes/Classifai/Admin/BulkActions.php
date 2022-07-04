@@ -135,7 +135,12 @@ class BulkActions {
 	 * Display an admin notice after bulk updates.
 	 */
 	public function bulk_action_admin_notice() {
-		if ( empty( $_REQUEST['bulk_classified'] ) && empty( $_REQUEST['bulk_alt_tagged'] ) && empty( $_REQUEST['bulk_image_tagged'] ) && empty( $_REQUEST['bulk_smart_cropped'] ) ) {
+		if (
+			empty( $_REQUEST['bulk_classified'] ) && 
+			empty( $_REQUEST['bulk_alt_tagged'] ) && 
+			empty( $_REQUEST['bulk_image_tagged'] ) && 
+			empty( $_REQUEST['bulk_smart_cropped'] )
+		) {
 			return;
 		}
 
