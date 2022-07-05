@@ -529,7 +529,7 @@ class ComputerVision extends Provider {
 		$url      = $this->prep_api_url( $routes );
 
 		/*
-		 * MS Comuter Vision requires full image URL. So, if the file URL is relative,
+		 * MS Computer Vision requires full image URL. So, if the file URL is relative,
 		 * then we transform it into a full URL.
 		 */
 		if ( '/' === substr( $image_url, 0, 1 ) ) {
