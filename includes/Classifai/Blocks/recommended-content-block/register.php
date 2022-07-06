@@ -28,14 +28,14 @@ function register() {
 /**
  * Render callback method for the block
  *
- * @param array  $attributes The blocks attributes
- * @param string $content    Data returned from InnerBlocks.Content
+ * @param array  $attributes The blocks attributes.
+ * @param string $content    Data returned from InnerBlocks.Content.
  * @param array  $block      Block information such as context.
  *
  * @return string The rendered block markup.
  */
 function render_block_callback( $attributes, $content, $block ) {
-	// Render block in Gutenberg Editor
+	// Render block in Gutenberg Editor.
 	if ( defined( 'REST_REQUEST' ) && \REST_REQUEST ) {
 		$personalizer = new Personalizer( false );
 		return $personalizer->render_recommended_content( $attributes );

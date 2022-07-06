@@ -29,10 +29,10 @@ function setup() {
  * @return void
  */
 function register_blocks() {
-	// Require custom blocks
+	// Require custom blocks.
 	require_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Blocks/recommended-content-block/register.php';
 
-	// Call block Register function for each block.
+	// Call register function for each block.
 	RecommendedContentBlock\register();
 }
 
