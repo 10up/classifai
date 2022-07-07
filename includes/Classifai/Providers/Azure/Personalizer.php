@@ -101,6 +101,7 @@ class Personalizer extends Provider {
 				'default_value' => $default_settings['url'],
 				'description'   => sprintf(
 					wp_kses(
+						// translators: 1 - link to create a Personalizer resource.
 						__( 'Azure Cognitive Service Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
 						array(
 							'a' => array(
@@ -141,7 +142,7 @@ class Personalizer extends Provider {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {
 				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
-				$new_settings['authenticated'] = false;
+				$new_settings['authenticated']                               = false;
 			} else {
 				$new_settings['authenticated'] = true;
 			}
@@ -186,8 +187,8 @@ class Personalizer extends Provider {
 		$key_attributes = array(
 			'terms' => isset( $attributes['taxQuery'] ) ? $attributes['taxQuery'] : array(),
 		);
-		$transient_key = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
-		$actions       = get_transient( $transient_key );
+		$transient_key  = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
+		$actions        = get_transient( $transient_key );
 		if ( false === $actions ) {
 			$query_args = array(
 				'posts_per_page'      => 50, // we have maximum 50 actions limit
@@ -231,7 +232,7 @@ class Personalizer extends Provider {
 			);
 
 			$actions = array();
-			$query = new \WP_Query( $query_args );
+			$query   = new \WP_Query( $query_args );
 			if ( $query->have_posts() ) {
 				while ( $query->have_posts() ) {
 					$query->the_post();
@@ -285,6 +286,7 @@ class Personalizer extends Provider {
 		$response = $this->personalizer_get_ranked_action( $rank_request );
 
 		if ( is_wp_error( $response ) ) {
+			// translators: %s - Error message.
 			return sprintf( __( 'Failed to contact Azure Cognitive Service Personalizer: %s', 'classifai' ) . $response->get_error_message() );
 		}
 
@@ -539,7 +541,7 @@ class Personalizer extends Provider {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( $url, $api_key ) {
-		$rtn    = false;
+		$rtn = false;
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		$result = wp_remote_get(
 			trailingslashit( $url ) . $this->status_endpoint,
