@@ -49,7 +49,7 @@ jQuery(document).ready(function () {
 		const attrKey = jQuery(this).data('attr_key');
 		const ajaxURL = classifai_personalizer_params?.ajax_url;
 		const data = JSON.parse(jQuery(`#attributes-${attrKey}`).html());
-		data.action = 'render_recommended_content';
+		data.action = 'classifai_render_recommended_content';
 		data.security = classifai_personalizer_params?.ajax_nonce;
 		jQuery
 			.post(ajaxURL, data)

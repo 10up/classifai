@@ -26,8 +26,8 @@ class Personalizer extends Service {
 	public function init() {
 		parent::init();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		add_action( 'wp_ajax_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
-		add_action( 'wp_ajax_nopriv_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+		add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+		add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 		add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
 	}
 
