@@ -8,7 +8,9 @@ describe('PDF read Tests', () => {
 	it('Can save "PDF scanning" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
-		cy.get('#classifai-settings-url').clear().type('http://e2e-test-image-processing.test');
+		cy.get('#classifai-settings-url')
+			.clear()
+			.type('http://e2e-test-image-processing.test');
 		cy.get('#classifai-settings-api_key').clear().type('password');
 		cy.get('#classifai-settings-enable_read_pdf').check();
 		cy.get('#submit').click();
@@ -32,7 +34,9 @@ describe('PDF read Tests', () => {
 		cy.get('.postbox-header h2, #attachment_meta_box h2')
 			.first()
 			.contains('ClassifAI PDF Processing');
-		cy.get('.misc-publishing-actions label[for=rescan-pdf]').contains('Rescan PDF for text');
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').contains(
+			'Rescan PDF for text'
+		);
 
 		// Verify generated Data.
 		cy.get('#attachment_content').should('have.value', getPDFData());

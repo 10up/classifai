@@ -27,7 +27,8 @@ import { getNLUData } from '../plugins/functions';
 
 Cypress.Commands.add('verifyPostTaxonomyTerms', (taxonomy, threshold) => {
 	const taxonomyTitle = taxonomy.charAt(0).toUpperCase() + taxonomy.slice(1);
-	const panelTitle = taxonomy === 'tags' ? taxonomyTitle : `Watson ${taxonomyTitle}`;
+	const panelTitle =
+		taxonomy === 'tags' ? taxonomyTitle : `Watson ${taxonomyTitle}`;
 	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("${panelTitle}")`;
 	let terms = [];
 	if (taxonomy === 'tags') {

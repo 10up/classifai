@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import './frontend.scss';
 
 /* global classifai_personalizer_params */
@@ -32,7 +33,7 @@ function classifaiSessionSet(key, value, expirationInMin) {
 		JSON.stringify({
 			expiresAt: new Date(new Date().getTime() + 60000 * expirationInMin),
 			value,
-		}),
+		})
 	);
 }
 

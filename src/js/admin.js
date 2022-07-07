@@ -1,7 +1,9 @@
 /* global ClassifAI */
 (() => {
 	const $toggler = document.getElementById('classifai-waston-cred-toggle');
-	const $userField = document.getElementById('classifai-settings-watson_username');
+	const $userField = document.getElementById(
+		'classifai-settings-watson_username'
+	);
 
 	if ($toggler === null || $userField === null) return;
 

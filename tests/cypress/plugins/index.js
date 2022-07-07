@@ -17,9 +17,9 @@ const { readConfig } = require('@wordpress/env/lib/config');
 /**
  * Start Cypress.
  *
- * @param {Function} on function which used to register listeners on events.
+ * @param {Function}             on     function which used to register listeners on events.
  * @param {Cypress.PluginConfig} config Cypress Configuration.
- * @returns {Cypress.PluginConfig} config.
+ * @return {Cypress.PluginConfig} config.
  */
 module.exports = async (on, config) => {
 	const wpEnvConfig = await readConfig('wp-env');

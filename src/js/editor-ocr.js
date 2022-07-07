@@ -1,3 +1,4 @@
+/* global lodash */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-use-before-define */
 /* eslint-disable @wordpress/no-unused-vars-before-return */
@@ -8,7 +9,8 @@ const { find, debounce } = lodash;
 const { addFilter } = wp.hooks;
 const { createHigherOrderComponent } = wp.compose;
 const { BlockControls } = wp.blockEditor; // eslint-disable-line no-unused-vars
-const { Button, Modal, Flex, FlexItem, ToolbarGroup, ToolbarButton } = wp.components; // eslint-disable-line no-unused-vars
+const { Button, Modal, Flex, FlexItem, ToolbarGroup, ToolbarButton } =
+	wp.components; // eslint-disable-line no-unused-vars
 const { __ } = wp.i18n;
 const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
 
@@ -49,8 +51,8 @@ const getImageOcrScannedText = async (imageId) => {
 /**
  * Insert scanned text as a paragraph block to the editor.
  *
- * @param {number} clientId - Client ID of image block.
- * @param {number} imageId - Image ID.
+ * @param {number} clientId    - Client ID of image block.
+ * @param {number} imageId     - Image ID.
  * @param {string} scannedText - Text to insert to editor.
  */
 const insertOcrScannedText = async (clientId, imageId, scannedText) => {
@@ -68,16 +70,23 @@ const insertOcrScannedText = async (clientId, imageId, scannedText) => {
 		content: scannedText,
 	});
 
-	await dispatch('core/block-editor').insertBlock(groupBlock, getBlockIndex(clientId) + 1);
-	dispatch('core/block-editor').insertBlock(textBlock, 0, groupBlock.clientId);
+	await dispatch('core/block-editor').insertBlock(
+		groupBlock,
+		getBlockIndex(clientId) + 1
+	);
+	dispatch('core/block-editor').insertBlock(
+		textBlock,
+		0,
+		groupBlock.clientId
+	);
 };
 
 /**
  * Check if current post has OCR block.
  *
  * @param {number} imageId - Image ID.
- * @param {Array} blocks - Current blocks of current post.
- * @returns {boolean}
+ * @param {Array}  blocks  - Current blocks of current post.
+ * @return {boolean} Whether the current post has an OCR block.
  */
 const hasOcrBlock = (imageId, blocks = []) => {
 	if (blocks.length === 0) {
@@ -85,7 +94,10 @@ const hasOcrBlock = (imageId, blocks = []) => {
 		// eslint-disable-next-line no-param-reassign
 		blocks = getBlocks();
 	}
-	return !!find(blocks, (block) => block.attributes.anchor === `classifai-ocr-${imageId}`);
+	return !!find(
+		blocks,
+		(block) => block.attributes.anchor === `classifai-ocr-${imageId}`
+	);
 };
 
 /**
@@ -124,13 +136,16 @@ const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
 					<BlockControls>
 						<ToolbarGroup>
 							<ToolbarButton
-								label={__('Insert scanned text into content', 'classifai')}
+								label={__(
+									'Insert scanned text into content',
+									'classifai'
+								)}
 								icon={insertIcon}
 								onClick={() =>
 									insertOcrScannedText(
 										clientId,
 										attributes.id,
-										attributes.ocrScannedText,
+										attributes.ocrScannedText
 									)
 								}
 								disabled={hasOcrBlock(attributes.id)}
@@ -139,11 +154,16 @@ const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
 					</BlockControls>
 				)}
 				{isModalOpen && (
-					<Modal title={__('ClassifAI detected text in your image', 'classifai')}>
+					<Modal
+						title={__(
+							'ClassifAI detected text in your image',
+							'classifai'
+						)}
+					>
 						<p>
 							{__(
 								'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.',
-								'classifai',
+								'classifai'
 							)}
 						</p>
 						<Flex align="flex-end" justify="flex-end">
@@ -154,7 +174,7 @@ const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
 										insertOcrScannedText(
 											clientId,
 											attributes.id,
-											attributes.ocrScannedText,
+											attributes.ocrScannedText
 										);
 										setModalOpen(false);
 									}}
@@ -163,7 +183,10 @@ const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
 								</Button>
 							</FlexItem>
 							<FlexItem>
-								<Button isSecondary onClick={() => setModalOpen(false)}>
+								<Button
+									isSecondary
+									onClick={() => setModalOpen(false)}
+								>
 									{__('Dismiss', 'classifai')}
 								</Button>
 							</FlexItem>
@@ -175,14 +198,18 @@ const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
 	};
 }, 'imageOcrControl');
 
-addFilter('editor.BlockEdit', 'classifai/image-processing-ocr', imageOcrControl);
+addFilter(
+	'editor.BlockEdit',
+	'classifai/image-processing-ocr',
+	imageOcrControl
+);
 
 /**
  * Add custom attribute for OCR to image block.
  *
- * @param {object} settings - Block settings.
- * @param {string} name - Block name.
- * @returns {object}
+ * @param {Object} settings - Block settings.
+ * @param {string} name     - Block name.
+ * @return {Object} Updated Block settings.
  */
 const modifyImageAttributes = (settings, name) => {
 	if (name !== 'core/image') {
@@ -202,7 +229,11 @@ const modifyImageAttributes = (settings, name) => {
 	return settings;
 };
 
-addFilter('blocks.registerBlockType', 'classifai/image-processing-ocr', modifyImageAttributes);
+addFilter(
+	'blocks.registerBlockType',
+	'classifai/image-processing-ocr',
+	modifyImageAttributes
+);
 
 wp.blocks.registerBlockStyle('core/group', {
 	name: 'classifai-ocr-text',
@@ -246,7 +277,8 @@ wp.blocks.registerBlockStyle('core/group', {
 				const ocrBlock = find(
 					blocks,
 					(block) =>
-						block.attributes.anchor === `classifai-ocr-${selectedBlock.attributes.id}`,
+						block.attributes.anchor ===
+						`classifai-ocr-${selectedBlock.attributes.id}`
 				);
 
 				if (undefined !== ocrBlock) {
@@ -254,30 +286,40 @@ wp.blocks.registerBlockStyle('core/group', {
 				}
 			} else {
 				const rootBlock = blockEditor.getBlock(
-					blockEditor.getBlockHierarchyRootClientId(selectedBlock.clientId),
+					blockEditor.getBlockHierarchyRootClientId(
+						selectedBlock.clientId
+					)
 				);
 
 				if (rootBlock.name === 'core/group') {
-					let imageId = /classifai-ocr-([0-9]+)/.exec(rootBlock.attributes.anchor);
+					let imageId = /classifai-ocr-([0-9]+)/.exec(
+						rootBlock.attributes.anchor
+					);
 
 					if (imageId !== null) {
 						[, imageId] = imageId;
 
-						const imageBlock = find(blocks, (block) => block.attributes.id == imageId);
+						const imageBlock = find(
+							blocks,
+							(block) => block.attributes.id == imageId
+						);
 
 						if (undefined !== imageBlock) {
-							generateCss([imageBlock.clientId, rootBlock.clientId]);
+							generateCss([
+								imageBlock.clientId,
+								rootBlock.clientId,
+							]);
 						}
 					}
 				}
 			}
-		}, 100),
+		}, 100)
 	);
 
 	/**
 	 * Create internal style tag if needed.
 	 *
-	 * @returns {HTMLStyleElement} style.
+	 * @return {HTMLStyleElement} style.
 	 */
 	const createStyle = () => {
 		const head = document.head || document.getElementsByTagName('head')[0];
@@ -293,7 +335,8 @@ wp.blocks.registerBlockStyle('core/group', {
 	 * @param {Array} ids Array of id.
 	 */
 	const generateCss = (ids) => {
-		const style = document.getElementById('classifai-ocr-style') ?? createStyle();
+		const style =
+			document.getElementById('classifai-ocr-style') ?? createStyle();
 		const selectors = ids.map((id) => `#block-${id}:before`).join(', ');
 		const css = `${selectors} {
 			content: "";

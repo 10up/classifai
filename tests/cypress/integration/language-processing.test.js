@@ -7,7 +7,7 @@ describe('Language processing Tests', () => {
 		Cypress.on('uncaught:exception', (err) => {
 			if (
 				err.message.includes(
-					"Failed to execute 'send' on 'XMLHttpRequest': Failed to load 'http://localhost:8889/wp-admin/admin-ajax.php': Synchronous XHR in page dismissal",
+					"Failed to execute 'send' on 'XMLHttpRequest': Failed to load 'http://localhost:8889/wp-admin/admin-ajax.php': Synchronous XHR in page dismissal"
 				)
 			) {
 				return false;
@@ -18,7 +18,9 @@ describe('Language processing Tests', () => {
 	it('Can save "Language Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=language_processing');
 
-		cy.get('#classifai-settings-watson_url').clear().type('http://e2e-test-nlu-server.test/');
+		cy.get('#classifai-settings-watson_url')
+			.clear()
+			.type('http://e2e-test-nlu-server.test/');
 		cy.get('#classifai-settings-watson_password').clear().type('password');
 
 		cy.get('#classifai-settings-post').check();
@@ -38,7 +40,9 @@ describe('Language processing Tests', () => {
 	it('Can select Watson taxonomies "Language Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=language_processing');
 
-		cy.get('#classifai-settings-category_taxonomy').select('watson-category');
+		cy.get('#classifai-settings-category_taxonomy').select(
+			'watson-category'
+		);
 		cy.get('#classifai-settings-keyword_taxonomy').select('watson-keyword');
 		cy.get('#classifai-settings-entity_taxonomy').select('watson-entity');
 		cy.get('#classifai-settings-concept_taxonomy').select('watson-concept');
@@ -82,9 +86,11 @@ describe('Language processing Tests', () => {
 		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies.
-		['categories', 'keywords', 'concepts', 'entities'].forEach((taxonomy) => {
-			cy.verifyPostTaxonomyTerms(taxonomy, threshold);
-		});
+		['categories', 'keywords', 'concepts', 'entities'].forEach(
+			(taxonomy) => {
+				cy.verifyPostTaxonomyTerms(taxonomy, threshold);
+			}
+		);
 	});
 
 	it('Can create post and taxonomy terms get created by ClassifAI (with 75 threshold)', () => {
@@ -93,7 +99,9 @@ describe('Language processing Tests', () => {
 		// Update Threshold to 75.
 		cy.visit('/wp-admin/admin.php?page=language_processing');
 
-		cy.get('#classifai-settings-category_threshold').clear().type(threshold);
+		cy.get('#classifai-settings-category_threshold')
+			.clear()
+			.type(threshold);
 		cy.get('#classifai-settings-keyword_threshold').clear().type(threshold);
 		cy.get('#classifai-settings-entity_threshold').clear().type(threshold);
 		cy.get('#classifai-settings-concept_threshold').clear().type(threshold);
@@ -117,9 +125,11 @@ describe('Language processing Tests', () => {
 		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies.
-		['categories', 'keywords', 'concepts', 'entities'].forEach((taxonomy) => {
-			cy.verifyPostTaxonomyTerms(taxonomy, threshold / 100);
-		});
+		['categories', 'keywords', 'concepts', 'entities'].forEach(
+			(taxonomy) => {
+				cy.verifyPostTaxonomyTerms(taxonomy, threshold / 100);
+			}
+		);
 	});
 
 	// Skiping this until issue get fixed.

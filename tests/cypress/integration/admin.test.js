@@ -3,14 +3,16 @@ describe('Admin can login and make sure plugin is activated', () => {
 		cy.login();
 	});
 
-	it('Can deactivate and activate plugin ', () => {
+	it('Can deactivate and activate plugin', () => {
 		cy.deactivatePlugin('classifai');
 		cy.activatePlugin('classifai');
 	});
 
 	it('Can see "ClassifAI" menu and Can visit "ClassifAI" settings page.', () => {
 		// Check ClassifAI menu.
-		cy.get('#adminmenu li.toplevel_page_classifai_settings').contains('ClassifAI');
+		cy.get('#adminmenu li.toplevel_page_classifai_settings').contains(
+			'ClassifAI'
+		);
 
 		// Check Heading
 		cy.visit('/wp-admin/admin.php?page=classifai_settings');

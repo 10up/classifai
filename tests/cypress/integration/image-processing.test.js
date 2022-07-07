@@ -10,7 +10,9 @@ describe('Image processing Tests', () => {
 	it('Can save "Image Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
-		cy.get('#classifai-settings-url').clear().type('http://e2e-test-image-processing.test');
+		cy.get('#classifai-settings-url')
+			.clear()
+			.type('http://e2e-test-image-processing.test');
 		cy.get('#classifai-settings-api_key').clear().type('password');
 		cy.get('#classifai-settings-enable_smart_cropping').check();
 		cy.get('#classifai-settings-enable_ocr').check();
@@ -23,7 +25,7 @@ describe('Image processing Tests', () => {
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
-			'../../../assets/img/banner-772x250.png',
+			'../../../assets/img/banner-772x250.png'
 		);
 
 		cy.get('#media-items .media-item a.edit-attachment').should('exist');
@@ -39,21 +41,29 @@ describe('Image processing Tests', () => {
 			.first()
 			.contains('ClassifAI Image Processing');
 		cy.get('.misc-publishing-actions label[for=rescan-captions]').contains(
-			'No alt text? Rescan image',
+			'No alt text? Rescan image'
 		);
 		cy.get('.misc-publishing-actions label[for=rescan-tags]').contains(
-			'Rescan image for new tags',
+			'Rescan image for new tags'
 		);
-		cy.get('.misc-publishing-actions label[for=rescan-ocr]').contains('Rescan for text');
-		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should('exist');
+		cy.get('.misc-publishing-actions label[for=rescan-ocr]').contains(
+			'Rescan for text'
+		);
+		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should(
+			'exist'
+		);
 
 		// Verify generated Data.
 		const imageData = getImageData();
 		cy.get('#attachment_alt').should('have.value', imageData.altText);
 		cy.get('#attachment_content').should('have.value', getOCRData());
-		cy.get('#classifai-image-tags ul.tagchecklist li span.screen-reader-text')
+		cy.get(
+			'#classifai-image-tags ul.tagchecklist li span.screen-reader-text'
+		)
 			.each((tag) => {
-				return expect(tag.text().replace('Remove term: ', '')).to.be.oneOf(imageData.tags);
+				return expect(
+					tag.text().replace('Remove term: ', '')
+				).to.be.oneOf(imageData.tags);
 			})
 			.then((imageTags) => {
 				expect(imageTags).to.have.length(imageData.tags.length);
@@ -83,8 +93,12 @@ describe('Image processing Tests', () => {
 
 		// Verify with Image processing features are not present in attachment metabox.
 		cy.visit(imageEditLink);
-		cy.get('.misc-publishing-actions label[for=rescan-ocr]').should('not.exist');
-		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should('not.exist');
+		cy.get('.misc-publishing-actions label[for=rescan-ocr]').should(
+			'not.exist'
+		);
+		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should(
+			'not.exist'
+		);
 
 		// Verify with Image processing features are not present in media model.
 		cy.visit(mediaModelLink);

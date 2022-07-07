@@ -7,7 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
  * The returned object is used for integration with `FormTokenField` component.
  *
  * @param {object[]} entities The entities to extract of helper object.
- * @returns {object} The object with the entities information.
+ * @return {Object} The object with the entities information.
  */
 export const getEntitiesInfo = (entities) => {
 	const mapping = entities?.reduce(
@@ -18,7 +18,7 @@ export const getEntitiesInfo = (entities) => {
 			names.push(entity.name);
 			return accumulator;
 		},
-		{ mapById: {}, mapByName: {}, names: [] },
+		{ mapById: {}, mapByName: {}, names: [] }
 	);
 	return {
 		entities,
@@ -31,14 +31,15 @@ export const getEntitiesInfo = (entities) => {
  * 1. An `options` object from the available post types, to be passed to a `SelectControl`.
  * 2. A helper map with available taxonomies per post type.
  *
- * @returns {object} The helper object related to post types.
+ * @return {Object} The helper object related to post types.
  */
 export const usePostTypes = () => {
 	const postTypes = useSelect((select) => {
 		const { getPostTypes } = select(coreStore);
 		const excludedPostTypes = ['attachment'];
 		const filteredPostTypes = getPostTypes({ per_page: -1 })?.filter(
-			({ viewable, slug }) => viewable && !excludedPostTypes.includes(slug),
+			({ viewable, slug }) =>
+				viewable && !excludedPostTypes.includes(slug)
 		);
 		return filteredPostTypes;
 	}, []);
@@ -56,7 +57,7 @@ export const usePostTypes = () => {
 				label: labels.singular_name,
 				value: slug,
 			})),
-		[postTypes],
+		[postTypes]
 	);
 	return { postTypesTaxonomiesMap, postTypesSelectOptions };
 };
@@ -65,7 +66,7 @@ export const usePostTypes = () => {
  * Hook that returns the taxonomies associated with a specific post type.
  *
  * @param {string} postType The post type from which to retrieve the associated taxonomies.
- * @returns {object[]} An array of the associated taxonomies.
+ * @return {object[]} An array of the associated taxonomies.
  */
 export const useTaxonomies = (postType) => {
 	const taxonomies = useSelect(
@@ -78,7 +79,7 @@ export const useTaxonomies = (postType) => {
 			});
 			return filteredTaxonomies;
 		},
-		[postType],
+		[postType]
 	);
 	return taxonomies;
 };

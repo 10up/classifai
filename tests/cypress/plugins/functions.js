@@ -6,18 +6,22 @@ import * as pdfData from '../../test-plugin/pdf.json';
 /**
  * Get Taxonomy data from test NLU json file.
  *
- * @param {string} taxonomy Taxonomy.
+ * @param {string} taxonomy  Taxonomy.
  * @param {number} threshold Thresold to select terms.
- * @returns {string[]}
+ * @return {string[]} NLU Data.
  */
 export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 	const taxonomies = [];
 	if (taxonomy === 'categories') {
 		nluData.categories
 			.filter((el) => el.score >= threshold)
-			.forEach((cat) => taxonomies.push(...cat.label.split('/').filter((n) => n)));
+			.forEach((cat) =>
+				taxonomies.push(...cat.label.split('/').filter((n) => n))
+			);
 	} else {
-		return nluData[taxonomy].filter((el) => el.relevance >= threshold).map((el) => el.text);
+		return nluData[taxonomy]
+			.filter((el) => el.relevance >= threshold)
+			.map((el) => el.text);
 	}
 	return taxonomies;
 };
@@ -25,7 +29,7 @@ export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 /**
  * Get Image OCR data
  *
- * @returns {string} data Image OCR data
+ * @return {string} data Image OCR data
  */
 export const getOCRData = () => {
 	const words = [];
@@ -42,12 +46,16 @@ export const getOCRData = () => {
 /**
  * Get image analysis data
  *
- * @returns {object} data image data
+ * @return {Object} data image data
  */
 export const getImageData = () => {
 	const data = {
-		altText: imageData.description.captions.filter((el) => el.confidence > 0.75)[0].text,
-		tags: imageData.tags.filter((el) => el.confidence > 0.7).map((el) => el.name),
+		altText: imageData.description.captions.filter(
+			(el) => el.confidence > 0.75
+		)[0].text,
+		tags: imageData.tags
+			.filter((el) => el.confidence > 0.7)
+			.map((el) => el.name),
 	};
 	return data;
 };
@@ -55,6 +63,7 @@ export const getImageData = () => {
 /**
  * Get PDF read data
  *
- * @returns {string} data pdf data
+ * @return {string} data pdf data
  */
-export const getPDFData = () => pdfData.analyzeResult.readResults[0].lines[0].text;
+export const getPDFData = () =>
+	pdfData.analyzeResult.readResults[0].lines[0].text;

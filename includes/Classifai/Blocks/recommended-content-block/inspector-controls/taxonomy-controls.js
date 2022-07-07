@@ -51,17 +51,22 @@ const TaxonomyControls = ({ onChange, query }) => {
 			});
 			return _taxonomiesInfo;
 		},
-		[taxonomies],
+		[taxonomies]
 	);
 	const onTermsChange = (taxonomySlug) => (newTermValues) => {
-		const taxonomyInfo = taxonomiesInfo.find(({ slug }) => slug === taxonomySlug);
+		const taxonomyInfo = taxonomiesInfo.find(
+			({ slug }) => slug === taxonomySlug
+		);
 		if (!taxonomyInfo) return;
 		const termIds = Array.from(
 			newTermValues.reduce((accumulator, termValue) => {
-				const termId = getTermIdByTermValue(taxonomyInfo.terms.mapByName, termValue);
+				const termId = getTermIdByTermValue(
+					taxonomyInfo.terms.mapByName,
+					termValue
+				);
 				if (termId) accumulator.add(termId);
 				return accumulator;
-			}, new Set()),
+			}, new Set())
 		);
 		const newTaxQuery = {
 			...query.taxQuery,
@@ -73,18 +78,23 @@ const TaxonomyControls = ({ onChange, query }) => {
 	// used in `FormTokenField`. This prevents the component from
 	// crashing in the editor, when non existing term ids were provided.
 	const getExistingTaxQueryValue = (taxonomySlug) => {
-		const taxonomyInfo = taxonomiesInfo.find(({ slug }) => slug === taxonomySlug);
+		const taxonomyInfo = taxonomiesInfo.find(
+			({ slug }) => slug === taxonomySlug
+		);
 		if (!taxonomyInfo) return [];
-		return (query.taxQuery?.[taxonomySlug] || []).reduce((accumulator, termId) => {
-			const term = taxonomyInfo.terms.mapById[termId];
-			if (term) {
-				accumulator.push({
-					id: termId,
-					value: term.name,
-				});
-			}
-			return accumulator;
-		}, []);
+		return (query.taxQuery?.[taxonomySlug] || []).reduce(
+			(accumulator, termId) => {
+				const term = taxonomyInfo.terms.mapById[termId];
+				if (term) {
+					accumulator.push({
+						id: termId,
+						value: term.name,
+					});
+				}
+				return accumulator;
+			},
+			[]
+		);
 	};
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment

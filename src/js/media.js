@@ -5,16 +5,17 @@
 	/**
 	 * Handle Click for given button.
 	 *
-	 * @param {object} root Option for handle click.
-	 * @param {Element} root.button The button being clicked
-	 * @param {string} root.endpoint Which endpoint to query
+	 * @param {Object}           root          Option for handle click.
+	 * @param {Element}          root.button   The button being clicked
+	 * @param {string}           root.endpoint Which endpoint to query
 	 * @param {Function|boolean} root.callback Optional callback to run after the request completes.
 	 *
 	 */
 	const handleClick = ({ button, endpoint, callback = false }) => {
 		const postID = button.getAttribute('data-id');
 		const [spinner] = button.parentNode.getElementsByClassName('spinner');
-		const [errorContainer] = button.parentNode.getElementsByClassName('error');
+		const [errorContainer] =
+			button.parentNode.getElementsByClassName('error');
 		const path = `${endpoint}${postID}`;
 
 		button.setAttribute('disabled', 'disabled');
@@ -42,7 +43,7 @@
 				button.textContent = __('Rescan', 'classifai');
 				errorContainer.style.display = 'inline-block';
 				errorContainer.textContent = `Error: ${errorObj.message}`;
-			},
+			}
 		);
 	};
 
@@ -50,10 +51,16 @@
 	 * Handle click events for Image Processing buttons added to media modal.
 	 */
 	const handleButtonsClick = () => {
-		const altTagsButton = document.getElementById('classifai-rescan-alt-tags');
-		const imageTagsButton = document.getElementById('classifai-rescan-image-tags');
+		const altTagsButton = document.getElementById(
+			'classifai-rescan-alt-tags'
+		);
+		const imageTagsButton = document.getElementById(
+			'classifai-rescan-image-tags'
+		);
 		const ocrScanButton = document.getElementById('classifai-rescan-ocr');
-		const smartCropButton = document.getElementById('classifai-rescan-smart-crop');
+		const smartCropButton = document.getElementById(
+			'classifai-rescan-smart-crop'
+		);
 		const readButton = document.getElementById('classifai-rescan-pdf');
 
 		if (altTagsButton) {
@@ -64,14 +71,18 @@
 					callback: (resp) => {
 						if (resp) {
 							const textField =
-								document.getElementById('attachment-details-two-column-alt-text') ??
-								document.getElementById('attachment-details-alt-text');
+								document.getElementById(
+									'attachment-details-two-column-alt-text'
+								) ??
+								document.getElementById(
+									'attachment-details-alt-text'
+								);
 							if (textField) {
 								textField.value = resp;
 							}
 						}
 					},
-				}),
+				})
 			);
 		}
 
@@ -80,7 +91,7 @@
 				handleClick({
 					button: e.target,
 					endpoint: '/classifai/v1/image-tags/',
-				}),
+				})
 			);
 		}
 
@@ -93,14 +104,17 @@
 						if (resp) {
 							const textField =
 								document.getElementById(
-									'attachment-details-two-column-description',
-								) ?? document.getElementById('attachment-details-description');
+									'attachment-details-two-column-description'
+								) ??
+								document.getElementById(
+									'attachment-details-description'
+								);
 							if (textField) {
 								textField.value = resp;
 							}
 						}
 					},
-				}),
+				})
 			);
 		}
 
@@ -109,7 +123,7 @@
 				handleClick({
 					button: e.target,
 					endpoint: '/classifai/v1/smart-crop/',
-				}),
+				})
 			);
 		}
 
