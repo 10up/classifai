@@ -24,7 +24,7 @@ function setup() {
 }
 
 /**
- * Registers blocks that are located within the includes/blocks directory
+ * Registers blocks that are located within the includes/blocks directory.
  *
  * @return void
  */

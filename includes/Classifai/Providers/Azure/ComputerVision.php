@@ -70,10 +70,7 @@ class ComputerVision extends Provider {
 	 */
 	public function can_register() {
 		$options = get_option( $this->get_option_name() );
-		if ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) {
-			return false;
-		}
-		if ( empty( $options ) ) {
+		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
 			return false;
 		}
 

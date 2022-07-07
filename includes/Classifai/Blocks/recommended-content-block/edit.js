@@ -16,17 +16,17 @@ import './editor.css';
  * Edit component.
  * See https://wordpress.org/gutenberg/handbook/designers-developers/developers/block-api/block-edit-save/#edit
  *
- * @param {object}   props                                 The block props.
- * @param {object}   props.attributes                      Block attributes.
- * @param {string}   props.attributes.contentPostType      Post type for display recommended content.
- * @param {object}   props.attributes.taxQuery             Tax Query for filter recommended content.
- * @param {boolean}  props.attributes.displayAuthor        Whether to display post author.
- * @param {boolean}  props.attributes.displayFeaturedImage Whether to display featured image.
- * @param {boolean}  props.attributes.displayPostDate      Whether to display post date.
- * @param {boolean}  props.attributes.displayPostExcept    Whether to display post excerpt.
+ * @param {object}   props                                   The block props.
+ * @param {object}   props.attributes                        Block attributes.
+ * @param {string}   props.attributes.contentPostType        Post type for display recommended content.
+ * @param {object}   props.attributes.taxQuery               Tax Query for filter recommended content.
+ * @param {boolean}  props.attributes.displayAuthor          Whether to display post author.
+ * @param {boolean}  props.attributes.displayFeaturedImage   Whether to display featured image.
+ * @param {boolean}  props.attributes.displayPostDate        Whether to display post date.
+ * @param {boolean}  props.attributes.displayPostExcerpt     Whether to display post excerpt.
  * @param {boolean}  props.attributes.addLinkToFeaturedImage Whether to add post permalink to featured image.
- * @param {string}   props.className                       Class name for the block.
- * @param {Function} props.setAttributes                   Sets the value for block attributes.
+ * @param {string}   props.className                         Class name for the block.
+ * @param {Function} props.setAttributes                     Sets the value for block attributes.
  * @returns {Function} Render the edit screen
  */
 const RecommendedContentBlockEdit = (props) => {
@@ -37,7 +37,7 @@ const RecommendedContentBlockEdit = (props) => {
 		displayAuthor,
 		displayFeaturedImage,
 		displayPostDate,
-		displayPostExcept,
+		displayPostExcerpt,
 		addLinkToFeaturedImage,
 	} = attributes;
 
@@ -46,7 +46,7 @@ const RecommendedContentBlockEdit = (props) => {
 	const onPostTypeChange = (newValue) => {
 		const updateQuery = { contentPostType: newValue };
 		// We need to dynamically update the `taxQuery` property,
-		// by removing any not supported taxonomy from the query.
+		// by removing any not supported taxonomies from the query.
 		const supportedTaxonomies = postTypesTaxonomiesMap[newValue];
 		const updatedTaxQuery = Object.entries(taxQuery || {}).reduce(
 			(accumulator, [taxonomySlug, terms]) => {
@@ -81,8 +81,8 @@ const RecommendedContentBlockEdit = (props) => {
 				<PanelBody title={__('Post content settings', 'classifai')}>
 					<ToggleControl
 						label={__('Post excerpt', 'classifai')}
-						checked={displayPostExcept}
-						onChange={(value) => setAttributes({ displayPostExcept: value })}
+						checked={displayPostExcerpt}
+						onChange={(value) => setAttributes({ displayPostExcerpt: value })}
 					/>
 				</PanelBody>
 
@@ -138,7 +138,7 @@ const RecommendedContentBlockEdit = (props) => {
 						displayAuthor,
 						displayFeaturedImage,
 						displayPostDate,
-						displayPostExcept,
+						displayPostExcerpt,
 						addLinkToFeaturedImage,
 					}}
 				/>

@@ -4,10 +4,10 @@
  *
  * @package Classifai\Blocks
  *
- * @var array    $attributes         Block attributes.
- * @var string   $content            Block content.
- * @var WP_Block $block              Block instance.
- * @var array    $context            BLock context.
+ * @var array    $attributes Block attributes.
+ * @var string   $content    Block content.
+ * @var WP_Block $block      Block instance.
+ * @var array    $context    Block context.
  */
 
 $attr_key = md5( maybe_serialize( $attributes ) );

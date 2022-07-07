@@ -14,7 +14,7 @@
     "taxQuery": {
       "type": "object"
     },
-    "displayPostExcept": {
+    "displayPostExcerpt": {
       "type": "boolean",
       "default": false
     },
