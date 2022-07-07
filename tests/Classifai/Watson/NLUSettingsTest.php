@@ -28,8 +28,8 @@ class NLUSettingsTest extends WP_UnitTestCase {
 	/**
 	 * setup method
 	 */
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 		// Add the settings
 		update_option( 'classifai_watson_nlu', $this->settings );
 

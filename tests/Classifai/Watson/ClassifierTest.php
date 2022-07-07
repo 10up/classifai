@@ -6,8 +6,8 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	public $classifier;
 
-	function setUp() {
-		parent::setUp();
+	function set_up() {
+		parent::set_up();
 
 		$this->classifier = new Classifier();
 		$this->classifier->endpoint = 'http://watsonplatform.net';
@@ -15,7 +15,7 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	function test_it_has_an_endpoint() {
 		$actual = $this->classifier->endpoint;
-		$this->assertContains( 'watsonplatform.net', $actual );
+		$this->assertStringContainsString( 'watsonplatform.net', $actual );
 	}
 
 	function test_it_has_a_request_object() {
@@ -33,7 +33,10 @@ class ClassifierTest extends \WP_UnitTestCase {
 
 	function test_it_can_classify_text() {
 		if ( ! defined( 'WATSON_USERNAME' ) && ! defined( 'WATSON_PASSWORD' ) ) {
-			$this->expectNotToPerformAssertions();
+			/** @doesNotPerformAssertions */
+			if ( method_exists( $this, 'expectNotToPerformAssertions' ) ) {
+				$this->expectNotToPerformAssertions();
+			}
 		}
 
 		if ( defined( 'WATSON_USERNAME' ) && ! empty( WATSON_USERNAME ) && defined( 'WATSON_PASSWORD' ) && ! empty( WATSON_PASSWORD ) ) {
