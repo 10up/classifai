@@ -118,6 +118,13 @@ class NLU extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+		// Add classifai meta box to classic editor.
+		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
+		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
+
+		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
 
@@ -172,12 +179,36 @@ class NLU extends Provider {
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
+		global $post;
 		wp_enqueue_script(
 			'classifai-editor', // Handle.
 			CLASSIFAI_PLUGIN_URL . 'dist/js/editor.min.js',
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
+		);
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'classifai-gutenberg-plugin',
+			CLASSIFAI_PLUGIN_URL . 'dist/js/gutenberg-plugin.min.js',
+			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'classifai-gutenberg-plugin',
+			'classifaiPostData',
+			[
+				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
+				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
+				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
+				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_posts' ),
+			]
 		);
 	}
 
@@ -735,5 +766,104 @@ class NLU extends Provider {
 		}
 
 		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
+	}
+
+	/**
+	 * Add metabox to enable/disable language processing on post/post types.
+	 *
+	 * @param string  $post_type Post Type.
+	 * @param WP_Post $post      WP_Post object.
+	 *
+	 * @since 1.8.0
+	 */
+	public function add_classifai_meta_box( $post_type, $post ) {
+		$supported_post_types = \Classifai\get_supported_post_types();
+		if ( in_array( $post_type, $supported_post_types, true ) ) {
+			add_meta_box(
+				'classifai-nlu-meta-box',
+				__( 'ClassifAI Language Processing', 'classifai' ),
+				[ $this, 'render_classifai_meta_box' ],
+				null,
+				'side',
+				'low',
+				array( '__back_compat_meta_box' => true )
+			);
+		}
+	}
+
+	/**
+	 * Render metabox content.
+	 *
+	 * @param WP_Post $post WP_Post object.
+	 *
+	 * @since 1.8.0
+	 */
+	public function render_classifai_meta_box( $post ) {
+		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
+		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
+		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
+		?>
+		<p>
+			<label for="_classifai_process_content">
+				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?>/>
+				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
+			</label>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Save language processing meta data on post/post types.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @since 1.8.0
+	 */
+	public function classifai_save_post_metadata( $post_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['classifai_language_processing_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), 'classifai_language_processing_meta_action' ) ) {
+			return;
+		}
+
+		$supported_post_types = \Classifai\get_supported_post_types();
+		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['_classifai_process_content'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['_classifai_process_content'] ) ) ) {
+			$classifai_process_content = 'yes';
+		} else {
+			$classifai_process_content = 'no';
+		}
+
+		update_post_meta( $post_id, '_classifai_process_content', $classifai_process_content );
+	}
+
+	/**
+	 * Add `classifai_process_content` to rest API for view/edit.
+	 */
+	public function add_process_content_meta_to_rest_api() {
+		$supported_post_types = \Classifai\get_supported_post_types();
+		register_rest_field(
+			$supported_post_types,
+			'classifai_process_content',
+			array(
+				'get_callback'    => function( $object ) {
+					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+					return ( 'no' === $process_content ) ? 'no' : 'yes';
+				},
+				'update_callback' => function ( $value, $object ) {
+					$value = ( 'no' === $value ) ? 'no' : 'yes';
+					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+				},
+				'schema'          => [
+					'type'    => 'string',
+					'context' => [ 'view', 'edit' ],
+				],
+			)
+		);
 	}
 }
