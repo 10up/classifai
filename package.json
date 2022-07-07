@@ -5,11 +5,9 @@
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "scripts": {
-    "start": "10up-toolkit build --watch",
-    "build": "10up-toolkit build",
-    "format-js": "10up-toolkit format-js",
-    "lint-js": "10up-toolkit lint-js",
-    "lint-style": "10up-toolkit lint-style",
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "lint:js": "wp-scripts lint-js",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
@@ -43,7 +41,8 @@
   "devDependencies": {
     "@10up/cypress-wp-utils": "github:10up/cypress-wp-utils#build",
     "@wordpress/env": "^4.5.0",
-    "10up-toolkit": "^4.0.0",
+    "@wordpress/eslint-plugin": "^12.6.0",
+    "@wordpress/scripts": "^23.4.0",
     "cypress": "^9.5.4",
     "cypress-file-upload": "^5.0.8",
     "husky": "^3.1.0",
@@ -51,15 +50,5 @@
     "lint-staged": "^9.5.0",
     "node-wp-i18n": "^1.2.3",
     "wp-hookdoc": "^0.2.0"
-  },
-  "10up-toolkit": {
-    "entry": {
-      "editor": "./src/js/editor.js",
-      "editor-ocr": "./src/js/editor-ocr.js",
-      "media": "./src/js/media.js",
-      "admin": "./src/js/admin.js",
-      "recommended-content-block": "./includes/Classifai/Blocks/recommended-content-block/index.js",
-      "recommended-content-block-frontend": "./includes/Classifai/Blocks/recommended-content-block/frontend.js"
-    }
   }
 }

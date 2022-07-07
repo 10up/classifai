@@ -1,4 +1,4 @@
-.wp-block-classifai-recommended-content{
+.wp-block-classifai-recommended-content {
 	list-style: none;
 	padding-left: 0;
 	display: flex;
@@ -24,9 +24,11 @@
 }
 
 .wp-block-classifai-recommended-content__featured-image {
+
 	a {
 		display: inline-block;
 	}
+
 	img {
 		height: auto;
 		width: auto;

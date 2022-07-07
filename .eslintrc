@@ -1,0 +1,15 @@
+{
+	"globals": {
+		"wp": "readonly",
+		"jQuery": "readonly",
+		"describe": "readonly",
+		"before": "readonly",
+		"beforeEach": "readonly",
+		"expect": "readonly",
+		"it": "readonly",
+		"Cypress": "readonly",
+		"cy": "readonly"
+	},
+	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
+	"ignorePatterns": ["**/vendor/**"]
+}

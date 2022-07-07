@@ -9,9 +9,6 @@ import ServerSideRender from '@wordpress/server-side-render';
 import TaxonomyControls from './inspector-controls/taxonomy-controls';
 import { usePostTypes } from './utils';
 
-// Importing the block's editor styles via JS will enable hot reloading for css
-import './editor.css';
-
 /**
  * Edit component.
  * See https://wordpress.org/gutenberg/handbook/designers-developers/developers/block-api/block-edit-save/#edit

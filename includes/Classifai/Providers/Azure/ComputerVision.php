@@ -129,7 +129,7 @@ class ComputerVision extends Provider {
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
 			'editor-ocr',
-			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
 			[
 				'wp-block-editor',
 				'wp-blocks',

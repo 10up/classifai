@@ -38,7 +38,6 @@
   "supports": {
     "html": false
   },
-  "editorScript": "file:../../../../dist/js/recommended-content-block.js",
-  "editorStyle": "file:../../../../dist/blocks/recommended-content-block/editor.css",
+  "editorScript": "file:../../../../dist/recommended-content-block.js",
   "style": "recommended-content-block-style"
 }
