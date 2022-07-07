@@ -10,7 +10,7 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "php": ">=7.0",
+    "php": ">=7.2",
     "yahnis-elsts/plugin-update-checker": "4.6",
     "ua-parser/uap-php": "dev-master"
   },
@@ -28,7 +28,7 @@
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
-    "lint": "phpcs . --runtime-set testVersion 7.0-",
+    "lint": "phpcs . --runtime-set testVersion 7.2-",
     "lint-fix": "phpcbf ."
   },
   "minimum-stability": "dev",

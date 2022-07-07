@@ -31,7 +31,7 @@
   },
   "lint-staged": {
     "*.php": [
-      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0"
+      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.2"
     ]
   },
   "author": {
