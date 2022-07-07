@@ -393,12 +393,9 @@ class Personalizer extends Provider {
 		if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
 			$class .= ' has-author';
 		}
-
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => $class ) );
-
 		return sprintf(
-			'<ul %1$s>%2$s</ul>',
-			$wrapper_attributes,
+			'<ul class="%1$s">%2$s</ul>',
+			esc_attr( $class ),
 			$markup
 		);
 	}
