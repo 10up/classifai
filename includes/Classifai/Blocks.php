@@ -54,7 +54,7 @@ function blocks_styles() {
 	wp_enqueue_script(
 		'recommended-content-block-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-frontend.js',
-		array_merge( $frontend_dependencies['dependencies'], [ 'jquery' ] ),
+		$frontend_dependencies['dependencies'],
 		$frontend_dependencies['version'],
 		true
 	);
