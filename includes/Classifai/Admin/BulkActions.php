@@ -1,6 +1,7 @@
 <?php
 namespace Classifai\Admin;
 
+use Classifai\Providers\Azure\ComputerVision;
 use function Classifai\get_supported_post_types;
 
 /**
@@ -22,6 +23,11 @@ class BulkActions {
 	private $save_post_handler;
 
 	/**
+	 * @var $computer_vision ComputerVision
+	 */
+	private $computer_vision;
+
+	/**
 	 * Register the actions needed.
 	 */
 	public function register() {
@@ -32,15 +38,11 @@ class BulkActions {
 		}
 
 		$this->save_post_handler = new SavePostHandler();
+		$this->computer_vision   = new ComputerVision( false );
 
 		foreach ( $post_types as $post_type ) {
-			if ( 'attachment' === $post_type ) {
-				add_filter( 'bulk_actions-upload', [ $this, 'register_media_bulk_actions' ] );
-				add_filter( 'handle_bulk_actions-upload', [ $this, 'media_bulk_action_handler' ], 10, 3 );
-			} else {
-				add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
-				add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
-			}
+			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
+			add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
 
 			if ( is_post_type_hierarchical( $post_type ) ) {
 				add_action( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
@@ -48,6 +50,9 @@ class BulkActions {
 				add_action( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
 			}
 		}
+
+		add_filter( 'bulk_actions-upload', [ $this, 'register_media_bulk_actions' ] );
+		add_filter( 'handle_bulk_actions-upload', [ $this, 'media_bulk_action_handler' ], 10, 3 );
 
 		add_action( 'admin_notices', [ $this, 'bulk_action_admin_notice' ] );
 	}
@@ -72,9 +77,19 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
-		$bulk_actions['alt_tags']   = __( 'Add Alt Text', 'classifai' );
-		$bulk_actions['image_tags'] = __( 'Add Image Tags', 'classifai' );
-		$bulk_actions['smart_crop'] = __( 'Smart Crop', 'classifai' );
+		$settings = $this->computer_vision->get_settings();
+
+		if (
+			'no' !== $settings['enable_image_tagging'] ||
+			'no' !== $settings['enable_image_captions']
+		) {
+			$bulk_actions['scan_image'] = __( 'Scan Image', 'classifai' );
+		}
+
+		if ( isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
+			$bulk_actions['smart_crop'] = __( 'Smart Crop', 'classifai' );
+		}
+
 		return $bulk_actions;
 	}
 
@@ -95,6 +110,7 @@ class BulkActions {
 		foreach ( $post_ids as $post_id ) {
 			$this->save_post_handler->classify( $post_id );
 		}
+		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
 		$redirect_to = add_query_arg( 'bulk_classified', count( $post_ids ), $redirect_to );
 		return $redirect_to;
 	}
@@ -109,25 +125,26 @@ class BulkActions {
 	 * @return string
 	 */
 	public function media_bulk_action_handler( $redirect_to, $doaction, $attachment_ids ) {
-		if ( empty( $attachment_ids ) ) {
+		if (
+			empty( $attachment_ids ) ||
+			! in_array( $doaction, [ 'scan_image', 'smart_crop' ], true )
+		) {
 			return $redirect_to;
 		}
-		switch ( $doaction ) {
-			case 'alt_tags':
-				$action = 'alt_tagged';
-				break;
-			case 'image_tags':
-				$action = 'image_tagged';
-				break;
-			case 'smart_crop':
-				$action = 'smart_cropped';
-				break;
-			default:
-				return $redirect_to;
-		}
+
 		foreach ( $attachment_ids as $attachment_id ) {
-			$this->save_post_handler->classify( $attachment_id );
+			$current_meta = wp_get_attachment_metadata( $attachment_id );
+
+			if ( 'smart_crop' === $doaction ) {
+				$this->computer_vision->smart_crop_image( $current_meta, $attachment_id );
+			} else {
+				$this->computer_vision->generate_image_alt_tags( $current_meta, $attachment_id );
+			}
 		}
+
+		$action = 'scan_image' === $doaction ? 'scanned' : 'cropped';
+
+		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
 		$redirect_to = add_query_arg( "bulk_{$action}", count( $attachment_ids ), $redirect_to );
 		return $redirect_to;
 	}
@@ -136,35 +153,32 @@ class BulkActions {
 	 * Display an admin notice after bulk updates.
 	 */
 	public function bulk_action_admin_notice() {
-		if (
-			empty( $_REQUEST['bulk_classified'] ) &&
-			empty( $_REQUEST['bulk_alt_tagged'] ) &&
-			empty( $_REQUEST['bulk_image_tagged'] ) &&
-			empty( $_REQUEST['bulk_smart_cropped'] )
-		) {
+
+		$classified = filter_input( INPUT_GET, 'bulk_classified', FILTER_SANITIZE_NUMBER_INT );
+		$scanned    = filter_input( INPUT_GET, 'bulk_scanned', FILTER_SANITIZE_NUMBER_INT );
+		$cropped    = filter_input( INPUT_GET, 'bulk_cropped', FILTER_SANITIZE_NUMBER_INT );
+
+		if ( ! $classified && ! $scanned && ! $cropped ) {
 			return;
 		}
 
-		if ( ! empty( $_REQUEST['bulk_classified'] ) ) {
-			$classified_posts_count = intval( $_REQUEST['bulk_classified'] );
+		if ( $classified ) {
+			$classified_posts_count = $classified;
 			$post_type              = 'post';
-			$action                 = 'Classified';
-		} elseif ( ! empty( $_REQUEST['bulk_alt_tagged'] ) ) {
-			$classified_posts_count = intval( $_REQUEST['bulk_alt_tagged'] );
+			$action                 = __( 'Classified', 'classifai' );
+		} elseif ( $scanned ) {
+			$classified_posts_count = $scanned;
 			$post_type              = 'image';
-			$action                 = 'Alt tags generated for';
-		} elseif ( ! empty( $_REQUEST['bulk_image_tagged'] ) ) {
-			$classified_posts_count = intval( $_REQUEST['bulk_image_tagged'] );
+			$action                 = __( 'Scanned', 'classifai' );
+		} elseif ( $cropped ) {
+			$classified_posts_count = $cropped;
 			$post_type              = 'image';
-			$action                 = 'Image tags generated for';
-		} elseif ( ! empty( $_REQUEST['bulk_smart_cropped'] ) ) {
-			$classified_posts_count = intval( $_REQUEST['bulk_smart_cropped'] );
-			$post_type              = 'image';
-			$action                 = 'Smart cropped';
+			$action                 = __( 'Cropped', 'classifai' );
 		}
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';
 		$output .= sprintf(
+			/* translators: %1$s: action, %2$s: number of posts, %3$s: post type*/
 			_n(
 				'%1$s %2$s %3$s.',
 				'%1$s %2$s %3$ss.',
