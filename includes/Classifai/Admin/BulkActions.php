@@ -154,9 +154,9 @@ class BulkActions {
 	 */
 	public function bulk_action_admin_notice() {
 
-		$classified = ! empty( $_GET['bulk_classified'] ) ? (int) wp_unslash( $_GET['bulk_classified'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$scanned    = ! empty( $_GET['bulk_scanned'] ) ? (int) wp_unslash( $_GET['bulk_scanned'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$cropped    = ! empty( $_GET['bulk_cropped'] ) ? (int) wp_unslash( $_GET['bulk_cropped'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classified = ! empty( $_GET['bulk_classified'] ) ? intval( wp_unslash( $_GET['bulk_classified'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$scanned    = ! empty( $_GET['bulk_scanned'] ) ? intval( wp_unslash( $_GET['bulk_scanned'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cropped    = ! empty( $_GET['bulk_cropped'] ) ? intval( wp_unslash( $_GET['bulk_cropped'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! $classified && ! $scanned && ! $cropped ) {
 			return;
