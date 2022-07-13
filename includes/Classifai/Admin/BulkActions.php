@@ -145,8 +145,8 @@ class BulkActions {
 		$action = 'scan_image' === $doaction ? 'scanned' : 'cropped';
 
 		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
-		$redirect_to = add_query_arg( "bulk_{$action}", count( $attachment_ids ), $redirect_to );
-		return $redirect_to;
+		$redirect_to = add_query_arg( urlencode( "bulk_{$action}" ), count( $attachment_ids ), $redirect_to );
+		return esc_url_raw( $redirect_to );
 	}
 
 	/**
