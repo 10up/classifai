@@ -145,7 +145,7 @@ class BulkActions {
 		$action = 'scan_image' === $doaction ? 'scanned' : 'cropped';
 
 		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
-		$redirect_to = add_query_arg( urlencode( "bulk_{$action}" ), count( $attachment_ids ), $redirect_to );
+		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $attachment_ids ), $redirect_to );
 		return esc_url_raw( $redirect_to );
 	}
 
@@ -154,9 +154,9 @@ class BulkActions {
 	 */
 	public function bulk_action_admin_notice() {
 
-		$classified = filter_input( INPUT_GET, 'bulk_classified', FILTER_SANITIZE_NUMBER_INT );
-		$scanned    = filter_input( INPUT_GET, 'bulk_scanned', FILTER_SANITIZE_NUMBER_INT );
-		$cropped    = filter_input( INPUT_GET, 'bulk_cropped', FILTER_SANITIZE_NUMBER_INT );
+		$classified = ! empty( $_GET['bulk_classified'] ) ? (int) wp_unslash( $_GET['bulk_classified'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$scanned    = ! empty( $_GET['bulk_scanned'] ) ? (int) wp_unslash( $_GET['bulk_scanned'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cropped    = ! empty( $_GET['bulk_cropped'] ) ? (int) wp_unslash( $_GET['bulk_cropped'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( ! $classified && ! $scanned && ! $cropped ) {
 			return;
