@@ -1,6 +1,7 @@
 <?php
 namespace Classifai\Admin;
 
+use Classifai\Providers\Azure\ComputerVision;
 use function Classifai\get_supported_post_types;
 
 /**
@@ -22,6 +23,11 @@ class BulkActions {
 	private $save_post_handler;
 
 	/**
+	 * @var $computer_vision ComputerVision
+	 */
+	private $computer_vision;
+
+	/**
 	 * Register the actions needed.
 	 */
 	public function register() {
@@ -32,6 +38,7 @@ class BulkActions {
 		}
 
 		$this->save_post_handler = new SavePostHandler();
+		$this->computer_vision   = new ComputerVision( false );
 
 		foreach ( $post_types as $post_type ) {
 			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
@@ -43,6 +50,9 @@ class BulkActions {
 				add_action( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
 			}
 		}
+
+		add_filter( 'bulk_actions-upload', [ $this, 'register_media_bulk_actions' ] );
+		add_filter( 'handle_bulk_actions-upload', [ $this, 'media_bulk_action_handler' ], 10, 3 );
 
 		add_action( 'admin_notices', [ $this, 'bulk_action_admin_notice' ] );
 	}
@@ -56,6 +66,30 @@ class BulkActions {
 	 */
 	public function register_bulk_actions( $bulk_actions ) {
 		$bulk_actions['classify'] = __( 'Classify', 'classifai' );
+		return $bulk_actions;
+	}
+
+	/**
+	 * Register Classifai media bulk actions.
+	 *
+	 * @param array $bulk_actions Current bulk actions.
+	 *
+	 * @return array
+	 */
+	public function register_media_bulk_actions( $bulk_actions ) {
+		$settings = $this->computer_vision->get_settings();
+
+		if (
+			'no' !== $settings['enable_image_tagging'] ||
+			'no' !== $settings['enable_image_captions']
+		) {
+			$bulk_actions['scan_image'] = __( 'Scan Image', 'classifai' );
+		}
+
+		if ( isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
+			$bulk_actions['smart_crop'] = __( 'Smart Crop', 'classifai' );
+		}
+
 		return $bulk_actions;
 	}
 
@@ -76,29 +110,84 @@ class BulkActions {
 		foreach ( $post_ids as $post_id ) {
 			$this->save_post_handler->classify( $post_id );
 		}
+		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
 		$redirect_to = add_query_arg( 'bulk_classified', count( $post_ids ), $redirect_to );
 		return $redirect_to;
 	}
 
 	/**
-	 * Display an admin notice after classifying posts in bulk.
+	 * Handle media bulk actions.
+	 *
+	 * @param string $redirect_to       Redirect URL after bulk actions.
+	 * @param string $doaction          Action ID.
+	 * @param array  $attachment_ids    Attachment ids to apply bulk actions to.
+	 *
+	 * @return string
+	 */
+	public function media_bulk_action_handler( $redirect_to, $doaction, $attachment_ids ) {
+		if (
+			empty( $attachment_ids ) ||
+			! in_array( $doaction, [ 'scan_image', 'smart_crop' ], true )
+		) {
+			return $redirect_to;
+		}
+
+		foreach ( $attachment_ids as $attachment_id ) {
+			$current_meta = wp_get_attachment_metadata( $attachment_id );
+
+			if ( 'smart_crop' === $doaction ) {
+				$this->computer_vision->smart_crop_image( $current_meta, $attachment_id );
+			} else {
+				$this->computer_vision->generate_image_alt_tags( $current_meta, $attachment_id );
+			}
+		}
+
+		$action = 'scan_image' === $doaction ? 'scanned' : 'cropped';
+
+		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_scanned', 'bulk_cropped' ], $redirect_to );
+		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $attachment_ids ), $redirect_to );
+		return esc_url_raw( $redirect_to );
+	}
+
+	/**
+	 * Display an admin notice after bulk updates.
 	 */
 	public function bulk_action_admin_notice() {
-		if ( empty( $_REQUEST['bulk_classified'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$classified = ! empty( $_GET['bulk_classified'] ) ? intval( wp_unslash( $_GET['bulk_classified'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$scanned    = ! empty( $_GET['bulk_scanned'] ) ? intval( wp_unslash( $_GET['bulk_scanned'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$cropped    = ! empty( $_GET['bulk_cropped'] ) ? intval( wp_unslash( $_GET['bulk_cropped'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $classified && ! $scanned && ! $cropped ) {
 			return;
 		}
 
-		$classified_posts_count = intval( $_REQUEST['bulk_classified'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $classified ) {
+			$classified_posts_count = $classified;
+			$post_type              = 'post';
+			$action                 = __( 'Classified', 'classifai' );
+		} elseif ( $scanned ) {
+			$classified_posts_count = $scanned;
+			$post_type              = 'image';
+			$action                 = __( 'Scanned', 'classifai' );
+		} elseif ( $cropped ) {
+			$classified_posts_count = $cropped;
+			$post_type              = 'image';
+			$action                 = __( 'Cropped', 'classifai' );
+		}
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';
 		$output .= sprintf(
+			/* translators: %1$s: action, %2$s: number of posts, %3$s: post type*/
 			_n(
-				'Classified %s post.',
-				'Classified %s posts.',
+				'%1$s %2$s %3$s.',
+				'%1$s %2$s %3$ss.',
 				$classified_posts_count,
 				'classifai'
 			),
-			$classified_posts_count
+			$action,
+			$classified_posts_count,
+			$post_type
 		);
 		$output .= '</p></div>';
 		echo wp_kses(
