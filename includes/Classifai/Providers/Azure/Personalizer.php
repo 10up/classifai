@@ -311,7 +311,7 @@ class Personalizer extends Provider {
 		$post_id   = $content->rewardActionId;
 		$event_id  = $content->eventId; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$post      = get_post( $post_id );
-		$post_link = esc_url( get_permalink( $post ) );
+		$post_link = get_permalink( $post );
 		$title     = get_the_title( $post );
 
 		if ( ! $title ) {
@@ -432,7 +432,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Get user agent for personilizer contextFeatures.
+	 * Get user agent for personalizer contextFeatures.
 	 */
 	protected function get_user_agent_features() {
 		// phpcs:ignore WordPressVIPMinimum.Variables.RestrictedVariables.cache_constraints___SERVER__HTTP_USER_AGENT__

@@ -40,7 +40,7 @@ class Personalizer extends Service {
 		check_ajax_referer( 'classifai-recommended-block', 'security' );
 
 		if ( ! isset( $_POST['contentPostType'] ) || empty( $_POST['contentPostType'] ) ) {
-			esc_html_e( 'No Results found.', 'classifai' );
+			esc_html_e( 'No results found.', 'classifai' );
 			exit();
 		}
 
@@ -114,7 +114,7 @@ class Personalizer extends Service {
 	}
 
 	/**
-	 * Maybe Clear save transient for recent actions.
+	 * Maybe clear transients for recent actions.
 	 *
 	 * @param int $post_id Post Id.
 	 * @return void
