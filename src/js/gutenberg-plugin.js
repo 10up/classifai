@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import PluginIcon from '../../assets/img/editor-icon.svg';
+import { ReactComponent as icon } from '../../assets/img/editor-icon.svg';
 
 const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
@@ -15,7 +15,7 @@ const { classifaiPostData } = window;
 const ClassifAIIcon = () => (
 	<Icon
 		className="components-panel__icon"
-		icon={ <PluginIcon /> }
+		icon={ icon }
 		size={ 20 }
 	/>
 );
@@ -78,7 +78,7 @@ const ClassifAIPlugin = () => {
 	return (
 		<PluginDocumentSettingPanel
 			title={ __( 'ClassifAI', 'classifai' ) }
-			icon={ ClassifAIIcon }
+			icon={ClassifAIIcon}
 			className="classifai-panel"
 		>
 			<ClassifAIToggle />
@@ -86,4 +86,4 @@ const ClassifAIPlugin = () => {
 	);
 };
 
-registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );
+registerPlugin('classifai-plugin', { render: ClassifAIPlugin });
