@@ -12,6 +12,7 @@ module.exports = {
 		'editor-ocr': path.resolve(process.cwd(), 'src/js', 'editor-ocr.js'),
 		media: path.resolve(process.cwd(), 'src/js', 'media.js'),
 		admin: path.resolve(process.cwd(), 'src/js', 'admin.js'),
+		'gutenberg-plugin': path.resolve(process.cwd(), 'src/js', 'gutenberg-plugin.js'),
 		'recommended-content-block': path.resolve(
 			process.cwd(),
 			'includes/Classifai/Blocks/recommended-content-block',

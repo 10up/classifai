@@ -1,7 +1,7 @@
 === ClassifAI ===
 Contributors:      10up
 Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
-Requires at least: 5.0
+Requires at least: 5.6
 Tested up to:      6.0
 Requires PHP:      7.2
 Stable tag:        1.7.2

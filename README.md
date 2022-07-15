@@ -37,7 +37,7 @@
 ## Requirements
 
 * PHP 7.2+
-* [WordPress](http://wordpress.org) 5.0+
+* [WordPress](http://wordpress.org) 5.6+
 * To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
