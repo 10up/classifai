@@ -160,6 +160,7 @@ abstract class Service {
 							),
 						);
 						?>
+					<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
 					<div id="classifai-post-preview-controls">
 						<select id="classifai-preview-post-selector">
 							<?php foreach ( $posts_to_preview as $post ) : ?>

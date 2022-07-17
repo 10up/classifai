@@ -1,5 +1,4 @@
 /* global ClassifAI */
-import 'choices.js';
 import Choices from 'choices.js';
 import '../scss/admin.scss';
 

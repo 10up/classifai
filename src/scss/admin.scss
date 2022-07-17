@@ -68,10 +68,10 @@
 }
 
 #classifai-post-preview-wrapper {
-    // display: none;
-
     .tax-row {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ccc;
+        padding: 0.5rem;
 
         &--hide {
             display: none;
@@ -80,14 +80,14 @@
 
     .tax-type {
         font-weight: bold;
-        font-size: 1.15rem;
+        font-size: 14px;
         margin-bottom: 0.75rem;
         text-transform: capitalize;
     }
 
     .tax-cell {
         margin-bottom: 8px;
-        padding: 4px 8px;
+        padding: 2px 8px;
         border-radius: 15px;
         text-transform: capitalize;
         background-color: #46b450ba;
@@ -101,7 +101,7 @@
 
     .tax-label {
         text-transform: capitalize;
-        font-size: 1rem;
+        font-size: 14px;
         margin-left: 8px;
     }
 }
@@ -123,6 +123,7 @@
         align-self: flex-start;
         position: sticky;
         top: 3rem;
+        margin-left: -5rem;
 
         .choices__inner {
             display: block;
