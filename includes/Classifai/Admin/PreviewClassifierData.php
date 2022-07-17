@@ -11,7 +11,7 @@ class PreviewClassifierData {
 	 */
 	public function __construct() {
 		add_action( 'wp_ajax_get_post_classifier_preview_data', array( $this, 'get_post_classifier_preview_data' ) );
-		add_action( 'wp_ajax_get_post_search_results', array( $this, 'get_post_search_results' ) );
+		add_action( 'wp_ajax_classifai_get_post_search_results', array( $this, 'get_post_search_results' ) );
 	}
 
 	/**
@@ -58,8 +58,8 @@ class PreviewClassifierData {
 		}
 
 		$search_term   = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-		$post_types    = isset( $_POST['post_types'] ) ? explode( '/', sanitize_text_field( $_POST['post_types'] ) ) : 'post';
-		$post_statuses = isset( $_POST['post_statuses'] ) ? explode( '/', sanitize_text_field( $_POST['post_statuses'] ) ) : 'publish';
+		$post_types    = isset( $_POST['post_types'] ) ? explode( ',', sanitize_text_field( $_POST['post_types'] ) ) : 'post';
+		$post_statuses = isset( $_POST['post_status'] ) ? explode( ',', sanitize_text_field( $_POST['post_status'] ) ) : 'publish';
 
 		$posts = get_posts(
 			array(

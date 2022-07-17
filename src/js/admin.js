@@ -232,7 +232,7 @@ import '../scss/admin.scss';
 		formData.append( 'post_types', postTypes );
 		formData.append( 'post_status', postStatuses );
 		formData.append( 'search', event.detail.value );
-		formData.append( 'action', 'get_post_search_results' );
+		formData.append( 'action', 'classifai_get_post_search_results' );
 		formData.append( 'nonce', previewerNonce );
 
 		fetch( `${ ajaxurl }`, {
