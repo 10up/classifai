@@ -5,7 +5,8 @@ module.exports = {
 		'editor': './src/js/editor.js',
 		'editor-ocr': './src/js/editor-ocr.js',
 		'media': './src/js/media.js',
-		'admin': './src/js/admin.js'
+		'admin': './src/js/admin.js',
+		'gutenberg-plugin': './src/js/gutenberg-plugin.js'
 	},
 	output: {
 		filename: '[name].min.js',
@@ -35,7 +36,16 @@ module.exports = {
 				  "css-loader",
 				  "sass-loader",
 				],
-			  }
+			},
+			{
+				test: /\.svg$/,
+				use: [{
+					loader: 'svg-react-loader'
+				}]
+			}
 		],
+	},
+	externals: {
+		react: 'React'
 	},
 };
