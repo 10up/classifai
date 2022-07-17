@@ -136,7 +136,30 @@ abstract class Service {
 								'posts_per_page' => 10,
 							)
 						);
-					?>
+
+						$features = array(
+							'category' => array(
+								'name'    => esc_html__( 'Category', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'category' ),
+								'plural'  => 'categories',
+							),
+							'keyword'  => array(
+								'name'    => esc_html__( 'Keyword', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
+								'plural'  => 'keywords',
+							),
+							'entity'   => array(
+								'name'    => esc_html__( 'Entity', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'entity' ),
+								'plural'  => 'entities',
+							),
+							'concept'  => array(
+								'name'    => esc_html__( 'Concept', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'concept' ),
+								'plural'  => 'concepts',
+							),
+						);
+						?>
 					<div id="classifai-post-preview-controls">
 						<select id="classifai-preview-post-selector">
 							<?php foreach ( $posts_to_preview as $post ) : ?>
@@ -148,7 +171,13 @@ abstract class Service {
 							<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
 						</button>
 					</div>
-					<div id="classifai-post-preview-wrapper"></div>
+					<div id="classifai-post-preview-wrapper">
+						<?php foreach ( $features as $feature_slug => $feature ) : ?>
+							<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
+								<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
+							</div>
+						<?php endforeach; ?>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -68,10 +68,14 @@
 }
 
 #classifai-post-preview-wrapper {
-    display: none;
+    // display: none;
 
     .tax-row {
         margin-bottom: 1.5rem;
+
+        &--hide {
+            display: none;
+        }
     }
 
     .tax-type {

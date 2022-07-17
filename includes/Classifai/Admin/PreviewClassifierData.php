@@ -24,17 +24,21 @@ class PreviewClassifierData {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
-		$post_id         = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
-		$classifier      = new \Classifai\Watson\Classifier();
-		$post_classifier = new \Classifai\PostClassifier();
-		$normalizer      = new \Classifai\Watson\Normalizer();
+		$post_id    = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		$classifier = new \Classifai\Watson\Classifier();
+		$normalizer = new \Classifai\Watson\Normalizer();
 
-		if ( empty( $opts['features'] ) ) {
-			$opts['features'] = $post_classifier->get_features();
-		}
+		$features['categories'] = (object) [];
+		$features['concepts']   = (object) [];
+		$features['entities']   = (object) [];
+		$features['keywords']   = [
+			'emotion'   => false,
+			'sentiment' => false,
+			'limit'     => defined( 'WATSON_KEYWORD_LIMIT' ) ? WATSON_KEYWORD_LIMIT : 10,
+		];
 
 		$text_to_classify        = $normalizer->normalize( $post_id );
-		$body                    = $classifier->get_body( $text_to_classify, $opts );
+		$body                    = $classifier->get_body( $text_to_classify, $features );
 		$request_options['body'] = $body;
 		$request                 = $classifier->get_request();
 

@@ -32,46 +32,69 @@ import '../scss/admin.scss';
 	/** Previewer nonce. */
 	const previewerNonce = document.getElementById( 'classifai-previewer-nonce' ).value;
 
+	/** Feature statuses. */
+	const featureStatuses = {
+		categoriesStatus: document.getElementById( 'classifai-settings-category' ).checked,
+		keywordsStatus: document.getElementById( 'classifai-settings-keyword' ).checked,
+		entitiesStatus: document.getElementById( 'classifai-settings-entity' ).checked,
+		conceptsStatus: document.getElementById( 'classifai-settings-concept' ).checked,
+	};
+
+	const plurals = {
+		category: 'categories',
+		keyword: 'keywords',
+		entity: 'entities',
+		concept: 'concepts',
+	};
+
+	document.querySelectorAll( '#classifai-settings-category, #classifai-settings-keyword, #classifai-settings-entity, #classifai-settings-concept' ).forEach( item => {
+		item.addEventListener( 'change', ( e ) => {
+			if ( 'classifai-settings-category' === e.target.id ) {
+				featureStatuses.categoriesStatus = e.target.checked;
+			}
+
+			if ( 'classifai-settings-keyword' === e.target.id ) {
+				featureStatuses.keywordsStatus = e.target.checked;
+			}
+
+			if ( 'classifai-settings-entity' === e.target.id ) {
+				featureStatuses.entitiesStatus = e.target.checked;
+			}
+
+			if ( 'classifai-settings-concept' === e.target.id ) {
+				featureStatuses.conceptsStatus = e.target.checked;
+			}
+
+			const taxType = e.target.id.split( '-' ).at( -1 );
+
+			if ( e.target.checked ) {
+				document.querySelector( `.tax-row--${ plurals[ taxType ] }` ).classList.remove( 'tax-row--hide' );
+			} else {
+				document.querySelector( `.tax-row--${ plurals[ taxType ] }` ).classList.add( 'tax-row--hide' );
+			}
+		} );
+	} ) ;
+
 	/**
 	 * Live preview features.
 	 */
 	function showPreview( e ) {
-		/*
-		 * Category thresholds. 
-		 */
+
+		/** Category thresholds. */
 		const categoryThreshold = Number( document.querySelector( '#classifai-settings-category_threshold' ).value );
 		const keywordThreshold = Number( document.querySelector( '#classifai-settings-keyword_threshold' ).value );
 		const entityThreshold = Number( document.querySelector( '#classifai-settings-entity_threshold' ).value );
 		const conceptThreshold = Number( document.querySelector( '#classifai-settings-concept_threshold' ).value );
 
-		/*
-		 * Feature statuses.
-		 */
-		const categoryStatus = document.getElementById( 'classifai-settings-category' ).checked;
-		const keywordStatus = document.getElementById( 'classifai-settings-keyword' ).checked;
-		const entityStatus = document.getElementById( 'classifai-settings-entity' ).checked;
-		const conceptStatus = document.getElementById( 'classifai-settings-concept' ).checked;
-
 		const postId = document.getElementById( 'classifai-preview-post-selector' ).value;
 
 		const previewWrapper = document.getElementById( 'classifai-post-preview-wrapper' );
-		const thresholds = {};
-
-		if ( categoryStatus ) {
-			thresholds.categories = categoryThreshold;
-		}
-
-		if ( keywordStatus ) {
-			thresholds.keywords = keywordThreshold;
-		}
-
-		if ( entityStatus ) {
-			thresholds.entities = entityThreshold;
-		}
-
-		if ( conceptStatus ) {
-			thresholds.concepts = conceptThreshold;
-		}
+		const thresholds = {
+			categories: categoryThreshold,
+			keywords: keywordThreshold,
+			entities: entityThreshold,
+			concepts: conceptThreshold,
+		};
 
 		e.target.closest( '.button' ).classList.add( 'get-classifier-preview-data-btn--loading' );
 
@@ -94,24 +117,13 @@ import '../scss/admin.scss';
 			}
 
 			const { data: { categories = [], concepts = [], entities = [], keywords = [] } } = data;
-			const dataToFilter = {};
 
-			if ( categoryStatus ) {
-				dataToFilter.categories = categories;
-			}
-	
-			if ( keywordStatus ) {
-				dataToFilter.keywords = keywords;
-			}
-	
-			if ( entityStatus ) {
-				dataToFilter.entities = entities;
-			}
-	
-			if ( conceptStatus ) {
-				dataToFilter.concepts = concepts;
-			}
-
+			const dataToFilter = {
+				categories: categories,
+				keywords: keywords,
+				entities: entities,
+				concepts: concepts,
+			};
 
 			const filteredItems = filterByScoreOrRelevance( dataToFilter, thresholds );
 			const htmlData = buildPreviewUI( filteredItems );
@@ -149,10 +161,9 @@ import '../scss/admin.scss';
 	 */
 	function buildPreviewUI( filteredItems = [] ) {
 		let htmlData = '';
-
 		filteredItems.forEach( obj => {
 			Object.keys( obj ).forEach( prop => {
-				htmlData += `<div class="tax-row"><div class="tax-type">${ prop }</div>`;
+				htmlData += `<div class="tax-row tax-row--${ prop } ${ featureStatuses[ `${ prop }Status` ] ? '' : 'tax-row--hide' }"><div class="tax-type tax-type--${ prop }">${ prop }</div>`;
 				obj[ prop ].forEach( item => {
 					let rating = 0;
 					let name = 0;
@@ -260,9 +271,7 @@ import '../scss/admin.scss';
 		return function() {
 			const context = this, args = arguments;
 
-			/**
-			 * Debounced function.
-			 */
+			/** Debounced function. */
 			const later = function() {
 				timeout = null;
 				if ( ! immediate ) func.apply( context, args );
