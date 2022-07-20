@@ -25,16 +25,24 @@ module.exports = {
 				test: /\.js$/,
 				exclude: /(node_modules)/,
 				loader: 'eslint-loader',
-				query: {
+				options: {
 					configFile: './.eslintrc.json'
 				}
+			},
+			{
+				test: /\.s[ac]ss$/i,
+				use: [
+				  "style-loader",
+				  "css-loader",
+				  "sass-loader",
+				],
 			},
 			{
 				test: /\.svg$/,
 				use: [{
 					loader: 'svg-react-loader'
 				}]
-			},
+			}
 		],
 	},
 	externals: {

@@ -8,7 +8,8 @@
     "expect": "readonly",
     "it": "readonly",
     "Cypress": "readonly",
-    "cy": "readonly"
+    "cy": "readonly",
+    "ajaxurl": "readonly"
   },
   "extends": "@10up/eslint-config"
 }

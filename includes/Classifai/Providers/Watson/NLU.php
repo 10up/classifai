@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Watson;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_post_types_for_language_settings;
@@ -133,6 +134,8 @@ class NLU extends Provider {
 		if ( $this->save_post_handler->can_register() ) {
 			$this->save_post_handler->register();
 		}
+
+		new PreviewClassifierData();
 	}
 
 	/**
@@ -227,10 +230,11 @@ class NLU extends Provider {
 			'classifai-admin',
 			'ClassifAI',
 			[
-				'api_password' => __( 'API Password', 'classifai' ),
-				'api_key'      => __( 'API Key', 'classifai' ),
-				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+				'api_password'    => __( 'API Password', 'classifai' ),
+				'api_key'         => __( 'API Key', 'classifai' ),
+				'use_key'         => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password'    => __( 'Use a username/password instead?', 'classifai' ),
+				'loading_preview' => __( 'Loading Preview', 'classifai' ),
 			]
 		);
 	}

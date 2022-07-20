@@ -106,7 +106,7 @@ abstract class Service {
 	public function render_settings_page() {
 		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
-		<div class="wrap">
+		<div class="wrap wrap--nlu">
 			<h2><?php echo esc_html( $this->display_name ); ?></h2>
 			<?php if ( ! empty( $this->provider_classes ) ) : ?>
 			<h2 class="nav-tab-wrapper">
@@ -116,13 +116,71 @@ abstract class Service {
 			</h2>
 			<?php endif; ?>
 			<?php settings_errors(); ?>
-			<form method="post" action="options.php">
-			<?php
-				settings_fields( 'classifai_' . $active_tab );
-				do_settings_sections( 'classifai_' . $active_tab );
-				submit_button();
-			?>
-			</form>
+			<div class="classifai-nlu-sections">
+				<form method="post" action="options.php">
+				<?php
+					settings_fields( 'classifai_' . $active_tab );
+					do_settings_sections( 'classifai_' . $active_tab );
+					submit_button();
+				?>
+				</form>
+				<div id="classifai-post-preview-app">
+					<?php
+						$supported_post_statuses = \Classifai\get_supported_post_statuses();
+						$supported_post_types    = \Classifai\get_supported_post_types();
+
+						$posts_to_preview = get_posts(
+							array(
+								'post_type'      => $supported_post_types,
+								'post_status'    => $supported_post_statuses,
+								'posts_per_page' => 10,
+							)
+						);
+
+						$features = array(
+							'category' => array(
+								'name'    => esc_html__( 'Category', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'category' ),
+								'plural'  => 'categories',
+							),
+							'keyword'  => array(
+								'name'    => esc_html__( 'Keyword', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
+								'plural'  => 'keywords',
+							),
+							'entity'   => array(
+								'name'    => esc_html__( 'Entity', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'entity' ),
+								'plural'  => 'entities',
+							),
+							'concept'  => array(
+								'name'    => esc_html__( 'Concept', 'classifai' ),
+								'enabled' => \Classifai\get_feature_enabled( 'concept' ),
+								'plural'  => 'concepts',
+							),
+						);
+						?>
+					<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
+					<div id="classifai-post-preview-controls">
+						<select id="classifai-preview-post-selector">
+							<?php foreach ( $posts_to_preview as $post ) : ?>
+								<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+							<?php endforeach; ?>
+						</select>
+						<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
+						<button type="button" class="button" id="get-classifier-preview-data-btn">
+							<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
+						</button>
+					</div>
+					<div id="classifai-post-preview-wrapper">
+						<?php foreach ( $features as $feature_slug => $feature ) : ?>
+							<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
+								<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+				</div>
+			</div>
 		</div>
 		<?php
 	}
