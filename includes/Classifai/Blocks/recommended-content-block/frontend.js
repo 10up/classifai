@@ -9,10 +9,17 @@ function setupRewardCall(blockId) {
 	contentLinks.forEach(function (contentLink) {
 		contentLink.addEventListener('click', function (event) {
 			event.preventDefault();
-			const restURL = classifai_personalizer_params?.reward_endpoint;
 			const eventId = this.getAttribute('data-eventid');
+			const isRewarded = this.getAttribute('data-rewarded');
+			const restURL = `${classifai_personalizer_params?.reward_endpoint}`;
 			/* Send Reward to personalizer */
-			fetch(restURL.replace('{eventId}', eventId)).catch((err) => {
+			fetch(restURL.replace('{eventId}', eventId), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ rewarded: isRewarded }),
+			}).catch((err) => {
 				// eslint-disable-next-line no-console
 				console.error(err);
 			});

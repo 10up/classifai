@@ -17,6 +17,7 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { list, grid } from '@wordpress/icons';
+import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
 import TaxonomyControls from './inspector-controls/taxonomy-controls';
 import { usePostTypes } from './utils';
@@ -54,7 +55,9 @@ const RecommendedContentBlockEdit = (props) => {
 		displayPostExcerpt,
 		addLinkToFeaturedImage,
 	} = attributes;
-
+	const postId = useSelect((select) =>
+		select('core/editor').getCurrentPostId()
+	);
 	const blockProps = useBlockProps();
 	const { postTypesTaxonomiesMap, postTypesSelectOptions } = usePostTypes();
 	const onPostTypeChange = (newValue) => {
@@ -221,6 +224,7 @@ const RecommendedContentBlockEdit = (props) => {
 						displayPostExcerpt,
 						numberOfItems,
 						taxQuery,
+						exclude: postId,
 					}}
 				/>
 			)}

@@ -47,6 +47,7 @@ class Personalizer extends Service {
 		$attributes = array(
 			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( $_POST['displayLayout'] ) : 'grid',
 			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
+			'exclude'                => isset( $_POST['exclude'] ) ? absint( $_POST['exclude'] ) : 0,
 			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( $_POST['displayPostExcerpt'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
@@ -76,7 +77,7 @@ class Personalizer extends Service {
 			'classifai/v1',
 			'personalizer/reward/(?P<eventId>[a-zA-Z0-9-]+)',
 			[
-				'methods'             => 'GET',
+				'methods'             => 'POST',
 				'callback'            => [ $this, 'provider_endpoint_callback' ],
 				'args'                => [ 'route' => [ 'reward' ] ],
 				'permission_callback' => '__return_true',
@@ -94,6 +95,7 @@ class Personalizer extends Service {
 	public function provider_endpoint_callback( $request ) {
 		$response   = true;
 		$event_id   = $request->get_param( 'eventId' );
+		$reward     = ( '1' === $request->get_param( 'rewarded' ) ) ? 1 : 0;
 		$attributes = $request->get_attributes();
 		$route      = empty( $attributes['args']['route'] ) ? false : $attributes['args']['route'][0];
 
@@ -109,7 +111,7 @@ class Personalizer extends Service {
 
 			// Send reward to personalizer.
 			if ( isset( $this->provider_classes[0] ) ) {
-				$response = $this->provider_classes[0]->personalizer_send_reward( $event_id );
+				$response = $this->provider_classes[0]->personalizer_send_reward( $event_id, $reward );
 			}
 		}
 

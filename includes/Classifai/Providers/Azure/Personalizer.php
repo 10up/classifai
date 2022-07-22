@@ -407,6 +407,7 @@ class Personalizer extends Provider {
 		foreach ( $recommended_posts as $post ) {
 			$post_link = get_permalink( $post );
 			$title     = get_the_title( $post );
+			$rewarded  = ( absint( $post->ID ) === absint( $rewarded_post ) ) ? '1' : '0';
 
 			if ( ! $title ) {
 				$title = __( '(no title)', 'classifai' );
@@ -420,10 +421,11 @@ class Personalizer extends Provider {
 				$featured_image = get_the_post_thumbnail( $post );
 				if ( $attributes['addLinkToFeaturedImage'] ) {
 					$featured_image = sprintf(
-						'<a href="%1$s" aria-label="%2$s" class="classifai-send-reward" data-eventid="%3$s">%4$s</a>',
+						'<a href="%1$s" aria-label="%2$s" class="classifai-send-reward" data-eventid="%3$s" data-rewarded="%4$s">%5$s</a>',
 						esc_url( $post_link ),
 						esc_attr( $title ),
 						esc_attr( $event_id ),
+						$rewarded,
 						$featured_image
 					);
 				}
@@ -436,9 +438,10 @@ class Personalizer extends Provider {
 
 			if ( ! empty( $event_id ) ) {
 				$markup .= sprintf(
-					'<a href="%1$s" class="classifai-send-reward" data-eventid="%2$s">%3$s</a>',
+					'<a href="%1$s" class="classifai-send-reward" data-eventid="%2$s" data-rewarded="%3$s">%4$s</a>',
 					esc_url( $post_link ),
 					esc_attr( $event_id ),
+					$rewarded,
 					esc_html( $title )
 				);
 			} else {
@@ -623,9 +626,11 @@ class Personalizer extends Provider {
 	 * Report reward to allocate to the top ranked action for the specified event.
 	 *
 	 * @param string $event_id Personalizer event ID.
+	 * @param int    $reward   Reward value to send.
+	 *
 	 * @return object|string
 	 */
-	public function personalizer_send_reward( $event_id ) {
+	public function personalizer_send_reward( $event_id, $reward ) {
 		$settings        = $this->get_settings();
 		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
 		$result          = wp_remote_post(
@@ -635,7 +640,7 @@ class Personalizer extends Provider {
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 					'Content-Type'              => 'application/json',
 				],
-				'body'    => wp_json_encode( array( 'value' => 1 ) ),
+				'body'    => wp_json_encode( array( 'value' => $reward ) ),
 			]
 		);
 

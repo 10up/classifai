@@ -10,6 +10,11 @@
  * @var array    $context    Block context.
  */
 
+// Excluded current page/post from the recommended content.
+if ( is_singular() ) {
+	$attributes['exclude'] = get_the_ID();
+}
+
 $attr_key = md5( maybe_serialize( $attributes ) );
 $block_id = 'classifai-recommended-block-' . $attr_key;
 ?>
