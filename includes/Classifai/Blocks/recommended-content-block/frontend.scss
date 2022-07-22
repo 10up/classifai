@@ -1,14 +1,34 @@
 .wp-block-classifai-recommended-content {
-	list-style: none;
-	padding-left: 0;
-	display: flex;
-	flex-wrap: wrap;
-	padding: 0;
+	&.wp-block-classifai-recommended-content__list {
+		list-style: none;
+		padding-left: 0;
 
-	li {
-		margin: 0 1.25em 1.25em 0;
-		width: 100%;
-		clear: both;
+		li {
+			clear: both;
+		}
+	}
+
+	&.is-grid {
+		display: flex;
+		flex-wrap: wrap;
+		padding: 0;
+
+		li {
+			margin: 0 1.25em 1.25em 0;
+			width: 100%;
+		}
+	}
+
+	@media ( min-width:600px ) {
+		@for $i from 2 through 6 {
+			&.columns-#{ $i } li {
+				width: calc((100% / #{ $i }) - 1.25em + (1.25em / #{ $i }));
+
+				&:nth-child( #{ $i }n ) {
+					margin-right: 0;
+				}
+			}
+		}
 	}
 }
 

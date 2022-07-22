@@ -45,12 +45,15 @@ class Personalizer extends Service {
 		}
 
 		$attributes = array(
+			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( $_POST['displayLayout'] ) : 'grid',
 			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
 			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( $_POST['displayPostExcerpt'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
 			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
+			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
 		);
 
 		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {

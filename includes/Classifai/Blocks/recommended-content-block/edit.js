@@ -7,9 +7,16 @@ import {
 	PanelBody,
 	ToggleControl,
 	Placeholder,
+	RangeControl,
 	SelectControl,
+	ToolbarGroup,
 } from '@wordpress/components';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	BlockControls,
+	InspectorControls,
+} from '@wordpress/block-editor';
+import { list, grid } from '@wordpress/icons';
 import ServerSideRender from '@wordpress/server-side-render';
 import TaxonomyControls from './inspector-controls/taxonomy-controls';
 import { usePostTypes } from './utils';
@@ -32,8 +39,13 @@ import { usePostTypes } from './utils';
  * @return {Function} Render the edit screen
  */
 const RecommendedContentBlockEdit = (props) => {
+	const maxPostColumns = 6;
+	const maxNumberOfItems = 50;
 	const { attributes, setAttributes } = props;
 	const {
+		columns = 3,
+		displayLayout = 'grid',
+		numberOfItems = 3,
 		contentPostType,
 		taxQuery,
 		displayAuthor,
@@ -66,8 +78,26 @@ const RecommendedContentBlockEdit = (props) => {
 		setAttributes(updateQuery);
 	};
 
+	const layoutControls = [
+		{
+			icon: list,
+			title: __('List view', 'classifai'),
+			onClick: () => setAttributes({ displayLayout: 'list' }),
+			isActive: displayLayout === 'list',
+		},
+		{
+			icon: grid,
+			title: __('Grid view'),
+			onClick: () => setAttributes({ displayLayout: 'grid' }),
+			isActive: displayLayout === 'grid',
+		},
+	];
+
 	return (
 		<div {...blockProps}>
+			<BlockControls>
+				<ToolbarGroup controls={layoutControls} />
+			</BlockControls>
 			<InspectorControls>
 				<PanelBody
 					title={__('Recommended Content Filters', 'classifai')}
@@ -87,6 +117,32 @@ const RecommendedContentBlockEdit = (props) => {
 						/>
 					)}
 				</PanelBody>
+
+				<PanelBody title={__('Settings', 'classifai')}>
+					<RangeControl
+						label={__('Number of items', 'classifai')}
+						value={numberOfItems}
+						onChange={(value) =>
+							setAttributes({ numberOfItems: value })
+						}
+						min={1}
+						max={maxNumberOfItems}
+						required
+					/>
+					{displayLayout === 'grid' && (
+						<RangeControl
+							label={__('Columns', 'classifai')}
+							value={columns}
+							onChange={(value) =>
+								setAttributes({ columns: value })
+							}
+							min={2}
+							max={maxPostColumns}
+							required
+						/>
+					)}
+				</PanelBody>
+
 				<PanelBody title={__('Post content settings', 'classifai')}>
 					<ToggleControl
 						label={__('Post excerpt', 'classifai')}
@@ -155,13 +211,16 @@ const RecommendedContentBlockEdit = (props) => {
 				<ServerSideRender
 					block="classifai/recommended-content-block"
 					attributes={{
+						addLinkToFeaturedImage,
+						columns,
 						contentPostType,
-						taxQuery,
 						displayAuthor,
 						displayFeaturedImage,
+						displayLayout,
 						displayPostDate,
 						displayPostExcerpt,
-						addLinkToFeaturedImage,
+						numberOfItems,
+						taxQuery,
 					}}
 				/>
 			)}

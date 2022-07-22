@@ -50,5 +50,8 @@
     "lint-staged": "^9.5.0",
     "node-wp-i18n": "^1.2.3",
     "wp-hookdoc": "^0.2.0"
+  },
+  "dependencies": {
+    "@wordpress/icons": "^9.4.0"
   }
 }

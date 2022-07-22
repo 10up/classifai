@@ -33,6 +33,18 @@
     "addLinkToFeaturedImage": {
       "type": "boolean",
       "default": false
+    },
+    "columns": {
+      "type": "number",
+      "default": 3
+    },
+    "numberOfItems": {
+      "type": "number",
+      "default": 3
+    },
+    "displayLayout": {
+      "type": "string",
+      "default": "grid"
     }
   },
   "supports": {

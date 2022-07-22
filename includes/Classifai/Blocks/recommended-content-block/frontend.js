@@ -3,7 +3,9 @@
 import './frontend.scss';
 
 function setupRewardCall(blockId) {
-	const contentLinks = document.querySelectorAll(`#${blockId} .classifai-send-reward`);
+	const contentLinks = document.querySelectorAll(
+		`#${blockId} .classifai-send-reward`
+	);
 	contentLinks.forEach(function (contentLink) {
 		contentLink.addEventListener('click', function (event) {
 			event.preventDefault();
