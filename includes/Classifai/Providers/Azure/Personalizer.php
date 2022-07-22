@@ -611,7 +611,6 @@ class Personalizer extends Provider {
 
 		if ( ! is_wp_error( $result ) ) {
 			$response = json_decode( wp_remote_retrieve_body( $result ) );
-			set_transient( 'classifai_azure_personalizer_rank_response', $response, DAY_IN_SECONDS * 30 );
 			if ( ! empty( $response->error ) ) {
 				return new WP_Error( 'error', $response->error->message );
 			}
