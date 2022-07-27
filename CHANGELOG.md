@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.7.3] - 2022-07-28
+**Note that this release bumps the WordPress minimum from 5.0 to 5.6.**
+
+### Added
+- Scan and Smart Crop bulk actions have been added for media files, allowing you to bulk process existing content (props [@ShahAaron](https://github.com/ShahAaron), [@dinhtungdu](https://github.com/dinhtungdu), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#253](https://github.com/10up/classifai/pull/253)).
+- Toggle to allow enabling/disabling language processing when content is updated (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#329](https://github.com/10up/classifai/pull/329)).
+- Preview for Language Processing settings changes (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul) via [#351](https://github.com/10up/classifai/pull/351)).
+
+### Changed
+- Bump our minimum supported version of WordPress to 5.6 (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#329](https://github.com/10up/classifai/pull/329)).
+
+### Fixed
+- Ensure we support relative image paths (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@dinhtungdu](https://github.com/dinhtungdu) via [#350](https://github.com/10up/classifai/pull/350)).
+
+### Security
+- Bump `terser` from 5.14.1 to 5.14.2 (props [@dependabot](https://github.com/apps/dependabot) via [#332](https://github.com/10up/classifai/pull/356)).
+
 ## [1.7.2] - 2022-06-27
 ### Added
 - `classifai_should_register_save_post_handler` filter; allows modifying the registration conditions for the `SavePostHandler` class (props [@s3rgiosan](https://github.com/s3rgiosan), [@dkotter](https://github.com/dkotter) via [#341](https://github.com/10up/classifai/pull/341)).
@@ -221,6 +238,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.7.3]: https://github.com/10up/classifai/compare/1.7.2...1.7.3
 [1.7.2]: https://github.com/10up/classifai/compare/1.7.1...1.7.2
 [1.7.1]: https://github.com/10up/classifai/compare/1.7.0...1.7.1
 [1.7.0]: https://github.com/10up/classifai/compare/1.6.0...1.7.0
