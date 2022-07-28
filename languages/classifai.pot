@@ -2,9 +2,9 @@
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.7.2\n"
+"Project-Id-Version: ClassifAI 1.7.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2022-06-27 21:23:16+00:00\n"
+"POT-Creation-Date: 2022-07-28 17:00:11+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -41,14 +41,35 @@ msgid ""
 "install</a> the stable version of ClassifAI instead."
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:58
-#: includes/Classifai/Admin/BulkActions.php:134
+#: includes/Classifai/Admin/BulkActions.php:68
+#: includes/Classifai/Admin/BulkActions.php:223
 msgid "Classify"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:95
-msgid "Classified %s post."
-msgid_plural "Classified %s posts."
+#: includes/Classifai/Admin/BulkActions.php:86
+msgid "Scan Image"
+msgstr ""
+
+#: includes/Classifai/Admin/BulkActions.php:90
+msgid "Smart Crop"
+msgstr ""
+
+#: includes/Classifai/Admin/BulkActions.php:168
+msgid "Classified"
+msgstr ""
+
+#: includes/Classifai/Admin/BulkActions.php:172
+msgid "Scanned"
+msgstr ""
+
+#: includes/Classifai/Admin/BulkActions.php:176
+msgid "Cropped"
+msgstr ""
+
+#: includes/Classifai/Admin/BulkActions.php:182
+#. translators: %1$s: action, %2$s: number of posts, %3$s: post type
+msgid "%1$s %2$s %3$s."
+msgid_plural "%1$s %2$s %3$ss."
 msgstr[0] ""
 msgstr[1] ""
 
@@ -67,6 +88,11 @@ msgstr ""
 msgid "ClassifAI requires setup"
 msgstr ""
 
+#: includes/Classifai/Admin/PreviewClassifierData.php:24
+#: includes/Classifai/Admin/PreviewClassifierData.php:57
+msgid "Failed nonce check."
+msgstr ""
+
 #: includes/Classifai/Providers/Azure/ComputerVision.php:212
 msgid "ClassifAI Image Processing"
 msgstr ""
@@ -80,7 +106,7 @@ msgid "No alt text? Rescan image"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:239
-#: includes/Classifai/Providers/Azure/ComputerVision.php:768
+#: includes/Classifai/Providers/Azure/ComputerVision.php:776
 msgid "Generate alt text"
 msgstr ""
 
@@ -123,11 +149,11 @@ msgstr ""
 msgid "In progress!"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:743
+#: includes/Classifai/Providers/Azure/ComputerVision.php:751
 msgid "Endpoint URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:751
+#: includes/Classifai/Providers/Azure/ComputerVision.php:759
 msgid ""
 "Supported protocol and hostname endpoints, e.g., "
 "<code>https://REGION.api.cognitive.microsoft.com</code> or "
@@ -135,126 +161,126 @@ msgid ""
 "different based on your setting choices in Azure."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:756
-#: includes/Classifai/Providers/Watson/NLU.php:200
-#: includes/Classifai/Providers/Watson/NLU.php:295
+#: includes/Classifai/Providers/Azure/ComputerVision.php:764
+#: includes/Classifai/Providers/Watson/NLU.php:234
+#: includes/Classifai/Providers/Watson/NLU.php:330
 msgid "API Key"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:776
+#: includes/Classifai/Providers/Azure/ComputerVision.php:784
 msgid "The alt text field will be filled out automatically."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:781
+#: includes/Classifai/Providers/Azure/ComputerVision.php:789
 msgid "Alt text confidence threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:789
+#: includes/Classifai/Providers/Azure/ComputerVision.php:797
 msgid ""
 "Minimum confidence score for automatically added alt text, numeric value "
 "from 0-100. Recommended to be set to at least 75."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:794
+#: includes/Classifai/Providers/Azure/ComputerVision.php:802
 msgid "Tag images"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:802
+#: includes/Classifai/Providers/Azure/ComputerVision.php:810
 msgid "Image tags will be added automatically."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:807
+#: includes/Classifai/Providers/Azure/ComputerVision.php:815
 msgid "Tag confidence threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:815
+#: includes/Classifai/Providers/Azure/ComputerVision.php:823
 msgid ""
 "Minimum confidence score for automatically added image tags, numeric value "
 "from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:826
+#: includes/Classifai/Providers/Azure/ComputerVision.php:834
 msgid "Tag taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:838
+#: includes/Classifai/Providers/Azure/ComputerVision.php:846
 msgid "Enable smart cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:846
+#: includes/Classifai/Providers/Azure/ComputerVision.php:854
 msgid ""
 "ComputerVision detects and saves the most visually interesting part of your "
 "image (i.e., faces, animals, notable text)."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:854
+#: includes/Classifai/Providers/Azure/ComputerVision.php:862
 msgid "Scan images for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:862
+#: includes/Classifai/Providers/Azure/ComputerVision.php:870
 msgid ""
 "OCR detects text in images (e.g., handwritten notes) and saves that as post "
 "content."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:870
+#: includes/Classifai/Providers/Azure/ComputerVision.php:878
 msgid "Enable scanning PDF"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:878
+#: includes/Classifai/Providers/Azure/ComputerVision.php:886
 msgid ""
 "Extract visible text from multi-pages PDF documents. Store the result as "
 "the attachment description."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:910
+#: includes/Classifai/Providers/Azure/ComputerVision.php:918
 msgid "Please enter your credentials"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1022
 msgid "Authenticated"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
-#: includes/Classifai/Providers/Watson/NLU.php:700
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1022
+#: includes/Classifai/Providers/Watson/NLU.php:735
 #: includes/Classifai/Services/ServicesManager.php:354
 msgid "yes"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1014
-#: includes/Classifai/Providers/Watson/NLU.php:700
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1022
+#: includes/Classifai/Providers/Watson/NLU.php:735
 #: includes/Classifai/Services/ServicesManager.php:354
 msgid "no"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1015
-#: includes/Classifai/Providers/Watson/NLU.php:267
-#: includes/Classifai/Providers/Watson/NLU.php:701
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1023
+#: includes/Classifai/Providers/Watson/NLU.php:302
+#: includes/Classifai/Providers/Watson/NLU.php:736
 msgid "API URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1016
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1024
 msgid "Caption threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1017
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1025
 msgid "Latest response - Image Scan"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1018
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1026
 msgid "Latest response - Smart Cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1019
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1027
 msgid "Latest response - OCR"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1032
-#: includes/Classifai/Providers/Watson/NLU.php:718
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1040
+#: includes/Classifai/Providers/Watson/NLU.php:753
 msgid "N/A"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1104
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1112
 msgid "Valid image size not found. Make sure the image is less than 4MB."
 msgstr ""
 
@@ -310,69 +336,77 @@ msgstr ""
 msgid "Please Choose"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:41
+#: includes/Classifai/Providers/Watson/NLU.php:42
+#: includes/Classifai/Services/Service.php:142
 msgid "Category"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:42
+#: includes/Classifai/Providers/Watson/NLU.php:43
 msgid "Category Threshold (%)"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:43
+#: includes/Classifai/Providers/Watson/NLU.php:44
 msgid "Category Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:48
+#: includes/Classifai/Providers/Watson/NLU.php:49
+#: includes/Classifai/Services/Service.php:147
 msgid "Keyword"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:49
+#: includes/Classifai/Providers/Watson/NLU.php:50
 msgid "Keyword Threshold (%)"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:50
+#: includes/Classifai/Providers/Watson/NLU.php:51
 msgid "Keyword Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:55
+#: includes/Classifai/Providers/Watson/NLU.php:56
+#: includes/Classifai/Services/Service.php:152
 msgid "Entity"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:56
+#: includes/Classifai/Providers/Watson/NLU.php:57
 msgid "Entity Threshold (%)"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:57
+#: includes/Classifai/Providers/Watson/NLU.php:58
 msgid "Entity Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:62
+#: includes/Classifai/Providers/Watson/NLU.php:63
+#: includes/Classifai/Services/Service.php:157
 msgid "Concept"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:63
+#: includes/Classifai/Providers/Watson/NLU.php:64
 msgid "Concept Threshold (%)"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:64
+#: includes/Classifai/Providers/Watson/NLU.php:65
 msgid "Concept Taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:199
+#: includes/Classifai/Providers/Watson/NLU.php:233
 msgid "API Password"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:201
-#: includes/Classifai/Providers/Watson/NLU.php:314
+#: includes/Classifai/Providers/Watson/NLU.php:235
+#: includes/Classifai/Providers/Watson/NLU.php:349
 msgid "Use an API Key instead?"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:202
-#: includes/Classifai/Providers/Watson/NLU.php:313
+#: includes/Classifai/Providers/Watson/NLU.php:236
+#: includes/Classifai/Providers/Watson/NLU.php:348
 msgid "Use a username/password instead?"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:218
+#: includes/Classifai/Providers/Watson/NLU.php:237
+msgid "Loading Preview"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:253
 msgid ""
 "Don't have an IBM Cloud account yet? <a title=\"Register for an IBM Cloud "
 "account\" href=\"%1$s\">Register for one</a> and set up a <a "
@@ -380,55 +414,63 @@ msgid ""
 "key."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:237
+#: includes/Classifai/Providers/Watson/NLU.php:272
 msgid ""
 "The `watsonplatform.net` endpoint URLs were retired on 26 May 2021. Please "
 "update the endpoint url. Check <a title=\"Deprecated Endpoint: "
 "watsonplatform.net\" href=\"%s\">here</a> for details."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:280
+#: includes/Classifai/Providers/Watson/NLU.php:315
 msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:343
+#: includes/Classifai/Providers/Watson/NLU.php:378
 msgid "Post Types to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:354
+#: includes/Classifai/Providers/Watson/NLU.php:389
 msgid "Post Statuses to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:505
+#: includes/Classifai/Providers/Watson/NLU.php:540
 msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:510
+#: includes/Classifai/Providers/Watson/NLU.php:545
 msgid "Enable"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:614
+#: includes/Classifai/Providers/Watson/NLU.php:649
 msgid "IBM Watson NLU Authentication Failed. Please check credentials."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:700
+#: includes/Classifai/Providers/Watson/NLU.php:735
 msgid "Configured"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:702
+#: includes/Classifai/Providers/Watson/NLU.php:737
 msgid "API username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:703
+#: includes/Classifai/Providers/Watson/NLU.php:738
 msgid "Post types"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:704
+#: includes/Classifai/Providers/Watson/NLU.php:739
 msgid "Features"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:705
+#: includes/Classifai/Providers/Watson/NLU.php:740
 msgid "Latest response"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:788
+msgid "ClassifAI Language Processing"
+msgstr ""
+
+#: includes/Classifai/Providers/Watson/NLU.php:813
+msgid "Process content on update"
 msgstr ""
 
 #: includes/Classifai/Services/ImageProcessing.php:55
@@ -467,6 +509,14 @@ msgstr ""
 
 #: includes/Classifai/Services/LanguageProcessing.php:14
 msgid "Language Processing"
+msgstr ""
+
+#: includes/Classifai/Services/Service.php:163
+msgid "Preview Language Processing"
+msgstr ""
+
+#: includes/Classifai/Services/Service.php:172
+msgid "Preview"
 msgstr ""
 
 #: includes/Classifai/Services/ServicesManager.php:134
