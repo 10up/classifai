@@ -224,7 +224,7 @@ const RecommendedContentBlockEdit = (props) => {
 						displayPostExcerpt,
 						numberOfItems,
 						taxQuery,
-						exclude: postId,
+						exclude: postId || 0,
 					}}
 				/>
 			)}

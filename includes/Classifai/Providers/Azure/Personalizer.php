@@ -280,6 +280,22 @@ class Personalizer extends Provider {
 			);
 		}
 
+		$action_ids = array_map(
+			function( $ele ) {
+				return $ele['id'];
+			},
+			$actions
+		);
+
+		// If actions are less than or equal to number of items we have to display, avoid call personalizer service.
+		$number_of_posts = isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3;
+		if ( count( $action_ids ) <= $number_of_posts ) {
+			return array(
+				'response' => (object) array(),
+				'actions'  => $action_ids,
+			);
+		}
+
 		// TODO: Add Location contextFeatures.
 		$rank_request = array(
 			'contextFeatures' => [
@@ -298,18 +314,17 @@ class Personalizer extends Provider {
 		$response = $this->personalizer_get_ranked_action( $rank_request );
 
 		if ( is_wp_error( $response ) ) {
-			// translators: %s - Error message.
-			return sprintf( __( 'Failed to contact Azure Cognitive Service Personalizer: %s', 'classifai' ) . $response->get_error_message() );
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log( __( 'Failed to contact Azure Cognitive Service Personalizer: ', 'classifai' ) . $response->get_error_message() );
+			return array(
+				'response' => (object) array(),
+				'actions'  => $action_ids,
+			);
 		}
 
 		return array(
 			'response' => $response,
-			'actions'  => array_map(
-				function( $ele ) {
-					return $ele['id'];
-				},
-				$actions
-			),
+			'actions'  => $action_ids,
 		);
 	}
 
@@ -346,7 +361,7 @@ class Personalizer extends Provider {
 		$number_of_posts = isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3;
 
 		if ( ! empty( $response ) && ! empty( $response->rewardActionId ) ) {
-			$rewarded_post = $response->rewardActionId;
+			$rewarded_post = absint( $response->rewardActionId );
 			$ranking       = $response->ranking ? $response->ranking : array();
 
 			// Sort ranking by probability.
@@ -359,7 +374,7 @@ class Personalizer extends Provider {
 
 			$recommended_ids = array_map(
 				function( $ele ) {
-					return $ele->id;
+					return absint( $ele->id );
 				},
 				$ranking
 			);
@@ -397,6 +412,7 @@ class Personalizer extends Provider {
 		$markup = '';
 		$args   = array(
 			'post__in'               => $recommended_ids,
+			'post_type'              => $attributes['contentPostType'],
 			'posts_per_page'         => $number_of_posts,
 			'orderby'                => 'post__in',
 			'no_found_rows'          => true,

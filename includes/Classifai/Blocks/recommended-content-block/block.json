@@ -45,6 +45,9 @@
     "displayLayout": {
       "type": "string",
       "default": "grid"
+    },
+    "exclude": {
+      "type": "number"
     }
   },
   "supports": {
