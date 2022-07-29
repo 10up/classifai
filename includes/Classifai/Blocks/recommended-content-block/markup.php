@@ -12,7 +12,7 @@
 
 // Excluded current page/post from the recommended content.
 if ( is_singular() ) {
-	$attributes['exclude'] = get_the_ID();
+	$attributes['excludeId'] = get_the_ID();
 }
 
 $attr_key = md5( maybe_serialize( $attributes ) );

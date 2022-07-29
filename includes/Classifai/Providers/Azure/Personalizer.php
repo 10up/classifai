@@ -270,8 +270,8 @@ class Personalizer extends Provider {
 		}
 
 		// Exclude post/page on which we are displaying the content.
-		if ( ! empty( $attributes['exclude'] ) ) {
-			$exclude = $attributes['exclude'];
+		if ( ! empty( $attributes['excludeId'] ) ) {
+			$exclude = $attributes['excludeId'];
 			$actions = array_filter(
 				$actions,
 				function( $ele ) use ( $exclude ) {

@@ -46,7 +46,7 @@
       "type": "string",
       "default": "grid"
     },
-    "exclude": {
+    "excludeId": {
       "type": "number"
     }
   },
