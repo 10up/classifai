@@ -49,6 +49,8 @@ The service that powers ClassifAI's Language Processing, IBM Watson's Natural La
 
 The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
+The service that powers ClassifAI's Recommended Content, Microsoft Azure's Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
+
 ## Installation
 
 #### 1. Download or Clone this repo, install dependencies and build.
@@ -138,6 +140,29 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
+
+## Set Up Recommended content (via Microsoft Azure Personalizer)
+Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to enable Personalizer learn effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
+
+
+#### 1. Sign up for Azure services
+- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+- Log into your account and create a new [Personalizer resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer).
+- Enter your service name, select a subscription, location, pricing tier, and resource group.
+- Select **Create** to create the resource.
+- After your resource has deployed, select the **Go to Resource** button to go to your Personalizer resource.
+- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+
+For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
+
+#### 2. Configure Microsoft Azure API and Key under ClassifAI > Recommended Content
+
+- In the `Endpoint URL` field, enter your `API endpoint`.
+- In the `API Key` field, enter your `KEY 1`.
+
+#### 3. Use "Recommended content" block to display recommended content on your website.
+
 
 ## WP CLI Commands
 
