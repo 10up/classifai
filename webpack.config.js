@@ -5,23 +5,29 @@ module.exports = {
 	...defaultConfig,
 	output: {
 		...defaultConfig.output,
-		path: path.resolve(process.cwd(), 'dist'),
+		path: path.resolve(__dirname, 'dist'),
 	},
 	entry: {
-		editor: path.resolve(process.cwd(), 'src/js', 'editor.js'),
-		'editor-ocr': path.resolve(process.cwd(), 'src/js', 'editor-ocr.js'),
-		media: path.resolve(process.cwd(), 'src/js', 'media.js'),
-		admin: path.resolve(process.cwd(), 'src/js', 'admin.js'),
-		'gutenberg-plugin': path.resolve(process.cwd(), 'src/js', 'gutenberg-plugin.js'),
-		'recommended-content-block': path.resolve(
-			process.cwd(),
-			'includes/Classifai/Blocks/recommended-content-block',
-			'index.js'
-		),
-		'recommended-content-block-frontend': path.resolve(
-			process.cwd(),
-			'includes/Classifai/Blocks/recommended-content-block',
-			'frontend.js'
-		),
+		editor: [ './src/js/editor.js'],
+		'editor-ocr': [ './src/js/editor-ocr.js'],
+		media: [ './src/js/media.js'],
+		admin: [ './src/js/admin.js'],
+		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js'],
+		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
+		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
+	},
+	module: {
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.svg$/,
+				use: [{
+					loader: 'svg-react-loader'
+				}]
+			}
+		],
+	},
+	externals: {
+		react: 'React'
 	},
 };
