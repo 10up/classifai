@@ -24,27 +24,30 @@ const insertIcon = <span className="dashicons dashicons-editor-paste-text" />;
  *
  * @param {number} imageId - Image ID.
  */
-const getImageOcrScannedText = async (imageId) => {
-	const media = await apiFetch({ path: `/wp/v2/media/${imageId}` });
+const getImageOcrScannedText = async ( imageId ) => {
+	const media = await apiFetch( { path: `/wp/v2/media/${ imageId }` } );
 
 	if (
-		!Object.prototype.hasOwnProperty.call(media, 'classifai_has_ocr') ||
-		!media.classifai_has_ocr
+		! Object.prototype.hasOwnProperty.call( media, 'classifai_has_ocr' ) ||
+		! media.classifai_has_ocr
 	) {
 		return false;
 	}
 
 	if (
-		!Object.prototype.hasOwnProperty.call(media, 'description') ||
-		!Object.prototype.hasOwnProperty.call(media.description, 'rendered') ||
-		!media.description.rendered
+		! Object.prototype.hasOwnProperty.call( media, 'description' ) ||
+		! Object.prototype.hasOwnProperty.call(
+			media.description,
+			'rendered'
+		) ||
+		! media.description.rendered
 	) {
 		return false;
 	}
 
 	return media.description.rendered
-		.replace(/(<([^>]+)>)/gi, '')
-		.replace(/(\r\n|\n|\r)/gm, '')
+		.replace( /(<([^>]+)>)/gi, '' )
+		.replace( /(\r\n|\n|\r)/gm, '' )
 		.trim();
 };
 
@@ -55,26 +58,26 @@ const getImageOcrScannedText = async (imageId) => {
  * @param {number} imageId     - Image ID.
  * @param {string} scannedText - Text to insert to editor.
  */
-const insertOcrScannedText = async (clientId, imageId, scannedText) => {
-	if (!scannedText) {
+const insertOcrScannedText = async ( clientId, imageId, scannedText ) => {
+	if ( ! scannedText ) {
 		return;
 	}
 
-	const { getBlockIndex } = select('core/block-editor');
-	const groupBlock = createBlock('core/group', {
-		anchor: `classifai-ocr-${imageId}`,
+	const { getBlockIndex } = select( 'core/block-editor' );
+	const groupBlock = createBlock( 'core/group', {
+		anchor: `classifai-ocr-${ imageId }`,
 		className: 'is-style-classifai-ocr-text',
-	});
+	} );
 
-	const textBlock = createBlock('core/paragraph', {
+	const textBlock = createBlock( 'core/paragraph', {
 		content: scannedText,
-	});
+	} );
 
-	await dispatch('core/block-editor').insertBlock(
+	await dispatch( 'core/block-editor' ).insertBlock(
 		groupBlock,
-		getBlockIndex(clientId) + 1
+		getBlockIndex( clientId ) + 1
 	);
-	dispatch('core/block-editor').insertBlock(
+	dispatch( 'core/block-editor' ).insertBlock(
 		textBlock,
 		0,
 		groupBlock.clientId
@@ -88,115 +91,115 @@ const insertOcrScannedText = async (clientId, imageId, scannedText) => {
  * @param {Array}  blocks  - Current blocks of current post.
  * @return {boolean} Whether the current post has an OCR block.
  */
-const hasOcrBlock = (imageId, blocks = []) => {
-	if (blocks.length === 0) {
-		const { getBlocks } = select('core/block-editor');
+const hasOcrBlock = ( imageId, blocks = [] ) => {
+	if ( blocks.length === 0 ) {
+		const { getBlocks } = select( 'core/block-editor' );
 		// eslint-disable-next-line no-param-reassign
 		blocks = getBlocks();
 	}
-	return !!find(
+	return !! find(
 		blocks,
-		(block) => block.attributes.anchor === `classifai-ocr-${imageId}`
+		( block ) => block.attributes.anchor === `classifai-ocr-${ imageId }`
 	);
 };
 
 /**
  * Add insert button to toolbar.
  */
-const imageOcrControl = createHigherOrderComponent((BlockEdit) => {
+const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => {
 	// eslint-disable-line no-unused-vars
-	return (props) => {
-		const [isModalOpen, setModalOpen] = useState(false);
+	return ( props ) => {
+		const [ isModalOpen, setModalOpen ] = useState( false );
 		const { attributes, clientId, isSelected, name, setAttributes } = props;
 
-		if (!isSelected || name != 'core/image') {
-			return <BlockEdit {...props} />;
+		if ( ! isSelected || name != 'core/image' ) {
+			return <BlockEdit { ...props } />;
 		}
 
-		if (!attributes.ocrChecked && attributes.id) {
-			getImageOcrScannedText(attributes.id).then((data) => {
-				if (data) {
-					setAttributes({
+		if ( ! attributes.ocrChecked && attributes.id ) {
+			getImageOcrScannedText( attributes.id ).then( ( data ) => {
+				if ( data ) {
+					setAttributes( {
 						ocrScannedText: data,
 						ocrChecked: true,
-					});
-					setModalOpen(true);
+					} );
+					setModalOpen( true );
 				} else {
-					setAttributes({
+					setAttributes( {
 						ocrChecked: true,
-					});
+					} );
 				}
-			});
+			} );
 		}
 
 		return (
 			<Fragment>
-				<BlockEdit {...props} />
-				{attributes.ocrScannedText && (
+				<BlockEdit { ...props } />
+				{ attributes.ocrScannedText && (
 					<BlockControls>
 						<ToolbarGroup>
 							<ToolbarButton
-								label={__(
+								label={ __(
 									'Insert scanned text into content',
 									'classifai'
-								)}
-								icon={insertIcon}
-								onClick={() =>
+								) }
+								icon={ insertIcon }
+								onClick={ () =>
 									insertOcrScannedText(
 										clientId,
 										attributes.id,
 										attributes.ocrScannedText
 									)
 								}
-								disabled={hasOcrBlock(attributes.id)}
+								disabled={ hasOcrBlock( attributes.id ) }
 							/>
 						</ToolbarGroup>
 					</BlockControls>
-				)}
-				{isModalOpen && (
+				) }
+				{ isModalOpen && (
 					<Modal
-						title={__(
+						title={ __(
 							'ClassifAI detected text in your image',
 							'classifai'
-						)}
+						) }
 					>
 						<p>
-							{__(
+							{ __(
 								'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.',
 								'classifai'
-							)}
+							) }
 						</p>
 						<Flex align="flex-end" justify="flex-end">
 							<FlexItem>
 								<Button
 									isPrimary
-									onClick={() => {
+									onClick={ () => {
 										insertOcrScannedText(
 											clientId,
 											attributes.id,
 											attributes.ocrScannedText
 										);
-										setModalOpen(false);
-									}}
+										setModalOpen( false );
+									} }
 								>
-									{__('Insert text', 'classifai')}
+									{ __( 'Insert text', 'classifai' ) }
 								</Button>
 							</FlexItem>
 							<FlexItem>
 								<Button
 									isSecondary
-									onClick={() => setModalOpen(false)}
+									onClick={ () => setModalOpen( false ) }
 								>
-									{__('Dismiss', 'classifai')}
+									{ __( 'Dismiss', 'classifai' ) }
 								</Button>
 							</FlexItem>
 						</Flex>
 					</Modal>
-				)}
+				) }
 			</Fragment>
 		);
 	};
-}, 'imageOcrControl');
+}, 'imageOcrControl' );
 
 addFilter(
 	'editor.BlockEdit',
@@ -211,12 +214,12 @@ addFilter(
  * @param {string} name     - Block name.
  * @return {Object} Updated Block settings.
  */
-const modifyImageAttributes = (settings, name) => {
-	if (name !== 'core/image') {
+const modifyImageAttributes = ( settings, name ) => {
+	if ( name !== 'core/image' ) {
 		return settings;
 	}
 
-	if (settings.attributes) {
+	if ( settings.attributes ) {
 		settings.attributes.ocrScannedText = {
 			type: 'string',
 			default: '',
@@ -235,10 +238,10 @@ addFilter(
 	modifyImageAttributes
 );
 
-wp.blocks.registerBlockStyle('core/group', {
+wp.blocks.registerBlockStyle( 'core/group', {
 	name: 'classifai-ocr-text',
-	label: __('Scanned Text from Image', 'classifai'),
-});
+	label: __( 'Scanned Text from Image', 'classifai' ),
+} );
 
 {
 	/**
@@ -248,13 +251,13 @@ wp.blocks.registerBlockStyle('core/group', {
 	let activeBlocks = [];
 
 	subscribe(
-		debounce(() => {
-			const blockEditor = select('core/block-editor');
+		debounce( () => {
+			const blockEditor = select( 'core/block-editor' );
 			const selectedBlock = blockEditor.getSelectedBlock();
 			const blocks = blockEditor.getBlocks();
 
 			// If no selected block, return early and if needed, remove classes
-			if (selectedBlock === null) {
+			if ( selectedBlock === null ) {
 				maybeClearCss();
 				previousSelectedBlock = selectedBlock;
 
@@ -264,7 +267,7 @@ wp.blocks.registerBlockStyle('core/group', {
 			// If the current selected block is the same as previously or the current block is styled, return early
 			if (
 				selectedBlock === previousSelectedBlock ||
-				activeBlocks.includes(selectedBlock.clientId)
+				activeBlocks.includes( selectedBlock.clientId )
 			) {
 				return;
 			}
@@ -273,16 +276,19 @@ wp.blocks.registerBlockStyle('core/group', {
 
 			previousSelectedBlock = selectedBlock;
 
-			if (selectedBlock.name === 'core/image') {
+			if ( selectedBlock.name === 'core/image' ) {
 				const ocrBlock = find(
 					blocks,
-					(block) =>
+					( block ) =>
 						block.attributes.anchor ===
-						`classifai-ocr-${selectedBlock.attributes.id}`
+						`classifai-ocr-${ selectedBlock.attributes.id }`
 				);
 
-				if (undefined !== ocrBlock) {
-					generateCss([ocrBlock.clientId, selectedBlock.clientId]);
+				if ( undefined !== ocrBlock ) {
+					generateCss( [
+						ocrBlock.clientId,
+						selectedBlock.clientId,
+					] );
 				}
 			} else {
 				const rootBlock = blockEditor.getBlock(
@@ -291,29 +297,29 @@ wp.blocks.registerBlockStyle('core/group', {
 					)
 				);
 
-				if (rootBlock.name === 'core/group') {
+				if ( rootBlock.name === 'core/group' ) {
 					let imageId = /classifai-ocr-([0-9]+)/.exec(
 						rootBlock.attributes.anchor
 					);
 
-					if (imageId !== null) {
-						[, imageId] = imageId;
+					if ( imageId !== null ) {
+						[ , imageId ] = imageId;
 
 						const imageBlock = find(
 							blocks,
-							(block) => block.attributes.id == imageId
+							( block ) => block.attributes.id == imageId
 						);
 
-						if (undefined !== imageBlock) {
-							generateCss([
+						if ( undefined !== imageBlock ) {
+							generateCss( [
 								imageBlock.clientId,
 								rootBlock.clientId,
-							]);
+							] );
 						}
 					}
 				}
 			}
-		}, 100)
+		}, 100 )
 	);
 
 	/**
@@ -322,10 +328,11 @@ wp.blocks.registerBlockStyle('core/group', {
 	 * @return {HTMLStyleElement} style.
 	 */
 	const createStyle = () => {
-		const head = document.head || document.getElementsByTagName('head')[0];
-		const style = document.createElement('style');
-		style.setAttribute('id', 'classifai-ocr-style');
-		head.appendChild(style);
+		const head =
+			document.head || document.getElementsByTagName( 'head' )[ 0 ];
+		const style = document.createElement( 'style' );
+		style.setAttribute( 'id', 'classifai-ocr-style' );
+		head.appendChild( style );
 		return style;
 	};
 
@@ -334,11 +341,13 @@ wp.blocks.registerBlockStyle('core/group', {
 	 *
 	 * @param {Array} ids Array of id.
 	 */
-	const generateCss = (ids) => {
+	const generateCss = ( ids ) => {
 		const style =
-			document.getElementById('classifai-ocr-style') ?? createStyle();
-		const selectors = ids.map((id) => `#block-${id}:before`).join(', ');
-		const css = `${selectors} {
+			document.getElementById( 'classifai-ocr-style' ) ?? createStyle();
+		const selectors = ids
+			.map( ( id ) => `#block-${ id }:before` )
+			.join( ', ' );
+		const css = `${ selectors } {
 			content: "";
 			position: absolute;
 			display: block;
@@ -350,7 +359,7 @@ wp.blocks.registerBlockStyle('core/group', {
 			opacity: 0.25;
 		}`;
 
-		style.appendChild(document.createTextNode(css));
+		style.appendChild( document.createTextNode( css ) );
 		activeBlocks = ids;
 	};
 
@@ -358,13 +367,13 @@ wp.blocks.registerBlockStyle('core/group', {
 	 * Clear generated CSS.
 	 */
 	const maybeClearCss = () => {
-		if (activeBlocks.length === 0) {
+		if ( activeBlocks.length === 0 ) {
 			return;
 		}
 
-		const style = document.getElementById('classifai-ocr-style');
+		const style = document.getElementById( 'classifai-ocr-style' );
 
-		if (style) {
+		if ( style ) {
 			style.innerText = '';
 		}
 

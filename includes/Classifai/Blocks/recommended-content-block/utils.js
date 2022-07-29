@@ -9,13 +9,13 @@ import { store as coreStore } from '@wordpress/core-data';
  * @param {object[]} entities The entities to extract of helper object.
  * @return {Object} The object with the entities information.
  */
-export const getEntitiesInfo = (entities) => {
+export const getEntitiesInfo = ( entities ) => {
 	const mapping = entities?.reduce(
-		(accumulator, entity) => {
+		( accumulator, entity ) => {
 			const { mapById, mapByName, names } = accumulator;
-			mapById[entity.id] = entity;
-			mapByName[entity.name] = entity;
-			names.push(entity.name);
+			mapById[ entity.id ] = entity;
+			mapByName[ entity.name ] = entity;
+			names.push( entity.name );
 			return accumulator;
 		},
 		{ mapById: {}, mapByName: {}, names: [] }
@@ -34,30 +34,30 @@ export const getEntitiesInfo = (entities) => {
  * @return {Object} The helper object related to post types.
  */
 export const usePostTypes = () => {
-	const postTypes = useSelect((select) => {
-		const { getPostTypes } = select(coreStore);
-		const excludedPostTypes = ['attachment'];
-		const filteredPostTypes = getPostTypes({ per_page: -1 })?.filter(
-			({ viewable, slug }) =>
-				viewable && !excludedPostTypes.includes(slug)
+	const postTypes = useSelect( ( select ) => {
+		const { getPostTypes } = select( coreStore );
+		const excludedPostTypes = [ 'attachment' ];
+		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
+			( { viewable, slug } ) =>
+				viewable && ! excludedPostTypes.includes( slug )
 		);
 		return filteredPostTypes;
-	}, []);
-	const postTypesTaxonomiesMap = useMemo(() => {
-		if (!postTypes?.length) return;
+	}, [] );
+	const postTypesTaxonomiesMap = useMemo( () => {
+		if ( ! postTypes?.length ) return;
 		// eslint-disable-next-line consistent-return
-		return postTypes.reduce((accumulator, type) => {
-			accumulator[type.slug] = type.taxonomies;
+		return postTypes.reduce( ( accumulator, type ) => {
+			accumulator[ type.slug ] = type.taxonomies;
 			return accumulator;
-		}, {});
-	}, [postTypes]);
+		}, {} );
+	}, [ postTypes ] );
 	const postTypesSelectOptions = useMemo(
 		() =>
-			(postTypes || []).map(({ labels, slug }) => ({
+			( postTypes || [] ).map( ( { labels, slug } ) => ( {
 				label: labels.singular_name,
 				value: slug,
-			})),
-		[postTypes]
+			} ) ),
+		[ postTypes ]
 	);
 	return { postTypesTaxonomiesMap, postTypesSelectOptions };
 };
@@ -68,18 +68,18 @@ export const usePostTypes = () => {
  * @param {string} postType The post type from which to retrieve the associated taxonomies.
  * @return {object[]} An array of the associated taxonomies.
  */
-export const useTaxonomies = (postType) => {
+export const useTaxonomies = ( postType ) => {
 	const taxonomies = useSelect(
-		(select) => {
-			const { getTaxonomies } = select(coreStore);
-			const filteredTaxonomies = getTaxonomies({
+		( select ) => {
+			const { getTaxonomies } = select( coreStore );
+			const filteredTaxonomies = getTaxonomies( {
 				type: postType,
 				per_page: -1,
 				context: 'view',
-			});
+			} );
 			return filteredTaxonomies;
 		},
-		[postType]
+		[ postType ]
 	);
 	return taxonomies;
 };

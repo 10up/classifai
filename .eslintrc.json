@@ -8,8 +8,9 @@
 		"expect": "readonly",
 		"it": "readonly",
 		"Cypress": "readonly",
-		"cy": "readonly"
+		"cy": "readonly",
+		"ajaxurl": "readonly",
+		"FormData": "readonly"
 	},
-	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
-	"ignorePatterns": ["**/vendor/**"]
+	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
 }

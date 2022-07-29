@@ -13,10 +13,10 @@ const termsPerPage = 100;
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
-const getTermIdByTermValue = (termsMappedByName, termValue) => {
+const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	// First we check for exact match by `term.id` or case sensitive `term.name` match.
-	const termId = termValue?.id || termsMappedByName[termValue]?.id;
-	if (termId) return termId;
+	const termId = termValue?.id || termsMappedByName[ termValue ]?.id;
+	if ( termId ) return termId;
 	/**
 	 * Here we make an extra check for entered terms in a non case sensitive way,
 	 * to match user expectations, due to `FormTokenField` behaviour that shows
@@ -28,68 +28,68 @@ const getTermIdByTermValue = (termsMappedByName, termValue) => {
 	 */
 	const termValueLower = termValue.toLocaleLowerCase();
 	// eslint-disable-next-line no-restricted-syntax
-	for (const term in termsMappedByName) {
-		if (term.toLocaleLowerCase() === termValueLower) {
-			return termsMappedByName[term].id;
+	for ( const term in termsMappedByName ) {
+		if ( term.toLocaleLowerCase() === termValueLower ) {
+			return termsMappedByName[ term ].id;
 		}
 	}
 };
 
-const TaxonomyControls = ({ onChange, query }) => {
-	const taxonomies = useTaxonomies(query.contentPostType);
+const TaxonomyControls = ( { onChange, query } ) => {
+	const taxonomies = useTaxonomies( query.contentPostType );
 	const taxonomiesInfo = useSelect(
-		(select) => {
-			const { getEntityRecords } = select(coreStore);
+		( select ) => {
+			const { getEntityRecords } = select( coreStore );
 			const termsQuery = { per_page: termsPerPage };
-			const _taxonomiesInfo = taxonomies?.map(({ slug, name }) => {
-				const _terms = getEntityRecords('taxonomy', slug, termsQuery);
+			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
+				const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
 				return {
 					slug,
 					name,
-					terms: getEntitiesInfo(_terms),
+					terms: getEntitiesInfo( _terms ),
 				};
-			});
+			} );
 			return _taxonomiesInfo;
 		},
-		[taxonomies]
+		[ taxonomies ]
 	);
-	const onTermsChange = (taxonomySlug) => (newTermValues) => {
+	const onTermsChange = ( taxonomySlug ) => ( newTermValues ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
-			({ slug }) => slug === taxonomySlug
+			( { slug } ) => slug === taxonomySlug
 		);
-		if (!taxonomyInfo) return;
+		if ( ! taxonomyInfo ) return;
 		const termIds = Array.from(
-			newTermValues.reduce((accumulator, termValue) => {
+			newTermValues.reduce( ( accumulator, termValue ) => {
 				const termId = getTermIdByTermValue(
 					taxonomyInfo.terms.mapByName,
 					termValue
 				);
-				if (termId) accumulator.add(termId);
+				if ( termId ) accumulator.add( termId );
 				return accumulator;
-			}, new Set())
+			}, new Set() )
 		);
 		const newTaxQuery = {
 			...query.taxQuery,
-			[taxonomySlug]: termIds,
+			[ taxonomySlug ]: termIds,
 		};
-		onChange({ taxQuery: newTaxQuery });
+		onChange( { taxQuery: newTaxQuery } );
 	};
 	// Returns only the existing term ids in proper format to be
 	// used in `FormTokenField`. This prevents the component from
 	// crashing in the editor, when non existing term ids were provided.
-	const getExistingTaxQueryValue = (taxonomySlug) => {
+	const getExistingTaxQueryValue = ( taxonomySlug ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
-			({ slug }) => slug === taxonomySlug
+			( { slug } ) => slug === taxonomySlug
 		);
-		if (!taxonomyInfo) return [];
-		return (query.taxQuery?.[taxonomySlug] || []).reduce(
-			(accumulator, termId) => {
-				const term = taxonomyInfo.terms.mapById[termId];
-				if (term) {
-					accumulator.push({
+		if ( ! taxonomyInfo ) return [];
+		return ( query.taxQuery?.[ taxonomySlug ] || [] ).reduce(
+			( accumulator, termId ) => {
+				const term = taxonomyInfo.terms.mapById[ termId ];
+				if ( term ) {
+					accumulator.push( {
 						id: termId,
 						value: term.name,
-					});
+					} );
 				}
 				return accumulator;
 			},
@@ -99,21 +99,21 @@ const TaxonomyControls = ({ onChange, query }) => {
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
-			{!!taxonomiesInfo?.length &&
-				taxonomiesInfo.map(({ slug, name, terms }) => {
-					if (!terms?.names?.length) {
+			{ !! taxonomiesInfo?.length &&
+				taxonomiesInfo.map( ( { slug, name, terms } ) => {
+					if ( ! terms?.names?.length ) {
 						return null;
 					}
 					return (
 						<FormTokenField
-							key={slug}
-							label={name}
-							value={getExistingTaxQueryValue(slug)}
-							suggestions={terms.names}
-							onChange={onTermsChange(slug)}
+							key={ slug }
+							label={ name }
+							value={ getExistingTaxQueryValue( slug ) }
+							suggestions={ terms.names }
+							onChange={ onTermsChange( slug ) }
 						/>
 					);
-				})}
+				} ) }
 		</>
 	);
 };

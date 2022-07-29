@@ -23,8 +23,8 @@ import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 /**
  * Register block
  */
-registerBlockType(block.name, {
-	title: __('Recommended Content', 'classifai'),
+registerBlockType( block.name, {
+	title: __( 'Recommended Content', 'classifai' ),
 	description: __(
 		'Display Recommended content from Azure Personalizer',
 		'classifai'
@@ -32,4 +32,4 @@ registerBlockType(block.name, {
 	edit,
 	save,
 	icon,
-});
+} );

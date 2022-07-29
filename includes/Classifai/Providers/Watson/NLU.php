@@ -220,14 +220,23 @@ class NLU extends Provider {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-admin',
+			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
 			[],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
+
+		wp_enqueue_style(
+			'classifai-admin-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
+		);
+
 		wp_localize_script(
-			'classifai-admin',
+			'classifai-admin-script',
 			'ClassifAI',
 			[
 				'api_password'    => __( 'API Password', 'classifai' ),

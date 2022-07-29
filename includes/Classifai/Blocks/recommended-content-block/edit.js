@@ -39,7 +39,7 @@ import { usePostTypes } from './utils';
  * @param {Function} props.setAttributes                     Sets the value for block attributes.
  * @return {Function} Render the edit screen
  */
-const RecommendedContentBlockEdit = (props) => {
+const RecommendedContentBlockEdit = ( props ) => {
 	const maxPostColumns = 6;
 	const maxNumberOfItems = 50;
 	const { attributes, setAttributes } = props;
@@ -55,165 +55,167 @@ const RecommendedContentBlockEdit = (props) => {
 		displayPostExcerpt,
 		addLinkToFeaturedImage,
 	} = attributes;
-	const postId = useSelect((select) =>
-		select('core/editor').getCurrentPostId()
+	const postId = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostId()
 	);
 	const blockProps = useBlockProps();
 	const { postTypesTaxonomiesMap, postTypesSelectOptions } = usePostTypes();
-	const onPostTypeChange = (newValue) => {
+	const onPostTypeChange = ( newValue ) => {
 		const updateQuery = { contentPostType: newValue };
 		// We need to dynamically update the `taxQuery` property,
 		// by removing any not supported taxonomies from the query.
-		const supportedTaxonomies = postTypesTaxonomiesMap[newValue];
-		const updatedTaxQuery = Object.entries(taxQuery || {}).reduce(
-			(accumulator, [taxonomySlug, terms]) => {
-				if (supportedTaxonomies.includes(taxonomySlug)) {
-					accumulator[taxonomySlug] = terms;
+		const supportedTaxonomies = postTypesTaxonomiesMap[ newValue ];
+		const updatedTaxQuery = Object.entries( taxQuery || {} ).reduce(
+			( accumulator, [ taxonomySlug, terms ] ) => {
+				if ( supportedTaxonomies.includes( taxonomySlug ) ) {
+					accumulator[ taxonomySlug ] = terms;
 				}
 				return accumulator;
 			},
 			{}
 		);
 		// eslint-disable-next-line no-extra-boolean-cast
-		updateQuery.taxQuery = !!Object.keys(updatedTaxQuery).length
+		updateQuery.taxQuery = !! Object.keys( updatedTaxQuery ).length
 			? updatedTaxQuery
 			: undefined;
-		setAttributes(updateQuery);
+		setAttributes( updateQuery );
 	};
 
 	const layoutControls = [
 		{
 			icon: list,
-			title: __('List view', 'classifai'),
-			onClick: () => setAttributes({ displayLayout: 'list' }),
+			title: __( 'List view', 'classifai' ),
+			onClick: () => setAttributes( { displayLayout: 'list' } ),
 			isActive: displayLayout === 'list',
 		},
 		{
 			icon: grid,
-			title: __('Grid view'),
-			onClick: () => setAttributes({ displayLayout: 'grid' }),
+			title: __( 'Grid view' ),
+			onClick: () => setAttributes( { displayLayout: 'grid' } ),
 			isActive: displayLayout === 'grid',
 		},
 	];
 
 	return (
-		<div {...blockProps}>
+		<div { ...blockProps }>
 			<BlockControls>
-				<ToolbarGroup controls={layoutControls} />
+				<ToolbarGroup controls={ layoutControls } />
 			</BlockControls>
 			<InspectorControls>
 				<PanelBody
-					title={__('Recommended Content Filters', 'classifai')}
+					title={ __( 'Recommended Content Filters', 'classifai' ) }
 				>
-					{postTypesSelectOptions && (
+					{ postTypesSelectOptions && (
 						<SelectControl
-							label={__('Post type', 'classifai')}
-							value={contentPostType}
-							options={postTypesSelectOptions}
-							onChange={onPostTypeChange}
+							label={ __( 'Post type', 'classifai' ) }
+							value={ contentPostType }
+							options={ postTypesSelectOptions }
+							onChange={ onPostTypeChange }
 						/>
-					)}
-					{postTypesSelectOptions && (
+					) }
+					{ postTypesSelectOptions && (
 						<TaxonomyControls
-							onChange={setAttributes}
-							query={attributes}
+							onChange={ setAttributes }
+							query={ attributes }
 						/>
-					)}
+					) }
 				</PanelBody>
 
-				<PanelBody title={__('Settings', 'classifai')}>
+				<PanelBody title={ __( 'Settings', 'classifai' ) }>
 					<RangeControl
-						label={__('Number of items', 'classifai')}
-						value={numberOfItems}
-						onChange={(value) =>
-							setAttributes({ numberOfItems: value })
+						label={ __( 'Number of items', 'classifai' ) }
+						value={ numberOfItems }
+						onChange={ ( value ) =>
+							setAttributes( { numberOfItems: value } )
 						}
-						min={1}
-						max={maxNumberOfItems}
+						min={ 1 }
+						max={ maxNumberOfItems }
 						required
 					/>
-					{displayLayout === 'grid' && (
+					{ displayLayout === 'grid' && (
 						<RangeControl
-							label={__('Columns', 'classifai')}
-							value={columns}
-							onChange={(value) =>
-								setAttributes({ columns: value })
+							label={ __( 'Columns', 'classifai' ) }
+							value={ columns }
+							onChange={ ( value ) =>
+								setAttributes( { columns: value } )
 							}
-							min={2}
-							max={maxPostColumns}
+							min={ 2 }
+							max={ maxPostColumns }
 							required
 						/>
-					)}
+					) }
 				</PanelBody>
 
-				<PanelBody title={__('Post content settings', 'classifai')}>
+				<PanelBody title={ __( 'Post content settings', 'classifai' ) }>
 					<ToggleControl
-						label={__('Post excerpt', 'classifai')}
-						checked={displayPostExcerpt}
-						onChange={(value) =>
-							setAttributes({ displayPostExcerpt: value })
-						}
-					/>
-				</PanelBody>
-
-				<PanelBody title={__('Post meta settings', 'classifai')}>
-					<ToggleControl
-						label={__('Display author name', 'classifai')}
-						checked={displayAuthor}
-						onChange={(value) =>
-							setAttributes({ displayAuthor: value })
-						}
-					/>
-					<ToggleControl
-						label={__('Display post date', 'classifai')}
-						checked={displayPostDate}
-						onChange={(value) =>
-							setAttributes({ displayPostDate: value })
+						label={ __( 'Post excerpt', 'classifai' ) }
+						checked={ displayPostExcerpt }
+						onChange={ ( value ) =>
+							setAttributes( { displayPostExcerpt: value } )
 						}
 					/>
 				</PanelBody>
 
-				<PanelBody title={__('Featured image settings', 'classifai')}>
+				<PanelBody title={ __( 'Post meta settings', 'classifai' ) }>
 					<ToggleControl
-						label={__('Display featured image', 'classifai')}
-						checked={displayFeaturedImage}
-						onChange={(value) =>
-							setAttributes({ displayFeaturedImage: value })
+						label={ __( 'Display author name', 'classifai' ) }
+						checked={ displayAuthor }
+						onChange={ ( value ) =>
+							setAttributes( { displayAuthor: value } )
 						}
 					/>
-					{displayFeaturedImage && (
+					<ToggleControl
+						label={ __( 'Display post date', 'classifai' ) }
+						checked={ displayPostDate }
+						onChange={ ( value ) =>
+							setAttributes( { displayPostDate: value } )
+						}
+					/>
+				</PanelBody>
+
+				<PanelBody
+					title={ __( 'Featured image settings', 'classifai' ) }
+				>
+					<ToggleControl
+						label={ __( 'Display featured image', 'classifai' ) }
+						checked={ displayFeaturedImage }
+						onChange={ ( value ) =>
+							setAttributes( { displayFeaturedImage: value } )
+						}
+					/>
+					{ displayFeaturedImage && (
 						<ToggleControl
-							label={__(
+							label={ __(
 								'Add link to featured image',
 								'classifai'
-							)}
-							checked={addLinkToFeaturedImage}
-							onChange={(value) =>
-								setAttributes({
+							) }
+							checked={ addLinkToFeaturedImage }
+							onChange={ ( value ) =>
+								setAttributes( {
 									addLinkToFeaturedImage: value,
-								})
+								} )
 							}
 						/>
-					)}
+					) }
 				</PanelBody>
 			</InspectorControls>
 
-			{!contentPostType && (
+			{ ! contentPostType && (
 				<Placeholder
-					label={__('ClassifAI Recommended Content', 'classifai')}
+					label={ __( 'ClassifAI Recommended Content', 'classifai' ) }
 				>
 					<p>
-						{__(
+						{ __(
 							'Please select Post type for this Recommended Content block on the sidebar settings.',
 							'classifai'
-						)}
+						) }
 					</p>
 				</Placeholder>
-			)}
-			{contentPostType && (
+			) }
+			{ contentPostType && (
 				<ServerSideRender
 					block="classifai/recommended-content-block"
-					attributes={{
+					attributes={ {
 						addLinkToFeaturedImage,
 						columns,
 						contentPostType,
@@ -225,9 +227,9 @@ const RecommendedContentBlockEdit = (props) => {
 						numberOfItems,
 						taxQuery,
 						exclude: postId || 0,
-					}}
+					} }
 				/>
-			)}
+			) }
 		</div>
 	);
 };
