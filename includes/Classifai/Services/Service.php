@@ -160,6 +160,8 @@ abstract class Service {
 							),
 						);
 						?>
+
+					<?php if ( 'watson_nlu' === $active_tab ) : ?>
 					<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
 					<div id="classifai-post-preview-controls">
 						<select id="classifai-preview-post-selector">
@@ -179,6 +181,7 @@ abstract class Service {
 							</div>
 						<?php endforeach; ?>
 					</div>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
