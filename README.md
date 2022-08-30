@@ -14,6 +14,7 @@
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
@@ -28,6 +29,7 @@
 * Automatically generate alt text and image tags for images
 * Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/computervision/3.1/generate-thumbnail/generate-thumbnail) around a region of interest identified by Computer Vision
+* BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 | Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
@@ -141,11 +143,12 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
-## Set Up Recommended content (via Microsoft Azure Personalizer)
-Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to enable Personalizer learn effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
+## Set Up Recommended Content (via Microsoft Azure Personalizer)
 
+Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to ensure Personalizer learns effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
 
 #### 1. Sign up for Azure services
+
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
 - Log into your account and create a new [Personalizer resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer).
 - Enter your service name, select a subscription, location, pricing tier, and resource group.
@@ -158,11 +161,10 @@ For more information, see https://docs.microsoft.com/en-us/azure/cognitive-servi
 
 #### 2. Configure Microsoft Azure API and Key under ClassifAI > Recommended Content
 
-- In the `Endpoint URL` field, enter your `API endpoint`.
-- In the `API Key` field, enter your `KEY 1`.
+- In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
+- In the `API Key` field, enter your `KEY 1` from Step 1 above.
 
-#### 3. Use "Recommended content" block to display recommended content on your website.
-
+#### 3. Use "Recommended Content" block to display recommended content on your website.
 
 ## WP CLI Commands
 
