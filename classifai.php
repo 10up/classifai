@@ -26,7 +26,7 @@ register_activation_hook(
 				sprintf(
 					wp_kses(
 						/* translators: PHP Update guide URL */
-						__( 'ClassifAI requires PHP version 7.2 <a href="%s">Click here</a> to learn how to update your PHP version.', 'classifai' ),
+						__( 'ClassifAI requires PHP version 7.2. <a href="%s">Click here</a> to learn how to update your PHP version.', 'classifai' ),
 						array(
 							'a' => array( 'href' => array() ),
 						)
