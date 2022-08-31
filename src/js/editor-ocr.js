@@ -165,7 +165,7 @@ const imageOcrControl = createHigherOrderComponent( ( BlockEdit ) => {
 					>
 						<p>
 							{ __(
-								'Would you like you insert the scanned text under this image block? This enhances search indexing and accessibility for readers.',
+								'Would you like to insert the scanned text under this image block? This enhances search indexing and accessibility for your readers.',
 								'classifai'
 							) }
 						</p>
