@@ -1,6 +1,6 @@
 <?php
 /**
- * Classifai Blocks setup
+ * ClassifAI Blocks setup
  *
  * @package Classifai
  */
