@@ -1,6 +1,6 @@
 <?php
 /**
- * Service definition for Language Processing
+ * Service definition for Recommended Content
  */
 
 namespace Classifai\Services;
@@ -32,7 +32,7 @@ class Personalizer extends Service {
 	}
 
 	/**
-	 * Render Recommended content over AJAX.
+	 * Render Recommended Content over AJAX.
 	 *
 	 * @return void
 	 */
