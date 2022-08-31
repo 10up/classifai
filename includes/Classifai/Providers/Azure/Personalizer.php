@@ -529,7 +529,7 @@ class Personalizer extends Provider {
 		/**
 		 * Filter the recommended content block markup
 		 *
-		 * @since 2.0.0
+		 * @since 1.8.0
 		 * @hook classifai_recommended_block_markup
 		 *
 		 * @param {string} $final_markup HTML Markup of recommended content block.
@@ -610,7 +610,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Get Ranked action by sending request to Azure personalizer.
+	 * Get Ranked action by sending request to Azure Personalizer.
 	 *
 	 * @param array $rank_request Prepared Request data.
 	 * @return object|string
