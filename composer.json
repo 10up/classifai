@@ -39,8 +39,7 @@
   },
   "archive": {
     "exclude": [
-      "!/vendor/yahnis-elsts",
-      "!/vendor/ua-parser"
+      "!/vendor/"
     ]
   }
 }

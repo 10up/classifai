@@ -9,7 +9,7 @@ node_modules export-ignore
 release export-ignore
 src export-ignore
 tests export-ignore
-vendor export-ignore
+# vendor export-ignore # do not ignore.
 
 # Files
 .babelrc export-ignore
