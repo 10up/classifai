@@ -32,9 +32,13 @@
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
-| :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.") |
+| Language Processing - Tagging | Recommended Content |
+| :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") |
+
+| Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
+| :-: | :-: | :-: |
+| ![Screenshot of ClassifAI alt-text](assets/img/screenshot-3.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](assets/img/screenshot-4.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](assets/img/screenshot-5.png "Example of an image with Azure Image Tagging.") |
 
 ## Requirements
 
@@ -77,7 +81,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
-![Screenshot of registration settings](assets/img/screenshot-1.png "Example of an empty ClassifAI Settings registration screen.")
+![Screenshot of registration settings](assets/img/screenshot-6.png "Example of an empty ClassifAI Settings registration screen.")
 
 ## Set Up Language Processing (via IBM Watson)
 
