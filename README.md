@@ -14,6 +14,7 @@
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
@@ -28,15 +29,20 @@
 * Automatically generate alt text and image tags for images
 * Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/computervision/3.1/generate-thumbnail/generate-thumbnail) around a region of interest identified by Computer Vision
+* BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
-| :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-2.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI alt-text](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-alt-tag-generator.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/smart-cropping.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/image-tagging.png "Example of an image with Azure Image Tagging.") |
+| Language Processing - Tagging | Recommended Content |
+| :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") |
+
+| Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
+| :-: | :-: | :-: |
+| ![Screenshot of ClassifAI alt-text](assets/img/screenshot-3.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](assets/img/screenshot-4.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](assets/img/screenshot-5.png "Example of an image with Azure Image Tagging.") |
 
 ## Requirements
 
-* PHP 7.0+
+* PHP 7.2+
 * [WordPress](http://wordpress.org) 5.6+
 * To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
@@ -48,6 +54,8 @@ Note that there is no cost to using ClassifAI and that both IBM Watson and Micro
 The service that powers ClassifAI's Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
 The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+
+The service that powers ClassifAI's Recommended Content, Microsoft Azure's Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
 ## Installation
 
@@ -73,7 +81,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
 
-![Screenshot of registration settings](assets/img/screenshot-1.png "Example of an empty ClassifAI Settings registration screen.")
+![Screenshot of registration settings](assets/img/screenshot-6.png "Example of an empty ClassifAI Settings registration screen.")
 
 ## Set Up Language Processing (via IBM Watson)
 
@@ -138,6 +146,29 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
+
+## Set Up Recommended Content (via Microsoft Azure Personalizer)
+
+Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to ensure Personalizer learns effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
+
+#### 1. Sign up for Azure services
+
+- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+- Log into your account and create a new [Personalizer resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer).
+- Enter your service name, select a subscription, location, pricing tier, and resource group.
+- Select **Create** to create the resource.
+- After your resource has deployed, select the **Go to Resource** button to go to your Personalizer resource.
+- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+
+For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
+
+#### 2. Configure Microsoft Azure API and Key under ClassifAI > Recommended Content
+
+- In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
+- In the `API Key` field, enter your `KEY 1` from Step 1 above.
+
+#### 3. Use "Recommended Content" block to display recommended content on your website.
 
 ## WP CLI Commands
 

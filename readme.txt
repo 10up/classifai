@@ -3,7 +3,7 @@ Contributors:      10up
 Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
 Requires at least: 5.6
 Tested up to:      6.0
-Requires PHP:      7.0
+Requires PHP:      7.2
 Stable tag:        1.7.3
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,7 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 * Automatically generate alt text and image tags for images
 * Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/generatethumbnail) around a region of interest identified by Computer Vision
+* BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 **Requirements**

@@ -185,7 +185,7 @@ class NLU extends Provider {
 		global $post;
 		wp_enqueue_script(
 			'classifai-editor', // Handle.
-			CLASSIFAI_PLUGIN_URL . 'dist/js/editor.min.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
@@ -197,7 +197,7 @@ class NLU extends Provider {
 
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/js/gutenberg-plugin.min.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
 			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
@@ -220,14 +220,23 @@ class NLU extends Provider {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-admin',
-			CLASSIFAI_PLUGIN_URL . 'dist/js/admin.min.js',
+			'classifai-admin-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
 			[],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
+
+		wp_enqueue_style(
+			'classifai-admin-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
+		);
+
 		wp_localize_script(
-			'classifai-admin',
+			'classifai-admin-script',
 			'ClassifAI',
 			[
 				'api_password'    => __( 'API Password', 'classifai' ),

@@ -101,6 +101,7 @@ class Plugin {
 			[
 				'language_processing' => 'Classifai\Services\LanguageProcessing',
 				'image_processing'    => 'Classifai\Services\ImageProcessing',
+				'personalizer'        => 'Classifai\Services\Personalizer',
 			]
 		);
 

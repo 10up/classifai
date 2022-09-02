@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import PluginIcon from '../../assets/img/editor-icon.svg';
+import { ReactComponent as icon } from '../../assets/img/editor-icon.svg';
 
 const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
@@ -13,11 +13,7 @@ const { classifaiPostData } = window;
  * Create the ClassifAI icon
  */
 const ClassifAIIcon = () => (
-	<Icon
-		className="components-panel__icon"
-		icon={ <PluginIcon /> }
-		size={ 20 }
-	/>
+	<Icon className="components-panel__icon" icon={ icon } size={ 20 } />
 );
 
 /**
@@ -26,24 +22,34 @@ const ClassifAIIcon = () => (
  */
 const ClassifAIToggle = () => {
 	// Use the datastore to retrieve all the meta for this post.
-	const processContent = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_process_content' ) );
+	const processContent = useSelect( ( select ) =>
+		select( 'core/editor' ).getEditedPostAttribute(
+			'classifai_process_content'
+		)
+	);
 
 	// Use the datastore to tell the post to update the meta.
 	const { editPost } = useDispatch( 'core/editor' );
-	const enabled = ( 'no' === processContent ) ? 'no' : 'yes';
+	const enabled = 'no' === processContent ? 'no' : 'yes';
 
 	return (
 		<ToggleControl
 			label={ __( 'Process content on update', 'classifai' ) }
 			help={
 				'yes' === enabled
-					? __( 'ClassifAI language processing is enabled', 'classifai' )
-					: __( 'ClassifAI language processing is disabled', 'classifai' )
+					? __(
+							'ClassifAI language processing is enabled',
+							'classifai'
+					  )
+					: __(
+							'ClassifAI language processing is disabled',
+							'classifai'
+					  )
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
-				editPost( { 'classifai_process_content': ( value ? 'yes' : 'no' ) } );
-			}}
+				editPost( { classifai_process_content: value ? 'yes' : 'no' } );
+			} }
 		/>
 	);
 };
@@ -52,26 +58,39 @@ const ClassifAIToggle = () => {
  * Add the ClassifAI panel to Gutenberg
  */
 const ClassifAIPlugin = () => {
+	const postType = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostType()
+	);
+	const postStatus = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
+	);
+
 	// Ensure the user has proper permissions
-	if ( classifaiPostData.noPermissions && 1 === parseInt( classifaiPostData.noPermissions ) ) {
+	if (
+		classifaiPostData.noPermissions &&
+		1 === parseInt( classifaiPostData.noPermissions )
+	) {
 		return null;
 	}
 
 	// Ensure that language processing is enabled.
-	if ( ! classifaiPostData.NLUEnabled  ) {
+	if ( ! classifaiPostData.NLUEnabled ) {
 		return null;
 	}
 
-	const postType = useSelect( select => select( 'core/editor' ).getCurrentPostType() );
-	const postStatus = useSelect( select => select( 'core/editor' ).getCurrentPostAttribute( 'status' ) );
-
 	// Ensure we are on a supported post type
-	if ( classifaiPostData.supportedPostTypes && ! classifaiPostData.supportedPostTypes.includes( postType ) ) {
+	if (
+		classifaiPostData.supportedPostTypes &&
+		! classifaiPostData.supportedPostTypes.includes( postType )
+	) {
 		return null;
 	}
 
 	// Ensure we are on a supported post status
-	if ( classifaiPostData.supportedPostStatues && ! classifaiPostData.supportedPostStatues.includes( postStatus ) ) {
+	if (
+		classifaiPostData.supportedPostStatues &&
+		! classifaiPostData.supportedPostStatues.includes( postStatus )
+	) {
 		return null;
 	}
 
