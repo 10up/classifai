@@ -791,7 +791,9 @@ class NLU extends Provider {
 	 */
 	public function add_classifai_meta_box( $post_type, $post ) {
 		$supported_post_types = \Classifai\get_supported_post_types();
-		if ( in_array( $post_type, $supported_post_types, true ) ) {
+		$post_statuses        = \Classifai\get_supported_post_statuses();
+		$post_status          = get_post_status( $post );
+		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
 			add_meta_box(
 				'classifai-nlu-meta-box',
 				__( 'ClassifAI Language Processing', 'classifai' ),
@@ -822,6 +824,9 @@ class NLU extends Provider {
 				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
 			</label>
 		</p>
+		<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button">
+			<?php esc_html_e( 'Generate Tags', 'classifai' ); ?>
+		</a>
 		<?php
 	}
 

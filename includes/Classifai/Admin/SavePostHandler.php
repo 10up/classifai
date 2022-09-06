@@ -18,6 +18,7 @@ class SavePostHandler {
 	public function register() {
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
+		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
 	}
 
 	/**
@@ -214,6 +215,19 @@ class SavePostHandler {
 			</div>
 			<?php
 		}
+
+		// Display classify post success message for manually classified post.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classified = isset( $_GET['classified'] ) ? intval( wp_unslash( $_GET['classified'] ) ) : 0;
+		if ( 1 === $classified ) {
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p>
+					<?php esc_html_e( 'Post classified successfully.', 'classifai' ); ?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 
 	/**
@@ -246,6 +260,28 @@ class SavePostHandler {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Classify post manually.
+	 *
+	 * @return void
+	 */
+	public function classifai_classify_post() {
+		if ( ! empty( $_GET['classifai_classify_post_nonce'] ) && wp_verify_nonce( $_GET['classifai_classify_post_nonce'], 'classifai_classify_post_action' ) ) {
+			$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+			if ( $post_id ) {
+				$result     = $this->classify( $post_id );
+				$classified = '';
+				if ( ! is_wp_error( $result ) ) {
+					$classified = '&classified=1';
+				}
+				wp_safe_redirect( esc_url_raw( get_edit_post_link( $post_id, 'edit' ) . $classified ) );
+				exit();
+			}
+		} else {
+			die( esc_html__( 'You don\'t have access to doing this operations.', 'classifai' ) );
+		}
 	}
 
 }
