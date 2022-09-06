@@ -1,10 +1,11 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/editor-icon.svg';
+import { handleClick } from './helpers';
 
 const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
-const { ToggleControl } = wp.components;
+const { ToggleControl, Button } = wp.components;
 const { __ } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
@@ -55,6 +56,93 @@ const ClassifAIToggle = () => {
 };
 
 /**
+ * Callback function to handle API response.
+ *
+ * @param {Object} resp
+ */
+const buttonClickCallBack = ( resp ) => {
+	const { select } = wp.data;
+	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postType = select( 'core/editor' ).getCurrentPostType();
+
+	if ( resp && resp.terms ) {
+		let updateNeeded = false;
+		const taxonomies = Object.keys( resp.terms );
+		const taxTerms = {};
+		taxonomies.forEach( ( taxonomy ) => {
+			let tax = taxonomy;
+			if ( 'post_tag' === taxonomy ) {
+				tax = 'tags';
+			}
+			if ( 'category' === taxonomy ) {
+				tax = 'categories';
+			}
+
+			const currentTerms =
+				select( 'core/editor' ).getEditedPostAttribute( taxonomy ) ||
+				[];
+			const newTerms = [
+				...currentTerms,
+				...resp.terms[ taxonomy ].map( ( term ) =>
+					Number.parseInt( term )
+				),
+			].filter( ( ele, i, a ) => a.indexOf( ele ) === i );
+
+			if ( newTerms && newTerms.length ) {
+				updateNeeded = true;
+				taxTerms[ tax ] = newTerms;
+			}
+		} );
+
+		if ( updateNeeded ) {
+			wp.data
+				.dispatch( 'core' )
+				.editEntityRecord( 'postType', postType, postId, taxTerms );
+		}
+	}
+};
+
+/**
+ *  Generate Tags Button
+ */
+const ClassifAIGenerateTagsButton = () => {
+	const postId = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostId()
+	);
+
+	return (
+		<>
+			<Button
+				variant={ 'secondary' }
+				data-id={ postId }
+				onClick={ ( e ) =>
+					handleClick( {
+						button: e.target,
+						endpoint: '/classifai/v1/generate-tags/',
+						callback: buttonClickCallBack,
+						buttonText: __( 'Generate Tags', 'classifai' ),
+					} )
+				}
+			>
+				{ __( 'Generate Tags', 'classifai' ) }
+			</Button>
+			<span
+				className="spinner"
+				style={ { display: 'none', float: 'none' } }
+			></span>
+			<span
+				className="error"
+				style={ {
+					display: 'none',
+					color: '#bc0b0b',
+					padding: '5px',
+				} }
+			></span>
+		</>
+	);
+};
+
+/**
  * Add the ClassifAI panel to Gutenberg
  */
 const ClassifAIPlugin = () => {
@@ -100,7 +188,10 @@ const ClassifAIPlugin = () => {
 			icon={ ClassifAIIcon }
 			className="classifai-panel"
 		>
-			<ClassifAIToggle />
+			<>
+				<ClassifAIToggle />
+				<ClassifAIGenerateTagsButton />
+			</>
 		</PluginDocumentSettingPanel>
 	);
 };
