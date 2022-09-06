@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { ReactComponent as icon } from '../../assets/img/editor-icon.svg';
+import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
 
 const { Icon } = wp.components;
@@ -14,7 +14,7 @@ const { classifaiPostData } = window;
  * Create the ClassifAI icon
  */
 const ClassifAIIcon = () => (
-	<Icon className="components-panel__icon" icon={ icon } size={ 20 } />
+	<Icon className="components-panel__icon" icon={ icon } size={ 24 } />
 );
 
 /**
