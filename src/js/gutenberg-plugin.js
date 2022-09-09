@@ -120,6 +120,17 @@ const ClassifAIGenerateTagsButton = () => {
 		select( 'core/editor' ).getCurrentPostId()
 	);
 
+	const processContent = useSelect( ( select ) =>
+		select( 'core/editor' ).getEditedPostAttribute(
+			'classifai_process_content'
+		)
+	);
+	const enabled = 'no' === processContent ? 'no' : 'yes';
+
+	if ( 'yes' === enabled ) {
+		return null;
+	}
+
 	return (
 		<>
 			<Button
