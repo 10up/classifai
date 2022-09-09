@@ -60,7 +60,7 @@ const ClassifAIToggle = () => {
  *
  * @param {Object} resp
  */
-const buttonClickCallBack = ( resp ) => {
+const buttonClickCallBack = async ( resp ) => {
 	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
@@ -95,9 +95,19 @@ const buttonClickCallBack = ( resp ) => {
 		} );
 
 		if ( updateNeeded ) {
-			wp.data
+			// Check for edited values in post.
+			const isDirty = await wp.data
+				.select( 'core/editor' )
+				.isEditedPostDirty();
+			await wp.data
 				.dispatch( 'core' )
 				.editEntityRecord( 'postType', postType, postId, taxTerms );
+			// If no edited values in post trigger save.
+			if ( ! isDirty ) {
+				await wp.data
+					.dispatch( 'core' )
+					.saveEditedEntityRecord( 'postType', postType, postId );
+			}
 		}
 	}
 };
@@ -115,6 +125,8 @@ const ClassifAIGenerateTagsButton = () => {
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
+				showTooltip={ true }
+				label={ __( 'Process content to generate tags.', 'classifai' ) }
 				onClick={ ( e ) =>
 					handleClick( {
 						button: e.target,
