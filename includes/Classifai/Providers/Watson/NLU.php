@@ -817,15 +817,21 @@ class NLU extends Provider {
 		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
 		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
+
+		$post_type       = get_post_type_object( get_post_type( $post ) );
+		$post_type_label = esc_html__( 'Post', 'classifai' );
+		if ( $post_type ) {
+			$post_type_label = $post_type->labels->singular_name;
+		}
 		?>
 		<p>
 			<label for="_classifai_process_content">
-				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?>/>
+				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
 				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
 			</label>
 		</p>
-		<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button">
-			<?php esc_html_e( 'Generate Tags', 'classifai' ); ?>
+		<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
+			<?php printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) ); ?>
 		</a>
 		<?php
 	}
