@@ -113,41 +113,41 @@ const buttonClickCallBack = async ( resp ) => {
 };
 
 /**
- *  Generate Tags Button
+ *  Classify Post Button
  */
 const ClassifAIGenerateTagsButton = () => {
-	const postId = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostId()
-	);
-
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
+	// Display classify post button only when process content on update is disabled.
 	const enabled = 'no' === processContent ? 'no' : 'yes';
-
 	if ( 'yes' === enabled ) {
 		return null;
 	}
+
+	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postTypeLabel =
+		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
+		__( 'Post', 'classifai' );
+	const buttonText = `${ __( 'Classify', 'classifai' ) } ${ postTypeLabel }`;
 
 	return (
 		<>
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
-				showTooltip={ true }
-				label={ __( 'Process content to generate tags.', 'classifai' ) }
 				onClick={ ( e ) =>
 					handleClick( {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
-						buttonText: __( 'Generate Tags', 'classifai' ),
+						buttonText,
 					} )
 				}
 			>
-				{ __( 'Generate Tags', 'classifai' ) }
+				{ buttonText }
 			</Button>
 			<span
 				className="spinner"
