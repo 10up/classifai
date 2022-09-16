@@ -103,5 +103,10 @@ import { handleClick } from './helpers';
 		if ( wp.media.frame ) {
 			wp.media.frame.on( 'edit:attachment', handleButtonsClick );
 		}
+
+		// For new uploaded media.
+		if ( wp.Uploader && wp.Uploader.queue ) {
+			wp.Uploader.queue.on( 'reset', handleButtonsClick );
+		}
 	} );
 } )( jQuery );
