@@ -44,9 +44,7 @@ class LanguageProcessing extends Service {
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
 					),
 				),
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
-				},
+				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
 			]
 		);
 	}
@@ -64,16 +62,6 @@ class LanguageProcessing extends Service {
 
 			if ( empty( $post_id ) ) {
 				return new \WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
-			}
-
-			$post_type     = get_post_type( $post_id );
-			$post_status   = get_post_status( $post_id );
-			$supported     = \Classifai\get_supported_post_types();
-			$post_statuses = \Classifai\get_supported_post_statuses();
-
-			// Check if processing allowed.
-			if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
-				return new \WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
 			}
 
 			$taxonomy_terms    = [];
@@ -101,5 +89,28 @@ class LanguageProcessing extends Service {
 		} catch ( \Exception $e ) {
 			return new \WP_Error( 'request_failed', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Check if a given request has access to generate tags
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_post_tags_permissions_check( $request ) {
+		$post_id = $request->get_param( 'id' );
+		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			$post_type     = get_post_type( $post_id );
+			$post_status   = get_post_status( $post_id );
+			$supported     = \Classifai\get_supported_post_types();
+			$post_statuses = \Classifai\get_supported_post_statuses();
+
+			// Check if processing allowed.
+			if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
+				return new \WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
+			}
+			return true;
+		}
+		return false;
 	}
 }

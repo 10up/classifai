@@ -210,7 +210,7 @@ class NLU extends Provider {
 				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
-				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_posts' ),
+				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
 		);
 	}
