@@ -12,7 +12,7 @@ module.exports = {
 		'editor-ocr': [ './src/js/editor-ocr.js' ],
 		media: [ './src/js/media.js' ],
 		admin: [ './src/js/admin.js' ],
-		'language-processing`': [ './src/js/language-processing.js' ],
+		'language-processing': [ './src/js/language-processing.js' ],
 		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
 		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
 		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
