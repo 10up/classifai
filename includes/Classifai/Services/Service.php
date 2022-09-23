@@ -124,7 +124,7 @@ abstract class Service {
 					submit_button();
 				?>
 				</form>
-				<?php if ( ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
+				<?php if ( isset( $this->provider_classes[0] ) && ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
 				<div id="classifai-post-preview-app">
 					<?php
 						$supported_post_statuses = \Classifai\get_supported_post_statuses();
