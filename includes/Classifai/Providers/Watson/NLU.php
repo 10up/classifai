@@ -198,7 +198,7 @@ class NLU extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
+			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
@@ -830,9 +830,11 @@ class NLU extends Provider {
 				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
 			</label>
 		</p>
-		<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
-			<?php printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) ); ?>
-		</a>
+		<div class="classifai-clasify-post-wrapper" style="display: none;">
+			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
+				<?php printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) ); ?>
+			</a>
+		</div>
 		<?php
 	}
 
