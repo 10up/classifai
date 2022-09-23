@@ -36,6 +36,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	/**
@@ -135,5 +136,29 @@ class Plugin {
 				$instance->register();
 			}
 		}
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-admin-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+
+		wp_localize_script(
+			'classifai-admin-script',
+			'ClassifAI',
+			[
+				'api_password'    => __( 'API Password', 'classifai' ),
+				'api_key'         => __( 'API Key', 'classifai' ),
+				'use_key'         => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password'    => __( 'Use a username/password instead?', 'classifai' ),
+			]
+		);
 	}
 }

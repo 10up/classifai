@@ -220,31 +220,19 @@ class NLU extends Provider {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-admin-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
+			'classifai-language-processing-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
 			[],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-admin-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
 			array(),
 			CLASSIFAI_PLUGIN_VERSION,
 			'all'
-		);
-
-		wp_localize_script(
-			'classifai-admin-script',
-			'ClassifAI',
-			[
-				'api_password'    => __( 'API Password', 'classifai' ),
-				'api_key'         => __( 'API Key', 'classifai' ),
-				'use_key'         => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password'    => __( 'Use a username/password instead?', 'classifai' ),
-				'loading_preview' => __( 'Loading Preview', 'classifai' ),
-			]
 		);
 	}
 
