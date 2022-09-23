@@ -61,9 +61,11 @@ const ClassifAIToggle = () => {
  * @param {Object} resp
  */
 const buttonClickCallBack = async ( resp ) => {
-	const { select } = wp.data;
+	const { select, dispatch } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
+	const postTypeLabel =
+		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
 
 	if ( resp && resp.terms ) {
 		let updateNeeded = false;
@@ -96,18 +98,30 @@ const buttonClickCallBack = async ( resp ) => {
 
 		if ( updateNeeded ) {
 			// Check for edited values in post.
-			const isDirty = await wp.data
-				.select( 'core/editor' )
-				.isEditedPostDirty();
-			await wp.data
-				.dispatch( 'core' )
-				.editEntityRecord( 'postType', postType, postId, taxTerms );
+			const isDirty = await select( 'core/editor' ).isEditedPostDirty();
+			await dispatch( 'core' ).editEntityRecord(
+				'postType',
+				postType,
+				postId,
+				taxTerms
+			);
 			// If no edited values in post trigger save.
 			if ( ! isDirty ) {
-				await wp.data
-					.dispatch( 'core' )
-					.saveEditedEntityRecord( 'postType', postType, postId );
+				await dispatch( 'core' ).saveEditedEntityRecord(
+					'postType',
+					postType,
+					postId
+				);
 			}
+
+			// Display success notice.
+			dispatch( 'core/notices' ).createSuccessNotice(
+				`${ postTypeLabel } ${ __(
+					'classified successfully.',
+					'classifai'
+				) }`,
+				{ type: 'snackbar' }
+			);
 		}
 	}
 };
