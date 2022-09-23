@@ -28,5 +28,4 @@
 		$toggler.innerText = ClassifAI.use_key;
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
-
 } )();
