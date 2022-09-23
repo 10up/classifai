@@ -16,6 +16,7 @@ class SavePostHandler {
 	 * Enables the classification on save post behaviour.
 	 */
 	public function register() {
+		add_filter( 'removable_query_args', [ $this, 'classifai_removable_query_args' ] );
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
@@ -218,7 +219,7 @@ class SavePostHandler {
 
 		// Display classify post success message for manually classified post.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$classified = isset( $_GET['classified'] ) ? intval( wp_unslash( $_GET['classified'] ) ) : 0;
+		$classified = isset( $_GET['classifai_reclassify'] ) ? intval( wp_unslash( $_GET['classifai_reclassify'] ) ) : 0;
 		if ( 1 === $classified ) {
 			?>
 			<div class="notice notice-success is-dismissible">
@@ -272,11 +273,11 @@ class SavePostHandler {
 			$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 			if ( $post_id ) {
 				$result     = $this->classify( $post_id );
-				$classified = '';
+				$classified = array();
 				if ( ! is_wp_error( $result ) ) {
-					$classified = '&classified=1';
+					$classified = array( 'classifai_reclassify' => 1 );
 				}
-				wp_safe_redirect( esc_url_raw( get_edit_post_link( $post_id, 'edit' ) . $classified ) );
+				wp_safe_redirect( esc_url_raw( add_query_arg( $classified, get_edit_post_link( $post_id, 'edit' ) ) ) );
 				exit();
 			}
 		} else {
@@ -284,4 +285,14 @@ class SavePostHandler {
 		}
 	}
 
+	/**
+	 * Add "classifai_reclassify" in list of query variable names to remove.
+	 *
+	 * @param string[] $removable_query_args An array of query variable names to remove from a URL.
+	 * @return string[]
+	 */
+	public function classifai_removable_query_args( $removable_query_args ) {
+		$removable_query_args[] = 'classifai_reclassify';
+		return $removable_query_args;
+	}
 }
