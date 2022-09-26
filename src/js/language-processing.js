@@ -341,3 +341,23 @@ import '../scss/language-processing.scss';
 		};
 	}
 } )();
+
+// Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
+document.addEventListener( 'DOMContentLoaded', function () {
+	const classifaiNLUCheckbox = document.getElementById(
+		'_classifai_process_content'
+	);
+	if ( classifaiNLUCheckbox ) {
+		classifaiNLUCheckbox.addEventListener( 'change', function () {
+			const classifyButton = document.querySelector(
+				'.classifai-clasify-post-wrapper'
+			);
+			if ( this.checked === true ) {
+				classifyButton.style.display = 'none';
+			} else {
+				classifyButton.style.display = 'block';
+			}
+		} );
+		classifaiNLUCheckbox.dispatchEvent( new Event( 'change' ) );
+	}
+} );
