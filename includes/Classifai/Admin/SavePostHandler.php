@@ -16,8 +16,10 @@ class SavePostHandler {
 	 * Enables the classification on save post behaviour.
 	 */
 	public function register() {
+		add_filter( 'removable_query_args', [ $this, 'classifai_removable_query_args' ] );
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
+		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
 	}
 
 	/**
@@ -214,6 +216,27 @@ class SavePostHandler {
 			</div>
 			<?php
 		}
+
+		// Display classify post success message for manually classified post.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classified = isset( $_GET['classifai_classify'] ) ? intval( wp_unslash( $_GET['classifai_classify'] ) ) : 0;
+		if ( 1 === $classified ) {
+			$post_type       = get_post_type_object( get_post_type( $post ) );
+			$post_type_label = esc_html__( 'Post', 'classifai' );
+			if ( $post_type ) {
+				$post_type_label = $post_type->labels->singular_name;
+			}
+			?>
+			<div class="notice notice-success is-dismissible">
+				<p>
+					<?php
+					// translators: %s is post type label.
+					printf( esc_html__( '%s classified successfully.', 'classifai' ), esc_html( $post_type_label ) );
+					?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 
 	/**
@@ -248,4 +271,36 @@ class SavePostHandler {
 		return false;
 	}
 
+	/**
+	 * Classify post manually.
+	 *
+	 * @return void
+	 */
+	public function classifai_classify_post() {
+		if ( ! empty( $_GET['classifai_classify_post_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['classifai_classify_post_nonce'] ), 'classifai_classify_post_action' ) ) {
+			$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+			if ( $post_id ) {
+				$result     = $this->classify( $post_id );
+				$classified = array();
+				if ( ! is_wp_error( $result ) ) {
+					$classified = array( 'classifai_classify' => 1 );
+				}
+				wp_safe_redirect( esc_url_raw( add_query_arg( $classified, get_edit_post_link( $post_id, 'edit' ) ) ) );
+				exit();
+			}
+		} else {
+			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
+		}
+	}
+
+	/**
+	 * Add "classifai_classify" in list of query variable names to remove.
+	 *
+	 * @param string[] $removable_query_args An array of query variable names to remove from a URL.
+	 * @return string[]
+	 */
+	public function classifai_removable_query_args( $removable_query_args ) {
+		$removable_query_args[] = 'classifai_classify';
+		return $removable_query_args;
+	}
 }

@@ -198,7 +198,7 @@ class NLU extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
+			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
@@ -210,7 +210,7 @@ class NLU extends Provider {
 				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
-				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_posts' ),
+				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
 		);
 	}
@@ -791,7 +791,9 @@ class NLU extends Provider {
 	 */
 	public function add_classifai_meta_box( $post_type, $post ) {
 		$supported_post_types = \Classifai\get_supported_post_types();
-		if ( in_array( $post_type, $supported_post_types, true ) ) {
+		$post_statuses        = \Classifai\get_supported_post_statuses();
+		$post_status          = get_post_status( $post );
+		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
 			add_meta_box(
 				'classifai-nlu-meta-box',
 				__( 'ClassifAI Language Processing', 'classifai' ),
@@ -815,13 +817,27 @@ class NLU extends Provider {
 		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
 		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
+
+		$post_type       = get_post_type_object( get_post_type( $post ) );
+		$post_type_label = esc_html__( 'Post', 'classifai' );
+		if ( $post_type ) {
+			$post_type_label = $post_type->labels->singular_name;
+		}
 		?>
 		<p>
 			<label for="_classifai_process_content">
-				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?>/>
+				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
 				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
 			</label>
 		</p>
+		<div class="classifai-clasify-post-wrapper" style="display: none;">
+			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
+				<?php
+				/* translators: %s Post type label */
+				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
+				?>
+			</a>
+		</div>
 		<?php
 	}
 
