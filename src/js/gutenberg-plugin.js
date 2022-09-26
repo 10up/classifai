@@ -6,7 +6,7 @@ const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { ToggleControl, Button } = wp.components;
-const { __ } = wp.i18n;
+const { __, sprintf } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
 
@@ -116,10 +116,11 @@ const buttonClickCallBack = async ( resp ) => {
 
 			// Display success notice.
 			dispatch( 'core/notices' ).createSuccessNotice(
-				`${ postTypeLabel } ${ __(
-					'classified successfully.',
-					'classifai'
-				) }`,
+				sprintf(
+					/** translators: %s is post type label. */
+					__( '%s classified successfully.', 'classifai' ),
+					postTypeLabel
+				),
 				{ type: 'snackbar' }
 			);
 		}
@@ -145,7 +146,11 @@ const ClassifAIGenerateTagsButton = () => {
 	const postTypeLabel =
 		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
 		__( 'Post', 'classifai' );
-	const buttonText = `${ __( 'Classify', 'classifai' ) } ${ postTypeLabel }`;
+	const buttonText = sprintf(
+		/** translators: %s Post type label */
+		__( 'Classify %s', 'classifai' ),
+		postTypeLabel
+	);
 
 	return (
 		<>

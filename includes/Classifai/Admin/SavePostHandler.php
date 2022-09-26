@@ -289,7 +289,7 @@ class SavePostHandler {
 				exit();
 			}
 		} else {
-			die( esc_html__( 'You don\'t have access to doing this operations.', 'classifai' ) );
+			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
 		}
 	}
 

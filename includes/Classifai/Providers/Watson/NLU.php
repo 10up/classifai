@@ -832,7 +832,10 @@ class NLU extends Provider {
 		</p>
 		<div class="classifai-clasify-post-wrapper" style="display: none;">
 			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
-				<?php printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) ); ?>
+				<?php
+				/* translators: %s Post type label */
+				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
+				?>
 			</a>
 		</div>
 		<?php
