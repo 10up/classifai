@@ -2,10 +2,13 @@ import Choices from 'choices.js';
 import '../scss/language-processing.scss';
 
 ( () => {
+	const nonceElement = document.getElementById( 'classifai-previewer-nonce' );
+	if ( ! nonceElement ) {
+		return;
+	}
+
 	/** Previewer nonce. */
-	const previewerNonce = document.getElementById(
-		'classifai-previewer-nonce'
-	).value;
+	const previewerNonce = nonceElement.value;
 
 	/** Feature statuses. */
 	const featureStatuses = {
