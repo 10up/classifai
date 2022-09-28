@@ -8,20 +8,20 @@ All notable changes to this project will be documented in this file, per [the Ke
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
 
 ### Added
-- Added: Initial "Recommended Content" Block. (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#343](https://github.com/10up/classifai/pull/343))
-- "Classify Post" button to process existing content. (props [@iamdharmesh](https://github.com/iamdharmesh), [@thrijith](https://github.com/thrijith), [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#366](https://github.com/10up/classifai/pull/366))
+- Added: "Recommended Content" Block powered by Azure Personalizer (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#343](https://github.com/10up/classifai/pull/343)).
+- "Classify Post" button in the Block Editor sidebar to process existing content (props [@iamdharmesh](https://github.com/iamdharmesh), [@thrijith](https://github.com/thrijith), [@dkotter](https://github.com/dkotter), [@dinhtungdu](https://github.com/dinhtungdu), [@jeffpaul](https://github.com/jeffpaul), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#366](https://github.com/10up/classifai/pull/366)).
 
 ### Fixed
-- Language Processing previewer loading on sections other than NLU (props [@Sidsector9](https://github.com/Sidsector9), [@iamdhamesh](https://github.com/iamdhamesh), [@cadic](https://github.com/cadic) via [#361](https://github.com/10up/classifai/pull/361))
-- Generate/Regenerate/Scan buttons for newly uploaded media. (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter), [@cadic](https://github.com/cadic) via [#364](https://github.com/10up/classifai/pull/364))
-- Admin js enqueue issues. (props [@iamdharmesh](https://github.com/iamdharmesh), [@cadic](https://github.com/cadic) via [#372](https://github.com/10up/classifai/pull/372))
+- Language Processing previewer now only loads properly within the Language Processing section (props [@Sidsector9](https://github.com/Sidsector9), [@iamdhamesh](https://github.com/iamdhamesh), [@cadic](https://github.com/cadic) via [#361](https://github.com/10up/classifai/pull/361)).
+- Generate, Regenerate, and Scan buttons now work for newly uploaded media (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter), [@cadic](https://github.com/cadic) via [#364](https://github.com/10up/classifai/pull/364)).
+- Admin JavaScript enqueue issues (props [@iamdharmesh](https://github.com/iamdharmesh), [@cadic](https://github.com/cadic) via [#372](https://github.com/10up/classifai/pull/372)).
 
 ### Changed
-- Upgrade the Plugin Update Checker library to 4.13 (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#365](https://github.com/10up/classifai/pull/365))
+- Upgrade the Plugin Update Checker library, `yahnis-elsts/plugin-update-checker`, from 4.6 to 4.13 (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#365](https://github.com/10up/classifai/pull/365)).
 
 ### Security
-- Bump `got` from 10.7.0 to 11.8.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@iamdharmesh](https://github.com/iamdharmesh) via [#371](https://github.com/10up/classifai/pull/371))
-- Bump `@wordpress/env` from 4.9.0 to 5.3.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@iamdharmesh](https://github.com/iamdharmesh) via [#371](https://github.com/10up/classifai/pull/371))
+- Bump `got` from 10.7.0 to 11.8.5 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@iamdharmesh](https://github.com/iamdharmesh) via [#371](https://github.com/10up/classifai/pull/371)).
+- Bump `@wordpress/env` from 4.9.0 to 5.3.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@iamdharmesh](https://github.com/iamdharmesh) via [#371](https://github.com/10up/classifai/pull/371)).
 
 ## [1.7.3] - 2022-07-28
 **Note that this release bumps the WordPress minimum from 5.0 to 5.6.**
