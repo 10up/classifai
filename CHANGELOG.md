@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.8.0] - TBD
+## [1.8.0] - 2022-09-30
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
 
 ### Added
