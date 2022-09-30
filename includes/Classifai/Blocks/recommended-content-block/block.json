@@ -1,0 +1,58 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "title": "Recommended Content",
+  "description": "Display content recommended by Azure Personalizer",
+  "textdomain": "classifai",
+  "name": "classifai/recommended-content-block",
+  "category": "classifai-blocks",
+  "attributes": {
+    "contentPostType": {
+      "type": "string",
+      "default": "post"
+    },
+    "taxQuery": {
+      "type": "object"
+    },
+    "displayPostExcerpt": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayAuthor": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayPostDate": {
+      "type": "boolean",
+      "default": false
+    },
+    "displayFeaturedImage": {
+      "type": "boolean",
+      "default": true
+    },
+    "addLinkToFeaturedImage": {
+      "type": "boolean",
+      "default": false
+    },
+    "columns": {
+      "type": "number",
+      "default": 3
+    },
+    "numberOfItems": {
+      "type": "number",
+      "default": 3
+    },
+    "displayLayout": {
+      "type": "string",
+      "default": "grid"
+    },
+    "excludeId": {
+      "type": "number"
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "file:../../../../dist/recommended-content-block.js",
+  "style": "recommended-content-block-style"
+}

@@ -10,15 +10,17 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "php": ">=7.0",
-    "yahnis-elsts/plugin-update-checker": "4.6"
+    "php": ">=7.2",
+    "yahnis-elsts/plugin-update-checker": "4.13",
+    "ua-parser/uap-php": "dev-master"
   },
   "autoload": {
     "psr-4": {
       "Classifai\\": "includes/Classifai/"
     },
     "files": [
-      "includes/Classifai/Helpers.php"
+      "includes/Classifai/Helpers.php",
+      "includes/Classifai/Blocks.php"
     ]
   },
   "require-dev": {
@@ -26,7 +28,7 @@
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
-    "lint": "phpcs . --runtime-set testVersion 7.0-",
+    "lint": "phpcs . --runtime-set testVersion 7.2-",
     "lint-fix": "phpcbf ."
   },
   "minimum-stability": "dev",
@@ -37,7 +39,7 @@
   },
   "archive": {
     "exclude": [
-      "!/vendor/yahnis-elsts"
+      "!/vendor/"
     ]
   }
 }

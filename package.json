@@ -5,8 +5,9 @@
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "scripts": {
-    "build": "webpack --mode=production",
-    "dev": "webpack --watch --mode=development",
+    "start": "wp-scripts start",
+    "build": "wp-scripts build",
+    "lint:js": "wp-scripts lint-js src/ includes/Classifai/Blocks/",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
@@ -28,7 +29,7 @@
   },
   "lint-staged": {
     "*.php": [
-      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.0"
+      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.2"
     ]
   },
   "author": {
@@ -39,31 +40,21 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "github:10up/cypress-wp-utils#build",
-    "@10up/eslint-config": "^1.0.9",
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "@wordpress/env": "^4.5.0",
-    "babel-eslint": "10.0.3",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^6.7.1",
+    "@wordpress/env": "^5.3.0",
+    "@wordpress/scripts": "^23.4.0",
     "cypress": "^9.5.4",
     "cypress-file-upload": "^5.0.8",
-    "eslint": "^6.3.0",
-    "eslint-loader": "^3.0.0",
-    "husky": "^3.0.5",
+    "husky": "^3.1.0",
     "jsdoc": "^3.6.3",
-    "lint-staged": "^9.2.5",
+    "lint-staged": "^9.5.0",
     "node-wp-i18n": "^1.2.3",
-    "sass": "^1.53.0",
-    "sass-loader": "^13.0.2",
-    "style-loader": "^3.3.1",
+    "svg-react-loader": "^0.4.6",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0",
-    "svg-react-loader": "^0.4.6",
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
+    "@wordpress/icons": "^9.4.0",
     "choices.js": "^10.1.0"
   }
 }

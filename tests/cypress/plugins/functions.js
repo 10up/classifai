@@ -6,56 +6,64 @@ import * as pdfData from '../../test-plugin/pdf.json';
 /**
  * Get Taxonomy data from test NLU json file.
  *
- * @param {string} taxonomy
- * @param {number} threshold
- * @returns string[]
+ * @param {string} taxonomy  Taxonomy.
+ * @param {number} threshold Thresold to select terms.
+ * @return {string[]} NLU Data.
  */
-export const getNLUData = ( taxonomy = 'categories', threshold = 0.70 ) => {
+export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 	const taxonomies = [];
-	if ( 'categories' === taxonomy ) {
+	if (taxonomy === 'categories') {
 		nluData.categories
-			.filter( el => ( el.score >= threshold ) )
-			.forEach( cat => taxonomies.push( ...cat.label.split( '/' ).filter( n => n ) ) );
+			.filter((el) => el.score >= threshold)
+			.forEach((cat) =>
+				taxonomies.push(...cat.label.split('/').filter((n) => n))
+			);
 	} else {
 		return nluData[taxonomy]
-			.filter( el => el.relevance >= threshold )
-			.map( el => el.text );
+			.filter((el) => el.relevance >= threshold)
+			.map((el) => el.text);
 	}
 	return taxonomies;
 };
 
 /**
  * Get Image OCR data
+ *
+ * @return {string} data Image OCR data
  */
 export const getOCRData = () => {
 	const words = [];
-	ocrData.regions.forEach( el => {
-		el.lines.forEach( el2 => {
-			el2.words.forEach( el3  => {
-				words.push( el3.text );
-			} );
-		} );
-	} );
-	return words.join( ' ' );
+	ocrData.regions.forEach((el) => {
+		el.lines.forEach((el2) => {
+			el2.words.forEach((el3) => {
+				words.push(el3.text);
+			});
+		});
+	});
+	return words.join(' ');
 };
 
 /**
  * Get image analysis data
  *
- * @returns Object data image data
+ * @return {Object} data image data
  */
 export const getImageData = () => {
 	const data = {
-		altText: imageData.description.captions.filter( el => 0.75 < el.confidence )[0].text,
-		tags: imageData.tags.filter( el => 0.70 < el.confidence ).map( el => el.name ),
+		altText: imageData.description.captions.filter(
+			(el) => el.confidence > 0.75
+		)[0].text,
+		tags: imageData.tags
+			.filter((el) => el.confidence > 0.7)
+			.map((el) => el.name),
 	};
 	return data;
 };
 
-
 /**
  * Get PDF read data
  *
- * @returns string data pdf data
+ * @return {string} data pdf data
  */
-export const getPDFData = () => pdfData.analyzeResult.readResults[0].lines[0].text;
+export const getPDFData = () =>
+	pdfData.analyzeResult.readResults[0].lines[0].text;

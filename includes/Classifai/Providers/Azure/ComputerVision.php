@@ -70,10 +70,7 @@ class ComputerVision extends Provider {
 	 */
 	public function can_register() {
 		$options = get_option( $this->get_option_name() );
-		if ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) {
-			return false;
-		}
-		if ( empty( $options ) ) {
+		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
 			return false;
 		}
 
@@ -132,7 +129,7 @@ class ComputerVision extends Provider {
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
 			'editor-ocr',
-			CLASSIFAI_PLUGIN_URL . 'dist/js/editor-ocr.min.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
 			[
 				'wp-block-editor',
 				'wp-blocks',
