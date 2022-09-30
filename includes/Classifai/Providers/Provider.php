@@ -195,6 +195,60 @@ abstract class Provider {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
+
+	/**
+	 * Renders the checkbox group for 'Generate alt text' setting.
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_auto_caption_fields( $args ) {
+		$setting_index = $this->get_settings();
+
+		$default_value = '';
+
+		if ( isset( $setting_index['enable_image_captions'] ) ) {
+			if ( ! is_array( $setting_index['enable_image_captions'] ) && '1' === $setting_index['enable_image_captions'] ) {
+				$default_value = 'alt';
+			} elseif ( ! is_array( $setting_index['enable_image_captions'] ) && 'no' === $setting_index['enable_image_captions'] ) {
+				$default_value = '';
+			}
+		}
+
+		$checkbox_options = array(
+			'alt'         => esc_html__( 'Alt', 'classifai' ),
+			'caption'     => esc_html__( 'Caption', 'classifai' ),
+			'description' => esc_html__( 'Description', 'classifai' ),
+		);
+
+		foreach ( $checkbox_options as $option_value => $option_label ) {
+			if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
+				$default_value = '1' === $setting_index['enable_image_captions'] ? 'alt' : '';
+			} else {
+				$default_value = $setting_index['enable_image_captions'][ $option_value ];
+			}
+
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s">
+						<input type="hidden" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						<input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
+						%5$s
+					</label>
+				</p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $default_value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		printf(
+			'<span class="description">%s</span>',
+			esc_html__( 'Choose image fields where the generated captions should be applied.', 'classifai' )
+		);
+	}
+
 	/**
 	 * Set up the fields for each section.
 	 */
