@@ -1,42 +1,25 @@
+const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const path = require('path');
 
 module.exports = {
-	entry: {
-		'editor': './src/js/editor.js',
-		'editor-ocr': './src/js/editor-ocr.js',
-		'media': './src/js/media.js',
-		'admin': './src/js/admin.js',
-		'gutenberg-plugin': './src/js/gutenberg-plugin.js'
-	},
+	...defaultConfig,
 	output: {
-		filename: '[name].min.js',
-		path: path.resolve( './dist/js')
+		...defaultConfig.output,
+		path: path.resolve(__dirname, 'dist'),
+	},
+	entry: {
+		editor: [ './src/js/editor.js' ],
+		'editor-ocr': [ './src/js/editor-ocr.js' ],
+		media: [ './src/js/media.js' ],
+		admin: [ './src/js/admin.js' ],
+		'language-processing': [ './src/js/language-processing.js' ],
+		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
+		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
+		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
 	},
 	module: {
 		rules: [
-			{
-				test: /\.js$/,
-				exclude: /(node_modules)/,
-				use: {
-					loader: 'babel-loader'
-				},
-			},
-			{
-				test: /\.js$/,
-				exclude: /(node_modules)/,
-				loader: 'eslint-loader',
-				options: {
-					configFile: './.eslintrc.json'
-				}
-			},
-			{
-				test: /\.s[ac]ss$/i,
-				use: [
-				  "style-loader",
-				  "css-loader",
-				  "sass-loader",
-				],
-			},
+			...defaultConfig.module.rules,
 			{
 				test: /\.svg$/,
 				use: [{

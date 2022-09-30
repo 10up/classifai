@@ -9,4 +9,6 @@
 		<!-- Class properties don't need this -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 	</rule>
+
+	<exclude-pattern>*/dist/*</exclude-pattern>
 </ruleset>

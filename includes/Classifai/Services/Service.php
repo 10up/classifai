@@ -124,6 +124,7 @@ abstract class Service {
 					submit_button();
 				?>
 				</form>
+				<?php if ( isset( $this->provider_classes[0] ) && ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
 				<div id="classifai-post-preview-app">
 					<?php
 						$supported_post_statuses = \Classifai\get_supported_post_statuses();
@@ -160,6 +161,8 @@ abstract class Service {
 							),
 						);
 						?>
+
+					<?php if ( 'watson_nlu' === $active_tab ) : ?>
 					<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
 					<div id="classifai-post-preview-controls">
 						<select id="classifai-preview-post-selector">
@@ -179,7 +182,9 @@ abstract class Service {
 							</div>
 						<?php endforeach; ?>
 					</div>
+					<?php endif; ?>
 				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php
