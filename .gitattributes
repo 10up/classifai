@@ -16,6 +16,7 @@ tests export-ignore
 .DS_Store export-ignore
 .editorconfig export-ignore
 .eslintrc.json export-ignore
+.eslintignore export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
 .wp-env.json export-ignore

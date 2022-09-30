@@ -29,7 +29,7 @@ The `develop` branch is the development branch which means it contains the next 
 ## Release instructions
 
 1. Branch: Starting from `develop`, cut a release branch named `release/X.Y.Z` for your changes.
-1. Version bump: Bump the version number in `classifai.php`, `config.php`, `package-lock.json`, `package.json`, and `classifai.pot` if it does not already reflect the version being released.
+1. Version bump: Bump the version number in `classifai.php`, `config.php`, `package-lock.json`, `package.json`, and `readme.txt` if it does not already reflect the version being released.
 1. Changelog: Add/update the changelog in `CHANGELOG.md`.
 1. Props: update `CREDITS.md` file with any new contributors, confirm maintainers are accurate.
 1. New files: Check to be sure any new files/paths that are unnecessary in the production version are included in `.gitattributes`.
