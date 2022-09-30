@@ -215,9 +215,9 @@ abstract class Provider {
 		}
 
 		$checkbox_options = array(
-			'alt'         => esc_html__( 'Alt', 'classifai' ),
-			'caption'     => esc_html__( 'Caption', 'classifai' ),
-			'description' => esc_html__( 'Description', 'classifai' ),
+			'alt'         => esc_html__( 'Alt text', 'classifai' ),
+			'caption'     => esc_html__( 'Image caption', 'classifai' ),
+			'description' => esc_html__( 'Image description', 'classifai' ),
 		);
 
 		foreach ( $checkbox_options as $option_value => $option_label ) {
