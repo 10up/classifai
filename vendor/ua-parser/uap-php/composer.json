@@ -1,0 +1,46 @@
+{
+    "name": "ua-parser/uap-php",
+    "description": "A multi-language port of Browserscope's user agent parser.",
+    "require": {
+        "php": "^7.2 || ^8.0",
+        "composer/ca-bundle": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8 || ^9",
+        "symfony/yaml": "^3.4 || ^4.2 || ^4.3 || ^5.0",
+        "symfony/filesystem": "^3.4 || ^4.2 ||  ^4.3 || ^5.0",
+        "symfony/finder": "^3.4 || ^4.2 || ^4.3 || ^5.0",
+        "symfony/console": "^3.4 || ^4.2 || ^4.3 || ^5.0",
+        "phpstan/phpstan": "^0.12.33",
+        "vimeo/psalm": "^3.12"
+    },
+    "suggest": {
+        "symfony/yaml": "Required for CLI usage - ^3.4 || ^4.3 || ^5.0",
+        "symfony/filesystem": "Required for CLI usage - ^3.4 || ^4.3 || ^5.0",
+        "symfony/finder": "Required for CLI usage - ^3.4 || ^4.3 || ^5.0",
+        "symfony/console": "Required for CLI usage - ^3.4 || ^4.3 || ^5.0"
+    },
+    "prefer-stable": true,
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dave Olsen",
+            "email": "dmolsen@gmail.com"
+        },
+        {
+            "name": "Lars Strojny",
+            "email": "lars@strojny.net"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "UAParser\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "UAParser\\Test\\": "tests/"
+        }
+    },
+    "bin": ["bin/uaparser"]
+}

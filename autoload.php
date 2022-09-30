@@ -151,3 +151,4 @@ $classifai_loader->register();
 $classifai_loader->add_namespace( 'Classifai', __DIR__ . '/includes/Classifai' );
 
 require_once __DIR__ . '/includes/Classifai/Helpers.php';
+require_once __DIR__ . '/includes/Classifai/Blocks.php';

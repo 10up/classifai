@@ -1,0 +1,3 @@
+*.json
+*.yaml
+regexes-*.php
