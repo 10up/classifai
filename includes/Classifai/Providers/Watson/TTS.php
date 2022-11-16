@@ -37,48 +37,48 @@ class TTS extends Provider {
 			$service
 		);
 
-		$this->tts_features = [
-			'category' => [
-				'feature'           => __( 'Category', 'classifai' ),
-				'threshold'         => __( 'Category Threshold (%)', 'classifai' ),
-				'taxonomy'          => __( 'Category Taxonomy', 'classifai' ),
-				'threshold_default' => WATSON_CATEGORY_THRESHOLD,
-				'taxonomy_default'  => WATSON_CATEGORY_TAXONOMY,
-			],
-			'keyword'  => [
-				'feature'           => __( 'Keyword', 'classifai' ),
-				'threshold'         => __( 'Keyword Threshold (%)', 'classifai' ),
-				'taxonomy'          => __( 'Keyword Taxonomy', 'classifai' ),
-				'threshold_default' => WATSON_KEYWORD_THRESHOLD,
-				'taxonomy_default'  => WATSON_KEYWORD_TAXONOMY,
-			],
-			'entity'   => [
-				'feature'           => __( 'Entity', 'classifai' ),
-				'threshold'         => __( 'Entity Threshold (%)', 'classifai' ),
-				'taxonomy'          => __( 'Entity Taxonomy', 'classifai' ),
-				'threshold_default' => WATSON_ENTITY_THRESHOLD,
-				'taxonomy_default'  => WATSON_ENTITY_TAXONOMY,
-			],
-			'concept'  => [
-				'feature'           => __( 'Concept', 'classifai' ),
-				'threshold'         => __( 'Concept Threshold (%)', 'classifai' ),
-				'taxonomy'          => __( 'Concept Taxonomy', 'classifai' ),
-				'threshold_default' => WATSON_CONCEPT_THRESHOLD,
-				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
-			],
-		];
+		$this->tts_features = array(
+			// 'category' => [
+			// 'feature'           => __( 'Category', 'classifai' ),
+			// 'threshold'         => __( 'Category Threshold (%)', 'classifai' ),
+			// 'taxonomy'          => __( 'Category Taxonomy', 'classifai' ),
+			// 'threshold_default' => WATSON_CATEGORY_THRESHOLD,
+			// 'taxonomy_default'  => WATSON_CATEGORY_TAXONOMY,
+			// ],
+			// 'keyword'  => [
+			// 'feature'           => __( 'Keyword', 'classifai' ),
+			// 'threshold'         => __( 'Keyword Threshold (%)', 'classifai' ),
+			// 'taxonomy'          => __( 'Keyword Taxonomy', 'classifai' ),
+			// 'threshold_default' => WATSON_KEYWORD_THRESHOLD,
+			// 'taxonomy_default'  => WATSON_KEYWORD_TAXONOMY,
+			// ],
+			// 'entity'   => [
+			// 'feature'           => __( 'Entity', 'classifai' ),
+			// 'threshold'         => __( 'Entity Threshold (%)', 'classifai' ),
+			// 'taxonomy'          => __( 'Entity Taxonomy', 'classifai' ),
+			// 'threshold_default' => WATSON_ENTITY_THRESHOLD,
+			// 'taxonomy_default'  => WATSON_ENTITY_TAXONOMY,
+			// ],
+			// 'concept'  => [
+			// 'feature'           => __( 'Concept', 'classifai' ),
+			// 'threshold'         => __( 'Concept Threshold (%)', 'classifai' ),
+			// 'taxonomy'          => __( 'Concept Taxonomy', 'classifai' ),
+			// 'threshold_default' => WATSON_CONCEPT_THRESHOLD,
+			// 'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
+			// ],
+		);
 	}
 
 	/**
 	 * Resets the settings for the TTS provider.
 	 */
 	public function reset_settings() {
-		$settings = [
-			'post_types' => [
+		$settings = array(
+			'post_types' => array(
 				'post',
 				'page',
-			],
-			'features'   => [
+			),
+			'features'   => array(
 				'category'           => true,
 				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
 				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
@@ -94,8 +94,8 @@ class TTS extends Provider {
 				'entity'             => false,
 				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
 				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-			],
-		];
+			),
+		);
 
 		update_option( $this->get_option_name(), $settings );
 	}
@@ -117,14 +117,14 @@ class TTS extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_editor_assets' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 
 		// Add classifai meta box to classic editor.
-		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
+		add_action( 'add_meta_boxes', array( $this, 'add_classifai_meta_box' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'classifai_save_post_metadata' ), 5 );
 
-		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_filter( 'rest_api_init', array( $this, 'add_process_content_meta_to_rest_api' ) );
 
 		$this->taxonomy_factory = new TaxonomyFactory();
 		$this->taxonomy_factory->build_all();
@@ -148,16 +148,16 @@ class TTS extends Provider {
 	 * @return array
 	 */
 	public function get_settings( $index = false ) {
-		$defaults = [];
-		$settings = get_option( $this->get_option_name(), [] );
+		$defaults = array();
+		$settings = get_option( $this->get_option_name(), array() );
 
 		// If no settings have been saved, check for older storage to polyfill
 		// These are pre-1.3 settings
 		if ( empty( $settings ) ) {
 			$old_settings = get_option( 'classifai_settings' );
 
-			if ( isset( $old_settings['credentials'] ) ) {
-				$defaults['credentials'] = $old_settings['credentials'];
+			if ( isset( $old_settings['tts_credentials'] ) ) {
+				$defaults['tts_credentials'] = $old_settings['tts_credentials'];
 			}
 
 			if ( isset( $old_settings['post_types'] ) ) {
@@ -206,12 +206,12 @@ class TTS extends Provider {
 		wp_localize_script(
 			'classifai-gutenberg-plugin',
 			'classifaiPostData',
-			[
+			array(
 				'TTSEnabled'           => \Classifai\language_processing_features_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-			]
+			)
 		);
 	}
 
@@ -222,7 +222,7 @@ class TTS extends Provider {
 		wp_enqueue_script(
 			'classifai-language-processing-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			[],
+			array(),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
@@ -247,19 +247,19 @@ class TTS extends Provider {
 			function() {
 				printf(
 					wp_kses(
-						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Text To Speech</a> Resource to get your API key.', 'classifai' ),
+						array(
+							'a' => array(
+								'href'  => array(),
+								'title' => array(),
+							),
+						)
 					),
 					esc_url( 'https://cloud.ibm.com/registration' ),
-					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
+					esc_url( 'https://cloud.ibm.com/catalog/services/text-to-speech' )
 				);
 
-				$credentials = $this->get_settings( 'credentials' );
+				$credentials = $this->get_settings( 'tts_credentials' );
 				$watson_url  = $credentials['watson_url'] ?? '';
 
 				if ( ! empty( $watson_url ) && strpos( $watson_url, 'watsonplatform.net' ) !== false ) {
@@ -267,12 +267,12 @@ class TTS extends Provider {
 						printf(
 							wp_kses(
 								__( 'The `watsonplatform.net` endpoint URLs were retired on 26 May 2021. Please update the endpoint url. Check <a title="Deprecated Endpoint: watsonplatform.net" href="%s">here</a> for details.', 'classifai' ),
-								[
-									'a' => [
-										'href'  => [],
-										'title' => [],
-									],
-								]
+								array(
+									'a' => array(
+										'href'  => array(),
+										'title' => array(),
+									),
+								)
 							),
 							esc_url( 'https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change' )
 						);
@@ -297,43 +297,43 @@ class TTS extends Provider {
 		add_settings_field(
 			'url',
 			esc_html__( 'API URL', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name(),
-			[
+			array(
 				'label_for'    => 'watson_url',
-				'option_index' => 'credentials',
+				'option_index' => 'tts_credentials',
 				'input_type'   => 'text',
 				'large'        => true,
-			]
+			)
 		);
 		add_settings_field(
 			'username',
 			esc_html__( 'API Username', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name(),
-			[
+			array(
 				'label_for'     => 'watson_username',
-				'option_index'  => 'credentials',
+				'option_index'  => 'tts_credentials',
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
 				'large'         => true,
 				'class'         => $this->use_username_password() ? 'hidden' : '',
-			]
+			)
 		);
 		add_settings_field(
 			'password',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
+			array( $this, 'render_input' ),
 			$this->get_option_name(),
 			$this->get_option_name(),
-			[
+			array(
 				'label_for'    => 'watson_password',
-				'option_index' => 'credentials',
+				'option_index' => 'tts_credentials',
 				'input_type'   => 'password',
 				'large'        => true,
-			]
+			)
 		);
 		add_settings_field(
 			'toggle',
@@ -357,7 +357,7 @@ class TTS extends Provider {
 	 * @return bool
 	 */
 	protected function use_username_password() {
-		$settings = $this->get_settings( 'credentials' );
+		$settings = $this->get_settings( 'tts_credentials' );
 
 		if ( empty( $settings['watson_username'] ) ) {
 			return false;
@@ -372,38 +372,38 @@ class TTS extends Provider {
 	protected function do_tts_features_sections() {
 		add_settings_field(
 			'post-types',
-			esc_html__( 'Post Types to Classify', 'classifai' ),
-			[ $this, 'render_post_types_checkboxes' ],
+			esc_html__( 'Post Types to Convert', 'classifai' ),
+			array( $this, 'render_post_types_checkboxes' ),
 			$this->get_option_name(),
 			$this->get_option_name(),
-			[
+			array(
 				'option_index' => 'post_types',
-			]
+			)
 		);
 
-		add_settings_field(
-			'post-statuses',
-			esc_html__( 'Post Statuses to Classify', 'classifai' ),
-			[ $this, 'render_post_statuses_checkboxes' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index' => 'post_statuses',
-			]
-		);
+		// add_settings_field(
+		// 'post-statuses',
+		// esc_html__( 'Post Statuses to Convert', 'classifai' ),
+		// [ $this, 'render_post_statuses_checkboxes' ],
+		// $this->get_option_name(),
+		// $this->get_option_name(),
+		// [
+		// 'option_index' => 'post_statuses',
+		// ]
+		// );
 
 		foreach ( $this->tts_features as $feature => $labels ) {
 			add_settings_field(
 				$feature,
 				esc_html( $labels['feature'] ),
-				[ $this, 'render_tts_feature_settings' ],
+				array( $this, 'render_tts_feature_settings' ),
 				$this->get_option_name(),
 				$this->get_option_name(),
-				[
+				array(
 					'option_index' => 'features',
 					'feature'      => $feature,
 					'labels'       => $labels,
-				]
+				)
 			);
 		}
 	}
@@ -461,11 +461,11 @@ class TTS extends Provider {
 		echo '<ul>';
 		$post_types = get_post_types_for_language_settings();
 		foreach ( $post_types as $post_type ) {
-			$args = [
+			$args = array(
 				'label_for'    => $post_type->name,
 				'option_index' => 'post_types',
 				'input_type'   => 'checkbox',
-			];
+			);
 
 			echo '<li>';
 			$this->render_input( $args );
@@ -488,11 +488,11 @@ class TTS extends Provider {
 		echo '<ul>';
 		$post_statuses = get_post_statuses_for_language_settings();
 		foreach ( $post_statuses as $post_status_key => $post_status_label ) {
-			$args = [
+			$args = array(
 				'label_for'    => $post_status_key,
 				'option_index' => 'post_statuses',
 				'input_type'   => 'checkbox',
-			];
+			);
 
 			echo '<li>';
 			$this->render_input( $args );
@@ -519,18 +519,18 @@ class TTS extends Provider {
 		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
 
 		// Enable classification type
-		$feature_args = [
+		$feature_args = array(
 			'label_for'    => $feature,
 			'option_index' => 'features',
 			'input_type'   => 'checkbox',
-		];
+		);
 
-		$threshold_args = [
+		$threshold_args = array(
 			'label_for'     => "{$feature}_threshold",
 			'option_index'  => 'features',
 			'input_type'    => 'number',
 			'default_value' => $labels['threshold_default'],
-		];
+		);
 		?>
 
 		<fieldset>
@@ -568,8 +568,8 @@ class TTS extends Provider {
 	 * @return array
 	 */
 	public function get_supported_taxonomies() {
-		$taxonomies = \get_taxonomies( [], 'objects' );
-		$supported  = [];
+		$taxonomies = \get_taxonomies( array(), 'objects' );
+		$supported  = array();
 
 		foreach ( $taxonomies as $taxonomy ) {
 			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
@@ -589,34 +589,32 @@ class TTS extends Provider {
 	protected function tts_authentication_check_failed( $settings ) {
 
 		// Check that we have credentials before hitting the API.
-		if ( ! isset( $settings['credentials'] )
-			|| empty( $settings['credentials']['watson_username'] )
-			|| empty( $settings['credentials']['watson_password'] )
-			|| empty( $settings['credentials']['watson_url'] )
+		if ( ! isset( $settings['tts_credentials'] )
+			|| empty( $settings['tts_credentials']['watson_username'] )
+			|| empty( $settings['tts_credentials']['watson_password'] )
+			|| empty( $settings['tts_credentials']['watson_url'] )
 		) {
 			return true;
 		}
 
 		$request           = new \Classifai\Watson\APIRequest();
-		$request->username = $settings['credentials']['watson_username'];
-		$request->password = $settings['credentials']['watson_password'];
-		$base_url          = trailingslashit( $settings['credentials']['watson_url'] ) . 'v1/analyze';
-		$url               = esc_url( add_query_arg( [ 'version' => WATSON_TTS_VERSION ], $base_url ) );
-		$options           = [
-			'body' => wp_json_encode(
-				[
-					'text'     => 'Lorem ipsum dolor sit amet.',
-					'language' => 'en',
-					'features' => [
-						'keywords' => [
-							'emotion' => false,
-							'limit'   => 1,
-						],
-					],
-				]
+		$request->username = $settings['tts_credentials']['watson_username'];
+		$request->password = $settings['tts_credentials']['watson_password'];
+		$base_url          = trailingslashit( $settings['tts_credentials']['watson_url'] ) . 'v1/synthesize';
+		$url               = esc_url( add_query_arg( array( 'version' => WATSON_TTS_VERSION ), $base_url ) );
+		$options           = array(
+			'headers' => array(
+				'Content-Type' => 'multipart/form-data',
+				'Accept'       => 'audio/mp3',
 			),
-		];
-		$response          = $request->post( $url, $options );
+			'body'    => wp_json_encode(
+				array(
+					'text'   => 'Lorem ipsum dolor sit amet.',
+					'accept' => 'audio/mp3',
+				)
+			),
+		);
+		$response          = $request->postAudio( $url, $options );
 
 		$is_error = is_wp_error( $response );
 		if ( ! $is_error ) {
@@ -641,27 +639,27 @@ class TTS extends Provider {
 		$new_settings = $this->get_settings();
 		if ( $this->tts_authentication_check_failed( $settings ) ) {
 			add_settings_error(
-				'credentials',
+				'tts_credentials',
 				'classifai-auth',
 				esc_html__( 'IBM Watson TTS Authentication Failed. Please check credentials.', 'classifai' ),
 				'error'
 			);
 		}
 
-		if ( isset( $settings['credentials']['watson_url'] ) ) {
-			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
+		if ( isset( $settings['tts_credentials']['watson_url'] ) ) {
+			$new_settings['tts_credentials']['watson_url'] = esc_url_raw( $settings['tts_credentials']['watson_url'] );
 		}
 
-		if ( isset( $settings['credentials']['watson_username'] ) ) {
-			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
+		if ( isset( $settings['tts_credentials']['watson_username'] ) ) {
+			$new_settings['tts_credentials']['watson_username'] = sanitize_text_field( $settings['tts_credentials']['watson_username'] );
 		}
 
-		if ( isset( $settings['credentials']['watson_password'] ) ) {
-			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
+		if ( isset( $settings['tts_credentials']['watson_password'] ) ) {
+			$new_settings['tts_credentials']['watson_password'] = sanitize_text_field( $settings['tts_credentials']['watson_password'] );
 		}
 
 		// Sanitize the post type checkboxes
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		$post_types = get_post_types( array( 'public' => true ), 'objects' );
 		foreach ( $post_types as $post_type ) {
 			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
 				$new_settings['post_types'][ $post_type->name ] = absint( $settings['post_types'][ $post_type->name ] );
@@ -718,7 +716,7 @@ class TTS extends Provider {
 			$configured = get_option( 'classifai_configured' );
 		}
 
-		$settings_post_types = $settings['post_types'] ?? [];
+		$settings_post_types = $settings['post_types'] ?? array();
 		$post_types          = array_filter(
 			array_keys( $settings_post_types ),
 			function( $post_type ) use ( $settings_post_types ) {
@@ -726,16 +724,16 @@ class TTS extends Provider {
 			}
 		);
 
-		$credentials = $settings['credentials'] ?? [];
+		$credentials = $settings['tts_credentials'] ?? array();
 
-		return [
+		return array(
 			__( 'Configured', 'classifai' )      => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'API URL', 'classifai' )         => $credentials['watson_url'] ?? '',
 			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
 			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
 			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response(),
-		];
+		);
 	}
 
 	/**
@@ -756,10 +754,10 @@ class TTS extends Provider {
 
 		$formatted_data = array_intersect_key(
 			$data,
-			[
+			array(
 				'usage'    => 1,
 				'language' => 1,
-			]
+			)
 		);
 
 		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
@@ -784,8 +782,8 @@ class TTS extends Provider {
 		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
 			add_meta_box(
 				'classifai-tts-meta-box',
-				__( 'ClassifAI Language Processing', 'classifai' ),
-				[ $this, 'render_classifai_meta_box' ],
+				__( 'ClassifAI Text To Speech', 'classifai' ),
+				array( $this, 'render_classifai_meta_box' ),
 				null,
 				'side',
 				'low',
@@ -876,10 +874,10 @@ class TTS extends Provider {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
 					return update_post_meta( $object->ID, '_classifai_process_content', $value );
 				},
-				'schema'          => [
+				'schema'          => array(
 					'type'    => 'string',
-					'context' => [ 'view', 'edit' ],
-				],
+					'context' => array( 'view', 'edit' ),
+				),
 			)
 		);
 	}

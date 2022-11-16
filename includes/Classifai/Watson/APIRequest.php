@@ -39,7 +39,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
-	public function request( $url, $options = [] ) {
+	public function request( $url, $options = array() ) {
 		$this->add_headers( $options );
 		return $this->get_result( wp_remote_request( $url, $options ) );
 	}
@@ -52,7 +52,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
-	public function get( $url, $options = [] ) {
+	public function get( $url, $options = array() ) {
 		$this->add_headers( $options );
 		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 	}
@@ -65,9 +65,53 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
-	public function post( $url, $options = [] ) {
+	public function post( $url, $options = array() ) {
 		$this->add_headers( $options );
 		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+	}
+
+	/**
+	 * Makes an authorized POST request and returns the parsed JSON
+	 * response if valid.
+	 *
+	 * @param string $url The Watson API url
+	 * @param array  $options Additional query params
+	 * @return array|WP_Error
+	 */
+	public function postAudio( $url, $options = array() ) {
+		$outputFile = fopen( 'testing.mp3', 'w' );
+
+		if ( $outputFile === false ) {
+			throw new Exception( 'There was a problem creating the file : ' . $this->outputFilePath );
+		}
+
+		$textJson = array( 'text' => 'Testing hello world' );
+
+		$ch = curl_init();
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_HEADER, false );
+		curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $ch, CURLOPT_USERPWD, 'apikey:4ecJm8pe9uoYK6pZkG5pLrTfr1L7Edj-tbb8xIYKR4OL' );
+		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $ch, CURLOPT_POST, true );
+		curl_setopt(
+			$ch,
+			CURLOPT_HTTPHEADER,
+			array(
+				'Content-Type: application/json',
+				'Accept: audio/mp3',
+			)
+		);
+		curl_setopt( $ch, CURLOPT_POSTFIELDS, json_encode( $textJson ) );
+		curl_setopt( $ch, CURLOPT_FILE, $outputFile );
+
+		$result = curl_exec( $ch );
+		if ( curl_errno( $ch ) ) {
+			throw new Exception( 'Error with curl response: ' . curl_error( $ch ) . ' ' . $result );
+		}
+
+		curl_close( $ch );
+		fclose( $outputFile );
 	}
 
 	/**
@@ -146,7 +190,7 @@ class APIRequest {
 	 */
 	public function add_headers( &$options ) {
 		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
+			$options['headers'] = array();
 		}
 
 		$options['headers']['Authorization'] = $this->get_auth_header();

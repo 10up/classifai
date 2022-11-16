@@ -101,6 +101,7 @@ class Plugin {
 			'classifai_services',
 			[
 				'language_processing' => 'Classifai\Services\LanguageProcessing',
+				'text_to_speech' => 'Classifai\Services\TextToSpeech',
 				'image_processing'    => 'Classifai\Services\ImageProcessing',
 				'personalizer'        => 'Classifai\Services\Personalizer',
 			]

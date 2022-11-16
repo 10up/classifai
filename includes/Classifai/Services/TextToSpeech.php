@@ -6,14 +6,15 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Watson\TTSClassifier;
 
-class LanguageProcessing extends Service {
+class TextToSpeech extends Service {
 
 	/**
 	 * LanguageProcessing constructor.
 	 */
 	public function __construct() {
-		parent::__construct( __( 'Language Processing', 'classifai' ), 'language_processing', [ 'Classifai\Providers\Watson\NLU' ] );
+		parent::__construct( __( 'Text To Speech', 'classifai' ), 'text_to_speech', [ 'Classifai\Providers\Watson\TTS' ] );
 	}
 
 	/**
@@ -32,10 +33,10 @@ class LanguageProcessing extends Service {
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1',
-			'generate-tags/(?P<id>\d+)',
+			'generate-tts/(?P<id>\d+)',
 			[
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_tags' ],
+				'callback'            => [ $this, 'generate_text_to_speech' ],
 				'args'                => array(
 					'id' => array(
 						'required'          => true,
@@ -44,7 +45,7 @@ class LanguageProcessing extends Service {
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
 					),
 				),
-				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
+				'permission_callback' => '__return_true',
 			]
 		);
 	}
@@ -89,6 +90,16 @@ class LanguageProcessing extends Service {
 		} catch ( \Exception $e ) {
 			return new \WP_Error( 'request_failed', $e->getMessage() );
 		}
+	}
+
+	public function generate_text_to_speech( $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		$post = get_post( $post_id );
+		$text = wp_strip_all_tags( $post->post_content );
+
+		$request = new TTSClassifier();
+		$request->text_to_speech( $text, $post_id );
 	}
 
 	/**

@@ -128,6 +128,27 @@ function get_watson_api_url() {
 	}
 }
 
+/**
+ * Returns the currently configured Watson Text To Speech API URL. Lookup order is,
+ *
+ * - Options
+ * - Constant
+ *
+ * @return string
+ */
+function get_watson_tts_api_url() {
+	$settings = get_plugin_settings( 'text_to_speech' );
+	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
+
+	if ( ! empty( $creds['watson_url'] ) ) {
+		return $creds['watson_url'];
+	} elseif ( defined( 'WATSON_URL' ) ) {
+		return WATSON_URL;
+	} else {
+		return '';
+	}
+}
+
 
 /**
  * Returns the currently configured Watson username. Lookup order is,
