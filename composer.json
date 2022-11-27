@@ -10,7 +10,7 @@
   "type": "wordpress-plugin",
   "license": "GPLv2",
   "require": {
-    "php": ">=7.2",
+    "php": ">=7.4",
     "yahnis-elsts/plugin-update-checker": "4.13",
     "ua-parser/uap-php": "dev-master"
   },
