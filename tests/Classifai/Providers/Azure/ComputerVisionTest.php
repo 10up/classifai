@@ -86,7 +86,11 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		// Create A settings object
 		$settings = [
 			'enable_image_tagging' => 'no',
-			'enable_image_captions' => 'no'
+			'enable_image_captions' => array(
+				'alt'         => 0,
+				'caption'     => 0,
+				'description' => 0,
+			),
 		];
 		// Add the settings.
 		add_option( 'classifai_computer_vision', $settings );
