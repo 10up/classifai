@@ -230,7 +230,7 @@ abstract class Provider {
 			printf(
 				'<p>
 					<label for="%1$s_%2$s_%3$s">
-						<input type="hidden" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						<input type="hidden" name="classifai_%1$s[%2$s][%3$s]" value="0" />
 						<input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
 						%5$s
 					</label>
