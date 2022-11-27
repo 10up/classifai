@@ -24,12 +24,18 @@ import { handleClick } from './helpers';
 				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/alt-tags/',
-					callback: resp => {
+					callback: ( resp ) => {
 						const { enabledAltTextFields } = classifaiMediaVars;
 
 						if ( resp ) {
 							if ( enabledAltTextFields.includes( 'alt' ) ) {
-								const textField = document.getElementById( 'attachment-details-two-column-alt-text' ) ?? document.getElementById( 'attachment-details-alt-text' );
+								const textField =
+									document.getElementById(
+										'attachment-details-two-column-alt-text'
+									) ??
+									document.getElementById(
+										'attachment-details-alt-text'
+									);
 
 								if ( textField ) {
 									textField.value = resp;
@@ -37,15 +43,29 @@ import { handleClick } from './helpers';
 							}
 
 							if ( enabledAltTextFields.includes( 'caption' ) ) {
-								const textField = document.getElementById( 'attachment-details-two-column-caption' ) ?? document.getElementById( 'attachment-details-caption' );
+								const textField =
+									document.getElementById(
+										'attachment-details-two-column-caption'
+									) ??
+									document.getElementById(
+										'attachment-details-caption'
+									);
 
 								if ( textField ) {
 									textField.value = resp;
 								}
 							}
 
-							if ( enabledAltTextFields.includes( 'description' ) ) {
-								const textField = document.getElementById( 'attachment-details-two-column-description' ) ?? document.getElementById( 'attachment-details-description' );
+							if (
+								enabledAltTextFields.includes( 'description' )
+							) {
+								const textField =
+									document.getElementById(
+										'attachment-details-two-column-description'
+									) ??
+									document.getElementById(
+										'attachment-details-description'
+									);
 
 								if ( textField ) {
 									textField.value = resp;
