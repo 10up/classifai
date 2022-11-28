@@ -102,4 +102,53 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$meta       = wp_get_attachment_metadata( $attachment );
 		$this->assertNotFalse( $meta );
 	}
+
+	public function test_alt_text_option_reformatting() {
+		add_option( 'classifai_computer_vision', array() );
+
+		$options = array(
+			'valid'                 => false,
+			'url'                   => '',
+			'api_key'               => '',
+			'enable_image_captions' => '1',
+			'enable_image_tagging'  => '1',
+			'enable_smart_cropping' => 'no',
+			'enable_ocr'            => 'no',
+			'enable_read_pdf'       => 'no',
+			'caption_threshold'     => 75,
+			'tag_threshold'         => 70,
+			'image_tag_taxonomy'    => 'classifai-image-tags',
+		);
+
+		/** Test with `enable_image_captions` set to `1` */
+		add_filter( 'pre_option_classifai_computer_vision', function() use( $options ) {
+			return $options;
+		} );
+
+		$image_captions_settings = $this->get_computer_vision()->get_alt_text_settings();
+		$this->assertSame(
+			$image_captions_settings,
+			array(
+				'alt'         => 'alt',
+				'caption'     => 0,
+				'description' => 0,
+			)
+		);
+
+		/** Test with `enable_image_captions` set to `no` */
+		$options['enable_image_captions'] = 'no';
+		add_filter( 'pre_option_classifai_computer_vision', function() use( $options ) {
+			return $options;
+		} );
+
+		$image_captions_settings = $this->get_computer_vision()->get_alt_text_settings();
+		$this->assertSame(
+			$image_captions_settings,
+			array(
+				'alt'         => 0,
+				'caption'     => 0,
+				'description' => 0,
+			)
+		);
+	}
 }

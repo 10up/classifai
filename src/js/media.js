@@ -25,8 +25,6 @@ import { handleClick } from './helpers';
 					button: e.target,
 					endpoint: '/classifai/v1/alt-tags/',
 					callback: ( resp ) => {
-						const { enabledAltTextFields } = classifaiMediaVars;
-
 						if ( resp ) {
 							const textField =
 								document.getElementById(
