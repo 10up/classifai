@@ -40,13 +40,6 @@ class ImageProcessing extends Service {
 	 */
 	public function enqueue_media_scripts() {
 		wp_enqueue_script( 'classifai-media-script', CLASSIFAI_PLUGIN_URL . '/dist/media.js', array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ), CLASSIFAI_PLUGIN_VERSION, true );
-		wp_localize_script(
-			'classifai-media-script',
-			'classifaiMediaVars',
-			array(
-				'enabledAltTextFields' => $this->provider_classes[0]->get_alt_text_settings() ? $this->provider_classes[0]->get_alt_text_settings() : array(),
-			)
-		);
 	}
 
 	/**

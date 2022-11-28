@@ -28,48 +28,15 @@ import { handleClick } from './helpers';
 						const { enabledAltTextFields } = classifaiMediaVars;
 
 						if ( resp ) {
-							if ( enabledAltTextFields.includes( 'alt' ) ) {
-								const textField =
-									document.getElementById(
-										'attachment-details-two-column-alt-text'
-									) ??
-									document.getElementById(
-										'attachment-details-alt-text'
-									);
-
-								if ( textField ) {
-									textField.value = resp;
-								}
-							}
-
-							if ( enabledAltTextFields.includes( 'caption' ) ) {
-								const textField =
-									document.getElementById(
-										'attachment-details-two-column-caption'
-									) ??
-									document.getElementById(
-										'attachment-details-caption'
-									);
-
-								if ( textField ) {
-									textField.value = resp;
-								}
-							}
-
-							if (
-								enabledAltTextFields.includes( 'description' )
-							) {
-								const textField =
-									document.getElementById(
-										'attachment-details-two-column-description'
-									) ??
-									document.getElementById(
-										'attachment-details-description'
-									);
-
-								if ( textField ) {
-									textField.value = resp;
-								}
+							const textField =
+								document.getElementById(
+									'attachment-details-two-column-alt-text'
+								) ??
+								document.getElementById(
+									'attachment-details-alt-text'
+								);
+							if ( textField ) {
+								textField.value = resp;
 							}
 						}
 					},
