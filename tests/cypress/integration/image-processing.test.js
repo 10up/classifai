@@ -42,7 +42,7 @@ describe('Image processing Tests', () => {
 			.first()
 			.contains('ClassifAI Image Processing');
 		cy.get('.misc-publishing-actions label[for=rescan-captions]').contains(
-			'No alt text? Rescan image'
+			'No descriptive text? Rescan image'
 		);
 		cy.get('.misc-publishing-actions label[for=rescan-tags]').contains(
 			'Rescan image for new tags'

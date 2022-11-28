@@ -268,7 +268,7 @@ class ComputerVision extends Provider {
 	 */
 	public function attachment_data_meta_box( $post ) {
 		$settings   = get_option( 'classifai_computer_vision' );
-		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No alt text? Rescan image', 'classifai' ) : __( 'Generate alt text', 'classifai' );
+		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No descriptive text? Rescan image', 'classifai' ) : __( 'Generate descriptive text', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
 		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan for text', 'classifai' ) : __( 'Scan image for text', 'classifai' );
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
@@ -827,7 +827,7 @@ class ComputerVision extends Provider {
 		);
 		add_settings_field(
 			'enable-image-captions',
-			esc_html__( 'Generate alt text', 'classifai' ),
+			esc_html__( 'Generate descriptive text', 'classifai' ),
 			[ $this, 'render_auto_caption_fields' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
