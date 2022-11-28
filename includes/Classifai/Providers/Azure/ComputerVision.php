@@ -81,6 +81,14 @@ class ComputerVision extends Provider {
 			return false;
 		}
 
+		if ( ! is_array( $settings['enable_image_captions'] ) ) {
+			return array(
+				'alt'         => 'no' === $settings['enable_image_captions'] ? 0 : 'alt',
+				'caption'     => 0,
+				'description' => 0,
+			);
+		}
+
 		foreach ( $settings['enable_image_captions'] as $key => $value ) {
 			if ( '0' !== $value ) {
 				$enabled_fields[] = $key;
