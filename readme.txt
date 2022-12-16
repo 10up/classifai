@@ -31,5 +31,8 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 
 == Upgrade Notice ==
 
+= 1.8.1 =
+**Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
+
 = 1.8.0 =
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
