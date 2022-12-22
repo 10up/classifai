@@ -8,7 +8,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 **Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
 
 ### Changed
-- Bump WordPress minimum to 5.7 and PHP minimum to 7.4 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
+- Bump WordPress minimum from 5.6 to 5.7 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
+- Bump PHP minimum from 7.2 to 7.4 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
 - Bump WordPress "tested up to" version to 6.1 (props [@iamdharmesh](https://github.com/iamdharmesh), [@cadic](https://github.com/cadic) via [#381](https://github.com/10up/classifai/pull/381)).
 
 ### Security
