@@ -71,14 +71,14 @@ class ComputerVision extends Provider {
 	 * Returns an array of fields enabled to be set to store image captions.
 	 * Returns `false` if no fields are selected.
 	 *
-	 * @return array|boolean
+	 * @return array
 	 */
 	public function get_alt_text_settings() {
 		$settings       = $this->get_settings();
 		$enabled_fields = array();
 
 		if ( ! isset( $settings['enable_image_captions'] ) ) {
-			return false;
+			return array();
 		}
 
 		if ( ! is_array( $settings['enable_image_captions'] ) ) {
@@ -457,7 +457,7 @@ class ComputerVision extends Provider {
 		$settings   = $this->get_settings();
 		if (
 			'no' !== $settings['enable_image_tagging'] ||
-			! $this->get_alt_text_settings()
+			empty( $this->get_alt_text_settings() )
 		) {
 
 			// Allow scanning image that are not stored in local storage.
@@ -645,11 +645,11 @@ class ComputerVision extends Provider {
 
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
-				if ( is_array( $enabled_fields ) && in_array( 'alt', $enabled_fields, true ) ) {
+				if ( in_array( 'alt', $enabled_fields, true ) ) {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
 				}
 
-				if ( is_array( $enabled_fields ) && in_array( 'caption', $enabled_fields, true ) ) {
+				if ( in_array( 'caption', $enabled_fields, true ) ) {
 					wp_update_post(
 						array(
 							'ID'           => $attachment_id,
@@ -658,7 +658,7 @@ class ComputerVision extends Provider {
 					);
 				}
 
-				if ( is_array( $enabled_fields ) && in_array( 'description', $enabled_fields, true ) ) {
+				if ( in_array( 'description', $enabled_fields, true ) ) {
 					wp_update_post(
 						array(
 							'ID'           => $attachment_id,

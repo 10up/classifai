@@ -221,10 +221,12 @@ abstract class Provider {
 		);
 
 		foreach ( $checkbox_options as $option_value => $option_label ) {
-			if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
-				$default_value = '1' === $setting_index['enable_image_captions'] ? 'alt' : '';
-			} else {
-				$default_value = $setting_index['enable_image_captions'][ $option_value ];
+			if ( isset( $setting_index['enable_image_captions'] ) ) {
+				if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
+					$default_value = '1' === $setting_index['enable_image_captions'] ? 'alt' : '';
+				} else {
+					$default_value = $setting_index['enable_image_captions'][ $option_value ];
+				}
 			}
 
 			printf(

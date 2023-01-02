@@ -81,7 +81,7 @@ class BulkActions {
 
 		if (
 			'no' !== $settings['enable_image_tagging'] ||
-			! $this->computer_vision->get_alt_text_settings()
+			empty( $this->computer_vision->get_alt_text_settings() )
 		) {
 			$bulk_actions['scan_image'] = __( 'Scan Image', 'classifai' );
 		}
