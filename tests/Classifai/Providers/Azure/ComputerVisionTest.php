@@ -120,7 +120,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			'image_tag_taxonomy'    => 'classifai-image-tags',
 		);
 
-		/** Test with `enable_image_captions` set to `1` */
+		// Test with `enable_image_captions` set to `1`.
 		add_filter( 'pre_option_classifai_computer_vision', function() use( $options ) {
 			return $options;
 		} );
@@ -135,7 +135,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			)
 		);
 
-		/** Test with `enable_image_captions` set to `no` */
+		// Test with `enable_image_captions` set to `no`.
 		$options['enable_image_captions'] = 'no';
 		add_filter( 'pre_option_classifai_computer_vision', function() use( $options ) {
 			return $options;
