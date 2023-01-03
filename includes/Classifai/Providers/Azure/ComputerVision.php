@@ -604,10 +604,10 @@ class ComputerVision extends Provider {
 	protected function prep_api_url( array $routes = [] ) {
 		$settings     = $this->get_settings();
 		$api_features = [];
-		if ( in_array( 'alt-tags', $routes, true ) || 'no' !== $settings['enable_image_captions'] ) {
+		if ( in_array( 'alt-tags', $routes, true ) || ( isset( $settings['enable_image_captions'] ) && 'no' !== $settings['enable_image_captions'] ) ) {
 			$api_features[] = 'Description';
 		}
-		if ( in_array( 'image-tags', $routes, true ) || 'no' !== $settings['enable_image_tagging'] ) {
+		if ( in_array( 'image-tags', $routes, true ) || ( isset( $settings['enable_image_captions'] ) && 'no' !== $settings['enable_image_tagging'] ) ) {
 			$api_features[] = 'Tags';
 		}
 		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['url'] ) . $this->analyze_url );
