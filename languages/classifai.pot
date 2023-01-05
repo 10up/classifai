@@ -1,14 +1,14 @@
-# Copyright (C) 2022 10up
+# Copyright (C) 2023 10up
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 1.8.0\n"
+"Project-Id-Version: ClassifAI 1.8.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2022-09-30 09:56:45+00:00\n"
+"POT-Creation-Date: 2023-01-05 17:38:25+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2022-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2023-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.6\n"
@@ -16,7 +16,7 @@ msgstr ""
 #: classifai.php:29
 #. translators: PHP Update guide URL
 msgid ""
-"ClassifAI requires PHP version 7.2. <a href=\"%s\">Click here</a> to learn "
+"ClassifAI requires PHP version 7.4. <a href=\"%s\">Click here</a> to learn "
 "how to update your PHP version."
 msgstr ""
 
