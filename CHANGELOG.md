@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.8.1] - 2023-01-05
+**Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
+
+### Added
+- New "Build release zip" workflow (props [@iamdharmesh](https://github.com/iamdharmesh), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#390](https://github.com/10up/classifai/pull/390)).
+
+### Changed
+- Bump WordPress minimum from 5.6 to 5.7 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
+- Bump PHP minimum from 7.2 to 7.4 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
+- Bump WordPress "tested up to" version to 6.1 (props [@iamdharmesh](https://github.com/iamdharmesh), [@cadic](https://github.com/cadic) via [#381](https://github.com/10up/classifai/pull/381)).
+
+### Security
+- Bump `decode-uri-component` from 0.2.0 to 0.2.2 (props [@dependabot[bot]](https://github.com/apps/dependabot) via [#383](https://github.com/10up/classifai/pull/383)).
+- Bump `simple-git` from 3.10.0 to 3.15.1 (props [@dependabot[bot]](https://github.com/apps/dependabot) via [#384](https://github.com/10up/classifai/pull/384)).
+
 ## [1.8.0] - 2022-09-30
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
 
@@ -257,6 +272,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.8.1]: https://github.com/10up/classifai/compare/1.8.0...1.8.1
 [1.8.0]: https://github.com/10up/classifai/compare/1.7.3...1.8.0
 [1.7.3]: https://github.com/10up/classifai/compare/1.7.2...1.7.3
 [1.7.2]: https://github.com/10up/classifai/compare/1.7.1...1.7.2
