@@ -4,8 +4,11 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.8.1] - 2022-12-19
+## [1.8.1] - 2023-01-05
 **Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
+
+### Added
+- New "Build release zip" workflow (props [@iamdharmesh](https://github.com/iamdharmesh), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#390](https://github.com/10up/classifai/pull/390)).
 
 ### Changed
 - Bump WordPress minimum from 5.6 to 5.7 (props [@zamanq](https://github.com/zamanq), [@Sidsector9](https://github.com/Sidsector9) via [#376](https://github.com/10up/classifai/pull/376)).
