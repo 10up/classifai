@@ -1,0 +1,8 @@
+# These owners will be the default owners for everything in the repo. Unless a later match takes precedence, @dkotter or @jeffpaul, as primary maintainers will be requested for review when someone opens a Pull Request.
+*                   @10up/open-source-practice @dkotter @jeffpaul
+
+# GitHub and WordPress.org specifics
+/.github/           @jeffpaul
+/.wordpress-org/    @jeffpaul
+CODE_OF_CONDUCT.md  @jeffpaul
+LICENSE.md          @jeffpaul
