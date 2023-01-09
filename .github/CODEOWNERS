@@ -4,5 +4,6 @@
 # GitHub and WordPress.org specifics
 /.github/           @jeffpaul
 /.wordpress-org/    @jeffpaul
+/assets/img/        @jeffpaul
 CODE_OF_CONDUCT.md  @jeffpaul
 LICENSE.md          @jeffpaul
