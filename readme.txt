@@ -1,10 +1,10 @@
 === ClassifAI ===
-Contributors:      10up
+Contributors:      10up, jeffpaul, dkotter
 Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, Content Tagging, Classification, Smart Cropping, Alt Text
 Requires at least: 5.7
 Tested up to:      6.1
 Requires PHP:      7.4
-Stable tag:        1.8.0
+Stable tag:        1.8.1
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,9 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 == Upgrade Notice ==
+
+= 1.8.1 =
+**Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
 
 = 1.8.0 =
 **Note that this release bumps the PHP minimum from 7.0 to 7.2.**
