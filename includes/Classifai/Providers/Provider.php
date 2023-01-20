@@ -197,7 +197,7 @@ abstract class Provider {
 	}
 
 	/**
-	 * Renders the checkbox group for 'Generate alt text' setting.
+	 * Renders the checkbox group for 'Generate descriptive text' setting.
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */

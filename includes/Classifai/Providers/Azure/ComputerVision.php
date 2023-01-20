@@ -840,7 +840,7 @@ class ComputerVision extends Provider {
 		);
 		add_settings_field(
 			'caption-threshold',
-			esc_html__( 'Alt text confidence threshold', 'classifai' ),
+			esc_html__( 'Descriptive text confidence threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
