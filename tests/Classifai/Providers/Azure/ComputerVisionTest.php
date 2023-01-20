@@ -79,6 +79,18 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		remove_filter( 'classifai_should_smart_crop_image', '__return_true' );
 	}
 
+
+	/**
+	 * Ensure that settings returns empty array of the `classifai_computer_vision` is not set.
+	 */
+	public function test_no_computer_vision_option_set() {
+		delete_option( 'classifai_computer_vision' );
+
+		$settings = $this->get_computer_vision()->get_settings();
+
+		$this->assertSame( $settings, array() );
+	}
+
 	/**
 	 * Ensure that attachment meta is being set.
 	 */
