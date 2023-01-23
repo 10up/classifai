@@ -84,7 +84,7 @@ class ImageProcessing extends Service {
 			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 
 			$form_fields['rescan_alt_tags'] = [
-				'label'        => __( 'Alt text', 'classifai' ),
+				'label'        => __( 'Descriptive text', 'classifai' ),
 				'input'        => 'html',
 				'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 				'show_in_edit' => false,
