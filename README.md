@@ -102,7 +102,7 @@ Add this repository to composer.json, specifying a release version, as shown bel
             }
         }
     }
-}
+]
 ```
 
 Finally, require the plugin, using the version number you specified in the previous step:
