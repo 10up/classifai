@@ -59,10 +59,61 @@ The service that powers ClassifAI's Recommended Content, Microsoft Azure's Perso
 
 ## Installation
 
+### Manual Installation
+
 #### 1. Download or Clone this repo, install dependencies and build.
 
 - `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
+
+#### 2. Activate Plugin
+
+### Installation via Composer
+
+ClassifAI releases can be installed via Composer. 
+
+#### 1. Update composer.json
+
+Instruct Composer to install ClassifAI into the plugins directory by adding or modifying the "extra" section of your project's composer.json file to match the following:
+
+```json
+"extra": {
+    "installer-paths": {
+        "plugins/{$name}": [
+            "type:wordpress-plugin"
+        ]
+    }
+}
+```
+
+Add this repository to composer.json, specifying a release version, as shown below:
+
+```json
+"repositories": [
+    {
+        "type": "package",
+        "package": {
+            "name": "10up/classifai",
+            "version": "1.8.1",
+            "type": "wordpress-plugin",
+            "dist": {
+                "url": "https://github.com/10up/classifai/archive/refs/tags/1.8.1.zip",
+                "type": "zip"
+            }
+        }
+    }
+}
+```
+
+Finally, require the plugin, using the version number you specified in the previous step:
+
+```json
+"require": {
+    "10up/classifai": "1.8.1"
+}
+```
+
+After running `composer update`, ClassifAI will be installed in the plugins directory with no build steps needed.
 
 #### 2. Activate Plugin
 
