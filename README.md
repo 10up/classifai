@@ -113,7 +113,7 @@ Finally, require the plugin, using the version number you specified in the previ
 }
 ```
 
-After running `composer update`, ClassifAI will be installed in the plugins directory with no build steps needed.
+After you run `composer update`, ClassifAI will be installed in the plugins directory with no build steps needed.
 
 #### 2. Activate Plugin
 
