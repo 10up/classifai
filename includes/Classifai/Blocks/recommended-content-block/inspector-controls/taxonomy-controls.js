@@ -4,7 +4,8 @@
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/taxonomy-controls.js
  */
-import { FormTokenField } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { FormTokenField, ToggleControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
@@ -35,7 +36,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	}
 };
 
-const TaxonomyControls = ( { onChange, query } ) => {
+const TaxonomyControls = ( { onChange, query, usePostTerms } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
 	const taxonomiesInfo = useSelect(
 		( select ) => {
@@ -96,12 +97,24 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			[]
 		);
 	};
+
+	const syncTerms = ['category', 'post_tag'];
+
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
+			{
+				!! taxonomiesInfo?.length && taxonomiesInfo.filter(({slug})=>syncTerms.indexOf(slug)>-1).length &&
+				<ToggleControl
+					label={ __( 'Use this Post\'s Categories and Tags', 'classifai' ) }
+					checked={ usePostTerms }
+					onChange={ usePostTerms => onChange({usePostTerms}) }
+				/> || null
+			}
+			
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {
-					if ( ! terms?.names?.length ) {
+					if ( ! terms?.names?.length || ( usePostTerms && syncTerms.indexOf(slug)>-1 )) {
 						return null;
 					}
 					return (

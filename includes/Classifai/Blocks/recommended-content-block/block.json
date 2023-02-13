@@ -8,8 +8,7 @@
   "category": "classifai-blocks",
   "attributes": {
     "contentPostType": {
-      "type": "string",
-      "default": "post"
+      "type": "string"
     },
     "taxQuery": {
       "type": "object"
@@ -17,6 +16,10 @@
     "displayPostExcerpt": {
       "type": "boolean",
       "default": false
+    },
+    "usePostTerms": {
+      "type": "boolean",
+      "default": true
     },
     "displayAuthor": {
       "type": "boolean",

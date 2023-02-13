@@ -47,13 +47,14 @@ const RecommendedContentBlockEdit = ( props ) => {
 		columns = 3,
 		displayLayout = 'grid',
 		numberOfItems = 3,
-		contentPostType,
+		contentPostType = (wp.data.select('core/editor').getCurrentPostType() || 'post'),
 		taxQuery,
 		displayAuthor,
 		displayFeaturedImage,
 		displayPostDate,
 		displayPostExcerpt,
 		addLinkToFeaturedImage,
+		usePostTerms,
 	} = attributes;
 	const postId = useSelect( ( select ) =>
 		select( 'core/editor' ).getCurrentPostId()
@@ -117,6 +118,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 						<TaxonomyControls
 							onChange={ setAttributes }
 							query={ attributes }
+							usePostTerms={ usePostTerms }
 						/>
 					) }
 				</PanelBody>
