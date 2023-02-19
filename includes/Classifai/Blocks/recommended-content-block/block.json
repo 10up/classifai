@@ -19,7 +19,11 @@
     },
     "usePostTerms": {
       "type": "boolean",
-      "default": true
+      "default": false
+    },
+    "defaultTermsSetFor": {
+      "type": "array",
+      "default": []
     },
     "displayAuthor": {
       "type": "boolean",

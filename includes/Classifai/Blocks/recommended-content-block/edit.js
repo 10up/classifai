@@ -21,6 +21,7 @@ import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
 import TaxonomyControls from './inspector-controls/taxonomy-controls';
 import { usePostTypes } from './utils';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Edit component.
@@ -47,7 +48,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 		columns = 3,
 		displayLayout = 'grid',
 		numberOfItems = 3,
-		contentPostType = (wp.data.select('core/editor').getCurrentPostType() || 'post'),
+		contentPostType,
 		taxQuery,
 		displayAuthor,
 		displayFeaturedImage,
@@ -60,7 +61,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 		select( 'core/editor' ).getCurrentPostId()
 	);
 	const blockProps = useBlockProps();
-	const { postTypesTaxonomiesMap, postTypesSelectOptions } = usePostTypes();
+	const { postTypesTaxonomiesMap=[], postTypesSelectOptions } = usePostTypes();
 	const onPostTypeChange = ( newValue ) => {
 		const updateQuery = { contentPostType: newValue };
 		// We need to dynamically update the `taxQuery` property,
@@ -97,6 +98,12 @@ const RecommendedContentBlockEdit = ( props ) => {
 		},
 	];
 
+	useEffect(()=>{
+		if ( ! contentPostType ) {
+			onPostTypeChange( wp.data.select('core/editor').getCurrentPostType() || 'post' );
+		}
+	}, []);
+
 	return (
 		<div { ...blockProps }>
 			<BlockControls>
@@ -117,7 +124,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 					{ postTypesSelectOptions && (
 						<TaxonomyControls
 							onChange={ setAttributes }
-							query={ attributes }
+							attributes={ attributes }
 							usePostTerms={ usePostTerms }
 						/>
 					) }
@@ -218,6 +225,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 				<ServerSideRender
 					block="classifai/recommended-content-block"
 					attributes={ {
+						usePostTerms,
 						addLinkToFeaturedImage,
 						columns,
 						contentPostType,

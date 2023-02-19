@@ -14,9 +14,9 @@
 if ( is_singular() ) {
 	$attributes['excludeId'] = get_the_ID();
 }
-
-$attr_key = md5( maybe_serialize( $attributes ) );
-$block_id = 'classifai-recommended-block-' . $attr_key;
+$attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
+$attr_key   = md5( maybe_serialize( $attributes ) );
+$block_id   = 'classifai-recommended-block-' . $attr_key;
 ?>
 <div class="classifai-recommended-block-wrap" id="<?php echo esc_attr( $block_id ); ?>" data-attr_key="<?php echo esc_attr( $attr_key ); ?>">
 	<?php esc_html_e( 'Loading...', 'classifai' ); ?>

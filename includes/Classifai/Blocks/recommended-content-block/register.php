@@ -23,6 +23,8 @@ function register() {
 			'render_callback' => $n( 'render_block_callback' ),
 		]
 	);
+
+	add_filter( 'classifai_recommended_block_attributes', $n( 'use_default_post_terms' ) );
 }
 
 /**
@@ -45,4 +47,32 @@ function render_block_callback( $attributes, $content, $block ) {
 	ob_start();
 	include __DIR__ . '/markup.php';
 	return ob_get_clean();
+}
+
+/**
+ * Reset category and taxonomy if usePostTerms is true
+ *
+ * @param array $attributes Block attributes
+ * @return array
+ */
+function use_default_post_terms( $attributes ) {
+	if ( ! empty( $attributes['usePostTerms'] ) && true === $attributes['usePostTerms'] ) {
+		if ( ! isset( $attributes['taxQuery'] ) || ! is_array( $attributes['taxQuery'] ) ) {
+			$attributes['taxQuery'] = array();
+		}
+
+		$post_id    = $attributes['excludeId'];
+		$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
+		$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
+
+		if ( ! empty( $categories ) ) {
+			$attributes['taxQuery']['category'] = $categories;
+		}
+
+		if ( ! empty( $tags ) ) {
+			$attributes['taxQuery']['post_tag'] = $tags;
+		}
+	}
+
+	return $attributes;
 }
