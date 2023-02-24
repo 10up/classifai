@@ -26,7 +26,7 @@ class Update {
 	 *
 	 * @var Puc_v4p13_Plugin_UpdateChecker
 	 */
-	private $updater;
+	protected $updater;
 
 	/**
 	 * Check to see if we can register this class.
