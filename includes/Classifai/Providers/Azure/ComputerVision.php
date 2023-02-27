@@ -338,7 +338,9 @@ class ComputerVision extends Provider {
 	 * @return array Read and running status.
 	 */
 	public static function get_read_status( $attachment_id = null ) {
-		if ( isset( $_POST['attachment_id'] ) ) {
+		$doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
+
+		if ( $doing_ajax ) {
 			$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
 		}
 
@@ -355,7 +357,7 @@ class ComputerVision extends Provider {
 			'running' => $running,
 		];
 
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+		if ( $doing_ajax ) {
 			wp_send_json_success( $resp );
 		} else {
 			return $resp;
