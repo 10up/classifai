@@ -148,9 +148,11 @@ import { handleClick } from './helpers';
 				attachment_id: postId,
 			},
 			success: ( resp ) => {
-				if ( resp && resp.data ) {
+				if ( resp?.data?.running ) {
 					readButton.setAttribute( 'disabled', 'disabled' );
 					readButton.textContent = __( 'In progress!', 'classifai' );
+				} else if ( resp?.data?.read ) {
+					readButton.textContent = __( 'Rescan', 'classifai' );
 				}
 			},
 		} );
