@@ -136,6 +136,7 @@ class ComputerVision extends Provider {
 		if ( $enable_read_pdf ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
+			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status' ] );
 		}
 	}
 
@@ -312,13 +313,8 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_pdf_data_meta_box( $post ) {
-		$read   = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF for text', 'classifai' ) : __( 'Rescan PDF for text', 'classifai' );
-		$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
-		if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
-			$running = true;
-		} else {
-			$running = false;
-		}
+		$read    = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF for text', 'classifai' ) : __( 'Rescan PDF for text', 'classifai' );
+		$running = $this->get_read_status();
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">
@@ -332,6 +328,23 @@ class ComputerVision extends Provider {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Callback to get the status of the PDF read with AJAX support.
+	 *
+	 * @return mixed
+	 */
+	public function get_read_status() {
+		$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
+		$status        = get_post_meta( $attachment_id, '_classifai_azure_read_status', true );
+		$running       = ( ! empty( $status['status'] ) && 'running' === $status['status'] );
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			wp_send_json_success( $running );
+		} else {
+			return $running;
+		}
 	}
 
 	/**
