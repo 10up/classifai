@@ -27,6 +27,87 @@ namespace Classifai\Watson;
 class Linker {
 
 	/**
+	 * Array of allowed Tags
+	 *
+	 * @var array
+	 */
+	protected $restricted_tags = [
+		'type' => 'none',
+		'tags' => [],
+	];
+
+	/**
+	 * Construct the Linker object
+	 */
+	public function __construct() {
+		$this->get_restricted_tags();
+	}
+
+	/**
+	 * Get tag restrictions
+	 *
+	 * @return void
+	 */
+	public function get_restricted_tags() {
+		$settings = new Classifai\Services\ServicesManager();
+		$type     = $settings->get_setting( 'tag_restrict_type' );
+		$tags     = [];
+
+		if ( ! empty( $type ) && 'none' !== $type ) {
+			if ( 'existing' === $type ) {
+				$tags = get_tags( [ 'hide_empty' => false ] );
+
+				if ( ! empty( $tags ) ) {
+					$tags = wp_list_pluck( $tags, 'name' );
+				}
+			}
+
+			if ( 'disallow' === $type ) {
+				$tags = $settings->get_setting( 'disallowed_tags' );
+
+				if ( ! empty( $tags ) ) {
+					$tags = preg_split( '/\r\n|[\r\n]/', $tags );
+				}
+			}
+
+			$this->restricted_tags = [
+				'type' => $type,
+				'tags' => $tags,
+			];
+		}
+	}
+
+	/**
+	 * Determine if a specific tag can be used based on user settings.
+	 *
+	 * @param string $tag Tag Name.
+	 * @return boolean
+	 */
+	public function can_use_tag( $tag ) {
+		if ( 'none' !== $this->restricted_tags['type'] ) {
+			$restricted_tags = array_map( 'strtolower', $this->restricted_tags['tags'] );
+
+			// Restricted Tags Disallowed List
+			if (
+				( 'disallowed' === $this->restricted_tags['type'] && ! empty( $restricted_tags ) ) &&
+				in_array( strtolower( $tag ), $restricted_tags, true )
+			) {
+				return false;
+			}
+
+			// Existing Tags Only
+			if (
+				( 'existing' === $this->restricted_tags['type'] ) &&
+				! in_array( strtolower( $tag ), $restricted_tags, true )
+			) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Links the IBM Watson NLU classification results to the
 	 * corresponding taxonomies in WordPress.
 	 *
@@ -272,6 +353,11 @@ class Linker {
 	 */
 	public function can_link_category( $category ) {
 		if ( ! empty( $category['label'] ) ) {
+
+			if ( ! $this->can_use_tag( $category['label'] ) ) {
+				return false;
+			}
+
 			if ( ! empty( $category['score'] ) ) {
 				$score     = floatval( $category['score'] );
 				$threshold = \Classifai\get_feature_threshold( 'category' );
@@ -291,6 +377,11 @@ class Linker {
 	 */
 	public function can_link_keyword( $keyword ) {
 		if ( ! empty( $keyword['text'] ) ) {
+
+			if ( ! $this->can_use_tag( $keyword['text'] ) ) {
+				return false;
+			}
+
 			if ( ! empty( $keyword['relevance'] ) ) {
 				$relevance = floatval( $keyword['relevance'] );
 				$threshold = \Classifai\get_feature_threshold( 'keyword' );
@@ -308,6 +399,11 @@ class Linker {
 	 */
 	public function can_link_concept( $concept ) {
 		if ( ! empty( $concept['text'] ) ) {
+
+			if ( ! $this->can_use_tag( $concept['text'] ) ) {
+				return false;
+			}
+
 			if ( ! empty( $concept['relevance'] ) ) {
 				$relevance = floatval( $concept['relevance'] );
 				$threshold = \Classifai\get_feature_threshold( 'concept' );
@@ -325,6 +421,11 @@ class Linker {
 	 */
 	public function can_link_entity( $entity ) {
 		if ( ! empty( $entity['text'] ) ) {
+
+			if ( ! $this->can_use_tag( $entity['text'] ) ) {
+				return false;
+			}
+
 			if ( ! empty( $entity['relevance'] ) ) {
 				$relevance = floatval( $entity['relevance'] );
 				$threshold = \Classifai\get_feature_threshold( 'entity' );
