@@ -68,24 +68,20 @@
 	 * Toggle the Disallowed Tags field based on chosen restriction type
 	 */
 	const disallowedTags = () => {
-		const $disallowedTagsToggles = Array.from(
-			document.querySelectorAll(
-				'input[name="classifai_settings[tag_restrict_type]'
-			)
+		const $disallowedTagsSelect = document.querySelector(
+			'select[name="classifai_settings[tag_restrict_type]'
 		);
 		const $disallowedTagsField = document.querySelector(
 			'.classifai-disallowed-tags'
 		);
 
-		if ( ! $disallowedTagsToggles.length || ! $disallowedTagsField ) return;
+		if ( ! $disallowedTagsSelect || ! $disallowedTagsField ) return;
 
-		$disallowedTagsToggles.forEach( ( toggle ) => {
-			toggle.addEventListener( 'change', ( e ) => {
-				toggleField(
-					$disallowedTagsField,
-					'disallow' === e.target.value
-				);
-			} );
+		$disallowedTagsSelect.addEventListener( 'change', ( e ) => {
+			toggleField(
+				$disallowedTagsField,
+				'disallow' === e.target.options[ e.target.selectedIndex ].value
+			);
 		} );
 	};
 

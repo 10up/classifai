@@ -118,16 +118,20 @@ class ServicesManager {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = [];
+
 		if ( isset( $settings['email'] )
 			&& isset( $settings['license_key'] )
 			&& $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
+
 			$new_settings['valid_license'] = true;
 			$new_settings['email']         = sanitize_text_field( $settings['email'] );
 			$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
 		} else {
+
 			$new_settings['valid_license'] = false;
 			$new_settings['email']         = isset( $settings['email'] ) ? sanitize_text_field( $settings['email'] ) : '';
 			$new_settings['license_key']   = isset( $settings['license_key'] ) ? sanitize_text_field( $settings['license_key'] ) : '';
+
 			add_settings_error(
 				'registration',
 				'classifai-registration',
@@ -141,6 +145,11 @@ class ServicesManager {
 			$new_settings['tag_restrict_type'] = sanitize_text_field( $settings['tag_restrict_type'] );
 		}
 
+		// Disallowed Tags List
+		if ( isset( $settings['disallowed_tags'] ) ) {
+			$new_settings['disallowed_tags'] = sanitize_textarea_field( $settings['disallowed_tags'] );
+		}
+
 		return $new_settings;
 	}
 
@@ -149,9 +158,6 @@ class ServicesManager {
 	 */
 	public function setup_fields_sections() {
 		add_settings_section( 'classifai_settings', 'ClassifAI Settings', '', 'classifai_settings' );
-
-		// Use this variable to hide/show fields conditionally.
-		$hide_field = false;
 
 		add_settings_field(
 			'email',
@@ -189,7 +195,7 @@ class ServicesManager {
 			[
 				'label_for'    => 'tag_restrict_type',
 				'option_index' => 'tags',
-				'input_type'   => 'radio',
+				'input_type'   => 'select',
 				'description'  => __( 'Restrict automated tags to existing tags within the site or create a list of tags not allowed.', 'classifai' ),
 			]
 		);
@@ -237,14 +243,16 @@ class ServicesManager {
 	 */
 	public function render_tag_restrict_type_field() {
 		$tag_limit_type = $this->get_settings( 'tag_restrict_type' );
+
+		if ( empty( $tag_limit_type ) ) {
+			$tag_limit_type = 'none';
+		}
 		?>
-		<label for="restrict_tags_existing">
-			<input id="restrict_tags_existing" type="radio" name="classifai_settings[tag_restrict_type]" value="existing" <?php checked( $tag_limit_type, 'existing' ); ?> /> <?php esc_html_e( 'Existing Tags', 'classifai' ); ?>
-		</label>
-		<br />
-		<label for="restrict_tags_disallow">
-			<input id="restrict_tags_disallow" type="radio" name="classifai_settings[tag_restrict_type]" value="disallow" <?php checked( $tag_limit_type, 'disallow' ); ?> /> <?php esc_html_e( 'Disallowed Tags', 'classifai' ); ?>
-		</label>
+		<select name="classifai_settings[tag_restrict_type]" id="tag_restrict_type">
+			<option value="none" <?php selected( $tag_limit_type, 'none' ); ?>><?php esc_html_e( 'None', 'classifai' ); ?></option>
+			<option value="existing" <?php selected( $tag_limit_type, 'existing' ); ?>><?php esc_html_e( 'Existing Tags', 'classifai' ); ?></option>
+			<option value="disallow" <?php selected( $tag_limit_type, 'disallow' ); ?>><?php esc_html_e( 'Disallowed Tags', 'classifai' ); ?></option>
+		</select>
 		<br /><span class="description"><?php esc_html_e( 'Limit automated tags to existing tags or provide a list of disallowed tags.', 'classifai' ); ?></span>
 		<?php
 	}
@@ -256,9 +264,7 @@ class ServicesManager {
 		$disallowed_tags = $this->get_settings( 'disallowed_tags' );
 		?>
 		<div class="classifai-disallowed-tags">
-			<textarea id="disallowed_tags" name="classifai_settings[disallowed_tags]" class="regular-text" rows="5" autocomplete="off">
-				<?php echo esc_textarea( $disallowed_tags ); ?>
-			</textarea>
+			<textarea id="disallowed_tags" name="classifai_settings[disallowed_tags]" class="regular-text" rows="5" autocomplete="off"><?php echo esc_textarea( $disallowed_tags ); ?></textarea>
 			<br /><span class="description"><?php esc_html_e( 'Tags to ignore if returned from classificaiton service. One tag per line.', 'classifai' ); ?></span>
 		</div>
 		<?php
