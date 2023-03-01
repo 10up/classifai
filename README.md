@@ -2,7 +2,7 @@
 
 > Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.0%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.1%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
@@ -59,10 +59,61 @@ The service that powers ClassifAI's Recommended Content, Microsoft Azure's Perso
 
 ## Installation
 
+### Manual Installation
+
 #### 1. Download or Clone this repo, install dependencies and build.
 
 - `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
+
+#### 2. Activate Plugin
+
+### Installation via Composer
+
+ClassifAI releases can be installed via Composer. 
+
+#### 1. Update composer.json
+
+Instruct Composer to install ClassifAI into the plugins directory by adding or modifying the "extra" section of your project's composer.json file to match the following:
+
+```json
+"extra": {
+    "installer-paths": {
+        "plugins/{$name}": [
+            "type:wordpress-plugin"
+        ]
+    }
+}
+```
+
+Add this repository to composer.json, specifying a release version, as shown below:
+
+```json
+"repositories": [
+    {
+        "type": "package",
+        "package": {
+            "name": "10up/classifai",
+            "version": "1.8.1",
+            "type": "wordpress-plugin",
+            "dist": {
+                "url": "https://github.com/10up/classifai/archive/refs/tags/1.8.1.zip",
+                "type": "zip"
+            }
+        }
+    }
+]
+```
+
+Finally, require the plugin, using the version number you specified in the previous step:
+
+```json
+"require": {
+    "10up/classifai": "1.8.1"
+}
+```
+
+After you run `composer update`, ClassifAI will be installed in the plugins directory with no build steps needed.
 
 #### 2. Activate Plugin
 

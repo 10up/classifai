@@ -60,9 +60,7 @@ jobs:
       run: composer install
 
     - name: PHPCS check
-      uses: chekalsky/phpcs-action@v1
-      with:
-        phpcs_bin_path: './vendor/bin/phpcs . --runtime-set testVersion 7.2-'
+      run: vendor/bin/phpcs . --runtime-set testVersion 7.4-
 
   vipcs:
     name: vipcs
@@ -71,7 +69,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: VIPCS check
-      uses: 10up/wpcs-action@v1.3.2
+      uses: 10up/wpcs-action@stable
       with:
         enable_warnings: true
         standard: 'WordPress-VIP-Go'
