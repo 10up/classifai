@@ -159,6 +159,8 @@ class Plugin {
 				'api_key'      => __( 'API Key', 'classifai' ),
 				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
 				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+				'add_tags'     => __( 'Enter tag name', 'classifai' ),
+				'search_tags'  => __( 'Search for tags...', 'classifai' ),
 			]
 		);
 	}

@@ -1,0 +1,14 @@
+@import '../../node_modules/choices.js/public/assets/styles/choices.min.css';
+
+.choices {
+	margin-bottom: 0;
+}
+
+.choices__list--multiple {
+	display: block;
+	margin: .5rem 0 1rem;
+}
+
+.choices__input {
+	width: 20rem !important;
+}

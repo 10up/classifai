@@ -184,7 +184,7 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'classifai-tag-filters-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/tags.js',
-			[],
+			[ 'classifai-admin-script' ],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
@@ -919,6 +919,8 @@ class ComputerVision extends Provider {
 				'default_value' => $default_settings['image_tag_taxonomy'],
 			]
 		);
+
+		// Filter Automated Tags Selection
 		add_settings_field(
 			'filter-tags-type',
 			esc_html__( 'Filter Automated Tags', 'classifai' ),
@@ -931,15 +933,17 @@ class ComputerVision extends Provider {
 				'input_type'    => 'select',
 				'default_value' => $default_settings['filter_tags_type'],
 				'options'       => [
-					'existing' => __( 'Limit to Existing Tags', 'classifai' ),
-					'disabled' => __( 'Enter Disabled Tags', 'classifai' ),
+					'allowed'  => __( 'Allowed Tags', 'classifai' ),
+					'disabled' => __( 'Disabled Tags', 'classifai' ),
 				],
+				'null_option'   => __( 'None', 'classifai' ),
 				'description'   => __( 'Filter automated tags to existing tags within the site or create a list of tags not allowed.', 'classifai' ),
 			]
 		);
 
+		// Allowed Tags Input
 		$hide_field = '';
-		if ( 'existing' !== $this->get_settings( 'filter_tags_type' ) ) {
+		if ( 'allowed' !== $this->get_settings( 'filter_tags_type' ) ) {
 			$hide_field = ' hidden';
 		}
 
@@ -948,22 +952,23 @@ class ComputerVision extends Provider {
 			$taxonomy = $default_settings['image_tag_taxonomy'];
 		}
 		add_settings_field(
-			'filtered-tags',
-			esc_html__( 'Filtered Tags', 'classifai' ),
+			'allowed-tags',
+			esc_html__( 'Allowed Tags', 'classifai' ),
 			[ $this, 'render_tags_input' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'    => 'filtered_tags',
+				'label_for'    => 'allowed_tags',
 				'option_index' => 'tags',
-				'class'        => 'classifai-filtered-tags' . $hide_field,
+				'class'        => 'classifai-allowed-tags' . $hide_field,
 				'taxonomy'     => $taxonomy,
-				'description'  => __( 'Tags to ignore if returned from classificaiton service.', 'classifai' ),
+				'description'  => __( 'Allowed automated tags.', 'classifai' ),
 			]
 		);
 
+		// Disabled Tags Input
 		$hide_field = '';
-		if ( 'disable' !== $this->get_settings( 'filter_tags_type' ) ) {
+		if ( 'disabled' !== $this->get_settings( 'filter_tags_type' ) ) {
 			$hide_field = ' hidden';
 		}
 		add_settings_field(
@@ -976,7 +981,7 @@ class ComputerVision extends Provider {
 				'label_for'    => 'disabled_tags',
 				'option_index' => 'tags',
 				'class'        => 'classifai-disabled-tags' . $hide_field,
-				'description'  => __( 'Tags to ignore if returned from classificaiton service.', 'classifai' ),
+				'description'  => __( 'Disabled automated tags.', 'classifai' ),
 			]
 		);
 
@@ -1098,14 +1103,17 @@ class ComputerVision extends Provider {
 			$new_settings['filter_tags_type'] = sanitize_text_field( $settings['filter_tags_type'] );
 		}
 
-		// Filtered Tags List.
-		// Explode new lines into an array and sanitize.
-		if ( isset( $settings['filtered_tags'] ) ) {
-			$filtered_tags = explode( "\r\n", $settings['filtered_tags'] );
-			$filtered_tags = array_filter( $filtered_tags );
-			$filtered_tags = array_map( 'sanitize_text_field', $filtered_tags );
+		// Allowed Tags. Processed by existing Tag IDs.
+		if ( ! empty( $settings['allowed_tags'] ) ) {
+			$new_settings['allowed_tags'] = array_map( 'intval', $settings['allowed_tags'] );
+		}
 
-			$new_settings['filtered_tags'] = $filtered_tags;
+		// Disabled Tags. Processed by tag names.
+		if ( ! empty( $settings['disabled_tags'] ) ) {
+			$new_settings['disabled_tags'] = array_map(
+				'sanitize_text_field',
+				explode( ',', $settings['disabled_tags'] )
+			);
 		}
 
 		if ( ! empty( $settings_errors ) ) {

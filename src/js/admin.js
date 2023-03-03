@@ -71,33 +71,28 @@
 		const $disallowedTagsSelect = document.querySelector(
 			'select[name="classifai_computer_vision[filter_tags_type]'
 		);
-		const $filteredTagsField = document.querySelector(
-			'.classifai-filtered-tags'
+		const $allowedTagsField = document.querySelector(
+			'.classifai-allowed-tags'
 		);
 		const $disabledTagsField = document.querySelector(
 			'.classifai-disabled-tags'
 		);
 
+		// If fields aren't available, bail.
 		if (
 			! $disallowedTagsSelect ||
-			! $filteredTagsField ||
+			! $allowedTagsField ||
 			! $disabledTagsField
-		)
+		) {
 			return;
+		}
 
 		$disallowedTagsSelect.addEventListener( 'change', ( e ) => {
 			const { value } = e.target.options[ e.target.selectedIndex ];
 
-			if ( 'existing' === value ) {
-				toggleField( $filteredTagsField, true );
-				toggleField( $disabledTagsField, false );
-			} else if ( 'disabled' === value ) {
-				toggleField( $disabledTagsField, true );
-				toggleField( $filteredTagsField, false );
-			} else {
-				toggleField( $filteredTagsField, false );
-				toggleField( $disabledTagsField, false );
-			}
+			toggleField( $allowedTagsField, 'allowed' === value );
+			toggleField( $disabledTagsField, 'disabled' === value );
+
 			e.target.dispatchEvent( new Event( 'filteredTagsTypeChanged' ) );
 		} );
 	};

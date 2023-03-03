@@ -138,6 +138,10 @@ abstract class Provider {
 		$attrs = '';
 		$class = '';
 
+		if ( is_array( $value ) ) {
+			$value = implode( ',', $value );
+		}
+
 		switch ( $type ) {
 			case 'text':
 			case 'password':
@@ -166,53 +170,6 @@ abstract class Provider {
 	}
 
 	/**
-	 * Tags input field callback.
-	 * Renders a multiselect input field for tags.
-	 *
-	 * @param  array $args The args passed to add_settings_field.
-	 * @return void
-	 */
-	public function render_tags_input( $args ) {
-		$setting_index = $this->get_settings();
-		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : [];
-		$defaults      = array( 'taxonomy' => 'post_tag' );
-
-		// Get taxonomy information
-		$tax_name = isset( $args['taxonomy'] ) ? $args['taxonomy'] : $defaults['taxonomy'];
-
-		if ( empty( $saved ) ) {
-			$saved = [];
-			$tags  = get_terms(
-				[
-					'taxonomy'   => $tax_name,
-					'hide_empty' => false,
-				]
-			);
-
-			if ( ! empty( $tags ) ) {
-				foreach ( $tags as $tag ) {
-					$saved[] = [
-						'label' => $tag->name,
-						'value' => $tag->term_id,
-					];
-				}
-			}
-		}
-		?>
-		<script>
-			window.classifaiTags = <?php echo wp_json_encode( $saved ); ?>;
-		</script>
-		<select
-			multiple
-			class="classifai-tags-select"
-			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
-		>
-		</select>
-		<?php
-	}
-
-	/**
 	 * Renders a select menu
 	 *
 	 * @param array $args The args passed to add_settings_field.
@@ -223,13 +180,15 @@ abstract class Provider {
 		// Check for a default value
 		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
 		$options = isset( $args['options'] ) ? $args['options'] : [];
+
+		$null_option = isset( $args['null_option'] ) ? $args['null_option'] : __( 'Please Choose', 'classifai' );
 		?>
 		<select
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			>
 			<?php if ( count( $options ) > 1 ) : ?>
-				<option><?php esc_html_e( 'Please Choose', 'classifai' ); ?></option>
+				<option><?php echo esc_html( $null_option ); ?></option>
 			<?php endif; ?>
 			<?php foreach ( $options as $value => $name ) : ?>
 				<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $saved, $value ); ?>>
@@ -296,6 +255,74 @@ abstract class Provider {
 			'<span class="description">%s</span>',
 			esc_html__( 'Choose image fields where the generated captions should be applied.', 'classifai' )
 		);
+	}
+
+	/**
+	 * Tags input field callback.
+	 * Renders a multiselect input field for tags.
+	 *
+	 * @param  array $args The args passed to add_settings_field.
+	 * @return void
+	 */
+	public function render_tags_input( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : [];
+		$defaults      = array( 'taxonomy' => 'post_tag' );
+
+		// Get taxonomy information
+		$tax_name = isset( $args['taxonomy'] ) ? $args['taxonomy'] : $defaults['taxonomy'];
+		$all_tags = get_terms(
+			[
+				'taxonomy'   => $tax_name,
+				'hide_empty' => false,
+			]
+		);
+
+		if ( ! empty( $all_tags ) ) {
+			$all_tags = array_map(
+				function( $tag ) {
+					return [
+						'label' => $tag->name,
+						'value' => $tag->term_id,
+					];
+				},
+				$all_tags
+			);
+		}
+
+		if ( empty( $saved ) && ! empty( $all_tags ) ) {
+			$saved = $all_tags;
+		} else {
+			$saved = array_map(
+				function( $tag ) use ( $tax_name ) {
+					$term = get_term( $tag, $tax_name );
+
+					if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
+						return [
+							'label' => $term->name,
+							'value' => $term->term_id,
+						];
+					}
+				},
+				$saved
+			);
+		}
+		?>
+		<script>
+			window.classifaiTags = <?php echo wp_json_encode( $all_tags ); ?>;
+			window.classifaiSelectedTags = <?php echo wp_json_encode( $saved ); ?>;
+		</script>
+		<select
+			multiple
+			class="classifai-tags-select"
+			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>][]"
+		>
+		</select>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
 	}
 
 	/**
