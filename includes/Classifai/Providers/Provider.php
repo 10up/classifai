@@ -290,21 +290,29 @@ abstract class Provider {
 			);
 		}
 
-		if ( empty( $saved ) && ! empty( $all_tags ) ) {
+		if ( empty( $saved ) ) {
 			$saved = $all_tags;
 		} else {
+			// Filter tags down to those selected.
 			$saved = array_map(
-				function( $tag ) use ( $tax_name ) {
-					$term = get_term( $tag, $tax_name );
-
-					if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
-						return [
-							'label' => $term->name,
-							'value' => $term->term_id,
-						];
-					}
+				function( $tag ) use ( $all_tags ) {
+					return array_filter(
+						$all_tags,
+						function( $t ) use ( $tag ) {
+							return intval( $t['value'] ) === intval( $tag );
+						}
+					);
 				},
 				$saved
+			);
+
+			// Flatten array.
+			$saved = array_reduce(
+				$saved,
+				function( $carry, $item ) {
+					return array_merge( $carry, $item );
+				},
+				[]
 			);
 		}
 		?>
@@ -317,8 +325,7 @@ abstract class Provider {
 			class="classifai-tags-select"
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>][]"
-		>
-		</select>
+		></select>
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
