@@ -18,12 +18,12 @@ class BulkActions {
 	}
 
 	/**
-	 * @var $save_post_handler SavePostHandler Triggers a classification with Watson
+	 * @var SavePostHandler Triggers a classification with Watson
 	 */
 	private $save_post_handler;
 
 	/**
-	 * @var $computer_vision ComputerVision
+	 * @var \Classifai\Providers\Azure\ComputerVision
 	 */
 	private $computer_vision;
 
@@ -81,7 +81,7 @@ class BulkActions {
 
 		if (
 			'no' !== $settings['enable_image_tagging'] ||
-			'no' !== $settings['enable_image_captions']
+			empty( $this->computer_vision->get_alt_text_settings() )
 		) {
 			$bulk_actions['scan_image'] = __( 'Scan Image', 'classifai' );
 		}

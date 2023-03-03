@@ -39,7 +39,16 @@ class ImageProcessing extends Service {
 	 * Enqueue the script for the media modal.
 	 */
 	public function enqueue_media_scripts() {
-		wp_enqueue_script( 'media-script', CLASSIFAI_PLUGIN_URL . '/dist/media.js', array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ), CLASSIFAI_PLUGIN_VERSION, true );
+		wp_enqueue_script( 'classifai-media-script', CLASSIFAI_PLUGIN_URL . '/dist/media.js', array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ), CLASSIFAI_PLUGIN_VERSION, true );
+		wp_add_inline_script(
+			'classifai-media-script',
+			'const classifaiMediaVars = ' . wp_json_encode(
+				array(
+					'enabledAltTextFields' => $this->provider_classes[0]->get_alt_text_settings() ? $this->provider_classes[0]->get_alt_text_settings() : array(),
+				)
+			),
+			'before'
+		);
 	}
 
 	/**
@@ -75,7 +84,7 @@ class ImageProcessing extends Service {
 			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 
 			$form_fields['rescan_alt_tags'] = [
-				'label'        => __( 'Alt text', 'classifai' ),
+				'label'        => __( 'Descriptive text', 'classifai' ),
 				'input'        => 'html',
 				'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
 				'show_in_edit' => false,

@@ -175,33 +175,6 @@ if ( file_exists( __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-u
 	add_action( 'network_admin_notices', 'classifai_dev_notice' );
 }
 
-if ( class_exists( 'Puc_v4_Factory' ) ) {
-	/*
-	 * Enable updates if we have a valid license
-	 */
-	$service_manager = new \Classifai\Services\ServicesManager();
-	$settings        = $service_manager->get_settings();
-
-	if ( isset( $settings['valid_license'] ) && $settings['valid_license'] ) {
-		// @codingStandardsIgnoreStart
-		$updateChecker = Puc_v4_Factory::buildUpdateChecker(
-			'https://github.com/10up/classifai/',
-			__FILE__,
-			'classifai'
-		);
-
-		$updateChecker->addResultFilter(
-			function( $plugin_info, $http_response = null ) {
-				$plugin_info->icons = array(
-					'svg' => plugins_url( '/assets/img/icon.svg', __FILE__ ),
-				);
-				return $plugin_info;
-			}
-		);
-		// @codingStandardsIgnoreEnd
-	}
-}
-
 /**
  * Show dev version notice on ClassifAI pages if necessary.
  */
