@@ -69,19 +69,36 @@
 	 */
 	const disallowedTags = () => {
 		const $disallowedTagsSelect = document.querySelector(
-			'select[name="classifai_settings[tag_restrict_type]'
+			'select[name="classifai_computer_vision[filter_tags_type]'
 		);
-		const $disallowedTagsField = document.querySelector(
-			'.classifai-disallowed-tags'
+		const $filteredTagsField = document.querySelector(
+			'.classifai-filtered-tags'
+		);
+		const $disabledTagsField = document.querySelector(
+			'.classifai-disabled-tags'
 		);
 
-		if ( ! $disallowedTagsSelect || ! $disallowedTagsField ) return;
+		if (
+			! $disallowedTagsSelect ||
+			! $filteredTagsField ||
+			! $disabledTagsField
+		)
+			return;
 
 		$disallowedTagsSelect.addEventListener( 'change', ( e ) => {
-			toggleField(
-				$disallowedTagsField,
-				'disallow' === e.target.options[ e.target.selectedIndex ].value
-			);
+			const { value } = e.target.options[ e.target.selectedIndex ];
+
+			if ( 'existing' === value ) {
+				toggleField( $filteredTagsField, true );
+				toggleField( $disabledTagsField, false );
+			} else if ( 'disabled' === value ) {
+				toggleField( $disabledTagsField, true );
+				toggleField( $filteredTagsField, false );
+			} else {
+				toggleField( $filteredTagsField, false );
+				toggleField( $disabledTagsField, false );
+			}
+			e.target.dispatchEvent( new Event( 'filteredTagsTypeChanged' ) );
 		} );
 	};
 

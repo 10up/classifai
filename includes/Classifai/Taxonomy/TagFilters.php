@@ -36,7 +36,7 @@ class TagFilters {
 	 */
 	public function get_filter_settings() {
 		$settings   = new Classifai\Services\ServicesManager();
-		$this->type = $settings->get_setting( 'tag_restrict_type' ) ?? 'none';
+		$this->type = $settings->get_setting( 'filter_tags_type' ) ?? 'none';
 
 		if ( 'none' !== $this->type ) {
 			if ( 'existing' === $this->type ) {
@@ -48,7 +48,7 @@ class TagFilters {
 			}
 
 			if ( 'disallow' === $this->type ) {
-				$tags = $settings->get_setting( 'disallowed_tags' );
+				$tags = $settings->get_setting( 'filtered_tags' );
 
 				if ( ! empty( $tags ) ) {
 					$this->tags_list = preg_split( '/\r\n|[\r\n]/', $tags );
@@ -74,7 +74,7 @@ class TagFilters {
 
 			// Restricted Tags Disallowed List
 			if (
-				( 'disallowed' === $this->type && ! empty( $restricted_tags ) ) &&
+				( 'disallow' === $this->type && ! empty( $restricted_tags ) ) &&
 				in_array( strtolower( $tag ), $restricted_tags, true )
 			) {
 				return false;

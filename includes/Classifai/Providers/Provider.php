@@ -166,6 +166,53 @@ abstract class Provider {
 	}
 
 	/**
+	 * Tags input field callback.
+	 * Renders a multiselect input field for tags.
+	 *
+	 * @param  array $args The args passed to add_settings_field.
+	 * @return void
+	 */
+	public function render_tags_input( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : [];
+		$defaults      = array( 'taxonomy' => 'post_tag' );
+
+		// Get taxonomy information
+		$tax_name = isset( $args['taxonomy'] ) ? $args['taxonomy'] : $defaults['taxonomy'];
+
+		if ( empty( $saved ) ) {
+			$saved = [];
+			$tags  = get_terms(
+				[
+					'taxonomy'   => $tax_name,
+					'hide_empty' => false,
+				]
+			);
+
+			if ( ! empty( $tags ) ) {
+				foreach ( $tags as $tag ) {
+					$saved[] = [
+						'label' => $tag->name,
+						'value' => $tag->term_id,
+					];
+				}
+			}
+		}
+		?>
+		<script>
+			window.classifaiTags = <?php echo wp_json_encode( $saved ); ?>;
+		</script>
+		<select
+			multiple
+			class="classifai-tags-select"
+			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+		>
+		</select>
+		<?php
+	}
+
+	/**
 	 * Renders a select menu
 	 *
 	 * @param array $args The args passed to add_settings_field.

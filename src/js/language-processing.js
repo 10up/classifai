@@ -1,4 +1,5 @@
 import Choices from 'choices.js';
+import { debounce } from './helpers';
 import '../scss/language-processing.scss';
 
 ( () => {
@@ -313,33 +314,6 @@ import '../scss/language-processing.scss';
 	const searchPostsDebounced = debounce( searchPosts, 300 );
 
 	selectEl.addEventListener( 'search', searchPostsDebounced );
-
-	/**
-	 * Function to debounce an input function.
-	 *
-	 * @param {Function} func      The function to debounce.
-	 * @param {number}   wait      Debounce period.
-	 * @param {boolean}  immediate Debounce immediately.
-	 * @return {Function} Returns a debounced function.
-	 */
-	function debounce( func, wait, immediate ) {
-		let timeout;
-
-		return function () {
-			const context = this,
-				args = arguments;
-
-			/** Debounced function. */
-			const later = function () {
-				timeout = null;
-				if ( ! immediate ) func.apply( context, args );
-			};
-			const callNow = immediate && ! timeout;
-			clearTimeout( timeout );
-			timeout = setTimeout( later, wait );
-			if ( callNow ) func.apply( context, args );
-		};
-	}
 } )();
 
 // Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).

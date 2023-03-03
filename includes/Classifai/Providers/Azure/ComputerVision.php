@@ -58,6 +58,8 @@ class ComputerVision extends Provider {
 				'description' => 0,
 			),
 			'enable_image_tagging'  => true,
+			'filter_tags_type'      => 'none',
+			'filtered_tags'         => '',
 			'enable_smart_cropping' => false,
 			'enable_ocr'            => false,
 			'enable_read_pdf'       => false,
@@ -116,6 +118,7 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
@@ -171,6 +174,27 @@ class ComputerVision extends Provider {
 			],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
+		);
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-tag-filters-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/tags.js',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-tag-filters-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/tags.css',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
 		);
 	}
 
@@ -896,6 +920,67 @@ class ComputerVision extends Provider {
 			]
 		);
 		add_settings_field(
+			'filter-tags-type',
+			esc_html__( 'Filter Automated Tags', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'filter_tags_type',
+				'option_index'  => 'tags',
+				'input_type'    => 'select',
+				'default_value' => $default_settings['filter_tags_type'],
+				'options'       => [
+					'existing' => __( 'Limit to Existing Tags', 'classifai' ),
+					'disabled' => __( 'Enter Disabled Tags', 'classifai' ),
+				],
+				'description'   => __( 'Filter automated tags to existing tags within the site or create a list of tags not allowed.', 'classifai' ),
+			]
+		);
+
+		$hide_field = '';
+		if ( 'existing' !== $this->get_settings( 'filter_tags_type' ) ) {
+			$hide_field = ' hidden';
+		}
+
+		$taxonomy = $this->get_settings( 'image_tag_taxonomy' );
+		if ( empty( $taxonomy ) ) {
+			$taxonomy = $default_settings['image_tag_taxonomy'];
+		}
+		add_settings_field(
+			'filtered-tags',
+			esc_html__( 'Filtered Tags', 'classifai' ),
+			[ $this, 'render_tags_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'    => 'filtered_tags',
+				'option_index' => 'tags',
+				'class'        => 'classifai-filtered-tags' . $hide_field,
+				'taxonomy'     => $taxonomy,
+				'description'  => __( 'Tags to ignore if returned from classificaiton service.', 'classifai' ),
+			]
+		);
+
+		$hide_field = '';
+		if ( 'disable' !== $this->get_settings( 'filter_tags_type' ) ) {
+			$hide_field = ' hidden';
+		}
+		add_settings_field(
+			'disabled-tags',
+			esc_html__( 'Disabled Tags', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'    => 'disabled_tags',
+				'option_index' => 'tags',
+				'class'        => 'classifai-disabled-tags' . $hide_field,
+				'description'  => __( 'Tags to ignore if returned from classificaiton service.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
 			'enable-smart-cropping',
 			esc_html__( 'Enable smart cropping', 'classifai' ),
 			[ $this, 'render_input' ],
@@ -1006,6 +1091,21 @@ class ComputerVision extends Provider {
 
 		if ( isset( $settings['enable_image_captions'] ) && is_array( $settings['enable_image_captions'] ) ) {
 			$new_settings['enable_image_captions'] = $settings['enable_image_captions'];
+		}
+
+		// Tag Restriction Type
+		if ( isset( $settings['filter_tags_type'] ) ) {
+			$new_settings['filter_tags_type'] = sanitize_text_field( $settings['filter_tags_type'] );
+		}
+
+		// Filtered Tags List.
+		// Explode new lines into an array and sanitize.
+		if ( isset( $settings['filtered_tags'] ) ) {
+			$filtered_tags = explode( "\r\n", $settings['filtered_tags'] );
+			$filtered_tags = array_filter( $filtered_tags );
+			$filtered_tags = array_map( 'sanitize_text_field', $filtered_tags );
+
+			$new_settings['filtered_tags'] = $filtered_tags;
 		}
 
 		if ( ! empty( $settings_errors ) ) {

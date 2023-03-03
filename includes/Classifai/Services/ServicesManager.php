@@ -140,16 +140,6 @@ class ServicesManager {
 			);
 		}
 
-		// Tag Restriction Type
-		if ( isset( $settings['tag_restrict_type'] ) ) {
-			$new_settings['tag_restrict_type'] = sanitize_text_field( $settings['tag_restrict_type'] );
-		}
-
-		// Disallowed Tags List
-		if ( isset( $settings['disallowed_tags'] ) ) {
-			$new_settings['disallowed_tags'] = sanitize_textarea_field( $settings['disallowed_tags'] );
-		}
-
 		return $new_settings;
 	}
 
@@ -185,36 +175,6 @@ class ServicesManager {
 				'description'  => __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ),
 			]
 		);
-
-		add_settings_field(
-			'tag-restrict-type',
-			esc_html__( 'Restrict Automated Tags', 'classifai' ),
-			[ $this, 'render_tag_restrict_type_field' ],
-			'classifai_settings',
-			'classifai_settings',
-			[
-				'label_for'    => 'tag_restrict_type',
-				'option_index' => 'tags',
-				'input_type'   => 'select',
-				'description'  => __( 'Restrict automated tags to existing tags within the site or create a list of tags not allowed.', 'classifai' ),
-			]
-		);
-
-		$hide_field = 'existing' === $this->get_settings( 'tag_restrict_type' ) ? ' hidden' : '';
-		add_settings_field(
-			'disallowed-tags',
-			esc_html__( 'Disallowed Tags', 'classifai' ),
-			[ $this, 'render_disallowed_tags_field' ],
-			'classifai_settings',
-			'classifai_settings',
-			[
-				'label_for'    => 'disallowed_tags',
-				'option_index' => 'tags',
-				'input_type'   => 'textarea',
-				'class'        => 'classifai-disallowed-tags' . $hide_field,
-				'description'  => __( 'Tags to ignore if returned from classificaiton service.', 'classifai' ),
-			]
-		);
 	}
 
 	/**
@@ -235,38 +195,6 @@ class ServicesManager {
 		?>
 		<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>"/>
 		<br /><span class="description"><?php _e( __( 'Registration is 100% free and provides update notifications and upgrades inside the dashboard.<br /><a href="https://classifaiplugin.com/#cta">Register for your key</a>', 'classifai' ) );// @codingStandardsIgnoreLine ?></span>
-		<?php
-	}
-
-	/**
-	 * Render the Restrict Tags Type field
-	 */
-	public function render_tag_restrict_type_field() {
-		$tag_limit_type = $this->get_settings( 'tag_restrict_type' );
-
-		if ( empty( $tag_limit_type ) ) {
-			$tag_limit_type = 'none';
-		}
-		?>
-		<select name="classifai_settings[tag_restrict_type]" id="tag_restrict_type">
-			<option value="none" <?php selected( $tag_limit_type, 'none' ); ?>><?php esc_html_e( 'None', 'classifai' ); ?></option>
-			<option value="existing" <?php selected( $tag_limit_type, 'existing' ); ?>><?php esc_html_e( 'Existing Tags', 'classifai' ); ?></option>
-			<option value="disallow" <?php selected( $tag_limit_type, 'disallow' ); ?>><?php esc_html_e( 'Disallowed Tags', 'classifai' ); ?></option>
-		</select>
-		<br /><span class="description"><?php esc_html_e( 'Limit automated tags to existing tags or provide a list of disallowed tags.', 'classifai' ); ?></span>
-		<?php
-	}
-
-	/**
-	 * Render the disallowed tags field
-	 */
-	public function render_disallowed_tags_field() {
-		$disallowed_tags = $this->get_settings( 'disallowed_tags' );
-		?>
-		<div class="classifai-disallowed-tags">
-			<textarea id="disallowed_tags" name="classifai_settings[disallowed_tags]" class="regular-text" rows="5" autocomplete="off"><?php echo esc_textarea( $disallowed_tags ); ?></textarea>
-			<br /><span class="description"><?php esc_html_e( 'Tags to ignore if returned from classificaiton service. One tag per line.', 'classifai' ); ?></span>
-		</div>
 		<?php
 	}
 
