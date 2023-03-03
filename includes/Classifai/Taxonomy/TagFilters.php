@@ -26,40 +26,35 @@ class TagFilters {
 	 * Construct the Linker object
 	 */
 	public function __construct() {
-		$this->get_filter_settings();
+		$this->set_filter_settings();
 	}
 
 	/**
 	 * Get Filter Settings
-	 *
-	 * @return array
 	 */
-	public function get_filter_settings() {
+	public function set_filter_settings() {
 		$settings   = new Classifai\Services\ServicesManager();
 		$this->type = $settings->get_setting( 'filter_tags_type' ) ?? 'none';
 
 		if ( 'none' !== $this->type ) {
-			if ( 'existing' === $this->type ) {
-				$tags = get_tags( [ 'hide_empty' => false ] );
+			if ( 'allowed' === $this->type ) {
+				$allowed_tags = $settings->get_setting( 'allowed_tags' );
 
-				if ( ! empty( $tags ) ) {
-					$this->tags_list = wp_list_pluck( $tags, 'name' );
+				if ( ! empty( $allowed_tags ) ) {
+					foreach ( $allowed_tags as $tag_id ) {
+						$tag = get_term( $tag_id );
+
+						if ( $tag ) {
+							$this->tags_list[] = $tag->name;
+						}
+					}
 				}
 			}
 
-			if ( 'disallow' === $this->type ) {
-				$tags = $settings->get_setting( 'filtered_tags' );
-
-				if ( ! empty( $tags ) ) {
-					$this->tags_list = preg_split( '/\r\n|[\r\n]/', $tags );
-				}
+			if ( 'disabled' === $this->type ) {
+				$this->tags_list = $settings->get_setting( 'disabled_tags' );
 			}
 		}
-
-		return [
-			'type'      => $this->type,
-			'tags_list' => $this->tags_list,
-		];
 	}
 
 	/**
@@ -70,22 +65,21 @@ class TagFilters {
 	 */
 	public function can_use_tag( $tag ) {
 		if ( 'none' !== $this->type ) {
-			$restricted_tags = array_map( 'strtolower', $this->tags_list );
+			$filtered_tags = array_map( 'strtolower', $this->tags_list );
+			$filtered_tags = array_map( 'trim', $filtered_tags );
+			$compare_tag   = trim( strtolower( $tag ) );
 
-			// Restricted Tags Disallowed List
-			if (
-				( 'disallow' === $this->type && ! empty( $restricted_tags ) ) &&
-				in_array( strtolower( $tag ), $restricted_tags, true )
-			) {
-				return false;
+			// If the filtered tags list is empty,
+			// That means all tags are allowed or disabled.
+			if ( empty( $filtered_tags ) ) {
+				return 'disabled' === $this->type ? true : false;
 			}
 
-			// Existing Tags Only
-			if (
-				( 'existing' === $this->type ) &&
-				! in_array( strtolower( $tag ), $restricted_tags, true )
-			) {
-				return false;
+			// Compare tags based on filter type
+			if ( 'disabled' === $this->type ) {
+				return ! in_array( $compare_tag, $filtered_tags, true );
+			} else {
+				return in_array( $compare_tag, $filtered_tags, true );
 			}
 		}
 
