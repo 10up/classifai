@@ -1,3 +1,5 @@
+/* global ClassifAI */
+
 import { handleClick } from './helpers';
 
 ( function ( $ ) {
@@ -146,13 +148,19 @@ import { handleClick } from './helpers';
 			data: {
 				action: 'classifai_get_read_status',
 				attachment_id: postId,
+				nonce: ClassifAI.ajax_nonce,
 			},
 			success: ( resp ) => {
-				if ( resp?.data?.running ) {
-					readButton.setAttribute( 'disabled', 'disabled' );
-					readButton.textContent = __( 'In progress!', 'classifai' );
-				} else if ( resp?.data?.read ) {
-					readButton.textContent = __( 'Rescan', 'classifai' );
+				if ( resp?.success ) {
+					if ( resp?.data?.running ) {
+						readButton.setAttribute( 'disabled', 'disabled' );
+						readButton.textContent = __(
+							'In progress!',
+							'classifai'
+						);
+					} else if ( resp?.data?.read ) {
+						readButton.textContent = __( 'Rescan', 'classifai' );
+					}
 				}
 			},
 		} );

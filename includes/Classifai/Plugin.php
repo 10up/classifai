@@ -154,10 +154,11 @@ class Plugin {
 			'classifai-admin-script',
 			'ClassifAI',
 			[
-				'api_password'    => __( 'API Password', 'classifai' ),
-				'api_key'         => __( 'API Key', 'classifai' ),
-				'use_key'         => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password'    => __( 'Use a username/password instead?', 'classifai' ),
+				'api_password' => __( 'API Password', 'classifai' ),
+				'api_key'      => __( 'API Key', 'classifai' ),
+				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
+				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
 			]
 		);
 	}

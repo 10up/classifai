@@ -335,13 +335,30 @@ class ComputerVision extends Provider {
 	 * Callback to get the status of the PDF read with AJAX support.
 	 */
 	public static function get_read_status_ajax() {
-		if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
+		if ( ! wp_doing_ajax() ) {
 			return;
 		}
 
+		// Nonce check.
+		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
+			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// Attachment ID check.
 		$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
 		if ( empty( $attachment_id ) ) {
-			return;
+			$error = new \WP_Error( 'invalid_post', __( 'Invalid attachment ID.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// User capability check.
+		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+			$error = new \WP_Error( 'unauthorized_access', __( 'Unauthorized access.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
 		}
 
 		wp_send_json_success( self::get_read_status( $attachment_id ) );
