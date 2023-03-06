@@ -136,7 +136,7 @@ class ComputerVision extends Provider {
 		if ( $enable_read_pdf ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
-			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status' ] );
+			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
 		}
 	}
 
@@ -333,20 +333,33 @@ class ComputerVision extends Provider {
 
 	/**
 	 * Callback to get the status of the PDF read with AJAX support.
+	 */
+	public static function get_read_status_ajax() {
+		if ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) {
+			return;
+		}
+
+		$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
+		if ( empty( $attachment_id ) ) {
+			return;
+		}
+
+		wp_send_json_success( self::get_read_status( $attachment_id ) );
+	}
+
+	/**
+	 * Callback to get the status of the PDF read.
 	 *
 	 * @param  int $attachment_id The attachment ID.
 	 * @return array Read and running status.
 	 */
 	public static function get_read_status( $attachment_id = null ) {
-		$doing_ajax = defined( 'DOING_AJAX' ) && DOING_AJAX;
-
-		if ( $doing_ajax ) {
-			$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
-		}
-
-		if ( empty( $attachment_id ) ) {
+		if ( empty( $attachment_id ) || ! is_numeric( $attachment_id ) ) {
 			return;
 		}
+
+		// Cast to an integer
+		$attachment_id = (int) $attachment_id;
 
 		$read    = ! empty( get_the_content( null, false, $attachment_id ) );
 		$status  = get_post_meta( $attachment_id, '_classifai_azure_read_status', true );
@@ -357,11 +370,7 @@ class ComputerVision extends Provider {
 			'running' => $running,
 		];
 
-		if ( $doing_ajax ) {
-			wp_send_json_success( $resp );
-		} else {
-			return $resp;
-		}
+		return $resp;
 	}
 
 	/**
