@@ -129,6 +129,7 @@ class Plugin {
 			'notifications' => new Admin\Notifications(),
 			'debug_info'    => new Admin\DebugInfo(),
 			'bulk_actions'  => new Admin\BulkActions(),
+			'updater'       => new Admin\Update(),
 		];
 
 		foreach ( $this->admin_helpers as $instance ) {
