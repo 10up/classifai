@@ -331,7 +331,7 @@ class OCR {
 
 			if ( isset( $body->message ) ) {
 				$error_message = $body->message;
-			} else if ( isset( $body->error->message ) ) {
+			} elseif ( isset( $body->error->message ) ) {
 				$error_message = $body->error->message;
 			} else {
 				$error_message = false;

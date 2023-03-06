@@ -13,7 +13,7 @@ class LanguageProcessing extends Service {
 	 * LanguageProcessing constructor.
 	 */
 	public function __construct() {
-		parent::__construct( __( 'Language Processing', 'classifai' ), 'language_processing', [ 'Classifai\Providers\Watson\NLU' ] );
+		parent::__construct( __( 'Language Processing', 'classifai' ), 'language_processing', [ 'Classifai\Providers\Watson\NLU', 'Classifai\Providers\Azure\TextToSpeech' ] );
 	}
 
 	/**
@@ -45,6 +45,24 @@ class LanguageProcessing extends Service {
 					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1',
+			'synthesize-speech/(?P<id>\d+)',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'synthesize_speech_from_text' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
+					),
+				),
+				'permission_callback' => [ $this, 'speech_synthesis_permissions_check' ],
 			]
 		);
 	}
@@ -112,5 +130,50 @@ class LanguageProcessing extends Service {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Generates text to speech for a post using REST.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return boolean
+	 */
+	public function synthesize_speech_from_text( $request ) {
+		$post_id           = $request->get_param( 'id' );
+		$save_post_handler = new SavePostHandler();
+		$attachment_id     = $save_post_handler->synthesize_speech( $post_id );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return false;
+		}
+
+		return home_url( wp_get_attachment_url( $attachment_id ) );
+	}
+
+	/**
+	 * Check if a given request has access to generate audio for the post.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function speech_synthesis_permissions_check( $request ) {
+		return true;
+		$post_id = $request->get_param( 'id' );
+
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			$post_type = get_post_type( $post_id );
+			$supported = \Classifai\get_supported_post_types_for_azure_speech_to_text();
+
+			// Check if processing allowed.
+			if ( ! in_array( $post_type, $supported, true ) ) {
+				return new \WP_Error( 'not_enabled', esc_html__( 'Azure Speech synthesis is not enabled for current post.', 'classifai' ) );
+			}
+		}
+
+		return true;
 	}
 }

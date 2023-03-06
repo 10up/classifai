@@ -2,10 +2,12 @@
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
 
+import { useState, useEffect, useRef } from '@wordpress/element';
+
 const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
-const { ToggleControl, Button } = wp.components;
+const { ToggleControl, Button, ClipboardButton, BaseControl, Spinner } = wp.components;
 const { __, sprintf } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
@@ -54,6 +56,116 @@ const ClassifAIToggle = () => {
 		/>
 	);
 };
+
+/**
+ * ClassifAI Text to Audio component.
+ */
+const ClassifAITSpeechSynthesisToggle = () => {
+
+	const [ hasCopied, setHasCopied ] = useState( false );
+	const [ isGeneratingAudio, setIsGeneratingAudio ] = useState( false );
+	const { editPost } = useDispatch( 'core/editor' );
+
+	const {
+		synthesizeSpeech,
+		audioFileUrl,
+		isPostSaving,
+		currentPostId,
+		currentPostType,
+	} = useSelect( ( select ) => {
+		const {
+			getEditedPostAttribute,
+			isSavingPost,
+			isAutosavingPost,
+			getCurrentPostType,
+		} = select( 'core/editor' );
+
+		const { getCurrentPostId } = select( 'core/editor' );
+
+		return {
+			synthesizeSpeech: 'yes' === getEditedPostAttribute( 'classifai_synthesize_speech' ),
+			audioFileUrl: getEditedPostAttribute( 'classifai_post_audio_url' ),
+			isPostSaving: isSavingPost() && ! isAutosavingPost(),
+			currentPostId: getCurrentPostId(),
+			currentPostType: getCurrentPostType(),
+		}
+	} );
+
+	const [ audioFileUrlState, setAudioFileUrlState ] = useState( audioFileUrl )
+
+	let isFeatureEnabled = false;
+
+	if ( classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( currentPostType ) ) {
+		isFeatureEnabled = true;
+	}
+
+	const isSaving = useRef( false );
+
+	useEffect( () => {
+		if ( isPostSaving && ! isSaving.current ) {
+			isSaving.current = true;
+		}
+
+		if ( ! isPostSaving && isSaving.current ) {
+			const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ currentPostId }`;
+
+			const synthesizeSpeech = async () => {
+				setIsGeneratingAudio( true );
+				const response = await fetch( synthesizeSpeechUrl );
+
+				if ( 200 !== response.status ) {
+					console.error( response.json() );
+				}
+
+				setAudioFileUrlState( await response.json() );
+				setIsGeneratingAudio( false );
+			};
+
+			synthesizeSpeech();
+
+			isSaving.current = false;
+		}
+	}, [ isPostSaving, isSaving.current ] );
+
+	return (
+		<>
+			<ToggleControl
+				label={ __( 'Generate audio for this post.' ) }
+				help={ isFeatureEnabled
+					? __( 'ClassifAI will generate audio for the post when it is published or updated.' )
+					: __( 'Text to Speech generation is disabled for this post type.' ) }
+				checked={ isFeatureEnabled && synthesizeSpeech }
+				onChange={ ( value ) => {
+					editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } )
+				} }
+				disabled={ ! isFeatureEnabled }
+			/>
+
+			{
+				synthesizeSpeech && audioFileUrlState && (
+					isGeneratingAudio ? (
+						<>
+							<Spinner />
+							<span>{ __( 'Generating speech audio for the post...' ) }</span>
+						</>
+					) : (
+						<BaseControl>
+							<ClipboardButton
+								text={ audioFileUrl }
+								onCopy={ () => setHasCopied( true ) }
+								onFinishCopy={ () => setHasCopied( false ) }
+								variant="secondary"
+								isSmall={ true }
+							>
+								{ hasCopied ? __( 'Copied!', 'classifai' ) : __( 'Copy post audio URL', 'classifai' ) }
+							</ClipboardButton>
+						</BaseControl>
+					)
+				)
+			}
+		</>
+	);
+;};
 
 /**
  * Callback function to handle API response.
@@ -195,34 +307,10 @@ const ClassifAIPlugin = () => {
 		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
 	);
 
-	// Ensure the user has proper permissions
-	if (
-		classifaiPostData.noPermissions &&
-		1 === parseInt( classifaiPostData.noPermissions )
-	) {
-		return null;
-	}
-
-	// Ensure that language processing is enabled.
-	if ( ! classifaiPostData.NLUEnabled ) {
-		return null;
-	}
-
-	// Ensure we are on a supported post type
-	if (
-		classifaiPostData.supportedPostTypes &&
-		! classifaiPostData.supportedPostTypes.includes( postType )
-	) {
-		return null;
-	}
-
-	// Ensure we are on a supported post status
-	if (
-		classifaiPostData.supportedPostStatues &&
-		! classifaiPostData.supportedPostStatues.includes( postStatus )
-	) {
-		return null;
-	}
+	const userHasPermissions = classifaiPostData && ! ( classifaiPostData.noPermissions && 1 === parseInt( classifaiPostData.noPermissions ) );
+	const isLanguageProcessingEnabled = classifaiPostData && classifaiPostData.NLUEnabled;
+	const isPosTypeSupported = classifaiPostData && classifaiPostData.supportedPostTypes && classifaiPostData.supportedPostTypes.includes( postType );
+	const isPostStatusSupported = classifaiPostData && classifaiPostData.supportedPostStatues && classifaiPostData.supportedPostStatues.includes( postStatus );
 
 	return (
 		<PluginDocumentSettingPanel
@@ -231,8 +319,18 @@ const ClassifAIPlugin = () => {
 			className="classifai-panel"
 		>
 			<>
-				<ClassifAIToggle />
-				<ClassifAIGenerateTagsButton />
+				{
+					userHasPermissions &&
+					isLanguageProcessingEnabled &&
+					isPosTypeSupported &&
+					isPostStatusSupported && (
+						<>
+							<ClassifAIToggle />
+							<ClassifAIGenerateTagsButton />
+						</>
+					)
+				}
+				<ClassifAITSpeechSynthesisToggle />
 			</>
 		</PluginDocumentSettingPanel>
 	);
