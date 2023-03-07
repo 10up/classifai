@@ -7,6 +7,8 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
+use \Classifai\Watson\Normalizer;
+use function Classifai\get_asset_info;
 use WP_Error;
 
 class ChatGPT extends Provider {
@@ -24,6 +26,27 @@ class ChatGPT extends Provider {
 	 * @var string
 	 */
 	protected $chatgpt_model = 'gpt-3.5-turbo';
+
+	/**
+	 * Maximum number of tokens our model supports
+	 *
+	 * @var int
+	 */
+	protected $max_tokens = 4096;
+
+	/**
+	 * How many characters in one token (roughly)
+	 *
+	 * @var int
+	 */
+	protected $characters_in_token = 3;
+
+	/**
+	 * How many tokens a sentence will take (roughly)
+	 *
+	 * @var int
+	 */
+	protected $tokens_per_sentence = 40;
 
 	/**
 	 * OpenAI ChatGPT constructor.
@@ -45,9 +68,9 @@ class ChatGPT extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		$options = get_option( $this->get_option_name() );
+		$settings = $this->get_settings();
 
-		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return false;
 		}
 
@@ -56,8 +79,24 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Register what we need for the plugin.
+	 *
+	 * This only fires if can_register returns true.
 	 */
 	public function register() {
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	}
+
+	/**
+	 * Enqueue the editor scripts.
+	 */
+	public function enqueue_editor_assets() {
+		wp_enqueue_script(
+			'classifai-post-excerpt',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
+			get_asset_info( 'post-excerpt', 'dependencies' ),
+			get_asset_info( 'post-excerpt', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -170,12 +209,12 @@ class ChatGPT extends Provider {
 				'error'
 			);
 
+			$new_settings['authenticated'] = false;
+
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
 				$new_settings['authenticated'] = true;
 			}
-
-			$new_settings['authenticated'] = false;
 		} else {
 			$new_settings['authenticated'] = true;
 		}
@@ -210,7 +249,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( $api_key = '' ) {
+	protected function authenticate_credentials( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your API key', 'classifai' ) );
@@ -276,9 +315,133 @@ class ChatGPT extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? null,
-			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? null,
+			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 2,
+			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 1,
 		];
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id The Post Id we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @return string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '' ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+		}
+
+		$return = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'excerpt':
+				$return = $this->generate_excerpt( $post_id );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Generate an excerpt using ChatGPT.
+	 *
+	 * @param int $post_id The Post Id we're processing
+	 * @return string|WP_Error
+	 */
+	public function generate_excerpt( int $post_id = 0 ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate an excerpt.', 'classifai' ) );
+		}
+
+		$settings = $this->get_settings();
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+		}
+
+		$normalizer     = new Normalizer();
+		$excerpt_length = $settings['length'] ?? 2;
+		$content        = $this->trim_content( $normalizer->normalize( $post_id ), $excerpt_length );
+
+		// Make our API request
+		$request  = new APIRequest( $settings['api_key'] ?? '' );
+		$response = $request->post(
+			$this->chatgpt_url,
+			[
+				'body' => wp_json_encode(
+					[
+						'model'       => $this->chatgpt_model,
+						'messages'    => [
+							'role'    => 'user',
+							'content' => 'Summarize the following text into ' . $excerpt_length . ' sentences: ' . $content . '',
+						],
+						'temperature' => $settings['temperature'] ?? 1,
+					]
+				),
+			]
+		);
+
+		// TODO: test a positive response works as expected
+		return $response;
+	}
+
+	/**
+	 * Trim our content, if needed.
+	 *
+	 * @param string $content Content we may need to trim.
+	 * @param int    $excerpt_length Length of final excerpt.
+	 * @return string
+	 */
+	public function trim_content( string $content = '', int $excerpt_length = 2 ) {
+		/**
+		 * We first determine how many tokens, roughly, our excerpt will require.
+		 * This is determined by the sentence length of the excerpt requested and how
+		 * many tokens are in a sentence.
+		 *
+		 * We then subtract those tokens from the max number of tokens ChatGPT allows
+		 * in a single request. ChatGPT counts both the tokens in the request and in
+		 * the response towards that max.
+		 *
+		 * We then figure out how many characters are in the content and figure out
+		 * how many tokens that is, rounding that number up.
+		 */
+		$excerpt_tokens     = $this->tokens_per_sentence * (int) $excerpt_length;
+		$max_content_tokens = $this->max_tokens - $excerpt_tokens;
+		$content_tokens     = ceil( mb_strlen( $content ) / $this->characters_in_token );
+
+		// If we don't need to trim, return full content.
+		if ( $content_tokens < $max_content_tokens ) {
+			return $content;
+		}
+
+		/**
+		 * Next we determine how many tokens we need to trim by taking the
+		 * number of tokens in the content and subtracting the max tokens
+		 * we can have.
+		 *
+		 * Then we convert that token number to characters.
+		 *
+		 * Finally we determine what the max character length our content
+		 * can be and trim it up.
+		 */
+		$tokens_to_trim     = $content_tokens - $max_content_tokens;
+		$characters_to_trim = $tokens_to_trim * $this->characters_in_token;
+		$max_content_length = mb_strlen( $content ) - $characters_to_trim;
+		$trimmed_content    = mb_substr( $content, 0, $max_content_length );
+
+		// Ensure we our final string ends on a full word instead of truncating in the middle.
+		if ( ! preg_match( '/\\W/u', mb_substr( $content, $max_content_length - 1, 2 ) ) ) {
+			if ( preg_match( '/.*\\W/u', $trimmed_content, $matches ) ) {
+				$trimmed_content = $matches[0];
+			}
+		}
+
+		return $trimmed_content;
 	}
 
 }
