@@ -88,6 +88,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name()
 		);
 
+		// Add all our settings.
 		add_settings_field(
 			'api-key',
 			esc_html__( 'API Key', 'classifai' ),
@@ -98,6 +99,54 @@ class ChatGPT extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
+			]
+		);
+
+		add_settings_field(
+			'enable-excerpt',
+			esc_html__( 'Generate excerpt', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_excerpt',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_excerpt'],
+				'description'   => __( 'Excerpt will be added automatically, if it doesn\'t exist.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'length',
+			esc_html__( 'Excerpt length', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'length',
+				'input_type'    => 'number',
+				'max'           => 5,
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $default_settings['length'],
+				'description'   => __( 'How many sentences should the excerpt be?', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'temperature',
+			esc_html__( 'Temperature value', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'temperature',
+				'input_type'    => 'number',
+				'max'           => 2,
+				'min'           => 0,
+				'step'          => 0.1,
+				'default_value' => $default_settings['temperature'],
+				'description'   => __( 'What sampling temperature to use, between 0 and 2. Higher values like 1.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.', 'classifai' ),
 			]
 		);
 	}
@@ -132,6 +181,24 @@ class ChatGPT extends Provider {
 		}
 
 		$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] ?? '' );
+
+		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
+			$new_settings['enable_excerpt'] = 'no';
+		} else {
+			$new_settings['enable_excerpt'] = '1';
+		}
+
+		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 && (int) $settings['length'] <= 5 ) {
+			$new_settings['length'] = absint( $settings['length'] );
+		} else {
+			$new_settings['length'] = 2;
+		}
+
+		if ( isset( $settings['temperature'] ) && is_numeric( $settings['temperature'] ) && (float) $settings['temperature'] >= 0 && (float) $settings['temperature'] <= 2 ) {
+			$new_settings['temperature'] = abs( (float) $settings['temperature'] );
+		} else {
+			$new_settings['temperature'] = 1;
+		}
 
 		return $new_settings;
 	}
@@ -183,8 +250,11 @@ class ChatGPT extends Provider {
 	 */
 	private function get_default_settings() {
 		return [
-			'authenticated' => false,
-			'api_key'       => '',
+			'authenticated'  => false,
+			'api_key'        => '',
+			'enable_excerpt' => false,
+			'length'         => 2,
+			'temperature'    => 1,
 		];
 	}
 
@@ -200,10 +270,14 @@ class ChatGPT extends Provider {
 			$settings = $this->sanitize_settings( $this->get_settings() );
 		}
 
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+		$authenticated  = 1 === intval( $settings['authenticated'] ?? 0 );
+		$enable_excerpt = 1 === intval( $settings['enable_excerpt'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' ) => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? null,
+			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? null,
 		];
 	}
 

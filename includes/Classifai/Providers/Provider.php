@@ -146,6 +146,19 @@ abstract class Provider {
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
+
+				if ( isset( $args['max'] ) && is_numeric( $args['max'] ) ) {
+					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+				}
+
+				if ( isset( $args['min'] ) && is_numeric( $args['min'] ) ) {
+					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+				}
+
+				if ( isset( $args['step'] ) && is_numeric( $args['step'] ) ) {
+					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+				}
+
 				$class = 'small-text';
 				break;
 			case 'checkbox':
@@ -155,7 +168,7 @@ abstract class Provider {
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
-			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
