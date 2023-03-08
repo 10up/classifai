@@ -90,6 +90,14 @@ class ChatGPT extends Provider {
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
+		$settings = $this->get_settings();
+
+		// Don't load our custom post excerpt if excerpt functionality isn't turned on.
+		if ( ! isset( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
+			return;
+		}
+
+		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-post-excerpt',
 			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
@@ -151,7 +159,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'enable_excerpt',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_excerpt'],
-				'description'   => __( 'Excerpt will be added automatically, if it doesn\'t exist.', 'classifai' ),
+				'description'   => __( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' ),
 			]
 		);
 

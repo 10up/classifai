@@ -52,7 +52,6 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 						buttonText,
 					} )
 				}
-				style={ { marginTop: '10px' } }
 			>
 				{ buttonText }
 			</Button>
