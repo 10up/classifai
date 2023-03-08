@@ -317,7 +317,26 @@ class ChatGPT extends Provider {
 			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 2,
 			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 1,
+			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response(),
 		];
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param mixed $data Response data to format.
+	 * @return string
+	 */
+	private function get_formatted_latest_response( $data ) {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**
@@ -385,6 +404,8 @@ class ChatGPT extends Provider {
 				),
 			]
 		);
+
+		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		// TODO: test a positive response works as expected
 		return $response;
