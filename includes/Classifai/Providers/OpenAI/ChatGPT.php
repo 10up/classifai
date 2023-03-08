@@ -259,8 +259,10 @@ class ChatGPT extends Provider {
 					[
 						'model'    => $this->chatgpt_model,
 						'messages' => [
-							'role'    => 'user',
-							'content' => 'Hi',
+							[
+								'role'    => 'user',
+								'content' => 'Hi',
+							],
 						],
 					]
 				),
@@ -377,7 +379,7 @@ class ChatGPT extends Provider {
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is turned off or authentication failed.', 'classifai' ) );
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 2 );
@@ -399,8 +401,10 @@ class ChatGPT extends Provider {
 			[
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
-					'role'    => 'user',
-					'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+					[
+						'role'    => 'user',
+						'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+					],
 				],
 				'temperature' => absint( $settings['temperature'] ?? 1 ),
 			]
@@ -416,7 +420,15 @@ class ChatGPT extends Provider {
 
 		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
 
-		// TODO: test a positive response works as expected
+		// Extract out the text response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
+			foreach ( $response['choices'] as $choice ) {
+				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+					$response = sanitize_text_field( $choice['message']['content'] );
+				}
+			}
+		}
+
 		return $response;
 	}
 

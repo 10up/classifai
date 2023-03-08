@@ -3,7 +3,7 @@
  */
 const { __ } = wp.i18n;
 const { Button, ExternalLink, TextareaControl } = wp.components;
-const { select, withSelect, withDispatch } = wp.data;
+const { withSelect, withDispatch } = wp.data;
 const { compose } = wp.compose;
 
 /**
@@ -11,17 +11,8 @@ const { compose } = wp.compose;
  */
 import { handleClick } from '../helpers';
 
-/**
- * Callback function to handle API response.
- *
- * @param {Object} resp
- */
-const buttonClickCallBack = async ( resp ) => {
-	// TODO: set excerpt here if good response
-	console.log( resp );
-};
-
 function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
+	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const buttonText = __( 'Generate excerpt', 'classifai' );
 
@@ -48,7 +39,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					handleClick( {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-excerpt/',
-						callback: buttonClickCallBack,
+						callback: onUpdateExcerpt,
 						buttonText,
 					} )
 				}
