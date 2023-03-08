@@ -65,7 +65,8 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 export default compose( [
 	withSelect( ( select ) => {
 		return {
-			excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
+			excerpt: select( 'core/editor' )
+				.getEditedPostAttribute( 'excerpt' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {
