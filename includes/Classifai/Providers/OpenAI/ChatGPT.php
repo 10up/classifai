@@ -7,7 +7,8 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
-use \Classifai\Watson\Normalizer;
+use Classifai\Providers\OpenAI\Tokenizer;
+use Classifai\Watson\Normalizer;
 use function Classifai\get_asset_info;
 use WP_Error;
 
@@ -33,20 +34,6 @@ class ChatGPT extends Provider {
 	 * @var int
 	 */
 	protected $max_tokens = 4096;
-
-	/**
-	 * How many characters in one token (roughly)
-	 *
-	 * @var int
-	 */
-	protected $characters_in_token = 3;
-
-	/**
-	 * How many tokens a sentence will take (roughly)
-	 *
-	 * @var int
-	 */
-	protected $tokens_per_sentence = 40;
 
 	/**
 	 * OpenAI ChatGPT constructor.
@@ -273,7 +260,7 @@ class ChatGPT extends Provider {
 						'model'    => $this->chatgpt_model,
 						'messages' => [
 							'role'    => 'user',
-							'content' => 'Hello',
+							'content' => 'Hi',
 						],
 					]
 				),
@@ -325,17 +312,19 @@ class ChatGPT extends Provider {
 			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 2,
 			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 1,
-			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response(),
+			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
 
 	/**
 	 * Format the result of most recent request.
 	 *
-	 * @param mixed $data Response data to format.
+	 * @param string $transient Transient that holds our data.
 	 * @return string
 	 */
-	private function get_formatted_latest_response( $data ) {
+	private function get_formatted_latest_response( string $transient = '' ) {
+		$data = get_transient( $transient );
+
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
@@ -391,9 +380,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
-		$normalizer     = new Normalizer();
 		$excerpt_length = $settings['length'] ?? 2;
-		$content        = $this->trim_content( $normalizer->normalize( $post_id ), $excerpt_length );
 
 		// Make our API request
 		$request  = new APIRequest( $settings['api_key'] ?? '' );
@@ -405,7 +392,7 @@ class ChatGPT extends Provider {
 						'model'       => $this->chatgpt_model,
 						'messages'    => [
 							'role'    => 'user',
-							'content' => 'Summarize the following text into ' . $excerpt_length . ' sentences: ' . $content . '',
+							'content' => 'Summarize the following text into ' . $excerpt_length . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
 						],
 						'temperature' => $settings['temperature'] ?? 1,
 					]
@@ -420,57 +407,35 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Trim our content, if needed.
+	 * Get our content, trimming if needed.
 	 *
-	 * @param string $content Content we may need to trim.
-	 * @param int    $excerpt_length Length of final excerpt.
+	 * @param int $post_id Post ID to get content from.
+	 * @param int $excerpt_length Sentence length of final excerpt.
 	 * @return string
 	 */
-	public function trim_content( string $content = '', int $excerpt_length = 2 ) {
+	public function get_content( int $post_id = 0, int $excerpt_length = 0 ) {
+		$normalizer = new Normalizer();
+		$tokenizer  = new Tokenizer( $this->max_tokens );
+
 		/**
 		 * We first determine how many tokens, roughly, our excerpt will require.
 		 * This is determined by the sentence length of the excerpt requested and how
 		 * many tokens are in a sentence.
-		 *
-		 * We then subtract those tokens from the max number of tokens ChatGPT allows
-		 * in a single request. ChatGPT counts both the tokens in the request and in
-		 * the response towards that max.
-		 *
-		 * We then figure out how many characters are in the content and figure out
-		 * how many tokens that is, rounding that number up.
 		 */
-		$excerpt_tokens     = $this->tokens_per_sentence * (int) $excerpt_length;
-		$max_content_tokens = $this->max_tokens - $excerpt_tokens;
-		$content_tokens     = ceil( mb_strlen( $content ) / $this->characters_in_token );
-
-		// If we don't need to trim, return full content.
-		if ( $content_tokens < $max_content_tokens ) {
-			return $content;
-		}
+		$excerpt_tokens = $tokenizer->tokens_in_sentences( (int) $excerpt_length );
 
 		/**
-		 * Next we determine how many tokens we need to trim by taking the
-		 * number of tokens in the content and subtracting the max tokens
-		 * we can have.
-		 *
-		 * Then we convert that token number to characters.
-		 *
-		 * Finally we determine what the max character length our content
-		 * can be and trim it up.
+		 * We then subtract those tokens from the max number of tokens ChatGPT allows
+		 * in a single request, as well as subtracting out the number of tokens in our
+		 * prompt (11). ChatGPT counts both the tokens in the request and in
+		 * the response towards the max.
 		 */
-		$tokens_to_trim     = $content_tokens - $max_content_tokens;
-		$characters_to_trim = $tokens_to_trim * $this->characters_in_token;
-		$max_content_length = mb_strlen( $content ) - $characters_to_trim;
-		$trimmed_content    = mb_substr( $content, 0, $max_content_length );
+		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 11;
 
-		// Ensure we our final string ends on a full word instead of truncating in the middle.
-		if ( ! preg_match( '/\\W/u', mb_substr( $content, $max_content_length - 1, 2 ) ) ) {
-			if ( preg_match( '/.*\\W/u', $trimmed_content, $matches ) ) {
-				$trimmed_content = $matches[0];
-			}
-		}
+		// Then trim our content, if needed, to stay under the max.
+		$content = $tokenizer->trim_content( $normalizer->normalize( $post_id ), $max_content_tokens );
 
-		return $trimmed_content;
+		return $content;
 	}
 
 }
