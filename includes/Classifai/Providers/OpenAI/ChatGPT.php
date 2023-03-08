@@ -380,23 +380,37 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
-		$excerpt_length = $settings['length'] ?? 2;
+		$excerpt_length = absint( $settings['length'] ?? 2 );
 
-		// Make our API request
-		$request  = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '' );
+
+		/**
+		 * Filter the request body before sending to ChatGPT.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to ChatGPT.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chatgpt_request_body',
+			[
+				'model'       => $this->chatgpt_model,
+				'messages'    => [
+					'role'    => 'user',
+					'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+				],
+				'temperature' => absint( $settings['temperature'] ?? 1 ),
+			]
+		);
+
+		// Make our API request.
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body' => wp_json_encode(
-					[
-						'model'       => $this->chatgpt_model,
-						'messages'    => [
-							'role'    => 'user',
-							'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
-						],
-						'temperature' => $settings['temperature'] ?? 1,
-					]
-				),
+				'body' => wp_json_encode( $body ),
 			]
 		);
 
@@ -460,15 +474,25 @@ class ChatGPT extends Provider {
 		/**
 		 * We then subtract those tokens from the max number of tokens ChatGPT allows
 		 * in a single request, as well as subtracting out the number of tokens in our
-		 * prompt (11). ChatGPT counts both the tokens in the request and in
+		 * prompt (12). ChatGPT counts both the tokens in the request and in
 		 * the response towards the max.
 		 */
-		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 11;
+		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 12;
 
 		// Then trim our content, if needed, to stay under the max.
 		$content = $tokenizer->trim_content( $normalizer->normalize( $post_id ), $max_content_tokens );
 
-		return $content;
+		/**
+		 * Filter content that will get sent to ChatGPT.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_content
+		 *
+		 * @param {string} $content Content that will be sent to ChatGPT.
+		 *
+		 * @return {string} Content.
+		 */
+		return apply_filters( 'classifai_chatgpt_content', $content );
 	}
 
 }

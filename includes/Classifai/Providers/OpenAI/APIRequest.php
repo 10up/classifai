@@ -4,15 +4,14 @@ namespace Classifai\Providers\OpenAI;
 
 /**
  * The APIRequest class is a low level class to make OpenAI API
- * requests. It uses constants declared in the config file for
- * authentication.
+ * requests.
  *
  * The returned response is parsed into JSON and returned as an
  * associative array.
  *
  * Usage:
  *
- * $request = new APIRequest();
+ * $request = new Classifai\Providers\OpenAI\APIRequest();
  * $request->post( $openai_url, $options );
  */
 class APIRequest {
