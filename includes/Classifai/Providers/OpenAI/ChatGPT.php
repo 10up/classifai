@@ -392,7 +392,7 @@ class ChatGPT extends Provider {
 						'model'       => $this->chatgpt_model,
 						'messages'    => [
 							'role'    => 'user',
-							'content' => 'Summarize the following text into ' . $excerpt_length . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+							'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
 						],
 						'temperature' => $settings['temperature'] ?? 1,
 					]
@@ -404,6 +404,39 @@ class ChatGPT extends Provider {
 
 		// TODO: test a positive response works as expected
 		return $response;
+	}
+
+	/**
+	 * Convert our sentence length into text.
+	 *
+	 * @param int $integer Integer to convert.
+	 * @return string
+	 */
+	private function convert_int_to_text( int $integer = 1 ) {
+		// Only support from 1 to 5 right now.
+		if ( $integer < 1 || $integer > 5 ) {
+			$integer = 1;
+		}
+
+		switch ( $integer ) {
+			case 1:
+				$text = 'one';
+				break;
+			case 2:
+				$text = 'two';
+				break;
+			case 3:
+				$text = 'three';
+				break;
+			case 4:
+				$text = 'four';
+				break;
+			case 5:
+				$text = 'five';
+				break;
+		}
+
+		return $text;
 	}
 
 	/**
