@@ -403,7 +403,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' sentences: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+						'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' short ' . _nx( 'sentence', 'sentences', $excerpt_length, 'Don\'t translate. Used in AI prompt', 'classifai' ) . ': ' . $this->get_content( $post_id, $excerpt_length ) . '',
 					],
 				],
 				'temperature' => absint( $settings['temperature'] ?? 1 ),
