@@ -197,19 +197,23 @@ class ChatGPT extends Provider {
 		$authenticated = $this->authenticate_credentials( $settings['api_key'] ?? '' );
 
 		if ( is_wp_error( $authenticated ) ) {
-			add_settings_error(
-				'api_key',
-				'classifai-auth',
-				$authenticated->get_error_message(),
-				'error'
-			);
-
 			$new_settings['authenticated'] = false;
+			$error_message                 = $authenticated->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
 				$new_settings['authenticated'] = true;
+				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
+			} else {
+				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
 			}
+
+			add_settings_error(
+				'api_key',
+				'classifai-auth',
+				$error_message,
+				'error'
+			);
 		} else {
 			$new_settings['authenticated'] = true;
 		}
