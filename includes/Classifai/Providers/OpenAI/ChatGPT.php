@@ -247,7 +247,7 @@ class ChatGPT extends Provider {
 	protected function authenticate_credentials( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your API key', 'classifai' ) );
+			return new WP_Error( 'auth', esc_html__( 'Please enter your OpenAI API key.', 'classifai' ) );
 		}
 
 		// Make request to ensure credentials work.
@@ -379,7 +379,7 @@ class ChatGPT extends Provider {
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is turned off or authentication failed.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 2 );
