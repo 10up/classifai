@@ -174,7 +174,7 @@ abstract class Provider {
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
