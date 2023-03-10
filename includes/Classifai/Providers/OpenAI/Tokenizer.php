@@ -12,21 +12,21 @@ class Tokenizer {
 	 *
 	 * @var int
 	 */
-	protected $max_tokens;
+	public $max_tokens;
 
 	/**
 	 * How many characters in one token (roughly)
 	 *
 	 * @var int
 	 */
-	protected $characters_in_token = 3;
+	public $characters_in_token = 4;
 
 	/**
-	 * How many tokens a sentence will take (roughly)
+	 * How many tokens a word will take (roughly)
 	 *
-	 * @var int
+	 * @var float
 	 */
-	protected $tokens_per_sentence = 45;
+	public $tokens_per_word = 1.5;
 
 	/**
 	 * OpenAI Tokenizer constructor.
@@ -41,24 +41,24 @@ class Tokenizer {
 	 * Determine roughly how many tokens a string contains.
 	 *
 	 * @param string $content Content to analyze.
-	 * @return float
+	 * @return int
 	 */
 	public function tokens_in_content( string $content = '' ) {
 		$tokens = ceil( mb_strlen( $content ) / $this->characters_in_token );
 
-		return $tokens;
+		return (int) $tokens;
 	}
 
 	/**
-	 * Determine how many tokens are in a certain number of sentences.
+	 * Determine how many tokens are in a certain number of words.
 	 *
-	 * @param int $sentences Number of sentences we want.
+	 * @param int $words Number of words we want.
 	 * @return int
 	 */
-	public function tokens_in_sentences( int $sentences = 1 ) {
-		$tokens = $this->tokens_per_sentence * absint( $sentences );
+	public function tokens_in_words( int $words = 1 ) {
+		$tokens = ceil( $this->tokens_per_word * absint( $words ) );
 
-		return $tokens;
+		return (int) $tokens;
 	}
 
 	/**
@@ -69,11 +69,14 @@ class Tokenizer {
 	 * @return string
 	 */
 	public function trim_content( string $content = '', int $max_tokens = 0 ) {
+		// Remove linebreaks that may have been added.
+		$content = str_replace( "\n\n", ' ', $content );
+
 		// Determine how many tokens the content has.
 		$content_tokens = $this->tokens_in_content( $content );
 
 		// If we don't need to trim, return full content.
-		if ( (int) $content_tokens < (int) $max_tokens ) {
+		if ( $content_tokens < $max_tokens ) {
 			return $content;
 		}
 
@@ -99,7 +102,7 @@ class Tokenizer {
 			}
 		}
 
-		return $trimmed_content;
+		return trim( $trimmed_content );
 	}
 
 }

@@ -159,11 +159,10 @@ class ChatGPT extends Provider {
 			[
 				'label_for'     => 'length',
 				'input_type'    => 'number',
-				'max'           => 5,
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $default_settings['length'],
-				'description'   => __( 'How many sentences should the excerpt be?', 'classifai' ),
+				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
 			]
 		);
 
@@ -197,19 +196,23 @@ class ChatGPT extends Provider {
 		$authenticated = $this->authenticate_credentials( $settings['api_key'] ?? '' );
 
 		if ( is_wp_error( $authenticated ) ) {
-			add_settings_error(
-				'api_key',
-				'classifai-auth',
-				$authenticated->get_error_message(),
-				'error'
-			);
-
 			$new_settings['authenticated'] = false;
+			$error_message                 = $authenticated->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
 				$new_settings['authenticated'] = true;
+				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
+			} else {
+				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
 			}
+
+			add_settings_error(
+				'api_key',
+				'classifai-auth',
+				$error_message,
+				'error'
+			);
 		} else {
 			$new_settings['authenticated'] = true;
 		}
@@ -222,10 +225,10 @@ class ChatGPT extends Provider {
 			$new_settings['enable_excerpt'] = '1';
 		}
 
-		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 && (int) $settings['length'] <= 5 ) {
+		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
 			$new_settings['length'] = absint( $settings['length'] );
 		} else {
-			$new_settings['length'] = 2;
+			$new_settings['length'] = 55;
 		}
 
 		if ( isset( $settings['temperature'] ) && is_numeric( $settings['temperature'] ) && (float) $settings['temperature'] >= 0 && (float) $settings['temperature'] <= 2 ) {
@@ -247,7 +250,7 @@ class ChatGPT extends Provider {
 	protected function authenticate_credentials( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your API key', 'classifai' ) );
+			return new WP_Error( 'auth', esc_html__( 'Please enter your OpenAI API key.', 'classifai' ) );
 		}
 
 		// Make request to ensure credentials work.
@@ -289,7 +292,7 @@ class ChatGPT extends Provider {
 			'authenticated'  => false,
 			'api_key'        => '',
 			'enable_excerpt' => false,
-			'length'         => 2,
+			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
 			'temperature'    => 1,
 		];
 	}
@@ -312,7 +315,7 @@ class ChatGPT extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 2,
+			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 55,
 			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 1,
 			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
@@ -379,10 +382,10 @@ class ChatGPT extends Provider {
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is turned off or authentication failed.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$excerpt_length = absint( $settings['length'] ?? 2 );
+		$excerpt_length = absint( $settings['length'] ?? 55 );
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
@@ -403,7 +406,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => 'Summarize the following text into ' . $this->convert_int_to_text( $excerpt_length ) . ' short ' . _nx( 'sentence', 'sentences', $excerpt_length, 'Don\'t translate. Used in AI prompt', 'classifai' ) . ': ' . $this->get_content( $post_id, $excerpt_length ) . '',
+						'content' => 'Provide a kicker for the following text in ' . $excerpt_length . ' words: ' . $this->get_content( $post_id, $excerpt_length ) . '',
 					],
 				],
 				'temperature' => absint( $settings['temperature'] ?? 1 ),
@@ -433,39 +436,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Convert our sentence length into text.
-	 *
-	 * @param int $integer Integer to convert.
-	 * @return string
-	 */
-	private function convert_int_to_text( int $integer = 1 ) {
-		// Only support from 1 to 5 right now.
-		if ( $integer < 1 || $integer > 5 ) {
-			$integer = 1;
-		}
-
-		switch ( $integer ) {
-			case 1:
-				$text = 'one';
-				break;
-			case 2:
-				$text = 'two';
-				break;
-			case 3:
-				$text = 'three';
-				break;
-			case 4:
-				$text = 'four';
-				break;
-			case 5:
-				$text = 'five';
-				break;
-		}
-
-		return $text;
-	}
-
-	/**
 	 * Get our content, trimming if needed.
 	 *
 	 * @param int $post_id Post ID to get content from.
@@ -473,26 +443,29 @@ class ChatGPT extends Provider {
 	 * @return string
 	 */
 	public function get_content( int $post_id = 0, int $excerpt_length = 0 ) {
-		$normalizer = new Normalizer();
 		$tokenizer  = new Tokenizer( $this->max_tokens );
+		$normalizer = new Normalizer();
 
 		/**
 		 * We first determine how many tokens, roughly, our excerpt will require.
-		 * This is determined by the sentence length of the excerpt requested and how
-		 * many tokens are in a sentence.
+		 * This is determined by the number of words our excerpt requested and how
+		 * many tokens are in an average word.
 		 */
-		$excerpt_tokens = $tokenizer->tokens_in_sentences( (int) $excerpt_length );
+		$excerpt_tokens = $tokenizer->tokens_in_words( $excerpt_length );
 
 		/**
 		 * We then subtract those tokens from the max number of tokens ChatGPT allows
 		 * in a single request, as well as subtracting out the number of tokens in our
-		 * prompt (12). ChatGPT counts both the tokens in the request and in
+		 * prompt (13). ChatGPT counts both the tokens in the request and in
 		 * the response towards the max.
 		 */
-		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 12;
+		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 13;
 
 		// Then trim our content, if needed, to stay under the max.
-		$content = $tokenizer->trim_content( $normalizer->normalize( $post_id ), $max_content_tokens );
+		$content = $tokenizer->trim_content(
+			$normalizer->normalize( $post_id ),
+			(int) $max_content_tokens
+		);
 
 		/**
 		 * Filter content that will get sent to ChatGPT.
