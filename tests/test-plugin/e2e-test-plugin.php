@@ -12,12 +12,15 @@ add_filter( 'pre_http_request', 'classifai_test_mock_http_requests', 10, 3 );
  * @param boolean $preempt     Whether to preempt an HTTP request's return value.
  * @param array   $parsed_args HTTP request arguments.
  * @param string  $url         The request URL.
- * @return void
+ * @return boolean|array
  */
-function classifai_test_mock_http_requests ( $preempt, $parsed_args, $url ) {
+function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 	$response = '';
+
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
@@ -40,10 +43,10 @@ function classifai_test_mock_http_requests ( $preempt, $parsed_args, $url ) {
 		);
 	}
 
-
 	if ( ! empty( $response ) ) {
 		return classifai_test_prepare_response( $response );
 	}
+
 	return $preempt;
 }
 
@@ -67,6 +70,6 @@ function classifai_test_prepare_response( $response ) {
 }
 
 // Enable PDF scan on upload.
-if( ! defined( 'FS_METHOD' ) ) {
+if ( ! defined( 'FS_METHOD' ) ) {
 	define( 'FS_METHOD', 'direct' );
 }

@@ -1,5 +1,7 @@
 /* eslint jest/expect-expect: 0 */
 
+import { getChatGPTData } from '../plugins/functions';
+
 describe('Language processing Tests', () => {
 	before(() => {
 		cy.login();
@@ -162,13 +164,15 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can see the generate excerpt button in a post', () => {
+		const data = getChatGPTData();
+
 		// Create test post.
 		cy.createPost( {
 			title: 'Test ChatGPT post',
 			content: 'Test GPT content',
 		} );
 
-		// Close post publish panel
+		// Close post publish panel.
 		const closePanelSelector = 'button[aria-label="Close panel"]';
 		cy.get( 'body' ).then( ( $body ) => {
 			if ( $body.find( closePanelSelector ).length > 0 ) {
@@ -176,22 +180,68 @@ describe('Language processing Tests', () => {
 			}
 		} );
 
-		// Open post settings sidebar
+		// Open post settings sidebar.
 		cy.openDocumentSettingsSidebar();
 
-		// Find and open the excerpt panel
+		// Find and open the excerpt panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
 
-		cy.get( panelButtonSelector ).then( ( $button ) => {
-			// Find the panel container
-			const $panel = $button.parents( '.components-panel__body' );
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
 
-			// Open panel
+			// Open panel.
 			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $button ).click();
+				cy.wrap( $panelButton ).click();
 			}
 
+			// Verify button exists.
 			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).should( 'exist' );
+
+			// Click on button and verify data loads in.
+			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).click();
+			cy.wrap( $panel ).find( 'textarea' ).should( 'have.value', data );
+		} );
+	} );
+
+	it( 'Can disable excerpt generation feature', () => {
+		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+
+		// Disable features.
+		cy.get( '#enable_excerpt' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT post',
+			content: 'Test GPT content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the excerpt panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button doesn't exist.
+			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).should( 'not.exist' );
 		} );
 	} );
 });
