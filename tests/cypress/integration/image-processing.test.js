@@ -10,13 +10,13 @@ describe('Image processing Tests', () => {
 	it('Can save "Image Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
-		cy.get('#classifai-settings-url')
+		cy.get('#url')
 			.clear()
 			.type('http://e2e-test-image-processing.test');
-		cy.get('#classifai-settings-api_key').clear().type('password');
+		cy.get('#api_key').clear().type('password');
 		cy.get('#computer_vision_enable_image_captions_alt').check();
-		cy.get('#classifai-settings-enable_smart_cropping').check();
-		cy.get('#classifai-settings-enable_ocr').check();
+		cy.get('#enable_smart_cropping').check();
+		cy.get('#enable_ocr').check();
 		cy.get('#submit').click();
 
 		cy.get('.notice').contains('Settings saved.');
@@ -88,8 +88,8 @@ describe('Image processing Tests', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		// Disable features
-		cy.get('#classifai-settings-enable_smart_cropping').uncheck();
-		cy.get('#classifai-settings-enable_ocr').uncheck();
+		cy.get('#enable_smart_cropping').uncheck();
+		cy.get('#enable_ocr').uncheck();
 		cy.get('#submit').click();
 
 		// Verify with Image processing features are not present in attachment metabox.

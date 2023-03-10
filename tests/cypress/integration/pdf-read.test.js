@@ -8,11 +8,11 @@ describe('PDF read Tests', () => {
 	it('Can save "PDF scanning" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
-		cy.get('#classifai-settings-url')
+		cy.get('#url')
 			.clear()
 			.type('http://e2e-test-image-processing.test');
-		cy.get('#classifai-settings-api_key').clear().type('password');
-		cy.get('#classifai-settings-enable_read_pdf').check();
+		cy.get('#api_key').clear().type('password');
+		cy.get('#enable_read_pdf').check();
 		cy.get('#submit').click();
 
 		cy.get('.notice').contains('Settings saved.');
