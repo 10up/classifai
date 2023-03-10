@@ -14,6 +14,7 @@ describe('Image processing Tests', () => {
 			.clear()
 			.type('http://e2e-test-image-processing.test');
 		cy.get('#classifai-settings-api_key').clear().type('password');
+		cy.get('#computer_vision_enable_image_captions_alt').check();
 		cy.get('#classifai-settings-enable_smart_cropping').check();
 		cy.get('#classifai-settings-enable_ocr').check();
 		cy.get('#submit').click();
@@ -41,7 +42,7 @@ describe('Image processing Tests', () => {
 			.first()
 			.contains('ClassifAI Image Processing');
 		cy.get('.misc-publishing-actions label[for=rescan-captions]').contains(
-			'No alt text? Rescan image'
+			'No descriptive text? Rescan image'
 		);
 		cy.get('.misc-publishing-actions label[for=rescan-tags]').contains(
 			'Rescan image for new tags'
