@@ -1,3 +1,5 @@
+/* global ClassifAI */
+
 import { handleClick } from './helpers';
 
 ( function ( $ ) {
@@ -128,15 +130,53 @@ import { handleClick } from './helpers';
 		}
 	};
 
+	/**
+	 * Check the PDF Scanner status and disable button if in progress.
+	 */
+	const checkPdfReadStatus = () => {
+		const readButton = document.getElementById( 'classifai-rescan-pdf' );
+
+		if ( ! readButton ) {
+			return;
+		}
+
+		const postId = readButton.getAttribute( 'data-id' );
+
+		$.ajax( {
+			url: ajaxurl,
+			type: 'POST',
+			data: {
+				action: 'classifai_get_read_status',
+				attachment_id: postId,
+				nonce: ClassifAI.ajax_nonce,
+			},
+			success: ( resp ) => {
+				if ( resp?.success ) {
+					if ( resp?.data?.running ) {
+						readButton.setAttribute( 'disabled', 'disabled' );
+						readButton.textContent = __(
+							'In progress!',
+							'classifai'
+						);
+					} else if ( resp?.data?.read ) {
+						readButton.textContent = __( 'Rescan', 'classifai' );
+					}
+				}
+			},
+		} );
+	};
+
 	$( document ).ready( function () {
 		if ( wp.media ) {
 			wp.media.view.Modal.prototype.on( 'open', function () {
 				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
+				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
 			} );
 		}
 
 		if ( wp.media.frame ) {
 			wp.media.frame.on( 'edit:attachment', handleButtonsClick );
+			wp.media.frame.on( 'edit:attachment', checkPdfReadStatus );
 		}
 
 		// For new uploaded media.
