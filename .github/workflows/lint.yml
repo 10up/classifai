@@ -19,16 +19,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: install node v16
+
+    - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+
+    - name: Setup node v16 and npm cache
       uses: actions/setup-node@v3
       with:
         node-version: 16
-    - name: npm install
+        cache: 'npm'
+
+    - name: Install Node dependencies
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm install
-    - name: eslint
-      uses: icrawl/action-eslint@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Generate linting report
+      run: npm run lint:js -- --output-file eslint-report.json --format json
+      continue-on-error: true
+
+    - name: Annotate code linting results
+      uses: ataylorme/eslint-annotate-action@v2
+      with:
+        repo-token: '${{ secrets.GITHUB_TOKEN }}'
+        report-json: 'eslint-report.json'
+
+    - name: Update summary
+      run: |
+        npm_config_yes=true npx github:10up/eslint-json-to-md --path ./eslint-report.json --output ./eslint-report.md
+        cat eslint-report.md >> $GITHUB_STEP_SUMMARY
+      if: ${{ failure() }}
+
   phpcs:
     name: phpcs
     runs-on: ubuntu-latest
