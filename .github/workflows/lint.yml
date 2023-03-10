@@ -42,7 +42,6 @@ jobs:
 
     - name: Run JS linting
       run: npm run lint:js
-      continue-on-error: true
 
   phpcs:
     name: phpcs
