@@ -16,11 +16,11 @@ jobs:
       matrix:
         core:
           - {name: 'WP latest', version: 'latest'}
-          - {name: 'WP minimum', version: 'WordPress/WordPress#5.6'}
+          - {name: 'WP minimum', version: 'WordPress/WordPress#5.7'}
           - {name: 'WP trunk', version: 'WordPress/WordPress#master'}
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Install dependencies
       run: npm install
@@ -43,7 +43,7 @@ jobs:
       run: npm run cypress:run
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       if: failure()
       with:
         name: cypress-artifact-classifai
