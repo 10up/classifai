@@ -168,7 +168,7 @@ import { handleClick } from './helpers';
 
 	$( document ).ready( function() {
 		if ( wp.media ) {
-			wp.media.view.Modal.prototype.on( 'open', function() {
+			wp.media.view.Modal.prototype.on( 'open', function () {
 				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
 				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
 			} );

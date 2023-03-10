@@ -121,7 +121,7 @@ class Plugin {
 	 * @since 1.4.0
 	 */
 	public function init_admin_helpers() {
-		if ( ! empty( $this->admin_helpers ) ) {
+		if (! empty( $this->admin_helpers ) ) {
 			return;
 		}
 
