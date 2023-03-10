@@ -17,6 +17,7 @@ jobs:
   eslint:
     name: eslint
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
 
@@ -37,23 +38,11 @@ jobs:
 
     - name: Install Node dependencies
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: npm install
+      run: npm ci --no-optional
 
-    - name: Generate linting report
-      run: npm run lint:js -- --output-file eslint-report.json --format json
+    - name: Run JS linting
+      run: npm run lint:js
       continue-on-error: true
-
-    - name: Annotate code linting results
-      uses: ataylorme/eslint-annotate-action@v2
-      with:
-        repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        report-json: "eslint-report.json"
-
-    - name: Update summary
-      run: |
-        npm_config_yes=true npx github:10up/eslint-json-to-md --path ./eslint-report.json --output ./eslint-report.md
-        cat eslint-report.md >> $GITHUB_STEP_SUMMARY
-      if: ${{ failure() }}
 
   phpcs:
     name: phpcs
