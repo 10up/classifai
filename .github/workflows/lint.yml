@@ -41,11 +41,11 @@ jobs:
       run: npm ci --no-optional
 
     - name: Get updated JS files
-        id: changed-files
-        uses: tj-actions/changed-files@v35
-        with:
-          files: |
-            **/*.js
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: |
+          **/*.js
 
     - name: Run JS linting
       run: |
@@ -86,11 +86,11 @@ jobs:
       run: composer install
 
     - name: Get updated PHP files
-        id: changed-files
-        uses: tj-actions/changed-files@v35
-        with:
-            files: |
-              **/*.php
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: |
+          **/*.php
 
     - name: PHPCS check
       run: |
