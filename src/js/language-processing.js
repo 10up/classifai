@@ -219,7 +219,7 @@ import '../scss/language-processing.scss';
 						name = item.label;
 					}
 
-					const width = 300 + 300 * rating;
+					const width = 300 + ( 300 * rating );
 					rating = ( rating * 100 ).toFixed( 2 );
 					name = name
 						.split( '/' )
@@ -325,30 +325,34 @@ import '../scss/language-processing.scss';
 	function debounce( func, wait, immediate ) {
 		let timeout;
 
-		return function () {
+		return function() {
 			const context = this,
 				args = arguments;
 
 			/** Debounced function. */
-			const later = function () {
+			const later = function() {
 				timeout = null;
-				if ( ! immediate ) func.apply( context, args );
+				if ( ! immediate ) {
+					func.apply( context, args );
+				}
 			};
 			const callNow = immediate && ! timeout;
 			clearTimeout( timeout );
 			timeout = setTimeout( later, wait );
-			if ( callNow ) func.apply( context, args );
+			if ( callNow ) {
+				func.apply( context, args );
+			}
 		};
 	}
 } )();
 
 // Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
-document.addEventListener( 'DOMContentLoaded', function () {
+document.addEventListener( 'DOMContentLoaded', function() {
 	const classifaiNLUCheckbox = document.getElementById(
 		'_classifai_process_content'
 	);
 	if ( classifaiNLUCheckbox ) {
-		classifaiNLUCheckbox.addEventListener( 'change', function () {
+		classifaiNLUCheckbox.addEventListener( 'change', function() {
 			const classifyButton = document.querySelector(
 				'.classifai-clasify-post-wrapper'
 			);
