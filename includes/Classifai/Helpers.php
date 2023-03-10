@@ -588,6 +588,7 @@ function attachment_is_pdf( $post ) {
  * Returns the settings for Azure's Text to Speech Provider.
  * Found at `/wp-admin/admin.php?page=language_processing&tab=azure_text_to_speech`
  *
+ * @todo Move this to a more generic method during refactoring of the plugin.
  * @return array
  */
 function get_azure_text_to_speech_settings() {
@@ -599,6 +600,7 @@ function get_azure_text_to_speech_settings() {
 /**
  * Returns supported post types for Azure Text to Speech.
  *
+ * @todo Move this to a more generic method during refactoring of the plugin.
  * @return array
  */
 function get_supported_post_types_for_azure_speech_to_text() {

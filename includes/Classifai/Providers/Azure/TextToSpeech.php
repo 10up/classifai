@@ -184,8 +184,9 @@ class TextToSpeech extends Provider {
 				$new_settings['authenticated'] = true;
 			}
 		} else {
-			$new_settings['url']     = '';
-			$new_settings['api_key'] = '';
+			$new_settings['url']           = '';
+			$new_settings['api_key']       = '';
+			$new_settings['authenticated'] = false;
 
 			add_settings_error(
 				$this->get_option_name(),
@@ -319,7 +320,16 @@ class TextToSpeech extends Provider {
 	 * @return array Keyed array of debug information.
 	 */
 	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		return array();
+		if ( is_null( $settings ) ) {
+			$settings = $this->sanitize_settings( $this->get_settings() );
+		}
+
+		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+
+		return [
+			__( 'Authenticated', 'classifai' )  => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
+			__( 'API URL', 'classifai' )        => $settings['url'] ?? '',
+		];
 	}
 
 	/**
