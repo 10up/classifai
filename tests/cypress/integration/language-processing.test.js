@@ -1,9 +1,11 @@
+/* eslint jest/expect-expect: 0 */
+
 describe('Language processing Tests', () => {
 	before(() => {
 		cy.login();
 	} );
 
-	it( 'Can save "Language Processing" settings', () => {
+	it( 'Can save IBM Watson "Language Processing" settings', () => {
 		cy.visit( '/wp-admin/admin.php?page=language_processing' );
 
 		cy.get( '#classifai-settings-watson_url' ).clear().type( 'http://e2e-test-nlu-server.test/' );
@@ -147,4 +149,49 @@ describe('Language processing Tests', () => {
 		// Verify Each Created taxonomies.
 		cy.verifyPostTaxonomyTerms('tags', threshold / 100);
 	});
+
+	it( 'Can save OpenAI "Language Processing" settings', () => {
+		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+
+		cy.get( '#api_key' ).clear().type( 'password' );
+
+		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#length' ).clear().type( 35 );
+		cy.get( '#temperature' ).clear().type( 0.5 );
+		cy.get( '#submit' ).click();
+	} );
+
+	it( 'Can see the generate excerpt button in a post', () => {
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT post',
+			content: 'Test GPT content',
+		} );
+
+		// Close post publish panel
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the excerpt panel
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+		cy.get( panelButtonSelector ).then( ( $button ) => {
+			// Find the panel container
+			const $panel = $button.parents( '.components-panel__body' );
+
+			// Open panel
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $button ).click();
+			}
+
+			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).should( 'exist' );
+		} );
+	} );
 });

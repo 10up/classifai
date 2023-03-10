@@ -1,3 +1,5 @@
+/* eslint jest/expect-expect: 0 */
+
 import { getOCRData, getImageData } from '../plugins/functions';
 
 describe('Image processing Tests', () => {
