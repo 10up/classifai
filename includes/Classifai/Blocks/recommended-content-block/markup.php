@@ -14,6 +14,14 @@
 if ( is_singular() ) {
 	$attributes['excludeId'] = get_the_ID();
 }
+
+// Backward compatibillity for default post type. 
+// We can not keep default post type in block.json as it makes impossible to distinguish whether it is previously selected or default one in the editor.
+// Because we've introduced auto selection of post type based on currently edit screen for the first time block component mount. 
+if ( empty( $attributes['contentPostType'] ) ) {
+	$attributes['contentPostType'] = 'post';
+}
+
 $attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
 $attr_key   = md5( maybe_serialize( $attributes ) );
 $block_id   = 'classifai-recommended-block-' . $attr_key;
