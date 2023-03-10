@@ -2,7 +2,7 @@
 
 import { handleClick } from './helpers';
 
-( function ( $ ) {
+( function( $ ) {
 	const { __ } = wp.i18n;
 
 	/**
