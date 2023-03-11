@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
-const { ToggleControl, Button, ClipboardButton, BaseControl, Spinner } = wp.components;
+const { ToggleControl, Button, ClipboardButton, Spinner } = wp.components;
 const { __, sprintf } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
@@ -91,7 +91,8 @@ const ClassifAITSpeechSynthesisToggle = () => {
 		}
 	} );
 
-	const [ audioFileUrlState, setAudioFileUrlState ] = useState( audioFileUrl )
+	const [ audioFileUrlState, setAudioFileUrlState ] = useState( audioFileUrl );
+	const [ manualRegenerateAudio, setManualRegenerateAudio ] = useState( false );
 
 	let isFeatureEnabled = false;
 
@@ -102,30 +103,38 @@ const ClassifAITSpeechSynthesisToggle = () => {
 	const isSaving = useRef( false );
 
 	useEffect( () => {
+		const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ currentPostId }`;
+
+		const synthesizeSpeech = async () => {
+			setIsGeneratingAudio( true );
+			const response = await fetch( synthesizeSpeechUrl );
+
+			if ( 200 !== response.status ) {
+				console.error( response.json() );
+			}
+
+			setAudioFileUrlState( await response.json() );
+			setIsGeneratingAudio( false );
+
+			if ( manualRegenerateAudio ) {
+				setManualRegenerateAudio( false );
+			}
+		};
+
+		if ( manualRegenerateAudio ) {
+			synthesizeSpeech();
+		}
+
 		if ( isPostSaving && ! isSaving.current ) {
 			isSaving.current = true;
 		}
 
 		if ( ! isPostSaving && isSaving.current ) {
-			const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ currentPostId }`;
-
-			const synthesizeSpeech = async () => {
-				setIsGeneratingAudio( true );
-				const response = await fetch( synthesizeSpeechUrl );
-
-				if ( 200 !== response.status ) {
-					console.error( response.json() );
-				}
-
-				setAudioFileUrlState( await response.json() );
-				setIsGeneratingAudio( false );
-			};
-
 			synthesizeSpeech();
 
 			isSaving.current = false;
 		}
-	}, [ isPostSaving, isSaving.current ] );
+	}, [ isPostSaving, isSaving.current, manualRegenerateAudio ] );
 
 	return (
 		<>
@@ -149,7 +158,7 @@ const ClassifAITSpeechSynthesisToggle = () => {
 							<span>{ __( 'Generating speech audio for the post...' ) }</span>
 						</>
 					) : (
-						<BaseControl>
+						<>
 							<ClipboardButton
 								text={ audioFileUrl }
 								onCopy={ () => setHasCopied( true ) }
@@ -159,7 +168,14 @@ const ClassifAITSpeechSynthesisToggle = () => {
 							>
 								{ hasCopied ? __( 'Copied!', 'classifai' ) : __( 'Copy post audio URL', 'classifai' ) }
 							</ClipboardButton>
-						</BaseControl>
+							<Button
+								variant="secondary"
+								isSmall={ true }
+								onClick={ () => setManualRegenerateAudio( ! manualRegenerateAudio ) }
+							>
+								{ __( 'Manually generate audio', 'classifai' ) }
+							</Button>
+						</>
 					)
 				)
 			}
