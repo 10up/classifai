@@ -179,7 +179,7 @@ class ChatGPT extends Provider {
 				'min'           => 0,
 				'step'          => 0.1,
 				'default_value' => $default_settings['temperature'],
-				'description'   => __( 'What sampling temperature to use, between 0 and 2. Higher values like 1.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.', 'classifai' ),
+				'description'   => __( 'What sampling temperature to use, between 0 and 2. Higher values will make the excerpt more random, while lower values will make it more focused.', 'classifai' ),
 			]
 		);
 	}
@@ -234,7 +234,7 @@ class ChatGPT extends Provider {
 		if ( isset( $settings['temperature'] ) && is_numeric( $settings['temperature'] ) && (float) $settings['temperature'] >= 0 && (float) $settings['temperature'] <= 2 ) {
 			$new_settings['temperature'] = abs( (float) $settings['temperature'] );
 		} else {
-			$new_settings['temperature'] = 1;
+			$new_settings['temperature'] = 0;
 		}
 
 		return $new_settings;
@@ -293,7 +293,7 @@ class ChatGPT extends Provider {
 			'api_key'        => '',
 			'enable_excerpt' => false,
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
-			'temperature'    => 1,
+			'temperature'    => 0,
 		];
 	}
 
@@ -316,7 +316,7 @@ class ChatGPT extends Provider {
 			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 55,
-			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 1,
+			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 0,
 			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
@@ -409,7 +409,7 @@ class ChatGPT extends Provider {
 						'content' => 'Provide a kicker for the following text in ' . $excerpt_length . ' words: ' . $this->get_content( $post_id, $excerpt_length ) . '',
 					],
 				],
-				'temperature' => absint( $settings['temperature'] ?? 1 ),
+				'temperature' => abs( (float) $settings['temperature'] ?? 0 ),
 			]
 		);
 
