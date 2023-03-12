@@ -3,7 +3,7 @@
  */
 const { __ } = wp.i18n;
 const { dispatch } = wp.data;
-const { PluginDocumentSettingPanel } = wp.editPost;
+const { PluginDocumentSettingPanel, PluginPrePublishPanel } = wp.editPost;
 const { PostExcerptCheck } = wp.editor;
 const { registerPlugin } = wp.plugins;
 
@@ -24,6 +24,13 @@ const PostExcerpt = () => {
 			<PluginDocumentSettingPanel title={ __( 'Excerpt' ) }>
 				<PostExcerptForm />
 			</PluginDocumentSettingPanel>
+			<PluginPrePublishPanel
+				title={ __( 'Excerpt' ) }
+				icon='aside'
+				initialOpen={ true }
+			>
+				<PostExcerptForm />
+			</PluginPrePublishPanel>
 		</PostExcerptCheck>
 	);
 };
