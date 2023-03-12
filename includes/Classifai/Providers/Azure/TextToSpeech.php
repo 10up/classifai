@@ -268,6 +268,16 @@ class TextToSpeech extends Provider {
 			$request_params
 		);
 
+		if ( is_wp_error( $response ) ) {
+			add_settings_error(
+				$this->get_option_name(),
+				'azure-text-to-request-failed',
+				esc_html__( 'HTTP request failed.', 'classifai' ),
+				'error'
+			);
+			return false;
+		}
+
 		$http_code = wp_remote_retrieve_response_code( $response );
 
 		// Return and render error if HTTP response status code is other than 200.
