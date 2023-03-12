@@ -322,29 +322,34 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 				disabled={ ! isFeatureSupported }
 			/>
 			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl }></audio> }
-			<BaseControl label={ __( 'Audio controls', 'classifai' ) }>
-				<div>
-					<ButtonGroup>
-						<Button
-							icon={ <Icon icon="update" /> }
-							variant="secondary"
-							isBusy={ isProcessingAudio }
-							onClick={ refreshAudio }
-						>
-							{ __( 'Refresh', 'classifai' ) }
-						</Button>
-						{ sourceUrl && <>
+			{ sourceUrl && (
+				<BaseControl
+					label={ __( 'Audio controls', 'classifai' ) }
+					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.' ) }
+				>
+					<div>
+						<ButtonGroup>
+							<Button
+								icon={ <Icon icon="update" /> }
+								variant="secondary"
+								isBusy={ isProcessingAudio }
+								onClick={ refreshAudio }
+							>
+								{ __( 'Refresh', 'classifai' ) }
+							</Button>
+
 							<Button
 								icon={ <Icon icon={ isPreviewing ? 'controls-pause' : 'controls-play' } /> }
 								variant="secondary"
 								onClick={ () => setIsPreviewing( ! isPreviewing ) }
+								disabled={ isProcessingAudio }
 							>
 								{ __( 'Preview', 'classifai' ) }
 							</Button>
-						</> }
-					</ButtonGroup>
-				</div>
-			</BaseControl>
+						</ButtonGroup>
+					</div>
+				</BaseControl>
+			) }
 		</>
 	);
 };
