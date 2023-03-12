@@ -238,12 +238,13 @@ class SavePostHandler {
 			);
 		}
 
-		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::POST_META_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
 
 		// If audio already exists for this post, delete it.
 		if ( $saved_attachment_id ) {
 			wp_delete_attachment( $saved_attachment_id, true );
-			delete_post_meta( $post_id, TextToSpeech::POST_META_KEY );
+			delete_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY );
 		}
 
 		// The audio file name.
@@ -276,7 +277,8 @@ class SavePostHandler {
 				esc_html__( 'Audio creation failed.', 'classifai' )
 			);
 		} else {
-			update_post_meta( $post_id, TextToSpeech::POST_META_KEY, $attachment_id );
+			update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, $attachment_id );
+			update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
 		}
 
 		return $attachment_id;

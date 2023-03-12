@@ -147,7 +147,7 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		return home_url( wp_get_attachment_url( $attachment_id ) );
+		return $attachment_id;
 	}
 
 	/**

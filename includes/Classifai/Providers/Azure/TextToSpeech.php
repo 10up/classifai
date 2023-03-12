@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use Classifai\Blocks;
 use WP_Http;
 
 use function Classifai\get_post_types_for_language_settings;
@@ -14,7 +15,9 @@ class TextToSpeech extends Provider {
 
 	const API_PATH = 'cognitiveservices/v1';
 
-	const POST_META_KEY = '_classifai_post_audio_id';
+	const AUDIO_ID_KEY = '_classifai_post_audio_id';
+
+	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
 
 	/**
 	 * Watson NLU constructor.
@@ -86,6 +89,8 @@ class TextToSpeech extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_filter( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+
+		Blocks\setup();
 	}
 
 	/**
@@ -381,15 +386,14 @@ class TextToSpeech extends Provider {
 
 		register_rest_field(
 			$supported_post_types,
-			'classifai_post_audio_url',
+			'classifai_post_audio_id',
 			array(
 				'get_callback' => function( $object ) {
 					$post_audio_id = get_post_meta( $object['id'], '_classifai_post_audio_id', true );
-					$attachment_url = wp_get_attachment_url( $post_audio_id );
-					return $attachment_url ? home_url( wp_get_attachment_url( $post_audio_id ) ) : '';
+					return (int) $post_audio_id;
 				},
 				'schema'       => [
-					'type'    => 'string',
+					'type'    => 'integer',
 					'context' => [ 'view', 'edit' ],
 				],
 			)

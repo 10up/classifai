@@ -1,13 +1,13 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
+import { store as postAudioStore } from '../../includes/Classifai/Blocks/post-audio-block/store/register';
 
 import { useState, useEffect, useRef } from '@wordpress/element';
 
-const { Icon } = wp.components;
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
-const { ToggleControl, Button, ClipboardButton, Spinner } = wp.components;
+const { Icon, ToggleControl, Button, ButtonGroup, BaseControl } = wp.components;
 const { __, sprintf } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
@@ -56,132 +56,6 @@ const ClassifAIToggle = () => {
 		/>
 	);
 };
-
-/**
- * ClassifAI Text to Audio component.
- */
-const ClassifAITSpeechSynthesisToggle = () => {
-
-	const [ hasCopied, setHasCopied ] = useState( false );
-	const [ isGeneratingAudio, setIsGeneratingAudio ] = useState( false );
-	const { editPost } = useDispatch( 'core/editor' );
-
-	const {
-		synthesizeSpeech,
-		audioFileUrl,
-		isPostSaving,
-		currentPostId,
-		currentPostType,
-	} = useSelect( ( select ) => {
-		const {
-			getEditedPostAttribute,
-			isSavingPost,
-			isAutosavingPost,
-			getCurrentPostType,
-		} = select( 'core/editor' );
-
-		const { getCurrentPostId } = select( 'core/editor' );
-
-		return {
-			synthesizeSpeech: 'yes' === getEditedPostAttribute( 'classifai_synthesize_speech' ),
-			audioFileUrl: getEditedPostAttribute( 'classifai_post_audio_url' ),
-			isPostSaving: isSavingPost() && ! isAutosavingPost(),
-			currentPostId: getCurrentPostId(),
-			currentPostType: getCurrentPostType(),
-		}
-	} );
-
-	const [ audioFileUrlState, setAudioFileUrlState ] = useState( audioFileUrl );
-	const [ manualRegenerateAudio, setManualRegenerateAudio ] = useState( false );
-
-	let isFeatureEnabled = false;
-
-	if ( classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( currentPostType ) ) {
-		isFeatureEnabled = true;
-	}
-
-	const isSaving = useRef( false );
-
-	useEffect( () => {
-		const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ currentPostId }`;
-
-		const synthesizeSpeech = async () => {
-			setIsGeneratingAudio( true );
-			const response = await fetch( synthesizeSpeechUrl );
-
-			if ( 200 !== response.status ) {
-				console.error( response.json() );
-			}
-
-			setAudioFileUrlState( await response.json() );
-			setIsGeneratingAudio( false );
-
-			if ( manualRegenerateAudio ) {
-				setManualRegenerateAudio( false );
-			}
-		};
-
-		if ( manualRegenerateAudio ) {
-			synthesizeSpeech();
-		}
-
-		if ( isPostSaving && ! isSaving.current ) {
-			isSaving.current = true;
-		}
-
-		if ( ! isPostSaving && isSaving.current ) {
-			synthesizeSpeech();
-
-			isSaving.current = false;
-		}
-	}, [ isPostSaving, isSaving.current, manualRegenerateAudio ] );
-
-	return (
-		<>
-			<ToggleControl
-				label={ __( 'Generate audio for this post.' ) }
-				help={ isFeatureEnabled
-					? __( 'ClassifAI will generate audio for the post when it is published or updated.' )
-					: __( 'Text to Speech generation is disabled for this post type.' ) }
-				checked={ isFeatureEnabled && synthesizeSpeech }
-				onChange={ ( value ) => {
-					editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } )
-				} }
-				disabled={ ! isFeatureEnabled }
-			/>
-
-			{
-				synthesizeSpeech && audioFileUrlState && (
-					isGeneratingAudio ? (
-						<>
-							<Spinner />
-							<span>{ __( 'Generating speech audio for the post...' ) }</span>
-						</>
-					) : (
-						<>
-							<ClipboardButton
-								text={ audioFileUrl }
-								onCopy={ () => setHasCopied( true ) }
-								onFinishCopy={ () => setHasCopied( false ) }
-								variant="secondary"
-								isSmall={ true }
-							>
-								{ hasCopied ? __( 'Copied!', 'classifai' ) : __( 'Copy post audio URL', 'classifai' ) }
-							</ClipboardButton>
-							<Button
-								variant="secondary"
-								isSmall={ true }
-								onClick={ () => setManualRegenerateAudio( ! manualRegenerateAudio ) }
-							>
-								{ __( 'Manually generate audio', 'classifai' ) }
-							</Button>
-						</>
-					)
-				)
-			}
-		</>
-	);
-;};
 
 /**
  * Callback function to handle API response.
@@ -313,6 +187,195 @@ const ClassifAIGenerateTagsButton = () => {
 };
 
 /**
+ * Calls the server-side method that synthesis speech for a post.
+ *
+ * @param {number} postId The Post ID
+ * @returns {boolean}
+ */
+const synthesizeSpeech = async ( postId ) => {
+	// Endpoint URL.
+	const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ postId }`;
+
+	// Stores status of the synthensis process.
+	const isProcessing = wp.data.select( postAudioStore ).getIsProcessing();
+
+	// Return early if already processing.
+	if ( isProcessing ) {
+		return;
+	}
+
+	// Set state indicating the synthesis process has begun.
+	wp.data.dispatch( postAudioStore ).setIsProcessing( true );
+
+	const response = await fetch( synthesizeSpeechUrl );
+
+	// Return false if error.
+	if ( 200 !== response.status ) {
+		console.error( await response.json() );
+
+		// Set state indicating the synthesis process has ended.
+		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+		return false;
+	}
+
+	const audioId = await response.json();
+
+	// Set audio ID state after successful synthesis.
+	wp.data.dispatch( postAudioStore ).setAudioId( audioId );
+
+	// Set state indicating the synthesis process has ended.
+	wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+
+	return true;
+};
+
+/**
+ * ClassifAI Text to Audio component.
+ */
+const ClassifAITSpeechSynthesisToggle = ( props ) => {
+	// State of the audio being previewed in PluginDocumentSettingPanel.
+	const [ isPreviewing, setIsPreviewing ] = useState( false );
+
+	const [ timestamp, setTimestamp ] = useState( new Date().getTime() );
+
+	// Indicates whether speech synthesis is supported for the current post.
+	let isFeatureSupported = false;
+
+	// Indicates whether speech synthesis is enabled for the current post.
+	let isSynthesizeSpeech = 'yes' === useSelect( select => select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' ) )
+
+	// Post type of the current post.
+	let postType = useSelect( select => select('core/editor').getCurrentPostType() );
+
+	// Says if the post is currently being saved.
+	let isSavingPost = useSelect( select => select( 'core/editor' ).isSavingPost() );
+
+	// Says whether if speech synthesis is in progress.
+	let isProcessingAudio = useSelect( select => select( postAudioStore ).getIsProcessing() );
+
+	// Figure out if speech synthesis is supported by the current post.
+	if ( classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( postType ) ) {
+		isFeatureSupported = true;
+	}
+
+	// The audio ID saved in the DB for the current post.
+	const defaultAudioId = useSelect( select => select('core/editor').getEditedPostAttribute( 'classifai_post_audio_id' ) );
+
+	// New audio ID in case it is regenerated manually or through publishing/updating the current post.
+	let audioId = props.audioId || defaultAudioId;
+
+	// Get the attachment data by audio ID.
+	let attachments = useSelect( select => select( 'core' ).getEntityRecords( 'postType', 'attachment', { include: [ audioId ] }) );
+
+	// Get URL for the attachment.
+	let sourceUrl = attachments && attachments.length > 0 && attachments[0].source_url;
+
+	const isProcessingAudioProgress = useRef( false );
+
+	// Handles playing/pausing post audio during preview.
+	useEffect( () => {
+		const audioEl = document.getElementById( 'classifai-audio-preview' );
+
+		if ( ! audioEl ) {
+			return;
+		}
+		if ( isPreviewing ) {
+			audioEl.play();
+		} else {
+			audioEl.pause();
+		}
+	}, [ isPreviewing ] );
+
+	useEffect( () => {
+		if ( isProcessingAudio ) {
+			isProcessingAudioProgress.current = true;
+		}
+
+		if ( isProcessingAudioProgress.current && ! isProcessingAudio ) {
+			setTimestamp( new Date().getTime() );
+		}
+	}, [ isProcessingAudio ] );
+
+	// Callback to refresh/regenrate audio manually.
+	function refreshAudio() {
+		if ( isSavingPost ) {
+			return;
+		}
+
+		wp.data.dispatch( 'core/editor' ).savePost();
+	}
+
+	// Fetches the latest audio file to avoid disk cache.
+	let cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
+
+	return (
+		<>
+			<ToggleControl
+				label={ __( 'Generate audio for this post.' ) }
+				help={ isFeatureSupported
+					? __( 'ClassifAI will generate audio for the post when it is published or updated.' )
+					: __( 'Text to Speech generation is disabled for this post type.' ) }
+				checked={ isSynthesizeSpeech }
+				onChange={ ( value ) => {
+					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } )
+				} }
+				disabled={ ! isFeatureSupported }
+			/>
+			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl }></audio> }
+			<BaseControl label={ __( 'Audio controls', 'classifai' ) }>
+				<div>
+					<ButtonGroup>
+						<Button
+							icon={ <Icon icon="update" /> }
+							variant="secondary"
+							isBusy={ isProcessingAudio }
+							onClick={ refreshAudio }
+						>
+							{ __( 'Refresh', 'classifai' ) }
+						</Button>
+						{ sourceUrl && <>
+							<Button
+								icon={ <Icon icon={ isPreviewing ? 'controls-pause' : 'controls-play' } /> }
+								variant="secondary"
+								onClick={ () => setIsPreviewing( ! isPreviewing ) }
+							>
+								{ __( 'Preview', 'classifai' ) }
+							</Button>
+						</> }
+					</ButtonGroup>
+				</div>
+			</BaseControl>
+		</>
+	);
+};
+
+let isPostSavingInProgress = false;
+
+// Synthesises audio for the post whenever a post is publish/updated.
+wp.data.subscribe( function() {
+	// Says whether if post is saving?
+	let isSavingPost = wp.data.select( 'core/editor' ).isSavingPost();
+
+	// Says whether if post is autosaving?
+	let isAutosavingPost = wp.data.select( 'core/editor' ).isAutosavingPost();
+
+	// Current post ID.
+	let postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+
+	// We want the speech synthesis to only happen on save and not autosave.
+	isSavingPost = isSavingPost && ! isAutosavingPost;
+
+	if ( isSavingPost && ! isPostSavingInProgress ) {
+		isPostSavingInProgress = true;
+	}
+
+	if ( ( ! isSavingPost && isPostSavingInProgress ) ) {
+		synthesizeSpeech( postId );
+		isPostSavingInProgress = false;
+	}
+} );
+
+/**
  * Add the ClassifAI panel to Gutenberg
  */
 const ClassifAIPlugin = () => {
@@ -327,6 +390,9 @@ const ClassifAIPlugin = () => {
 	const isLanguageProcessingEnabled = classifaiPostData && classifaiPostData.NLUEnabled;
 	const isPosTypeSupported = classifaiPostData && classifaiPostData.supportedPostTypes && classifaiPostData.supportedPostTypes.includes( postType );
 	const isPostStatusSupported = classifaiPostData && classifaiPostData.supportedPostStatues && classifaiPostData.supportedPostStatues.includes( postStatus );
+
+	const defaultAudioId = useSelect( select => select('core/editor').getEditedPostAttribute( 'classifai_post_audio_id' ) );
+	let audioId = useSelect( select => select( postAudioStore ).getAudioId() ) || defaultAudioId;
 
 	return (
 		<PluginDocumentSettingPanel
@@ -346,8 +412,8 @@ const ClassifAIPlugin = () => {
 						</>
 					)
 				}
-				<ClassifAITSpeechSynthesisToggle />
 			</>
+			<ClassifAITSpeechSynthesisToggle audioId={ audioId } />
 		</PluginDocumentSettingPanel>
 	);
 };
