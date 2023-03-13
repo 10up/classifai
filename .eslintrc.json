@@ -11,7 +11,9 @@
 		"cy": "readonly",
 		"ajaxurl": "readonly",
 		"FormData": "readonly",
-		"classifaiMediaVars": "readonly"
+		"classifaiMediaVars": "readonly",
+		"classifaiTextToSpeechData": "readonly",
+		"wpApiSettings": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
 }

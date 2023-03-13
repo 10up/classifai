@@ -41,13 +41,13 @@ const ClassifAIToggle = () => {
 			help={
 				'yes' === enabled
 					? __(
-							'ClassifAI language processing is enabled',
-							'classifai'
-					  )
+						'ClassifAI language processing is enabled',
+						'classifai'
+					)
 					: __(
-							'ClassifAI language processing is disabled',
-							'classifai'
-					  )
+						'ClassifAI language processing is disabled',
+						'classifai'
+					)
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
@@ -190,7 +190,7 @@ const ClassifAIGenerateTagsButton = () => {
  * Calls the server-side method that synthesis speech for a post.
  *
  * @param {number} postId The Post ID
- * @returns {boolean}
+ * @return {boolean} Returns true on success.
  */
 const synthesizeSpeech = async ( postId ) => {
 	// Endpoint URL.
@@ -211,8 +211,6 @@ const synthesizeSpeech = async ( postId ) => {
 
 	// Return false if error.
 	if ( 200 !== response.status ) {
-		console.error( await response.json() );
-
 		// Set state indicating the synthesis process has ended.
 		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
 		return false;
@@ -231,6 +229,8 @@ const synthesizeSpeech = async ( postId ) => {
 
 /**
  * ClassifAI Text to Audio component.
+ *
+ * @param {Object} props Props object.
  */
 const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	// State of the audio being previewed in PluginDocumentSettingPanel.
@@ -242,16 +242,16 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	let isFeatureSupported = false;
 
 	// Indicates whether speech synthesis is enabled for the current post.
-	let isSynthesizeSpeech = 'yes' === useSelect( select => select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' ) )
+	const isSynthesizeSpeech = 'yes' === useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' ) );
 
 	// Post type of the current post.
-	let postType = useSelect( select => select('core/editor').getCurrentPostType() );
+	const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType() );
 
 	// Says if the post is currently being saved.
-	let isSavingPost = useSelect( select => select( 'core/editor' ).isSavingPost() );
+	const isSavingPost = useSelect( ( select ) => select( 'core/editor' ).isSavingPost() );
 
 	// Says whether if speech synthesis is in progress.
-	let isProcessingAudio = useSelect( select => select( postAudioStore ).getIsProcessing() );
+	const isProcessingAudio = useSelect( ( select ) => select( postAudioStore ).getIsProcessing() );
 
 	// Figure out if speech synthesis is supported by the current post.
 	if ( classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( postType ) ) {
@@ -259,16 +259,16 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	}
 
 	// The audio ID saved in the DB for the current post.
-	const defaultAudioId = useSelect( select => select('core/editor').getEditedPostAttribute( 'classifai_post_audio_id' ) );
+	const defaultAudioId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_post_audio_id' ) );
 
 	// New audio ID in case it is regenerated manually or through publishing/updating the current post.
-	let audioId = props.audioId || defaultAudioId;
+	const audioId = props.audioId || defaultAudioId;
 
 	// Get the attachment data by audio ID.
-	let attachments = useSelect( select => select( 'core' ).getEntityRecords( 'postType', 'attachment', { include: [ audioId ] }) );
+	const attachments = useSelect( ( select ) => select( 'core' ).getEntityRecords( 'postType', 'attachment', { include: [ audioId ] } ) );
 
 	// Get URL for the attachment.
-	let sourceUrl = attachments && attachments.length > 0 && attachments[0].source_url;
+	const sourceUrl = attachments && attachments.length > 0 && attachments[ 0 ].source_url;
 
 	const isProcessingAudioProgress = useRef( false );
 
@@ -308,7 +308,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	}
 
 	// Fetches the latest audio file to avoid disk cache.
-	let cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
+	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
 
 	return (
 		<>
@@ -319,13 +319,14 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
-					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } )
+					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
 				} }
 				disabled={ ! isFeatureSupported }
 			/>
 			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl }></audio> }
 			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
+					id="classifai-audio-controls"
 					label={ __( 'Audio controls', 'classifai' ) }
 					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.' ) }
 				>
@@ -370,10 +371,10 @@ wp.data.subscribe( function() {
 	let isSavingPost = wp.data.select( 'core/editor' ).isSavingPost();
 
 	// Says whether if post is autosaving?
-	let isAutosavingPost = wp.data.select( 'core/editor' ).isAutosavingPost();
+	const isAutosavingPost = wp.data.select( 'core/editor' ).isAutosavingPost();
 
 	// Current post ID.
-	let postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
 
 	// We want the speech synthesis to only happen on save and not autosave.
 	isSavingPost = isSavingPost && ! isAutosavingPost;
@@ -404,8 +405,8 @@ const ClassifAIPlugin = () => {
 	const isPosTypeSupported = classifaiPostData && classifaiPostData.supportedPostTypes && classifaiPostData.supportedPostTypes.includes( postType );
 	const isPostStatusSupported = classifaiPostData && classifaiPostData.supportedPostStatues && classifaiPostData.supportedPostStatues.includes( postStatus );
 
-	const defaultAudioId = useSelect( select => select('core/editor').getEditedPostAttribute( 'classifai_post_audio_id' ) );
-	let audioId = useSelect( select => select( postAudioStore ).getAudioId() ) || defaultAudioId;
+	const defaultAudioId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_post_audio_id' ) );
+	const audioId = useSelect( ( select ) => select( postAudioStore ).getAudioId() ) || defaultAudioId;
 
 	return (
 		<PluginDocumentSettingPanel

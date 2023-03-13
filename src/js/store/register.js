@@ -7,17 +7,17 @@ const DEFAULT_STATE = {
 
 export const store = createReduxStore( 'classifai-post-audio', {
 	reducer( state = DEFAULT_STATE, action ) {
-		switch( action.type ) {
+		switch ( action.type ) {
 			case 'SET_AUDIO_ID':
 				return {
 					...state,
 					audioId: action.id,
-				}
+				};
 			case 'SET_PROCESSING_STATUS':
 				return {
 					...state,
 					isProcessing: action.status,
-				}
+				};
 		}
 
 		return state;
@@ -27,14 +27,14 @@ export const store = createReduxStore( 'classifai-post-audio', {
 			return {
 				type: 'SET_AUDIO_ID',
 				id,
-			}
+			};
 		},
 		setIsProcessing( status ) {
 			return {
 				type: 'SET_PROCESSING_STATUS',
 				status,
-			}
-		}
+			};
+		},
 	},
 	selectors: {
 		getAudioId( state ) {
@@ -42,8 +42,8 @@ export const store = createReduxStore( 'classifai-post-audio', {
 		},
 		getIsProcessing( state ) {
 			return state.isProcessing;
-		}
-	}
+		},
+	},
 } );
 
 register( store );
