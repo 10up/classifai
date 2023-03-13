@@ -3,7 +3,7 @@
  */
 const { __ } = wp.i18n;
 const { dispatch } = wp.data;
-const { PluginDocumentSettingPanel, PluginPrePublishPanel } = wp.editPost;
+const { PluginDocumentSettingPanel } = wp.editPost;
 const { PostExcerptCheck } = wp.editor;
 const { registerPlugin } = wp.plugins;
 
@@ -11,6 +11,7 @@ const { registerPlugin } = wp.plugins;
  * Internal dependencies
  */
 import PostExcerptForm from './panel';
+import MaybeExcerptPanel from './maybe-excerpt-panel';
 
 // Remove core Post Excerpt panel.
 ( () => {
@@ -24,13 +25,7 @@ const PostExcerpt = () => {
 			<PluginDocumentSettingPanel title={ __( 'Excerpt' ) }>
 				<PostExcerptForm />
 			</PluginDocumentSettingPanel>
-			<PluginPrePublishPanel
-				title={ __( 'Excerpt' ) }
-				icon='aside'
-				initialOpen={ true }
-			>
-				<PostExcerptForm />
-			</PluginPrePublishPanel>
+			<MaybeExcerptPanel />
 		</PostExcerptCheck>
 	);
 };
