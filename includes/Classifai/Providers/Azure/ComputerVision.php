@@ -136,6 +136,7 @@ class ComputerVision extends Provider {
 		if ( $enable_read_pdf ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
+			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
 		}
 	}
 
@@ -312,13 +313,9 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_pdf_data_meta_box( $post ) {
-		$read   = empty( get_the_content( null, false, $post ) ) ? __( 'Scan PDF for text', 'classifai' ) : __( 'Rescan PDF for text', 'classifai' );
-		$status = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
-		if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
-			$running = true;
-		} else {
-			$running = false;
-		}
+		$status  = self::get_read_status( $post->ID );
+		$read    = (bool) $status['read'] ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
+		$running = (bool) $status['running'];
 		?>
 		<div class="misc-publishing-actions">
 			<div class="misc-pub-section">
@@ -332,6 +329,65 @@ class ComputerVision extends Provider {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Callback to get the status of the PDF read with AJAX support.
+	 */
+	public static function get_read_status_ajax() {
+		if ( ! wp_doing_ajax() ) {
+			return;
+		}
+
+		// Nonce check.
+		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
+			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// Attachment ID check.
+		$attachment_id = filter_input( INPUT_POST, 'attachment_id', FILTER_SANITIZE_NUMBER_INT );
+		if ( empty( $attachment_id ) ) {
+			$error = new \WP_Error( 'invalid_post', __( 'Invalid attachment ID.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// User capability check.
+		if ( ! current_user_can( 'edit_post', $attachment_id ) ) {
+			$error = new \WP_Error( 'unauthorized_access', __( 'Unauthorized access.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		wp_send_json_success( self::get_read_status( $attachment_id ) );
+	}
+
+	/**
+	 * Callback to get the status of the PDF read.
+	 *
+	 * @param  int $attachment_id The attachment ID.
+	 * @return array Read and running status.
+	 */
+	public static function get_read_status( $attachment_id = null ) {
+		if ( empty( $attachment_id ) || ! is_numeric( $attachment_id ) ) {
+			return;
+		}
+
+		// Cast to an integer
+		$attachment_id = (int) $attachment_id;
+
+		$read    = ! empty( get_the_content( null, false, $attachment_id ) );
+		$status  = get_post_meta( $attachment_id, '_classifai_azure_read_status', true );
+		$running = ( ! empty( $status['status'] ) && 'running' === $status['status'] );
+
+		$resp = [
+			'read'    => $read,
+			'running' => $running,
+		];
+
+		return $resp;
 	}
 
 	/**

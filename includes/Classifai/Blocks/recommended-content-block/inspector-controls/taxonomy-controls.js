@@ -16,7 +16,11 @@ const termsPerPage = 100;
 const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	// First we check for exact match by `term.id` or case sensitive `term.name` match.
 	const termId = termValue?.id || termsMappedByName[ termValue ]?.id;
-	if ( termId ) return termId;
+
+	if ( termId ) {
+		return termId;
+	}
+
 	/**
 	 * Here we make an extra check for entered terms in a non case sensitive way,
 	 * to match user expectations, due to `FormTokenField` behaviour that shows
@@ -57,14 +61,22 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
 			( { slug } ) => slug === taxonomySlug
 		);
-		if ( ! taxonomyInfo ) return;
+
+		if ( ! taxonomyInfo ) {
+			return;
+		}
+
 		const termIds = Array.from(
 			newTermValues.reduce( ( accumulator, termValue ) => {
 				const termId = getTermIdByTermValue(
 					taxonomyInfo.terms.mapByName,
 					termValue
 				);
-				if ( termId ) accumulator.add( termId );
+
+				if ( termId ) {
+					accumulator.add( termId );
+				}
+
 				return accumulator;
 			}, new Set() )
 		);
@@ -81,7 +93,11 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
 			( { slug } ) => slug === taxonomySlug
 		);
-		if ( ! taxonomyInfo ) return [];
+
+		if ( ! taxonomyInfo ) {
+			return [];
+		}
+
 		return ( query.taxQuery?.[ taxonomySlug ] || [] ).reduce(
 			( accumulator, termId ) => {
 				const term = taxonomyInfo.terms.mapById[ termId ];

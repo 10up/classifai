@@ -6,7 +6,9 @@
 		'classifai-settings-watson_username'
 	);
 
-	if ( $toggler === null || $userField === null ) return;
+	if ( $toggler === null || $userField === null ) {
+		return;
+	}
 
 	const $userFieldWrapper = $userField.closest( 'tr' );
 	const [ $passwordFieldTitle ] = document

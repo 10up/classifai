@@ -44,7 +44,10 @@ export const usePostTypes = () => {
 		return filteredPostTypes;
 	}, [] );
 	const postTypesTaxonomiesMap = useMemo( () => {
-		if ( ! postTypes?.length ) return;
+		if ( ! postTypes?.length ) {
+			return;
+		}
+
 		// eslint-disable-next-line consistent-return
 		return postTypes.reduce( ( accumulator, type ) => {
 			accumulator[ type.slug ] = type.taxonomies;
