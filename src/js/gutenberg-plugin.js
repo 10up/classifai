@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
-import { store as postAudioStore } from '../../includes/Classifai/Blocks/post-audio-block/store/register';
+import { store as postAudioStore } from './store/register';
 
 import { useState, useEffect, useRef } from '@wordpress/element';
 
@@ -279,6 +279,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 		if ( ! audioEl ) {
 			return;
 		}
+
 		if ( isPreviewing ) {
 			audioEl.play();
 		} else {
@@ -286,6 +287,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 		}
 	}, [ isPreviewing ] );
 
+	// Generates a unique timestamp to cache bust audio file.
 	useEffect( () => {
 		if ( isProcessingAudio ) {
 			isProcessingAudioProgress.current = true;
@@ -322,7 +324,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 				disabled={ ! isFeatureSupported }
 			/>
 			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl }></audio> }
-			{ sourceUrl && (
+			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
 					label={ __( 'Audio controls', 'classifai' ) }
 					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.' ) }
@@ -358,6 +360,12 @@ let isPostSavingInProgress = false;
 
 // Synthesises audio for the post whenever a post is publish/updated.
 wp.data.subscribe( function() {
+	const isSynthesizeSpeech = 'yes' === wp.data.select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' );
+
+	if ( ! isSynthesizeSpeech ) {
+		return;
+	}
+
 	// Says whether if post is saving?
 	let isSavingPost = wp.data.select( 'core/editor' ).isSavingPost();
 
@@ -374,7 +382,7 @@ wp.data.subscribe( function() {
 		isPostSavingInProgress = true;
 	}
 
-	if ( ( ! isSavingPost && isPostSavingInProgress ) ) {
+	if ( ! isSavingPost && isPostSavingInProgress ) {
 		synthesizeSpeech( postId );
 		isPostSavingInProgress = false;
 	}
