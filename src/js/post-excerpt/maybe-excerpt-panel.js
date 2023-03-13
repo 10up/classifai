@@ -2,33 +2,75 @@
  * WordPress dependencies
  */
 const { __ } = wp.i18n;
+const { withSelect } = wp.data;
 const { PluginPrePublishPanel } = wp.editPost;
-const { useSelect } = wp.data;
+const { Component } = wp.element;
 
 /**
  * Internal dependencies
  */
-import ExcerptForm from './panel';
 
-function MaybeExcerptPanel() {
-	const excerpt = useSelect( select => select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ) );
-
-	const panelTitle = [
-		__( 'Suggestion:', 'classifai' ),
+const ExcerptPanel = ( { children } ) => {
+	const panelBodyTitle = [
+		__( 'Suggestion:' ),
 		<span className="editor-post-publish-panel__link" key="label">
 			{ __( 'Generate excerpt', 'classifai' ) }
 		</span>,
 	];
 
-	if ( '' !== excerpt ) {
-		return null;
+	return (
+		<PluginPrePublishPanel
+			title={ panelBodyTitle }
+			icon="aside"
+			initialOpen={ true }
+		>
+			{ children }
+		</PluginPrePublishPanel>
+	);
+};
+
+class MaybeExcerptPanel extends Component {
+	constructor( props ) {
+		super( props );
+		this.state = {
+			hadExcerptWhenOpeningThePanel: '' !== props.excerpt,
+		};
 	}
 
-	return (
-		<PluginPrePublishPanel initialOpen={ false } title={ panelTitle } icon='aside'>
-			<ExcerptForm />
-		</PluginPrePublishPanel>
-	)
+	componentDidUpdate( prevProps ) {
+		// Update our state when the publish panel opens.
+		if (
+			this.props.isPublishPanelOpen &&
+			prevProps.isPublishPanelOpen !== this.props.isPublishPanelOpen
+		) {
+			this.setState( {
+				hadExcerptWhenOpeningThePanel: '' !== this.props.excerpt,
+			} );
+		}
+	}
+
+	/*
+	 * We only want to show the excerpt panel if the post didn't have
+	 * an excerpt when the user hit the Publish button.
+	 */
+	render() {
+		if ( ! this.state.hadExcerptWhenOpeningThePanel ) {
+			return (
+				<ExcerptPanel>
+					{ this.props.children }
+				</ExcerptPanel>
+			);
+		}
+
+		return null;
+	}
 }
 
-export default MaybeExcerptPanel;
+export default withSelect( ( select ) => {
+	return {
+		excerpt:
+			select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
+		isPublishPanelOpen:
+			select( 'core/edit-post' ).isPublishSidebarOpened(),
+	};
+} )( MaybeExcerptPanel );

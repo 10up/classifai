@@ -25,7 +25,9 @@ const PostExcerpt = () => {
 			<PluginDocumentSettingPanel title={ __( 'Excerpt' ) }>
 				<PostExcerptForm />
 			</PluginDocumentSettingPanel>
-			<MaybeExcerptPanel />
+			<MaybeExcerptPanel>
+				<PostExcerptForm />
+			</MaybeExcerptPanel>
 		</PostExcerptCheck>
 	);
 };
