@@ -130,8 +130,6 @@ import { handleClick } from './helpers';
 		}
 	};
 
-<<<<<<< HEAD
-=======
 	/**
 	 * Check the PDF Scanner status and disable button if in progress.
 	 */
@@ -168,7 +166,6 @@ import { handleClick } from './helpers';
 		} );
 	};
 
->>>>>>> develop
 	$( document ).ready( function() {
 		if ( wp.media ) {
 			wp.media.view.Modal.prototype.on( 'open', function() {
