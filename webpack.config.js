@@ -17,7 +17,6 @@ module.exports = {
 		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
 		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
 		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
-		'post-audio-block': [ './includes/Classifai/Blocks/post-audio-block/index.js' ],
 	},
 	module: {
 		rules: [

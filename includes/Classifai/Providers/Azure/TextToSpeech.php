@@ -15,6 +15,8 @@ class TextToSpeech extends Provider {
 
 	const API_PATH = 'cognitiveservices/v1';
 
+	const SYNTHESIZE_SPEECH_KEY = '_classifai_synthesize_speech';
+
 	const AUDIO_ID_KEY = '_classifai_post_audio_id';
 
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
@@ -89,8 +91,7 @@ class TextToSpeech extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_filter( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
-
-		Blocks\setup();
+		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
 	/**
@@ -381,12 +382,12 @@ class TextToSpeech extends Provider {
 			'classifai_synthesize_speech',
 			array(
 				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_synthesize_speech', true );
+					$process_content = get_post_meta( $object['id'], self::SYNTHESIZE_SPEECH_KEY, true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
 				'update_callback' => function ( $value, $object ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_synthesize_speech', $value );
+					return update_post_meta( $object->ID, self::SYNTHESIZE_SPEECH_KEY, $value );
 				},
 				'schema'          => [
 					'type'    => 'string',
@@ -400,7 +401,7 @@ class TextToSpeech extends Provider {
 			'classifai_post_audio_id',
 			array(
 				'get_callback' => function( $object ) {
-					$post_audio_id = get_post_meta( $object['id'], '_classifai_post_audio_id', true );
+					$post_audio_id = get_post_meta( $object['id'], self::AUDIO_ID_KEY, true );
 					return (int) $post_audio_id;
 				},
 				'schema'       => [
@@ -409,6 +410,69 @@ class TextToSpeech extends Provider {
 				],
 			)
 		);
+	}
+
+	/**
+	 * Adds audio controls to the post that has speech sythesis enabled.
+	 *
+	 * @param string $content Post content.
+	 */
+	public function render_post_audio_controls( $content ) {
+		global $post;
+
+		if ( ! $post ) {
+			return;
+		}
+
+		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
+			return $content;
+		}
+
+		wp_enqueue_script(
+			'classifai-post-audio-player-js',
+			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.js',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-post-audio-player-css',
+			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.css',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
+		);
+
+		$audio_attachment_id  = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+
+		if ( ! $audio_attachment_id ) {
+			return $content;
+		}
+
+		$audio_timestamp      = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
+		$audio_attachment_url = sprintf(
+			'%1$s?ver=%2$s',
+			wp_get_attachment_url( $audio_attachment_id ),
+			filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT )
+		);
+
+		ob_start();
+
+		?>
+			<div>
+				<div class='classifai-listen-to-post-wrapper'>
+					<div class="class-post-audio-controls">
+						<span class="dashicons dashicons-controls-play"></span>
+						<span class="dashicons dashicons-controls-pause"></span>
+					</div>
+					<div class='classifai-post-audio-heading'>Listen to this post</div>
+				</div>
+				<audio id="classifai-post-audio-player" src="<?php echo esc_url( home_url( $audio_attachment_url ) ); ?>"></audio>
+			</div>
+		<?php
+
+		return ob_get_clean() . $content;
 	}
 
 	/**

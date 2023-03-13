@@ -315,8 +315,8 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 			<ToggleControl
 				label={ __( 'Generate audio for this post.' ) }
 				help={ isFeatureSupported
-					? __( 'ClassifAI will generate audio for the post when it is published or updated.' )
-					: __( 'Text to Speech generation is disabled for this post type.' ) }
+					? __( 'ClassifAI will generate audio for the post when it is published or updated.', 'classifai' )
+					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
 					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } )

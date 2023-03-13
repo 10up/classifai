@@ -188,5 +188,3 @@ function classifai_dev_notice() {
 		<?php
 	}
 }
-
-require_once 'post-audio-block.php';
