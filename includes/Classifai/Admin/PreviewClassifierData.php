@@ -28,17 +28,8 @@ class PreviewClassifierData {
 		$classifier = new \Classifai\Watson\Classifier();
 		$normalizer = new \Classifai\Watson\Normalizer();
 
-		$features['categories'] = (object) [];
-		$features['concepts']   = (object) [];
-		$features['entities']   = (object) [];
-		$features['keywords']   = [
-			'emotion'   => false,
-			'sentiment' => false,
-			'limit'     => defined( 'WATSON_KEYWORD_LIMIT' ) ? WATSON_KEYWORD_LIMIT : 10,
-		];
-
 		$text_to_classify        = $normalizer->normalize( $post_id );
-		$body                    = $classifier->get_body( $text_to_classify, $features );
+		$body                    = $classifier->get_body( $text_to_classify );
 		$request_options['body'] = $body;
 		$request                 = $classifier->get_request();
 
