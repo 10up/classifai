@@ -190,23 +190,6 @@ class ChatGPT extends Provider {
 				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
 			]
 		);
-
-		add_settings_field(
-			'temperature',
-			esc_html__( 'Temperature value', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'temperature',
-				'input_type'    => 'number',
-				'max'           => 2,
-				'min'           => 0,
-				'step'          => 0.1,
-				'default_value' => $default_settings['temperature'],
-				'description'   => __( 'What sampling temperature to use, between 0 and 2. Higher values will make the excerpt more random, while lower values will make it more focused.', 'classifai' ),
-			]
-		);
 	}
 
 	/**
@@ -258,12 +241,6 @@ class ChatGPT extends Provider {
 			$new_settings['length'] = absint( $settings['length'] );
 		} else {
 			$new_settings['length'] = 55;
-		}
-
-		if ( isset( $settings['temperature'] ) && is_numeric( $settings['temperature'] ) && (float) $settings['temperature'] >= 0 && (float) $settings['temperature'] <= 2 ) {
-			$new_settings['temperature'] = abs( (float) $settings['temperature'] );
-		} else {
-			$new_settings['temperature'] = 0;
 		}
 
 		return $new_settings;
@@ -323,7 +300,6 @@ class ChatGPT extends Provider {
 			'enable_excerpt' => false,
 			'roles'          => array_keys( get_editable_roles() ?? [] ),
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
-			'temperature'    => 0,
 		];
 	}
 
@@ -343,11 +319,10 @@ class ChatGPT extends Provider {
 		$enable_excerpt = 1 === intval( $settings['enable_excerpt'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate excerpt', 'classifai' )  => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Excerpt length', 'classifai' )    => $settings['length'] ?? 55,
-			__( 'Temperature value', 'classifai' ) => $settings['temperature'] ?? 0,
-			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Generate excerpt', 'classifai' ) => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Excerpt length', 'classifai' )   => $settings['length'] ?? 55,
+			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
 
@@ -420,12 +395,27 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		/**
+		 * Filter the prompt we will send to ChatGPT.
+		 *
+		 * @since 1.9.0
+		 * @hook classifai_chatgpt_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {int} $excerpt_length Length of final excerpt.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chatgpt_prompt', 'Provide a kicker for the following text in ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+
+		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 1.9.0
 		 * @hook classifai_chatgpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
+		 * @param {int} $post_id ID of post we are summarizing.
 		 *
 		 * @return {array} Request body.
 		 */
@@ -436,11 +426,12 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => 'Provide a kicker for the following text in ' . $excerpt_length . ' words: ' . $this->get_content( $post_id, $excerpt_length ) . '',
+						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length ) . '',
 					],
 				],
-				'temperature' => abs( (float) $settings['temperature'] ?? 0 ),
-			]
+				'temperature' => 0,
+			],
+			$post_id
 		);
 
 		// Make our API request.
@@ -500,14 +491,15 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter content that will get sent to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 1.9.0
 		 * @hook classifai_chatgpt_content
 		 *
 		 * @param {string} $content Content that will be sent to ChatGPT.
+		 * @param {int} $post_id ID of post we are summarizing.
 		 *
 		 * @return {string} Content.
 		 */
-		return apply_filters( 'classifai_chatgpt_content', $content );
+		return apply_filters( 'classifai_chatgpt_content', $content, $post_id );
 	}
 
 }
