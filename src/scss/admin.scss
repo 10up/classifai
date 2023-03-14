@@ -1,0 +1,60 @@
+#classifai-activation-notice {
+	padding: 24px;
+
+	.classifai-logo {
+		line-height: 0;
+		img {
+			width: 180px;
+		}
+	}
+
+	h3.classifai-activation-message {
+		margin: 8px 0 18px;
+		font-weight: 400;
+		line-height: 1.3;
+		font-size: 1.6em;
+	}
+}
+
+a.classifai-button {
+    padding: 8px 16px;
+    background: #1E8CBE;
+    color: #fff;
+	font-style: normal;
+    font-weight: 400;
+	display: inline-block;
+	cursor: pointer;
+	white-space: nowrap;
+    box-sizing: border-box;
+	text-decoration: none;
+    text-shadow: none;
+    text-transform: uppercase;
+	border-color: #1E8CBE;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+
+	&:hover,
+	&:focus,
+	&:active {
+		color: #fff;
+		background: #0979A3;
+		border-color: #0979A3;
+	}
+
+	&:focus {
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #0979A3;
+	}
+
+	&:active {
+		box-shadow: none;
+	}
+
+	&:disabled,
+	&.disabled {
+		color: #fff;
+		background: #9EA3A8;
+		cursor: not-allowed;
+		box-shadow: none;
+	}
+}

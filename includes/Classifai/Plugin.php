@@ -143,6 +143,15 @@ class Plugin {
 	 * Enqueue the admin scripts.
 	 */
 	public function enqueue_admin_assets() {
+
+		wp_enqueue_style(
+			'classifai-admin-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
+			array(),
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
+		);
+
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',

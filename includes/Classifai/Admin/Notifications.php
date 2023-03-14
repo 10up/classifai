@@ -48,10 +48,21 @@ class Notifications {
 
 		$needs_setup = get_transient( 'classifai_activation_notice' );
 		if ( $needs_setup ) {
-			printf(
-				'<div class="notice notice-warning"><p><a href="%s">' . esc_html__( 'ClassifAI requires setup', 'classifai' ) . '</a></p></div>',
-				esc_url( admin_url( 'admin.php?page=classifai_settings' ) )
-			);
+			?>
+			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
+				<div id="classifai-activation-notice">
+					<div class="classifai-logo">
+						<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="ClassifAI" />
+					</div>
+					<h3 class="classifai-activation-message">
+						<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
+					</h3>
+					<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_settings' ) ); ?>">
+						<?php esc_html_e( 'Start setup', 'classifai' ); ?>
+					</a>
+				</div>
+			</div>
+			<?php
 			delete_transient( 'classifai_activation_notice' );
 		}
 	}

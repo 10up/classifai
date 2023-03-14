@@ -1,4 +1,5 @@
 /* global ClassifAI */
+import '../scss/admin.scss';
 
 ( () => {
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
