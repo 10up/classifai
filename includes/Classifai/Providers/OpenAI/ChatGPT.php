@@ -84,6 +84,14 @@ class ChatGPT extends Provider {
 			return;
 		}
 
+		// Check if the current user has permission to use the generate excerpt button.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return;
+		}
+
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-post-excerpt',
@@ -147,6 +155,23 @@ class ChatGPT extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_excerpt'],
 				'description'   => __( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' ),
+			]
+		);
+
+		$roles = get_editable_roles() ?? [];
+		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		add_settings_field(
+			'roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'roles',
+				'options'        => $roles,
+				'default_values' => $default_settings['roles'],
+				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
 			]
 		);
 
@@ -225,6 +250,10 @@ class ChatGPT extends Provider {
 			$new_settings['enable_excerpt'] = '1';
 		}
 
+		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
+			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		}
+
 		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
 			$new_settings['length'] = absint( $settings['length'] );
 		} else {
@@ -292,6 +321,7 @@ class ChatGPT extends Provider {
 			'authenticated'  => false,
 			'api_key'        => '',
 			'enable_excerpt' => false,
+			'roles'          => array_keys( get_editable_roles() ?? [] ),
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
 			'temperature'    => 0,
 		];

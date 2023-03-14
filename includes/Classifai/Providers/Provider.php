@@ -210,6 +210,55 @@ abstract class Provider {
 	}
 
 	/**
+	 * Render a group of checkboxes.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_checkbox_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+
+		// Iterate through all of our options.
+		foreach ( $args['options'] as $option_value => $option_label ) {
+			$value       = '';
+			$default_key = array_search( $option_value, $args['default_values'], true );
+
+			// Get saved value, if any.
+			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
+				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
+			}
+
+			// If no saved value, check if we have a default value.
+			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
+				$value = $args['default_values'][ $default_key ];
+			}
+
+			// Render checkbox.
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s">
+						<input type="hidden" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						<input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
+						%5$s
+					</label>
+				</p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description classifai-input-description">%s</span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
 	 * Renders the checkbox group for 'Generate descriptive text' setting.
 	 *
 	 * @param array $args The args passed to add_settings_field.
