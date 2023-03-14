@@ -159,7 +159,6 @@ describe('Language processing Tests', () => {
 
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#length' ).clear().type( 35 );
-		cy.get( '#temperature' ).clear().type( 0.5 );
 		cy.get( '#submit' ).click();
 	} );
 
