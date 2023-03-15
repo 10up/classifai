@@ -17,33 +17,33 @@
 }
 
 a.classifai-button {
-    padding: 8px 16px;
-    background: #1E8CBE;
-    color: #fff;
+	padding: 8px 16px;
+	background: #1e8cbe;
+	color: #fff;
 	font-style: normal;
-    font-weight: 400;
+	font-weight: 400;
 	display: inline-block;
 	cursor: pointer;
 	white-space: nowrap;
-    box-sizing: border-box;
+	box-sizing: border-box;
 	text-decoration: none;
-    text-shadow: none;
-    text-transform: uppercase;
-	border-color: #1E8CBE;
-    border-radius: 4px;
-    border-width: 1px;
-    border-style: solid;
+	text-shadow: none;
+	text-transform: uppercase;
+	border-color: #1e8cbe;
+	border-radius: 4px;
+	border-width: 1px;
+	border-style: solid;
 
 	&:hover,
 	&:focus,
 	&:active {
 		color: #fff;
-		background: #0979A3;
-		border-color: #0979A3;
+		background: #0979a3;
+		border-color: #0979a3;
 	}
 
 	&:focus {
-		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #0979A3;
+		box-shadow: 0 0 0 1px #fff, 0 0 0 3px #0979a3;
 	}
 
 	&:active {
@@ -53,8 +53,51 @@ a.classifai-button {
 	&:disabled,
 	&.disabled {
 		color: #fff;
-		background: #9EA3A8;
+		background: #9ea3a8;
 		cursor: not-allowed;
 		box-shadow: none;
 	}
 }
+
+#classifai-header {
+	background-color: #fff;
+	box-sizing: border-box;
+	display: block;
+	left: 0;
+    right: 0;
+    top: 0;
+	position: sticky;
+    z-index: 1001;
+	margin-left: -20px;
+	padding: 0 10px;
+
+	@media screen and (max-width: 782px) {
+		margin-left: -10px;
+		padding: 0 5px;
+	}
+
+	body.admin-bar & {
+		@media (min-width: 601px) {
+			top: 46px;
+		}
+
+		@media (min-width: 783px) {
+			top: 32px;
+		}
+	}
+
+	.classifai-header-layout {
+		justify-content: space-between;
+		padding: 24px;
+		display: flex;
+		align-items: center;
+	}
+
+	#classifai-logo {
+		line-height: 0;
+		img {
+			max-width: 180px;
+		}
+	}
+}
+

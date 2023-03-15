@@ -288,15 +288,20 @@ class ServicesManager {
 		if ( count( $this->services ) > 1 ) {
 
 			?>
-			<div class="wrap">
-				<?php settings_errors(); ?>
-				<form method="post" action="options.php">
-					<?php
-					settings_fields( 'classifai_settings' );
-					do_settings_sections( 'classifai_settings' );
-					submit_button();
-					?>
-				</form>
+			<div class="classifai-content">
+				<?php
+				include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
+				?>
+				<div class="wrap">
+					<?php settings_errors(); ?>
+					<form method="post" action="options.php">
+						<?php
+						settings_fields( 'classifai_settings' );
+						do_settings_sections( 'classifai_settings' );
+						submit_button();
+						?>
+					</form>
+				</div>
 			</div>
 			<?php
 		} else {
