@@ -264,7 +264,7 @@ class ChatGPT extends Provider {
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body' => wp_json_encode(
+				'body'    => wp_json_encode(
 					[
 						'model'    => $this->chatgpt_model,
 						'messages' => [
@@ -275,6 +275,7 @@ class ChatGPT extends Provider {
 						],
 					]
 				),
+				'timeout' => 60,
 			]
 		);
 
@@ -438,7 +439,8 @@ class ChatGPT extends Provider {
 		$response = $request->post(
 			$this->chatgpt_url,
 			[
-				'body' => wp_json_encode( $body ),
+				'body'    => wp_json_encode( $body ),
+				'timeout' => 60,
 			]
 		);
 

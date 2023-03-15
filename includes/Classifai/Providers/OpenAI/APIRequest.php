@@ -2,6 +2,8 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use WP_Error;
+
 /**
  * The APIRequest class is a low level class to make OpenAI API
  * requests.
@@ -61,10 +63,10 @@ class APIRequest {
 					return $json;
 				} else {
 					$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
-					return new \WP_Error( $code, $message );
+					return new WP_Error( $code, $message );
 				}
 			} else {
-				return new \WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
+				return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
 			}
 		} else {
 			return $response;
