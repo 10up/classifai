@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
@@ -43,7 +44,7 @@ class LanguageProcessing extends Service {
 			'classifai/v1',
 			'generate-tags/(?P<id>\d+)',
 			[
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
 					'id' => array(
@@ -58,19 +59,19 @@ class LanguageProcessing extends Service {
 		);
 
 		register_rest_route(
-			'classifai/v1',
+			'classifai/v1/openai',
 			'generate-excerpt/(?P<id>\d+)',
 			[
-				'methods'             => \WP_REST_Server::READABLE,
+				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_excerpt' ],
-				'args'                => array(
-					'id' => array(
+				'args'                => [
+					'id' => [
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
-					),
-				),
+					],
+				],
 				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
 			]
 		);

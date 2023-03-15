@@ -38,7 +38,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				onClick={ ( e ) =>
 					handleClick( {
 						button: e.target,
-						endpoint: '/classifai/v1/generate-excerpt/',
+						endpoint: '/classifai/v1/openai/generate-excerpt/',
 						callback: onUpdateExcerpt,
 						buttonText,
 					} )
