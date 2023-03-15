@@ -6,6 +6,8 @@
 namespace Classifai\Services;
 
 use Classifai\Taxonomy\ImageTagTaxonomy;
+use WP_REST_Server;
+use WP_REST_Request;
 use function Classifai\attachment_is_pdf;
 
 class ImageProcessing extends Service {
@@ -15,10 +17,11 @@ class ImageProcessing extends Service {
 	 */
 	public function __construct() {
 		parent::__construct(
-			'Image Processing',
+			__( 'Image Processing', 'classifai' ),
 			'image_processing',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
+				'Classifai\Providers\OpenAI\DallE',
 			]
 		);
 	}
@@ -177,6 +180,24 @@ class ImageProcessing extends Service {
 				'permission_callback' => '__return_true',
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-image',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_image' ],
+				'args'                => [
+					'prompt' => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
+					],
+				],
+				// 'permission_callback' => 'is_user_logged_in',
+			]
+		);
 	}
 
 	/**
@@ -207,6 +228,18 @@ class ImageProcessing extends Service {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Handle request to generate an image for a given prompt.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return string
+	 */
+	public function generate_image( WP_REST_Request $request ) {
+		$prompt = $request->get_param( 'prompt' );
+
+		return $prompt;
 	}
 
 	/**
