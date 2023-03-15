@@ -275,7 +275,7 @@ class ChatGPT extends Provider {
 						],
 					]
 				),
-				'timeout' => 60,
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 
@@ -440,7 +440,7 @@ class ChatGPT extends Provider {
 			$this->chatgpt_url,
 			[
 				'body'    => wp_json_encode( $body ),
-				'timeout' => 60,
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 
