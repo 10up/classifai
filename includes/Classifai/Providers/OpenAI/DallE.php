@@ -103,6 +103,20 @@ class DallE extends Provider {
 				'default_value' => $default_settings['api_key'],
 			]
 		);
+
+		add_settings_field(
+			'enable-image-gen',
+			esc_html__( 'Enable image generation', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_image_gen',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_image_gen'],
+				'description'   => __( 'Something will happen.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -138,6 +152,12 @@ class DallE extends Provider {
 		}
 
 		$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] ?? '' );
+
+		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
+			$new_settings['enable_image_gen'] = 'no';
+		} else {
+			$new_settings['enable_image_gen'] = '1';
+		}
 
 		return $new_settings;
 	}
@@ -175,8 +195,9 @@ class DallE extends Provider {
 	 */
 	private function get_default_settings() {
 		return [
-			'authenticated' => false,
-			'api_key'       => '',
+			'authenticated'    => false,
+			'api_key'          => '',
+			'enable_image_gen' => false,
 		];
 	}
 

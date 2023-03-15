@@ -24,10 +24,10 @@ function get_plugin() {
  * Returns the ClassifAI plugin's stored settings in the WP options.
  *
  * @param string $service The service to get settings from, defaults to the ServiceManager class.
- *
+ * @param string $provider The provider service name to get settings from, defaults to the first one found.
  * @return array The array of ClassifAi settings.
  */
-function get_plugin_settings( $service = '' ) {
+function get_plugin_settings( $service = '', $provider = '' ) {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
@@ -40,6 +40,17 @@ function get_plugin_settings( $service = '' ) {
 	}
 
 	if ( ! isset( $service_manager->service_classes[ $service ] ) || ! $service_manager->service_classes[ $service ] instanceof Service ) {
+		return [];
+	}
+
+	// If we want settings for a specific provider, find the proper provider service.
+	if ( ! empty( $provider ) ) {
+		foreach ( $service_manager->service_classes[ $service ]->provider_classes as $provider_class ) {
+			if ( $provider_class->provider_service_name === $provider ) {
+				return $provider_class->get_settings();
+			}
+		}
+
 		return [];
 	}
 

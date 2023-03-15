@@ -8,6 +8,7 @@ namespace Classifai\Services;
 use Classifai\Taxonomy\ImageTagTaxonomy;
 use WP_REST_Server;
 use WP_REST_Request;
+use WP_Error;
 use function Classifai\attachment_is_pdf;
 
 class ImageProcessing extends Service {
@@ -195,7 +196,7 @@ class ImageProcessing extends Service {
 						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
 					],
 				],
-				// 'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
 			]
 		);
 	}
@@ -240,6 +241,37 @@ class ImageProcessing extends Service {
 		$prompt = $request->get_param( 'prompt' );
 
 		return $prompt;
+	}
+
+	/**
+	 * Check if a given request has access to generate an image.
+	 *
+	 * This check ensures we have a valid user with proper capabilities
+	 * making the request, that we are properly authenticated with OpenAI
+	 * and that image generation is turned on.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_image_permissions_check( WP_REST_Request $request ) {
+		// Ensure we have a logged in user that can upload files.
+		if ( ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'image_processing', 'DALL·E' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Check if image generation is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_image_gen'] ) && 'no' === $settings['enable_image_gen'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
 	}
 
 	/**
