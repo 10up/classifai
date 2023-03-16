@@ -252,7 +252,7 @@ describe('Language processing Tests', () => {
 
 		// Disable editor role.
 		cy.get( '#enable_excerpt' ).check();
-		cy.get( '#openai_chatgpt_roles_editor' ).uncheck();
+		cy.get( '#openai_chatgpt_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Create test post.
