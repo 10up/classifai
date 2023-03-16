@@ -193,7 +193,29 @@ class ImageProcessing extends Service {
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
+					],
+					'n'      => [
+						'type'              => 'integer',
+						'default'           => 1,
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+					],
+					'size'   => [
+						'type'              => 'string',
+						'default'           => '1024x1024',
+						'enum'              => [
+							'256x256',
+							'512x512',
+							'1024x1024',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
 					],
 				],
 				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
@@ -235,12 +257,12 @@ class ImageProcessing extends Service {
 	 * Handle request to generate an image for a given prompt.
 	 *
 	 * @param WP_REST_Request $request The full request object.
-	 * @return string
+	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_image( WP_REST_Request $request ) {
 		$prompt = $request->get_param( 'prompt' );
 
-		return $prompt;
+		return rest_ensure_response( $prompt );
 	}
 
 	/**
@@ -250,10 +272,9 @@ class ImageProcessing extends Service {
 	 * making the request, that we are properly authenticated with OpenAI
 	 * and that image generation is turned on.
 	 *
-	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|bool
 	 */
-	public function generate_image_permissions_check( WP_REST_Request $request ) {
+	public function generate_image_permissions_check() {
 		// Ensure we have a logged in user that can upload files.
 		if ( ! current_user_can( 'upload_files' ) ) {
 			return false;

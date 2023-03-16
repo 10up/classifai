@@ -114,7 +114,39 @@ class DallE extends Provider {
 				'label_for'     => 'enable_image_gen',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_gen'],
-				'description'   => __( 'Something will happen.', 'classifai' ),
+				'description'   => __( 'TODO', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'number',
+			esc_html__( 'Number of images', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'number',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $default_settings['number'],
+				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'size',
+			esc_html__( 'Image size', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'size',
+				'options'       => [
+					'256x256'   => '256x256',
+					'512x512'   => '512x512',
+					'1024x1024' => '1024x1024',
+				],
+				'default_value' => $default_settings['size'],
+				'description'   => __( 'Size of generated images.', 'classifai' ),
 			]
 		);
 	}
@@ -159,6 +191,18 @@ class DallE extends Provider {
 			$new_settings['enable_image_gen'] = '1';
 		}
 
+		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {
+			$new_settings['number'] = absint( $settings['number'] );
+		} else {
+			$new_settings['number'] = 1;
+		}
+
+		if ( isset( $settings['size'] ) && in_array( $settings['size'], [ '256x256', '512x512', '1024x1024' ], true ) ) {
+			$new_settings['size'] = sanitize_text_field( $settings['size'] );
+		} else {
+			$new_settings['size'] = '1024x1024';
+		}
+
 		return $new_settings;
 	}
 
@@ -198,6 +242,8 @@ class DallE extends Provider {
 			'authenticated'    => false,
 			'api_key'          => '',
 			'enable_image_gen' => false,
+			'number'           => 1,
+			'size'             => '1024x1024',
 		];
 	}
 
@@ -214,10 +260,14 @@ class DallE extends Provider {
 		}
 
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+		$enabled       = 1 === intval( $settings['enable_image_gen'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )   => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Number of images', 'classifai' ) => $settings['number'] ?? 1,
+			__( 'Image size', 'classifai' )       => $settings['size'] ?? '1024x1024',
+			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
 
