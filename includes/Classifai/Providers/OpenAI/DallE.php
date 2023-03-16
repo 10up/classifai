@@ -267,7 +267,7 @@ class DallE extends Provider {
 			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Number of images', 'classifai' ) => $settings['number'] ?? 1,
 			__( 'Image size', 'classifai' )       => $settings['size'] ?? '1024x1024',
-			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),
 		];
 	}
 
