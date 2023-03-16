@@ -146,7 +146,7 @@ class LanguageProcessing extends Service {
 	 * Handle request to generate excerpt for given post ID.
 	 *
 	 * @param WP_REST_Request $request The full request object.
-	 * @return string|WP_Error
+	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
 		$post_id  = $request->get_param( 'id' );
@@ -164,7 +164,7 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 		}
 
-		return $provider->rest_endpoint_callback( $post_id, 'excerpt' );
+		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt' ) );
 	}
 
 	/**
@@ -202,7 +202,7 @@ class LanguageProcessing extends Service {
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return;
+			return false;
 		}
 
 		return true;
