@@ -321,6 +321,7 @@ class ChatGPT extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate excerpt', 'classifai' ) => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
 			__( 'Excerpt length', 'classifai' )   => $settings['length'] ?? 55,
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];

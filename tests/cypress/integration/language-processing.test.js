@@ -158,6 +158,7 @@ describe('Language processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#openai_chatgpt_roles_editor' ).check();
 		cy.get( '#length' ).clear().type( 35 );
 		cy.get( '#submit' ).click();
 	} );
@@ -212,7 +213,7 @@ describe('Language processing Tests', () => {
 
 		// Create test post.
 		cy.createPost( {
-			title: 'Test ChatGPT post',
+			title: 'Test ChatGPT post disabled',
 			content: 'Test GPT content',
 		} );
 
@@ -240,7 +241,53 @@ describe('Language processing Tests', () => {
 			}
 
 			// Verify button doesn't exist.
-			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).should( 'not.exist' );
+			cy.wrap( $panel )
+				.find( '.editor-post-excerpt button' )
+				.should( 'not.exist' );
+		} );
+	} );
+
+	it( 'Can disable excerpt generation feature by role', () => {
+		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+
+		// Disable editor role.
+		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#openai_chatgpt_roles_editor' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT post editor disabled',
+			content: 'Test GPT content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the excerpt panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button doesn't exist.
+			cy.wrap( $panel )
+				.find( '.editor-post-excerpt button' )
+				.should( 'not.exist' );
 		} );
 	} );
 });
