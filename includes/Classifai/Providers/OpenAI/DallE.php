@@ -60,6 +60,10 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
+		// TODO: clean up
+		add_action( 'admin_enqueue_scripts', function() {
+			wp_enqueue_script( 'modal', CLASSIFAI_PLUGIN_URL . 'src/js/modal.js', array( 'jquery' ), '', true );
+		} );
 	}
 
 	/**

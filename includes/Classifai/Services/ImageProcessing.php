@@ -262,7 +262,21 @@ class ImageProcessing extends Service {
 	public function generate_image( WP_REST_Request $request ) {
 		$prompt = $request->get_param( 'prompt' );
 
-		return rest_ensure_response( $prompt );
+		// TODO: hook up to API.
+
+		$results = [
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
+			],
+		];
+
+		return rest_ensure_response( $results );
 	}
 
 	/**
