@@ -60,7 +60,12 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		$settings = $this->get_settings();
+
+		if ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] ) {
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
+		}
 	}
 
 	/**
@@ -69,24 +74,54 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix || 'post-new.php' !== $hook_suffix ) {
-			return;
-		}
-
-		$settings = $this->get_settings();
-
-		// Don't load our custom JS if image generation functionality isn't turned on.
-		if ( ! isset( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
 			return;
 		}
 
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'src/js/modal.js', // TODO update this to a built file
-			[ 'jquery' ],
+			[ 'jquery', 'wp-api' ],
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
+
+		wp_localize_script(
+			'classifai-generate-images',
+			'classifaiDalleData',
+			[
+				'endpoint' => 'classifai/v1/openai/generate-image',
+				'tabText'  => esc_html__( 'Generate images', 'classifai' ),
+
+			]
+		);
+	}
+
+	/**
+	 * Print the templates we need for our media modal integration.
+	 */
+	public function print_media_templates() {
+		?>
+
+		<?php // Template for the Generate images tab content. Includes prompt input. ?>
+		<script type="text/html" id="tmpl-dalle-prompt">
+			<div class="generated-images"></div>
+			<div class="prompt-view">
+				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
+				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
+				<span class="error"></span>
+			</div>
+		</script>
+
+		<?php // Template for a single generated image. ?>
+		<script type="text/html" id="tmpl-dalle-image">
+			<div class="generated-image">
+				<img src="{{ url }}" />
+				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Import', 'classifai' ); ?></button>
+			</div>
+		</script>
+
+		<?php
 	}
 
 	/**

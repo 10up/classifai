@@ -11,22 +11,19 @@ const Image = Backbone.Model.extend( {
 const Images = Backbone.Collection.extend( {
 	model: Image,
 
-	url: 'https://oss.test/wp-json/classifai/v1/openai/generate-image', // TODO don't hardcode this
+	url: wpApiSettings.root + classifaiDalleData.endpoint,
 
 	makeRequest: function ( prompt ) {
 		this.fetch( {
 			type: 'get',
 			beforeSend: function ( xhr ) {
-				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce ); //TODO ensure this library is loaded
+				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
 			data: {
 				prompt: prompt,
-				n: 1, // TODO don't hardcode these
-				size: '256x256',
 			},
 			reset: true,
 			error: function ( collection, response ) {
-				console.log( response );
 				new ErrorMessage( { error: response.responseJSON.message } );
 			},
 		} );
@@ -55,7 +52,7 @@ wp.media.view.MediaFrame.Select = oldMediaFrame.extend( {
 
 		routerView.set( {
 			generate: {
-				text: 'Generate image',
+				text: classifaiDalleData.tabText,
 				priority: 60,
 			},
 		} );
@@ -70,7 +67,7 @@ wp.media.view.MediaFrame.Select = oldMediaFrame.extend( {
 } );
 
 const Prompt = wp.media.View.extend( {
-	template: _.template( '<div class="generated-images"></div><div class="prompt-view"><input type="search" class="prompt" placeholder="Enter prompt"><button type="button" class="button media-button button-secondary button-large media-button-select">Generate images</button><span class="error"></span></div>' ), // wp.template( 'prompt' )
+	template: wp.template( 'dalle-prompt' ),
 
 	events: {
 		'click button': 'search',
@@ -102,7 +99,7 @@ const Prompt = wp.media.View.extend( {
 
 const GeneratedImage = wp.media.View.extend( {
 	tagName: 'li',
-	template: _.template( '<div class="generated-image"><img src="<%= url %>" /><button type="button" class="button media-button button-secondary button-large media-button-select">Import</button></div>' ), // wp.template( 'generated-images' )
+	template: wp.template( 'dalle-image' ),
 
 	render: function () {
 		this.$el.html( this.template( this.model.toJSON() ) );
@@ -124,7 +121,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	},
 
 	render: function () {
-		this.$el.html( this.template( { text: 'Loading...' } ) );
+		this.$el.html( this.template( { text: 'Loading...' } ) ); // TODO add proper loading state
 		return this;
 	},
 
