@@ -60,10 +60,33 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		// TODO: clean up
-		add_action( 'admin_enqueue_scripts', function() {
-			wp_enqueue_script( 'modal', CLASSIFAI_PLUGIN_URL . 'src/js/modal.js', array( 'jquery' ), '', true );
-		} );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_admin_scripts( $hook_suffix = '' ) {
+		if ( 'post.php' !== $hook_suffix || 'post-new.php' !== $hook_suffix ) {
+			return;
+		}
+
+		$settings = $this->get_settings();
+
+		// Don't load our custom JS if image generation functionality isn't turned on.
+		if ( ! isset( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
+			return;
+		}
+
+		wp_enqueue_script(
+			'classifai-generate-images',
+			CLASSIFAI_PLUGIN_URL . 'src/js/modal.js', // TODO update this to a built file
+			[ 'jquery' ],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
 	}
 
 	/**
@@ -299,9 +322,11 @@ class DallE extends Provider {
 	 * Entry point for the generate-image REST endpoint.
 	 *
 	 * @param string $prompt The prompt used to generate an image.
+	 * @param int    $num Number of images to generate.
+	 * @param string $size Size generated images should be.
 	 * @return string|WP_Error
 	 */
-	public function generate_image_callback( string $prompt = '' ) {
+	public function generate_image_callback( string $prompt = '', int $num = null, string $size = null ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -330,7 +355,17 @@ class DallE extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt  = apply_filters( 'classifai_dalle_prompt', $prompt );
+		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+
+		// Set our needed params if those haven't been sent in the request.
+		if ( ! $num ) {
+			$num = $settings['number'] ?? 1;
+		}
+
+		if ( ! $size ) {
+			$size = $settings['size'] ?? '1024x1024';
+		}
+
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		/**
@@ -346,9 +381,9 @@ class DallE extends Provider {
 		$body = apply_filters(
 			'classifai_dalle_request_body',
 			[
-				'prompt' => $prompt,
-				'n'      => absint( $settings['number'] ?? 1 ), // TODO allow these values to be overridden from what's passed into REST endpoint
-				'size'   => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
+				'prompt' => sanitize_text_field( $prompt ),
+				'n'      => absint( $num ),
+				'size'   => sanitize_text_field( $size ),
 			]
 		);
 

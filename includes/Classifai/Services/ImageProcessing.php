@@ -198,7 +198,6 @@ class ImageProcessing extends Service {
 					],
 					'n'      => [
 						'type'              => 'integer',
-						'default'           => 1,
 						'minimum'           => 1,
 						'maximum'           => 10,
 						'sanitize_callback' => 'absint',
@@ -207,7 +206,6 @@ class ImageProcessing extends Service {
 					],
 					'size'   => [
 						'type'              => 'string',
-						'default'           => '1024x1024',
 						'enum'              => [
 							'256x256',
 							'512x512',
@@ -261,6 +259,8 @@ class ImageProcessing extends Service {
 	 */
 	public function generate_image( WP_REST_Request $request ) {
 		$prompt   = $request->get_param( 'prompt' );
+		$num      = $request->get_param( 'n' );
+		$size     = $request->get_param( 'size' );
 		$provider = '';
 
 		// Find the right provider class.
@@ -275,7 +275,7 @@ class ImageProcessing extends Service {
 			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 		}
 
-		return rest_ensure_response( $provider->generate_image_callback( $prompt ) );
+		return rest_ensure_response( $provider->generate_image_callback( $prompt, $num, $size ) );
 	}
 
 	/**
