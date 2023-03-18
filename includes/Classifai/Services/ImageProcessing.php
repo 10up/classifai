@@ -260,23 +260,22 @@ class ImageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_image( WP_REST_Request $request ) {
-		$prompt = $request->get_param( 'prompt' );
+		$prompt   = $request->get_param( 'prompt' );
+		$provider = '';
 
-		// TODO: hook up to API.
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'DALL·E' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
 
-		$results = [
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/05/image.jpeg',
-			],
-		];
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
 
-		return rest_ensure_response( $results );
+		return rest_ensure_response( $provider->generate_image_callback( $prompt ) );
 	}
 
 	/**

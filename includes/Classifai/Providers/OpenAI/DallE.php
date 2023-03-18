@@ -269,8 +269,8 @@ class DallE extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Number of images', 'classifai' ) => $settings['number'] ?? 1,
-			__( 'Image size', 'classifai' )       => $settings['size'] ?? '1024x1024',
+			__( 'Number of images', 'classifai' ) => absint( $settings['number'] ?? 1 ),
+			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),
 		];
 	}
@@ -293,6 +293,89 @@ class DallE extends Provider {
 		}
 
 		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
+	}
+
+	/**
+	 * Entry point for the generate-image REST endpoint.
+	 *
+	 * @param string $prompt The prompt used to generate an image.
+	 * @return string|WP_Error
+	 */
+	public function generate_image_callback( string $prompt = '' ) {
+		if ( ! $prompt ) {
+			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
+		}
+
+		$settings = $this->get_settings();
+
+		// These checks already ran in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( ! current_user_can( 'upload_files' ) ) {
+			// Note that we purposely leave off the textdomain here as this is the same error
+			// message core uses, so we want translations to load from there.
+			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
+		}
+
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_image_gen'] ) && 'no' === $settings['enable_image_gen'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Filter the prompt we will send to DALL·E.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_dalle_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to DALL·E.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt  = apply_filters( 'classifai_dalle_prompt', $prompt );
+		$request = new APIRequest( $settings['api_key'] ?? '' );
+
+		/**
+		 * Filter the request body before sending to DALL·E.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_dalle_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to DALL·E.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_dalle_request_body',
+			[
+				'prompt' => $prompt,
+				'n'      => absint( $settings['number'] ?? 1 ), // TODO allow these values to be overridden from what's passed into REST endpoint
+				'size'   => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
+			]
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->dalle_url,
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		set_transient( 'classifai_openai_dalle_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Extract out the image response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
+			$cleaned_response = [];
+
+			foreach ( $response['data'] as $data ) {
+				if ( ! empty( $data['url'] ) ) {
+					$cleaned_response[] = [ 'url' => esc_url_raw( $data['url'] ) ];
+				}
+			}
+
+			$response = $cleaned_response;
+		}
+
+		return $response;
 	}
 
 }
