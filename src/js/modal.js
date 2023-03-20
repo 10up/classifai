@@ -1,5 +1,8 @@
 /* eslint object-shorthand: 0 */
 
+const { uploadMedia } = wp.mediaUtils;
+const { cleanForSlug } = wp.url;
+
 const oldMediaFrame = wp.media.view.MediaFrame.Select;
 
 /**
@@ -86,7 +89,7 @@ const Prompt = wp.media.View.extend( {
 	template: wp.template( 'dalle-prompt' ),
 
 	events: {
-		'click button': 'search',
+		'click .button-generate': 'search',
 		'keyup .prompt': 'search',
 	},
 
@@ -120,9 +123,44 @@ const GeneratedImage = wp.media.View.extend( {
 	tagName: 'li',
 	template: wp.template( 'dalle-image' ),
 
+	events: {
+		'click .button-import': 'import',
+	},
+
+	initialize: function ( options ) {
+		this.data = this.model.toJSON();
+		this.prompt = options.prompt;
+		this.fileName = cleanForSlug( this.prompt );
+	},
+
 	render: function () {
-		this.$el.html( this.template( this.model.toJSON() ) );
+		this.$el.html( this.template( this.data ) );
 		return this;
+	},
+
+	import: async function () {
+		// TODO loading state; disable buttons
+		const file = await this.convertImageToFile( this.data.url );
+		const status = await uploadMedia( {
+			filesList: [ file ],
+			onFileChange: function ( [ fileObj ] ) {
+				// TODO send user back to Media Library with the image selected
+				// wait until response has id
+				console.log( fileObj ); // eslint-disable-line no-console
+			},
+			// TODO show error message
+			onError: console.error, // eslint-disable-line no-console
+		} );
+		return status;
+	},
+
+	convertImageToFile: async function ( url ) {
+		const response = await fetch( url );
+		const data = await response.blob();
+
+		return new File( [ data ], this.fileName + '.png', {
+			type: data.type || 'image/png',
+		} );
 	},
 } );
 
@@ -155,7 +193,10 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	},
 
 	renderImage: function ( image ) {
-		const view = new GeneratedImage( { model: image } );
+		const view = new GeneratedImage( {
+			model: image,
+			prompt: this.prompt,
+		} );
 		this.$( 'ul' ).append( view.render().el );
 	},
 

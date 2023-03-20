@@ -107,7 +107,7 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view"> <!-- TODO add prompt description text -->
 				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
-				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
 			</div>
 			<div class="generated-images">
@@ -121,7 +121,7 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
 				<img src="{{{ data.url }}}" />
-				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Import', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-import"><?php esc_html_e( 'Import', 'classifai' ); ?></button>
 			</div>
 		</script>
 
@@ -180,7 +180,7 @@ class DallE extends Provider {
 				'label_for'     => 'enable_image_gen',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_gen'],
-				'description'   => __( 'TODO', 'classifai' ),
+				'description'   => __( 'When enabled, a new Generate images tab will be shown in the media upload flow, allowing you to generate and import images.', 'classifai' ),
 			]
 		);
 
