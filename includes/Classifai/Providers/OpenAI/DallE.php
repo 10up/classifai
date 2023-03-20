@@ -105,18 +105,22 @@ class DallE extends Provider {
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
 		<script type="text/html" id="tmpl-dalle-prompt">
-			<div class="generated-images"></div>
-			<div class="prompt-view">
+			<div class="prompt-view"> <!-- TODO add prompt description text -->
 				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
 				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
+			</div>
+			<div class="generated-images">
+				<h2 class="prompt-text hidden"><?php esc_html_e( 'Images generated from prompt: ', 'classifai' ); ?><span></span></h2>
+				<span class="spinner"></span>
+				<ul></ul>
 			</div>
 		</script>
 
 		<?php // Template for a single generated image. ?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
-				<img src="{{ url }}" />
+				<img src="{{{ data.url }}}" />
 				<button type="button" class="button media-button button-secondary button-large media-button-select"><?php esc_html_e( 'Import', 'classifai' ); ?></button>
 			</div>
 		</script>
@@ -421,6 +425,40 @@ class DallE extends Provider {
 				'size'   => sanitize_text_field( $size ),
 			]
 		);
+
+		// Hardcoded data for now to avoid excess API requests while testing.
+		return [
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+			[
+				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
+			],
+		];
 
 		// Make our API request.
 		$response = $request->post(

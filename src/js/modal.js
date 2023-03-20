@@ -2,12 +2,19 @@
 
 const oldMediaFrame = wp.media.view.MediaFrame.Select;
 
+/**
+ * Model to hold our image data.
+ */
 const Image = Backbone.Model.extend( {
 	defaults: {
 		url: '',
 	},
 } );
 
+/**
+ * Collection to hold all of our Image models.
+ * This has the functionality to make an API request.
+ */
 const Images = Backbone.Collection.extend( {
 	model: Image,
 
@@ -30,6 +37,10 @@ const Images = Backbone.Collection.extend( {
 	},
 } );
 
+/**
+ * Extends the core MediaFrame.Select view in order
+ * to add our new tab and content.
+ */
 wp.media.view.MediaFrame.Select = oldMediaFrame.extend( {
 	/**
 	 * Bind region mode event callbacks.
@@ -66,6 +77,11 @@ wp.media.view.MediaFrame.Select = oldMediaFrame.extend( {
 	},
 } );
 
+/**
+ * View to render the tab content. This contains
+ * the prompt input (and related functionality) as
+ * well as basic HTML for the other containers (errors, images).
+ */
 const Prompt = wp.media.View.extend( {
 	template: wp.template( 'dalle-prompt' ),
 
@@ -97,6 +113,9 @@ const Prompt = wp.media.View.extend( {
 	},
 } );
 
+/**
+ * View to render a single generated image.
+ */
 const GeneratedImage = wp.media.View.extend( {
 	tagName: 'li',
 	template: wp.template( 'dalle-image' ),
@@ -107,21 +126,31 @@ const GeneratedImage = wp.media.View.extend( {
 	},
 } );
 
+/**
+ * View to render out the generated images container.
+ *
+ * This uses the Images collection to make our API
+ * request, showing a loading state and then rendering
+ * the images.
+ */
 const GeneratedImagesContainer = wp.media.View.extend( {
 	el: '.generated-images',
-	template: _.template( '<%= text %>' ), // wp.template( 'generated-images' )
 
 	initialize: function ( options ) {
 		this.collection = new Images();
+		this.prompt = options.prompt;
 
 		this.listenTo( this.collection, 'reset', this.renderAll );
 
-		this.collection.makeRequest( options.prompt );
+		this.collection.makeRequest( this.prompt );
 		this.render();
 	},
 
 	render: function () {
-		this.$el.html( this.template( { text: 'Loading...' } ) ); // TODO add proper loading state
+		this.$el.prev().find( 'button' ).prop( 'disabled', true );
+		this.$( 'ul' ).empty();
+		this.$( '.spinner' ).addClass( 'active' );
+		this.$( '.prompt-text' ).addClass( 'hidden' );
 		return this;
 	},
 
@@ -131,11 +160,18 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	},
 
 	renderAll: function () {
-		this.$el.html( this.template( { text: '<ul></ul>' } ) );
+		this.$( '.prompt-text' ).removeClass( 'hidden' );
+		this.$( '.prompt-text span' ).text( this.prompt );
+		this.$( '.spinner' ).removeClass( 'active' );
 		this.collection.each( this.renderImage, this );
+		this.$el.prev().find( '.prompt' ).val( '' );
+		this.$el.prev().find( 'button' ).prop( 'disabled', false );
 	},
 } );
 
+/**
+ * View to render an error message.
+ */
 const ErrorMessage = wp.media.View.extend( {
 	el: '.error',
 
