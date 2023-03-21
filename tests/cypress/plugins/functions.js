@@ -1,5 +1,6 @@
 import * as nluData from '../../test-plugin/nlu.json';
 import * as chatgptData from '../../test-plugin/chatgpt.json';
+import * as dalleData from '../../test-plugin/dalle.json';
 import * as ocrData from '../../test-plugin/ocr.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
 import * as pdfData from '../../test-plugin/pdf.json';
@@ -40,6 +41,15 @@ export const getChatGPTData = () => {
 	} );
 
 	return text.join( ' ' );
+};
+
+/**
+ * Get data from test DALL·E json file.
+ *
+ * @return {string[]} DALL·E Data.
+ */
+export const getDalleData = () => {
+	return dalleData.data;
 };
 
 /**

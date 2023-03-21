@@ -1,6 +1,6 @@
 /* eslint jest/expect-expect: 0 */
 
-import { getOCRData, getImageData } from '../plugins/functions';
+import { getOCRData, getImageData, getDalleData } from '../plugins/functions';
 
 describe('Image processing Tests', () => {
 	let imageEditLink = '';
@@ -9,7 +9,7 @@ describe('Image processing Tests', () => {
 		cy.login();
 	});
 
-	it('Can save "Image Processing" settings', () => {
+	it('Can save Computer Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		cy.get('#url')
@@ -24,7 +24,7 @@ describe('Image processing Tests', () => {
 		cy.get('.notice').contains('Settings saved.');
 	});
 
-	it('Can see Image processing actions on edit media page and verify Generated data.', () => {
+	it('Can see Computer Vision Image processing actions on edit media page and verify Generated data.', () => {
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
@@ -73,7 +73,7 @@ describe('Image processing Tests', () => {
 			});
 	});
 
-	it('Can see Image processing actions on media model', () => {
+	it('Can see Computer Vision Image processing actions on media model', () => {
 		const imageId = imageEditLink.split('post=')[1]?.split('&')[0];
 		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
 		cy.visit(mediaModelLink);
@@ -86,7 +86,7 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('exist');
 	});
 
-	it('Can disable Image processing features', () => {
+	it('Can disable Computer Vision Image processing features', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		// Disable features
@@ -109,4 +109,52 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('not.exist');
 		cy.get('#classifai-rescan-ocr').should('not.exist');
 	});
+
+	it( 'Can save OpenAI "Image Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#api_key' ).clear().type( 'password' );
+
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#number' ).select( '2' );
+		cy.get( '#size' ).select( '512x512' );
+		cy.get( '#submit' ).click();
+	} );
+
+	it( 'Can generate images in the media modal', () => {
+		const data = getDalleData();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		cy.insertBlock( 'core/image' ).then( ( id ) => {
+			cy.get( `#${ id } button.is-tertiary` ).click();
+
+			// Verify tab exists.
+			cy.get( '#menu-item-generate' ).should( 'exist' );
+
+			// Click into the tab and submit a prompt.
+			cy.get( '#menu-item-generate' ).click();
+			cy.get( '.prompt-view .prompt' ).type(
+				'A sunset over the mountains'
+			);
+			cy.get( '.prompt-view .button-generate' ).click();
+
+			// Verify images show up.
+			cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
+		} );
+	} );
 });
