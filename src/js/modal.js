@@ -144,19 +144,14 @@ const GeneratedImage = wp.media.View.extend( {
 
 	import: async function () {
 		const self = this;
-		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
-		const $spinner = this.$( '.spinner' );
-
-		// Set loading state.
-		$buttons.prop( 'disabled', true );
-		$spinner.addClass( 'active' );
+		this.enableLoadingState();
 
 		const file = await this.convertImageToFile( this.data.url );
 		const status = await uploadMedia( {
 			filesList: [ file ],
 			onFileChange: function ( [ fileObj ] ) {
 				if ( fileObj.id ) {
-					self.imageId = fileObj.id;
+					self.file = fileObj;
 				}
 			},
 			onError: function ( error ) {
@@ -164,19 +159,68 @@ const GeneratedImage = wp.media.View.extend( {
 			},
 		} );
 
-		// Disable loading state.
 		this.$( '.button-import' )
 			.removeClass( 'button-import' )
 			.addClass( 'button-media-library' )
 			.text( classifaiDalleData.buttonText );
-		$buttons.prop( 'disabled', false );
-		$spinner.removeClass( 'active' );
+		this.disableLoadingState();
 
 		return status;
 	},
 
-	loadMediaLibrary: function () {
-		console.log( this.imageId ); // eslint-disable-line no-console
+	loadMediaLibrary: async function () {
+		this.enableLoadingState();
+
+		// Turn our uploaded file into an Attachment model.
+		// Allows us to fetch the proper attachment data.
+		const Attachment = wp.media.model.Attachment;
+		this.attachment = await Attachment.get( this.file.id ).fetch();
+
+		// Create a new Attachment model to trigger the queue.
+		const attributes = {
+			file: this.attachment,
+			uploading: true,
+			date: new Date(),
+			filename: this.fileName + '.png',
+			menuOrder: 0,
+			loaded: 0,
+			percent: 0,
+			uploadedTo: wp.media.model.settings.post.id,
+		};
+
+		const attachment = wp.media.model.Attachment.create( attributes );
+		wp.Uploader.queue.add( attachment );
+
+		// Re-fetch the model and clear the queue.
+		_.each( [ 'file', 'loaded', 'size', 'percent' ], function ( key ) {
+			attachment.unset( key );
+		} );
+
+		attachment.set( _.extend( this.attachment, { uploading: false } ) );
+		wp.media.model.Attachment.get( this.file.id, attachment );
+		wp.Uploader.queue.reset();
+
+		this.disableLoadingState();
+
+		// Trigger a click on the Media Library tab.
+		jQuery( '#menu-item-browse' ).click();
+	},
+
+	enableLoadingState: function () {
+		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
+		const $spinner = this.$( '.spinner' );
+
+		// Set loading state.
+		$buttons.prop( 'disabled', true );
+		$spinner.addClass( 'active' );
+	},
+
+	disableLoadingState: function () {
+		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
+		const $spinner = this.$( '.spinner' );
+
+		$buttons.prop( 'disabled', false );
+		$spinner.removeClass( 'active' );
 	},
 
 	convertImageToFile: async function ( url ) {
