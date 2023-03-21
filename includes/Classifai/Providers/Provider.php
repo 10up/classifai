@@ -146,6 +146,19 @@ abstract class Provider {
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';
+
+				if ( isset( $args['max'] ) && is_numeric( $args['max'] ) ) {
+					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+				}
+
+				if ( isset( $args['min'] ) && is_numeric( $args['min'] ) ) {
+					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+				}
+
+				if ( isset( $args['step'] ) && is_numeric( $args['step'] ) ) {
+					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+				}
+
 				$class = 'small-text';
 				break;
 			case 'checkbox':
@@ -155,13 +168,13 @@ abstract class Provider {
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
-			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -193,6 +206,55 @@ abstract class Provider {
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
+	 * Render a group of checkboxes.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_checkbox_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+
+		// Iterate through all of our options.
+		foreach ( $args['options'] as $option_value => $option_label ) {
+			$value       = '';
+			$default_key = array_search( $option_value, $args['default_values'], true );
+
+			// Get saved value, if any.
+			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
+				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
+			}
+
+			// If no saved value, check if we have a default value.
+			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
+				$value = $args['default_values'][ $default_key ];
+			}
+
+			// Render checkbox.
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s">
+						<input type="hidden" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						<input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
+						%5$s
+					</label>
+				</p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description classifai-input-description">%s</span>',
+				esc_html( $args['description'] )
+			);
 		}
 	}
 

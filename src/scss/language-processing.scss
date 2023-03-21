@@ -112,6 +112,12 @@
     form {
         min-width: 550px;
     }
+
+    .classifai-input-description {
+        display: block;
+        margin-top: 8px;
+        max-width: 600px;
+	}
 }
 
 .wrap--nlu {
@@ -130,4 +136,10 @@
             min-height: auto;
         }
     }
+}
+
+.editor-post-excerpt {
+	button {
+		margin-top: 10px;
+	}
 }
