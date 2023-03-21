@@ -177,6 +177,7 @@ const GeneratedImage = wp.media.View.extend( {
 		this.attachment = await Attachment.get( this.file.id ).fetch();
 
 		// Create a new Attachment model to trigger the queue.
+		// Note most of this logic was copied from wp-plupload.js.
 		const attributes = {
 			file: this.attachment,
 			uploading: true,
