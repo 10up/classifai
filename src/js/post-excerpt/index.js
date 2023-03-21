@@ -11,6 +11,7 @@ const { registerPlugin } = wp.plugins;
  * Internal dependencies
  */
 import PostExcerptForm from './panel';
+import MaybeExcerptPanel from './maybe-excerpt-panel';
 
 // Remove core Post Excerpt panel.
 ( () => {
@@ -24,6 +25,9 @@ const PostExcerpt = () => {
 			<PluginDocumentSettingPanel title={ __( 'Excerpt' ) }>
 				<PostExcerptForm />
 			</PluginDocumentSettingPanel>
+			<MaybeExcerptPanel>
+				<PostExcerptForm />
+			</MaybeExcerptPanel>
 		</PostExcerptCheck>
 	);
 };
