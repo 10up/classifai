@@ -12,7 +12,8 @@
 * [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up Language Processing](#set-up-language-processing-via-ibm-watson)
+* [Set Up NLU Language Processing](#set-up-language-processing-via-ibm-watson)
+* [Set Up ChatGPT Language Processing](#set-up-language-processing-via-openai)
 * [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
@@ -24,6 +25,7 @@
 ## Features
 
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
@@ -32,9 +34,9 @@
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Recommended Content |
-| :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") |
+| Language Processing - Tagging | Recommended Content | Excerpt Generation |
+| :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
 
 | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
 | :-: | :-: | :-: |
@@ -44,14 +46,17 @@
 
 * PHP 7.4+
 * [WordPress](http://wordpress.org) 5.7+
-* To utilize the Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
+* To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
+* To utilize the ChatGPT Language Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
 
-Note that there is no cost to using ClassifAI and that both IBM Watson and Microsoft Azure have free plans for their AI services, but that above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage.
+Note that there is no cost to using ClassifAI itself. Both IBM Watson and Microsoft Azure have free plans for their AI services, but above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage. OpenAI has a limited trial option that can be used for testing but will require a valid paid plan after that.
 
-The service that powers ClassifAI's Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
+The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
+
+The service that powers ClassifAI's ChatGPT Language Processing, OpenAI's ChatGPT, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
 The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
@@ -61,7 +66,7 @@ The service that powers ClassifAI's Recommended Content, Microsoft Azure's Perso
 
 ### Manual Installation
 
-#### 1. Download or Clone this repo, install dependencies and build.
+#### 1. Download or Clone this repo, install dependencies and build
 
 - `git clone https://github.com/10up/classifai.git && cd classifai`
 - `composer install && npm install && npm run build`
@@ -70,7 +75,7 @@ The service that powers ClassifAI's Recommended Content, Microsoft Azure's Perso
 
 ### Installation via Composer
 
-ClassifAI releases can be installed via Composer. 
+ClassifAI releases can be installed via Composer.
 
 #### 1. Update composer.json
 
@@ -143,7 +148,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-#### 2. Configure IBM Watson API Keys under ClassifAI > Language Processing
+#### 2. Configure IBM Watson API Keys under ClassifAI > Language Processing > IBM Watson
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -158,7 +163,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Enter the `username` value into the `API Username`.
 - Enter the `password` into the `API Key` field.
 
-#### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing
+#### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > IBM Watson
 
 - Choose which public post types to classify when saved.
 - Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
@@ -170,6 +175,31 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 IBM Watson endpoint urls with `watsonplatform.net` were deprecated on 26 May 2021. The pattern for the new endpoint URLs is `api.{location}.{offering}.watson.cloud.ibm.com`. For example, Watson's NLU service offering endpoint will be like: `api.{location}.natural-language-understanding.watson.cloud.ibm.com`
 
 For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change.
+
+## Set Up Language Processing (via OpenAI)
+
+#### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+#### 2. Configure OpenAI API Keys under ClassifAI > Language Processing > OpenAI
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+#### 3. Enable specific Language Processing features
+
+* Choose to add the ability to generate excerpts.
+* If excerpt generation is configured, set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+#### 4. Edit a content type that has excerpts enabled
+
+* Edit (or create) an item that supports excerpts. Note: only the block editor is supported.
+* Ensure this item has content saved.
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`
 
 ## Set Up Image Processing (via Microsoft Azure)
 
@@ -229,15 +259,15 @@ For more information, see https://docs.microsoft.com/en-us/azure/cognitive-servi
 
 ### What data does ClassifAI gather?
 
-ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
+ClassifAI connects your WordPress site directly to your account with specific service provider(s) (e.g. Microsoft Azure AI, IBM Watson, OpenAI), so no data is gathered by 10up.  The data gathered in our [registration form](https://classifaiplugin.com/#cta) is used simply to stay in touch with users so we can provide product updates and news.  More information is available in the [Privacy Policy on ClassifAIplugin.com](https://drive.google.com/open?id=1Hn4XEWmNGqeMzLqnS7Uru2Hl2vJeLc7cI7225ztThgQ).
 
-### What are the Categories, Keywords, Concepts, and Entities within the Language Processing feature?
+### What are the Categories, Keywords, Concepts, and Entities within the NLU Language Processing feature?
 
 [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories) are five levels of hierarchies that IBM Watson can identify from your text.  [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords) are specific terms from your text that IBM Watson is able to identify.  [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) are high-level concepts that are not necessarily directly referenced in your text.  [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) are people, companies, locations, and classifications that are made by IBM Watson from your text.
 
-### How can I view the taxonomies that are generated from Language Processing?
+### How can I view the taxonomies that are generated from the NLU Language Processing?
 
-Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
+Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the NLU Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
 
 ## Support Level
 
