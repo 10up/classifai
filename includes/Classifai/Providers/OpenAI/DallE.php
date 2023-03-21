@@ -90,9 +90,9 @@ class DallE extends Provider {
 			'classifai-generate-images',
 			'classifaiDalleData',
 			[
-				'endpoint' => 'classifai/v1/openai/generate-image',
-				'tabText'  => esc_html__( 'Generate images', 'classifai' ),
-
+				'endpoint'   => 'classifai/v1/openai/generate-image',
+				'tabText'    => esc_html__( 'Generate images', 'classifai' ),
+				'buttonText' => esc_html__( 'Insert image from Media Library', 'classifai' ),
 			]
 		);
 	}
@@ -121,7 +121,9 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
 				<img src="{{{ data.url }}}" />
-				<button type="button" class="button button-secondary button-large button-import"><?php esc_html_e( 'Import', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
+				<span class="spinner"></span>
+				<span class="error"></span>
 			</div>
 		</script>
 

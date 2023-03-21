@@ -118,6 +118,9 @@ const Prompt = wp.media.View.extend( {
 
 /**
  * View to render a single generated image.
+ *
+ * This renders out an individual image as well
+ * as handles importing that image into the Media Library.
  */
 const GeneratedImage = wp.media.View.extend( {
 	tagName: 'li',
@@ -125,6 +128,7 @@ const GeneratedImage = wp.media.View.extend( {
 
 	events: {
 		'click .button-import': 'import',
+		'click .button-media-library': 'loadMediaLibrary',
 	},
 
 	initialize: function ( options ) {
@@ -139,19 +143,40 @@ const GeneratedImage = wp.media.View.extend( {
 	},
 
 	import: async function () {
-		// TODO loading state; disable buttons
+		const self = this;
+		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
+		const $spinner = this.$( '.spinner' );
+
+		// Set loading state.
+		$buttons.prop( 'disabled', true );
+		$spinner.addClass( 'active' );
+
 		const file = await this.convertImageToFile( this.data.url );
 		const status = await uploadMedia( {
 			filesList: [ file ],
 			onFileChange: function ( [ fileObj ] ) {
-				// TODO send user back to Media Library with the image selected
-				// wait until response has id
-				console.log( fileObj ); // eslint-disable-line no-console
+				if ( fileObj.id ) {
+					self.imageId = fileObj.id;
+				}
 			},
-			// TODO show error message
-			onError: console.error, // eslint-disable-line no-console
+			onError: function ( error ) {
+				this.$( '.error' ).text( error );
+			},
 		} );
+
+		// Disable loading state.
+		this.$( '.button-import' )
+			.removeClass( 'button-import' )
+			.addClass( 'button-media-library' )
+			.text( classifaiDalleData.buttonText );
+		$buttons.prop( 'disabled', false );
+		$spinner.removeClass( 'active' );
+
 		return status;
+	},
+
+	loadMediaLibrary: function () {
+		console.log( this.imageId ); // eslint-disable-line no-console
 	},
 
 	convertImageToFile: async function ( url ) {
