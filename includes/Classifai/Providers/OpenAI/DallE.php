@@ -11,12 +11,7 @@ use WP_Error;
 
 class DallE extends Provider {
 
-	/**
-	 * OpenAI model URL
-	 *
-	 * @var string
-	 */
-	protected $model_url = 'https://api.openai.com/v1/models';
+	use \Classifai\Providers\OpenAI\OpenAI;
 
 	/**
 	 * OpenAI DALL·E URL
@@ -62,7 +57,7 @@ class DallE extends Provider {
 	public function register() {
 		$settings = $this->get_settings();
 
-		if ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] ) {
+		if ( current_user_can( 'upload_files' ) && isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
@@ -232,32 +227,11 @@ class DallE extends Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings  = $this->get_settings();
-		$authenticated = $this->authenticate_credentials( $settings['api_key'] ?? '' );
-
-		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
-			$error_message                 = $authenticated->get_error_message();
-
-			// For response code 429, credentials are valid but rate limit is reached.
-			if ( 429 === (int) $authenticated->get_error_code() ) {
-				$new_settings['authenticated'] = true;
-				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
-			} else {
-				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
-			}
-
-			add_settings_error(
-				'api_key',
-				'classifai-auth',
-				$error_message,
-				'error'
-			);
-		} else {
-			$new_settings['authenticated'] = true;
-		}
-
-		$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] ?? '' );
+		$new_settings = $this->get_settings();
+		$new_settings = array_merge(
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$new_settings
+		);
 
 		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
 			$new_settings['enable_image_gen'] = 'no';
@@ -278,25 +252,6 @@ class DallE extends Provider {
 		}
 
 		return $new_settings;
-	}
-
-	/**
-	 * Authenticate our credentials.
-	 *
-	 * @param string $api_key Api Key.
-	 * @return bool|WP_Error
-	 */
-	protected function authenticate_credentials( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your OpenAI API key.', 'classifai' ) );
-		}
-
-		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->model_url );
-
-		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**
@@ -343,26 +298,6 @@ class DallE extends Provider {
 			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),
 		];
-	}
-
-	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param string $transient Transient that holds our data.
-	 * @return string
-	 */
-	private function get_formatted_latest_response( string $transient = '' ) {
-		$data = get_transient( $transient );
-
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**
@@ -433,40 +368,6 @@ class DallE extends Provider {
 				'size'   => sanitize_text_field( $size ),
 			]
 		);
-
-		// Hardcoded data for now to avoid excess API requests while testing.
-		return [
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-			[
-				'url' => 'https://oss.test/wp-content/uploads/2022/07/10up-Logo-2019@3x.png',
-			],
-		];
 
 		// Make our API request.
 		$response = $request->post(
