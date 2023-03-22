@@ -18,10 +18,10 @@ const Images = Backbone.Collection.extend( {
 	 *
 	 * @param {string} prompt Prompt used in generating images.
 	 */
-	makeRequest: function ( prompt ) {
+	makeRequest: function( prompt ) {
 		this.fetch( {
 			type: 'get',
-			beforeSend: function ( xhr ) {
+			beforeSend: function( xhr ) {
 				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
 			data: {
@@ -29,7 +29,7 @@ const Images = Backbone.Collection.extend( {
 				format: 'b64_json',
 			},
 			reset: true,
-			error: function ( collection, response ) {
+			error: function( collection, response ) {
 				new ErrorMessage( { error: response.responseJSON.message } );
 			},
 		} );

@@ -23,7 +23,7 @@ const GeneratedImage = wp.media.View.extend( {
 	 *
 	 * @param {Object} options Options passed to the view.
 	 */
-	initialize: function ( options ) {
+	initialize: function( options ) {
 		this.data = this.model.toJSON();
 		this.prompt = options.prompt;
 		this.fileName = cleanForSlug( this.prompt );
@@ -32,7 +32,7 @@ const GeneratedImage = wp.media.View.extend( {
 	/**
 	 * Render the view.
 	 */
-	render: function () {
+	render: function() {
 		this.$el.html( this.template( this.data ) );
 		return this;
 	},
@@ -43,19 +43,19 @@ const GeneratedImage = wp.media.View.extend( {
 	 * Attempts to download the chosen image to
 	 * your site.
 	 */
-	import: async function () {
+	import: async function() {
 		const self = this;
 		this.enableLoadingState();
 
 		const blob = await this.convertImageToBlob( this.data.url );
 		const status = await uploadMedia( {
 			filesList: [ new File( [ blob ], this.fileName + '.png' ) ],
-			onFileChange: function ( [ fileObj ] ) {
+			onFileChange: function( [ fileObj ] ) {
 				if ( fileObj.id ) {
 					self.file = fileObj;
 				}
 			},
-			onError: function ( error ) {
+			onError: function( error ) {
 				this.$( '.error' ).text( error );
 			},
 		} );
@@ -76,7 +76,7 @@ const GeneratedImage = wp.media.View.extend( {
 	 * controller and switches to the Media Library
 	 * tab.
 	 */
-	loadMediaLibrary: async function () {
+	loadMediaLibrary: async function() {
 		this.enableLoadingState();
 
 		// Turn our uploaded file into an Attachment model.
@@ -101,7 +101,7 @@ const GeneratedImage = wp.media.View.extend( {
 		wp.Uploader.queue.add( attachment );
 
 		// Re-fetch the model and clear the queue.
-		_.each( [ 'file', 'loaded', 'size', 'percent' ], function ( key ) {
+		_.each( [ 'file', 'loaded', 'size', 'percent' ], function( key ) {
 			attachment.unset( key );
 		} );
 
@@ -118,7 +118,7 @@ const GeneratedImage = wp.media.View.extend( {
 	/**
 	 * Enable the loading state.
 	 */
-	enableLoadingState: function () {
+	enableLoadingState: function() {
 		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
 		const $spinner = this.$( '.spinner' );
 
@@ -130,7 +130,7 @@ const GeneratedImage = wp.media.View.extend( {
 	/**
 	 * Disable the loading state.
 	 */
-	disableLoadingState: function () {
+	disableLoadingState: function() {
 		const $buttons = this.$el.parent( 'ul' ).find( 'button' );
 		const $spinner = this.$( '.spinner' );
 
@@ -143,8 +143,8 @@ const GeneratedImage = wp.media.View.extend( {
 	 *
 	 * @param {string} base64Image base64 encoded image.
 	 */
-	convertImageToBlob: async function ( base64Image ) {
-		const image = new Image();
+	convertImageToBlob: async function( base64Image ) {
+		const image = new Image(); // eslint-disable-line no-undef
 		image.src = `data:image/png;base64,${ base64Image }`;
 		image.crossOrigin = 'anonymous';
 		await this.loadImage( image );
@@ -154,19 +154,21 @@ const GeneratedImage = wp.media.View.extend( {
 		canvas.height = image.height;
 
 		const ctx = canvas.getContext( '2d' );
-		if ( ! ctx ) return;
+		if ( ! ctx ) {
+			return;
+		}
 		ctx.drawImage( image, 0, 0 );
 
-		const blob = await new Promise( ( resolve ) => {
+		const finalBlob = await new Promise( ( resolve ) => {
 			canvas.toBlob( ( blob ) => {
-				blob && resolve( blob );
+				blob && resolve( blob ); // eslint-disable-line no-unused-expressions
 			}, 'image/jpeg' );
 		} );
 
-		return blob;
+		return finalBlob;
 	},
 
-	loadImage: function ( img ) {
+	loadImage: function( img ) {
 		return new Promise( ( resolve ) => ( img.onload = resolve ) );
 	},
 } );
