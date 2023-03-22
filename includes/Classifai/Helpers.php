@@ -127,7 +127,7 @@ function reset_plugin_settings() {
  * @return string
  */
 function get_watson_api_url() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_url'] ) ) {
@@ -149,7 +149,7 @@ function get_watson_api_url() {
  * @return string
  */
 function get_watson_username() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_username'] ) ) {
@@ -170,7 +170,7 @@ function get_watson_username() {
  * @return string
  */
 function get_watson_password() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_password'] ) ) {
@@ -238,7 +238,7 @@ function get_post_statuses_for_language_settings() {
  * return array
  */
 function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing' );
+	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_types = [];
@@ -273,7 +273,7 @@ function get_supported_post_types() {
  * @return array
  */
 function get_supported_post_statuses() {
-	$classifai_settings = get_plugin_settings( 'language_processing' );
+	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_statuses = [ 'publish' ];
@@ -308,7 +308,7 @@ function get_supported_post_statuses() {
  * @return bool
  */
 function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature ] ) ) {
@@ -359,7 +359,7 @@ function language_processing_features_enabled() {
  * @return int
  */
 function get_feature_threshold( $feature ) {
-	$settings  = get_plugin_settings( 'language_processing' );
+	$settings  = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$threshold = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
@@ -403,7 +403,7 @@ function get_feature_threshold( $feature ) {
  * @return string Taxonomy mapped to the feature
  */
 function get_feature_taxonomy( $feature ) {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$taxonomy = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
