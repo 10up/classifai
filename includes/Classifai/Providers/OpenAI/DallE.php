@@ -7,6 +7,7 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
+use function Classifai\get_asset_info;
 use WP_Error;
 
 class DallE extends Provider {
@@ -75,9 +76,9 @@ class DallE extends Provider {
 
 		wp_enqueue_script(
 			'classifai-generate-images',
-			CLASSIFAI_PLUGIN_URL . 'src/js/modal.js', // TODO update this to a built file
+			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
 			[ 'jquery', 'wp-api' ],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
 
@@ -121,7 +122,7 @@ class DallE extends Provider {
 		<?php // Template for a single generated image. ?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
-				<img src="{{{ data.url }}}" />
+				<img src="data:image/png;base64,{{{ data.url }}}" />
 				<button type="button" class="button button-secondary button-large button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
 				<span class="spinner"></span>
 				<span class="error"></span>
@@ -304,16 +305,23 @@ class DallE extends Provider {
 	 * Entry point for the generate-image REST endpoint.
 	 *
 	 * @param string $prompt The prompt used to generate an image.
-	 * @param int    $num Number of images to generate.
-	 * @param string $size Size generated images should be.
+	 * @param array  $args Optional arguments passed to endpoint.
 	 * @return string|WP_Error
 	 */
-	public function generate_image_callback( string $prompt = '', int $num = null, string $size = null ) {
+	public function generate_image_callback( string $prompt = '', array $args = [] ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
 
 		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num'    => $settings['number'] ?? 1,
+				'size'   => $settings['size'] ?? '1024x1024',
+				'format' => 'url',
+			]
+		);
 
 		// These checks already ran in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -339,15 +347,6 @@ class DallE extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
 
-		// Set our needed params if those haven't been sent in the request.
-		if ( ! $num ) {
-			$num = $settings['number'] ?? 1;
-		}
-
-		if ( ! $size ) {
-			$size = $settings['size'] ?? '1024x1024';
-		}
-
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		/**
@@ -363,9 +362,10 @@ class DallE extends Provider {
 		$body = apply_filters(
 			'classifai_dalle_request_body',
 			[
-				'prompt' => sanitize_text_field( $prompt ),
-				'n'      => absint( $num ),
-				'size'   => sanitize_text_field( $size ),
+				'prompt'          => sanitize_text_field( $prompt ),
+				'n'               => absint( $args['num'] ),
+				'size'            => sanitize_text_field( $args['size'] ),
+				'response_format' => sanitize_text_field( $args['format'] ),
 			]
 		);
 
@@ -384,8 +384,12 @@ class DallE extends Provider {
 			$cleaned_response = [];
 
 			foreach ( $response['data'] as $data ) {
-				if ( ! empty( $data['url'] ) ) {
-					$cleaned_response[] = [ 'url' => esc_url_raw( $data['url'] ) ];
+				if ( ! empty( $data[ $args['format'] ] ) ) {
+					if ( 'url' === $args['format'] ) {
+						$cleaned_response[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+					} else {
+						$cleaned_response[] = [ 'url' => $data[ $args['format'] ] ];
+					}
 				}
 			}
 

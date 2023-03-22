@@ -215,6 +215,16 @@ class ImageProcessing extends Service {
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
 					],
+					'format' => [
+						'type'              => 'string',
+						'enum'              => [
+							'url',
+							'b64_json',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+					],
 				],
 				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
 			]
@@ -258,9 +268,6 @@ class ImageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_image( WP_REST_Request $request ) {
-		$prompt   = $request->get_param( 'prompt' );
-		$num      = $request->get_param( 'n' );
-		$size     = $request->get_param( 'size' );
 		$provider = '';
 
 		// Find the right provider class.
@@ -275,7 +282,16 @@ class ImageProcessing extends Service {
 			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 		}
 
-		return rest_ensure_response( $provider->generate_image_callback( $prompt, $num, $size ) );
+		return rest_ensure_response(
+			$provider->generate_image_callback(
+				$request->get_param( 'prompt' ),
+				[
+					'num'    => $request->get_param( 'n' ),
+					'size'   => $request->get_param( 'size' ),
+					'format' => $request->get_param( 'format' ),
+				]
+			)
+		);
 	}
 
 	/**
