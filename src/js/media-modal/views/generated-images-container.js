@@ -23,6 +23,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 		this.prompt = options.prompt;
 
 		this.listenTo( this.collection, 'reset', this.renderAll );
+		this.listenTo( this.collection, 'error', this.error );
 
 		this.collection.makeRequest( this.prompt );
 		this.render();
@@ -33,6 +34,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	 */
 	render: function() {
 		this.$el.prev().find( 'button' ).prop( 'disabled', true );
+		this.$el.prev().find( '.error' ).text( '' );
 		this.$( 'ul' ).empty();
 		this.$( '.spinner' ).addClass( 'active' );
 		this.$( '.prompt-text' ).addClass( 'hidden' );
@@ -56,11 +58,26 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	 * Render all images.
 	 */
 	renderAll: function() {
-		this.$( '.prompt-text' ).removeClass( 'hidden' );
-		this.$( '.prompt-text span' ).text( this.prompt );
+		if ( this.collection.length < 1 ) {
+			this.error();
+			this.$el
+				.prev()
+				.find( '.error' )
+				.text( classifaiDalleData.errorText );
+		} else {
+			this.$( '.prompt-text' ).removeClass( 'hidden' );
+			this.$( '.prompt-text span' ).text( this.prompt );
+			this.$( '.spinner' ).removeClass( 'active' );
+
+			this.collection.each( this.renderImage, this );
+
+			this.$el.prev().find( '.prompt' ).val( '' );
+			this.$el.prev().find( 'button' ).prop( 'disabled', false );
+		}
+	},
+
+	error: function() {
 		this.$( '.spinner' ).removeClass( 'active' );
-		this.collection.each( this.renderImage, this );
-		this.$el.prev().find( '.prompt' ).val( '' );
 		this.$el.prev().find( 'button' ).prop( 'disabled', false );
 	},
 } );

@@ -48,23 +48,30 @@ const GeneratedImage = wp.media.View.extend( {
 		this.enableLoadingState();
 
 		const blob = await this.convertImageToBlob( this.data.url );
+
+		if ( ! blob ) {
+			this.$( '.error' ).text( classifaiDalleData.errorText );
+			return;
+		}
+
 		const status = await uploadMedia( {
 			filesList: [ new File( [ blob ], this.fileName + '.png' ) ],
 			onFileChange: function( [ fileObj ] ) {
-				if ( fileObj.id ) {
+				if ( fileObj && fileObj.id ) {
 					self.file = fileObj;
+
+					self.$( '.button-import' )
+						.removeClass( 'button-import' )
+						.addClass( 'button-media-library' )
+						.text( classifaiDalleData.buttonText );
+					self.disableLoadingState();
 				}
 			},
 			onError: function( error ) {
-				this.$( '.error' ).text( error );
+				self.disableLoadingState();
+				self.$( '.error' ).text( error );
 			},
 		} );
-
-		this.$( '.button-import' )
-			.removeClass( 'button-import' )
-			.addClass( 'button-media-library' )
-			.text( classifaiDalleData.buttonText );
-		this.disableLoadingState();
 
 		return status;
 	},

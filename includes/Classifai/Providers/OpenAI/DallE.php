@@ -88,6 +88,7 @@ class DallE extends Provider {
 			[
 				'endpoint'   => 'classifai/v1/openai/generate-image',
 				'tabText'    => esc_html__( 'Generate images', 'classifai' ),
+				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
 			]
 		);
@@ -103,10 +104,10 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view">
 				<p>
-					<?php esc_html_e( 'Enter a prompt to generate images from.', 'classifai' ); ?>
+					<?php esc_html_e( 'Enter a prompt below to generate images.', 'classifai' ); ?>
 				</p>
 				<p>
-					<?php esc_html_e( 'Once images are generated, choose which of those you want to import into your site and finally choose which image you want to render.', 'classifai' ); ?>
+					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
 				</p>
 				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
