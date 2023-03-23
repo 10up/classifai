@@ -15,6 +15,7 @@ const GeneratedImage = wp.media.View.extend( {
 
 	events: {
 		'click .button-import': 'import',
+		'click .button-import-insert': 'importMediaLibrary',
 		'click .button-media-library': 'loadMediaLibrary',
 	},
 
@@ -74,6 +75,11 @@ const GeneratedImage = wp.media.View.extend( {
 		} );
 
 		return status;
+	},
+
+	importMediaLibrary: async function() {
+		await this.import();
+		await this.loadMediaLibrary();
 	},
 
 	/**

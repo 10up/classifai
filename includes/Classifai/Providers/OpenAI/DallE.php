@@ -135,7 +135,8 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
 				<img src="data:image/png;base64,{{{ data.url }}}" />
-				<button type="button" class="button button-secondary button-large button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
+				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
+				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
 				<span class="spinner"></span>
 				<span class="error"></span>
 			</div>
