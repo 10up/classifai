@@ -138,8 +138,25 @@ describe('Image processing Tests', () => {
 			}
 		} );
 
-		cy.insertBlock( 'core/image' ).then( ( id ) => {
-			cy.get( `#${ id } button.is-tertiary:first` ).click();
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
 
 			// Verify tab exists.
 			cy.get( '#menu-item-generate' ).should( 'exist' );
@@ -178,8 +195,25 @@ describe('Image processing Tests', () => {
 			}
 		} );
 
-		cy.insertBlock( 'core/image' ).then( ( id ) => {
-			cy.get( `#${ id } button.is-tertiary:first` ).click();
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
 
 			// Verify tab doesn't exist.
 			cy.get( '#menu-item-generate' ).should( 'not.exist' );
