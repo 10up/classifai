@@ -58,7 +58,15 @@ class DallE extends Provider {
 	public function register() {
 		$settings = $this->get_settings();
 
-		if ( current_user_can( 'upload_files' ) && isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] ) {
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			current_user_can( 'upload_files' )
+			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
+			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+		) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
@@ -195,6 +203,30 @@ class DallE extends Provider {
 			]
 		);
 
+		// Get all roles that have the upload_files cap.
+		$roles = get_editable_roles() ?? [];
+		$roles = array_filter(
+			$roles,
+			function( $role ) {
+				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
+			}
+		);
+		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		add_settings_field(
+			'roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'roles',
+				'options'        => $roles,
+				'default_values' => $default_settings['roles'],
+				'description'    => __( 'Choose which roles are allowed to generate images. Note that the roles above only include those that have permissions to upload media.', 'classifai' ),
+			]
+		);
+
 		add_settings_field(
 			'number',
 			esc_html__( 'Number of images', 'classifai' ),
@@ -247,6 +279,10 @@ class DallE extends Provider {
 			$new_settings['enable_image_gen'] = '1';
 		}
 
+		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
+			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		}
+
 		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {
 			$new_settings['number'] = absint( $settings['number'] );
 		} else {
@@ -279,6 +315,7 @@ class DallE extends Provider {
 			'authenticated'    => false,
 			'api_key'          => '',
 			'enable_image_gen' => false,
+			'roles'            => array_keys( get_editable_roles() ?? [] ),
 			'number'           => 1,
 			'size'             => '1024x1024',
 		];
@@ -302,6 +339,7 @@ class DallE extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
 			__( 'Number of images', 'classifai' ) => absint( $settings['number'] ?? 1 ),
 			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),

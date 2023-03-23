@@ -118,6 +118,7 @@ describe('Image processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#openai_dalle_roles_administrator' ).check();
 		cy.get( '#number' ).select( '2' );
 		cy.get( '#size' ).select( '512x512' );
 		cy.get( '#submit' ).click();
@@ -183,7 +184,55 @@ describe('Image processing Tests', () => {
 
 		// Create test post.
 		cy.createPost( {
-			title: 'Test DALL-E post',
+			title: 'Test DALL-E post disabled',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
+
+			// Verify tab doesn't exist.
+			cy.get( '#menu-item-generate' ).should( 'not.exist' );
+		} );
+	} );
+
+	it( 'Can disable image generation by role', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#openai_dalle_roles_administrator' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post admin disabled',
 			content: 'Test content',
 		} );
 

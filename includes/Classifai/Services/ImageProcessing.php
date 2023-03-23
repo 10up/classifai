@@ -321,6 +321,14 @@ class ImageProcessing extends Service {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
 		}
 
+		// Check if the current user's role is allowed.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
+
 		return true;
 	}
 
