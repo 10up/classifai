@@ -15,7 +15,7 @@ trait OpenAI {
 	 *
 	 * @var string
 	 */
-	protected $compeletions_url = 'https://api.openai.com/v1/completions';
+	protected $completions_url = 'https://api.openai.com/v1/completions';
 
 	/**
 	 * Sanitize the API key, showing an error message if needed.
@@ -69,7 +69,7 @@ trait OpenAI {
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
 		$response = $request->post(
-			$this->compeletions_url,
+			$this->completions_url,
 			[
 				'body' => wp_json_encode(
 					[

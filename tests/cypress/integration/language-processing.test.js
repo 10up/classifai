@@ -158,7 +158,7 @@ describe('Language processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_excerpt' ).check();
-		cy.get( '#openai_chatgpt_roles_editor' ).check();
+		cy.get( '#openai_chatgpt_roles_administrator' ).check();
 		cy.get( '#length' ).clear().type( 35 );
 		cy.get( '#submit' ).click();
 	} );
