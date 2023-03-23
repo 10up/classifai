@@ -124,8 +124,6 @@ describe('Image processing Tests', () => {
 	} );
 
 	it( 'Can generate images in the media modal', () => {
-		const data = getDalleData();
-
 		// Create test post.
 		cy.createPost( {
 			title: 'Test DALL-E post',
@@ -155,6 +153,36 @@ describe('Image processing Tests', () => {
 
 			// Verify images show up.
 			cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
+		} );
+	} );
+
+	it( 'Can disable image generation feature', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#enable_image_gen' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		cy.insertBlock( 'core/image' ).then( ( id ) => {
+			cy.get( `#${ id } button.is-tertiary:first` ).click();
+
+			// Verify tab doesn't exist.
+			cy.get( '#menu-item-generate' ).should( 'not.exist' );
 		} );
 	} );
 });
