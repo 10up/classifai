@@ -141,7 +141,7 @@ describe('Image processing Tests', () => {
 		} );
 
 		cy.insertBlock( 'core/image' ).then( ( id ) => {
-			cy.get( `#${ id } button.is-tertiary` ).click();
+			cy.get( `#${ id } button.is-tertiary:first` ).click();
 
 			// Verify tab exists.
 			cy.get( '#menu-item-generate' ).should( 'exist' );

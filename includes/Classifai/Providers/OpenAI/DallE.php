@@ -120,7 +120,10 @@ class DallE extends Provider {
 			</div>
 		</script>
 
-		<?php // Template for a single generated image. ?>
+		<?php
+		// Template for a single generated image.
+		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation */
+		?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
 				<img src="data:image/png;base64,{{{ data.url }}}" />
@@ -129,6 +132,9 @@ class DallE extends Provider {
 				<span class="error"></span>
 			</div>
 		</script>
+		<?php
+		/* phpcs:enable WordPressVIPMinimum.Security.Mustache.OutputNotation */
+		?>
 
 		<?php
 	}
