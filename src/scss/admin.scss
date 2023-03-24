@@ -101,3 +101,88 @@ a.classifai-button {
 	}
 }
 
+.classifai-wizard {
+	margin-left: -20px;
+
+	&__header{
+		height: 60px;
+		border-top: 1px solid #dcdcde;
+		border-bottom: 1px solid #dcdcde;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #fff;
+	}
+
+	&__step-wrapper {
+		margin: 0 16px;
+    	width: 100%;
+		max-width: 980px;
+	}
+
+	&__steps {
+		display: flex;
+		justify-content: space-around;
+	}
+
+	&__step {
+		padding: 8px;
+		font-weight: 400;
+		position: relative;
+
+		&__label {
+			font-size: 16px;
+
+			span.step-count {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 24px;
+				height: 24px;
+				min-width: 24px;
+				margin-right: 8px;
+				background: #f0f0f0;
+				color: #757575;
+				border-radius: 50%;
+			}
+
+			span.step-title {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			@media screen and (max-width: 480px) {
+				font-size: 14px;
+			}
+		}
+
+		&.is-active {
+			span.step-title{
+				font-weight: 600;
+			}
+
+			span.step-count {
+				background: #fb342c;
+				color: #fff;
+			}
+		}
+
+	}
+
+	&__step-divider {
+		align-self: flex-start;
+		flex-grow: 1;
+		border-bottom: 1px solid #f0f0f0;
+		margin-top: 20px;
+	}
+
+	&__step-label {
+
+		font-size: 1.2em;
+	}
+
+	@media screen and (max-width: 782px) {
+		margin-left: -10px;
+	}
+}

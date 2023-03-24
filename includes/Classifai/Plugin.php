@@ -67,6 +67,9 @@ class Plugin {
 			);
 		}
 
+		// initialize the classifAI Onboarding.
+		new Admin\Onboarding();
+
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
