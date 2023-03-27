@@ -16,7 +16,8 @@
 	}
 }
 
-a.classifai-button {
+a.classifai-button,
+input.classifai-button {
 	padding: 8px 16px;
 	background: #1e8cbe;
 	color: #fff;
@@ -64,10 +65,10 @@ a.classifai-button {
 	box-sizing: border-box;
 	display: block;
 	left: 0;
-    right: 0;
-    top: 0;
+	right: 0;
+	top: 0;
 	position: sticky;
-    z-index: 1001;
+	z-index: 1001;
 	margin-left: -20px;
 	padding: 0 10px;
 
@@ -86,6 +87,19 @@ a.classifai-button {
 		}
 	}
 
+	.classifai-setup-page & {
+		position: relative;
+		body.admin-bar & {
+			@media (min-width: 601px) {
+				top: 0px;
+			}
+
+			@media (min-width: 783px) {
+				top: 0px;
+			}
+		}
+	}
+
 	.classifai-header-layout {
 		justify-content: space-between;
 		padding: 24px;
@@ -101,10 +115,10 @@ a.classifai-button {
 	}
 }
 
-.classifai-wizard {
+.classifai-setup {
 	margin-left: -20px;
 
-	&__header{
+	&__header {
 		height: 60px;
 		border-top: 1px solid #dcdcde;
 		border-bottom: 1px solid #dcdcde;
@@ -116,7 +130,7 @@ a.classifai-button {
 
 	&__step-wrapper {
 		margin: 0 16px;
-    	width: 100%;
+		width: 100%;
 		max-width: 980px;
 	}
 
@@ -158,7 +172,7 @@ a.classifai-button {
 		}
 
 		&.is-active {
-			span.step-title{
+			span.step-title {
 				font-weight: 600;
 			}
 
@@ -167,7 +181,6 @@ a.classifai-button {
 				color: #fff;
 			}
 		}
-
 	}
 
 	&__step-divider {
@@ -178,11 +191,121 @@ a.classifai-button {
 	}
 
 	&__step-label {
-
 		font-size: 1.2em;
 	}
 
 	@media screen and (max-width: 782px) {
 		margin-left: -10px;
+	}
+
+	&__content {
+		padding: 24px;
+		background-color: #fff;
+		box-sizing: border-box;
+		display: block;
+		border-radius: 4px;
+		max-width: 1232px;
+		margin: 20px auto;
+		padding-bottom: 60px;
+
+		&__row {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			width: 100%;
+
+			&__column {
+				display: flex;
+				flex-direction: column;
+				flex-basis: 100%;
+
+				img {
+					max-width: 334px;
+					width: 100%;
+				}
+			}
+
+			@media screen and (min-width: 767px) {
+				&__column {
+					flex: 1;
+					padding: 0px 10px;
+				}
+			}
+		}
+
+		h1.classifai-setup-heading {
+			text-align: center;
+			font-size: 22px;
+			margin: 24px 0px 48px 0px;
+			font-weight: 600;
+		}
+
+		.classifai-setup-image {
+			text-align: center;
+		}
+
+		h1.classifai-setup-title {
+			font-size: 22px;
+			padding: 0px;
+		}
+
+		.classifai-step1-content {
+			max-width: 400px;
+		}
+
+		.classifai-feature-box {
+			margin: 40px 0;
+		}
+
+		.classifai-feature-box-title {
+			text-transform: uppercase;
+			font-weight: 700;
+		}
+
+		li.classifai-enable-feature {
+			width: 100%;
+			list-style: none;
+			margin-top: 14px;
+			display: block;
+			clear: both;
+		}
+
+		.classifai-feature-box-divider {
+			border: 1px solid #ddd;
+		}
+
+		label.classifai-feature-text {
+			color: #707070;
+			font-size: 14px;
+		}
+
+		input.classifai-feature-checkbox {
+			float: right;
+		}
+
+		.classifai-setup-footer {
+			text-align: right;
+		}
+
+		a.classifai-setup-skip-link {
+			text-decoration: none;
+			color: #000;
+			font-weight: 400;
+		}
+
+		.classifai-setup-footer__right {
+			margin-left: 40px;
+		}
+
+		@media screen and (max-width: 767px) {
+			.classifai-step1-content {
+				max-width: 100%;
+				margin-top: 20px;
+			}
+
+			h1.classifai-setup-title {
+				text-align: center;
+			}
+		}
 	}
 }
