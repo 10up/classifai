@@ -80,6 +80,24 @@ use function Classifai\get_post_types_for_language_settings;
 					</ul>
 				</div>
 			</div>
+			<div class="classifai-feature-box-divider"></div>
+
+			<div class="classifai-feature-box">
+				<div class="classifai-feature-box-title">
+					<?php esc_html_e( 'Recommended Content', 'classifai' ); ?>
+				</div>
+				<div class="classifai-features">
+					<ul>
+						<li class="classifai-enable-feature">
+							<label class="classifai-feature-text">
+								<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
+							</label>
+							<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[recommended_content]" value="yes">
+						</li>
+					</ul>
+				</div>
+			</div>
+
 			<div class="classifai-setup-footer">
 				<span class="classifai-setup-footer__left">
 					<a href="<?php echo esc_url( admin_url() ); ?>" class="classifai-setup-skip-link">
