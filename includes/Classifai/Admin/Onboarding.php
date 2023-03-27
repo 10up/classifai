@@ -29,7 +29,7 @@ class Onboarding {
 	 * Renders the ClassifAI setup page.
 	 */
 	public function render_setup_page() {
-		$current_step     = isset( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : '1';
+		$current_step     = isset( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$onboarding_steps = array(
 			'1' => array(
 				'step'  => __( '1', 'classifai' ),
@@ -106,11 +106,11 @@ class Onboarding {
 	 * @return void
 	 */
 	public function handle_step_one_submission() {
-		if ( ! isset( $_POST['classifai-setup-step-one-nonce'] ) || ! wp_verify_nonce( $_POST['classifai-setup-step-one-nonce'], 'classifai-setup-step-one-action' ) ) {
+		if ( ! isset( $_POST['classifai-setup-step-one-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-one-nonce'] ) ), 'classifai-setup-step-one-action' ) ) {
 			return;
 		}
 
-		$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array();
+		$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
 		$onboarding_options['enabled_features'] = $enabled_features;
@@ -120,6 +120,7 @@ class Onboarding {
 
 		// Redirect to next setup step.
 		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=2' ) );
+		exit();
 	}
 
 	/**

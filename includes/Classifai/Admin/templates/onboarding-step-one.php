@@ -14,7 +14,7 @@ use function Classifai\get_post_types_for_language_settings;
 <div class="classifai-setup__content__row">
 	<div class="classifai-setup__content__row__column">
 		<div class="classifai-setup-image">
-			<img src="https://via.placeholder.com/334x334" alt="<?php esc_html_e( 'ClassifAI Setup', 'classifai' ); ?>" />
+			<img src="https://via.placeholder.com/334x334" alt="<?php esc_attr_e( 'ClassifAI Setup', 'classifai' ); ?>" />
 		</div>
 	</div>
 	<div class="classifai-setup__content__row__column">
@@ -30,8 +30,8 @@ use function Classifai\get_post_types_for_language_settings;
 				<div class="classifai-features">
 					<ul>
 						<?php
-						$post_types = get_post_types_for_language_settings();
-						foreach ( $post_types as $post_type ) {
+						$types = get_post_types_for_language_settings();
+						foreach ( $types as $post_type ) {
 							?>
 							<li class="classifai-enable-feature">
 								<label class="classifai-feature-text">
