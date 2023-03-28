@@ -104,7 +104,7 @@ use function Classifai\get_post_types_for_language_settings;
 					</a>
 				</span>
 				<span class="classifai-setup-footer__right">
-					<input class="classifai-setup-step" type="hidden" value="1" />
+					<input name="classifai-setup-step" type="hidden" value="1" />
 					<?php wp_nonce_field( 'classifai-setup-step-one-action', 'classifai-setup-step-one-nonce' ); ?>
 					<input class="classifai-button" type="submit" value="<?php esc_attr_e( 'Start Setup', 'classifai' ); ?>" />
 				</span>

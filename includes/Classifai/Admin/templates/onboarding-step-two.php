@@ -47,7 +47,7 @@ settings_errors( 'registration' );
 							</a>
 						</span>
 						<span class="classifai-setup-footer__right">
-							<input class="classifai-setup-step" type="hidden" value="2" />
+							<input name="classifai-setup-step" type="hidden" value="2" />
 							<?php wp_nonce_field( 'classifai-setup-step-two-action', 'classifai-setup-step-two-nonce' ); ?>
 							<input class="classifai-button" type="submit" value="<?php esc_attr_e( 'Register', 'classifai' ); ?>" />
 						</span>
