@@ -110,41 +110,7 @@ class ChatGPT extends Provider {
 	public function setup_fields_sections() {
 		$default_settings = $this->get_default_settings();
 
-		// Add the settings section.
-		add_settings_section(
-			$this->get_option_name(),
-			$this->provider_service_name,
-			function() {
-				printf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
-					),
-					esc_url( 'https://platform.openai.com/signup' )
-				);
-			},
-			$this->get_option_name()
-		);
-
-		// Add all our settings.
-		add_settings_field(
-			'api-key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-			]
-		);
+		$this->setup_api_fields( $default_settings['api_key'] );
 
 		add_settings_field(
 			'enable-excerpt',
