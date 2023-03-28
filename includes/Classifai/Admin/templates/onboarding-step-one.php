@@ -7,10 +7,6 @@
 
 use function Classifai\get_post_types_for_language_settings;
 ?>
-
-<h1 class="classifai-setup-heading">
-	<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
-</h1>
 <div class="classifai-setup__content__row">
 	<div class="classifai-setup__content__row__column">
 		<div class="classifai-setup-image">
@@ -31,13 +27,16 @@ use function Classifai\get_post_types_for_language_settings;
 					<ul>
 						<?php
 						$types = get_post_types_for_language_settings();
-						foreach ( $types as $post_type ) {
+						foreach ( $types as $type ) {
 							?>
 							<li class="classifai-enable-feature">
 								<label class="classifai-feature-text">
-									<?php printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $post_type->label ) ); ?>
+									<?php
+									// translators: %s is the post type label.
+									printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $type->label ) );
+									?>
 								</label>
-								<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[language][classify][<?php echo esc_attr( $post_type->name ); ?>]" value="yes">
+								<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[language][classify][<?php echo esc_attr( $type->name ); ?>]" value="yes">
 							</li>
 							<?php
 						}

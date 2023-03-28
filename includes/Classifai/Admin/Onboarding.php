@@ -9,6 +9,7 @@ class Onboarding {
 	public function __construct() {
 		add_action( 'admin_menu', [ $this, 'register_setup_page' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
+		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
 	}
 
 	/**
@@ -17,7 +18,7 @@ class Onboarding {
 	public function register_setup_page() {
 		add_submenu_page(
 			null,
-			esc_html__( 'ClassifAI Setup', 'classifai' ),
+			esc_attr__( 'ClassifAI Setup', 'classifai' ),
 			'',
 			'manage_options',
 			'classifai_setup',
@@ -47,7 +48,7 @@ class Onboarding {
 		?>
 		<div class="classifai-content classifai-setup-page">
 			<?php
-			include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
+			include_once 'templates/classifai-header.php';
 			?>
 			<div class="classifai-setup">
 				<div class="classifai-setup__header">
@@ -75,15 +76,19 @@ class Onboarding {
 						</div>
 					</div>
 				</div>
-
 				<div class="wrap classifai-setup__content">
+					<h1 class="classifai-setup-heading">
+						<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
+					</h1>
 					<?php
+					// Load the appropriate step.
 					switch ( $current_step ) {
 						case '1':
-							require_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/onboarding-step-one.php';
+							require_once 'templates/onboarding-step-one.php';
 							break;
 
 						case '2':
+							require_once 'templates/onboarding-step-two.php';
 							break;
 
 						case '3':
@@ -113,6 +118,7 @@ class Onboarding {
 		$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+
 		$onboarding_options['enabled_features'] = $enabled_features;
 
 		// Save the options to use it later steps.
@@ -120,6 +126,32 @@ class Onboarding {
 
 		// Redirect to next setup step.
 		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=2' ) );
+		exit();
+	}
+
+	/**
+	 * Handle the submission of the Register ClassifAI step of the onboarding wizard.
+	 *
+	 * @return void
+	 */
+	public function handle_step_two_submission() {
+		if ( ! isset( $_POST['classifai-setup-step-two-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-two-nonce'] ) ), 'classifai-setup-step-two-action' ) ) {
+			return;
+		}
+
+		$classifai_settings = isset( $_POST['classifai_settings'] ) ? $this->classifai_sanitize( $_POST['classifai_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		// Save the options to use it later steps.
+		update_option( 'classifai_settings', $classifai_settings );
+
+		$setting_errors = get_settings_errors( 'registration' );
+		if ( ! empty( $setting_errors ) ) {
+			// Stay on same setup step and display error.
+			return;
+		}
+
+		// Redirect to next setup step.
+		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3' ) );
 		exit();
 	}
 

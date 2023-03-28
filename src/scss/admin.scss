@@ -253,6 +253,11 @@ input.classifai-button {
 			max-width: 400px;
 		}
 
+		.classifai-step2-content{
+			max-width: 350px;
+			margin: 0 auto;
+		}
+
 		.classifai-feature-box {
 			margin: 40px 0;
 		}
@@ -305,6 +310,30 @@ input.classifai-button {
 
 			h1.classifai-setup-title {
 				text-align: center;
+			}
+		}
+
+		.classifai-setup-form {
+			.classifai-setup-form-field{
+				margin-top: 40px;
+			}
+
+			label {
+				display: block;
+				font-weight: 700;
+				text-transform: uppercase;
+				margin-bottom: 20px;
+			}
+
+			input[type="text"],
+			input[type="password"] {
+				width: 100%;
+				height: 38px;
+				font-size: 14px;
+			}
+
+			.classifai-setup-footer{
+				margin-top: 40px;
 			}
 		}
 	}
