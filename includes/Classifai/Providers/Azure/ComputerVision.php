@@ -13,6 +13,7 @@ use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\attachment_is_pdf;
+use function Classifai\get_asset_info;
 
 class ComputerVision extends Provider {
 
@@ -166,11 +167,8 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			[
-				'wp-block-editor',
-				'wp-blocks',
-			],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'editor-ocr', 'dependencies' ),
+			get_asset_info( 'editor-ocr', 'version' ),
 			true
 		);
 	}

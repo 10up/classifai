@@ -7,6 +7,7 @@ namespace Classifai\Services;
 
 use Classifai\Taxonomy\ImageTagTaxonomy;
 use function Classifai\attachment_is_pdf;
+use function Classifai\get_asset_info;
 
 class ImageProcessing extends Service {
 
@@ -39,7 +40,14 @@ class ImageProcessing extends Service {
 	 * Enqueue the script for the media modal.
 	 */
 	public function enqueue_media_scripts() {
-		wp_enqueue_script( 'classifai-media-script', CLASSIFAI_PLUGIN_URL . '/dist/media.js', array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ), CLASSIFAI_PLUGIN_VERSION, true );
+		wp_enqueue_script(
+			'classifai-media-script',
+			CLASSIFAI_PLUGIN_URL . '/dist/media.js',
+			get_asset_info( 'media', 'dependencies' ),
+			get_asset_info( 'media', 'version' ),
+			true
+		);
+
 		wp_add_inline_script(
 			'classifai-media-script',
 			'const classifaiMediaVars = ' . wp_json_encode(
