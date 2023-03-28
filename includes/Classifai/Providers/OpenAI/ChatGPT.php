@@ -204,8 +204,8 @@ class ChatGPT extends Provider {
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
-			$this->sanitize_api_key_settings( $new_settings, $settings ),
-			$new_settings
+			$new_settings,
+			$this->sanitize_api_key_settings( $new_settings, $settings )
 		);
 
 		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
