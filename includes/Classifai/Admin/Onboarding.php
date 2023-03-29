@@ -172,22 +172,38 @@ class Onboarding {
 			return;
 		}
 
-		// Bail if no provider
+		// Bail if no provider provided.
 		if ( empty( $_POST['classifai-setup-provider'] ) ) {
 			return;
 		}
 
+		$providers       = $this->get_setup_providers();
 		$provider_option = sanitize_text_field( wp_unslash( $_POST['classifai-setup-provider'] ) );
+		$provider        = $providers[ $provider_option ];
 		$option_name     = 'classifai_' . $provider_option;
+
+		if ( empty( $provider ) ) {
+			return;
+		}
 
 		$form_data = isset( $_POST[ $option_name ] ) ? $this->classifai_sanitize( $_POST[ $option_name ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		$settings = $this->get_provider_settings( $provider_option );
+		$settings = \Classifai\get_plugin_settings( $provider['service'], $provider['provider'] );
 
 		// Update settings.
 		switch ( $provider_option ) {
 			case 'watson_nlu':
 				$settings['credentials'] = $form_data['credentials'];
+				break;
+
+			case 'openai_chatgpt':
+				$settings['api_key'] = $form_data['api_key'];
+				break;
+
+			case 'computer_vision':
+			case 'personalizer':
+				$settings['url']     = $form_data['url'];
+				$settings['api_key'] = $form_data['api_key'];
 				break;
 
 			default:
@@ -303,19 +319,19 @@ class Onboarding {
 			),
 			'openai_chatgpt'  => array(
 				'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
-				'fields'   => array( 'api_key' ),
+				'fields'   => array( 'api-key' ),
 				'service'  => 'language_processing',
 				'provider' => 'ChatGPT',
 			),
 			'computer_vision' => array(
 				'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
-				'fields'   => array(),
+				'fields'   => array( 'url', 'api-key' ),
 				'service'  => 'image_processing',
 				'provider' => 'Computer Vision',
 			),
 			'personalizer' => array(
 				'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
-				'fields'   => array(),
+				'fields'   => array( 'url', 'api-key' ),
 				'service'  => 'personalizer',
 				'provider' => 'Personalizer',
 			),
@@ -323,29 +339,32 @@ class Onboarding {
 	}
 
 	/**
-	 * Returns the ClassifAI plugin's stored settings by provider option name.
+	 * Get list of providers enabled for setup in step 1.
+	 * This is a subset of the providers returned by get_setup_providers().
 	 *
-	 * @param string $option_name The provider option name to get settings from.
-	 *
-	 * @return array The array of ClassifAi settings.
+	 * @return array Array of enabled providers.
 	 */
-	public function get_provider_settings( $option_name ) {
-		$services = Plugin::$instance->services;
-		if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
-			return [];
-		}
+	public static function get_enabled_providers() {
+		$providers          = self::get_setup_providers();
+		$enabled_providers  = array();
+		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+		$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
 
-		/** @var ServicesManager $service_manager Instance of the services manager class. */
-		$service_manager = $services['service_manager'];
-
-		foreach ( $service_manager->service_classes as $service ) {
-			foreach ( $service->provider_classes as $provider_class ) {
-				if ( $provider_class->option_name === $option_name ) {
-					return $provider_class->get_settings();
+		foreach ( $enabled_features as $feature => $value ) {
+			if ( 'language' === $feature ) {
+				if ( ! empty( $value['classify'] ) ) {
+					$enabled_providers['watson_nlu'] = $providers['watson_nlu'];
 				}
+				if ( ! empty( $value['excerpt_generation'] ) ) {
+					$enabled_providers['openai_chatgpt'] = $providers['openai_chatgpt'];
+				}
+			} elseif ( 'images' === $feature ) {
+				$enabled_providers['computer_vision'] = $providers['computer_vision'];
+			} elseif ( 'recommended_content' === $feature ) {
+				$enabled_providers['personalizer'] = $providers['personalizer'];
 			}
 		}
 
-		return [];
+		return $enabled_providers;
 	}
 }

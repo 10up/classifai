@@ -5,29 +5,11 @@
  * @package ClassifAI
  */
 
-$base_url           = admin_url( 'admin.php?page=classifai_setup&step=3' );
-$onboarding_options = get_option( 'classifai_onboarding_options', array() );
-$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
-$enabled_providers  = array();
-$providers          = Classifai\Admin\Onboarding::get_setup_providers();
-
-if ( isset( $enabled_features['language'] ) && ! empty( $enabled_features['language']['classify'] ) ) {
-	$enabled_providers[] = 'watson_nlu';
-}
-
-if ( isset( $enabled_features['language'] ) && ! empty( $enabled_features['language']['excerpt_generation'] ) ) {
-	$enabled_providers[] = 'openai_chatgpt';
-}
-
-if ( ! empty( $enabled_features['images'] ) ) {
-	$enabled_providers[] = 'computer_vision';
-}
-
-if ( ! empty( $enabled_features['recommended_content'] ) ) {
-	$enabled_providers[] = 'personalizer';
-}
-$current_provider = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : $enabled_providers[0]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$next_provider    = $enabled_providers[ array_search( $current_provider, $enabled_providers, true ) + 1 ];
+$base_url          = admin_url( 'admin.php?page=classifai_setup&step=3' );
+$enabled_providers = Classifai\Admin\Onboarding::get_enabled_providers();
+$provider_keys     = array_keys( $enabled_providers );
+$current_provider  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : $provider_keys[0]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$next_provider     = $provider_keys[ array_search( $current_provider, $provider_keys, true ) + 1 ];
 
 // Display any errors.
 settings_errors();
@@ -41,12 +23,12 @@ settings_errors();
 			<div class="classifai-tabs tabs-center">
 				<?php
 
-				foreach ( $enabled_providers as $provider ) {
-					$provider_url = add_query_arg( 'tab', $provider, $base_url );
-					$is_active    = ( $current_provider === $provider ) ? 'active' : '';
+				foreach ( $enabled_providers as $key => $provider ) {
+					$provider_url = add_query_arg( 'tab', $key, $base_url );
+					$is_active    = ( $current_provider === $key ) ? 'active' : '';
 					?>
 					<a href="<?php echo esc_url( $provider_url ); ?>" class="tab <?php echo esc_attr( $is_active ); ?>">
-						<?php echo esc_html( $providers[ $provider ]['title'] ); ?>
+						<?php echo esc_html( $provider['title'] ); ?>
 					</a>
 					<?php
 				}
@@ -55,14 +37,15 @@ settings_errors();
 			<div class="classifai-setup-form">
 				<form method="POST" action="">
 					<?php
-					// Load the appropriate step.
-					switch ( $current_provider ) {
-						case 'watson_nlu':
-							Classifai\Admin\Onboarding::render_classifai_setup_settings( 'classifai_watson_nlu', array( 'url', 'username', 'password', 'toggle' ) );
-							break;
-
-						default:
-							break;
+					// Load the appropriate provider settings.
+					if ( ! empty( $current_provider ) && ! empty( $enabled_providers ) ) {
+						Classifai\Admin\Onboarding::render_classifai_setup_settings( 'classifai_' . $current_provider, $enabled_providers[ $current_provider ]['fields'] );
+					} else {
+						?>
+						<p class="classifai-setup-error">
+							<?php esc_html_e( 'No providers are enabled.', 'classifai' ); ?>
+						</p>
+						<?php
 					}
 					?>
 					<div class="classifai-setup-footer">
