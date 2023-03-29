@@ -11,6 +11,7 @@ class Onboarding {
 		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_three_submission' ] );
+		add_action( 'admin_init', [ $this, 'prevent_direct_step_visits' ] );
 		add_action( 'admin_post_classifai_skip_step', [ $this, 'handle_skip_setup_step' ] );
 	}
 
@@ -32,7 +33,7 @@ class Onboarding {
 	 * Renders the ClassifAI setup page.
 	 */
 	public function render_setup_page() {
-		$current_step     = isset( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$current_step = isset( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$onboarding_steps = array(
 			'1' => array(
@@ -388,6 +389,15 @@ class Onboarding {
 	}
 
 	/**
+	 * Get onboarding options.
+	 *
+	 * @return array The onboarding options.
+	 */
+	public function get_onboarding_options() {
+		return get_option( 'classifai_onboarding_options', array() );
+	}
+
+	/**
 	 * Update onboarding options.
 	 *
 	 * @param array $options The options to update.
@@ -476,5 +486,24 @@ class Onboarding {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Prevents users from accessing the onboarding wizard steps directly.
+	 */
+	public function prevent_direct_step_visits() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) || ! isset( $_GET['step'] ) || 'classifai_setup' !== sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$step               = absint( wp_unslash( $_GET['step'] ) );
+		$onboarding_options = $this->get_onboarding_options();
+		$step_completed     = isset( $onboarding_options['step_completed'] ) ? absint( $onboarding_options['step_completed'] ) : 0;
+
+		if ( ( $step_completed + 1 ) < $step ) {
+			wp_die( esc_html__( 'You are not allowed to access this page.', 'classifai' ) );
+		}
 	}
 }
