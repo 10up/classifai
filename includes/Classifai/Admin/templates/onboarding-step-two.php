@@ -12,12 +12,12 @@ $license_key     = $service_manager->get_settings( 'license_key' );
 // Display any errors.
 settings_errors( 'registration' );
 ?>
+<h1 class="classifai-setup-heading">
+	<?php esc_html_e( 'Register ClassifAI', 'classifai' ); ?>
+</h1>
 <div class="classifai-setup__content__row">
 	<div class="classifai-setup__content__row__column">
 		<div class="classifai-step2-content">
-			<h1 class="classifai-setup-title center">
-				<?php esc_html_e( 'Register ClassifAI', 'classifai' ); ?>
-			</h1>
 			<div class="classifai-setup-form">
 				<form method="POST" action="">
 					<div class="classifai-setup-form-field">
@@ -55,6 +55,5 @@ settings_errors( 'registration' );
 				</form>
 			</div>
 		</div>
-		</form>
 	</div>
 </div>

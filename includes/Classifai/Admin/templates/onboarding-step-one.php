@@ -9,7 +9,14 @@ use function Classifai\get_post_types_for_language_settings;
 
 $onboarding_options = get_option( 'classifai_onboarding_options', array() );
 $enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
+
+// Display any errors.
+settings_errors( 'classifai-setup' );
 ?>
+<h1 class="classifai-setup-heading">
+	<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
+</h1>
+<div class="classifai-spacer"></div>
 <div class="classifai-setup__content__row">
 	<div class="classifai-setup__content__row__column">
 		<div class="classifai-setup-image">

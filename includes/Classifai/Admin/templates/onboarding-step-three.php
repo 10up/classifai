@@ -10,16 +10,17 @@ $enabled_providers = Classifai\Admin\Onboarding::get_enabled_providers();
 $provider_keys     = array_keys( $enabled_providers );
 $current_provider  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : $provider_keys[0]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $next_provider     = $provider_keys[ array_search( $current_provider, $provider_keys, true ) + 1 ];
-
+?>
+<h1 class="classifai-setup-heading">
+	<?php esc_html_e( 'Set up AI Providers', 'classifai' ); ?>
+</h1>
+<?php
 // Display any errors.
 settings_errors();
 ?>
 <div class="classifai-setup__content__row">
 	<div class="classifai-setup__content__row__column">
 		<div class="classifai-step3-content">
-			<h1 class="classifai-setup-title center">
-				<?php esc_html_e( 'Set up AI Services', 'classifai' ); ?>
-			</h1>
 			<div class="classifai-tabs tabs-center">
 				<?php
 
@@ -43,7 +44,7 @@ settings_errors();
 					} else {
 						?>
 						<p class="classifai-setup-error">
-							<?php esc_html_e( 'No providers are enabled.', 'classifai' ); ?>
+							<?php esc_html_e( 'No features are enabled.', 'classifai' ); ?>
 						</p>
 						<?php
 					}
