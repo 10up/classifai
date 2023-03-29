@@ -57,7 +57,7 @@ class Notifications {
 					<h3 class="classifai-activation-message">
 						<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
 					</h3>
-					<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_settings' ) ); ?>">
+					<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
 						<?php esc_html_e( 'Start setup', 'classifai' ); ?>
 					</a>
 				</div>
