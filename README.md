@@ -14,7 +14,8 @@
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up NLU Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up ChatGPT Language Processing](#set-up-language-processing-via-openai)
-* [Set Up Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up DALL·E Image Processing](#set-up-image-processing-via-openai)
 * [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
@@ -31,6 +32,7 @@
 * Automatically generate alt text and image tags for images
 * Automatically scan images and PDF files for embedded text and save for use in WordPress
 * [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/computervision/3.1/generate-thumbnail/generate-thumbnail) around a region of interest identified by Computer Vision
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
@@ -38,17 +40,17 @@
 | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
 
-| Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging |
-| :-: | :-: | :-: |
-| ![Screenshot of ClassifAI alt-text](assets/img/screenshot-3.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](assets/img/screenshot-4.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](assets/img/screenshot-5.png "Example of an image with Azure Image Tagging.") |
+| Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging | Image Processing - Generate images |
+| :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI alt-text](assets/img/screenshot-3.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](assets/img/screenshot-4.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](assets/img/screenshot-5.png "Example of an image with Azure Image Tagging.") | ![Screenshot of ClassifAI image generation](assets/img/screenshot-8.png "Example of generating an image using OpenAI.") |
 
 ## Requirements
 
 * PHP 7.4+
 * [WordPress](http://wordpress.org) 5.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT Language Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
-* To utilize the Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the ChatGPT Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the Computer Vision Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
 
@@ -56,9 +58,9 @@ Note that there is no cost to using ClassifAI itself. Both IBM Watson and Micros
 
 The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
-The service that powers ClassifAI's ChatGPT Language Processing, OpenAI's ChatGPT, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
+The service that powers ClassifAI's ChatGPT Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
-The service that powers ClassifAI's Image Processing, Microsoft Azure's Computer Vision, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+The service that powers ClassifAI's Computer Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 The service that powers ClassifAI's Recommended Content, Microsoft Azure's Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
@@ -227,6 +229,34 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
+
+## Set Up Image Processing (via OpenAI)
+
+#### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+#### 2. Configure OpenAI API Keys under ClassifAI > Image Processing > OpenAI
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+#### 3. Enable specific Image Processing features
+
+* Choose to add the ability to generate images.
+* If image generation is configured, set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+#### 4. Trigger the media flow within a content item
+
+* Create a new content item
+* Insert an Image block or choose to add a featured image and choose a new item from the Media Library
+* In the media modal that opens, click on the `Generate image` tab
+* Enter in a prompt to generate an image
+* Once images are generated, choose one or more images to import into your media library
+* Choose one image to insert into the content
 
 ## Set Up Recommended Content (via Microsoft Azure Personalizer)
 

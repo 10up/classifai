@@ -14,6 +14,8 @@ use WP_Error;
 
 class ChatGPT extends Provider {
 
+	use \Classifai\Providers\OpenAI\OpenAI;
+
 	/**
 	 * OpenAI ChatGPT URL
 	 *
@@ -108,41 +110,7 @@ class ChatGPT extends Provider {
 	public function setup_fields_sections() {
 		$default_settings = $this->get_default_settings();
 
-		// Add the settings section.
-		add_settings_section(
-			$this->get_option_name(),
-			$this->provider_service_name,
-			function() {
-				printf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
-					),
-					esc_url( 'https://platform.openai.com/signup' )
-				);
-			},
-			$this->get_option_name()
-		);
-
-		// Add all our settings.
-		add_settings_field(
-			'api-key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-			]
-		);
+		$this->setup_api_fields( $default_settings['api_key'] );
 
 		add_settings_field(
 			'enable-excerpt',
@@ -200,32 +168,11 @@ class ChatGPT extends Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings  = $this->get_settings();
-		$authenticated = $this->authenticate_credentials( $settings['api_key'] ?? '' );
-
-		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
-			$error_message                 = $authenticated->get_error_message();
-
-			// For response code 429, credentials are valid but rate limit is reached.
-			if ( 429 === (int) $authenticated->get_error_code() ) {
-				$new_settings['authenticated'] = true;
-				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
-			} else {
-				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
-			}
-
-			add_settings_error(
-				'api_key',
-				'classifai-auth',
-				$error_message,
-				'error'
-			);
-		} else {
-			$new_settings['authenticated'] = true;
-		}
-
-		$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] ?? '' );
+		$new_settings = $this->get_settings();
+		$new_settings = array_merge(
+			$new_settings,
+			$this->sanitize_api_key_settings( $new_settings, $settings )
+		);
 
 		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
 			$new_settings['enable_excerpt'] = 'no';
@@ -244,41 +191,6 @@ class ChatGPT extends Provider {
 		}
 
 		return $new_settings;
-	}
-
-	/**
-	 * Authenticate our credentials.
-	 *
-	 * @param string $api_key Api Key.
-	 *
-	 * @return bool|WP_Error
-	 */
-	protected function authenticate_credentials( string $api_key = '' ) {
-		// Check that we have credentials before hitting the API.
-		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your OpenAI API key.', 'classifai' ) );
-		}
-
-		// Make request to ensure credentials work.
-		$request  = new APIRequest( $api_key );
-		$response = $request->post(
-			$this->chatgpt_url,
-			[
-				'body' => wp_json_encode(
-					[
-						'model'    => $this->chatgpt_model,
-						'messages' => [
-							[
-								'role'    => 'user',
-								'content' => 'Hi',
-							],
-						],
-					]
-				),
-			]
-		);
-
-		return ! is_wp_error( $response ) ? true : $response;
 	}
 
 	/**
@@ -325,26 +237,6 @@ class ChatGPT extends Provider {
 			__( 'Excerpt length', 'classifai' )   => $settings['length'] ?? 55,
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
-	}
-
-	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param string $transient Transient that holds our data.
-	 * @return string
-	 */
-	private function get_formatted_latest_response( string $transient = '' ) {
-		$data = get_transient( $transient );
-
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**

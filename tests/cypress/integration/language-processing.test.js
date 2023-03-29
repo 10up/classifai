@@ -158,7 +158,7 @@ describe('Language processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_excerpt' ).check();
-		cy.get( '#openai_chatgpt_roles_editor' ).check();
+		cy.get( '#openai_chatgpt_roles_administrator' ).check();
 		cy.get( '#length' ).clear().type( 35 );
 		cy.get( '#submit' ).click();
 	} );
@@ -250,14 +250,14 @@ describe('Language processing Tests', () => {
 	it( 'Can disable excerpt generation feature by role', () => {
 		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
 
-		// Disable editor role.
+		// Disable admin role.
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#openai_chatgpt_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Create test post.
 		cy.createPost( {
-			title: 'Test ChatGPT post editor disabled',
+			title: 'Test ChatGPT post admin disabled',
 			content: 'Test GPT content',
 		} );
 
