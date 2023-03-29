@@ -2,9 +2,6 @@
 
 namespace Classifai\Admin;
 
-use Classifai\Plugin;
-use Classifai\Services\ServicesManager;
-
 class Onboarding {
 	/**
 	 * Register the actions needed.
@@ -35,6 +32,7 @@ class Onboarding {
 	 */
 	public function render_setup_page() {
 		$current_step     = isset( $_GET['step'] ) ? sanitize_text_field( wp_unslash( $_GET['step'] ) ) : '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
 		$onboarding_steps = array(
 			'1' => array(
 				'step'  => __( '1', 'classifai' ),
@@ -60,13 +58,21 @@ class Onboarding {
 						<div class="classifai-setup__steps">
 							<?php
 							foreach ( $onboarding_steps as $key => $step ) {
+								$is_active   = ( $current_step === (string) $key ) ? 'is-active' : '';
+								$is_complete = ( $current_step > $key ) ? 'is-complete' : '';
 								?>
-								<div class="classifai-setup__step <?php echo ( $current_step === (string) $key ) ? 'is-active' : ''; ?>">
+								<div class="classifai-setup__step <?php echo esc_attr( $is_active . ' ' . $is_complete ); ?>">
 									<div class="classifai-setup__step__label">
-										<span class="step-count"><?php echo esc_html( $step['step'] ); ?></span>
-										<span class="step-title">
-											<?php echo esc_html( $step['title'] ); ?>
-										</span>
+										<?php if ( $is_complete ) { ?>
+											<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup&step=' . $key ) ); ?>">
+										<?php } ?>
+											<span class="step-count"><?php echo esc_html( $step['step'] ); ?></span>
+											<span class="step-title">
+												<?php echo esc_html( $step['title'] ); ?>
+											</span>
+										<?php if ( $is_complete ) { ?>
+											</a>
+										<?php } ?>
 									</div>
 								</div>
 								<?php
@@ -82,9 +88,6 @@ class Onboarding {
 				</div>
 				<div class="wrap classifai-setup__wrapper">
 					<div class="classifai-setup__content">
-						<h1 class="classifai-setup-heading">
-							<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
-						</h1>
 						<?php
 						// Load the appropriate step.
 						switch ( $current_step ) {
@@ -98,6 +101,10 @@ class Onboarding {
 
 							case '3':
 								require_once 'templates/onboarding-step-three.php';
+								break;
+
+							case '4':
+								require_once 'templates/onboarding-step-four.php';
 								break;
 
 							default:
@@ -124,8 +131,19 @@ class Onboarding {
 
 		$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
+		if ( empty( $enabled_features ) ) {
+			add_settings_error(
+				'classifai-setup',
+				'classifai-step-one-error',
+				esc_html__( 'Please enable at least one feature to set up ClassifAI.', 'classifai' ),
+				'error'
+			);
+			return;
+		}
+
 		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
 
+		$onboarding_options['status']           = 'inprogress';
 		$onboarding_options['enabled_features'] = $enabled_features;
 
 		// Save the options to use it later steps.
@@ -218,6 +236,13 @@ class Onboarding {
 			// Stay on same setup step and display error.
 			return;
 		}
+
+		$onboarding_options   = get_option( 'classifai_onboarding_options', array() );
+		$configured_providers = isset( $onboarding_options['configured_providers'] ) ? $onboarding_options['configured_providers'] : array();
+
+		$onboarding_options['configured_providers'] = array_unique( array_merge( $configured_providers, array( $provider_option ) ) );
+		// Save the options to use it later steps.
+		update_option( 'classifai_onboarding_options', $onboarding_options );
 
 		// Redirect to next setup step. TODO: Manage move to next provider here.
 		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3' ) );
@@ -329,7 +354,7 @@ class Onboarding {
 				'service'  => 'image_processing',
 				'provider' => 'Computer Vision',
 			),
-			'personalizer' => array(
+			'personalizer'    => array(
 				'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
 				'fields'   => array( 'url', 'api-key' ),
 				'service'  => 'personalizer',

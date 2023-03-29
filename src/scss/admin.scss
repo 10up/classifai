@@ -166,8 +166,20 @@ input.classifai-button {
 				justify-content: center;
 			}
 
+			a, a:hover, a:active, a:focus {
+				text-decoration: none;
+    			color: #3c434a;
+			}
+
 			@media screen and (max-width: 480px) {
 				font-size: 14px;
+			}
+		}
+
+		&.is-complete {
+			span.step-count {
+				background: #fb342c;
+				color: #fff;
 			}
 		}
 
@@ -240,7 +252,7 @@ input.classifai-button {
 		h1.classifai-setup-heading {
 			text-align: center;
 			font-size: 22px;
-			margin: 24px 0px 48px 0px;
+			margin: 24px 0px 24px 0px;
 			font-weight: 600;
 		}
 
@@ -413,5 +425,13 @@ input.classifai-button {
 			}
 		}
 
+		p.classifai-setup-error {
+			text-align: center;
+			color: red;
+		}
+
+		.classifai-spacer {
+			padding: 12px 0px;
+		}
 	}
 }
