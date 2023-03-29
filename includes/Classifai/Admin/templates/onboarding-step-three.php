@@ -7,9 +7,8 @@
 
 $base_url          = admin_url( 'admin.php?page=classifai_setup&step=3' );
 $enabled_providers = Classifai\Admin\Onboarding::get_enabled_providers();
-$provider_keys     = array_keys( $enabled_providers );
-$current_provider  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : $provider_keys[0]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$next_provider     = $provider_keys[ array_search( $current_provider, $provider_keys, true ) + 1 ];
+$current_provider  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : array_key_first( $enabled_providers ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$next_provider     = Classifai\Admin\Onboarding::get_next_provider( $current_provider );
 ?>
 <h1 class="classifai-setup-heading">
 	<?php esc_html_e( 'Set up AI Providers', 'classifai' ); ?>
@@ -48,10 +47,15 @@ settings_errors();
 						</p>
 						<?php
 					}
+
+					$skip_url = add_query_arg( 'tab', $next_provider, $base_url );
+					if ( empty( $next_provider ) ) {
+						$skip_url = wp_nonce_url( admin_url( 'admin-post.php?action=classifai_skip_step&step=3' ), 'classifai_skip_step_action', 'classifai_skip_step_nonce' );
+					}
 					?>
 					<div class="classifai-setup-footer">
 						<span class="classifai-setup-footer__left">
-							<a href="<?php echo esc_url( add_query_arg( 'tab', $next_provider, $base_url ) ); ?>" class="classifai-setup-skip-link">
+							<a href="<?php echo esc_url( $skip_url ); ?>" class="classifai-setup-skip-link">
 								<?php esc_html_e( 'Skip for now', 'classifai' ); ?>
 							</a>
 						</span>

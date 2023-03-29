@@ -117,10 +117,10 @@ $configured_providers = isset( $onboarding_options['configured_providers'] ) ? $
 					<div class="classifai-features">
 						<ul>
 							<li class="classifai-enable-feature">
+								<span class="dashicons dashicons-yes-alt"></span>
 								<label class="classifai-feature-text">
 									<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
 								</label>
-								<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[recommended_content]" value="yes">
 							</li>
 						</ul>
 					</div>

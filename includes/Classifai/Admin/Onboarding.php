@@ -11,6 +11,7 @@ class Onboarding {
 		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_three_submission' ] );
+		add_action( 'admin_post_classifai_skip_step', [ $this, 'handle_skip_setup_step' ] );
 	}
 
 	/**
@@ -141,13 +142,14 @@ class Onboarding {
 			return;
 		}
 
-		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
-
-		$onboarding_options['status']           = 'inprogress';
-		$onboarding_options['enabled_features'] = $enabled_features;
+		$onboarding_options = array(
+			'status'           => 'inprogress',
+			'step_completed'   => 1,
+			'enabled_features' => $enabled_features,
+		);
 
 		// Save the options to use it later steps.
-		update_option( 'classifai_onboarding_options', $onboarding_options );
+		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next setup step.
 		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=2' ) );
@@ -174,6 +176,13 @@ class Onboarding {
 			// Stay on same setup step and display error.
 			return;
 		}
+
+		$onboarding_options = array(
+			'step_completed' => 2,
+		);
+
+		// Save the options to use it later steps.
+		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next setup step.
 		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3' ) );
@@ -244,8 +253,23 @@ class Onboarding {
 		// Save the options to use it later steps.
 		update_option( 'classifai_onboarding_options', $onboarding_options );
 
-		// Redirect to next setup step. TODO: Manage move to next provider here.
-		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3' ) );
+		// Redirect to next provider setup step.
+		$next_provider = $this->get_next_provider( $provider_option );
+		if ( ! empty( $next_provider ) ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3&tab=' . $next_provider ) );
+			exit();
+		}
+
+		$onboarding_options = array(
+			'status'         => 'completed',
+			'step_completed' => 3,
+		);
+
+		// Save the options to use it later steps.
+		$this->update_onboarding_options( $onboarding_options );
+
+		// Redirect to next completion step.
+		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=4' ) );
 		exit();
 	}
 
@@ -364,6 +388,46 @@ class Onboarding {
 	}
 
 	/**
+	 * Update onboarding options.
+	 *
+	 * @param array $options The options to update.
+	 */
+	public function update_onboarding_options( $options ) {
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+		$onboarding_options = array_merge( $onboarding_options, $options );
+
+		// Update options.
+		update_option( 'classifai_onboarding_options', $onboarding_options );
+	}
+
+	/**
+	 * Handle skip setup step.
+	 */
+	public function handle_skip_setup_step() {
+		if ( ! empty( $_GET['classifai_skip_step_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['classifai_skip_step_nonce'] ), 'classifai_skip_step_action' ) ) {
+			$step = isset( $_GET['step'] ) ? absint( $_GET['step'] ) : 1;
+
+			$onboarding_options = array(
+				'step_completed' => $step,
+			);
+			if ( 3 === $step ) {
+				$onboarding_options['status'] = 'completed';
+			}
+			$this->update_onboarding_options( $onboarding_options );
+
+			// Redirect to next step.
+			wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=' . ( $step + 1 ) ) );
+			exit();
+		} else {
+			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
+		}
+	}
+
+	/**
 	 * Get list of providers enabled for setup in step 1.
 	 * This is a subset of the providers returned by get_setup_providers().
 	 *
@@ -391,5 +455,26 @@ class Onboarding {
 		}
 
 		return $enabled_providers;
+	}
+
+	/**
+	 * Get next provider to setup.
+	 *
+	 * @param string $current_provider Current provider.
+	 * @return string|bool Next provider to setup or false if none.
+	 */
+	public static function get_next_provider( $current_provider ) {
+		$enabled_providers = self::get_enabled_providers();
+		$keys              = array_keys( $enabled_providers );
+		$index             = array_search( $current_provider, $keys, true );
+		if ( false === $index ) {
+			return false;
+		}
+
+		if ( isset( $keys[ $index + 1 ] ) ) {
+			return $keys[ $index + 1 ];
+		}
+
+		return false;
 	}
 }

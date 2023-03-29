@@ -42,7 +42,7 @@ settings_errors( 'registration' );
 
 					<div class="classifai-setup-footer">
 						<span class="classifai-setup-footer__left">
-							<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup&step=3' ) ); ?>" class="classifai-setup-skip-link">
+							<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_skip_step&step=2' ), 'classifai_skip_step_action', 'classifai_skip_step_nonce' ) ); ?>" class="classifai-setup-skip-link">
 								<?php esc_html_e( 'Skip for now', 'classifai' ); ?>
 							</a>
 						</span>
