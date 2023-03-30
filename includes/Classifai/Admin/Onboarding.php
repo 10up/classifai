@@ -217,18 +217,42 @@ class Onboarding {
 		$form_data = isset( $_POST[ $option_name ] ) ? $this->classifai_sanitize( $_POST[ $option_name ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$settings = \Classifai\get_plugin_settings( $provider['service'], $provider['provider'] );
+		$options  = $this->get_onboarding_options();
+		$features = isset( $options['enabled_features'] ) ? $options['enabled_features'] : array();
 
 		// Update settings.
 		switch ( $provider_option ) {
 			case 'watson_nlu':
 				$settings['credentials'] = $form_data['credentials'];
+				if ( isset( $features['language']['classify'] ) ) {
+					$settings['post_types'] = array();
+					foreach ( $features['language']['classify'] as $enabled_type => $value ) {
+						$settings['post_types'][ $enabled_type ] = '1';
+					}
+				}
 				break;
 
 			case 'openai_chatgpt':
+				if ( isset( $features['language']['excerpt_generation'] ) ) {
+					$settings['enable_excerpt'] = '1';
+				}
 				$settings['api_key'] = $form_data['api_key'];
 				break;
 
 			case 'computer_vision':
+				$settings['url']     = $form_data['url'];
+				$settings['api_key'] = $form_data['api_key'];
+
+				$settings['enable_image_tagging']  = isset( $features['images']['image_tags'] ) ? 1 : 'no';
+				$settings['enable_smart_cropping'] = isset( $features['images']['image_crop'] ) ? 1 : 'no';
+				$settings['enable_ocr']            = isset( $features['images']['image_ocr'] ) ? 1 : 'no';
+				$settings['enable_image_captions'] = array(
+					'alt'         => isset( $features['images']['image_captions'] ) ? 'alt' : 0,
+					'caption'     => 0,
+					'description' => 0,
+				);
+				break;
+
 			case 'personalizer':
 				$settings['url']     = $form_data['url'];
 				$settings['api_key'] = $form_data['api_key'];
