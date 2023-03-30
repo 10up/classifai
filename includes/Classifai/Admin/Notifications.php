@@ -48,6 +48,11 @@ class Notifications {
 
 		$needs_setup = get_transient( 'classifai_activation_notice' );
 		if ( $needs_setup ) {
+			$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+			if ( isset( $onboarding_options['status'] ) && 'completed' === $onboarding_options['status'] ) {
+				delete_transient( 'classifai_activation_notice' );
+				return;
+			}
 			?>
 			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
 				<div id="classifai-activation-notice">
