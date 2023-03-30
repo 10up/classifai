@@ -72,6 +72,7 @@ body.admin-color-sunrise{
 
 a.classifai-button,
 input.classifai-button {
+	font-size: 14px;
 	padding: 8px 16px;
 	background: var( --classifai-admin-theme-color );
 	color: #fff;
@@ -156,7 +157,7 @@ input.classifai-button {
 
 	.classifai-header-layout {
 		justify-content: space-between;
-		padding: 24px;
+		padding: 18px;
 		display: flex;
 		align-items: center;
 	}
@@ -165,6 +166,61 @@ input.classifai-button {
 		line-height: 0;
 		img {
 			max-width: 180px;
+		}
+	}
+
+	#classifai-header-controls {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+
+		.header-control-item {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			position: relative;
+			outline: none;
+			cursor: pointer;
+			margin-left: 24px;
+		}
+
+		a.classifai-help-links {
+			text-decoration: none;
+			color: #757575;
+			text-align: center;
+
+			&[aria-expanded="true"] {
+				color: var( --classifai-admin-theme-color );
+			}
+
+			&:hover {
+				color: var( --classifai-admin-theme-color );
+			}
+
+			span.control-item-text {
+				display: block;
+			}
+		}
+	}
+
+	.tippy-content {
+		padding: 0;
+	}
+
+	.classifai-help-menu{
+		display: block;
+		width: 200px;
+
+		&__menu-item {
+			display: block;
+			text-decoration: none;
+			color: #757575;
+			padding: 8px 12px;
+
+			&:hover {
+				color: var( --classifai-admin-theme-color );
+			}
 		}
 	}
 }
@@ -324,7 +380,7 @@ input.classifai-button {
 		}
 
 		.classifai-step2-content{
-			max-width: 350px;
+			max-width: 480px;
 			margin: 0 auto;
 		}
 
@@ -346,9 +402,6 @@ input.classifai-button {
 
 			span.dashicons.dashicons-yes-alt {
 				color: #48BE1E;
-				width: 24px;
-				height: 24px;
-				font-size: 24px;
 			}
 		}
 
@@ -422,6 +475,8 @@ input.classifai-button {
 		}
 
 		.classifai-step3-content {
+			margin: 0 auto;
+
 			.classifai-setup-title {
 				text-align: center;
 				margin-bottom: 12px;
@@ -434,9 +489,7 @@ input.classifai-button {
 		}
 
 		.classifai-tabs {
-			display: table;
-			border-collapse: separate;
-			table-layout: auto;
+			display: block;
 			&.tabs-center {
 				margin: auto;
 				margin-bottom: 24px;
@@ -448,7 +501,7 @@ input.classifai-button {
 			a.tab {
 				text-decoration: none;
 				position: relative;
-				display: table-cell;
+				display: inline-block;
 				transition: all ease .3s;
 				padding: 16px 12px;
 				transform: translate3d(0, 0, 0);
