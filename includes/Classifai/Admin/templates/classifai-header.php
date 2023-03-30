@@ -54,3 +54,28 @@
 		</div>
 	</div>
 </header>
+<?php
+$classifai_settings = array(
+	'classifai_settings'  => __( 'ClassifAI Registration', 'classifai' ),
+	'language_processing' => __( 'Language Processing', 'classifai' ),
+	'image_processing'    => __( 'Image Processing', 'classifai' ),
+	'personalizer'        => __( 'Recommended Content', 'classifai' ),
+);
+
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+if ( 'classifai_setup' === $page ) {
+	return;
+}
+?>
+<h2 class="nav-tab-wrapper classifai-nav-wrapper">
+	<?php
+	foreach ( $classifai_settings as $key => $value ) {
+		?>
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo ( $page === $key ) ? 'nav-tab-active' : ''; ?>">
+			<?php echo esc_html( $value ); ?>
+		</a>
+		<?php
+	}
+	?>
+</h2>

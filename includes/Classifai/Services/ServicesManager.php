@@ -292,7 +292,7 @@ class ServicesManager {
 				<?php
 				include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
 				?>
-				<div class="wrap">
+				<div class="classifai-wrap wrap">
 					<?php settings_errors(); ?>
 					<form method="post" action="options.php">
 						<?php

@@ -110,7 +110,7 @@ abstract class Service {
 			<?php
 			include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
 			?>
-			<div class="wrap wrap--nlu">
+			<div class="classifai-wrap wrap wrap--nlu">
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
 				<?php if ( ! empty( $this->provider_classes ) ) : ?>
 				<h2 class="nav-tab-wrapper">

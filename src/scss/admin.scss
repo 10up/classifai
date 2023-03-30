@@ -126,6 +126,7 @@ input.classifai-button {
 	z-index: 1001;
 	margin-left: -20px;
 	padding: 0 10px;
+	box-shadow: 0px 10px 10px 0px #f0f0f1;
 
 	@media screen and (max-width: 782px) {
 		margin-left: -10px;
@@ -220,6 +221,71 @@ input.classifai-button {
 
 			&:hover {
 				color: var( --classifai-admin-theme-color );
+			}
+		}
+	}
+
+	.admin_page_classifai_setup &{
+		box-shadow: none;
+	}
+}
+
+.classifai-content {
+	.classifai-wrap {
+		background-color: #fff;
+		border-radius: 4px;
+		padding: 24px;
+		margin: 0px 20px 0px 0px;
+
+		.form-table td fieldset p {
+			margin-bottom: 12px;
+		}
+	}
+
+	input[type="text"],
+	input[type="password"] {
+		height: 38px;
+		font-size: 14px;
+		margin-bottom: 4px;
+	}
+
+	h2.nav-tab-wrapper.classifai-nav-wrapper {
+		margin-right: 20px;
+		margin-top: 20px;
+		padding-top: 0px;
+		border-color: transparent;
+	}
+
+	a.nav-tab {
+		border: none;
+		margin-left: 0;
+		background: transparent;
+		padding: 10px 12px;
+		position: relative;
+
+		&:after {
+			transition: all .3s cubic-bezier(1, 0, 0, 1);
+			will-change: transform, box-shadow, opacity;
+			position: absolute;
+			content: '';
+			height: 3px;
+			bottom: 0px;
+			left: 0px;
+			right: 0px;
+			border-radius: 3px 3px 0px 0px;
+			background: var( --classifai-admin-theme-color );
+			box-shadow: 0px 4px 10px 3px rgba( var(--classifai-admin-theme-color--rgb), .15);
+			opacity: 0;
+			transform: scale(0, 1);
+		}
+
+		&.nav-tab-active,
+		&:hover {
+			color: var( --classifai-admin-theme-color );
+			font-weight: 600;
+			&:after {
+				opacity: 1;
+				transform: scale(1, 1);
 			}
 		}
 	}
