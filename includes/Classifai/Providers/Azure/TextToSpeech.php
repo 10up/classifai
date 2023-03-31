@@ -477,7 +477,12 @@ class TextToSpeech extends Provider {
 						<span class="dashicons dashicons-controls-play"></span>
 						<span class="dashicons dashicons-controls-pause"></span>
 					</div>
-					<div class='classifai-post-audio-heading'>Listen to this post</div>
+					<div class='classifai-post-audio-heading'>
+						<?php
+							$list_to_post_text = apply_filters( 'classifai_listen_to_this_post_text', esc_html__( 'Listen to this post', 'classifai' ) );
+							echo esc_html( $list_to_post_text );
+						?>
+					</div>
 				</div>
 				<audio id="classifai-post-audio-player" src="<?php echo esc_url( home_url( $audio_attachment_url ) ); ?>"></audio>
 			</div>
