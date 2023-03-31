@@ -8,7 +8,19 @@
 use function Classifai\get_post_types_for_language_settings;
 
 $onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
-$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
+$default_enabled    = array(
+	'language' => array(
+		'classify'         => array(
+			'post' => 'yes',
+			'page' => 'yes',
+		),
+	),
+	'images'  => array(
+		'image_captions' => 'yes',
+		'image_tags'     => 'yes',
+	),
+);
+$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : $default_enabled;
 
 // Display any errors.
 settings_errors( 'classifai-setup' );
