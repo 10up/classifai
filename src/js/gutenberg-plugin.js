@@ -207,7 +207,14 @@ const synthesizeSpeech = async ( postId ) => {
 	// Set state indicating the synthesis process has begun.
 	wp.data.dispatch( postAudioStore ).setIsProcessing( true );
 
-	const response = await fetch( synthesizeSpeechUrl );
+	const response = await fetch(
+		synthesizeSpeechUrl,
+		{
+			headers: new Headers( {
+				'X-WP-Nonce': wpApiSettings.nonce,
+			} )
+		}
+	);
 
 	// Return false if error.
 	if ( 200 !== response.status ) {
