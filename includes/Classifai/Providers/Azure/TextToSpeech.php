@@ -433,7 +433,7 @@ class TextToSpeech extends Provider {
 		global $post;
 
 		if ( ! $post ) {
-			return;
+			return $content;
 		}
 
 		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
