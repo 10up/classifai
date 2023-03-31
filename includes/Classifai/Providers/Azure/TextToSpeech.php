@@ -506,7 +506,7 @@ class TextToSpeech extends Provider {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_checkbox_group( $args ) {
+	public function render_checkbox_group( array $args = array() ) {
 		$setting_index = $this->get_settings( $args['option_index'] );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';

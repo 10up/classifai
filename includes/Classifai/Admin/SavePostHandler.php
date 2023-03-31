@@ -179,7 +179,8 @@ class SavePostHandler {
 	public function synthesize_speech( $post_id ) {
 		$normalizer   = new Normalizer();
 		$settings     = \Classifai\get_azure_text_to_speech_settings();
-		$post_content = $normalizer->normalize( $post_id );
+		$post         = get_post( $post_id );
+		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
 		$voice        = $settings['voice'];
 		$voice_data   = explode( '|', $voice );
 		$voice_name   = '';

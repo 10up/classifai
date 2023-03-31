@@ -254,11 +254,7 @@ class LanguageProcessing extends Service {
 	public function speech_synthesis_permissions_check( $request ) {
 		$post_id = $request->get_param( 'id' );
 
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+		if ( ! empty( $post_id ) ) {
 			$post_type = get_post_type( $post_id );
 			$supported = \Classifai\get_supported_post_types_for_azure_text_to_speech();
 
@@ -266,8 +262,10 @@ class LanguageProcessing extends Service {
 			if ( ! in_array( $post_type, $supported, true ) ) {
 				return new \WP_Error( 'not_enabled', esc_html__( 'Azure Speech synthesis is not enabled for current post.', 'classifai' ) );
 			}
+
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 }
