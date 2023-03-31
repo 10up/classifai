@@ -5,6 +5,8 @@
  * @package ClassifAI
  */
 
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 ?>
 <header id="classifai-header">
 	<div class="classifai-header-layout">
@@ -15,8 +17,7 @@
 		</div>
 		<div id="classifai-header-controls">
 			<?php
-			$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( 'classifai_setup' === $page ) {
+			if ( 'classifai_setup' === $classifai_page ) {
 				?>
 				<div class="header-control-item">
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_settings' ) ); ?>" class="classifai-help-links">
@@ -54,18 +55,16 @@
 	</div>
 </header>
 <?php
+if ( 'classifai_setup' === $classifai_page ) {
+	return;
+}
+
 $classifai_settings = array(
 	'classifai_settings'  => __( 'ClassifAI Registration', 'classifai' ),
 	'language_processing' => __( 'Language Processing', 'classifai' ),
 	'image_processing'    => __( 'Image Processing', 'classifai' ),
 	'personalizer'        => __( 'Recommended Content', 'classifai' ),
 );
-
-// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
-if ( 'classifai_setup' === $page ) {
-	return;
-}
 ?>
 <h2 class="nav-tab-wrapper classifai-nav-wrapper">
 	<?php
