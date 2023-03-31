@@ -26,8 +26,7 @@
 				</div>
 				<?php
 			} else {
-				$onboarding_options = get_option( 'classifai_onboarding_options', array() );
-				if ( ! isset( $onboarding_options['status'] ) || 'completed' !== $onboarding_options['status'] ) {
+				if ( ! Classifai\Admin\Onboarding::is_onboarding_completed() ) {
 					?>
 					<div class="header-control-item">
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>" class="classifai-help-links">

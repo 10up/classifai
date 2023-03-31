@@ -4,9 +4,16 @@ namespace Classifai\Admin;
 
 class Onboarding {
 	/**
+	 * @var string $setup_url The admin onboarding URL.
+	 */
+	protected $setup_url;
+
+	/**
 	 * Register the actions needed.
 	 */
 	public function __construct() {
+		$this->setup_url = admin_url( 'admin.php?page=classifai_setup' );
+
 		add_action( 'admin_menu', [ $this, 'register_setup_page' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
@@ -62,11 +69,12 @@ class Onboarding {
 							foreach ( $onboarding_steps as $key => $step ) {
 								$is_active   = ( $current_step === (string) $key ) ? 'is-active' : '';
 								$is_complete = ( $current_step > $key ) ? 'is-complete' : '';
+								$step_url    = add_query_arg( 'step', $key, $this->setup_url );
 								?>
 								<div class="classifai-setup__step <?php echo esc_attr( $is_active . ' ' . $is_complete ); ?>">
 									<div class="classifai-setup__step__label">
 										<?php if ( $is_complete ) { ?>
-											<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup&step=' . $key ) ); ?>">
+											<a href="<?php echo esc_url( $step_url ); ?>">
 										<?php } ?>
 											<span class="step-count">
 												<?php
@@ -163,7 +171,7 @@ class Onboarding {
 		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next setup step.
-		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=2' ) );
+		wp_safe_redirect( add_query_arg( 'step', 2, $this->setup_url ) );
 		exit();
 	}
 
@@ -196,7 +204,7 @@ class Onboarding {
 		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next setup step.
-		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3' ) );
+		wp_safe_redirect( add_query_arg( 'step', 3, $this->setup_url ) );
 		exit();
 	}
 
@@ -227,7 +235,7 @@ class Onboarding {
 		$form_data = isset( $_POST[ $option_name ] ) ? $this->classifai_sanitize( $_POST[ $option_name ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$settings = \Classifai\get_plugin_settings( $provider['service'], $provider['provider'] );
-		$options  = $this->get_onboarding_options();
+		$options  = self::get_onboarding_options();
 		$features = isset( $options['enabled_features'] ) ? $options['enabled_features'] : array();
 
 		// Update settings.
@@ -281,17 +289,25 @@ class Onboarding {
 			return;
 		}
 
-		$onboarding_options   = get_option( 'classifai_onboarding_options', array() );
+		$onboarding_options   = self::get_onboarding_options();
 		$configured_providers = isset( $onboarding_options['configured_providers'] ) ? $onboarding_options['configured_providers'] : array();
 
 		$onboarding_options['configured_providers'] = array_unique( array_merge( $configured_providers, array( $provider_option ) ) );
 		// Save the options to use it later steps.
-		update_option( 'classifai_onboarding_options', $onboarding_options );
+		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next provider setup step.
 		$next_provider = $this->get_next_provider( $provider_option );
 		if ( ! empty( $next_provider ) ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=3&tab=' . $next_provider ) );
+			wp_safe_redirect(
+				add_query_arg(
+					array(
+						'step' => 3,
+						'tab'  => $next_provider,
+					),
+					$this->setup_url
+				)
+			);
 			exit();
 		}
 
@@ -304,7 +320,7 @@ class Onboarding {
 		$this->update_onboarding_options( $onboarding_options );
 
 		// Redirect to next completion step.
-		wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=4' ) );
+		wp_safe_redirect( add_query_arg( 'step', 4, $this->setup_url ) );
 		exit();
 	}
 
@@ -427,8 +443,18 @@ class Onboarding {
 	 *
 	 * @return array The onboarding options.
 	 */
-	public function get_onboarding_options() {
+	public static function get_onboarding_options() {
 		return get_option( 'classifai_onboarding_options', array() );
+	}
+
+	/**
+	 * Check if onboarding is completed.
+	 *
+	 * @return bool True if onboarding is completed, false otherwise.
+	 */
+	public static function is_onboarding_completed() {
+		$options = self::get_onboarding_options();
+		return isset( $options['status'] ) && 'completed' === $options['status'];
 	}
 
 	/**
@@ -441,7 +467,7 @@ class Onboarding {
 			return;
 		}
 
-		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+		$onboarding_options = self::get_onboarding_options();
 		$onboarding_options = array_merge( $onboarding_options, $options );
 
 		// Update options.
@@ -464,7 +490,7 @@ class Onboarding {
 			$this->update_onboarding_options( $onboarding_options );
 
 			// Redirect to next step.
-			wp_safe_redirect( admin_url( 'admin.php?page=classifai_setup&step=' . ( $step + 1 ) ) );
+			wp_safe_redirect( add_query_arg( 'step', ( $step + 1 ), $this->setup_url ) );
 			exit();
 		} else {
 			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
@@ -480,7 +506,7 @@ class Onboarding {
 	public static function get_enabled_providers() {
 		$providers          = self::get_setup_providers();
 		$enabled_providers  = array();
-		$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+		$onboarding_options = self::get_onboarding_options();
 		$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
 
 		foreach ( $enabled_features as $feature => $value ) {
@@ -533,7 +559,7 @@ class Onboarding {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$step               = absint( wp_unslash( $_GET['step'] ) );
-		$onboarding_options = $this->get_onboarding_options();
+		$onboarding_options = self::get_onboarding_options();
 		$step_completed     = isset( $onboarding_options['step_completed'] ) ? absint( $onboarding_options['step_completed'] ) : 0;
 
 		if ( ( $step_completed + 1 ) < $step ) {

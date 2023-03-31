@@ -15,13 +15,10 @@ document.addEventListener( 'DOMContentLoaded', function() {
 		trigger: 'click', // mouseenter, click, focus; manual.
 		placement: 'bottom-end',
 		arrow: true,
-		arrowType: 'round',
 		animation: 'scale',
 		duration: [ 250, 200 ],
 		theme: 'light',
-		distance: 12,
 		interactive: true,
-		showOnInit: true,
 	} );
 } );
 

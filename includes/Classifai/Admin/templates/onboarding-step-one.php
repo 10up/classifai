@@ -7,7 +7,7 @@
 
 use function Classifai\get_post_types_for_language_settings;
 
-$onboarding_options = get_option( 'classifai_onboarding_options', array() );
+$onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
 $enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
 
 // Display any errors.
