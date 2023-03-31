@@ -354,7 +354,7 @@ class Onboarding {
 		}
 
 		// Render the section.
-		if ( isset( $wp_settings_sections[ $setting_name ] ) && ! empty( $wp_settings_sections[ $setting_name ][ $setting_name ] ) ) {
+		if ( isset( $wp_settings_sections[ $setting_name ] ) && ! empty( $wp_settings_sections[ $setting_name ][ $setting_name ] ) && 'classifai_settings' !== $setting_name ) {
 			$section = $wp_settings_sections[ $setting_name ][ $setting_name ];
 			if ( '' !== $section['before_section'] ) {
 				if ( '' !== $section['section_class'] ) {

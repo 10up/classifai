@@ -20,26 +20,9 @@ settings_errors( 'registration' );
 		<div class="classifai-step2-content">
 			<div class="classifai-setup-form">
 				<form method="POST" action="">
-					<div class="classifai-setup-form-field">
-						<label for="email">
-							<?php esc_html_e( 'Registered Email', 'classifai' ); ?>
-						</label>
-						<input type="text" name="classifai_settings[email]" class="regular-text" value="<?php echo esc_attr( $email ); ?>" required="required" id="email"/>
-					</div>
-					<div class="classifai-setup-form-field">
-						<label for="license_key">
-							<?php esc_html_e( 'Registered Key', 'classifai' ); ?>
-						</label>
-						<input type="password" name="classifai_settings[license_key]" class="regular-text" value="<?php echo esc_attr( $license_key ); ?>" required="required" id="license_key"/>
-						<br />
-						<span class="description">
-							<?php
-							// translators: %1$s: <br />,<a> tag, %2$s: </a> tag.
-							printf( esc_html__( 'Registration is 100%% free and provides update notifications and upgrades inside the dashboard. %1$sRegister for your key%2$s', 'classifai' ), '<br /><a href="https://classifaiplugin.com/#cta" target="blank">', '</a>' );
-							?>
-						</span>
-					</div>
-
+					<?php
+					Classifai\Admin\Onboarding::render_classifai_setup_settings( 'classifai_settings', array( 'email', 'registration-key' ) );
+					?>
 					<div class="classifai-setup-footer">
 						<span class="classifai-setup-footer__left">
 							<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_skip_step&step=2' ), 'classifai_skip_step_action', 'classifai_skip_step_nonce' ) ); ?>" class="classifai-setup-skip-link">
