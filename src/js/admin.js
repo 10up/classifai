@@ -6,6 +6,9 @@ import 'tippy.js/themes/light.css';
 
 document.addEventListener('DOMContentLoaded', function () {
 	const template = document.getElementById('help-menu-template');
+	if (!template) {
+		return;
+	}
 	const container = document.createElement('div');
 	container.appendChild(document.importNode(template.content, true));
 

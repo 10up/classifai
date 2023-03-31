@@ -70,7 +70,7 @@ $classifai_settings = array(
 	<?php
 	foreach ( $classifai_settings as $key => $value ) {
 		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo ( $page === $key ) ? 'nav-tab-active' : ''; ?>">
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo ( $classifai_page === $key ) ? 'nav-tab-active' : ''; ?>">
 			<?php echo esc_html( $value ); ?>
 		</a>
 		<?php
