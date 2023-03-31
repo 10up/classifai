@@ -273,7 +273,7 @@ class TextToSpeech extends Provider {
 				$request_params
 			);
 		} else {
-			// Send request.
+			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
 			$response = wp_remote_get(
 				$request_url,
 				$request_params
