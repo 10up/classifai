@@ -427,6 +427,7 @@ class TextToSpeech extends Provider {
 	 * Adds audio controls to the post that has speech sythesis enabled.
 	 *
 	 * @param string $content Post content.
+	 * @return string
 	 */
 	public function render_post_audio_controls( $content ) {
 		global $post;
