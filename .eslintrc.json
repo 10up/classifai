@@ -17,7 +17,8 @@
 		"classifaiDalleData": "readonly",
 		"Backbone": "readonly",
 		"_": "readonly",
-		"File": "readonly"
+		"File": "readonly",
+		"Headers": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
 }

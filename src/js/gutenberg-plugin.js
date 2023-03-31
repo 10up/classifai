@@ -215,7 +215,7 @@ const synthesizeSpeech = async ( postId ) => {
 		{
 			headers: new Headers( {
 				'X-WP-Nonce': wpApiSettings.nonce,
-			} )
+			} ),
 		}
 	);
 
@@ -241,13 +241,12 @@ const synthesizeSpeech = async ( postId ) => {
 		}
 
 		return true;
-	} else {
-		errorCode = result.code;
-		wp.data.dispatch( 'core/notices' ).createErrorNotice( result.message, {
-			id: errorCode
-		} );
-		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
 	}
+	errorCode = result.code;
+	wp.data.dispatch( 'core/notices' ).createErrorNotice( result.message, {
+		id: errorCode,
+	} );
+	wp.data.dispatch( postAudioStore ).setIsProcessing( false );
 };
 
 /**
