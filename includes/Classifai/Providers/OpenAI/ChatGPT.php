@@ -248,6 +248,7 @@ class ChatGPT extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '' ) {
+		$route_to_call = strtolower( $route_to_call );
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}

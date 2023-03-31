@@ -131,10 +131,18 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'alt-tags/(?P<id>\d+)',
 			[
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'alt-tags' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
+				'args'                => [
+					'id'    => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+					'route' => [ 'alt-tags' ],
+				],
+				'permission_callback' => [ $this, 'computer_vision_endpoint_permissions_check' ],
 			]
 		);
 
@@ -142,10 +150,18 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'image-tags/(?P<id>\d+)',
 			[
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'image-tags' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
+				'args'                => [
+					'id'    => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+					'route' => [ 'image-tags' ],
+				],
+				'permission_callback' => [ $this, 'computer_vision_endpoint_permissions_check' ],
 			]
 		);
 
@@ -153,10 +169,18 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'ocr/(?P<id>\d+)',
 			[
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'ocr' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
+				'args'                => [
+					'id'    => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+					'route' => [ 'ocr' ],
+				],
+				'permission_callback' => [ $this, 'computer_vision_endpoint_permissions_check' ],
 			]
 		);
 
@@ -164,10 +188,18 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'smart-crop/(?P<id>\d+)',
 			[
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'smart-crop' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
+				'args'                => [
+					'id'    => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+					'route' => [ 'smart-crop' ],
+				],
+				'permission_callback' => [ $this, 'computer_vision_endpoint_permissions_check' ],
 			]
 		);
 
@@ -175,10 +207,18 @@ class ImageProcessing extends Service {
 			'classifai/v1',
 			'read-pdf/(?P<id>\d+)',
 			[
-				'methods'             => 'GET',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'read-pdf' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
+				'args'                => [
+					'id'    => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+					'route' => [ 'read-pdf' ],
+				],
+				'permission_callback' => [ $this, 'computer_vision_endpoint_permissions_check' ],
 			]
 		);
 
@@ -232,33 +272,91 @@ class ImageProcessing extends Service {
 	}
 
 	/**
-	 * Single call back to pass the route callback to the provider.
+	 * Single callback to pass the route callback to the Computer Vision provider.
 	 *
-	 * @param \WP_REST_Request $request The full request object.
-	 *
-	 * @return array|bool|string|\WP_Error
+	 * @param WP_REST_Request $request The full request object.
+	 * @return array|bool|string|WP_Error
 	 */
-	public function provider_endpoint_callback( $request ) {
-		$response          = true;
-		$attachment_id     = $request->get_param( 'id' );
-		$custom_attributes = $request->get_attributes();
-		$route_to_call     = empty( $custom_attributes['args']['route'] ) ? false : $custom_attributes['args']['route'][0];
+	public function computer_vision_endpoint_callback( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$custom_atts   = $request->get_attributes();
+		$route_to_call = empty( $custom_atts['args']['route'] ) ? false : strtolower( $custom_atts['args']['route'][0] );
+		$provider      = '';
 
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
-			return new \WP_Error( 'incorrect ID', "{$attachment_id} is not found or not an attachement", array( 'status' => 404 ) );
+			/* translators: %1$s: the attachment ID */
+			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), [ 'status' => 404 ] );
 		}
+
 		// If no args, we can't pass the call into the active provider.
 		if ( false === $route_to_call ) {
-			return new \WP_Error( 'no route', 'No route indicated for the provider class to use.', array( 'status' => 404 ) );
+			return new WP_Error( 'no_route', esc_html__( 'No route indicated for the provider class to use.', 'classifai' ), [ 'status' => 404 ] );
+		}
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'Computer Vision' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 		}
 
 		// Call the provider endpoint function
-		if ( isset( $this->provider_classes[0] ) ) {
-			$response = $this->provider_classes[0]->rest_endpoint_callback( $attachment_id, $route_to_call );
+		return rest_ensure_response( $provider->rest_endpoint_callback( $attachment_id, $route_to_call ) );
+	}
+
+	/**
+	 * Check if a given request has access to generate an excerpt.
+	 *
+	 * This check ensures the current user making the request has
+	 * proper capabilities for media and that we are properly
+	 * authenticated with Azure.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function computer_vision_endpoint_permissions_check( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$custom_atts   = $request->get_attributes();
+		$route_to_call = empty( $custom_atts['args']['route'] ) ? false : strtolower( $custom_atts['args']['route'][0] );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
 		}
 
-		return $response;
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'image_processing', 'Computer Vision' );
+
+		// For the image-tags route, ensure the taxonomy is valid and the user has permission to assign terms.
+		if ( 'image-tags' === $route_to_call ) {
+			if ( ! empty( $settings ) && isset( $settings['image_tag_taxonomy'] ) ) {
+				$permission = $this->check_term_permissions( $settings['image_tag_taxonomy'] );
+
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+			} else {
+				return new WP_Error( 'invalid_settings', esc_html__( 'Ensure the service settings have been saved.', 'classifai' ) );
+			}
+		}
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+		}
+
+		return true;
 	}
 
 	/**
