@@ -263,11 +263,22 @@ class TextToSpeech extends Provider {
 			$default['url']
 		);
 
-		// Send request.
-		$response = wp_remote_get(
-			$request_url,
-			$request_params
-		);
+		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
+			$response = vip_safe_wp_remote_get(
+				$request_url,
+				'',
+				3,
+				1,
+				20,
+				$request_params
+			);
+		} else {
+			// Send request.
+			$response = wp_remote_get(
+				$request_url,
+				$request_params
+			);
+		}
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(

@@ -337,6 +337,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 								variant="secondary"
 								isBusy={ isProcessingAudio }
 								onClick={ refreshAudio }
+								disabled={ isPreviewing }
 							>
 								{ __( 'Refresh', 'classifai' ) }
 							</Button>
