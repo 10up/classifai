@@ -4,6 +4,7 @@ import { handleClick } from './helpers';
 import { store as postAudioStore } from './store/register';
 
 import { useState, useEffect, useRef } from '@wordpress/element';
+import { store as noticesStore } from '@wordpress/notices';
 
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
@@ -186,6 +187,8 @@ const ClassifAIGenerateTagsButton = () => {
 	);
 };
 
+let errorCode = '';
+
 /**
  * Calls the server-side method that synthesis speech for a post.
  *
@@ -223,15 +226,28 @@ const synthesizeSpeech = async ( postId ) => {
 		return false;
 	}
 
-	const audioId = await response.json();
+	const result = await response.json();
 
-	// Set audio ID state after successful synthesis.
-	wp.data.dispatch( postAudioStore ).setAudioId( audioId );
+	if ( result.success ) {
+		// Set audio ID state after successful synthesis.
+		wp.data.dispatch( postAudioStore ).setAudioId( result.audio_id );
 
-	// Set state indicating the synthesis process has ended.
-	wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+		// Set state indicating the synthesis process has ended.
+		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
 
-	return true;
+		if ( errorCode ) {
+			wp.data.dispatch( noticesStore ).removeNotice( errorCode );
+			errorCode = '';
+		}
+
+		return true;
+	} else {
+		errorCode = result.code;
+		wp.data.dispatch( 'core/notices' ).createErrorNotice( result.message, {
+			id: errorCode
+		} );
+		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+	}
 };
 
 /**
@@ -335,7 +351,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 				<BaseControl
 					id="classifai-audio-controls"
 					label={ __( 'Audio controls', 'classifai' ) }
-					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.' ) }
+					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.', 'classifai' ) }
 				>
 					<div>
 						<ButtonGroup>

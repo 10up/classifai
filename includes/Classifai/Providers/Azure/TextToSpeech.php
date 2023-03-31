@@ -157,7 +157,7 @@ class TextToSpeech extends Provider {
 				[
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
-					'default_value' => $default_settings['voices'],
+					'default_value' => $default_settings['voice'],
 				]
 			);
 		}
@@ -367,7 +367,7 @@ class TextToSpeech extends Provider {
 		return [
 			'url'           => '',
 			'api_key'       => '',
-			'voices'        => array(),
+			'voice'         => '',
 			'authenticated' => false,
 		];
 	}
@@ -485,7 +485,7 @@ class TextToSpeech extends Provider {
 						?>
 					</div>
 				</div>
-				<audio id="classifai-post-audio-player" src="<?php echo esc_url( home_url( $audio_attachment_url ) ); ?>"></audio>
+				<audio id="classifai-post-audio-player" src="<?php echo esc_url( $audio_attachment_url ); ?>"></audio>
 			</div>
 		<?php
 

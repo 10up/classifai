@@ -198,10 +198,20 @@ class LanguageProcessing extends Service {
 		$attachment_id     = $save_post_handler->synthesize_speech( $post_id );
 
 		if ( is_wp_error( $attachment_id ) ) {
-			return false;
+			$error_code    = $attachment_id->get_error_code();
+			$error_message = $attachment_id->get_error_message();
+
+			return array(
+				'success' => false,
+				'code'    => $error_code,
+				'message' => $error_message,
+			);
 		}
 
-		return $attachment_id;
+		return array(
+			'success'  => true,
+			'audio_id' => $attachment_id,
+		);
 	}
 
 	/**
