@@ -323,7 +323,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 				} }
 				disabled={ ! isFeatureSupported }
 			/>
-			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl }></audio> }
+			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl } onEnded={ () => setIsPreviewing( false ) }></audio> }
 			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
 					id="classifai-audio-controls"
