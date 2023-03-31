@@ -24,10 +24,10 @@ function get_plugin() {
  * Returns the ClassifAI plugin's stored settings in the WP options.
  *
  * @param string $service The service to get settings from, defaults to the ServiceManager class.
- *
+ * @param string $provider The provider service name to get settings from, defaults to the first one found.
  * @return array The array of ClassifAi settings.
  */
-function get_plugin_settings( $service = '' ) {
+function get_plugin_settings( $service = '', $provider = '' ) {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
@@ -40,6 +40,17 @@ function get_plugin_settings( $service = '' ) {
 	}
 
 	if ( ! isset( $service_manager->service_classes[ $service ] ) || ! $service_manager->service_classes[ $service ] instanceof Service ) {
+		return [];
+	}
+
+	// If we want settings for a specific provider, find the proper provider service.
+	if ( ! empty( $provider ) ) {
+		foreach ( $service_manager->service_classes[ $service ]->provider_classes as $provider_class ) {
+			if ( $provider_class->provider_service_name === $provider ) {
+				return $provider_class->get_settings();
+			}
+		}
+
 		return [];
 	}
 
@@ -116,7 +127,7 @@ function reset_plugin_settings() {
  * @return string
  */
 function get_watson_api_url() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_url'] ) ) {
@@ -138,7 +149,7 @@ function get_watson_api_url() {
  * @return string
  */
 function get_watson_username() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_username'] ) ) {
@@ -159,7 +170,7 @@ function get_watson_username() {
  * @return string
  */
 function get_watson_password() {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
 
 	if ( ! empty( $creds['watson_password'] ) ) {
@@ -227,7 +238,7 @@ function get_post_statuses_for_language_settings() {
  * return array
  */
 function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing' );
+	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_types = [];
@@ -262,7 +273,7 @@ function get_supported_post_types() {
  * @return array
  */
 function get_supported_post_statuses() {
-	$classifai_settings = get_plugin_settings( 'language_processing' );
+	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( empty( $classifai_settings ) ) {
 		$post_statuses = [ 'publish' ];
@@ -297,7 +308,7 @@ function get_supported_post_statuses() {
  * @return bool
  */
 function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
 		if ( ! empty( $settings['features'][ $feature ] ) ) {
@@ -348,7 +359,7 @@ function language_processing_features_enabled() {
  * @return int
  */
 function get_feature_threshold( $feature ) {
-	$settings  = get_plugin_settings( 'language_processing' );
+	$settings  = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$threshold = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
@@ -392,7 +403,7 @@ function get_feature_threshold( $feature ) {
  * @return string Taxonomy mapped to the feature
  */
 function get_feature_taxonomy( $feature ) {
-	$settings = get_plugin_settings( 'language_processing' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$taxonomy = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
@@ -603,7 +614,7 @@ function get_azure_text_to_speech_settings() {
  * @todo Move this to a more generic method during refactoring of the plugin.
  * @return array
  */
-function get_supported_post_types_for_azure_speech_to_text() {
+function get_supported_post_types_for_azure_text_to_speech() {
 	$settings             = \Classifai\get_azure_text_to_speech_settings();
 	$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
 
@@ -615,4 +626,24 @@ function get_supported_post_types_for_azure_speech_to_text() {
 			}
 		)
 	);
+}
+
+/** Get asset info from extracted asset files.
+ *
+ * @param string $slug Asset slug as defined in build/webpack configuration.
+ * @param string $attribute Optional attribute to get. Can be version or dependencies.
+ * @return string|array
+ */
+function get_asset_info( $slug, $attribute = null ) {
+	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
+		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
+	} else {
+		return null;
+	}
+
+	if ( ! empty( $attribute ) && isset( $asset[ $attribute ] ) ) {
+		return $asset[ $attribute ];
+	}
+
+	return $asset;
 }

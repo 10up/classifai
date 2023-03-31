@@ -13,7 +13,11 @@
 		"FormData": "readonly",
 		"classifaiMediaVars": "readonly",
 		"classifaiTextToSpeechData": "readonly",
-		"wpApiSettings": "readonly"
+		"wpApiSettings": "readonly",
+		"classifaiDalleData": "readonly",
+		"Backbone": "readonly",
+		"_": "readonly",
+		"File": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
 }

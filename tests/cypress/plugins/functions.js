@@ -1,4 +1,6 @@
 import * as nluData from '../../test-plugin/nlu.json';
+import * as chatgptData from '../../test-plugin/chatgpt.json';
+import * as dalleData from '../../test-plugin/dalle.json';
 import * as ocrData from '../../test-plugin/ocr.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
 import * as pdfData from '../../test-plugin/pdf.json';
@@ -24,6 +26,30 @@ export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 			.map((el) => el.text);
 	}
 	return taxonomies;
+};
+
+/**
+ * Get text data from test ChatGPT json file.
+ *
+ * @return {string[]} ChatGPT Data.
+ */
+export const getChatGPTData = () => {
+	const text = [];
+
+	chatgptData.choices.forEach( ( el ) => {
+		text.push( el.message.content );
+	} );
+
+	return text.join( ' ' );
+};
+
+/**
+ * Get data from test DALL·E json file.
+ *
+ * @return {string[]} DALL·E Data.
+ */
+export const getDalleData = () => {
+	return dalleData.data;
 };
 
 /**

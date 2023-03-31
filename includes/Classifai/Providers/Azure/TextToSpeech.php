@@ -64,7 +64,7 @@ class TextToSpeech extends Provider {
 			'classifai-gutenberg-plugin',
 			'classifaiTextToSpeechData',
 			[
-				'supportedPostTypes' => \Classifai\get_supported_post_types_for_azure_speech_to_text(),
+				'supportedPostTypes' => \Classifai\get_supported_post_types_for_azure_text_to_speech(),
 				'noPermissions'      => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
 		);
