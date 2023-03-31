@@ -68,7 +68,17 @@ class Onboarding {
 										<?php if ( $is_complete ) { ?>
 											<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup&step=' . $key ) ); ?>">
 										<?php } ?>
-											<span class="step-count"><?php echo esc_html( $step['step'] ); ?></span>
+											<span class="step-count">
+												<?php
+												if ( ! $is_complete ) {
+													echo esc_html( $step['step'] );
+												} else {
+													?>
+													<span class="dashicons dashicons-yes"></span>
+													<?php
+												}
+												?>
+											</span>
 											<span class="step-title">
 												<?php echo esc_html( $step['title'] ); ?>
 											</span>
