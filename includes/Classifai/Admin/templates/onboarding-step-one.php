@@ -42,23 +42,29 @@ settings_errors( 'classifai-setup' );
 							$checked = isset( $features[ $posttype->name ] ) ? $features[ $posttype->name ] : '';
 							?>
 							<li class="classifai-enable-feature">
-								<label class="classifai-feature-text">
-									<?php
-									// translators: %s is the post type label.
-									printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $posttype->label ) );
-									?>
+								<label class="classifai-toggle">
+									<span class="classifai-feature-text">
+										<?php
+										// translators: %s is the post type label.
+										printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $posttype->label ) );
+										?>
+									</span>
+									<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[language][classify][<?php echo esc_attr( $posttype->name ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
+									<span class="classifai-toggle-switch"></span>
 								</label>
-								<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[language][classify][<?php echo esc_attr( $posttype->name ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
 							</li>
 							<?php
 						}
 						$checked = isset( $enabled_features['language']['excerpt_generation'] ) ? $enabled_features['language']['excerpt_generation'] : '';
 						?>
 						<li class="classifai-enable-feature">
-							<label class="classifai-feature-text">
-								<?php esc_html_e( 'Automatic excerpt generation', 'classifai' ); ?>
+							<label class="classifai-toggle">
+								<span class="classifai-feature-text">
+									<?php esc_html_e( 'Automatic excerpt generation', 'classifai' ); ?>
+								</span>
+								<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[language][excerpt_generation]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
+								<span class="classifai-toggle-switch"></span>
 							</label>
-							<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[language][excerpt_generation]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
 						</li>
 					</ul>
 				</div>
@@ -82,10 +88,13 @@ settings_errors( 'classifai-setup' );
 							$checked = isset( $enabled_features['images'][ $image_feature ] ) ? $enabled_features['images'][ $image_feature ] : '';
 							?>
 							<li class="classifai-enable-feature">
-								<label class="classifai-feature-text">
-									<?php echo esc_html( $image_feature_label ); ?>
+								<label class="classifai-toggle">
+									<span class="classifai-feature-text">
+										<?php echo esc_html( $image_feature_label ); ?>
+									</span>
+									<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[images][<?php echo esc_attr( $image_feature ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?> />
+									<span class="classifai-toggle-switch"></span>
 								</label>
-								<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[images][<?php echo esc_attr( $image_feature ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?> />
 							</li>
 							<?php
 						}
@@ -102,13 +111,16 @@ settings_errors( 'classifai-setup' );
 				<div class="classifai-features">
 					<ul>
 						<li class="classifai-enable-feature">
-							<label class="classifai-feature-text">
-								<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
+							<label class="classifai-toggle">
+								<span class="classifai-feature-text">
+									<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
+								</span>
+								<?php
+								$checked = isset( $enabled_features['recommended_content'] ) ? $enabled_features['recommended_content'] : '';
+								?>
+								<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[recommended_content]" value="yes" <?php checked( $checked, 'yes', true ); ?> >
+								<span class="classifai-toggle-switch"></span>
 							</label>
-							<?php
-							$checked = isset( $enabled_features['recommended_content'] ) ? $enabled_features['recommended_content'] : '';
-							?>
-							<input type="checkbox" class="classifai-feature-checkbox" name="classifai-features[recommended_content]" value="yes" <?php checked( $checked, 'yes', true ); ?> >
 						</li>
 					</ul>
 				</div>

@@ -321,6 +321,9 @@ input.classifai-button {
 		position: relative;
 
 		&__label {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 			font-size: 16px;
 
 			span.step-count {
@@ -343,6 +346,7 @@ input.classifai-button {
 			}
 
 			a, a:hover, a:active, a:focus {
+				display: inherit;
 				text-decoration: none;
     			color: #3c434a;
 			}
@@ -475,13 +479,10 @@ input.classifai-button {
 			border: 1px solid #ddd;
 		}
 
-		label.classifai-feature-text {
+		span.classifai-feature-text {
 			color: #707070;
 			font-size: 14px;
-		}
-
-		input.classifai-feature-checkbox {
-			float: right;
+			float: left;
 		}
 
 		.classifai-setup-footer {
@@ -620,4 +621,52 @@ input.classifai-button {
 			font-size: 12px;
 		}
 	}
+}
+
+.classifai-toggle {
+	cursor: pointer;
+	display: inline-block;
+	width: 100%;
+	text-align: right;
+}
+.classifai-toggle-switch {
+	display: inline-block;
+	background: transparent;
+	border-radius: 9px;
+	border: 1px solid #1e1e1e;
+	width: 36px;
+	height: 18px;
+	position: relative;
+	vertical-align: middle;
+	transition: background 0.25s;
+	box-sizing: border-box;
+	&:before,
+	&:after {
+		content: "";
+	}
+	&:before {
+		display: block;
+		background: #1e1e1e;
+		border-radius: 50%;
+		width: 12px;
+		height: 12px;
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		box-sizing: border-box;
+		transition: left 0.25s;
+	}
+
+	.classifai-toggle-checkbox:checked + & {
+		background: var(--classifai-admin-theme-color);
+		border-color: var(--classifai-admin-theme-color);
+		&:before {
+			background-color: #fff;
+			left: 20px;
+		}
+	}
+}
+.classifai-toggle-checkbox {
+	position: absolute;
+	visibility: hidden;
 }
