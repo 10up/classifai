@@ -17,32 +17,48 @@ jobs:
   eslint:
     name: eslint
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
-    - name: install node v16
+
+    - name: Setup node v16 and npm cache
       uses: actions/setup-node@v3
       with:
         node-version: 16
-    - name: npm install
-      run: npm install
-    - name: eslint
-      uses: icrawl/action-eslint@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        cache: npm
+
+    - name: Install Node dependencies
+      run: npm ci --no-optional
+
+    - name: Get updated JS files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: |
+          **/*.js
+
+    - name: Run JS linting
+      run: |
+        if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+          npx wp-scripts lint-js ${{ steps.changed-files.outputs.all_changed_files }}
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          npm run lint:js
+        fi
+
   phpcs:
     name: phpcs
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2.4.0
+      uses: actions/checkout@v3
 
     - name: Set standard 10up cache directories
       run: |
         composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
 
     - name: Prepare composer cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ env.COMPOSER_CACHE }}
         key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
@@ -59,15 +75,29 @@ jobs:
     - name: Install dependencies
       run: composer install
 
+    - name: Get updated PHP files
+      id: changed-files
+      uses: tj-actions/changed-files@v35
+      with:
+        files: |
+          **/*.php
+
     - name: PHPCS check
-      run: vendor/bin/phpcs . --runtime-set testVersion 7.4-
+      run: |
+        if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} --runtime-set testVersion 7.4-
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          ./vendor/bin/phpcs . --runtime-set testVersion 7.4-
+        fi
 
   vipcs:
     name: vipcs
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+
     - name: VIPCS check
       uses: 10up/wpcs-action@stable
       with:

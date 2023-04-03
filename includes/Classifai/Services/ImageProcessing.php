@@ -6,6 +6,9 @@
 namespace Classifai\Services;
 
 use Classifai\Taxonomy\ImageTagTaxonomy;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
 use function Classifai\attachment_is_pdf;
 
 class ImageProcessing extends Service {
@@ -15,10 +18,11 @@ class ImageProcessing extends Service {
 	 */
 	public function __construct() {
 		parent::__construct(
-			'Image Processing',
+			__( 'Image Processing', 'classifai' ),
 			'image_processing',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
+				'Classifai\Providers\OpenAI\DallE',
 			]
 		);
 	}
@@ -177,6 +181,54 @@ class ImageProcessing extends Service {
 				'permission_callback' => '__return_true',
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-image',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_image' ],
+				'args'                => [
+					'prompt' => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
+					],
+					'n'      => [
+						'type'              => 'integer',
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+					],
+					'size'   => [
+						'type'              => 'string',
+						'enum'              => [
+							'256x256',
+							'512x512',
+							'1024x1024',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
+					],
+					'format' => [
+						'type'              => 'string',
+						'enum'              => [
+							'url',
+							'b64_json',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
+			]
+		);
 	}
 
 	/**
@@ -207,6 +259,77 @@ class ImageProcessing extends Service {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Handle request to generate an image for a given prompt.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_image( WP_REST_Request $request ) {
+		$provider = '';
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'DALL·E' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
+
+		return rest_ensure_response(
+			$provider->generate_image_callback(
+				$request->get_param( 'prompt' ),
+				[
+					'num'    => $request->get_param( 'n' ),
+					'size'   => $request->get_param( 'size' ),
+					'format' => $request->get_param( 'format' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate an image.
+	 *
+	 * This check ensures we have a valid user with proper capabilities
+	 * making the request, that we are properly authenticated with OpenAI
+	 * and that image generation is turned on.
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function generate_image_permissions_check() {
+		// Ensure we have a logged in user that can upload files.
+		if ( ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'image_processing', 'DALL·E' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Check if image generation is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_image_gen'] ) && 'no' === $settings['enable_image_gen'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
+		}
+
+		// Check if the current user's role is allowed.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

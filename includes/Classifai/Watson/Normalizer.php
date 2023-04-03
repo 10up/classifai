@@ -69,7 +69,7 @@ class Normalizer {
 		 *
 		 * @return {string} The filtered normalized post content.
 		 */
-		$post_content = apply_filters( 'classifai_normalize', $post_content, $post_id );
+		$post_content = apply_filters( 'classifai_normalize', trim( $post_content ), $post_id );
 
 		return $post_content;
 	}

@@ -6,8 +6,8 @@ function setupRewardCall( blockId ) {
 	const contentLinks = document.querySelectorAll(
 		`#${ blockId } .classifai-send-reward`
 	);
-	contentLinks.forEach( function ( contentLink ) {
-		contentLink.addEventListener( 'click', function ( event ) {
+	contentLinks.forEach( function( contentLink ) {
+		contentLink.addEventListener( 'click', function( event ) {
 			event.preventDefault();
 			const eventId = this.getAttribute( 'data-eventid' );
 			const isRewarded = this.getAttribute( 'data-rewarded' );
@@ -44,18 +44,18 @@ function classifaiSessionSet( key, value, expirationInMin ) {
 		key,
 		JSON.stringify( {
 			expiresAt: new Date(
-				new Date().getTime() + 60000 * expirationInMin
+				new Date().getTime() + ( 60000 * expirationInMin )
 			),
 			value,
 		} )
 	);
 }
 
-document.addEventListener( 'DOMContentLoaded', function () {
+document.addEventListener( 'DOMContentLoaded', function() {
 	const classifaiBlocks = document.querySelectorAll(
 		'.classifai-recommended-block-wrap'
 	);
-	classifaiBlocks.forEach( function ( classifaiBlock ) {
+	classifaiBlocks.forEach( function( classifaiBlock ) {
 		const blockId = classifaiBlock.getAttribute( 'id' );
 		const cached = classifaiSessionGet( blockId );
 		if ( cached !== null ) {

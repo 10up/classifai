@@ -18,7 +18,11 @@ export const syncTaxonomies = ['category', 'post_tag'];
 const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	// First we check for exact match by `term.id` or case sensitive `term.name` match.
 	const termId = termValue?.id || termsMappedByName[ termValue ]?.id;
-	if ( termId ) return termId;
+
+	if ( termId ) {
+		return termId;
+	}
+
 	/**
 	 * Here we make an extra check for entered terms in a non case sensitive way,
 	 * to match user expectations, due to `FormTokenField` behaviour that shows
@@ -62,14 +66,22 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
 			( { slug } ) => slug === taxonomySlug
 		);
-		if ( ! taxonomyInfo ) return;
+
+		if ( ! taxonomyInfo ) {
+			return;
+		}
+
 		const termIds = Array.from(
 			newTermValues.reduce( ( accumulator, termValue ) => {
 				const termId = getTermIdByTermValue(
 					taxonomyInfo.terms.mapByName,
 					termValue
 				);
-				if ( termId ) accumulator.add( termId );
+
+				if ( termId ) {
+					accumulator.add( termId );
+				}
+
 				return accumulator;
 			}, new Set() )
 		);
@@ -88,12 +100,12 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
 			( { slug } ) => slug === taxonomySlug
 		);
-		if ( ! taxonomyInfo ) return [];
 
-		let values = query.taxQuery?.[ taxonomySlug ] || [];
+		if ( ! taxonomyInfo ) {
+			return [];
+		}
 
-		// Iterate over the the selected terms of the taxonomy and return a prepared array
-		return values.reduce(
+		return ( query.taxQuery?.[ taxonomySlug ] || [] ).reduce(
 			( accumulator, termId ) => {
 				const term = taxonomyInfo.terms.mapById[ termId ];
 				if ( term ) {
