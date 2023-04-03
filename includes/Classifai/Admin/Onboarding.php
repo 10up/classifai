@@ -421,6 +421,34 @@ class Onboarding {
 	}
 
 	/**
+	 * Get Default features values.
+	 *
+	 * @return array The default feature values.
+	 */
+	public function get_default_features() {
+		$features  = $this->get_features();
+		$providers = $this->get_providers();
+		$defaults  = array();
+
+		foreach ( $features as $service_slug => $service ) {
+			foreach ( $service['features'] as $provider_slug => $provider ) {
+				$settings = $providers[ $provider_slug ]->get_settings();
+				foreach ( $provider as $feature_slug => $feature ) {
+					$value = $settings[ $feature_slug ] ?? 'no';
+					if ( strpos( $feature_slug, 'post_types_' ) !== false ) {
+						$value = $settings['post_types'][ str_replace( 'post_types_', '', $feature_slug ) ] ?? 'no';
+					} elseif ( 'enable_image_captions' === $feature_slug ) {
+						$value = 'alt' === $settings['enable_image_captions']['alt'] ? 1 : 'no';
+					}
+					$defaults[ $provider_slug ][ $feature_slug ] = $value;
+				}
+			}
+		}
+
+		return $defaults;
+	}
+
+	/**
 	 * Get onboarding options.
 	 *
 	 * @return array The onboarding options.

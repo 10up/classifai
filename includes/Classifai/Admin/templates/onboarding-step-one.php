@@ -8,19 +8,7 @@
 $onboarding         = new Classifai\Admin\Onboarding();
 $features           = $onboarding->get_features();
 $onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
-$default_enabled    = array(
-	array(
-		'classifai_watson_nlu'  => array(
-			'post_types_post' => '1',
-			'post_types_page' => '1',
-		),
-	),
-	'classifai_computer_vision' => array(
-		'enable_image_captions' => '1',
-		'enable_image_tagging'  => '1',
-	),
-);
-$enabled_features   = $onboarding_options['enabled_features'] ?? $default_enabled;
+$enabled_features   = $onboarding_options['enabled_features'] ?? $onboarding->get_default_features();
 
 // Display any errors.
 settings_errors( 'classifai-setup' );
