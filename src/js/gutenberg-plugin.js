@@ -272,7 +272,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	// Says if the post is currently being saved.
 	const isSavingPost = useSelect( ( select ) => select( 'core/editor' ).isSavingPost() );
 
-	// Says whether if speech synthesis is in progress.
+	// Says whether speech synthesis is in progress.
 	const isProcessingAudio = useSelect( ( select ) => select( postAudioStore ).getIsProcessing() );
 
 	// Figure out if speech synthesis is supported by the current post.
@@ -335,7 +335,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Generate audio for this post.' ) }
+				label={ __( 'Generate audio for this post.', 'classifai' ) }
 				help={ isFeatureSupported
 					? __( 'ClassifAI will generate audio for the post when it is published or updated.', 'classifai' )
 					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }

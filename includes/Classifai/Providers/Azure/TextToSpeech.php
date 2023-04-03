@@ -1,26 +1,53 @@
 <?php
 /**
- * IBM Watson NLU
+ * Provides Text to Speech synthesis feature using Microsoft Azure Speech to Text.
  */
 
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
-use Classifai\Blocks;
 use WP_Http;
 
 use function Classifai\get_post_types_for_language_settings;
+use function Classifai\get_asset_info;
 
 class TextToSpeech extends Provider {
 
+	/**
+	 * Name of the feature that is displayed to the end user.
+	 *
+	 * @var string
+	 */
 	const FEATURE_NAME = 'Text to Speech';
 
+	/**
+	 * Azure's Speech to Text endpoint path.
+	 *
+	 * @var string
+	 */
 	const API_PATH = 'cognitiveservices/v1';
 
+	/**
+	 * Meta key to store data indicating whether Speech to Text is enabled for
+	 * the current post.
+	 *
+	 * @var string
+	 */
 	const SYNTHESIZE_SPEECH_KEY = '_classifai_synthesize_speech';
 
+	/**
+	 * Meta key to get/set the ID of the speech audio file.
+	 *
+	 * @var string
+	 */
 	const AUDIO_ID_KEY = '_classifai_post_audio_id';
 
+	/**
+	 * Meta key to get/set the timestamp indicating when the speech was generated.
+	 * Used for cache-busting as the audio filename remains static for a given post.
+	 *
+	 * @var string
+	 */
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
 
 	/**
@@ -173,7 +200,6 @@ class TextToSpeech extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-		$new_settings = array();
 
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$new_settings['url']     = trailingslashit( esc_url_raw( $settings['url'] ) );
@@ -445,8 +471,8 @@ class TextToSpeech extends Provider {
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
 			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.js',
-			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'post-audio-controls', 'dependencies' ),
+			get_asset_info( 'post-audio-controls', 'version' ),
 			true
 		);
 
@@ -454,7 +480,7 @@ class TextToSpeech extends Provider {
 			'classifai-post-audio-player-css',
 			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.css',
 			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
 		);
 
