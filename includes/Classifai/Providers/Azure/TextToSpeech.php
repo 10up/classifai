@@ -475,6 +475,12 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		$audio_attachment_id = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+
+		if ( ! $audio_attachment_id ) {
+			return $content;
+		}
+
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
 			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.js',
@@ -490,12 +496,6 @@ class TextToSpeech extends Provider {
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
 		);
-
-		$audio_attachment_id = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
-
-		if ( ! $audio_attachment_id ) {
-			return $content;
-		}
 
 		$audio_timestamp      = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
 		$audio_attachment_url = sprintf(
