@@ -24,9 +24,7 @@ class Onboarding {
 	 */
 	public function init() {
 		add_action( 'admin_menu', [ $this, 'register_setup_page' ] );
-		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
-		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
-		add_action( 'admin_init', [ $this, 'handle_step_three_submission' ] );
+		add_action( 'admin_init', [ $this, 'handle_step_submission' ] );
 		add_action( 'admin_init', [ $this, 'prevent_direct_step_visits' ] );
 		add_action( 'admin_post_classifai_skip_step', [ $this, 'handle_skip_setup_step' ] );
 	}
@@ -149,159 +147,138 @@ class Onboarding {
 	}
 
 	/**
-	 * Handle the submission of the first step of the onboarding wizard.
+	 * Handle the submission of the step of the onboarding wizard.
 	 *
 	 * @return void
 	 */
-	public function handle_step_one_submission() {
-		if ( ! isset( $_POST['classifai-setup-step-one-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-one-nonce'] ) ), 'classifai-setup-step-one-action' ) ) {
+	public function handle_step_submission() {
+		if ( ! isset( $_POST['classifai-setup-step-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-nonce'] ) ), 'classifai-setup-step-action' ) ) {
 			return;
 		}
 
-		$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		if ( empty( $enabled_features ) ) {
-			add_settings_error(
-				'classifai-setup',
-				'classifai-step-one-error',
-				esc_html__( 'Please enable at least one feature to set up ClassifAI.', 'classifai' ),
-				'error'
-			);
+		$step = isset( $_POST['classifai-setup-step'] ) ? absint( wp_unslash( $_POST['classifai-setup-step'] ) ) : '';
+		if ( empty( $step ) ) {
 			return;
 		}
 
 		$onboarding_options = array(
-			'status'           => 'inprogress',
-			'step_completed'   => 1,
-			'enabled_features' => $enabled_features,
+			'status' => 'inprogress',
 		);
 
-		// Save the options to use it later steps.
-		$this->update_onboarding_options( $onboarding_options );
+		switch ( $step ) {
+			case 1:
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array();
 
-		// Redirect to next setup step.
-		wp_safe_redirect( add_query_arg( 'step', 2, $this->setup_url ) );
-		exit();
-	}
-
-	/**
-	 * Handle the submission of the Register ClassifAI step of the onboarding wizard.
-	 *
-	 * @return void
-	 */
-	public function handle_step_two_submission() {
-		if ( ! isset( $_POST['classifai-setup-step-two-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-two-nonce'] ) ), 'classifai-setup-step-two-action' ) ) {
-			return;
-		}
-
-		$classifai_settings = isset( $_POST['classifai_settings'] ) ? $this->classifai_sanitize( $_POST['classifai_settings'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		// Save the ClassifAI settings.
-		update_option( 'classifai_settings', $classifai_settings );
-
-		$setting_errors = get_settings_errors( 'registration' );
-		if ( ! empty( $setting_errors ) ) {
-			// Stay on same setup step and display error.
-			return;
-		}
-
-		$onboarding_options = array(
-			'step_completed' => 2,
-		);
-
-		// Save the options to use it later steps.
-		$this->update_onboarding_options( $onboarding_options );
-
-		// Redirect to next setup step.
-		wp_safe_redirect( add_query_arg( 'step', 3, $this->setup_url ) );
-		exit();
-	}
-
-	/**
-	 * Handle the submission of ClassifAI set up AI services.
-	 *
-	 * @return void
-	 */
-	public function handle_step_three_submission() {
-		if ( ! isset( $_POST['classifai-setup-step-three-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-three-nonce'] ) ), 'classifai-setup-step-three-action' ) ) {
-			return;
-		}
-
-		// Bail if no provider provided.
-		if ( empty( $_POST['classifai-setup-provider'] ) ) {
-			return;
-		}
-
-		$providers       = $this->get_providers();
-		$provider_option = sanitize_text_field( wp_unslash( $_POST['classifai-setup-provider'] ) );
-		$provider        = $providers[ $provider_option ];
-
-		if ( empty( $provider ) ) {
-			return;
-		}
-
-		$form_data = isset( $_POST[ $provider_option ] ) ? $this->classifai_sanitize( $_POST[ $provider_option ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-
-		$settings     = $provider->get_settings();
-		$options      = self::get_onboarding_options();
-		$features     = $options['enabled_features'] ?? array();
-		$feature_data = $features[ $provider_option ] ?? array();
-
-		// Remove all features from the settings.
-		foreach ( $this->get_features() as $value ) {
-			$provider_features = $value['features'][ $provider_option ] ?? array();
-			foreach ( $provider_features as $feature => $name ) {
-				if ( ! isset( $settings[ $feature ] ) ) {
-					continue;
+				if ( empty( $enabled_features ) ) {
+					add_settings_error(
+						'classifai-setup',
+						'classifai-step-one-error',
+						esc_html__( 'Please enable at least one feature to set up ClassifAI.', 'classifai' ),
+						'error'
+					);
+					return;
 				}
-				unset( $settings[ $feature ] );
-			}
+				$onboarding_options['step_completed']       = $step;
+				$onboarding_options['enabled_features']     = $enabled_features;
+				$onboarding_options['configured_providers'] = array();
+				break;
+
+			case 2:
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$classifai_settings = isset( $_POST['classifai_settings'] ) ? $this->classifai_sanitize( $_POST['classifai_settings'] ) : array();
+
+				// Save the ClassifAI settings.
+				update_option( 'classifai_settings', $classifai_settings );
+
+				$setting_errors = get_settings_errors( 'registration' );
+				if ( ! empty( $setting_errors ) ) {
+					// Stay on same setup step and display error.
+					return;
+				}
+				$onboarding_options['step_completed'] = $step;
+				break;
+
+			case 3:
+				// Bail if no provider provided.
+				if ( empty( $_POST['classifai-setup-provider'] ) ) {
+					return;
+				}
+
+				$providers       = $this->get_providers();
+				$provider_option = sanitize_text_field( wp_unslash( $_POST['classifai-setup-provider'] ) );
+				$provider        = $providers[ $provider_option ];
+
+				if ( empty( $provider ) ) {
+					return;
+				}
+
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$form_data = isset( $_POST[ $provider_option ] ) ? $this->classifai_sanitize( $_POST[ $provider_option ] ) : array();
+
+				$settings     = $provider->get_settings();
+				$options      = self::get_onboarding_options();
+				$features     = $options['enabled_features'] ?? array();
+				$feature_data = $features[ $provider_option ] ?? array();
+
+				// Remove all features from the settings.
+				foreach ( $this->get_features() as $value ) {
+					$provider_features = $value['features'][ $provider_option ] ?? array();
+					foreach ( $provider_features as $feature => $name ) {
+						if ( ! isset( $settings[ $feature ] ) ) {
+							continue;
+						}
+						unset( $settings[ $feature ] );
+					}
+				}
+
+				// Update the settings with the new values.
+				$settings = array_merge( $settings, $form_data, $feature_data );
+
+				// Save the ClassifAI settings.
+				update_option( $provider_option, $settings );
+
+				$setting_errors = get_settings_errors();
+				if ( ! empty( $setting_errors ) ) {
+					// Stay on same setup step and display error.
+					return;
+				}
+
+				$onboarding_options   = self::get_onboarding_options();
+				$configured_providers = $onboarding_options['configured_providers'] ?? array();
+
+				$onboarding_options['configured_providers'] = array_unique( array_merge( $configured_providers, array( $provider_option ) ) );
+				// Save the options to use it later steps.
+				$this->update_onboarding_options( $onboarding_options );
+
+				// Redirect to next provider setup step.
+				$next_provider = $this->get_next_provider( $provider_option );
+				if ( ! empty( $next_provider ) ) {
+					wp_safe_redirect(
+						add_query_arg(
+							array(
+								'step' => $step,
+								'tab'  => $next_provider,
+							),
+							$this->setup_url
+						)
+					);
+					exit();
+				}
+
+				$onboarding_options['step_completed'] = $step;
+				$onboarding_options['status']         = 'completed';
+				break;
+
+			default:
+				break;
 		}
 
-		// Update the settings with the new values.
-		$settings = array_merge( $settings, $form_data, $feature_data );
-
-		// Save the ClassifAI settings.
-		update_option( $provider_option, $settings );
-
-		$setting_errors = get_settings_errors();
-		if ( ! empty( $setting_errors ) ) {
-			// Stay on same setup step and display error.
-			return;
-		}
-
-		$onboarding_options   = self::get_onboarding_options();
-		$configured_providers = $onboarding_options['configured_providers'] ?? array();
-
-		$onboarding_options['configured_providers'] = array_unique( array_merge( $configured_providers, array( $provider_option ) ) );
 		// Save the options to use it later steps.
 		$this->update_onboarding_options( $onboarding_options );
 
-		// Redirect to next provider setup step.
-		$next_provider = $this->get_next_provider( $provider_option );
-		if ( ! empty( $next_provider ) ) {
-			wp_safe_redirect(
-				add_query_arg(
-					array(
-						'step' => 3,
-						'tab'  => $next_provider,
-					),
-					$this->setup_url
-				)
-			);
-			exit();
-		}
-
-		$onboarding_options = array(
-			'status'         => 'completed',
-			'step_completed' => 3,
-		);
-
-		// Save the options to use it later steps.
-		$this->update_onboarding_options( $onboarding_options );
-
-		// Redirect to next completion step.
-		wp_safe_redirect( add_query_arg( 'step', 4, $this->setup_url ) );
+		// Redirect to next setup step.
+		wp_safe_redirect( add_query_arg( 'step', ( $step + 1 ), $this->setup_url ) );
 		exit();
 	}
 

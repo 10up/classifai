@@ -5,10 +5,6 @@
  * @package ClassifAI
  */
 
-$service_manager = new \Classifai\Services\ServicesManager();
-$email           = $service_manager->get_settings( 'email' );
-$license_key     = $service_manager->get_settings( 'license_key' );
-
 // Display any errors.
 settings_errors( 'registration' );
 ?>
@@ -31,7 +27,7 @@ settings_errors( 'registration' );
 						</span>
 						<span class="classifai-setup-footer__right">
 							<input name="classifai-setup-step" type="hidden" value="2" />
-							<?php wp_nonce_field( 'classifai-setup-step-two-action', 'classifai-setup-step-two-nonce' ); ?>
+							<?php wp_nonce_field( 'classifai-setup-step-action', 'classifai-setup-step-nonce' ); ?>
 							<input class="classifai-button" type="submit" value="<?php esc_attr_e( 'Register', 'classifai' ); ?>" />
 						</span>
 					</div>

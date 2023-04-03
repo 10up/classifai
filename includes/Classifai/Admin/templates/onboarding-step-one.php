@@ -91,7 +91,7 @@ settings_errors( 'classifai-setup' );
 				</span>
 				<span class="classifai-setup-footer__right">
 					<input name="classifai-setup-step" type="hidden" value="1" />
-					<?php wp_nonce_field( 'classifai-setup-step-one-action', 'classifai-setup-step-one-nonce' ); ?>
+					<?php wp_nonce_field( 'classifai-setup-step-action', 'classifai-setup-step-nonce' ); ?>
 					<input class="classifai-button" type="submit" value="<?php esc_attr_e( 'Start Setup', 'classifai' ); ?>" />
 				</span>
 			</div>

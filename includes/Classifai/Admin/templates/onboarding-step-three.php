@@ -63,7 +63,7 @@ settings_errors();
 						<span class="classifai-setup-footer__right">
 							<input name="classifai-setup-step" type="hidden" value="3" />
 							<input name="classifai-setup-provider" type="hidden" value="<?php echo esc_attr( $current_provider ); ?>" />
-							<?php wp_nonce_field( 'classifai-setup-step-three-action', 'classifai-setup-step-three-nonce' ); ?>
+							<?php wp_nonce_field( 'classifai-setup-step-action', 'classifai-setup-step-nonce' ); ?>
 							<input class="classifai-button" type="submit" value="<?php esc_attr_e( 'Submit', 'classifai' ); ?>" />
 						</span>
 					</div>
