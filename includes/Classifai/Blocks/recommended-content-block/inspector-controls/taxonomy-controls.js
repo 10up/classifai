@@ -11,7 +11,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
 
 const termsPerPage = 100;
-const syncTaxonomies = ['category', 'post_tag'];
+export const syncTaxonomies = ['category', 'post_tag'];
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
@@ -79,7 +79,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		};
 		onChange( { 
 			taxQuery: newTaxQuery, 
-			defaultTermsSetFor: [...query.defaultTermsSetFor, taxonomySlug] 
+			defaultTermsSetFor: [...new Set([...query.defaultTermsSetFor, taxonomySlug])] // Unique taxonomy slug array
 		} );
 	};
 	
@@ -94,10 +94,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		if ( ! taxonomyInfo ) return [];
 
 		let values = query.taxQuery?.[ taxonomySlug ] || [];
-		if ( syncTaxonomies.indexOf(taxonomySlug)>-1 && query.defaultTermsSetFor.indexOf(taxonomySlug)===-1) {
-			values = taxonomyInfo.terms.entities.map(term=>term.id);
-		}
-		
+
 		// Iterate over the the selected terms of the taxonomy and return a prepared array
 		return values.reduce(
 			( accumulator, termId ) => {

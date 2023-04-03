@@ -25,6 +25,34 @@ function register() {
 	);
 
 	add_filter( 'classifai_recommended_block_attributes', $n( 'use_default_post_terms' ) );
+	add_action( 'wp_ajax_classifai_get_post_info', $n( 'get_post_info' ) );
+}
+
+function get_post_info() {
+	$post_id = (int) $_GET['post_id'];
+	$index = (int) $_GET['block_index'];
+
+	$content = get_the_content( null, false, $post_id );
+	$blocks  = parse_blocks( $content );
+	$blocks  = array_values( 
+		array_filter(
+			$blocks, 
+			function( $block ){
+				return ! empty( $block['blockName'] ) && 'classifai/recommended-content-block' === $block['blockName'];
+			}
+		)
+	);
+	$attributes = isset( $blocks[ $index ] ) ? $blocks[ $index ] : null;
+	$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
+	$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
+
+	wp_send_json_success( 
+		array( 
+			'attributes' => $attributes,  
+			'categories' => $categories,
+			'tags'       => $tags,
+		) 
+	); 
 }
 
 /**
