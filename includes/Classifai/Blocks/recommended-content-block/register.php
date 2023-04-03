@@ -28,31 +28,36 @@ function register() {
 	add_action( 'wp_ajax_classifai_get_post_info', $n( 'get_post_info' ) );
 }
 
+/**
+ * Get post info to set default terms based on.
+ *
+ * @return void
+ */
 function get_post_info() {
-	$post_id = (int) $_GET['post_id'];
-	$index = (int) $_GET['block_index'];
-
+	$post_id = ! empty( $_GET['post_id'] ) ? (int) $_GET['post_id'] : 0;
+	$index   = ! empty( $_GET['block_index'] ) ? (int) $_GET['block_index'] : null;
 	$content = get_the_content( null, false, $post_id );
 	$blocks  = parse_blocks( $content );
-	$blocks  = array_values( 
+	$blocks  = array_values(
 		array_filter(
-			$blocks, 
-			function( $block ){
+			$blocks,
+			function( $block ) {
 				return ! empty( $block['blockName'] ) && 'classifai/recommended-content-block' === $block['blockName'];
 			}
 		)
 	);
+
 	$attributes = isset( $blocks[ $index ] ) ? $blocks[ $index ] : null;
 	$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
 	$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
 
-	wp_send_json_success( 
-		array( 
+	wp_send_json_success(
+		array(
 			'attributes' => $attributes,  
 			'categories' => $categories,
 			'tags'       => $tags,
-		) 
-	); 
+		)
+	);
 }
 
 /**

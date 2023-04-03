@@ -11,7 +11,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
 
 const termsPerPage = 100;
-export const syncTaxonomies = ['category', 'post_tag'];
+export const syncTaxonomies = [ 'category', 'post_tag' ];
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
@@ -44,23 +44,26 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 	// Get available taxonomies for the selected post type
 	const taxonomies = useTaxonomies( query.contentPostType );
-	
+
 	// Get those taxonomy name, slug and terms
-	const taxonomiesInfo = useSelect(
-		( select ) => {
-			const { getEntityRecords } = select( coreStore );
-			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
-				const _terms = getEntityRecords( 'taxonomy', slug, { per_page: termsPerPage } );
-				return {
-					slug,
-					name,
-					terms: getEntitiesInfo( _terms ),
-				};
-			} );
-			return _taxonomiesInfo;
-		},
-		[ taxonomies ]
-	) || [];
+	const taxonomiesInfo =
+		useSelect(
+			( select ) => {
+				const { getEntityRecords } = select( coreStore );
+				const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
+					const _terms = getEntityRecords( 'taxonomy', slug, {
+						per_page: termsPerPage,
+					} );
+					return {
+						slug,
+						name,
+						terms: getEntitiesInfo( _terms ),
+					};
+				} );
+				return _taxonomiesInfo;
+			},
+			[ taxonomies ]
+		) || [];
 
 	const onTermsChange = ( taxonomySlug ) => ( newTermValues ) => {
 		const taxonomyInfo = taxonomiesInfo.find(
@@ -91,7 +94,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		};
 		onChange( { taxQuery: newTaxQuery } );
 	};
-	
+
 	// Returns only the existing term ids in proper format to be
 	// used in `FormTokenField`. This prevents the component from
 	// crashing in the editor, when non existing term ids were provided.
@@ -123,20 +126,31 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
-			{
-				!! taxonomiesInfo?.length && taxonomiesInfo.filter(({slug})=>syncTaxonomies.indexOf(slug)>-1).length &&
-				<ToggleControl
-					label={ __( 'Use this Post\'s Categories and Tags', 'classifai' ) }
-					checked={ usePostTerms }
-					onChange={ usePostTerms => onChange({usePostTerms}) }
-				/> || null
-			}
-			
+			{ ( !! taxonomiesInfo?.length &&
+				taxonomiesInfo.filter(
+					( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
+				).length && (
+					<ToggleControl
+						label={ __(
+							"Use this Post's Categories and Tags",
+							'classifai'
+						) }
+						checked={ usePostTerms }
+						onChange={ ( usePostTerms ) =>
+							onChange( { usePostTerms } )
+						}
+					/>
+				) ) ||
+				null }
+
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {
-					if ( ! terms?.names?.length || ( usePostTerms && syncTaxonomies.indexOf(slug)>-1 )) {
+					if (
+						! terms?.names?.length ||
+						( usePostTerms && syncTaxonomies.indexOf( slug ) > -1 )
+					) {
 						return null;
-					}					
+					}
 
 					return (
 						<FormTokenField

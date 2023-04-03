@@ -19,7 +19,9 @@ import {
 import { list, grid } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
-import TaxonomyControls, { syncTaxonomies } from './inspector-controls/taxonomy-controls';
+import TaxonomyControls, {
+	syncTaxonomies,
+} from './inspector-controls/taxonomy-controls';
 import { usePostTypes } from './utils';
 import { useEffect, useState } from '@wordpress/element';
 
@@ -62,7 +64,8 @@ const RecommendedContentBlockEdit = ( props ) => {
 	);
 
 	const blockProps = useBlockProps();
-	const { postTypesTaxonomiesMap=[], postTypesSelectOptions } = usePostTypes();
+	const { postTypesTaxonomiesMap = [], postTypesSelectOptions } =
+		usePostTypes();
 	const onPostTypeChange = ( newValue ) => {
 		const updateQuery = { contentPostType: newValue };
 		// We need to dynamically update the `taxQuery` property,
@@ -99,48 +102,62 @@ const RecommendedContentBlockEdit = ( props ) => {
 		},
 	];
 
-	const getPostInfo=blockIndex=>{
+	const getPostInfo = ( blockIndex ) => {
 		window.jQuery.getJSON(
-			window.ajaxurl+'?action=classifai_get_post_info&post_id='+postId+'&block_index='+blockIndex, 
-			function(r){
-				let {data={}} = r;
-				let {categories: category, tags:post_tag, attributes: savedAttrs } = data;
+			window.ajaxurl +
+				'?action=classifai_get_post_info&post_id=' +
+				postId +
+				'&block_index=' +
+				blockIndex,
+			function ( r ) {
+				const { data = {} } = r;
+				const {
+					categories: category,
+					tags: post_tag,
+					attributes: savedAttrs,
+				} = data;
 
-				if(!(savedAttrs===null)) {
+				if ( ! ( savedAttrs === null ) ) {
 					// It's old mounted block, don't set default terms as it will change current behavior. Just mark as terms set
-					setAttributes({defaultTermsSetFor:syncTaxonomies});
+					setAttributes( { defaultTermsSetFor: syncTaxonomies } );
 				} else {
 					// It's newly mounted block. So set current post terms as default for the first time, and mark as terms set.
-					setAttributes({
-						taxQuery:{
-							...attributes.taxQuery, 
-							category, 
-							post_tag
+					setAttributes( {
+						taxQuery: {
+							...attributes.taxQuery,
+							category,
+							post_tag,
 						},
-						defaultTermsSetFor: syncTaxonomies
-					});
+						defaultTermsSetFor: syncTaxonomies,
+					} );
 				}
 			}
 		);
-	}
+	};
 
-	useEffect(()=>{
+	useEffect( () => {
 		if ( ! window.classifaiRecommendedContentBlockIndex ) {
 			window.classifaiRecommendedContentBlockIndex = [];
 		}
-		window.classifaiRecommendedContentBlockIndex.push(blockId);
-		const blockIndex = window.classifaiRecommendedContentBlockIndex.indexOf(blockId);
-		
+		window.classifaiRecommendedContentBlockIndex.push( blockId );
+		const blockIndex =
+			window.classifaiRecommendedContentBlockIndex.indexOf( blockId );
+
 		if ( ! contentPostType ) {
-			onPostTypeChange( wp.data.select('core/editor').getCurrentPostType() || 'post' );
+			onPostTypeChange(
+				wp.data.select( 'core/editor' ).getCurrentPostType() || 'post'
+			);
 		}
 
 		getPostInfo( blockIndex );
 
-		return ()=>{
-			window.classifaiRecommendedContentBlockIndex.splice(blockIndex, 1);
-		}
-	}, []);
+		return () => {
+			window.classifaiRecommendedContentBlockIndex.splice(
+				blockIndex,
+				1
+			);
+		};
+	}, [] );
 
 	return (
 		<div { ...blockProps }>
@@ -162,7 +179,10 @@ const RecommendedContentBlockEdit = ( props ) => {
 					{ postTypesSelectOptions && (
 						<TaxonomyControls
 							onChange={ setAttributes }
-							attributes={ { ...attributes, blockId: blockProps.id } }
+							attributes={ {
+								...attributes,
+								blockId: blockProps.id,
+							} }
 							usePostTerms={ usePostTerms }
 						/>
 					) }
