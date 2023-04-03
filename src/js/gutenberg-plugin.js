@@ -6,7 +6,7 @@ import { store as postAudioStore } from './store/register';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 
-const { useSelect, useDispatch } = wp.data;
+const { select, dispatch, useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { Icon, ToggleControl, Button, ButtonGroup, BaseControl } = wp.components;
 const { __, sprintf } = wp.i18n;
@@ -145,9 +145,9 @@ const ClassifAIGenerateTagsButton = () => {
 		return null;
 	}
 
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postTypeLabel =
-		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
+		select( 'core/editor' ).getPostTypeLabel() ||
 		__( 'Post', 'classifai' );
 	const buttonText = sprintf(
 		/** translators: %s Post type label */
@@ -190,7 +190,7 @@ const ClassifAIGenerateTagsButton = () => {
 let errorCode = '';
 
 /**
- * Calls the server-side method that synthesis speech for a post.
+ * Calls the server-side method that synthesizes speech for a post.
  *
  * @param {number} postId The Post ID
  * @return {boolean} Returns true on success.
@@ -200,7 +200,7 @@ const synthesizeSpeech = async ( postId ) => {
 	const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ postId }`;
 
 	// Stores status of the synthensis process.
-	const isProcessing = wp.data.select( postAudioStore ).getIsProcessing();
+	const isProcessing = select( postAudioStore ).getIsProcessing();
 
 	// Return early if already processing.
 	if ( isProcessing ) {
@@ -208,7 +208,7 @@ const synthesizeSpeech = async ( postId ) => {
 	}
 
 	// Set state indicating the synthesis process has begun.
-	wp.data.dispatch( postAudioStore ).setIsProcessing( true );
+	dispatch( postAudioStore ).setIsProcessing( true );
 
 	const response = await fetch(
 		synthesizeSpeechUrl,
@@ -222,7 +222,7 @@ const synthesizeSpeech = async ( postId ) => {
 	// Return false if error.
 	if ( 200 !== response.status ) {
 		// Set state indicating the synthesis process has ended.
-		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+		dispatch( postAudioStore ).setIsProcessing( false );
 		return false;
 	}
 
@@ -230,23 +230,23 @@ const synthesizeSpeech = async ( postId ) => {
 
 	if ( result.success ) {
 		// Set audio ID state after successful synthesis.
-		wp.data.dispatch( postAudioStore ).setAudioId( result.audio_id );
+		dispatch( postAudioStore ).setAudioId( result.audio_id );
 
 		// Set state indicating the synthesis process has ended.
-		wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+		dispatch( postAudioStore ).setIsProcessing( false );
 
 		if ( errorCode ) {
-			wp.data.dispatch( noticesStore ).removeNotice( errorCode );
+			dispatch( noticesStore ).removeNotice( errorCode );
 			errorCode = '';
 		}
 
 		return true;
 	}
 	errorCode = result.code;
-	wp.data.dispatch( 'core/notices' ).createErrorNotice( result.message, {
+	dispatch( 'core/notices' ).createErrorNotice( result.message, {
 		id: errorCode,
 	} );
-	wp.data.dispatch( postAudioStore ).setIsProcessing( false );
+	dispatch( postAudioStore ).setIsProcessing( false );
 };
 
 /**
@@ -326,7 +326,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 			return;
 		}
 
-		wp.data.dispatch( 'core/editor' ).savePost();
+		dispatch( 'core/editor' ).savePost();
 	}
 
 	// Fetches the latest audio file to avoid disk cache.
@@ -341,7 +341,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
-					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
+					dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
 				} }
 				disabled={ ! isFeatureSupported }
 			/>
@@ -384,20 +384,20 @@ let isPostSavingInProgress = false;
 
 // Synthesises audio for the post whenever a post is publish/updated.
 wp.data.subscribe( function() {
-	const isSynthesizeSpeech = 'yes' === wp.data.select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' );
+	const isSynthesizeSpeech = 'yes' === select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' );
 
 	if ( ! isSynthesizeSpeech ) {
 		return;
 	}
 
 	// Says whether if post is saving?
-	let isSavingPost = wp.data.select( 'core/editor' ).isSavingPost();
+	let isSavingPost = select( 'core/editor' ).isSavingPost();
 
 	// Says whether if post is autosaving?
-	const isAutosavingPost = wp.data.select( 'core/editor' ).isAutosavingPost();
+	const isAutosavingPost = select( 'core/editor' ).isAutosavingPost();
 
 	// Current post ID.
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postId = select( 'core/editor' ).getCurrentPostId();
 
 	// We want the speech synthesis to only happen on save and not autosave.
 	isSavingPost = isSavingPost && ! isAutosavingPost;
