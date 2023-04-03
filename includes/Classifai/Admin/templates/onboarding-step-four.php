@@ -1,6 +1,6 @@
 <?php
 /**
- * Step-1 template for ClassifAI Onboarding.
+ * Step-4 template for ClassifAI Onboarding.
  *
  * @package ClassifAI
  */
@@ -8,8 +8,8 @@
 use function Classifai\get_post_types_for_language_settings;
 
 $onboarding_options   = get_option( 'classifai_onboarding_options', array() );
-$enabled_features     = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
-$configured_providers = isset( $onboarding_options['configured_providers'] ) ? $onboarding_options['configured_providers'] : array();
+$enabled_features     = $onboarding_options['enabled_features'] ?? array();
+$configured_providers = $onboarding_options['configured_providers'] ?? array();
 ?>
 <h1 class="classifai-setup-heading">
 	<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
@@ -39,7 +39,7 @@ $configured_providers = isset( $onboarding_options['configured_providers'] ) ? $
 						<ul>
 							<?php
 							$types    = get_post_types_for_language_settings();
-							$features = isset( $enabled_features['language']['classify'] ) ? $enabled_features['language']['classify'] : array();
+							$features = $enabled_features['language']['classify'] ?? array();
 							foreach ( $types as $posttype ) {
 								if ( ! isset( $features[ $posttype->name ] ) ) {
 									continue;
@@ -61,7 +61,7 @@ $configured_providers = isset( $onboarding_options['configured_providers'] ) ? $
 								<li class="classifai-enable-feature">
 									<span class="dashicons dashicons-yes-alt"></span>
 									<label class="classifai-feature-text">
-										<?php esc_html_e( 'Automatic excerpt generation', 'classifai' ); ?>
+										<?php esc_html_e( 'Excerpt generation', 'classifai' ); ?>
 									</label>
 								</li>
 								<?php
@@ -83,9 +83,9 @@ $configured_providers = isset( $onboarding_options['configured_providers'] ) ? $
 						<ul>
 							<?php
 							$image_features = array(
-								'image_captions' => __( 'Automatically add alt-text to Images', 'classifai' ),
-								'image_tags'     => __( 'Automatically tag Images', 'classifai' ),
-								'image_crop'     => __( 'Smart crop Images', 'classifai' ),
+								'image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
+								'image_tags'     => __( 'Automatically tag images', 'classifai' ),
+								'image_crop'     => __( 'Smart crop images', 'classifai' ),
 								'image_ocr'      => __( 'Scan images for text', 'classifai' ),
 							);
 							foreach ( $image_features as $image_feature => $image_feature_label ) {

@@ -20,7 +20,7 @@ $default_enabled    = array(
 		'image_tags'     => 'yes',
 	),
 );
-$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : $default_enabled;
+$enabled_features   = $onboarding_options['enabled_features'] ?? $default_enabled;
 
 // Display any errors.
 settings_errors( 'classifai-setup' );
@@ -49,9 +49,9 @@ settings_errors( 'classifai-setup' );
 					<ul>
 						<?php
 						$types    = get_post_types_for_language_settings();
-						$features = isset( $enabled_features['language']['classify'] ) ? $enabled_features['language']['classify'] : array();
+						$features = $enabled_features['language']['classify'] ?? array();
 						foreach ( $types as $posttype ) {
-							$checked = isset( $features[ $posttype->name ] ) ? $features[ $posttype->name ] : '';
+							$checked = $features[ $posttype->name ] ?? '';
 							?>
 							<li class="classifai-enable-feature">
 								<label class="classifai-toggle">
@@ -72,7 +72,7 @@ settings_errors( 'classifai-setup' );
 						<li class="classifai-enable-feature">
 							<label class="classifai-toggle">
 								<span class="classifai-feature-text">
-									<?php esc_html_e( 'Automatic excerpt generation', 'classifai' ); ?>
+									<?php esc_html_e( 'Excerpt generation', 'classifai' ); ?>
 								</span>
 								<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[language][excerpt_generation]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
 								<span class="classifai-toggle-switch"></span>
@@ -91,9 +91,9 @@ settings_errors( 'classifai-setup' );
 					<ul>
 						<?php
 						$image_features = array(
-							'image_captions' => __( 'Automatically add alt-text to Images', 'classifai' ),
-							'image_tags'     => __( 'Automatically tag Images', 'classifai' ),
-							'image_crop'     => __( 'Smart crop Images', 'classifai' ),
+							'image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
+							'image_tags'     => __( 'Automatically tag images', 'classifai' ),
+							'image_crop'     => __( 'Smart crop images', 'classifai' ),
 							'image_ocr'      => __( 'Scan images for text', 'classifai' ),
 						);
 						foreach ( $image_features as $image_feature => $image_feature_label ) {

@@ -1,6 +1,6 @@
 <?php
 /**
- * Step-1 template for ClassifAI Onboarding.
+ * Step-2 template for ClassifAI Onboarding.
  *
  * @package ClassifAI
  */

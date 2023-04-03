@@ -13,7 +13,13 @@ class Onboarding {
 	 */
 	public function __construct() {
 		$this->setup_url = admin_url( 'admin.php?page=classifai_setup' );
+	}
 
+
+	/**
+	 * Inintialize the class and register the actions needed.
+	 */
+	public function init() {
 		add_action( 'admin_menu', [ $this, 'register_setup_page' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_one_submission' ] );
 		add_action( 'admin_init', [ $this, 'handle_step_two_submission' ] );
@@ -290,7 +296,7 @@ class Onboarding {
 		}
 
 		$onboarding_options   = self::get_onboarding_options();
-		$configured_providers = isset( $onboarding_options['configured_providers'] ) ? $onboarding_options['configured_providers'] : array();
+		$configured_providers = $onboarding_options['configured_providers'] ?? array();
 
 		$onboarding_options['configured_providers'] = array_unique( array_merge( $configured_providers, array( $provider_option ) ) );
 		// Save the options to use it later steps.
@@ -507,7 +513,7 @@ class Onboarding {
 		$providers          = self::get_setup_providers();
 		$enabled_providers  = array();
 		$onboarding_options = self::get_onboarding_options();
-		$enabled_features   = isset( $onboarding_options['enabled_features'] ) ? $onboarding_options['enabled_features'] : array();
+		$enabled_features   = $onboarding_options['enabled_features'] ?? array();
 
 		foreach ( $enabled_features as $feature => $value ) {
 			if ( 'language' === $feature ) {

@@ -67,8 +67,9 @@ class Plugin {
 			);
 		}
 
-		// initialize the classifAI Onboarding.
-		new Admin\Onboarding();
+		// Initialize the classifAI Onboarding.
+		$onboarding = new Admin\Onboarding();
+		$onboarding->init();
 
 		/**
 		 * Fires after ClassifAI services are loaded.
