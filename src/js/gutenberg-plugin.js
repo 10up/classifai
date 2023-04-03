@@ -6,7 +6,7 @@ import { store as postAudioStore } from './store/register';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 
-const { select, dispatch, useSelect, useDispatch } = wp.data;
+const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
 const { Icon, ToggleControl, Button, ButtonGroup, BaseControl } = wp.components;
 const { __, sprintf } = wp.i18n;
@@ -145,9 +145,9 @@ const ClassifAIGenerateTagsButton = () => {
 		return null;
 	}
 
-	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
 	const postTypeLabel =
-		select( 'core/editor' ).getPostTypeLabel() ||
+		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
 		__( 'Post', 'classifai' );
 	const buttonText = sprintf(
 		/** translators: %s Post type label */
@@ -196,6 +196,8 @@ let errorCode = '';
  * @return {boolean} Returns true on success.
  */
 const synthesizeSpeech = async ( postId ) => {
+	const { select, dispatch } = wp.data;
+
 	// Endpoint URL.
 	const synthesizeSpeechUrl = `${ wpApiSettings.root }classifai/v1/synthesize-speech/${ postId }`;
 
@@ -326,7 +328,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 			return;
 		}
 
-		dispatch( 'core/editor' ).savePost();
+		wp.data.dispatch( 'core/editor' ).savePost();
 	}
 
 	// Fetches the latest audio file to avoid disk cache.
@@ -341,7 +343,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
-					dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
+					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
 				} }
 				disabled={ ! isFeatureSupported }
 			/>
@@ -384,6 +386,8 @@ let isPostSavingInProgress = false;
 
 // Synthesises audio for the post whenever a post is publish/updated.
 wp.data.subscribe( function() {
+	const { select } = wp.data;
+
 	const isSynthesizeSpeech = 'yes' === select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' );
 
 	if ( ! isSynthesizeSpeech ) {

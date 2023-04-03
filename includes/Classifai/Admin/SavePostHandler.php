@@ -225,6 +225,7 @@ class SavePostHandler {
 		$request_params = array(
 			'method'  => 'POST',
 			'body'    => $request_body,
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'headers' => array(
 				'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 				'Content-Type'              => 'application/ssml+xml',
@@ -238,7 +239,7 @@ class SavePostHandler {
 		if ( is_wp_error( $response ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_http_error',
-				esc_html__( 'Error with the HTTP request.', 'classifai' )
+				esc_html( $response->get_error_message() )
 			);
 		}
 

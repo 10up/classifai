@@ -71,7 +71,7 @@ class TextToSpeech extends Provider {
 	 * Re-connects to the service on page load when the transient expires.
 	 */
 	public function maybe_connect_on_init() {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : false;
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( 'azure_text_to_speech' !== $active_tab ) {
 			return;
