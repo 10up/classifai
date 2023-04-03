@@ -434,6 +434,7 @@ input.classifai-button {
 
 		.classifai-setup-image {
 			text-align: center;
+			margin-top: 20px;
 		}
 
 		h1.classifai-setup-title {
@@ -441,13 +442,19 @@ input.classifai-button {
 			padding: 0px;
 		}
 
-		.classifai-step1-content {
+		.classifai-step1-content,
+		.classifai-step4-content {
 			max-width: 400px;
+			margin-top: 20px;
 		}
 
 		.classifai-step2-content{
 			max-width: 480px;
 			margin: 0 auto;
+		}
+
+		.classifai-setup-footer {
+			margin-top: 40px;
 		}
 
 		.classifai-feature-box {
@@ -500,7 +507,8 @@ input.classifai-button {
 		}
 
 		@media screen and (max-width: 767px) {
-			.classifai-step1-content {
+			.classifai-step1-content,
+			.classifai-step4-content {
 				max-width: 100%;
 				margin-top: 20px;
 			}
@@ -549,9 +557,14 @@ input.classifai-button {
 				margin-bottom: 12px;
 			}
 
-			.classifai-setup-form {
+			.classifai-setup-form,
+			.classifai-setup-footer {
 				margin: 0 auto;
 				max-width: 480px;
+			}
+
+			.classifai-setup-footer {
+				margin-top: 40px;
 			}
 		}
 
@@ -611,10 +624,6 @@ input.classifai-button {
 		p.classifai-setup-error {
 			text-align: center;
 			color: red;
-		}
-
-		.classifai-spacer {
-			padding: 12px 0px;
 		}
 
 		span.classifai-input-description {
