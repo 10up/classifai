@@ -105,7 +105,7 @@ class TextToSpeech extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		$options = get_option( $this->get_option_name() );
+		$options = $this->get_settings();
 
 		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
 			return false;
@@ -254,9 +254,10 @@ class TextToSpeech extends Provider {
 	 * Connects to Azure's Text to Speech service.
 	 *
 	 * @param array $args Overridable args.
+	 * @return boolean
 	 */
-	public function connect_to_service( $args = array() ) {
-		$options = get_option( $this->get_option_name(), array() );
+	public function connect_to_service( array $args = array() ) {
+		$options = $this->get_settings();
 
 		$default = array(
 			'url'     => isset( $options['url'] ) ? $options['url'] : '',
@@ -358,9 +359,9 @@ class TextToSpeech extends Provider {
 			// phpcs:disable
 			$options[ "{$voice->ShortName}|{$voice->Gender}" ] = sprintf(
 				'%1$s (%2$s/%3$s)',
-				$voice->LocaleName,
-				$voice->DisplayName,
-				$voice->Gender
+				esc_html( $voice->LocaleName ),
+				esc_html( $voice->DisplayName ),
+				esc_html( $voice->Gender )
 			);
 			// phpcs:enable
 		}
@@ -383,8 +384,8 @@ class TextToSpeech extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )  => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )        => $settings['url'] ?? '',
+			__( 'Authenticated', 'classifai' ) => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
+			__( 'API URL', 'classifai' )       => $settings['url'] ?? '',
 		];
 	}
 
@@ -404,8 +405,8 @@ class TextToSpeech extends Provider {
 	 * Add `classifai_synthesize_speech` to rest API for view/edit.
 	 */
 	public function add_synthesize_speech_meta_to_rest_api() {
-		$settings             = \Classifai\get_plugin_settings( 'language_processing', self::FEATURE_NAME );
-		$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
+		$settings             = $this->get_settings();
+		$supported_post_types = $settings['post_types'] ?? array();
 
 		$supported_post_types = array_keys(
 			array_filter(
@@ -464,6 +465,12 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		/**
+		 * Filter to disable Text to Speech synthesis for a post by post ID.
+		 *
+		 * @param boolean 'is_disabled' Boolean to toggle the service. By default - false.
+		 * @param boolean 'post_id'     Post ID.
+		 */
 		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
 			return $content;
 		}
@@ -484,7 +491,7 @@ class TextToSpeech extends Provider {
 			'all'
 		);
 
-		$audio_attachment_id  = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+		$audio_attachment_id = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
 
 		if ( ! $audio_attachment_id ) {
 			return $content;
