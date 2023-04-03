@@ -192,7 +192,7 @@ class SavePostHandler {
 		}
 
 		$normalizer   = new Normalizer();
-		$settings     = \Classifai\get_azure_text_to_speech_settings();
+		$settings     = \Classifai\get_plugin_settings( 'language_processing', TextToSpeech::FEATURE_NAME );
 		$post         = get_post( $post_id );
 		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
 		$voice        = $settings['voice'] ?? '';
@@ -275,7 +275,7 @@ class SavePostHandler {
 			$response_body
 		);
 
-		if ( isset( $file_data['error'] ) ) {
+		if ( isset( $file_data['error'] ) && ! empty( $file_data['error'] ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_upload_bits_failure',
 				esc_html( $file_data['error'] )

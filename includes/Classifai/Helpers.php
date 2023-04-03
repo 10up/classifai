@@ -5,6 +5,7 @@ namespace Classifai;
 use Classifai\Providers\Provider;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
+use Classifai\Providers\Azure\TextToSpeech;
 
 /**
  * Miscellaneous Helper functions to access different parts of the
@@ -593,39 +594,6 @@ function attachment_is_pdf( $post ) {
 	}
 
 	return false;
-}
-
-/**
- * Returns the settings for Azure's Text to Speech Provider.
- * Found at `/wp-admin/admin.php?page=language_processing&tab=azure_text_to_speech`
- *
- * @todo Move this to a more generic method during refactoring of the plugin.
- * @return array
- */
-function get_azure_text_to_speech_settings() {
-	$provider = new \Classifai\Providers\Azure\TextToSpeech( false );
-
-	return $provider->get_settings();
-}
-
-/**
- * Returns supported post types for Azure Text to Speech.
- *
- * @todo Move this to a more generic method during refactoring of the plugin.
- * @return array
- */
-function get_supported_post_types_for_azure_text_to_speech() {
-	$settings             = \Classifai\get_azure_text_to_speech_settings();
-	$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
-
-	return array_keys(
-		array_filter(
-			$supported_post_types,
-			function( $post_type ) {
-				return ! is_null( $post_type );
-			}
-		)
-	);
 }
 
 /** Get asset info from extracted asset files.

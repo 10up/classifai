@@ -13,6 +13,8 @@ use function Classifai\get_post_types_for_language_settings;
 
 class TextToSpeech extends Provider {
 
+	const FEATURE_NAME = 'Text to Speech';
+
 	const API_PATH = 'cognitiveservices/v1';
 
 	const SYNTHESIZE_SPEECH_KEY = '_classifai_synthesize_speech';
@@ -29,7 +31,7 @@ class TextToSpeech extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Text to Speech',
+			self::FEATURE_NAME,
 			'azure_text_to_speech',
 			$service
 		);
@@ -64,7 +66,7 @@ class TextToSpeech extends Provider {
 			'classifai-gutenberg-plugin',
 			'classifaiTextToSpeechData',
 			[
-				'supportedPostTypes' => \Classifai\get_supported_post_types_for_azure_text_to_speech(),
+				'supportedPostTypes' => self::get_supported_post_types(),
 				'noPermissions'      => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
 		);
@@ -376,7 +378,7 @@ class TextToSpeech extends Provider {
 	 * Add `classifai_synthesize_speech` to rest API for view/edit.
 	 */
 	public function add_synthesize_speech_meta_to_rest_api() {
-		$settings             = \Classifai\get_azure_text_to_speech_settings();
+		$settings             = \Classifai\get_plugin_settings( 'language_processing', self::FEATURE_NAME );
 		$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
 
 		$supported_post_types = array_keys(
@@ -549,5 +551,25 @@ class TextToSpeech extends Provider {
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
+	}
+
+	/**
+	 * Returns supported post types for Azure Text to Speech.
+	 *
+	 * @todo Move this to a more generic method during refactoring of the plugin.
+	 * @return array
+	 */
+	public static function get_supported_post_types() {
+		$settings             = \Classifai\get_plugin_settings( 'language_processing', self::FEATURE_NAME );
+		$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
+
+		return array_keys(
+			array_filter(
+				$supported_post_types,
+				function( $post_type ) {
+					return ! is_null( $post_type );
+				}
+			)
+		);
 	}
 }
