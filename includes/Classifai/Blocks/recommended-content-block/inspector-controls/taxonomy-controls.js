@@ -77,10 +77,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 			...query.taxQuery,
 			[ taxonomySlug ]: termIds,
 		};
-		onChange( { 
-			taxQuery: newTaxQuery, 
-			defaultTermsSetFor: [...new Set([...query.defaultTermsSetFor, taxonomySlug])] // Unique taxonomy slug array
-		} );
+		onChange( { taxQuery: newTaxQuery } );
 	};
 	
 	// Returns only the existing term ids in proper format to be
