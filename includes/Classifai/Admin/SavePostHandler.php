@@ -181,7 +181,7 @@ class SavePostHandler {
 		$settings     = \Classifai\get_azure_text_to_speech_settings();
 		$post         = get_post( $post_id );
 		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
-		$voice        = isset( $settings['voice'] ) ? $settings['voice'] : '';
+		$voice        = $settings['voice'] ?? '';
 		$voice_data   = explode( '|', $voice );
 		$voice_name   = '';
 		$voice_gender = '';
@@ -261,6 +261,13 @@ class SavePostHandler {
 			$response_body
 		);
 
+		if ( isset( $file_data['error'] ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_upload_bits_failure',
+				esc_html( $file_data['error'] )
+			);
+		}
+
 		// Insert the audio file as attachment.
 		$attachment_id = wp_insert_attachment(
 			array(
@@ -272,15 +279,15 @@ class SavePostHandler {
 		);
 
 		// Return error if creation of attachment fails.
-		if ( is_wp_error( $attachment_id ) ) {
+		if ( ! $attachment_id ) {
 			return new \WP_Error(
 				'azure_text_to_speech_resource_creation_failure',
 				esc_html__( 'Audio creation failed.', 'classifai' )
 			);
-		} else {
-			update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, $attachment_id );
-			update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
 		}
+
+		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, $attachment_id );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
 
 		return $attachment_id;
 	}
