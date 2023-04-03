@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use stdClass;
 use WP_Http;
 
 use function Classifai\get_post_types_for_language_settings;
@@ -62,6 +63,39 @@ class TextToSpeech extends Provider {
 			'azure_text_to_speech',
 			$service
 		);
+
+		add_action( 'admin_init', array( $this, 'maybe_connect_on_init' ) );
+	}
+
+	/**
+	 * Re-connects to the service on page load when the transient expires.
+	 */
+	public function maybe_connect_on_init() {
+		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : false;
+
+		if ( 'azure_text_to_speech' !== $active_tab ) {
+			return;
+		}
+
+		$settings = $this->get_settings();
+
+		// In case the transient expires, we reconnect to the service.
+		if ( isset( $settings['url'] ) && isset( $settings['api_key'] ) ) {
+			if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
+				$is_connected = $this->connect_to_service(
+					array(
+						'url'     => $settings['url'],
+						'api_key' => $settings['api_key'],
+					)
+				);
+
+				$settings['authenticated'] = $is_connected;
+
+				if ( ! is_null( $is_connected ) ) {
+					update_option( 'classifai_azure_text_to_speech', $settings );
+				}
+			}
+		}
 	}
 
 	/**
@@ -209,7 +243,8 @@ class TextToSpeech extends Provider {
 				array(
 					'url'     => $new_settings['url'],
 					'api_key' => $new_settings['api_key'],
-				)
+				),
+				true
 			);
 
 			if ( is_wp_error( $is_connected ) ) {
@@ -253,10 +288,11 @@ class TextToSpeech extends Provider {
 	/**
 	 * Connects to Azure's Text to Speech service.
 	 *
-	 * @param array $args Overridable args.
-	 * @return boolean
+	 * @param array   $args             Overridable args.
+	 * @param boolean $ignore_transient Boolean to ignore transient. Used to reconnect to the service.
+	 * @return boolean|null
 	 */
-	public function connect_to_service( array $args = array() ) {
+	public function connect_to_service( array $args = array(), $ignore_transient = false ) {
 		$options = $this->get_settings();
 
 		$default = array(
@@ -269,8 +305,8 @@ class TextToSpeech extends Provider {
 		$voices_transient = get_transient( 'classifai-azure-speech-to-text-voices' );
 
 		// Return if transient exists.
-		if ( false !== $voices_transient ) {
-			return false;
+		if ( false !== $voices_transient && $ignore_transient ) {
+			return null;
 		}
 
 		// Return if credentials don't exist.
@@ -313,7 +349,7 @@ class TextToSpeech extends Provider {
 			add_settings_error(
 				$this->get_option_name(),
 				'azure-text-to-request-failed',
-				esc_html__( 'HTTP request failed.', 'classifai' ),
+				esc_html__( 'Azure Speech to Text: HTTP request failed.', 'classifai' ),
 				'error'
 			);
 			return false;
@@ -333,8 +369,21 @@ class TextToSpeech extends Provider {
 			return false;
 		}
 
-		$response_body = wp_remote_retrieve_body( $response );
-		$voices        = json_decode( $response_body );
+		$response_body    = wp_remote_retrieve_body( $response );
+		$voices           = json_decode( $response_body );
+		$sanitized_voices = array();
+
+		if ( is_array( $voices ) ) {
+			foreach ( $voices as $voice ) {
+				$voice_object = new stdClass();
+
+				foreach ( $voice as $key => $value ) {
+					$voice_object->$key = sanitize_text_field( $value );
+				}
+
+				$sanitized_voices[] = $voice_object;
+			}
+		}
 
 		set_transient( 'classifai-azure-speech-to-text-voices', $voices, MONTH_IN_SECONDS );
 
@@ -462,6 +511,10 @@ class TextToSpeech extends Provider {
 		global $post;
 
 		if ( ! $post ) {
+			return $content;
+		}
+
+		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {
 			return $content;
 		}
 
