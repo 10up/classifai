@@ -192,6 +192,7 @@ function get_watson_password() {
  */
 function get_post_types_for_language_settings() {
 	$post_types = get_post_types( [ 'public' => true ], 'objects' );
+	$post_types = array_filter( $post_types, 'is_post_type_viewable' );
 
 	// Remove the attachment post type
 	unset( $post_types['attachment'] );

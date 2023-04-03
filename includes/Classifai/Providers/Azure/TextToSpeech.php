@@ -266,7 +266,7 @@ class TextToSpeech extends Provider {
 		}
 
 		// Sanitize the post type checkboxes
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
+		$post_types = get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
 			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
