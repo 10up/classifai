@@ -39,6 +39,15 @@ class Personalizer extends Provider {
 			'personalizer',
 			$service
 		);
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
+			'fields'   => array( 'url', 'api-key' ),
+			'features' => array(
+				'recommended_content' => __( 'Recommended content block', 'classifai' ),
+			),
+		);
 	}
 
 	/**

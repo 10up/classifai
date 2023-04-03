@@ -5,11 +5,16 @@
  * @package ClassifAI
  */
 
-use function Classifai\get_post_types_for_language_settings;
-
 $onboarding_options   = get_option( 'classifai_onboarding_options', array() );
 $enabled_features     = $onboarding_options['enabled_features'] ?? array();
 $configured_providers = $onboarding_options['configured_providers'] ?? array();
+$onboarding           = new Classifai\Admin\Onboarding();
+$features             = array_filter(
+	$onboarding->get_features(),
+	function( $feature ) use ( $enabled_features ) {
+		return ! empty( $feature['features'] ) && array_intersect( array_keys( $feature['features'] ), array_keys( $enabled_features ) );
+	}
+);
 ?>
 <h1 class="classifai-setup-heading">
 	<?php esc_html_e( 'Welcome to ClassifAI', 'classifai' ); ?>
@@ -28,100 +33,37 @@ $configured_providers = $onboarding_options['configured_providers'] ?? array();
 				<?php esc_html_e( 'ClassifAI configured successfully!', 'classifai' ); ?>
 			</h1>
 			<?php
-			$divider = false;
-			if ( count( array_intersect( array( 'computer_vision', 'openai_chatgpt' ), $configured_providers ) ) > 1 && isset( $enabled_features['language'] ) ) {
+			foreach ( $features as $key => $feature ) {
+				if ( empty( $feature['title'] ) || empty( $feature['features'] ) ) {
+					continue;
+				}
 				?>
 				<div class="classifai-feature-box">
 					<div class="classifai-feature-box-title">
-						<?php esc_html_e( 'Language', 'classifai' ); ?>
+						<?php echo esc_html( $feature['title'] ); ?>
 					</div>
 					<div class="classifai-features">
 						<ul>
 							<?php
-							$types    = get_post_types_for_language_settings();
-							$features = $enabled_features['language']['classify'] ?? array();
-							foreach ( $types as $posttype ) {
-								if ( ! isset( $features[ $posttype->name ] ) ) {
+							foreach ( $feature['features'] as $provider => $provider_features ) {
+								if ( ! in_array( $provider, $configured_providers, true ) ) {
 									continue;
 								}
-								?>
-								<li class="classifai-enable-feature">
-									<span class="dashicons dashicons-yes-alt"></span>
-									<label class="classifai-feature-text">
-									<?php
-										// translators: %s is the post type label.
-										printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $posttype->label ) );
+								foreach ( $provider_features as $feature_key => $feature_name ) {
+									if ( ! in_array( $feature_key, array_keys( $enabled_features[ $provider ] ?? array() ), true ) ) {
+										continue;
+									}
 									?>
-									</label>
-								</li>
-								<?php
-							}
-							if ( isset( $enabled_features['language']['excerpt_generation'] ) ) {
-								?>
-								<li class="classifai-enable-feature">
-									<span class="dashicons dashicons-yes-alt"></span>
-									<label class="classifai-feature-text">
-										<?php esc_html_e( 'Excerpt generation', 'classifai' ); ?>
-									</label>
-								</li>
-								<?php
-							}
-							?>
-						</ul>
-					</div>
-				</div>
-				<?php
-			}
-
-			if ( in_array( 'computer_vision', $configured_providers, true ) && isset( $enabled_features['images'] ) ) {
-				?>
-				<div class="classifai-feature-box">
-					<div class="classifai-feature-box-title">
-						<?php esc_html_e( 'Images', 'classifai' ); ?>
-					</div>
-					<div class="classifai-features">
-						<ul>
-							<?php
-							$image_features = array(
-								'image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
-								'image_tags'     => __( 'Automatically tag images', 'classifai' ),
-								'image_crop'     => __( 'Smart crop images', 'classifai' ),
-								'image_ocr'      => __( 'Scan images for text', 'classifai' ),
-							);
-							foreach ( $image_features as $image_feature => $image_feature_label ) {
-								if ( ! isset( $enabled_features['images'][ $image_feature ] ) ) {
-									continue;
+									<li class="classifai-enable-feature">
+										<span class="dashicons dashicons-yes-alt"></span>
+										<label class="classifai-feature-text">
+											<?php echo esc_html( $feature_name ); ?>
+										</label>
+									</li>
+									<?php
 								}
-								?>
-								<li class="classifai-enable-feature">
-									<span class="dashicons dashicons-yes-alt"></span>
-									<label class="classifai-feature-text">
-										<?php echo esc_html( $image_feature_label ); ?>
-									</label>
-								</li>
-								<?php
 							}
 							?>
-						</ul>
-					</div>
-				</div>
-				<?php
-			}
-
-			if ( in_array( 'personalizer', $configured_providers, true ) && isset( $enabled_features['recommended_content'] ) ) {
-				?>
-				<div class="classifai-feature-box">
-					<div class="classifai-feature-box-title">
-						<?php esc_html_e( 'Recommended Content', 'classifai' ); ?>
-					</div>
-					<div class="classifai-features">
-						<ul>
-							<li class="classifai-enable-feature">
-								<span class="dashicons dashicons-yes-alt"></span>
-								<label class="classifai-feature-text">
-									<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
-								</label>
-							</li>
 						</ul>
 					</div>
 				</div>

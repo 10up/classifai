@@ -67,6 +67,20 @@ class NLU extends Provider {
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'IBM Watson NLU', 'classifai' ),
+			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
+			'features' => array(),
+		);
+
+		$post_types = get_post_types_for_language_settings();
+		foreach ( $post_types as $post_type ) {
+			// translators: %s is the post type label.
+			$this->onboarding_options['features'][ 'post_types_' . $post_type->name ] = sprintf( __( 'Automatically tag %s', 'classifai' ), $post_type->label );
+		}
+
 	}
 
 	/**
@@ -663,7 +677,7 @@ class NLU extends Provider {
 		// Sanitize the post type checkboxes
 		$post_types = get_post_types( [ 'public' => true ], 'objects' );
 		foreach ( $post_types as $post_type ) {
-			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
+			if ( isset( $settings['post_types'][ $post_type->name ] ) || isset( $settings[ 'post_types_' . $post_type->name ] ) ) {
 				$new_settings['post_types'][ $post_type->name ] = absint( $settings['post_types'][ $post_type->name ] );
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = null;

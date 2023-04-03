@@ -2,6 +2,9 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Plugin;
+use Classifai\Services\ServicesManager;
+
 class Onboarding {
 	/**
 	 * @var string $setup_url The admin onboarding URL.
@@ -229,65 +232,37 @@ class Onboarding {
 			return;
 		}
 
-		$providers       = $this->get_setup_providers();
+		$providers       = $this->get_providers();
 		$provider_option = sanitize_text_field( wp_unslash( $_POST['classifai-setup-provider'] ) );
 		$provider        = $providers[ $provider_option ];
-		$option_name     = 'classifai_' . $provider_option;
 
 		if ( empty( $provider ) ) {
 			return;
 		}
 
-		$form_data = isset( $_POST[ $option_name ] ) ? $this->classifai_sanitize( $_POST[ $option_name ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$form_data = isset( $_POST[ $provider_option ] ) ? $this->classifai_sanitize( $_POST[ $provider_option ] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		$settings = \Classifai\get_plugin_settings( $provider['service'], $provider['provider'] );
-		$options  = self::get_onboarding_options();
-		$features = isset( $options['enabled_features'] ) ? $options['enabled_features'] : array();
+		$settings     = $provider->get_settings();
+		$options      = self::get_onboarding_options();
+		$features     = $options['enabled_features'] ?? array();
+		$feature_data = $features[ $provider_option ] ?? array();
 
-		// Update settings.
-		switch ( $provider_option ) {
-			case 'watson_nlu':
-				$settings['credentials'] = $form_data['credentials'];
-				if ( isset( $features['language']['classify'] ) ) {
-					$settings['post_types'] = array();
-					foreach ( $features['language']['classify'] as $enabled_type => $value ) {
-						$settings['post_types'][ $enabled_type ] = '1';
-					}
+		// Remove all features from the settings.
+		foreach ( $this->get_features() as $value ) {
+			$provider_features = $value['features'][ $provider_option ] ?? array();
+			foreach ( $provider_features as $feature => $name ) {
+				if ( ! isset( $settings[ $feature ] ) ) {
+					continue;
 				}
-				break;
-
-			case 'openai_chatgpt':
-				if ( isset( $features['language']['excerpt_generation'] ) ) {
-					$settings['enable_excerpt'] = '1';
-				}
-				$settings['api_key'] = $form_data['api_key'];
-				break;
-
-			case 'computer_vision':
-				$settings['url']     = $form_data['url'];
-				$settings['api_key'] = $form_data['api_key'];
-
-				$settings['enable_image_tagging']  = isset( $features['images']['image_tags'] ) ? 1 : 'no';
-				$settings['enable_smart_cropping'] = isset( $features['images']['image_crop'] ) ? 1 : 'no';
-				$settings['enable_ocr']            = isset( $features['images']['image_ocr'] ) ? 1 : 'no';
-				$settings['enable_image_captions'] = array(
-					'alt'         => isset( $features['images']['image_captions'] ) ? 'alt' : 0,
-					'caption'     => 0,
-					'description' => 0,
-				);
-				break;
-
-			case 'personalizer':
-				$settings['url']     = $form_data['url'];
-				$settings['api_key'] = $form_data['api_key'];
-				break;
-
-			default:
-				break;
+				unset( $settings[ $feature ] );
+			}
 		}
 
+		// Update the settings with the new values.
+		$settings = array_merge( $settings, $form_data, $feature_data );
+
 		// Save the ClassifAI settings.
-		update_option( $option_name, $settings );
+		update_option( $provider_option, $settings );
 
 		$setting_errors = get_settings_errors();
 		if ( ! empty( $setting_errors ) ) {
@@ -411,37 +386,61 @@ class Onboarding {
 	}
 
 	/**
-	 * Get list of providers enabled for setup.
+	 * Get the Onboarding features from provider class to display on the setup wizard.
+	 *
+	 * @return array The Onboarding features.
+	 */
+	public function get_features() {
+		$services = Plugin::$instance->services;
+		if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+			return [];
+		}
+
+		/** @var ServicesManager $service_manager Instance of the services manager class. */
+		$service_manager     = $services['service_manager'];
+		$onboarding_features = [];
+
+		foreach ( $service_manager->service_classes as $service ) {
+			$display_name = $service->get_display_name();
+			$service_slug = $service->get_menu_slug();
+			$features     = array();
+			foreach ( $service->provider_classes as $provider_class ) {
+				$options = $provider_class->get_onboarding_options();
+				if ( ! empty( $options ) && ! empty( $options['features'] ) ) {
+					$features[ $provider_class->get_option_name() ] = $options['features'];
+				}
+			}
+			if ( ! empty( $features ) ) {
+				$onboarding_features[ $service_slug ] = array(
+					'title'    => $display_name,
+					'features' => $features,
+				);
+			}
+		}
+		return $onboarding_features;
+	}
+
+	/**
+	 * Get the list of providers.
 	 *
 	 * @return array Array of providers.
 	 */
-	public static function get_setup_providers() {
-		return array(
-			'watson_nlu'      => array(
-				'title'    => __( 'IBM Watson NLU', 'classifai' ),
-				'fields'   => array( 'url', 'username', 'password', 'toggle' ),
-				'service'  => 'language_processing',
-				'provider' => 'Natural Language Understanding',
-			),
-			'openai_chatgpt'  => array(
-				'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
-				'fields'   => array( 'api-key' ),
-				'service'  => 'language_processing',
-				'provider' => 'ChatGPT',
-			),
-			'computer_vision' => array(
-				'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
-				'fields'   => array( 'url', 'api-key' ),
-				'service'  => 'image_processing',
-				'provider' => 'Computer Vision',
-			),
-			'personalizer'    => array(
-				'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
-				'fields'   => array( 'url', 'api-key' ),
-				'service'  => 'personalizer',
-				'provider' => 'Personalizer',
-			),
-		);
+	public function get_providers() {
+		$services = Plugin::$instance->services;
+		if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+			return [];
+		}
+
+		/** @var ServicesManager $service_manager Instance of the services manager class. */
+		$service_manager = $services['service_manager'];
+		$providers       = [];
+
+		foreach ( $service_manager->service_classes as $service ) {
+			foreach ( $service->provider_classes as $provider_class ) {
+				$providers[ $provider_class->get_option_name() ] = $provider_class;
+			}
+		}
+		return $providers;
 	}
 
 	/**
@@ -505,28 +504,18 @@ class Onboarding {
 
 	/**
 	 * Get list of providers enabled for setup in step 1.
-	 * This is a subset of the providers returned by get_setup_providers().
 	 *
 	 * @return array Array of enabled providers.
 	 */
-	public static function get_enabled_providers() {
-		$providers          = self::get_setup_providers();
-		$enabled_providers  = array();
+	public function get_enabled_providers() {
+		$providers          = $this->get_providers();
 		$onboarding_options = self::get_onboarding_options();
 		$enabled_features   = $onboarding_options['enabled_features'] ?? array();
+		$enabled_providers  = [];
 
-		foreach ( $enabled_features as $feature => $value ) {
-			if ( 'language' === $feature ) {
-				if ( ! empty( $value['classify'] ) ) {
-					$enabled_providers['watson_nlu'] = $providers['watson_nlu'];
-				}
-				if ( ! empty( $value['excerpt_generation'] ) ) {
-					$enabled_providers['openai_chatgpt'] = $providers['openai_chatgpt'];
-				}
-			} elseif ( 'images' === $feature ) {
-				$enabled_providers['computer_vision'] = $providers['computer_vision'];
-			} elseif ( 'recommended_content' === $feature ) {
-				$enabled_providers['personalizer'] = $providers['personalizer'];
+		foreach ( array_keys( $enabled_features ) as $provider ) {
+			if ( ! empty( $providers[ $provider ] ) ) {
+				$enabled_providers[ $provider ] = $providers[ $provider ]->get_onboarding_options();
 			}
 		}
 
@@ -539,8 +528,8 @@ class Onboarding {
 	 * @param string $current_provider Current provider.
 	 * @return string|bool Next provider to setup or false if none.
 	 */
-	public static function get_next_provider( $current_provider ) {
-		$enabled_providers = self::get_enabled_providers();
+	public function get_next_provider( $current_provider ) {
+		$enabled_providers = $this->get_enabled_providers();
 		$keys              = array_keys( $enabled_providers );
 		$index             = array_search( $current_provider, $keys, true );
 		if ( false === $index ) {

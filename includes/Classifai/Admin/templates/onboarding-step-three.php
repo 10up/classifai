@@ -6,9 +6,10 @@
  */
 
 $base_url          = admin_url( 'admin.php?page=classifai_setup&step=3' );
-$enabled_providers = Classifai\Admin\Onboarding::get_enabled_providers();
+$onboarding        = new Classifai\Admin\Onboarding();
+$enabled_providers = $onboarding->get_enabled_providers();
 $current_provider  = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : array_key_first( $enabled_providers ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$next_provider     = Classifai\Admin\Onboarding::get_next_provider( $current_provider );
+$next_provider     = $onboarding->get_next_provider( $current_provider );
 ?>
 <h1 class="classifai-setup-heading">
 	<?php esc_html_e( 'Set up AI Providers', 'classifai' ); ?>
@@ -39,7 +40,7 @@ settings_errors();
 					<?php
 					// Load the appropriate provider settings.
 					if ( ! empty( $current_provider ) && ! empty( $enabled_providers ) ) {
-						Classifai\Admin\Onboarding::render_classifai_setup_settings( 'classifai_' . $current_provider, $enabled_providers[ $current_provider ]['fields'] );
+						Classifai\Admin\Onboarding::render_classifai_setup_settings( $current_provider, $enabled_providers[ $current_provider ]['fields'] );
 					} else {
 						?>
 						<p class="classifai-setup-error">

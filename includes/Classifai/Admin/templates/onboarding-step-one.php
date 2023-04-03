@@ -5,19 +5,19 @@
  * @package ClassifAI
  */
 
-use function Classifai\get_post_types_for_language_settings;
-
+$onboarding         = new Classifai\Admin\Onboarding();
+$features           = $onboarding->get_features();
 $onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
 $default_enabled    = array(
-	'language' => array(
-		'classify'         => array(
-			'post' => 'yes',
-			'page' => 'yes',
+	array(
+		'classifai_watson_nlu'  => array(
+			'post_types_post' => '1',
+			'post_types_page' => '1',
 		),
 	),
-	'images'  => array(
-		'image_captions' => 'yes',
-		'image_tags'     => 'yes',
+	'classifai_computer_vision' => array(
+		'enable_image_captions' => '1',
+		'enable_image_tagging'  => '1',
 	),
 );
 $enabled_features   = $onboarding_options['enabled_features'] ?? $default_enabled;
@@ -41,102 +41,47 @@ settings_errors( 'classifai-setup' );
 			<h1 class="classifai-setup-title">
 				<?php esc_html_e( 'Set up ClassifAI to meet your needs', 'classifai' ); ?>
 			</h1>
-			<div class="classifai-feature-box">
-				<div class="classifai-feature-box-title">
-					<?php esc_html_e( 'Language', 'classifai' ); ?>
-				</div>
-				<div class="classifai-features">
-					<ul>
-						<?php
-						$types    = get_post_types_for_language_settings();
-						$features = $enabled_features['language']['classify'] ?? array();
-						foreach ( $types as $posttype ) {
-							$checked = $features[ $posttype->name ] ?? '';
-							?>
-							<li class="classifai-enable-feature">
-								<label class="classifai-toggle">
-									<span class="classifai-feature-text">
-										<?php
-										// translators: %s is the post type label.
-										printf( esc_html__( 'Automatically tag %s', 'classifai' ), esc_html( $posttype->label ) );
-										?>
-									</span>
-									<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[language][classify][<?php echo esc_attr( $posttype->name ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
-									<span class="classifai-toggle-switch"></span>
-								</label>
-							</li>
+			<?php
+			foreach ( $features as $key => $feature ) {
+				if ( empty( $feature['title'] ) || empty( $feature['features'] ) ) {
+					continue;
+				}
+				?>
+				<div class="classifai-feature-box">
+					<div class="classifai-feature-box-title">
+						<?php echo esc_html( $feature['title'] ); ?>
+					</div>
+					<div class="classifai-features">
+						<ul>
 							<?php
-						}
-						$checked = isset( $enabled_features['language']['excerpt_generation'] ) ? $enabled_features['language']['excerpt_generation'] : '';
-						?>
-						<li class="classifai-enable-feature">
-							<label class="classifai-toggle">
-								<span class="classifai-feature-text">
-									<?php esc_html_e( 'Excerpt generation', 'classifai' ); ?>
-								</span>
-								<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[language][excerpt_generation]" value="yes" <?php checked( $checked, 'yes', true ); ?>>
-								<span class="classifai-toggle-switch"></span>
-							</label>
-						</li>
-					</ul>
-				</div>
-			</div>
-			<div class="classifai-feature-box-divider"></div>
-
-			<div class="classifai-feature-box">
-				<div class="classifai-feature-box-title">
-					<?php esc_html_e( 'Images', 'classifai' ); ?>
-				</div>
-				<div class="classifai-features">
-					<ul>
-						<?php
-						$image_features = array(
-							'image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
-							'image_tags'     => __( 'Automatically tag images', 'classifai' ),
-							'image_crop'     => __( 'Smart crop images', 'classifai' ),
-							'image_ocr'      => __( 'Scan images for text', 'classifai' ),
-						);
-						foreach ( $image_features as $image_feature => $image_feature_label ) {
-							$checked = isset( $enabled_features['images'][ $image_feature ] ) ? $enabled_features['images'][ $image_feature ] : '';
+							foreach ( $feature['features'] as $provider => $provider_features ) {
+								foreach ( $provider_features as $feature_key => $feature_name ) {
+									$checked = $enabled_features[ $provider ][ $feature_key ] ?? '';
+									?>
+									<li class="classifai-enable-feature">
+										<label class="classifai-toggle">
+											<span class="classifai-feature-text">
+												<?php echo esc_html( $feature_name ); ?>
+											</span>
+											<input type="checkbox" class="classifai-toggle-checkbox" name="<?php echo esc_attr( 'classifai-features[' . $provider . '][' . $feature_key . ']' ); ?>" value="1" <?php checked( $checked, '1', true ); ?>>
+											<span class="classifai-toggle-switch"></span>
+										</label>
+									</li>
+									<?php
+								}
+							}
 							?>
-							<li class="classifai-enable-feature">
-								<label class="classifai-toggle">
-									<span class="classifai-feature-text">
-										<?php echo esc_html( $image_feature_label ); ?>
-									</span>
-									<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[images][<?php echo esc_attr( $image_feature ); ?>]" value="yes" <?php checked( $checked, 'yes', true ); ?> />
-									<span class="classifai-toggle-switch"></span>
-								</label>
-							</li>
-							<?php
-						}
-						?>
-					</ul>
+						</ul>
+					</div>
 				</div>
-			</div>
-			<div class="classifai-feature-box-divider"></div>
-
-			<div class="classifai-feature-box">
-				<div class="classifai-feature-box-title">
-					<?php esc_html_e( 'Recommended Content', 'classifai' ); ?>
-				</div>
-				<div class="classifai-features">
-					<ul>
-						<li class="classifai-enable-feature">
-							<label class="classifai-toggle">
-								<span class="classifai-feature-text">
-									<?php esc_html_e( 'Recommended content block', 'classifai' ); ?>
-								</span>
-								<?php
-								$checked = isset( $enabled_features['recommended_content'] ) ? $enabled_features['recommended_content'] : '';
-								?>
-								<input type="checkbox" class="classifai-toggle-checkbox" name="classifai-features[recommended_content]" value="yes" <?php checked( $checked, 'yes', true ); ?> >
-								<span class="classifai-toggle-switch"></span>
-							</label>
-						</li>
-					</ul>
-				</div>
-			</div>
+				<?php
+				if ( array_key_last( $features ) !== $key ) {
+					?>
+					<div class="classifai-feature-box-divider"></div>
+					<?php
+				}
+			}
+			?>
 
 			<div class="classifai-setup-footer">
 				<span class="classifai-setup-footer__left">

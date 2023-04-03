@@ -475,9 +475,13 @@ input.classifai-button {
 			border: 1px solid #ddd;
 		}
 
-		span.classifai-feature-text {
+		span.classifai-feature-text,
+		label.classifai-feature-text {
 			color: #707070;
 			font-size: 14px;
+		}
+
+		span.classifai-feature-text{
 			float: left;
 		}
 

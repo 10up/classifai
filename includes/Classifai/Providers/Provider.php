@@ -29,6 +29,11 @@ abstract class Provider {
 	 */
 	protected $service;
 
+	/**
+	 * @var array $onboarding The onboarding options for this provider.
+	 */
+	public $onboarding_options;
+
 
 	/**
 	 * Provider constructor.
@@ -43,6 +48,7 @@ abstract class Provider {
 		$this->provider_service_name = $provider_service_name;
 		$this->option_name           = $option_name;
 		$this->service               = $service;
+		$this->onboarding_options    = array();
 	}
 
 	/**
@@ -71,6 +77,14 @@ abstract class Provider {
 		return 'classifai_' . $this->option_name;
 	}
 
+	/**
+	 * Get the onboarding options.
+	 *
+	 * @return array
+	 */
+	public function get_onboarding_options() {
+		return $this->onboarding_options;
+	}
 
 	/**
 	 * Can the Provider be initalized?

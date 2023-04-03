@@ -33,6 +33,18 @@ class ComputerVision extends Provider {
 			'computer_vision',
 			$service
 		);
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
+			'fields'   => array( 'url', 'api-key' ),
+			'features' => array(
+				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
+				'enable_image_tagging'  => __( 'Automatically tag images', 'classifai' ),
+				'enable_smart_cropping' => __( 'Smart crop images', 'classifai' ),
+				'enable_ocr'            => __( 'Scan images for text', 'classifai' ),
+			),
+		);
 	}
 
 	/**
@@ -1060,8 +1072,23 @@ class ComputerVision extends Provider {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
 		}
 
-		if ( isset( $settings['enable_image_captions'] ) && is_array( $settings['enable_image_captions'] ) ) {
-			$new_settings['enable_image_captions'] = $settings['enable_image_captions'];
+		if ( isset( $settings['enable_image_captions'] ) ) {
+			if ( is_array( $settings['enable_image_captions'] ) ) {
+				$new_settings['enable_image_captions'] = $settings['enable_image_captions'];
+			} elseif ( 1 === (int) $settings['enable_image_captions'] ) {
+				// Handle submission from onboarding wizard.
+				$new_settings['enable_image_captions'] = array(
+					'alt'         => 'alt',
+					'caption'     => 0,
+					'description' => 0,
+				);
+			}
+		} else {
+			$new_settings['enable_image_captions'] = array(
+				'alt'         => 0,
+				'caption'     => 0,
+				'description' => 0,
+			);
 		}
 
 		if ( ! empty( $settings_errors ) ) {
