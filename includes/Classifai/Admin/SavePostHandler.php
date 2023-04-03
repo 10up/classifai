@@ -177,6 +177,20 @@ class SavePostHandler {
 	 * @return bool|int|WP_Error
 	 */
 	public function synthesize_speech( $post_id ) {
+		if ( empty( $post_id ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_post_id_missing',
+				esc_html__( 'Post ID missing.', 'classifai' )
+			);
+		}
+
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_user_not_authorized',
+				esc_html__( 'Unauthorized user.', 'classifai' )
+			);
+		}
+
 		$normalizer   = new Normalizer();
 		$settings     = \Classifai\get_azure_text_to_speech_settings();
 		$post         = get_post( $post_id );
@@ -286,7 +300,7 @@ class SavePostHandler {
 			);
 		}
 
-		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, $attachment_id );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, absint( $attachment_id ) );
 		update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
 
 		return $attachment_id;
