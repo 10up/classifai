@@ -126,7 +126,7 @@ After you run `composer update`, ClassifAI will be installed in the plugins dire
 
 ## Register ClassifAI account
 
-ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
+ClassifAI is a sophisticated solution that we want organizations of all shapes and sizes to count on. To keep adopters apprised of major updates and beta testing opportunities, gather feedback, support auto updates, and prioritize common use cases, we're asking for a little bit of information in exchange for a free key. Your information will be kept confidential.
 
 #### 1. Register for a ClassifAI account
 
@@ -225,7 +225,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 #### 3. Enable specific Image Processing features
 
-- Choose to `Generate alt text`, `Tag images`, `Enable smart cropping`, and/or `Scan image or PDF for text`.
+- Choose to `Generate descriptive text`, `Tag images`, `Enable smart cropping`, and/or `Scan image or PDF for text`.
 - For features that have thresholds or taxonomy settings, set those as well.
 
 #### 4. Save Image or PDF file or run WP CLI command to batch classify your content
