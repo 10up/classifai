@@ -165,7 +165,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 
 			$this->assertEquals(
-				sprintf( '/wp-content/uploads/%s/%s/33772-150x150.jpg', date( 'Y' ), date( 'm' ) ),
+				sprintf( '%s/33772-150x150.jpg', wp_upload_dir()['path'] ),
 				$prepped_url
 			);
 

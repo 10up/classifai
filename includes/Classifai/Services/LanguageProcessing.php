@@ -80,16 +80,16 @@ class LanguageProcessing extends Service {
 	/**
 	 * Handle request to generate tags for given post ID.
 	 *
-	 * @param \WP_REST_Request $request The full request object.
+	 * @param WP_REST_Request $request The full request object.
 	 *
-	 * @return array|bool|string|\WP_Error
+	 * @return array|bool|string|WP_Error
 	 */
-	public function generate_post_tags( $request ) {
+	public function generate_post_tags( WP_REST_Request $request ) {
 		try {
 			$post_id = $request->get_param( 'id' );
 
 			if ( empty( $post_id ) ) {
-				return new \WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
+				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 			}
 
 			$taxonomy_terms    = [];
@@ -113,9 +113,9 @@ class LanguageProcessing extends Service {
 			}
 
 			// Return taxonomy terms.
-			return [ 'terms' => $taxonomy_terms ];
+			return rest_ensure_response( [ 'terms' => $taxonomy_terms ] );
 		} catch ( \Exception $e ) {
-			return new \WP_Error( 'request_failed', $e->getMessage() );
+			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
 	}
 
@@ -125,21 +125,46 @@ class LanguageProcessing extends Service {
 	 * @param WP_REST_Request $request Full data about the request.
 	 * @return WP_Error|bool
 	 */
-	public function generate_post_tags_permissions_check( $request ) {
+	public function generate_post_tags_permissions_check( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
-		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
-			$post_type     = get_post_type( $post_id );
-			$post_status   = get_post_status( $post_id );
-			$supported     = \Classifai\get_supported_post_types();
-			$post_statuses = \Classifai\get_supported_post_statuses();
 
-			// Check if processing allowed.
-			if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
-				return new \WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
-			}
-			return true;
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
 		}
-		return false;
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		// For all enabled features, ensure the user has proper permissions to add/edit terms.
+		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
+			if ( ! \Classifai\get_feature_enabled( $feature ) ) {
+				continue;
+			}
+
+			$taxonomy   = \Classifai\get_feature_taxonomy( $feature );
+			$permission = $this->check_term_permissions( $taxonomy );
+
+			if ( is_wp_error( $permission ) ) {
+				return $permission;
+			}
+		}
+
+		$post_status   = get_post_status( $post_id );
+		$supported     = \Classifai\get_supported_post_types();
+		$post_statuses = \Classifai\get_supported_post_statuses();
+
+		// Check if processing allowed.
+		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
+		}
+
+		return true;
 	}
 
 	/**
@@ -181,7 +206,16 @@ class LanguageProcessing extends Service {
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
 
+		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
 			return false;
 		}
 
