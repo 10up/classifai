@@ -138,8 +138,9 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 					checked={ usePostTerms }
 					onChange={ ( useTerm ) =>
 						onChange( { usePostTerms: useTerm } )
-					}/>
-				) : null }
+					}
+				/>
+			) : null }
 
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {
