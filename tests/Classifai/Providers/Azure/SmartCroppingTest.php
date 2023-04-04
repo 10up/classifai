@@ -166,7 +166,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 			$this->assertEquals(
 				sprintf( '%s/33772-150x150.jpg', wp_upload_dir()['path'] ),
-				$prepped_url
+				$cropped_thumbnail_url
 			);
 
 			// Test when file operations fail.
