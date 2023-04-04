@@ -130,7 +130,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 			taxonomiesInfo.filter(
 				( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
 			).length ? (
-					<ToggleControl
+				<ToggleControl
 						label={ __(
 							"Use this Post's Categories and Tags",
 							'classifai'
