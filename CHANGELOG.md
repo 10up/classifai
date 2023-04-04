@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [1.9.0] - 2023-04-04
+
+### Added
+- Automatic generation of excerpts using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk) via [#405](https://github.com/10up/classifai/pull/405)).
+- Generate images using OpenAI's DALL·E API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@joemcgill](https://github.com/joemcgill) via [#419](https://github.com/10up/classifai/pull/419)).
+- Ability to set `alt` text as the image caption and image description (props [@Sidsector9](https://github.com/Sidsector9), [@peterwilsoncc](https://github.com/peterwilsoncc), [@jeffpaul](https://github.com/jeffpaul) via [#374](https://github.com/10up/classifai/pull/374)).
+- Support for WordPress auto-updates for sites with a valid ClassifAI registration key (props [@TylerB24890](https://github.com/TylerB24890), [@dkotter](https://github.com/dkotter) via [#400](https://github.com/10up/classifai/pull/400)).
+- Composer installation instructions added to the `README` (props [@johnwatkins0](https://github.com/johnwatkins0), [@dkotter](https://github.com/dkotter) via [#395](https://github.com/10up/classifai/pull/395)).
+
+### Fixed
+- Implement check to prevent requesting a PDF scan on a document which has a scan already in progress (props [@TylerB24890](https://github.com/TylerB24890), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#401](https://github.com/10up/classifai/pull/401)).
+- Ensure our E2E and eslint tests pass (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#406](https://github.com/10up/classifai/pull/406) and [#407](https://github.com/10up/classifai/pull/407)).
+- Removed some unnecessary code in the preview feature (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#402](https://github.com/10up/classifai/pull/402)).
+- Remove unnecessary caching in our lint action (props [@szepeviktor](https://github.com/szepeviktor), [@dkotter](https://github.com/dkotter) via [#409](https://github.com/10up/classifai/pull/409)).
+
+### Changed
+- Update usage of `get_plugin_settings` to new function signature (props [@Spoygg](https://github.com/Spoygg), [@dkotter](https://github.com/dkotter) via [#418](https://github.com/10up/classifai/pull/418)).
+- Cypress integration migrated to 11+ (props [@jayedul](https://github.com/jayedul), [@cadic](https://github.com/cadic) via [#385](https://github.com/10up/classifai/pull/385)).
+- Bump WordPress "tested up to" version to 6.2 (props [@ggutenberg](https://github.com/ggutenberg), [@ravinderk](https://github.com/ravinderk) via [#420](https://github.com/10up/classifai/pull/420)).
+
+### Security
+- Ensure custom REST endpoints have proper user permission checks (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [GHSA-fxxq-j2vx-j99r](https://github.com/10up/classifai/security/advisories/GHSA-fxxq-j2vx-j99r)).
+- Bump `http-cache-semantics` from 4.1.0 to 4.1.1 (props [@dependabot[bot]](https://github.com/apps/dependabot) via [#393](https://github.com/10up/classifai/pull/393)).
+- Bump `webpack` from 5.75.0 to 5.76.0 (props [@dependabot[bot]](https://github.com/apps/dependabot) via [#410](https://github.com/10up/classifai/pull/410)).
+
 ## [1.8.1] - 2023-01-05
 **Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
 
@@ -272,6 +297,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[1.9.0]: https://github.com/10up/classifai/compare/1.8.1...1.9.0
 [1.8.1]: https://github.com/10up/classifai/compare/1.8.0...1.8.1
 [1.8.0]: https://github.com/10up/classifai/compare/1.7.3...1.8.0
 [1.7.3]: https://github.com/10up/classifai/compare/1.7.2...1.7.3
