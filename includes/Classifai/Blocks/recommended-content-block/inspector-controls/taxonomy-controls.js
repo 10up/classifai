@@ -131,15 +131,14 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 				( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
 			).length ? (
 				<ToggleControl
-						label={ __(
-							"Use this Post's Categories and Tags",
-							'classifai'
-						) }
-						checked={ usePostTerms }
-						onChange={ ( useTerm ) =>
-							onChange( { usePostTerms: useTerm } )
-						}
-					/>
+					label={ __(
+						"Use this Post's Categories and Tags",
+						'classifai'
+					) }
+					checked={ usePostTerms }
+					onChange={ ( useTerm ) =>
+						onChange( { usePostTerms: useTerm } )
+					}/>
 				) : null }
 
 			{ !! taxonomiesInfo?.length &&
