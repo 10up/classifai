@@ -126,22 +126,21 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
-			{ ( !! taxonomiesInfo?.length &&
-				taxonomiesInfo.filter(
-					( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
-				).length && (
-					<ToggleControl
-						label={ __(
-							"Use this Post's Categories and Tags",
-							'classifai'
-						) }
-						checked={ usePostTerms }
-						onChange={ ( usePostTerms ) =>
-							onChange( { usePostTerms } )
-						}
-					/>
-				) ) ||
-				null }
+			{ !! taxonomiesInfo?.length &&
+			taxonomiesInfo.filter(
+				( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
+			).length ? (
+				<ToggleControl
+					label={ __(
+						"Use this Post's Categories and Tags",
+						'classifai'
+					) }
+					checked={ usePostTerms }
+					onChange={ ( useTerm ) =>
+						onChange( { usePostTerms: useTerm } )
+					}
+				/>
+			) : null }
 
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {

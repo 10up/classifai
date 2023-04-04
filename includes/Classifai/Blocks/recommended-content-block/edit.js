@@ -108,25 +108,27 @@ const RecommendedContentBlockEdit = ( props ) => {
 				'?action=classifai_get_post_info&post_id=' +
 				postId +
 				'&block_index=' +
-				blockIndex,
+				blockIndex +
+				'&classifai_editor_nonce=' +
+				window.classifai_editor_nonce.action,
 			function ( r ) {
 				const { data = {} } = r;
 				const {
 					categories: category,
-					tags: post_tag,
+					tags: postTag,
 					attributes: savedAttrs,
 				} = data;
 
 				if ( ! ( savedAttrs === null ) ) {
 					// It's old mounted block, don't set default terms as it will change current behavior. Just mark as terms set
 					setAttributes( { defaultTermsSetFor: syncTaxonomies } );
-				} else {
+				} else if ( ! savedAttrs?.attrs?.defaultTermsSetFor?.length ) {
 					// It's newly mounted block. So set current post terms as default for the first time, and mark as terms set.
 					setAttributes( {
 						taxQuery: {
 							...attributes.taxQuery,
 							category,
-							post_tag,
+							post_tag: postTag,
 						},
 						defaultTermsSetFor: syncTaxonomies,
 					} );

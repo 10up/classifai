@@ -26,6 +26,7 @@ function register() {
 
 	add_filter( 'classifai_recommended_block_attributes', $n( 'use_default_post_terms' ) );
 	add_action( 'wp_ajax_classifai_get_post_info', $n( 'get_post_info' ) );
+	add_action( 'admin_enqueue_scripts', $n( 'nonce_field' ) );
 }
 
 /**
@@ -34,6 +35,11 @@ function register() {
  * @return void
  */
 function get_post_info() {
+	if( ! isset( $_GET['classifai_editor_nonce'] ) || ! wp_verify_nonce( $_GET['classifai_editor_nonce'], 'classifai_editor_nonce' ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid noncce' ) );
+		exit;
+	}
+
 	$post_id = ! empty( $_GET['post_id'] ) ? (int) $_GET['post_id'] : 0;
 	$index   = ! empty( $_GET['block_index'] ) ? (int) $_GET['block_index'] : null;
 	$content = get_the_content( null, false, $post_id );
@@ -53,7 +59,7 @@ function get_post_info() {
 
 	wp_send_json_success(
 		array(
-			'attributes' => $attributes,  
+			'attributes' => $attributes,
 			'categories' => $categories,
 			'tags'       => $tags,
 		)
@@ -108,4 +114,13 @@ function use_default_post_terms( $attributes ) {
 	}
 
 	return $attributes;
+}
+
+/**
+ * Send nonce value
+ *
+ * @return void
+ */
+function nonce_field() {
+	wp_localize_script( 'jquery', 'classifai_editor_nonce', array( 'action' => wp_create_nonce( 'classifai_editor_nonce' ) ) );
 }
