@@ -35,7 +35,7 @@ function register() {
  * @return void
  */
 function get_post_info() {
-	if( ! isset( $_GET['classifai_editor_nonce'] ) || ! wp_verify_nonce( $_GET['classifai_editor_nonce'], 'classifai_editor_nonce' ) ) {
+	if ( empty( $_GET['classifai_editor_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( $_GET['classifai_editor_nonce'] ), 'classifai_editor_nonce' ) ) {
 		wp_send_json_error( array( 'message' => 'Invalid noncce' ) );
 		exit;
 	}

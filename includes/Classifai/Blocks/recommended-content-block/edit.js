@@ -111,7 +111,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 				blockIndex +
 				'&classifai_editor_nonce=' +
 				window.classifai_editor_nonce.action,
-			function ( r ) {
+			function( r ) {
 				const { data = {} } = r;
 				const {
 					categories: category,
