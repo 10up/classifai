@@ -396,6 +396,11 @@ class ComputerVision extends Provider {
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
 		$routes   = [];
+
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return;
+		}
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// Allow rescanning image that are not stored in local storage.
