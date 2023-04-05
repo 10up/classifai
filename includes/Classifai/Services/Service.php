@@ -5,6 +5,8 @@
 
 namespace Classifai\Services;
 
+use WP_Error;
+
 abstract class Service {
 
 	/**
@@ -222,4 +224,27 @@ abstract class Service {
 
 		return array_map( $make_line, $this->provider_classes );
 	}
+
+	/**
+	 * Check if the current user has permission to create and assign terms.
+	 *
+	 * @param string $tax Taxonomy name.
+	 * @return bool|WP_Error
+	 */
+	public function check_term_permissions( string $tax = '' ) {
+		$taxonomy = get_taxonomy( $tax );
+
+		if ( empty( $taxonomy ) || empty( $taxonomy->show_in_rest ) ) {
+			return new WP_Error( 'invalid_taxonomy', esc_html__( 'Taxonomy not found. Double check your settings.', 'classifai' ) );
+		}
+
+		$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
+
+		if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+			return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
 }

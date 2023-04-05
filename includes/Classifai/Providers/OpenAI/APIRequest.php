@@ -35,6 +35,18 @@ class APIRequest {
 	}
 
 	/**
+	 * Makes an authorized GET request.
+	 *
+	 * @param string $url The OpenAI API url
+	 * @param array  $options Additional query params
+	 * @return array|WP_Error
+	 */
+	public function get( $url, $options = [] ) {
+		$this->add_headers( $options );
+		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+	}
+
+	/**
 	 * Makes an authorized POST request.
 	 *
 	 * @param string $url The OpenAI API URL.

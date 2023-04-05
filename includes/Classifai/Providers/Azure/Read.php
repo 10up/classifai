@@ -114,13 +114,18 @@ class Read {
 	 * @return object|WP_Error
 	 */
 	public function read_document() {
+		// Check if valid authentication is in place.
+		if ( empty( $this->settings ) || ( isset( $this->settings['authenticated'] ) && false === $this->settings['authenticated'] ) ) {
+			return $this->log_error( new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) ) );
+		}
+
 		if ( ! $this->should_process( $this->attachment_id ) ) {
-			return $this->log_error( new WP_Error( 'processError', esc_html__( 'Document does not meet processing requirements.', 'classifai' ) ) );
+			return $this->log_error( new WP_Error( 'process_error', esc_html__( 'Document does not meet processing requirements.', 'classifai' ) ) );
 		}
 
 		$filesize = filesize( get_attached_file( $this->attachment_id ) );
 		if ( ! $filesize || $filesize > computer_vision_max_filesize() ) {
-			return $this->log_error( new WP_Error( 'sizeError', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (defaults to 4MB).', 'classifai' ), $metadata ), $attachment_id );
+			return $this->log_error( new WP_Error( 'size_error', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (defaults to 4MB).', 'classifai' ), $metadata ), $attachment_id );
 		}
 
 		/**
