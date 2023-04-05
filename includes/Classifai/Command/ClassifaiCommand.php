@@ -266,7 +266,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
 			\WP_CLI::line( 'Processing ' . $attachment_id );
-			$classifier->generate_image_alt_tags( $current_meta, $attachment_id );
+			$results = $classifier->generate_image_alt_tags( $current_meta, $attachment_id );
+
+			if ( is_wp_error( $results ) ) {
+				$errors[ $attachment_id ] = $results;
+			}
+
 			$classifier->smart_crop_image( $current_meta, $attachment_id );
 		}
 

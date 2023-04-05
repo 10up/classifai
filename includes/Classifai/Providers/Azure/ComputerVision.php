@@ -553,6 +553,11 @@ class ComputerVision extends Provider {
 		// OCR processing
 		$this->ocr_processing( $metadata, $attachment_id, false, is_wp_error( $image_scan ) ? false : $image_scan );
 
+		// If we are not generating metadata, return the error.
+		if ( ! doing_filter( 'wp_generate_attachment_metadata' ) && is_wp_error( $image_scan ) ) {
+			return $image_scan;
+		}
+
 		return $metadata;
 	}
 
