@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [1.9.0] - 2023-04-04
+## [2.0.0] - 2023-04-04
 
 ### Added
 - Automatic generation of excerpts using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk) via [#405](https://github.com/10up/classifai/pull/405)).
@@ -297,7 +297,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
-[1.9.0]: https://github.com/10up/classifai/compare/1.8.1...1.9.0
+[2.0.0]: https://github.com/10up/classifai/compare/1.8.1...2.0.0
 [1.8.1]: https://github.com/10up/classifai/compare/1.8.0...1.8.1
 [1.8.0]: https://github.com/10up/classifai/compare/1.7.3...1.8.0
 [1.7.3]: https://github.com/10up/classifai/compare/1.7.2...1.7.3

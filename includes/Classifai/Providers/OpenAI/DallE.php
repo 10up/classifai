@@ -350,7 +350,7 @@ class DallE extends Provider {
 		/**
 		 * Filter the prompt we will send to DALL·E.
 		 *
-		 * @since x.x.x
+		 * @since 2.0.0
 		 * @hook classifai_dalle_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to DALL·E.
@@ -364,7 +364,7 @@ class DallE extends Provider {
 		/**
 		 * Filter the request body before sending to DALL·E.
 		 *
-		 * @since x.x.x
+		 * @since 2.0.0
 		 * @hook classifai_dalle_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to DALL·E.
