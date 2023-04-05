@@ -11,8 +11,8 @@ $configured_providers = $onboarding_options['configured_providers'] ?? array();
 $onboarding           = new Classifai\Admin\Onboarding();
 $features             = array_filter(
 	$onboarding->get_features(),
-	function( $feature ) use ( $enabled_features ) {
-		return ! empty( $feature['features'] ) && array_intersect( array_keys( $feature['features'] ), array_keys( $enabled_features ) );
+	function( $feature ) use ( $enabled_features, $configured_providers ) {
+		return ! empty( $feature['features'] ) && array_intersect( array_keys( $feature['features'] ), array_keys( $enabled_features ) ) && array_intersect( array_keys( $feature['features'] ), $configured_providers );
 	}
 );
 
