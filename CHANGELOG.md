@@ -5,9 +5,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [Unreleased] - TBD
 
 ## [2.0.0] - 2023-04-04
-
 ### Added
-- Automatic generation of excerpts using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk) via [#405](https://github.com/10up/classifai/pull/405)).
+- Automatic generation of excerpts using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk) via [#405](https://github.com/10up/classifai/pull/405), [#408](https://github.com/10up/classifai/pull/408)).
 - Generate images using OpenAI's DALL·E API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@joemcgill](https://github.com/joemcgill) via [#419](https://github.com/10up/classifai/pull/419)).
 - Ability to set `alt` text as the image caption and image description (props [@Sidsector9](https://github.com/Sidsector9), [@peterwilsoncc](https://github.com/peterwilsoncc), [@jeffpaul](https://github.com/jeffpaul) via [#374](https://github.com/10up/classifai/pull/374)).
 - Support for WordPress auto-updates for sites with a valid ClassifAI registration key (props [@TylerB24890](https://github.com/TylerB24890), [@dkotter](https://github.com/dkotter) via [#400](https://github.com/10up/classifai/pull/400)).
@@ -15,7 +14,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ### Fixed
 - Implement check to prevent requesting a PDF scan on a document which has a scan already in progress (props [@TylerB24890](https://github.com/TylerB24890), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#401](https://github.com/10up/classifai/pull/401)).
-- Ensure our E2E and eslint tests pass (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#406](https://github.com/10up/classifai/pull/406) and [#407](https://github.com/10up/classifai/pull/407)).
+- Ensure our E2E and eslint tests pass (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#406](https://github.com/10up/classifai/pull/406), [#407](https://github.com/10up/classifai/pull/407)).
 - Removed some unnecessary code in the preview feature (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#402](https://github.com/10up/classifai/pull/402)).
 - Remove unnecessary caching in our lint action (props [@szepeviktor](https://github.com/szepeviktor), [@dkotter](https://github.com/dkotter) via [#409](https://github.com/10up/classifai/pull/409)).
 
