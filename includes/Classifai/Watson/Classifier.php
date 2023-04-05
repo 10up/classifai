@@ -115,7 +115,7 @@ class Classifier {
 				'keywords'   => [
 					'emotion'   => false,
 					'sentiment' => false,
-					'limit'     => 10,
+					'limit'     => defined( 'WATSON_KEYWORD_LIMIT' ) ? WATSON_KEYWORD_LIMIT : 10,
 				],
 				'concepts'   => (object) [],
 				'entities'   => (object) [],

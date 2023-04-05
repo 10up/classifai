@@ -10,7 +10,13 @@
 		"Cypress": "readonly",
 		"cy": "readonly",
 		"ajaxurl": "readonly",
-		"FormData": "readonly"
+		"FormData": "readonly",
+		"classifaiMediaVars": "readonly",
+		"classifaiDalleData": "readonly",
+		"Backbone": "readonly",
+		"wpApiSettings": "readonly",
+		"_": "readonly",
+		"File": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
 }

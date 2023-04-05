@@ -39,13 +39,13 @@ const ClassifAIToggle = () => {
 			help={
 				'yes' === enabled
 					? __(
-							'ClassifAI language processing is enabled',
-							'classifai'
-					  )
+						'ClassifAI language processing is enabled',
+						'classifai'
+					)
 					: __(
-							'ClassifAI language processing is disabled',
-							'classifai'
-					  )
+						'ClassifAI language processing is disabled',
+						'classifai'
+					)
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
