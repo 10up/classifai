@@ -1,16 +1,18 @@
 <?php
 /**
- * Plugin Name:     ClassifAI
- * Plugin URI:      https://github.com/10up/classifai
- * Update URI:      https://classifaiplugin.com
- * Description:     Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:         1.8.1
- * Author:          10up
- * Author URI:      https://10up.com
- * License:         GPLv2
- * License URI:     https://spdx.org/licenses/GPL-2.0-or-later.html
- * Text Domain:     classifai
- * Domain Path:     /languages
+ * Plugin Name:       ClassifAI
+ * Plugin URI:        https://github.com/10up/classifai
+ * Update URI:        https://classifaiplugin.com
+ * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
+ * Version:           2.0.0
+ * Requires at least: 5.7
+ * Requires PHP:      7.4
+ * Author:            10up
+ * Author URI:        https://10up.com
+ * License:           GPLv2
+ * License URI:       https://spdx.org/licenses/GPL-2.0-or-later.html
+ * Text Domain:       classifai
+ * Domain Path:       /languages
  */
 
 /**
@@ -55,14 +57,14 @@ function classifai_define( $name, $value ) {
 }
 
 if ( file_exists( __DIR__ . '/config.test.php' ) && defined( 'PHPUNIT_RUNNER' ) ) {
-	require_once( __DIR__ . '/config.test.php' );
+	require_once __DIR__ . '/config.test.php';
 }
 
 if ( file_exists( __DIR__ . '/config.local.php' ) ) {
-	require_once( __DIR__ . '/config.local.php' );
+	require_once __DIR__ . '/config.local.php';
 }
 
-require_once( __DIR__ . '/config.php' );
+require_once __DIR__ . '/config.php';
 
 /**
  * Loads the CLASSIFAI PHP autoloader if possible.
@@ -71,7 +73,7 @@ require_once( __DIR__ . '/config.php' );
  */
 function classifai_autoload() {
 	if ( classifai_can_autoload() ) {
-		require_once( classifai_autoloader() );
+		require_once classifai_autoloader();
 
 		return true;
 	} else {
@@ -173,33 +175,6 @@ if ( file_exists( __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-u
 } else {
 	add_action( 'admin_notices', 'classifai_dev_notice' );
 	add_action( 'network_admin_notices', 'classifai_dev_notice' );
-}
-
-if ( class_exists( 'Puc_v4_Factory' ) ) {
-	/*
-	 * Enable updates if we have a valid license
-	 */
-	$service_manager = new \Classifai\Services\ServicesManager();
-	$settings        = $service_manager->get_settings();
-
-	if ( isset( $settings['valid_license'] ) && $settings['valid_license'] ) {
-		// @codingStandardsIgnoreStart
-		$updateChecker = Puc_v4_Factory::buildUpdateChecker(
-			'https://github.com/10up/classifai/',
-			__FILE__,
-			'classifai'
-		);
-
-		$updateChecker->addResultFilter(
-			function( $plugin_info, $http_response = null ) {
-				$plugin_info->icons = array(
-					'svg' => plugins_url( '/assets/img/icon.svg', __FILE__ ),
-				);
-				return $plugin_info;
-			}
-		);
-		// @codingStandardsIgnoreEnd
-	}
 }
 
 /**
