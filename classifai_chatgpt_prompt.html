@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_smart_cropping_source_url - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_chatgpt_prompt - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_smart_cropping_source_url</h1>
+    <h1 class="page-title">Filter: classifai_chatgpt_prompt</h1>
 	
 
     
@@ -43,15 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_smart_cropping_source_url">apply_filters( 'classifai_smart_cropping_source_url', <span class="signature">url, $attachment_id )</span><span class="type-signature"> &rarr; {null|string}</span></h4>
+    <h4 class="name" id="classifai_chatgpt_prompt">apply_filters( 'classifai_chatgpt_prompt', <span class="signature">$prompt, $post_id, $excerpt_length )</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filters the image URL to send to Computer Vision for smart cropping. A non-null value will override default
-plugin behavior.</p>
+    <p>Filter the prompt we will send to ChatGPT.</p>
 </div>
 
 
@@ -85,15 +84,12 @@ plugin behavior.</p>
 
         <tr>
             
-                <td class="name"><code>url</code></td>
+                <td class="name"><code>$prompt</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">null</span>
-|
-
 <span class="param-type">string</span>
 
 
@@ -104,14 +100,14 @@ plugin behavior.</p>
 
             
 
-            <td class="description last"><p><code>null</code> to use default plugin behavior; <code>string</code> to override.</p></td>
+            <td class="description last"><p>Prompt we are sending to ChatGPT. Gets added before post content.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>$attachment_id</code></td>
+                <td class="name"><code>$post_id</code></td>
             
 
             <td class="type">
@@ -127,7 +123,30 @@ plugin behavior.</p>
 
             
 
-            <td class="description last"><p>The attachment image ID.</p></td>
+            <td class="description last"><p>ID of post we are summarizing.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$excerpt_length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Length of final excerpt.</p></td>
         </tr>
 
     
@@ -145,7 +164,7 @@ plugin behavior.</p>
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.0.0</li></ul></dd>
     
 
     
@@ -171,7 +190,7 @@ plugin behavior.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line204">line 204</a>
+        <a href="Providers_OpenAI_ChatGPT.php.html">Providers/OpenAI/ChatGPT.php</a>, <a href="Providers_OpenAI_ChatGPT.php.html#line291">line 291</a>
     </li></ul></dd>
     
 
@@ -198,7 +217,7 @@ plugin behavior.</p>
 
         
 <div class="param-desc">
-    <p>URL to be sent to Computer Vision for smart cropping.</p>
+    <p>Prompt.</p>
 </div>
 
 
@@ -209,9 +228,6 @@ plugin behavior.</p>
     </dt>
     <dd>
         
-<span class="param-type">null</span>
-|
-
 <span class="param-type">string</span>
 
 
