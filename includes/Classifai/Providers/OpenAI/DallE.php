@@ -39,7 +39,7 @@ class DallE extends Provider {
 			'title'    => __( 'OpenAI DALL·E', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
-				'enable_excerpt' => __( 'Image generation', 'classifai' ),
+				'enable_image_gen' => __( 'Image generation', 'classifai' ),
 			),
 		);
 	}
