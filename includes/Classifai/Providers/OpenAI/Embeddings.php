@@ -102,7 +102,34 @@ class Embeddings extends Provider {
 			]
 		);
 
-		// TODO: add settings for post types, post statuses, and taxonomies to classify.
+		add_settings_field(
+			'post-types',
+			esc_html__( 'Post types to classify', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'post_types',
+				'options'        => $this->get_post_types_for_settings(),
+				'default_values' => $default_settings['post_types'],
+				'description'    => __( 'Choose which post types should be classified.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'post-statuses',
+			esc_html__( 'Post statuses to classify', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'post_statuses',
+				'options'        => $this->get_post_statuses_for_settings(),
+				'default_values' => $default_settings['post_statuses'],
+				'description'    => __( 'Choose which post statuses should be classified.', 'classifai' ),
+			]
+		);
+		// TODO: add settings for taxonomies to classify.
 	}
 
 	/**
@@ -125,6 +152,26 @@ class Embeddings extends Provider {
 			$new_settings['enable_classification'] = '1';
 		}
 
+		// Sanitize the post type checkboxes.
+		$post_types = $this->get_post_types_for_settings();
+		foreach ( $post_types as $post_type => $post_type_label ) {
+			if ( isset( $settings['post_types'][ $post_type ] ) && '0' !== $settings['post_types'][ $post_type ] ) {
+				$new_settings['post_types'][ $post_type ] = sanitize_text_field( $settings['post_types'][ $post_type ] );
+			} else {
+				$new_settings['post_types'][ $post_type ] = 0;
+			}
+		}
+
+		// Sanitize the post statuses checkboxes.
+		$post_statuses = $this->get_post_statuses_for_settings();
+		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
+			if ( isset( $settings['post_statuses'][ $post_status_key ] ) && '0' !== $settings['post_statuses'][ $post_status_key ] ) {
+				$new_settings['post_statuses'][ $post_status_key ] = sanitize_text_field( $settings['post_statuses'][ $post_status_key ] );
+			} else {
+				$new_settings['post_statuses'][ $post_status_key ] = 0;
+			}
+		}
+
 		return $new_settings;
 	}
 
@@ -145,6 +192,12 @@ class Embeddings extends Provider {
 			'authenticated'         => false,
 			'api_key'               => '',
 			'enable_classification' => false,
+			'post_types'            => [
+				'post',
+			],
+			'post_statuses'         => [
+				'publish',
+			],
 		];
 	}
 
@@ -166,8 +219,127 @@ class Embeddings extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )          => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Classification enabled', 'classifai' ) => $enable_classification ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Post types', 'classifai' )             => implode( ', ', $settings['post_types'] ?? [] ),
+			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
 			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( 'classifai_openai_embeddings_latest_response' ),
 		];
+	}
+
+	/**
+	 * Get available post types to use in settings.
+	 *
+	 * @return array
+	 */
+	public function get_post_types_for_settings() {
+		$post_types     = [];
+		$post_type_objs = get_post_types( [], 'objects' );
+		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
+		unset( $post_type_objs['attachment'] );
+
+		foreach ( $post_type_objs as $post_type ) {
+			$post_types[ $post_type->name ] = $post_type->label;
+		}
+
+		/**
+		 * Filter post types shown in settings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_settings_post_types
+		 *
+		 * @param {array} $post_types Array of post types to show in settings.
+		 *
+		 * @return {array} Array of post types.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_settings_post_types', $post_types );
+	}
+
+	/**
+	 * Get available post statuses to use in settings.
+	 *
+	 * @return array
+	 */
+	public function get_post_statuses_for_settings() {
+		$post_statuses = get_post_statuses();
+
+		/**
+		 * Filter post statuses shown in settings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_settings_post_statuses
+		 *
+		 * @param {array} $post_statuses Array of post statuses to show in settings.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_settings_post_statuses', $post_statuses );
+	}
+
+	/**
+	 * The list of supported post types.
+	 *
+	 * return array
+	 */
+	public function get_supported_post_types() {
+		$settings = $this->get_settings();
+
+		if ( empty( $settings ) ) {
+			$post_types = [];
+		} else {
+			$post_types = [];
+			foreach ( $settings['post_types'] as $post_type => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_types[] = $post_type;
+				}
+			}
+		}
+
+		/**
+		 * Filter post types supported for embeddings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_post_types
+		 *
+		 * @param {array} $post_types Array of post types to be classified.
+		 *
+		 * @return {array} Array of post types.
+		 */
+		$post_types = apply_filters( 'classifai_openai_embeddings_post_types', $post_types );
+
+		return $post_types;
+	}
+
+	/**
+	 * The list of supported post statuses.
+	 *
+	 * @return array
+	 */
+	public function get_supported_post_statuses() {
+		$settings = $this->get_settings();
+
+		if ( empty( $settings ) ) {
+			$post_statuses = [];
+		} else {
+			$post_statuses = [];
+			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_statuses[] = $post_status;
+				}
+			}
+		}
+
+		/**
+		 * Filter post statuses supported for embeddings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_post_statuses
+		 *
+		 * @param {array} $post_types Array of post statuses to be classified.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		$post_statuses = apply_filters( 'classifai_openai_embeddings_post_statuses', $post_statuses );
+
+		return $post_statuses;
 	}
 
 	/**
@@ -188,8 +360,11 @@ class Embeddings extends Provider {
 
 		$post = get_post( $post_id );
 
-		// Only run on supported post types.
-		if ( 'publish' !== $post->post_status ) { // TODO: add setting to support other statuses.
+		// Only run on supported post types and statuses.
+		if (
+			! in_array( $post->post_type, $this->get_supported_post_types(), true ) ||
+			! in_array( $post->post_status, $this->get_supported_post_statuses(), true )
+		) {
 			return;
 		}
 
@@ -199,12 +374,13 @@ class Embeddings extends Provider {
 
 		// Add terms to this item based on embedding data.
 		if ( ! is_wp_error( $embeddings ) ) {
+			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
 			$this->set_terms( $post_id, $embeddings );
 		}
 	}
 
 	/**
-	 * Add terms to post based on embeddings.
+	 * Add terms to a post based on embeddings.
 	 *
 	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
@@ -268,7 +444,11 @@ class Embeddings extends Provider {
 
 		// TODO: add custom filter to turn this off
 
-		$this->generate_embeddings( $term_id, 'term' );
+		$embeddings = $this->generate_embeddings( $term_id, 'term' );
+
+		if ( ! is_wp_error( $embeddings ) ) {
+			update_term_meta( $term_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+		}
 	}
 
 	/**
@@ -336,15 +516,6 @@ class Embeddings extends Provider {
 			}
 
 			$response = $data['embedding'];
-
-			switch ( $type ) {
-				case 'post':
-					update_post_meta( $id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $data['embedding'] ) );
-					break;
-				case 'term':
-					update_term_meta( $id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $data['embedding'] ) );
-					break;
-			}
 
 			break;
 		}
@@ -419,7 +590,7 @@ class Embeddings extends Provider {
 				break;
 			case 'term':
 				$term    = get_term( $id );
-				$content = is_a( $term, 'WP_Term' ) ? $term->name : '';
+				$content = is_a( $term, 'WP_Term' ) ? $term->name : ''; // TODO: Also pull term description for more data points.
 				break;
 		}
 
