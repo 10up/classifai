@@ -437,9 +437,11 @@ input.classifai-button {
 			margin-top: 20px;
 		}
 
-		h1.classifai-setup-title {
+		h2.classifai-setup-title {
 			font-size: 22px;
 			padding: 0px;
+			font-weight: 400;
+			margin: 0px;
 		}
 
 		.classifai-step1-content,
@@ -513,7 +515,7 @@ input.classifai-button {
 				margin-top: 20px;
 			}
 
-			h1.classifai-setup-title {
+			h2.classifai-setup-title {
 				text-align: center;
 			}
 		}

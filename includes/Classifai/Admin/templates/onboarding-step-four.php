@@ -35,9 +35,9 @@ $args = array(
 require_once 'onboarding-header.php';
 ?>
 
-<h1 class="classifai-setup-title">
+<h2 class="classifai-setup-title">
 	<?php esc_html_e( 'ClassifAI configured successfully!', 'classifai' ); ?>
-</h1>
+</h2>
 <?php
 foreach ( $features as $key => $feature ) {
 	if ( empty( $feature['title'] ) || empty( $feature['features'] ) ) {

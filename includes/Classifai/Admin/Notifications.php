@@ -56,7 +56,7 @@ class Notifications {
 			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
 				<div id="classifai-activation-notice">
 					<div class="classifai-logo">
-						<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="ClassifAI" />
+						<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
 					</div>
 					<h3 class="classifai-activation-message">
 						<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>

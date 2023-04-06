@@ -12,7 +12,7 @@ $classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GE
 	<div class="classifai-header-layout">
 		<div id="classifai-branding">
 			<div id="classifai-logo">
-				<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="ClassifAI" />
+				<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
 			</div>
 		</div>
 		<div id="classifai-header-controls">
@@ -46,8 +46,8 @@ $classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GE
 				</a>
 				<template id="help-menu-template">
 					<div class="classifai-help-menu">
-						<a class="classifai-help-menu__menu-item" target="_blank" href="https://github.com/10up/classifai#frequently-asked-questions"><?php esc_html_e( 'FAQs', 'classifai' ); ?></a>
-						<a class="classifai-help-menu__menu-item" target="_blank"  href="https://github.com/10up/classifai/issues/new/choose"><?php esc_html_e( 'Report issue/enhancement', 'classifai' ); ?></a>
+						<a class="classifai-help-menu__menu-item" target="_blank" rel="noopener noreferrer" href="https://github.com/10up/classifai#frequently-asked-questions"><?php esc_html_e( 'FAQs', 'classifai' ); ?></a>
+						<a class="classifai-help-menu__menu-item" target="_blank" rel="noopener noreferrer" href="https://github.com/10up/classifai/issues/new/choose"><?php esc_html_e( 'Report issue/enhancement', 'classifai' ); ?></a>
 					</div>
 				</template>
 			</div>
@@ -70,7 +70,7 @@ $classifai_header_menu = array_merge( $classifai_settings, $services_menu );
 	<?php
 	foreach ( $classifai_header_menu as $key => $value ) {
 		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo ( $classifai_page === $key ) ? 'nav-tab-active' : ''; ?>">
+		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo esc_attr( ( $classifai_page === $key ) ? 'nav-tab-active' : '' ); ?>">
 			<?php echo esc_html( $value ); ?>
 		</a>
 		<?php
