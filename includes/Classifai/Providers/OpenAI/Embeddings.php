@@ -129,7 +129,20 @@ class Embeddings extends Provider {
 				'description'    => __( 'Choose which post statuses should be classified.', 'classifai' ),
 			]
 		);
-		// TODO: add settings for taxonomies to classify.
+
+		add_settings_field(
+			'taxonomies',
+			esc_html__( 'Taxonomies to use in classification', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'taxonomies',
+				'options'        => $this->get_taxonomies_for_settings(),
+				'default_values' => $default_settings['taxonomies'],
+				'description'    => __( 'Terms within the taxonomies selected here will be checked against your content (following the post settings above) and the closest matching ones will get auto-assigned.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -158,7 +171,7 @@ class Embeddings extends Provider {
 			if ( isset( $settings['post_types'][ $post_type ] ) && '0' !== $settings['post_types'][ $post_type ] ) {
 				$new_settings['post_types'][ $post_type ] = sanitize_text_field( $settings['post_types'][ $post_type ] );
 			} else {
-				$new_settings['post_types'][ $post_type ] = 0;
+				$new_settings['post_types'][ $post_type ] = '0';
 			}
 		}
 
@@ -168,7 +181,17 @@ class Embeddings extends Provider {
 			if ( isset( $settings['post_statuses'][ $post_status_key ] ) && '0' !== $settings['post_statuses'][ $post_status_key ] ) {
 				$new_settings['post_statuses'][ $post_status_key ] = sanitize_text_field( $settings['post_statuses'][ $post_status_key ] );
 			} else {
-				$new_settings['post_statuses'][ $post_status_key ] = 0;
+				$new_settings['post_statuses'][ $post_status_key ] = '0';
+			}
+		}
+
+		// Sanitize the taxonomy checkboxes.
+		$taxonomies = $this->get_taxonomies_for_settings();
+		foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
+			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
+				$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $settings['taxonomies'][ $taxonomy_key ] );
+			} else {
+				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
 			}
 		}
 
@@ -192,12 +215,9 @@ class Embeddings extends Provider {
 			'authenticated'         => false,
 			'api_key'               => '',
 			'enable_classification' => false,
-			'post_types'            => [
-				'post',
-			],
-			'post_statuses'         => [
-				'publish',
-			],
+			'post_types'            => [ 'post' ],
+			'post_statuses'         => [ 'publish' ],
+			'taxonomies'            => [ 'category' ],
 		];
 	}
 
@@ -221,6 +241,7 @@ class Embeddings extends Provider {
 			__( 'Classification enabled', 'classifai' ) => $enable_classification ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Post types', 'classifai' )             => implode( ', ', $settings['post_types'] ?? [] ),
 			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
+			__( 'Taxonomies', 'classifai' )             => implode( ', ', $settings['taxonomies'] ?? [] ),
 			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( 'classifai_openai_embeddings_latest_response' ),
 		];
 	}
@@ -272,6 +293,33 @@ class Embeddings extends Provider {
 		 * @return {array} Array of post statuses.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_settings_post_statuses', $post_statuses );
+	}
+
+	/**
+	 * Get available taxonomies to use in settings.
+	 *
+	 * @return array
+	 */
+	public function get_taxonomies_for_settings() {
+		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_settings_taxonomies
+		 *
+		 * @param {array} $supported Array of supported taxonomies.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_settings_taxonomies', $supported );
 	}
 
 	/**
