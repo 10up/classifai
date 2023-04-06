@@ -368,12 +368,10 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		// TODO: add custom filter to turn this off
-
 		$embeddings = $this->generate_embeddings( $post_id, 'post' );
 
 		// Add terms to this item based on embedding data.
-		if ( ! is_wp_error( $embeddings ) ) {
+		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
 			$this->set_terms( $post_id, $embeddings );
 		}
@@ -442,11 +440,9 @@ class Embeddings extends Provider {
 
 		// TODO: only run this if the taxonomy is supported in settings.
 
-		// TODO: add custom filter to turn this off
-
 		$embeddings = $this->generate_embeddings( $term_id, 'term' );
 
-		if ( ! is_wp_error( $embeddings ) ) {
+		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			update_term_meta( $term_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
 		}
 	}
@@ -456,7 +452,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param int    $id ID of object to generate embeddings for.
 	 * @param string $type Type of object. Default 'post'.
-	 * @return array|WP_Error
+	 * @return array|boolean|WP_Error
 	 */
 	public function generate_embeddings( int $id = 0, $type = 'post' ) {
 		$settings = $this->get_settings();
@@ -465,6 +461,24 @@ class Embeddings extends Provider {
 		// this method directly, we run it again.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_classification'] ) && 'no' === $settings['enable_classification'] ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Filter whether ClassifAI should classify an item.
+		 *
+		 * Default is true, return false to skip classifying.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_should_classify
+		 *
+		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
+		 * @param {int}    $id         The ID of the item to be considered for classification.
+		 * @param {string} $type    The type of item to be considered for classification.
+		 *
+		 * @return {bool} Whether the post should be classified.
+		 */
+		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $id, $type ) ) {
+			return false;
 		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
