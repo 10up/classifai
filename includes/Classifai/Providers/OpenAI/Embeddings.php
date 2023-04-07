@@ -8,6 +8,7 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\Tokenizer;
+use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Watson\Normalizer;
 use function Classifai\get_asset_info;
@@ -265,6 +266,7 @@ class Embeddings extends Provider {
 		foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
 			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
 				$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $settings['taxonomies'][ $taxonomy_key ] );
+				$this->trigger_taxonomy_update( $taxonomy_key );
 			} else {
 				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
 			}
@@ -446,6 +448,7 @@ class Embeddings extends Provider {
 		$number_to_add        = $settings['number'] ?? 1;
 		$embedding_similarity = [];
 		$taxonomies           = $this->supported_taxonomies();
+		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
 			$terms = get_terms(
@@ -471,7 +474,7 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
-					$embedding_similarity[ $tax ][ $term_id ] = $this->embedding_similarity( $embedding, $term_embedding );
+					$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
 				}
 			}
 		}
@@ -494,7 +497,33 @@ class Embeddings extends Provider {
 		}
 	}
 
-	// TODO: add ability to generate embedding data on existing terms.
+	// TODO: add tests
+
+	/**
+	 * Generate embedding data for all terms within a taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 */
+	private function trigger_taxonomy_update( string $taxonomy = '' ) {
+		$terms = get_terms(
+			[
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'meta_key'   => 'classifai_openai_embeddings',
+				// 'number'  => 500, TODO: see if we need a limit here.
+			]
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return;
+		}
+
+		// Generate embedding data for each term.
+		foreach ( $terms as $term_id ) {
+			$this->generate_embeddings_for_term( $term_id );
+		}
+	}
 
 	/**
 	 * Trigger embedding generation for term being saved.
@@ -615,55 +644,6 @@ class Embeddings extends Provider {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Calculate the similarity between two embeddings.
-	 *
-	 * This code is based on what OpenAI does in their Python SDK.
-	 * See https://github.com/openai/openai-python/blob/ede0882939656ce4289cb4f61142e7658bb2dec7/openai/embeddings_utils.py#L141
-	 *
-	 * @param array $source_embedding Embedding data of the source item.
-	 * @param array $compare_embedding Embedding data of the item to compare.
-	 * @return float
-	 */
-	public function embedding_similarity( array $source_embedding = [], array $compare_embedding = [] ) {
-		// uv = np.average(u * v, weights=w)
-		$combined_average = array_sum(
-			array_map(
-				function( $x, $y ) {
-					return (float) $x * (float) $y;
-				},
-				$source_embedding,
-				$compare_embedding
-			)
-		) / count( $source_embedding );
-
-		// uu = np.average(np.square(u), weights=w)
-		$source_average = array_sum(
-			array_map(
-				function( $x ) {
-					return pow( (float) $x, 2 );
-				},
-				$source_embedding
-			)
-		) / count( $source_embedding );
-
-		// vv = np.average(np.square(v), weights=w)
-		$compare_average = array_sum(
-			array_map(
-				function( $x ) {
-					return pow( (float) $x, 2 );
-				},
-				$compare_embedding
-			)
-		) / count( $compare_embedding );
-
-		// dist = 1.0 - uv / np.sqrt(uu * vv)
-		$distance = 1.0 - ( $combined_average / sqrt( $source_average * $compare_average ) );
-
-		// max(0, min(correlation(u, v, w=w, centered=False), 2.0))
-		return max( 0, min( abs( (float) $distance ), 2.0 ) );
 	}
 
 	/**
