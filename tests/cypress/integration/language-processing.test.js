@@ -152,7 +152,7 @@ describe('Language processing Tests', () => {
 		cy.verifyPostTaxonomyTerms('tags', threshold / 100);
 	});
 
-	it( 'Can save OpenAI "Language Processing" settings', () => {
+	it( 'Can save OpenAI ChatGPT "Language Processing" settings', () => {
 		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
 
 		cy.get( '#api_key' ).clear().type( 'password' );
@@ -288,6 +288,103 @@ describe('Language processing Tests', () => {
 			cy.wrap( $panel )
 				.find( '.editor-post-excerpt button' )
 				.should( 'not.exist' );
+		} );
+	} );
+
+	it( 'Can save OpenAI Embeddings "Language Processing" settings', () => {
+		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_embeddings' );
+
+		cy.get( '#api_key' ).clear().type( 'password' );
+
+		cy.get( '#enable_classification' ).check();
+		cy.get( '#openai_embeddings_post_types_post' ).check();
+		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#number' ).clear().type( 1 );
+		cy.get( '#submit' ).click();
+	} );
+
+	it( 'Can create category and post and category will get auto-assigned', () => {
+		// Create test term.
+		cy.deleteAllTerms( 'category' );
+		cy.createTerm( 'Test', 'category' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test embeddings',
+			content: 'Test embeddings content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the category panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Ensure our test category is checked.
+			cy.wrap( $panel ).find( '#inspector-checkbox-control-0' ).should( 'be.checked' );
+			cy.wrap( $panel ).find( 'label[for="inspector-checkbox-control-0"]' ).contains( 'Test' );
+		} );
+	} );
+
+	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
+		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_embeddings' );
+		cy.get( '#enable_classification' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test term.
+		cy.deleteAllTerms( 'category' );
+		cy.createTerm( 'Test', 'category' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test embeddings disabled',
+			content: 'Test embeddings content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the category panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Ensure our test category is not checked.
+			cy.wrap( $panel ).find( '#inspector-checkbox-control-0' ).should( 'not.be.checked' );
+			cy.wrap( $panel ).find( 'label[for="inspector-checkbox-control-0"]' ).contains( 'Test' );
 		} );
 	} );
 });

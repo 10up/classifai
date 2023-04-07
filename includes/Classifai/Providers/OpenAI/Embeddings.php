@@ -497,8 +497,6 @@ class Embeddings extends Provider {
 		}
 	}
 
-	// TODO: add tests
-
 	/**
 	 * Generate embedding data for all terms within a taxonomy.
 	 *
