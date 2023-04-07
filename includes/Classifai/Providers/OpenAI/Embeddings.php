@@ -433,8 +433,6 @@ class Embeddings extends Provider {
 
 	// TODO: add ability to generate embedding data on existing terms.
 
-	// TODO: add ability to generate embedding data on existing posts.
-
 	// TODO: add ability to turn off classification on a post.
 
 	/**
