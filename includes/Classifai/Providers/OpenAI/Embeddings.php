@@ -328,12 +328,10 @@ class Embeddings extends Provider {
 	 * return array
 	 */
 	public function get_supported_post_types() {
-		$settings = $this->get_settings();
+		$settings   = $this->get_settings();
+		$post_types = [];
 
-		if ( empty( $settings ) ) {
-			$post_types = [];
-		} else {
-			$post_types = [];
+		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
 			foreach ( $settings['post_types'] as $post_type => $enabled ) {
 				if ( ! empty( $enabled ) ) {
 					$post_types[] = $post_type;
@@ -362,12 +360,10 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_supported_post_statuses() {
-		$settings = $this->get_settings();
+		$settings      = $this->get_settings();
+		$post_statuses = [];
 
-		if ( empty( $settings ) ) {
-			$post_statuses = [];
-		} else {
-			$post_statuses = [];
+		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
 			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
 				if ( ! empty( $enabled ) ) {
 					$post_statuses[] = $post_status;
@@ -388,6 +384,38 @@ class Embeddings extends Provider {
 		$post_statuses = apply_filters( 'classifai_openai_embeddings_post_statuses', $post_statuses );
 
 		return $post_statuses;
+	}
+
+	/**
+	 * The list of supported taxonomies.
+	 *
+	 * @return array
+	 */
+	public function get_supported_taxonomies() {
+		$settings   = $this->get_settings();
+		$taxonomies = [];
+
+		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {
+			foreach ( $settings['taxonomies'] as $taxonomy => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$taxonomies[] = $taxonomy;
+				}
+			}
+		}
+
+		/**
+		 * Filter taxonomies supported for embeddings.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_taxonomies
+		 *
+		 * @param {array} $taxonomies Array of taxonomies to be classified.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		$taxonomies = apply_filters( 'classifai_openai_embeddings_taxonomies', $taxonomies );
+
+		return $taxonomies;
 	}
 
 	/**
@@ -439,27 +467,30 @@ class Embeddings extends Provider {
 		// TODO: term cap checks here?
 
 		$embedding_similarity = [];
+		$taxonomies           = $this->get_supported_taxonomies();
 
-		// TODO: loop over taxonomies from settings. Ensure we only pull taxonomies that this post type supports.
-		$terms = get_terms(
-			[
-				'taxonomy'   => 'category',
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'meta_key'   => 'classifai_openai_embeddings', // TODO: set limit here?
-			]
-		);
+		foreach ( $taxonomies as $tax ) {
+			$terms = get_terms(
+				[
+					'taxonomy'   => $tax,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'classifai_openai_embeddings',
+					// 'number'  => 500, TODO: see if we need a limit here.
+				]
+			);
 
-		// TODO: for actual comparison of embeddings, probably need to limit that to a certain number for performance reasons. Run some tests to see what that number should be.
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
 
-		// TODO: error handling if no terms found.
+			// Get embedding similarity for each term.
+			foreach ( $terms as $term_id ) {
+				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
-		// Get embedding similarity for each term.
-		foreach ( $terms as $term_id ) {
-			$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-			if ( $term_embedding ) {
-				$embedding_similarity[ $term_id ] = $this->embedding_similarity( $embedding, $term_embedding );
+				if ( $term_embedding ) {
+					$embedding_similarity[ $tax ][ $term_id ] = $this->embedding_similarity( $embedding, $term_embedding );
+				}
 			}
 		}
 
@@ -467,12 +498,15 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		// Sort embeddings from lowest to highest.
-		asort( $embedding_similarity );
+		// Set terms based on similarity.
+		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Sort embeddings from lowest to highest.
+			asort( $terms );
 
-		$terms_to_add = array_keys( array_slice( $embedding_similarity, 0, 2, true ) ); // TODO: add setting to support number of terms.
+			$terms_to_add = array_keys( array_slice( $terms, 0, 2, true ) ); // TODO: add setting to support number of terms.
 
-		wp_set_object_terms( $post_id, array_map( 'absint', $terms_to_add ), 'category', false ); // TODO: pull taxonomy from settings.
+			wp_set_object_terms( $post_id, array_map( 'absint', $terms_to_add ), $tax, false );
+		}
 	}
 
 	/**
@@ -486,7 +520,18 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		// TODO: only run this if the taxonomy is supported in settings.
+		$term = get_term( $term_id );
+
+		if ( ! is_a( $term, '\WP_Term' ) ) {
+			return;
+		}
+
+		$taxonomies = $this->get_supported_taxonomies();
+
+		// Ensure this term is part of a taxonomy we support.
+		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {
+			return;
+		}
 
 		$embeddings = $this->generate_embeddings( $term_id, 'term' );
 
@@ -651,8 +696,13 @@ class Embeddings extends Provider {
 				$content = $normalizer->normalize( $id );
 				break;
 			case 'term':
+				$content = '';
 				$term    = get_term( $id );
-				$content = is_a( $term, 'WP_Term' ) ? $term->name : ''; // TODO: Also pull term description for more data points.
+
+				if ( is_a( $term, '\WP_Term' ) ) {
+					$content = $term->name . ' ' . $term->description;
+				}
+
 				break;
 		}
 
