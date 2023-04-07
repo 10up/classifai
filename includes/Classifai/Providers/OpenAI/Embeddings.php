@@ -8,7 +8,9 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\Tokenizer;
+use Classifai\Providers\Watson\NLU;
 use Classifai\Watson\Normalizer;
+use function Classifai\get_asset_info;
 use WP_Error;
 
 class Embeddings extends Provider {
@@ -77,6 +79,62 @@ class Embeddings extends Provider {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
+			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		}
+	}
+
+	/**
+	 * Enqueue editor assets.
+	 */
+	public function enqueue_editor_assets() {
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		/**
+		 * If the NLU provider is active, add our data using the filter.
+		 *
+		 * If not, enqueue the script and add our data using the inline script.
+		 */
+		$nlu = new NLU( false );
+		if ( $nlu->can_register() ) {
+			add_filter(
+				'classifai_gutenberg_post_data',
+				function( array $post_data = [] ) {
+					$post_data['embeddingsEnabled']          = true;
+					$post_data['supportedEmbeddingTypes']    = $this->supported_post_types();
+					$post_data['supportedEmbeddingStatuses'] = $this->supported_post_statuses();
+
+					return $post_data;
+				}
+			);
+		} else {
+			wp_enqueue_script(
+				'classifai-gutenberg-plugin',
+				CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
+				get_asset_info( 'gutenberg-plugin', 'dependencies' ),
+				get_asset_info( 'gutenberg-plugin', 'version' ),
+				true
+			);
+
+			wp_add_inline_script(
+				'classifai-gutenberg-plugin',
+				sprintf(
+					'var classifaiPostData = %s;',
+					wp_json_encode(
+						[
+							'embeddingsEnabled'          => true,
+							'supportedEmbeddingTypes'    => $this->supported_post_types(),
+							'supportedEmbeddingStatuses' => $this->supported_post_statuses(),
+							'noPermissions'              => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+						]
+					)
+				),
+				'before'
+			);
 		}
 	}
 
@@ -355,6 +413,11 @@ class Embeddings extends Provider {
 			return;
 		}
 
+		// Don't run if turned off for this particular post.
+		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
+			return;
+		}
+
 		$embeddings = $this->generate_embeddings( $post_id, 'post' );
 
 		// Add terms to this item based on embedding data.
@@ -432,8 +495,6 @@ class Embeddings extends Provider {
 	}
 
 	// TODO: add ability to generate embedding data on existing terms.
-
-	// TODO: add ability to turn off classification on a post.
 
 	/**
 	 * Trigger embedding generation for term being saved.
@@ -648,6 +709,32 @@ class Embeddings extends Provider {
 		 * @return {string} Content.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_content', $content, $id, $type );
+	}
+
+	/**
+	 * Add `classifai_process_content` to the REST API for view/edit.
+	 */
+	public function add_process_content_meta_to_rest_api() {
+		$supported_post_types = $this->supported_post_types();
+
+		register_rest_field(
+			$supported_post_types,
+			'classifai_process_content',
+			[
+				'get_callback'    => function( $object ) {
+					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+					return ( 'no' === $process_content ) ? 'no' : 'yes';
+				},
+				'update_callback' => function ( $value, $object ) {
+					$value = ( 'no' === $value ) ? 'no' : 'yes';
+					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+				},
+				'schema'          => [
+					'type'    => 'string',
+					'context' => [ 'view', 'edit' ],
+				],
+			]
+		);
 	}
 
 }

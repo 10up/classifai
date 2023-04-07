@@ -11,6 +11,7 @@ use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
+use function Classifai\get_asset_info;
 
 class NLU extends Provider {
 
@@ -198,20 +199,35 @@ class NLU extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
+			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
 
-		wp_localize_script(
-			'classifai-gutenberg-plugin',
-			'classifaiPostData',
+		/**
+		 * Filter the data passed to the Gutenberg plugin.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_gutenberg_post_data
+		 *
+		 * @param {array} $post_data Data we pass to our Gutenberg plugin.
+		 *
+		 * @return {array} Post data.
+		 */
+		$post_data = apply_filters(
+			'classifai_gutenberg_post_data',
 			[
 				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
+		);
+
+		wp_localize_script(
+			'classifai-gutenberg-plugin',
+			'classifaiPostData',
+			$post_data
 		);
 	}
 

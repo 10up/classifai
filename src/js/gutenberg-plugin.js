@@ -203,24 +203,56 @@ const ClassifAIPlugin = () => {
 		return null;
 	}
 
-	// Ensure that language processing is enabled.
-	if ( ! classifaiPostData.NLUEnabled ) {
+	// Ensure that at least one language processing feature is enabled.
+	if ( ! classifaiPostData.NLUEnabled && ! classifaiPostData.embeddingsEnabled ) {
 		return null;
 	}
 
-	// Ensure we are on a supported post type
-	if (
-		classifaiPostData.supportedPostTypes &&
-		! classifaiPostData.supportedPostTypes.includes( postType )
-	) {
+	// Ensure we are on a supported post type, checking settings from all features.
+	let postTypeSupported = true;
+	if ( classifaiPostData.embeddingsEnabled ) {
+		if (
+			classifaiPostData.supportedEmbeddingTypes &&
+			! classifaiPostData.supportedEmbeddingTypes.includes( postType )
+		) {
+			postTypeSupported = false;
+		}
+	}
+
+	if ( classifaiPostData.NLUEnabled ) {
+		if (
+			classifaiPostData.supportedPostTypes &&
+			! classifaiPostData.supportedPostTypes.includes( postType )
+		) {
+			postTypeSupported = false;
+		}
+	}
+
+	if ( ! postTypeSupported ) {
 		return null;
 	}
 
-	// Ensure we are on a supported post status
-	if (
-		classifaiPostData.supportedPostStatues &&
-		! classifaiPostData.supportedPostStatues.includes( postStatus )
-	) {
+	// Ensure we are on a supported post status, checking settings from all features.
+	let postStatusSupported = true;
+	if ( classifaiPostData.embeddingsEnabled ) {
+		if (
+			classifaiPostData.supportedEmbeddingStatuses &&
+			! classifaiPostData.supportedEmbeddingStatuses.includes( postStatus )
+		) {
+			postStatusSupported = false;
+		}
+	}
+
+	if ( classifaiPostData.NLUEnabled ) {
+		if (
+			classifaiPostData.supportedPostStatues &&
+			! classifaiPostData.supportedPostStatues.includes( postStatus )
+		) {
+			postStatusSupported = false;
+		}
+	}
+
+	if ( ! postStatusSupported ) {
 		return null;
 	}
 
@@ -232,7 +264,7 @@ const ClassifAIPlugin = () => {
 		>
 			<>
 				<ClassifAIToggle />
-				<ClassifAIGenerateTagsButton />
+				{ classifaiPostData.NLUEnabled && <ClassifAIGenerateTagsButton /> }
 			</>
 		</PluginDocumentSettingPanel>
 	);
