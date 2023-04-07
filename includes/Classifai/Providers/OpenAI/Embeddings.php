@@ -104,7 +104,7 @@ class Embeddings extends Provider {
 
 		add_settings_field(
 			'post-types',
-			esc_html__( 'Post types to classify', 'classifai' ),
+			esc_html__( 'Post types', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -118,7 +118,7 @@ class Embeddings extends Provider {
 
 		add_settings_field(
 			'post-statuses',
-			esc_html__( 'Post statuses to classify', 'classifai' ),
+			esc_html__( 'Post statuses', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -132,7 +132,7 @@ class Embeddings extends Provider {
 
 		add_settings_field(
 			'taxonomies',
-			esc_html__( 'Taxonomies to use in classification', 'classifai' ),
+			esc_html__( 'Taxonomies', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -140,7 +140,24 @@ class Embeddings extends Provider {
 				'label_for'      => 'taxonomies',
 				'options'        => $this->get_taxonomies_for_settings(),
 				'default_values' => $default_settings['taxonomies'],
-				'description'    => __( 'Terms within the taxonomies selected here will be checked against your content (following the post settings above) and the closest matching ones will get auto-assigned.', 'classifai' ),
+				'description'    => __( 'Choose which taxonomies will be used for classification.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'number',
+			esc_html__( 'Number of terms', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'number',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'max'           => 10,
+				'step'          => 1,
+				'default_value' => $default_settings['number'],
+				'description'   => __( 'Maximum number of terms that will get auto-assigned.', 'classifai' ),
 			]
 		);
 	}
@@ -195,6 +212,13 @@ class Embeddings extends Provider {
 			}
 		}
 
+		// Sanitize the number setting.
+		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 0 && (int) $settings['number'] <= 10 ) {
+			$new_settings['number'] = absint( $settings['number'] );
+		} else {
+			$new_settings['number'] = 1;
+		}
+
 		return $new_settings;
 	}
 
@@ -218,6 +242,7 @@ class Embeddings extends Provider {
 			'post_types'            => [ 'post' ],
 			'post_statuses'         => [ 'publish' ],
 			'taxonomies'            => [ 'category' ],
+			'number'                => 1,
 		];
 	}
 
@@ -242,6 +267,7 @@ class Embeddings extends Provider {
 			__( 'Post types', 'classifai' )             => implode( ', ', $settings['post_types'] ?? [] ),
 			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
 			__( 'Taxonomies', 'classifai' )             => implode( ', ', $settings['taxonomies'] ?? [] ),
+			__( 'Number of terms', 'classifai' )        => $settings['number'] ?? 1,
 			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( 'classifai_openai_embeddings_latest_response' ),
 		];
 	}
@@ -345,10 +371,16 @@ class Embeddings extends Provider {
 	 * @param array $embedding Embedding data.
 	 */
 	private function set_terms( int $post_id = 0, array $embedding = [] ) {
-		if ( empty( $embedding ) ) {
-			return;
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
 
+		if ( empty( $embedding ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
+		}
+
+		$settings             = $this->get_settings();
+		$number_to_add        = $settings['number'] ?? 1;
 		$embedding_similarity = [];
 		$taxonomies           = $this->supported_taxonomies();
 
@@ -390,13 +422,20 @@ class Embeddings extends Provider {
 			// Sort embeddings from lowest to highest.
 			asort( $terms );
 
-			$terms_to_add = array_keys( array_slice( $terms, 0, 2, true ) ); // TODO: add setting to support number of terms.
+			// Only add the number of terms specified in settings.
+			if ( count( $terms ) > $number_to_add ) {
+				$terms = array_slice( $terms, 0, $number_to_add, true );
+			}
 
-			wp_set_object_terms( $post_id, array_map( 'absint', $terms_to_add ), $tax, false );
+			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
 		}
 	}
 
 	// TODO: add ability to generate embedding data on existing terms.
+
+	// TODO: add ability to generate embedding data on existing posts.
+
+	// TODO: add ability to turn off classification on a post.
 
 	/**
 	 * Trigger embedding generation for term being saved.
