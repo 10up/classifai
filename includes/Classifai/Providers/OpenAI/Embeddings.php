@@ -75,7 +75,7 @@ class Embeddings extends Provider {
 
 		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
-			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); // TODO: run this only for taxonomy selected in settings.
+			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
 		}
 	}
@@ -247,98 +247,11 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get available post types to use in settings.
-	 *
-	 * @return array
-	 */
-	public function get_post_types_for_settings() {
-		$post_types     = [];
-		$post_type_objs = get_post_types( [], 'objects' );
-		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
-		unset( $post_type_objs['attachment'] );
-
-		foreach ( $post_type_objs as $post_type ) {
-			$post_types[ $post_type->name ] = $post_type->label;
-		}
-
-		/**
-		 * Filter post types shown in settings.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_openai_embeddings_settings_post_types
-		 *
-		 * @param {array} $post_types Array of post types to show in settings.
-		 *
-		 * @return {array} Array of post types.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_settings_post_types', $post_types );
-	}
-
-	/**
-	 * Get available post statuses to use in settings.
-	 *
-	 * @return array
-	 */
-	public function get_post_statuses_for_settings() {
-		$post_statuses = get_post_statuses();
-
-		/**
-		 * Filter post statuses shown in settings.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_openai_embeddings_settings_post_statuses
-		 *
-		 * @param {array} $post_statuses Array of post statuses to show in settings.
-		 *
-		 * @return {array} Array of post statuses.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_settings_post_statuses', $post_statuses );
-	}
-
-	/**
-	 * Get available taxonomies to use in settings.
-	 *
-	 * @return array
-	 */
-	public function get_taxonomies_for_settings() {
-		$taxonomies = get_taxonomies( [], 'objects' );
-		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
-		$supported  = [];
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
-		}
-
-		/**
-		 * Filter taxonomies shown in settings.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_openai_embeddings_settings_taxonomies
-		 *
-		 * @param {array} $supported Array of supported taxonomies.
-		 *
-		 * @return {array} Array of taxonomies.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_settings_taxonomies', $supported );
-	}
-
-	/**
 	 * The list of supported post types.
 	 *
 	 * return array
 	 */
-	public function get_supported_post_types() {
-		$settings   = $this->get_settings();
-		$post_types = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
-			foreach ( $settings['post_types'] as $post_type => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_types[] = $post_type;
-				}
-			}
-		}
-
+	public function supported_post_types() {
 		/**
 		 * Filter post types supported for embeddings.
 		 *
@@ -349,9 +262,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post types.
 		 */
-		$post_types = apply_filters( 'classifai_openai_embeddings_post_types', $post_types );
-
-		return $post_types;
+		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types() );
 	}
 
 	/**
@@ -359,18 +270,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_supported_post_statuses() {
-		$settings      = $this->get_settings();
-		$post_statuses = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
-			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_statuses[] = $post_status;
-				}
-			}
-		}
-
+	public function supported_post_statuses() {
 		/**
 		 * Filter post statuses supported for embeddings.
 		 *
@@ -381,9 +281,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post statuses.
 		 */
-		$post_statuses = apply_filters( 'classifai_openai_embeddings_post_statuses', $post_statuses );
-
-		return $post_statuses;
+		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses() );
 	}
 
 	/**
@@ -391,18 +289,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_supported_taxonomies() {
-		$settings   = $this->get_settings();
-		$taxonomies = [];
-
-		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {
-			foreach ( $settings['taxonomies'] as $taxonomy => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$taxonomies[] = $taxonomy;
-				}
-			}
-		}
-
+	public function supported_taxonomies() {
 		/**
 		 * Filter taxonomies supported for embeddings.
 		 *
@@ -413,9 +300,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of taxonomies.
 		 */
-		$taxonomies = apply_filters( 'classifai_openai_embeddings_taxonomies', $taxonomies );
-
-		return $taxonomies;
+		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies() );
 	}
 
 	/**
@@ -438,8 +323,8 @@ class Embeddings extends Provider {
 
 		// Only run on supported post types and statuses.
 		if (
-			! in_array( $post->post_type, $this->get_supported_post_types(), true ) ||
-			! in_array( $post->post_status, $this->get_supported_post_statuses(), true )
+			! in_array( $post->post_type, $this->supported_post_types(), true ) ||
+			! in_array( $post->post_status, $this->supported_post_statuses(), true )
 		) {
 			return;
 		}
@@ -464,10 +349,8 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		// TODO: term cap checks here?
-
 		$embedding_similarity = [];
-		$taxonomies           = $this->get_supported_taxonomies();
+		$taxonomies           = $this->supported_taxonomies();
 
 		foreach ( $taxonomies as $tax ) {
 			$terms = get_terms(
@@ -486,6 +369,10 @@ class Embeddings extends Provider {
 
 			// Get embedding similarity for each term.
 			foreach ( $terms as $term_id ) {
+				if ( ! current_user_can( 'assign_term', $term_id ) ) {
+					continue;
+				}
+
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
@@ -509,6 +396,8 @@ class Embeddings extends Provider {
 		}
 	}
 
+	// TODO: add ability to generate embedding data on existing terms.
+
 	/**
 	 * Trigger embedding generation for term being saved.
 	 *
@@ -526,7 +415,7 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		$taxonomies = $this->get_supported_taxonomies();
+		$taxonomies = $this->supported_taxonomies();
 
 		// Ensure this term is part of a taxonomy we support.
 		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {
