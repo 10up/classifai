@@ -37,6 +37,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
 
 	/**
@@ -174,6 +175,36 @@ class Plugin {
 				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
 				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
 			]
+		);
+	}
+
+	/**
+	 * Add the action links to the plugin page.
+	 *
+	 * @param array $links The Action links for the plugin.
+	 *
+	 * @return array
+	 */
+	public function filter_plugin_action_links( $links ) {
+
+		if ( ! is_array( $links ) ) {
+			return $links;
+		}
+
+		return array_merge(
+			array(
+				'setup'    => sprintf(
+					'<a href="%s"> %s </a>',
+					esc_url( admin_url( 'admin.php?page=classifai_setup' ) ),
+					esc_html__( 'Set up', 'classifai' )
+				),
+				'settings' => sprintf(
+					'<a href="%s"> %s </a>',
+					esc_url( admin_url( 'tools.php?page=classifai' ) ),
+					esc_html__( 'Settings', 'classifai' )
+				),
+			),
+			$links
 		);
 	}
 }
