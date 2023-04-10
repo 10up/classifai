@@ -73,6 +73,7 @@ const GeneratedImage = wp.media.View.extend( {
 				self.$( '.error' ).text( error );
 			},
 			additionalData: {
+				post: wp.media.model.settings.post.id ?? null,
 				caption: classifaiDalleData.caption,
 			},
 		} );
