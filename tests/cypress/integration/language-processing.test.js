@@ -347,8 +347,8 @@ describe('Language processing Tests', () => {
 			}
 
 			// Ensure our test category is checked.
-			cy.wrap( $panel ).find( '#inspector-checkbox-control-0' ).should( 'be.checked' );
-			cy.wrap( $panel ).find( 'label[for="inspector-checkbox-control-0"]' ).contains( 'Test' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first input' ).should( 'be.checked' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first label' ).contains( 'Test' );
 		} );
 	} );
 
@@ -391,8 +391,8 @@ describe('Language processing Tests', () => {
 			}
 
 			// Ensure our test category is not checked.
-			cy.wrap( $panel ).find( '#inspector-checkbox-control-0' ).should( 'not.be.checked' );
-			cy.wrap( $panel ).find( 'label[for="inspector-checkbox-control-0"]' ).contains( 'Test' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first input' ).should( 'be.checked' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first label' ).contains( 'Uncategorized' );
 		} );
 	} );
 });
