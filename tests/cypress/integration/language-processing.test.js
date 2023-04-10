@@ -309,7 +309,7 @@ describe('Language processing Tests', () => {
 		cy.visit( '/wp-admin/admin.php?page=language_processing' );
 		cy.get( '#classifai-settings-category' ).uncheck();
 		cy.get( '#classifai-settings-keyword' ).uncheck();
-		cy.get( '#classifai-settings-entity' ).cheuncheckck();
+		cy.get( '#classifai-settings-entity' ).uncheck();
 		cy.get( '#classifai-settings-concept' ).uncheck();
 		cy.get( '#submit' ).click();
 
