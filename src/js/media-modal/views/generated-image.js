@@ -72,6 +72,9 @@ const GeneratedImage = wp.media.View.extend( {
 				self.disableLoadingState();
 				self.$( '.error' ).text( error );
 			},
+			additionalData: {
+				caption: classifaiDalleData.caption,
+			},
 		} );
 
 		return status;
