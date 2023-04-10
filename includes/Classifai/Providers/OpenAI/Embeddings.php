@@ -46,7 +46,7 @@ class Embeddings extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'OpenAI',
+			'OpenAI Embeddings',
 			'Embeddings',
 			'openai_embeddings',
 			$service
