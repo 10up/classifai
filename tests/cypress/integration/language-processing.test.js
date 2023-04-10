@@ -305,6 +305,14 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can create category and post and category will get auto-assigned', () => {
+		// Remove custom taxonomies so those don't interfere with the test.
+		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+		cy.get( '#classifai-settings-category' ).uncheck();
+		cy.get( '#classifai-settings-keyword' ).uncheck();
+		cy.get( '#classifai-settings-entity' ).cheuncheckck();
+		cy.get( '#classifai-settings-concept' ).uncheck();
+		cy.get( '#submit' ).click();
+
 		// Create test term.
 		cy.deleteAllTerms( 'category' );
 		cy.createTerm( 'Test', 'category' );
