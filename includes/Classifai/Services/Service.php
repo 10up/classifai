@@ -106,7 +106,14 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$base_url   = add_query_arg(
+			array(
+				'page' => 'classifai',
+				'tab'  => $this->get_menu_slug(),
+			),
+			admin_url( 'tools.php' )
+		);
 		?>
 		<div class="classifai-content">
 			<?php
@@ -117,7 +124,7 @@ abstract class Service {
 				<?php if ( ! empty( $this->provider_classes ) ) : ?>
 				<h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
-						<a href="?page=<?php echo esc_attr( $this->get_menu_slug() ); ?>&tab=<?php echo esc_attr( $provider_class->get_settings_section() ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
 					<?php endforeach; ?>
 				</h2>
 				<?php endif; ?>

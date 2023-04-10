@@ -90,12 +90,7 @@ class ServicesManager {
 	 * If there are more than a single service, we'll create a top level admin menu and add subsequent items there.
 	 */
 	public function do_settings() {
-		if ( count( $this->service_classes ) > 1 ) {
-			add_action( 'admin_menu', [ $this, 'register_top_level_admin_menu_item' ] );
-		} else {
-			add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
-		}
-
+		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
 		add_action( 'admin_init', [ $this, 'register_settings' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
 	}
@@ -234,51 +229,14 @@ class ServicesManager {
 	 */
 	public function register_admin_menu_item() {
 		add_submenu_page(
-			'options-general.php',
+			'tools.php',
 			$this->title,
 			$this->menu_title,
 			'manage_options',
-			'classifai_settings',
+			'classifai',
 			[ $this, 'render_settings_page' ]
 		);
-
-		$this->init_services_settings();
 	}
-
-	/**
-	 * Register a top level page.
-	 */
-	public function register_top_level_admin_menu_item() {
-		add_menu_page(
-			$this->title,
-			$this->menu_title,
-			'manage_options',
-			'classifai_settings',
-			[ $this, 'render_settings_page' ],
-			CLASSIFAI_PLUGIN_URL . 'assets/img/menu-icon.svg'
-		);
-
-		$this->init_services_settings();
-	}
-
-	/**
-	 * Registers each of the service pages.
-	 */
-	public function init_services_settings() {
-
-		foreach ( $this->service_classes as $service_class ) {
-			add_submenu_page(
-				'classifai_settings',
-				$service_class->get_display_name(),
-				$service_class->get_display_name(),
-				'manage_options',
-				$service_class->get_menu_slug(),
-				[ $service_class, 'render_settings_page' ]
-			);
-		}
-	}
-
-
 
 	/**
 	 * Render the main settings page for the Classifai plugin.
@@ -286,24 +244,31 @@ class ServicesManager {
 	public function render_settings_page() {
 
 		if ( count( $this->services ) > 1 ) {
-
-			?>
-			<div class="classifai-content">
-				<?php
-				include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$service = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'classifai_settings';
+			if ( ! empty( $service ) && isset( $this->service_classes[ $service ] ) ) {
+				// Render settings page for a specific service.
+				$this->service_classes[ $service ]->render_settings_page();
+				return;
+			} else {
 				?>
-				<div class="classifai-wrap wrap">
-					<?php settings_errors(); ?>
-					<form method="post" action="options.php">
-						<?php
-						settings_fields( 'classifai_settings' );
-						do_settings_sections( 'classifai_settings' );
-						submit_button();
-						?>
-					</form>
+				<div class="classifai-content">
+					<?php
+					include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
+					?>
+					<div class="classifai-wrap wrap">
+						<?php settings_errors(); ?>
+						<form method="post" action="options.php">
+							<?php
+							settings_fields( 'classifai_settings' );
+							do_settings_sections( 'classifai_settings' );
+							submit_button();
+							?>
+						</form>
+					</div>
 				</div>
-			</div>
-			<?php
+				<?php
+			}
 		} else {
 			// Render settings page for the first ( and only ) settings page.
 			$this->service_classes[0]->render_settings_page();

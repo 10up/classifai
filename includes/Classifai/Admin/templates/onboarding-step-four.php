@@ -22,7 +22,7 @@ $args = array(
 	'image'      => 'https://via.placeholder.com/334x334',
 	'left_link'  => array(
 		'text' => __( 'Adjust ClassifAI settings', 'classifai' ),
-		'url'  => admin_url( 'admin.php?page=classifai_settings' ),
+		'url'  => admin_url( 'tools.php?page=classifai' ),
 	),
 	'right_link' => array(
 		'text'   => __( 'Done', 'classifai' ),

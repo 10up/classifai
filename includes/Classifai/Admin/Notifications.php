@@ -31,9 +31,11 @@ class Notifications {
 	 */
 	public function maybe_render_notices() {
 		$registration_settings = get_option( 'classifai_settings' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
 		if (
-			'classifai_settings' === get_current_screen()->parent_base &&
+			'classifai' === $page &&
 			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';

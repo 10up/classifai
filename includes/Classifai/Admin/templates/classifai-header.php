@@ -6,7 +6,9 @@
  */
 
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+$active_page = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'classifai_settings';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$is_setup_page = isset( $_GET['page'] ) && 'classifai_setup' === sanitize_text_field( wp_unslash( $_GET['page'] ) );
 ?>
 <header id="classifai-header">
 	<div class="classifai-header-layout">
@@ -17,10 +19,10 @@ $classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GE
 		</div>
 		<div id="classifai-header-controls">
 			<?php
-			if ( 'classifai_setup' === $classifai_page ) {
+			if ( $is_setup_page ) {
 				?>
 				<div class="header-control-item">
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_settings' ) ); ?>" class="classifai-help-links">
+					<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai' ) ); ?>" class="classifai-help-links">
 						<span class="dashicons dashicons-admin-generic"></span>
 						<span class="control-item-text"><?php esc_html_e( 'Settings', 'classifai' ); ?></span>
 					</a>
@@ -55,7 +57,7 @@ $classifai_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GE
 	</div>
 </header>
 <?php
-if ( 'classifai_setup' === $classifai_page ) {
+if ( $is_setup_page ) {
 	return;
 }
 
@@ -70,7 +72,7 @@ $classifai_header_menu = array_merge( $classifai_settings, $services_menu );
 	<?php
 	foreach ( $classifai_header_menu as $key => $value ) {
 		?>
-		<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . $key ) ); ?>" class="nav-tab <?php echo esc_attr( ( $classifai_page === $key ) ? 'nav-tab-active' : '' ); ?>">
+		<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai&tab=' . $key ) ); ?>" class="nav-tab <?php echo esc_attr( ( $active_page === $key ) ? 'nav-tab-active' : '' ); ?>">
 			<?php echo esc_html( $value ); ?>
 		</a>
 		<?php
