@@ -9,6 +9,7 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+use function Classifai\get_plugin_settings;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
@@ -696,10 +697,13 @@ class NLU extends Provider {
 			}
 		}
 
+		$feature_enabled = false;
+
 		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
 				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
+				$feature_enabled                      = true;
 			} else {
 				$new_settings['features'][ $feature ] = null;
 			}
@@ -711,6 +715,20 @@ class NLU extends Provider {
 
 			if ( isset( $settings['features'][ "{$feature}_taxonomy" ] ) ) {
 				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
+			}
+		}
+
+		// Show a warning if the NLU feature and Embeddings feature are both enabled.
+		if ( $feature_enabled ) {
+			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
+
+			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
+				add_settings_error(
+					'features',
+					'conflict',
+					esc_html__( 'OpenAI Embeddings classification is turned on. This may conflict with the NLU classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
+					'warning'
+				);
 			}
 		}
 

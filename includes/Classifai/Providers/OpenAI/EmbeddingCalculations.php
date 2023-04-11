@@ -15,9 +15,13 @@ class EmbeddingCalculations {
 	 *
 	 * @param array $source_embedding Embedding data of the source item.
 	 * @param array $compare_embedding Embedding data of the item to compare.
-	 * @return float
+	 * @return bool|float
 	 */
 	public function similarity( array $source_embedding = [], array $compare_embedding = [] ) {
+		if ( empty( $source_embedding ) || empty( $compare_embedding ) ) {
+			return false;
+		}
+
 		// Get the combined average between the two embeddings.
 		$combined_average = array_sum(
 			array_map(

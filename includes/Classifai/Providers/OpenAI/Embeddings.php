@@ -12,6 +12,7 @@ use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Watson\Normalizer;
 use function Classifai\get_asset_info;
+use function Classifai\language_processing_features_enabled;
 use WP_Error;
 
 class Embeddings extends Provider {
@@ -239,6 +240,16 @@ class Embeddings extends Provider {
 			$new_settings['enable_classification'] = 'no';
 		} else {
 			$new_settings['enable_classification'] = '1';
+
+			// If any NLU features are turned, show an admin notice.
+			if ( language_processing_features_enabled() ) {
+				add_settings_error(
+					'enable_classification',
+					'conflict',
+					esc_html__( 'IBM Watson NLU classification is turned on. This may conflict with the Embeddings classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
+					'warning'
+				);
+			}
 		}
 
 		// Sanitize the post type checkboxes.
@@ -474,7 +485,10 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
-					$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity ) {
+						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+					}
 				}
 			}
 		}
