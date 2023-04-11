@@ -179,6 +179,13 @@ class Onboarding {
 					);
 					return;
 				}
+
+				// Skip step 2 if it is already configured.
+				$registration_settings = get_option( 'classifai_settings', array() );
+				if ( isset( $registration_settings['valid_license'] ) && $registration_settings['valid_license'] ) {
+					$step = 2;
+				}
+
 				$onboarding_options['step_completed']       = $step;
 				$onboarding_options['enabled_features']     = $enabled_features;
 				$onboarding_options['configured_providers'] = array();
