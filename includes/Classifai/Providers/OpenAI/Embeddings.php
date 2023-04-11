@@ -157,7 +157,7 @@ class Embeddings extends Provider {
 				'label_for'     => 'enable_classification',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_classification'],
-				'description'   => __( 'Automatically classify content within your existing category structure.', 'classifai' ),
+				'description'   => __( 'Automatically classify content within your existing taxonomy structure.', 'classifai' ),
 			]
 		);
 
