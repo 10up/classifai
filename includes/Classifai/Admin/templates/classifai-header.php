@@ -29,16 +29,14 @@ $is_setup_page = isset( $_GET['page'] ) && 'classifai_setup' === sanitize_text_f
 				</div>
 				<?php
 			} else {
-				if ( ! Classifai\Admin\Onboarding::is_onboarding_completed() ) {
-					?>
-					<div class="header-control-item">
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>" class="classifai-help-links">
-							<span class="dashicons dashicons-admin-tools"></span>
-							<span class="control-item-text"><?php esc_html_e( 'Set up', 'classifai' ); ?></span>
-						</a>
-					</div>
-					<?php
-				}
+				?>
+				<div class="header-control-item">
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>" class="classifai-help-links">
+						<span class="dashicons dashicons-admin-tools"></span>
+						<span class="control-item-text"><?php esc_html_e( 'Set up', 'classifai' ); ?></span>
+					</a>
+				</div>
+				<?php
 			}
 			?>
 			<div class="header-control-item">
