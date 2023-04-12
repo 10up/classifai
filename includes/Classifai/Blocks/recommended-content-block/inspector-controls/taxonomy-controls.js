@@ -123,24 +123,28 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 		);
 	};
 
+	const UseTermToggle = () => {
+		return (
+			<ToggleControl
+				label={ __(
+					"Use this Post's Categories and Tags",
+					'classifai'
+				) }
+				checked={ usePostTerms }
+				onChange={ ( useTerm ) =>
+					onChange( { usePostTerms: useTerm } )
+				}
+			/>
+		);
+	};
+
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
 			{ !! taxonomiesInfo?.length &&
-			taxonomiesInfo.filter(
-				( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
-			).length ? (
-				<ToggleControl
-					label={ __(
-						"Use this Post's Categories and Tags",
-						'classifai'
-					) }
-					checked={ usePostTerms }
-					onChange={ ( useTerm ) =>
-						onChange( { usePostTerms: useTerm } )
-					}
-				/>
-			) : null }
+				taxonomiesInfo.filter(
+					( { slug } ) => syncTaxonomies.indexOf( slug ) > -1
+				).length && <UseTermToggle /> }
 
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {
