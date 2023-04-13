@@ -356,7 +356,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 						disabled={ isProcessingAudio }
 						isBusy={ isProcessingAudio }
 					>
-						{ isProcessingAudio ? __( 'Generating audio...', 'classifai' ) : __( 'Preview', 'classifai' ) }
+						{ isProcessingAudio ? __( 'Generating audio..', 'classifai' ) : __( 'Preview', 'classifai' ) }
 					</Button>
 				</BaseControl>
 			) }
