@@ -179,6 +179,7 @@ class TextToSpeech extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
+				'option_index'  => 'credentials',
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['url'],
@@ -193,6 +194,7 @@ class TextToSpeech extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
+				'option_index'  => 'credentials',
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
@@ -235,14 +237,14 @@ class TextToSpeech extends Provider {
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
 
-		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
-			$new_settings['url']     = trailingslashit( esc_url_raw( $settings['url'] ) );
-			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
+		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
+			$new_settings['credentials']['url']     = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
+			$new_settings['credentials']['api_key'] = sanitize_text_field( $settings['credentials']['api_key'] );
 
 			$is_connected = $this->connect_to_service(
 				array(
-					'url'     => $new_settings['url'],
-					'api_key' => $new_settings['api_key'],
+					'url'     => $new_settings['credentials']['url'],
+					'api_key' => $new_settings['credentials']['api_key'],
 				),
 				true
 			);
@@ -253,8 +255,8 @@ class TextToSpeech extends Provider {
 				$new_settings['authenticated'] = true;
 			}
 		} else {
-			$new_settings['url']           = '';
-			$new_settings['api_key']       = '';
+			$new_settings['credentials']['url']           = '';
+			$new_settings['credentials']['api_key']       = '';
 			$new_settings['authenticated'] = false;
 
 			add_settings_error(
@@ -293,11 +295,11 @@ class TextToSpeech extends Provider {
 	 * @return boolean|null
 	 */
 	public function connect_to_service( array $args = array(), $ignore_transient = false ) {
-		$options = $this->get_settings();
+		$creditials = $this->get_settings( 'credentials' );
 
 		$default = array(
-			'url'     => isset( $options['url'] ) ? $options['url'] : '',
-			'api_key' => isset( $options['api_key'] ) ? $options['api_key'] : '',
+			'url'     => isset( $creditials['url'] ) ? $creditials['url'] : '',
+			'api_key' => isset( $creditials['api_key'] ) ? $creditials['api_key'] : '',
 		);
 
 		$default = array_merge( $default, $args );
@@ -590,6 +592,7 @@ class TextToSpeech extends Provider {
 	public function render_post_types_checkboxes( $args ) {
 		echo '<ul>';
 		$post_types = get_post_types_for_language_settings();
+
 		foreach ( $post_types as $post_type ) {
 			$args = [
 				'label_for'    => $post_type->name,
@@ -598,7 +601,7 @@ class TextToSpeech extends Provider {
 			];
 
 			echo '<li>';
-			$this->render_checkbox_group( $args );
+			$this->render_input( $args );
 			echo '<label for="classifai-settings-' . esc_attr( $post_type->name ) . '">' . esc_html( $post_type->label ) . '</label>';
 			echo '</li>';
 		}
@@ -611,7 +614,7 @@ class TextToSpeech extends Provider {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_checkbox_group( array $args = array() ) {
+	public function render_input( $args ) {
 		$setting_index = $this->get_settings( $args['option_index'] );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
@@ -622,8 +625,17 @@ class TextToSpeech extends Provider {
 		$class = '';
 
 		switch ( $type ) {
+			case 'text':
+			case 'password':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+				$class = empty( $args['large'] ) ? 'regular-text' : 'large-text';
+				break;
+			case 'number':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+				$class = 'small-text';
+				break;
 			case 'checkbox':
-				$attrs = ' value="' . esc_attr( $args['label_for'] ) . '"' . checked( $args['label_for'], $value, false );
+				$attrs = ' value="1"' . checked( '1', $value, false );
 				break;
 		}
 		?>

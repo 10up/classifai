@@ -322,6 +322,14 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	// Fetches the latest audio file to avoid disk cache.
 	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
 
+	let audioIcon = 'controls-play';
+
+	if ( isProcessingAudio ) {
+		audioIcon = 'format-audio';
+	} else if ( isPreviewing ) {
+		audioIcon = 'controls-pause';
+	}
+
 	return (
 		<>
 			<ToggleControl
@@ -339,15 +347,16 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
 					id="classifai-audio-controls"
-					help={ __( 'Preview the generated audio.', 'classifai' ) }
+					help={ isProcessingAudio ? '' : __( 'Preview the generated audio.', 'classifai' ) }
 				>
 					<Button
-						icon={ <Icon icon={ isPreviewing ? 'controls-pause' : 'controls-play' } /> }
+						icon={ <Icon icon={ audioIcon } /> }
 						variant="secondary"
 						onClick={ () => setIsPreviewing( ! isPreviewing ) }
 						disabled={ isProcessingAudio }
+						isBusy={ isProcessingAudio }
 					>
-						{ __( 'Preview', 'classifai' ) }
+						{ isProcessingAudio ? __( 'Generating audio...', 'classifai' ) : __( 'Preview', 'classifai' ) }
 					</Button>
 				</BaseControl>
 			) }

@@ -227,13 +227,13 @@ class SavePostHandler {
 			'body'    => $request_body,
 			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			'headers' => array(
-				'Ocp-Apim-Subscription-Key' => $settings['api_key'],
+				'Ocp-Apim-Subscription-Key' => $settings['credentials']['api_key'],
 				'Content-Type'              => 'application/ssml+xml',
 				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $settings['url'], TextToSpeech::API_PATH );
+		$remote_url = sprintf( '%s%s', $settings['credentials']['url'], TextToSpeech::API_PATH );
 		$response   = wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
