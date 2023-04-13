@@ -8,7 +8,7 @@ import { store as noticesStore } from '@wordpress/notices';
 
 const { useSelect, useDispatch } = wp.data;
 const { PluginDocumentSettingPanel } = wp.editPost;
-const { Icon, ToggleControl, Button, ButtonGroup, BaseControl } = wp.components;
+const { Icon, ToggleControl, Button, BaseControl } = wp.components;
 const { __, sprintf } = wp.i18n;
 const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
@@ -271,9 +271,6 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	// Post type of the current post.
 	const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType() );
 
-	// Says if the post is currently being saved.
-	const isSavingPost = useSelect( ( select ) => select( 'core/editor' ).isSavingPost() );
-
 	// Says whether speech synthesis is in progress.
 	const isProcessingAudio = useSelect( ( select ) => select( postAudioStore ).getIsProcessing() );
 
@@ -322,15 +319,6 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 		}
 	}, [ isProcessingAudio ] );
 
-	// Callback to refresh/regenrate audio manually.
-	function refreshAudio() {
-		if ( isSavingPost ) {
-			return;
-		}
-
-		wp.data.dispatch( 'core/editor' ).savePost();
-	}
-
 	// Fetches the latest audio file to avoid disk cache.
 	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
 
@@ -351,31 +339,16 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
 					id="classifai-audio-controls"
-					label={ __( 'Audio controls', 'classifai' ) }
-					help={ __( 'Helper controls to preview the audio and manually regenerate the audio without saving the post.', 'classifai' ) }
+					help={ __( 'Preview the generated audio.', 'classifai' ) }
 				>
-					<div>
-						<ButtonGroup>
-							<Button
-								icon={ <Icon icon="update" /> }
-								variant="secondary"
-								isBusy={ isProcessingAudio }
-								onClick={ refreshAudio }
-								disabled={ isPreviewing }
-							>
-								{ __( 'Refresh', 'classifai' ) }
-							</Button>
-
-							<Button
-								icon={ <Icon icon={ isPreviewing ? 'controls-pause' : 'controls-play' } /> }
-								variant="secondary"
-								onClick={ () => setIsPreviewing( ! isPreviewing ) }
-								disabled={ isProcessingAudio }
-							>
-								{ __( 'Preview', 'classifai' ) }
-							</Button>
-						</ButtonGroup>
-					</div>
+					<Button
+						icon={ <Icon icon={ isPreviewing ? 'controls-pause' : 'controls-play' } /> }
+						variant="secondary"
+						onClick={ () => setIsPreviewing( ! isPreviewing ) }
+						disabled={ isProcessingAudio }
+					>
+						{ __( 'Preview', 'classifai' ) }
+					</Button>
 				</BaseControl>
 			) }
 		</>
