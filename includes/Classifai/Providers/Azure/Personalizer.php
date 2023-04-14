@@ -45,7 +45,7 @@ class Personalizer extends Provider {
 			'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'recommended_content' => __( 'Recommended content block', 'classifai' ),
+				'authenticated' => __( 'Recommended content block', 'classifai' ),
 			),
 		);
 	}

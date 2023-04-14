@@ -34,7 +34,7 @@ class Onboarding {
 	 */
 	public function register_setup_page() {
 		add_submenu_page(
-			null,
+			'admin.php',
 			esc_attr__( 'ClassifAI Setup', 'classifai' ),
 			'',
 			'manage_options',
@@ -442,8 +442,9 @@ class Onboarding {
 				$settings = $providers[ $provider_slug ]->get_settings();
 				foreach ( $provider as $feature_slug => $feature ) {
 					$value = $settings[ $feature_slug ] ?? 'no';
-					if ( strpos( $feature_slug, 'post_types_' ) !== false ) {
-						$value = $settings['post_types'][ str_replace( 'post_types_', '', $feature_slug ) ] ?? 'no';
+					if ( count( explode( '__', $feature_slug ) ) > 1 ) {
+						$keys  = explode( '__', $feature_slug );
+						$value = $settings[ $keys[0] ][ $keys[1] ] ?? 'no';
 					} elseif ( 'enable_image_captions' === $feature_slug ) {
 						$value = 'alt' === $settings['enable_image_captions']['alt'] ? 1 : 'no';
 					}
@@ -572,5 +573,20 @@ class Onboarding {
 		if ( ( $step_completed + 1 ) < $step ) {
 			wp_die( esc_html__( 'You are not allowed to access this page.', 'classifai' ) );
 		}
+	}
+
+	/**
+	 * Check if any of the providers are configured.
+	 *
+	 * @return boolean
+	 */
+	public function has_configured_providers() {
+		$providers = $this->get_providers();
+		foreach ( $providers as $provider ) {
+			if ( $provider->is_configured() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

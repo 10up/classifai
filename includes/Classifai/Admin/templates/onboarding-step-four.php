@@ -9,12 +9,7 @@ $onboarding_options   = get_option( 'classifai_onboarding_options', array() );
 $enabled_features     = $onboarding_options['enabled_features'] ?? array();
 $configured_providers = $onboarding_options['configured_providers'] ?? array();
 $onboarding           = new Classifai\Admin\Onboarding();
-$features             = array_filter(
-	$onboarding->get_features(),
-	function( $feature ) use ( $enabled_features, $configured_providers ) {
-		return ! empty( $feature['features'] ) && array_intersect( array_keys( $feature['features'] ), array_keys( $enabled_features ) ) && array_intersect( array_keys( $feature['features'] ), $configured_providers );
-	}
-);
+$features             = $onboarding->get_features();
 
 $args = array(
 	'step'       => 4,
@@ -52,18 +47,23 @@ foreach ( $features as $key => $feature ) {
 			<ul>
 				<?php
 				foreach ( $feature['features'] as $provider => $provider_features ) {
-					if ( ! in_array( $provider, $configured_providers, true ) ) {
-						continue;
-					}
-					foreach ( $provider_features as $feature_key => $feature_name ) {
-						if ( ! in_array( $feature_key, array_keys( $enabled_features[ $provider ] ?? array() ), true ) ) {
+					foreach ( $provider_features as $feature_key => $feature_options ) {
+						$enabled = isset( $enabled_features[ $provider ][ $feature_key ] );
+						if ( count( explode( '__', $feature_key ) ) > 1 ) {
+							$keys    = explode( '__', $feature_key );
+							$enabled = isset( $enabled_features[ $provider ][ $keys[0] ][ $keys[1] ] );
+						}
+
+						if ( ! $enabled ) {
 							continue;
 						}
+
+						$icon_class = ( $feature_options['enabled'] ) ? 'dashicons-yes-alt' : 'dashicons-dismiss';
 						?>
 						<li class="classifai-enable-feature">
-							<span class="dashicons dashicons-yes-alt"></span>
+							<span class="dashicons <?php echo esc_attr( $icon_class ); ?>"></span>
 							<label class="classifai-feature-text">
-								<?php echo esc_html( $feature_name ); ?>
+								<?php echo esc_html( $feature_options['title'] ); ?>
 							</label>
 						</li>
 						<?php

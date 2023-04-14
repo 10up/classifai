@@ -412,7 +412,7 @@ input.classifai-button {
 				flex-basis: 100%;
 
 				img {
-					max-width: 334px;
+					max-width: 400px;
 					width: 100%;
 				}
 			}
@@ -477,6 +477,10 @@ input.classifai-button {
 
 			span.dashicons.dashicons-yes-alt {
 				color: #48BE1E;
+			}
+
+			span.dashicons.dashicons-dismiss {
+				color: #cc0000;
 			}
 		}
 
