@@ -23,7 +23,7 @@ class Notifications {
 	 */
 	public function register() {
 		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
-		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ] );
+		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 	}
 
 	/**
@@ -54,6 +54,9 @@ class Notifications {
 				delete_transient( 'classifai_activation_notice' );
 				return;
 			}
+
+			// Prevent showing the default WordPress "Plugin Activated" notice.
+			unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
 			?>
 			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
 				<div id="classifai-activation-notice">
