@@ -180,6 +180,39 @@ class Onboarding {
 					return;
 				}
 
+				// Disable unchecked features.
+				$configured_features = $this->get_configured_features();
+				$providers           = $this->get_providers();
+				foreach ( $configured_features as $provider_key => $data ) {
+					$save_needed = false;
+					$provider    = $providers[ $provider_key ];
+					if ( empty( $provider ) ) {
+						continue;
+					}
+					$settings = $provider->get_settings();
+
+					foreach ( $data as $feature_key ) {
+						$enabled = isset( $enabled_features[ $provider_key ][ $feature_key ] );
+						$keys    = explode( '__', $feature_key );
+						if ( count( $keys ) > 1 ) {
+							$enabled = isset( $enabled_features[ $provider_key ][ $keys[0] ][ $keys[1] ] );
+						}
+
+						if ( ! $enabled ) {
+							unset( $settings[ $feature_key ] );
+							if ( count( $keys ) > 1 ) {
+								unset( $settings[ $keys[0] ][ $keys[1] ] );
+							}
+							$save_needed = true;
+						}
+					}
+
+					// Save settings
+					if ( $save_needed ) {
+						update_option( $provider->get_option_name(), $settings );
+					}
+				}
+
 				// Skip step 2 if it is already configured.
 				$registration_settings = get_option( 'classifai_settings', array() );
 				if ( isset( $registration_settings['valid_license'] ) && $registration_settings['valid_license'] ) {
@@ -588,5 +621,25 @@ class Onboarding {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get configured features.
+	 *
+	 * @return array
+	 */
+	public function get_configured_features() {
+		$features            = $this->get_features();
+		$configured_features = array();
+		foreach ( $features as $feature ) {
+			foreach ( $feature['features'] as $provider_key => $provider_features ) {
+				foreach ( $provider_features as $feature_key => $feature_options ) {
+					if ( $feature_options['enabled'] ) {
+						$configured_features[ $provider_key ][] = $feature_key;
+					}
+				}
+			}
+		}
+		return $configured_features;
 	}
 }
