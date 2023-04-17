@@ -396,11 +396,6 @@ class ComputerVision extends Provider {
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
 		$routes   = [];
-
-		if ( ! wp_attachment_is_image( $attachment_id ) ) {
-			return;
-		}
-
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		// Allow rescanning image that are not stored in local storage.
@@ -410,7 +405,7 @@ class ComputerVision extends Provider {
 			$image_url = get_largest_acceptable_image_url(
 				get_attached_file( $attachment_id ),
 				wp_get_attachment_url( $attachment_id ),
-				$metadata['sizes'],
+				wp_attachment_is_image( $attachment_id ) ? $metadata['sizes'] : [],
 				computer_vision_max_filesize()
 			);
 		}
