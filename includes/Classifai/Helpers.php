@@ -597,7 +597,8 @@ function attachment_is_pdf( $post ) {
 	return false;
 }
 
-/** Get asset info from extracted asset files.
+/**
+ * Get asset info from extracted asset files.
  *
  * @param string $slug Asset slug as defined in build/webpack configuration.
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
