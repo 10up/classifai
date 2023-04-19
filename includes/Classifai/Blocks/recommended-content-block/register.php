@@ -40,13 +40,13 @@ function get_post_info() {
 		exit;
 	}
 
-	$post_id = ! empty( $_GET['post_id'] ) ? (int) wp_unslash( $_GET['post_id'] ) : 0;
-	$index   = ! empty( $_GET['block_index'] ) ? (int) wp_unslash( $_GET['block_index'] ) : null;
-	
+	$post_id = ! empty( $_GET['post_id'] ) ? (int) wp_unslash( sanitize_text_field( $_GET['post_id'] ) ) : 0;
+	$index   = ! empty( $_GET['block_index'] ) ? (int) wp_unslash( sanitize_text_field( $_GET['block_index'] ) ) : null;
+
 	// Get block attributes
-	$post    = $post_id ? get_post( $post_id ) : null;
-	$blocks  = ! empty( $post ) ? parse_blocks( $post->post_content ) : array();
-	$blocks  = array_values(
+	$post   = $post_id ? get_post( $post_id ) : null;
+	$blocks = ! empty( $post ) ? parse_blocks( $post->post_content ) : array();
+	$blocks = array_values(
 		array_filter(
 			$blocks,
 			function( $block ) {
@@ -54,11 +54,10 @@ function get_post_info() {
 			}
 		)
 	);
-	$attributes = $blocks[ $index ] ?? null;
 
 	wp_send_json_success(
 		array(
-			'attributes' => $attributes,
+			'attributes' => $blocks[ $index ] ?? null,
 		)
 	);
 }
