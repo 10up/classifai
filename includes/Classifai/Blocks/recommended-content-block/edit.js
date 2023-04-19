@@ -19,11 +19,10 @@ import {
 import { list, grid } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
-import TaxonomyControls, {
-	syncTaxonomies,
-} from './inspector-controls/taxonomy-controls';
-import { usePostTypes } from './utils';
-import { useEffect, useState } from '@wordpress/element';
+import TaxonomyControls from './inspector-controls/taxonomy-controls';
+import { usePostTypes, useTaxonomies, getEntitiesInfo } from './utils';
+import { useEffect } from '@wordpress/element';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Edit component.
@@ -63,6 +62,8 @@ const RecommendedContentBlockEdit = ( props ) => {
 		select( 'core/editor' ).getCurrentPostId()
 	);
 
+	const taxonomies = useTaxonomies( attributes.contentPostType );
+	const syncTaxonomies = taxonomies?.map( ( t ) => t.slug );
 	const blockProps = useBlockProps();
 	const { postTypesTaxonomiesMap = [], postTypesSelectOptions } =
 		usePostTypes();
@@ -86,6 +87,25 @@ const RecommendedContentBlockEdit = ( props ) => {
 			: undefined;
 		setAttributes( updateQuery );
 	};
+
+	const currentTaxonomiesTerms =
+		useSelect(
+			( select ) => {
+				const { getEntityRecords } = select( coreStore );
+				const taxonomyMap = {};
+				taxonomies?.forEach( ( { slug } ) => {
+					const _terms = getEntityRecords( 'taxonomy', slug, {
+						post: postId,
+					} );
+					taxonomyMap[ slug ] = getEntitiesInfo(
+						_terms
+					)?.entities?.map( ( term ) => term.id );
+				} );
+
+				return taxonomyMap;
+			},
+			[ taxonomies ]
+		) || [];
 
 	const layoutControls = [
 		{
@@ -111,24 +131,33 @@ const RecommendedContentBlockEdit = ( props ) => {
 				blockIndex +
 				'&classifai_editor_nonce=' +
 				window.classifai_editor_nonce.action,
-			function( r ) {
+			function ( r ) {
 				const { data = {} } = r;
-				const {
-					categories: category,
-					tags: postTag,
-					attributes: savedAttrs,
-				} = data;
+				const { attributes: savedAttrs } = data;
 
 				if ( ! ( savedAttrs === null ) ) {
 					// It's old mounted block, don't set default terms as it will change current behavior. Just mark as terms set
 					setAttributes( { defaultTermsSetFor: syncTaxonomies } );
 				} else if ( ! savedAttrs?.attrs?.defaultTermsSetFor?.length ) {
 					// It's newly mounted block. So set current post terms as default for the first time, and mark as terms set.
+					const associatedTerms = {};
+					Object.keys( currentTaxonomiesTerms ).forEach(
+						( taxonomy ) => {
+							if (
+								Array.isArray(
+									currentTaxonomiesTerms[ taxonomy ]
+								)
+							) {
+								associatedTerms[ taxonomy ] =
+									currentTaxonomiesTerms[ taxonomy ];
+							}
+						}
+					);
+
 					setAttributes( {
 						taxQuery: {
 							...attributes.taxQuery,
-							category,
-							post_tag: postTag,
+							...associatedTerms,
 						},
 						defaultTermsSetFor: syncTaxonomies,
 					} );

@@ -35,15 +35,17 @@ function register() {
  * @return void
  */
 function get_post_info() {
-	if ( empty( $_GET['classifai_editor_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( $_GET['classifai_editor_nonce'] ), 'classifai_editor_nonce' ) ) {
-		wp_send_json_error( array( 'message' => 'Invalid noncce' ) );
+	if ( empty( $_GET['classifai_editor_nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['classifai_editor_nonce'] ) ), 'classifai_editor_nonce' ) ) {
+		wp_send_json_error( array( 'message' => __( 'Invalid nonce', 'classifai' ) ) );
 		exit;
 	}
 
-	$post_id = ! empty( $_GET['post_id'] ) ? (int) $_GET['post_id'] : 0;
-	$index   = ! empty( $_GET['block_index'] ) ? (int) $_GET['block_index'] : null;
-	$content = get_the_content( null, false, $post_id );
-	$blocks  = parse_blocks( $content );
+	$post_id = ! empty( $_GET['post_id'] ) ? (int) wp_unslash( $_GET['post_id'] ) : 0;
+	$index   = ! empty( $_GET['block_index'] ) ? (int) wp_unslash( $_GET['block_index'] ) : null;
+	
+	// Get block attributes
+	$post    = $post_id ? get_post( $post_id ) : null;
+	$blocks  = ! empty( $post ) ? parse_blocks( $post->post_content ) : array();
 	$blocks  = array_values(
 		array_filter(
 			$blocks,
@@ -52,16 +54,11 @@ function get_post_info() {
 			}
 		)
 	);
-
-	$attributes = isset( $blocks[ $index ] ) ? $blocks[ $index ] : null;
-	$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
-	$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
+	$attributes = $blocks[ $index ] ?? null;
 
 	wp_send_json_success(
 		array(
 			'attributes' => $attributes,
-			'categories' => $categories,
-			'tags'       => $tags,
 		)
 	);
 }
@@ -95,22 +92,24 @@ function render_block_callback( $attributes, $content, $block ) {
  * @return array
  */
 function use_default_post_terms( $attributes ) {
-	if ( ! empty( $attributes['usePostTerms'] ) && true === $attributes['usePostTerms'] ) {
-		if ( ! isset( $attributes['taxQuery'] ) || ! is_array( $attributes['taxQuery'] ) ) {
-			$attributes['taxQuery'] = array();
-		}
+	if ( empty( $attributes['usePostTerms'] ) || ! $attributes['usePostTerms'] ) {
+		return $attributes;
+	}
 
-		$post_id    = $attributes['excludeId'];
-		$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
-		$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
+	if ( ! isset( $attributes['taxQuery'] ) || ! is_array( $attributes['taxQuery'] ) ) {
+		$attributes['taxQuery'] = array();
+	}
 
-		if ( ! empty( $categories ) ) {
-			$attributes['taxQuery']['category'] = $categories;
-		}
+	$post_id    = $attributes['excludeId'];
+	$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'ids' ) );
+	$tags       = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'ids' ) );
 
-		if ( ! empty( $tags ) ) {
-			$attributes['taxQuery']['post_tag'] = $tags;
-		}
+	if ( ! empty( $categories ) ) {
+		$attributes['taxQuery']['category'] = $categories;
+	}
+
+	if ( ! empty( $tags ) ) {
+		$attributes['taxQuery']['post_tag'] = $tags;
 	}
 
 	return $attributes;

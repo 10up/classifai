@@ -11,7 +11,6 @@ import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
 
 const termsPerPage = 100;
-export const syncTaxonomies = [ 'category', 'post_tag' ];
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
@@ -44,6 +43,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 	// Get available taxonomies for the selected post type
 	const taxonomies = useTaxonomies( query.contentPostType );
+	const syncTaxonomies = taxonomies?.map( ( t ) => t.slug );
 
 	// Get those taxonomy name, slug and terms
 	const taxonomiesInfo =
@@ -126,10 +126,7 @@ const TaxonomyControls = ( { onChange, attributes: query, usePostTerms } ) => {
 	const UseTermToggle = () => {
 		return (
 			<ToggleControl
-				label={ __(
-					"Use this Post's Categories and Tags",
-					'classifai'
-				) }
+				label={ __( 'Use assigned terms', 'classifai' ) }
 				checked={ usePostTerms }
 				onChange={ ( useTerm ) =>
 					onChange( { usePostTerms: useTerm } )

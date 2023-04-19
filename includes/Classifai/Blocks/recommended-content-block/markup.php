@@ -22,6 +22,15 @@ if ( empty( $attributes['contentPostType'] ) ) {
 	$attributes['contentPostType'] = 'post';
 }
 
+/**
+ * Filter the recommended content block attributes
+ *
+ * @hook classifai_recommended_block_attributes
+ *
+ * @param {array}  $attributes   Attributes of blocks.
+ *
+ * @return {string} The filtered attributes.
+ */
 $attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
 $attr_key   = md5( maybe_serialize( $attributes ) );
 $block_id   = 'classifai-recommended-block-' . $attr_key;
