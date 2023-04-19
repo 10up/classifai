@@ -248,6 +248,7 @@ class ChatGPT extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '' ) {
+		$route_to_call = strtolower( $route_to_call );
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
@@ -290,7 +291,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
-		 * @since 1.9.0
+		 * @since 2.0.0
 		 * @hook classifai_chatgpt_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
@@ -304,7 +305,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since 1.9.0
+		 * @since 2.0.0
 		 * @hook classifai_chatgpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
@@ -384,7 +385,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter content that will get sent to ChatGPT.
 		 *
-		 * @since 1.9.0
+		 * @since 2.0.0
 		 * @hook classifai_chatgpt_content
 		 *
 		 * @param {string} $content Content that will be sent to ChatGPT.

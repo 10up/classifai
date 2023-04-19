@@ -610,11 +610,17 @@ class ComputerVision extends Provider {
 	 * @param string $image_url Path to the uploaded image.
 	 * @param array  $routes    Routes we are calling.
 	 *
-	 * @return bool|object|\WP_Error
+	 * @return bool|object|WP_Error
 	 */
 	protected function scan_image( $image_url, array $routes = [] ) {
 		$settings = $this->get_settings();
-		$url      = $this->prep_api_url( $routes );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+		}
+
+		$url = $this->prep_api_url( $routes );
 
 		/*
 		 * MS Computer Vision requires full image URL. So, if the file URL is relative,
@@ -793,13 +799,19 @@ class ComputerVision extends Provider {
 	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
-	 * @param array $tags          Array ot tags returned from the API.
+	 * @param array $tags          Array of tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return string|array
+	 * @return string|array|WP_Error
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
-		$rtn = '';
+		$rtn      = '';
+		$settings = $this->get_settings();
+
+		// Don't save tags if the setting is disabled.
+		if ( ! is_array( $settings ) || ! isset( $settings['enable_image_tagging'] ) || '1' !== $settings['enable_image_tagging'] ) {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Image tagging is disabled.', 'classifai' ) );
+		}
 
 		/**
 		 * Filter the tags returned from the API.
@@ -1199,6 +1211,13 @@ class ComputerVision extends Provider {
 	 * @return array|string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+		$route_to_call = strtolower( $route_to_call );
+		// Check to be sure the post both exists and is an attachment.
+		if ( ! get_post( $post_id ) || 'attachment' !== get_post_type( $post_id ) ) {
+			/* translators: %1$s: the attachment ID */
+			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $post_id ), [ 'status' => 404 ] );
+		}
+
 		$metadata = wp_get_attachment_metadata( $post_id );
 
 		if ( 'ocr' === $route_to_call ) {

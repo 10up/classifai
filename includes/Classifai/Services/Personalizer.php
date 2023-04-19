@@ -5,6 +5,10 @@
 
 namespace Classifai\Services;
 
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
+
 class Personalizer extends Service {
 
 	/**
@@ -77,10 +81,37 @@ class Personalizer extends Service {
 			'classifai/v1',
 			'personalizer/reward/(?P<eventId>[a-zA-Z0-9-]+)',
 			[
-				'methods'             => 'POST',
-				'callback'            => [ $this, 'provider_endpoint_callback' ],
-				'args'                => [ 'route' => [ 'reward' ] ],
-				'permission_callback' => '__return_true',
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'reward_endpoint_callback' ],
+				'args'                => [
+					'eventId'  => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Event ID to track', 'classifai' ),
+					],
+					'rewarded' => [
+						'required'          => false,
+						'type'              => 'string',
+						'enum'              => [
+							'0',
+							'1',
+						],
+						'default'           => '0',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Reward we want to send', 'classifai' ),
+					],
+					'route'    => [
+						'required'          => false,
+						'type'              => 'string',
+						'default'           => 'reward',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Route we want to call', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'reward_permissions_check' ],
 			]
 		);
 	}
@@ -88,34 +119,63 @@ class Personalizer extends Service {
 	/**
 	 * Single call back to pass the route callback to the provider.
 	 *
-	 * @param \WP_REST_Request $request The full request object.
+	 * @param WP_REST_Request $request The full request object.
 	 *
-	 * @return array|bool|string|\WP_Error
+	 * @return array|bool|string|WP_Error
 	 */
-	public function provider_endpoint_callback( $request ) {
-		$response   = true;
-		$event_id   = $request->get_param( 'eventId' );
-		$reward     = ( '1' === $request->get_param( 'rewarded' ) ) ? 1 : 0;
-		$attributes = $request->get_attributes();
-		$route      = empty( $attributes['args']['route'] ) ? false : $attributes['args']['route'][0];
+	public function reward_endpoint_callback( WP_REST_Request $request ) {
+		$response = true;
+		$event_id = $request->get_param( 'eventId' );
+		$reward   = ( '1' === $request->get_param( 'rewarded' ) ) ? 1 : 0;
+		$route    = $request->get_param( 'route' ) ?? false;
+		$provider = '';
 
-		// If no args, respond 404
+		// If no args, respond 404.
 		if ( false === $route ) {
-			return new \WP_Error( 'no route', 'No route indicated for the provider class to use.', array( 'status' => 404 ) );
+			return new WP_Error( 'no_route', esc_html__( 'No route indicated for the provider class to use.', 'classifai' ), [ 'status' => 404 ] );
 		}
 
 		if ( 'reward' === $route ) {
 			if ( empty( $event_id ) ) {
-				return new \WP_Error( 'Bad Request', 'Event ID required.', array( 'status' => 400 ) );
+				return new WP_Error( 'bad_request', esc_html__( 'Event ID required.', 'classifai' ), [ 'status' => 400 ] );
+			}
+
+			// Find the right provider class.
+			foreach ( $this->provider_classes as $provider_class ) {
+				if ( 'Personalizer' === $provider_class->provider_service_name ) {
+					$provider = $provider_class;
+				}
+			}
+
+			// Ensure we have a provider class. Should never happen but :shrug:
+			if ( ! $provider ) {
+				return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 			}
 
 			// Send reward to personalizer.
-			if ( isset( $this->provider_classes[0] ) ) {
-				$response = $this->provider_classes[0]->personalizer_send_reward( $event_id, $reward );
-			}
+			$response = $provider->personalizer_send_reward( $event_id, $reward );
 		}
 
-		return $response;
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Check if a given request has access to send reward.
+	 *
+	 * This check ensures that we are properly authenticated.
+	 * TODO: add additional checks here, maybe a nonce check or rate limiting?
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function reward_permissions_check() {
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'Personalizer' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+		}
+
+		return true;
 	}
 
 	/**
