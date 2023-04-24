@@ -389,7 +389,7 @@ class TextToSpeech extends Provider {
 			}
 		}
 
-		set_transient( 'classifai-azure-speech-to-text-voices', $voices, MONTH_IN_SECONDS );
+		set_transient( 'classifai-azure-speech-to-text-voices', $sanitized_voices, MONTH_IN_SECONDS );
 
 		return true;
 	}
