@@ -203,7 +203,7 @@ class OCR {
 		$rtn = '';
 
 		if ( ! $this->should_process( $attachment_id ) ) {
-			return new WP_Error( 'processError', esc_html__( 'Image does not meet processing requirements.', 'classifai' ), $metadata );
+			return new WP_Error( 'process_error', esc_html__( 'Image does not meet processing requirements.', 'classifai' ), $metadata );
 		}
 
 		$url = get_largest_size_and_dimensions_image_url(
@@ -217,7 +217,7 @@ class OCR {
 
 		// If a properly sized image isn't found, return
 		if ( ! $url ) {
-			return new WP_Error( 'sizeError', esc_html__( 'Image does not meet size requirements. Please ensure it is at least 50x50 but less than 4200x4200 and smaller than 4MB.', 'classifai' ), $metadata );
+			return new WP_Error( 'size_error', esc_html__( 'Image does not meet size requirements. Please ensure it is at least 50x50 but less than 4200x4200 and smaller than 4MB.', 'classifai' ), $metadata );
 		}
 
 		$scan = $this->process( $url );
@@ -300,6 +300,11 @@ class OCR {
 	 * @return object|WP_Error
 	 */
 	public function process( string $url ) {
+		// Check if valid authentication is in place.
+		if ( empty( $this->settings ) || ( isset( $this->settings['authenticated'] ) && false === $this->settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+		}
+
 		$response = wp_remote_post(
 			$this->get_api_url(),
 			[
