@@ -741,9 +741,11 @@ class NLU extends Provider {
 	/**
 	 * Format the result of most recent request.
 	 *
+	 * @param string $data Response data to format.
+	 *
 	 * @return string
 	 */
-	private function get_formatted_latest_response() {
+	protected function get_formatted_latest_response( string $data ) {
 		$data = get_transient( 'classifai_watson_nlu_latest_response' );
 
 		if ( ! $data ) {

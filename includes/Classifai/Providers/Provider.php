@@ -129,7 +129,8 @@ abstract class Provider {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_input( $args ) {
-		$setting_index = $this->get_settings();
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 
@@ -170,7 +171,7 @@ abstract class Provider {
 			type="<?php echo esc_attr( $type ); ?>"
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
@@ -349,11 +350,11 @@ abstract class Provider {
 	/**
 	 * Format the result of most recent request.
 	 *
-	 * @param mixed $data Response data to format.
+	 * @param string $data Response data to format.
 	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( $data ) {
+	protected function get_formatted_latest_response( string $data ) {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}

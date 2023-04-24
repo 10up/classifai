@@ -210,11 +210,14 @@ class TextToSpeech extends Provider {
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types', 'classifai' ),
-			[ $this, 'render_post_types_checkboxes' ],
+			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
+				'label_for'    => 'post_types',
 				'option_index' => 'post_types',
+				'options'      => $this->get_post_types_select_options(),
+				'default_values' => $default_settings['post-types'],
 			]
 		);
 
@@ -434,9 +437,9 @@ class TextToSpeech extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' ) => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )       => $settings['url'] ?? '',
-			__( 'Voices', 'classifai' )        => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
+			__( 'Authenticated', 'classifai' )             => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
+			__( 'API URL', 'classifai' )                   => $settings['url'] ?? '',
+			__( 'Latest response - Voices', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
 		];
 	}
 
@@ -451,6 +454,7 @@ class TextToSpeech extends Provider {
 			),
 			'voice'         => '',
 			'authenticated' => false,
+			'post-types'    => array(),
 		];
 	}
 
@@ -585,72 +589,19 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
-	 * Render the post types checkbox array.
+	 * Returns post type array data for select dropdown options.
 	 *
-	 * @param array $args Settings for the input
-	 *
-	 * @return void
+	 * @return array
 	 */
-	public function render_post_types_checkboxes( $args ) {
-		echo '<ul>';
+	protected function get_post_types_select_options() {
 		$post_types = get_post_types_for_language_settings();
+		$options    = array();
 
 		foreach ( $post_types as $post_type ) {
-			$args = [
-				'label_for'    => $post_type->name,
-				'option_index' => 'post_types',
-				'input_type'   => 'checkbox',
-			];
-
-			echo '<li>';
-			$this->render_input( $args );
-			echo '<label for="classifai-settings-' . esc_attr( $post_type->name ) . '">' . esc_html( $post_type->label ) . '</label>';
-			echo '</li>';
+			$options[ $post_type->name ] = $post_type->label;
 		}
 
-		echo '</ul>';
-	}
-
-	/**
-	 * Generic text input field callback
-	 *
-	 * @param array $args The args passed to add_settings_field.
-	 */
-	public function render_input( $args ) {
-		$setting_index = $this->get_settings( $args['option_index'] );
-		$type          = $args['input_type'] ?? 'text';
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-
-		// Check for a default value
-		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
-		$attrs = '';
-		$class = '';
-
-		switch ( $type ) {
-			case 'text':
-			case 'password':
-				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = empty( $args['large'] ) ? 'regular-text' : 'large-text';
-				break;
-			case 'number':
-				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = 'small-text';
-				break;
-			case 'checkbox':
-				$attrs = ' value="1"' . checked( '1', $value, false );
-				break;
-		}
-		?>
-		<input
-			type="<?php echo esc_attr( $type ); ?>"
-			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
-			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
-			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
-		<?php
-		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
-		}
+		return $options;
 	}
 
 	/**

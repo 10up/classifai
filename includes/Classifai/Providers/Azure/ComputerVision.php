@@ -1154,25 +1154,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param mixed $data Response data to format.
-	 *
-	 * @return string
-	 */
-	private function get_formatted_latest_response( $data ) {
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
-	}
-
-	/**
 	 * Filter the SQL clauses of an attachment query to include tags and alt text.
 	 *
 	 * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
