@@ -474,6 +474,10 @@ class TextToSpeech extends Provider {
 			)
 		);
 
+		if ( empty( $supported_post_types ) ) {
+			return;
+		}
+
 		register_rest_field(
 			$supported_post_types,
 			'classifai_synthesize_speech',
