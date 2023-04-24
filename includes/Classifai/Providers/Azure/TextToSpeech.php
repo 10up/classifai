@@ -79,13 +79,19 @@ class TextToSpeech extends Provider {
 
 		$settings = $this->get_settings();
 
+		if ( isset( $settings['authenticated'] ) && $settings['authenticated'] ) {
+			return;
+		}
+
+		$credentials = isset( $settings['credentials'] ) ? $settings['credentials'] : array();
+
 		// In case the transient expires, we reconnect to the service.
-		if ( isset( $settings['url'] ) && isset( $settings['api_key'] ) ) {
-			if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
+		if ( isset( $credentials['url'] ) && isset( $credentials['api_key'] ) ) {
+			if ( ! empty( $credentials['url'] ) && ! empty( $credentials['api_key'] ) ) {
 				$is_connected = $this->connect_to_service(
 					array(
-						'url'     => $settings['url'],
-						'api_key' => $settings['api_key'],
+						'url'     => $credentials['url'],
+						'api_key' => $credentials['api_key'],
 					)
 				);
 
@@ -182,7 +188,7 @@ class TextToSpeech extends Provider {
 				'option_index'  => 'credentials',
 				'label_for'     => 'url',
 				'input_type'    => 'text',
-				'default_value' => $default_settings['url'],
+				'default_value' => $default_settings['credentials']['url'],
 				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
 			]
 		);
@@ -197,7 +203,7 @@ class TextToSpeech extends Provider {
 				'option_index'  => 'credentials',
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
+				'default_value' => $default_settings['credentials']['api_key'],
 			]
 		);
 
@@ -235,29 +241,21 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
+		$new_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$is_url_changed     = $settings['credentials']['url'] !== $new_settings['credentials']['url'];
+		$is_api_key_changed = $settings['credentials']['api_key'] !== $new_settings['credentials']['api_key'];
+
+		if ( $is_url_changed || $is_api_key_changed ) {
+			delete_transient( 'classifai-azure-speech-to-text-voices' );
+			$new_settings['authenticated'] = false;
+		}
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
 			$new_settings['credentials']['url']     = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
 			$new_settings['credentials']['api_key'] = sanitize_text_field( $settings['credentials']['api_key'] );
-
-			$is_connected = $this->connect_to_service(
-				array(
-					'url'     => $new_settings['credentials']['url'],
-					'api_key' => $new_settings['credentials']['api_key'],
-				),
-				true
-			);
-
-			if ( is_wp_error( $is_connected ) ) {
-				$new_settings['authenticated'] = false;
-			} else {
-				$new_settings['authenticated'] = true;
-			}
 		} else {
 			$new_settings['credentials']['url']     = '';
 			$new_settings['credentials']['api_key'] = '';
-			$new_settings['authenticated']          = false;
 
 			add_settings_error(
 				$this->get_option_name(),
@@ -340,6 +338,7 @@ class TextToSpeech extends Provider {
 				$request_params
 			);
 		} else {
+			$request_params['timeout'] = 20;
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
 			$response = wp_remote_get(
 				$request_url,
@@ -445,8 +444,10 @@ class TextToSpeech extends Provider {
 	 */
 	private function get_default_settings() {
 		return [
-			'url'           => '',
-			'api_key'       => '',
+			'credentials'   => array(
+				'url'     => '',
+				'api_key' => '',
+			),
 			'voice'         => '',
 			'authenticated' => false,
 		];
