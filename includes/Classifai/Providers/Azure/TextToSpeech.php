@@ -570,7 +570,7 @@ class TextToSpeech extends Provider {
 		?>
 			<div>
 				<div class='classifai-listen-to-post-wrapper'>
-					<div class="class-post-audio-controls">
+					<div class="class-post-audio-controls" tabindex="0" role="button" aria-label="<?php esc_attr_e( 'Play audio', 'classifai' ); ?>" data-aria-pause-audio="<?php esc_attr_e( 'Pause audio', 'classifai' ); ?>">
 						<span class="dashicons dashicons-controls-play"></span>
 						<span class="dashicons dashicons-controls-pause"></span>
 					</div>
