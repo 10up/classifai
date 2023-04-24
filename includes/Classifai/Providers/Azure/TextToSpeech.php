@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides Text to Speech synthesis feature using Microsoft Azure Speech to Text.
+ * Provides Text to Speech synthesis feature using Microsoft Azure Text to Speech.
  */
 
 namespace Classifai\Providers\Azure;
@@ -22,14 +22,14 @@ class TextToSpeech extends Provider {
 	const FEATURE_NAME = 'Text to Speech';
 
 	/**
-	 * Azure's Speech to Text endpoint path.
+	 * Azure's Text to Speech endpoint path.
 	 *
 	 * @var string
 	 */
 	const API_PATH = 'cognitiveservices/v1';
 
 	/**
-	 * Meta key to store data indicating whether Speech to Text is enabled for
+	 * Meta key to store data indicating whether Text to Speech is enabled for
 	 * the current post.
 	 *
 	 * @var string
@@ -52,7 +52,7 @@ class TextToSpeech extends Provider {
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
 
 	/**
-	 * Watson NLU constructor.
+	 * Azure Text to Speech constructor.
 	 *
 	 * @param string $service The service this class belongs to.
 	 */
@@ -255,9 +255,9 @@ class TextToSpeech extends Provider {
 				$new_settings['authenticated'] = true;
 			}
 		} else {
-			$new_settings['credentials']['url']           = '';
-			$new_settings['credentials']['api_key']       = '';
-			$new_settings['authenticated'] = false;
+			$new_settings['credentials']['url']     = '';
+			$new_settings['credentials']['api_key'] = '';
+			$new_settings['authenticated']          = false;
 
 			add_settings_error(
 				$this->get_option_name(),
@@ -294,12 +294,12 @@ class TextToSpeech extends Provider {
 	 * @param boolean $ignore_transient Boolean to ignore transient. Used to reconnect to the service.
 	 * @return boolean|null
 	 */
-	public function connect_to_service( array $args = array(), $ignore_transient = false ) {
-		$creditials = $this->get_settings( 'credentials' );
+	public function connect_to_service( array $args = array(), bool $ignore_transient = false ) {
+		$credentials = $this->get_settings( 'credentials' );
 
 		$default = array(
-			'url'     => isset( $creditials['url'] ) ? $creditials['url'] : '',
-			'api_key' => isset( $creditials['api_key'] ) ? $creditials['api_key'] : '',
+			'url'     => isset( $credentials['url'] ) ? $credentials['url'] : '',
+			'api_key' => isset( $credentials['api_key'] ) ? $credentials['api_key'] : '',
 		);
 
 		$default = array_merge( $default, $args );
@@ -670,4 +670,5 @@ class TextToSpeech extends Provider {
 			)
 		);
 	}
+
 }
