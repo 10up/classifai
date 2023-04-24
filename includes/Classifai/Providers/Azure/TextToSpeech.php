@@ -159,7 +159,7 @@ class TextToSpeech extends Provider {
 	 */
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_filter( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
