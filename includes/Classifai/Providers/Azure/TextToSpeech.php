@@ -622,7 +622,7 @@ class TextToSpeech extends Provider {
 			array_filter(
 				$supported_post_types,
 				function( $post_type ) {
-					return ! is_null( $post_type );
+					return '0' !== $post_type;
 				}
 			)
 		);

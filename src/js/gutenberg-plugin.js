@@ -275,7 +275,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	const isProcessingAudio = useSelect( ( select ) => select( postAudioStore ).getIsProcessing() );
 
 	// Figure out if speech synthesis is supported by the current post.
-	if ( classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( postType ) ) {
+	if ( 'undefined' !== typeof classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( postType ) ) {
 		isFeatureSupported = true;
 	}
 
@@ -337,7 +337,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 				help={ isFeatureSupported
 					? __( 'ClassifAI will generate audio for the post when it is published or updated.', 'classifai' )
 					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
-				checked={ isSynthesizeSpeech }
+				checked={ isFeatureSupported && isSynthesizeSpeech }
 				onChange={ ( value ) => {
 					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
 				} }
