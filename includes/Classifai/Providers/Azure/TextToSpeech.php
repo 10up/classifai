@@ -436,6 +436,7 @@ class TextToSpeech extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' ) => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
 			__( 'API URL', 'classifai' )       => $settings['url'] ?? '',
+			__( 'Voices', 'classifai' )        => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
 		];
 	}
 

@@ -345,4 +345,23 @@ abstract class Provider {
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
 		return null;
 	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param mixed $data Response data to format.
+	 *
+	 * @return string
+	 */
+	protected function get_formatted_latest_response( $data ) {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
+	}
 }
