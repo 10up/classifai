@@ -354,7 +354,7 @@ abstract class Provider {
 	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( string $data ) {
+	protected function get_formatted_latest_response( string $data = '' ) {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}

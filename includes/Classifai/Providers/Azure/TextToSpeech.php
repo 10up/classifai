@@ -341,7 +341,7 @@ class TextToSpeech extends Provider {
 				$request_params
 			);
 		} else {
-			$request_params['timeout'] = 20;
+			$request_params['timeout'] = 20; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
 			$response = wp_remote_get(
 				$request_url,
