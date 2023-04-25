@@ -8,21 +8,24 @@ const pauseAria = audioControlEl.dataset.ariaPauseAudio;
 
 if ( audioControlEl ) {
 	const audioEl = document.getElementById( 'classifai-post-audio-player' );
+	let audioPromise = null
 
 	/**
 	 * Switches audio playback state.
 	 */
 	function switchState() {
 		if ( audioEl.paused ) {
-			audioEl.play();
+			audioPromise = audioEl.play();
 			pauseBtn.style.display = 'block';
 			playBtn.style.display = 'none';
 			audioControlEl.ariaLabel = pauseAria;
 		} else {
-			audioEl.pause();
-			pauseBtn.style.display = 'none';
-			playBtn.style.display = 'block';
-			audioControlEl.ariaLabel = defaultAria;
+			audioPromise.then( () => {
+				audioEl.pause();
+				pauseBtn.style.display = 'none';
+				playBtn.style.display = 'block';
+				audioControlEl.ariaLabel = defaultAria;
+			} );
 		}
 	}
 

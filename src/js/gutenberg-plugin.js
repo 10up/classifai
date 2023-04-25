@@ -350,6 +350,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 					help={ isProcessingAudio ? '' : __( 'Preview the generated audio.', 'classifai' ) }
 				>
 					<Button
+						id="classifai-audio-controls__preview-btn"
 						icon={ <Icon icon={ audioIcon } /> }
 						variant="secondary"
 						onClick={ () => setIsPreviewing( ! isPreviewing ) }
