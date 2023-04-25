@@ -2,7 +2,8 @@
 
 import { handleClick } from './helpers';
 
-( function( $ ) { // eslint-disable-line wrap-iife
+( function ( $ ) {
+	// eslint-disable-line wrap-iife
 	const { __ } = wp.i18n;
 
 	/**
@@ -166,9 +167,9 @@ import { handleClick } from './helpers';
 		} );
 	};
 
-	$( document ).ready( function() {
+	$( document ).ready( function () {
 		if ( wp.media ) {
-			wp.media.view.Modal.prototype.on( 'open', function() {
+			wp.media.view.Modal.prototype.on( 'open', function () {
 				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
 				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
 			} );
@@ -184,4 +185,4 @@ import { handleClick } from './helpers';
 			wp.Uploader.queue.on( 'reset', handleButtonsClick );
 		}
 	} );
-}( jQuery ) );
+} )( jQuery );

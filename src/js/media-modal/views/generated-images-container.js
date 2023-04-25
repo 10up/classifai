@@ -18,7 +18,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	 *
 	 * @param {Object} options Options passed to the view.
 	 */
-	initialize: function( options ) {
+	initialize: function ( options ) {
 		this.collection = new Images();
 		this.prompt = options.prompt;
 
@@ -32,7 +32,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	/**
 	 * Render the view.
 	 */
-	render: function() {
+	render: function () {
 		this.$el.prev().find( 'button' ).prop( 'disabled', true );
 		this.$el.prev().find( '.error' ).text( '' );
 		this.$( 'ul' ).empty();
@@ -46,7 +46,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	 *
 	 * @param {wp.media.View.GeneratedImage} image Individual image model.
 	 */
-	renderImage: function( image ) {
+	renderImage: function ( image ) {
 		const view = new GeneratedImage( {
 			model: image,
 			prompt: this.prompt,
@@ -57,7 +57,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	/**
 	 * Render all images.
 	 */
-	renderAll: function() {
+	renderAll: function () {
 		if ( this.collection.length < 1 ) {
 			this.error();
 			this.$el
@@ -76,7 +76,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 		}
 	},
 
-	error: function() {
+	error: function () {
 		this.$( '.spinner' ).removeClass( 'active' );
 		this.$el.prev().find( 'button' ).prop( 'disabled', false );
 	},

@@ -42,13 +42,13 @@ const ClassifAIToggle = () => {
 			help={
 				'yes' === enabled
 					? __(
-						'ClassifAI language processing is enabled',
-						'classifai'
-					)
+							'ClassifAI language processing is enabled',
+							'classifai'
+					  )
 					: __(
-						'ClassifAI language processing is disabled',
-						'classifai'
-					)
+							'ClassifAI language processing is disabled',
+							'classifai'
+					  )
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
@@ -212,14 +212,11 @@ const synthesizeSpeech = async ( postId ) => {
 	// Set state indicating the synthesis process has begun.
 	dispatch( postAudioStore ).setIsProcessing( true );
 
-	const response = await fetch(
-		synthesizeSpeechUrl,
-		{
-			headers: new Headers( {
-				'X-WP-Nonce': wpApiSettings.nonce,
-			} ),
-		}
-	);
+	const response = await fetch( synthesizeSpeechUrl, {
+		headers: new Headers( {
+			'X-WP-Nonce': wpApiSettings.nonce,
+		} ),
+	} );
 
 	// Return false if error.
 	if ( 200 !== response.status ) {
@@ -266,30 +263,52 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	let isFeatureSupported = false;
 
 	// Indicates whether speech synthesis is enabled for the current post.
-	const isSynthesizeSpeech = 'yes' === useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' ) );
+	const isSynthesizeSpeech =
+		'yes' ===
+		useSelect( ( select ) =>
+			select( 'core/editor' ).getEditedPostAttribute(
+				'classifai_synthesize_speech'
+			)
+		);
 
 	// Post type of the current post.
-	const postType = useSelect( ( select ) => select( 'core/editor' ).getCurrentPostType() );
+	const postType = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostType()
+	);
 
 	// Says whether speech synthesis is in progress.
-	const isProcessingAudio = useSelect( ( select ) => select( postAudioStore ).getIsProcessing() );
+	const isProcessingAudio = useSelect( ( select ) =>
+		select( postAudioStore ).getIsProcessing()
+	);
 
 	// Figure out if speech synthesis is supported by the current post.
-	if ( 'undefined' !== typeof classifaiTextToSpeechData && classifaiTextToSpeechData.supportedPostTypes.includes( postType ) ) {
+	if (
+		'undefined' !== typeof classifaiTextToSpeechData &&
+		classifaiTextToSpeechData.supportedPostTypes.includes( postType )
+	) {
 		isFeatureSupported = true;
 	}
 
 	// The audio ID saved in the DB for the current post.
-	const defaultAudioId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_post_audio_id' ) );
+	const defaultAudioId = useSelect( ( select ) =>
+		select( 'core/editor' ).getEditedPostAttribute(
+			'classifai_post_audio_id'
+		)
+	);
 
 	// New audio ID in case it is regenerated manually or through publishing/updating the current post.
 	const audioId = props.audioId || defaultAudioId;
 
 	// Get the attachment data by audio ID.
-	const attachments = useSelect( ( select ) => select( 'core' ).getEntityRecords( 'postType', 'attachment', { include: [ audioId ] } ) );
+	const attachments = useSelect( ( select ) =>
+		select( 'core' ).getEntityRecords( 'postType', 'attachment', {
+			include: [ audioId ],
+		} )
+	);
 
 	// Get URL for the attachment.
-	const sourceUrl = attachments && attachments.length > 0 && attachments[ 0 ].source_url;
+	const sourceUrl =
+		attachments && attachments.length > 0 && attachments[ 0 ].source_url;
 
 	const isProcessingAudioProgress = useRef( false );
 
@@ -334,20 +353,40 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 		<>
 			<ToggleControl
 				label={ __( 'Generate audio for this post.', 'classifai' ) }
-				help={ isFeatureSupported
-					? __( 'ClassifAI will generate audio for the post when it is published or updated.', 'classifai' )
-					: __( 'Text to Speech generation is disabled for this post type.', 'classifai' ) }
+				help={
+					isFeatureSupported
+						? __(
+								'ClassifAI will generate audio for the post when it is published or updated.',
+								'classifai'
+						  )
+						: __(
+								'Text to Speech generation is disabled for this post type.',
+								'classifai'
+						  )
+				}
 				checked={ isFeatureSupported && isSynthesizeSpeech }
 				onChange={ ( value ) => {
-					wp.data.dispatch( 'core/editor' ).editPost( { classifai_synthesize_speech: value ? 'yes' : 'no' } );
+					wp.data.dispatch( 'core/editor' ).editPost( {
+						classifai_synthesize_speech: value ? 'yes' : 'no',
+					} );
 				} }
 				disabled={ ! isFeatureSupported }
 			/>
-			{ sourceUrl && <audio id="classifai-audio-preview" src={ cacheBustingUrl } onEnded={ () => setIsPreviewing( false ) }></audio> }
+			{ sourceUrl && (
+				<audio
+					id="classifai-audio-preview"
+					src={ cacheBustingUrl }
+					onEnded={ () => setIsPreviewing( false ) }
+				></audio>
+			) }
 			{ sourceUrl && isSynthesizeSpeech && (
 				<BaseControl
 					id="classifai-audio-controls"
-					help={ isProcessingAudio ? '' : __( 'Preview the generated audio.', 'classifai' ) }
+					help={
+						isProcessingAudio
+							? ''
+							: __( 'Preview the generated audio.', 'classifai' )
+					}
 				>
 					<Button
 						id="classifai-audio-controls__preview-btn"
@@ -357,7 +396,9 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 						disabled={ isProcessingAudio }
 						isBusy={ isProcessingAudio }
 					>
-						{ isProcessingAudio ? __( 'Generating audio..', 'classifai' ) : __( 'Preview', 'classifai' ) }
+						{ isProcessingAudio
+							? __( 'Generating audio..', 'classifai' )
+							: __( 'Preview', 'classifai' ) }
 					</Button>
 				</BaseControl>
 			) }
@@ -368,10 +409,14 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 let isPostSavingInProgress = false;
 
 // Synthesises audio for the post whenever a post is publish/updated.
-wp.data.subscribe( function() {
+wp.data.subscribe( function () {
 	const { select } = wp.data;
 
-	const isSynthesizeSpeech = 'yes' === select( 'core/editor' ).getEditedPostAttribute( 'classifai_synthesize_speech' );
+	const isSynthesizeSpeech =
+		'yes' ===
+		select( 'core/editor' ).getEditedPostAttribute(
+			'classifai_synthesize_speech'
+		);
 
 	if ( ! isSynthesizeSpeech ) {
 		return;
@@ -410,13 +455,31 @@ const ClassifAIPlugin = () => {
 		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
 	);
 
-	const userHasPermissions = classifaiPostData && ! ( classifaiPostData.noPermissions && 1 === parseInt( classifaiPostData.noPermissions ) );
-	const isLanguageProcessingEnabled = classifaiPostData && classifaiPostData.NLUEnabled;
-	const isPosTypeSupported = classifaiPostData && classifaiPostData.supportedPostTypes && classifaiPostData.supportedPostTypes.includes( postType );
-	const isPostStatusSupported = classifaiPostData && classifaiPostData.supportedPostStatues && classifaiPostData.supportedPostStatues.includes( postStatus );
+	const userHasPermissions =
+		classifaiPostData &&
+		! (
+			classifaiPostData.noPermissions &&
+			1 === parseInt( classifaiPostData.noPermissions )
+		);
+	const isLanguageProcessingEnabled =
+		classifaiPostData && classifaiPostData.NLUEnabled;
+	const isPosTypeSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostTypes &&
+		classifaiPostData.supportedPostTypes.includes( postType );
+	const isPostStatusSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostStatues &&
+		classifaiPostData.supportedPostStatues.includes( postStatus );
 
-	const defaultAudioId = useSelect( ( select ) => select( 'core/editor' ).getEditedPostAttribute( 'classifai_post_audio_id' ) );
-	const audioId = useSelect( ( select ) => select( postAudioStore ).getAudioId() ) || defaultAudioId;
+	const defaultAudioId = useSelect( ( select ) =>
+		select( 'core/editor' ).getEditedPostAttribute(
+			'classifai_post_audio_id'
+		)
+	);
+	const audioId =
+		useSelect( ( select ) => select( postAudioStore ).getAudioId() ) ||
+		defaultAudioId;
 
 	return (
 		<PluginDocumentSettingPanel
@@ -425,8 +488,7 @@ const ClassifAIPlugin = () => {
 			className="classifai-panel"
 		>
 			<>
-				{
-					userHasPermissions &&
+				{ userHasPermissions &&
 					isLanguageProcessingEnabled &&
 					isPosTypeSupported &&
 					isPostStatusSupported && (
@@ -434,8 +496,7 @@ const ClassifAIPlugin = () => {
 							<ClassifAIToggle />
 							<ClassifAIGenerateTagsButton />
 						</>
-					)
-				}
+					) }
 			</>
 			<ClassifAITSpeechSynthesisToggle audioId={ audioId } />
 		</PluginDocumentSettingPanel>

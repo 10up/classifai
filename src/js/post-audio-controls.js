@@ -8,7 +8,7 @@ const pauseAria = audioControlEl.dataset.ariaPauseAudio;
 
 if ( audioControlEl ) {
 	const audioEl = document.getElementById( 'classifai-post-audio-player' );
-	let audioPromise = null
+	let audioPromise = null;
 
 	/**
 	 * Switches audio playback state.
@@ -38,7 +38,7 @@ if ( audioControlEl ) {
 		}
 	} );
 
-	audioEl.addEventListener( 'ended', function() {
+	audioEl.addEventListener( 'ended', function () {
 		audioEl.currentTime = 0;
 		pauseBtn.style.display = 'none';
 		playBtn.style.display = 'block';

@@ -14,19 +14,27 @@ import { handleClick } from '../helpers';
 function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
-	const buttonText = '' === excerpt ? __( 'Generate excerpt', 'classifai' ) : __( 'Re-generate excerpt', 'classifai' );
-	const isPublishPanelOpen = select( 'core/edit-post' ).isPublishSidebarOpened();
+	const buttonText =
+		'' === excerpt
+			? __( 'Generate excerpt', 'classifai' )
+			: __( 'Re-generate excerpt', 'classifai' );
+	const isPublishPanelOpen =
+		select( 'core/edit-post' ).isPublishSidebarOpened();
 
 	return (
 		<div className="editor-post-excerpt">
 			<TextareaControl
 				__nextHasNoMarginBottom
-				label={ ! isPublishPanelOpen ? __( 'Write an excerpt (optional)' ) : null }
+				label={
+					! isPublishPanelOpen
+						? __( 'Write an excerpt (optional)' )
+						: null
+				}
 				className="editor-post-excerpt__textarea"
 				onChange={ ( value ) => onUpdateExcerpt( value ) }
 				value={ excerpt }
 			/>
-			{ ! isPublishPanelOpen &&
+			{ ! isPublishPanelOpen && (
 				<ExternalLink
 					href={ __(
 						'https://wordpress.org/support/article/settings-sidebar/#excerpt'
@@ -34,7 +42,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				>
 					{ __( 'Learn more about manual excerpts' ) }
 				</ExternalLink>
-			}
+			) }
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
