@@ -20,6 +20,7 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 
 		cy.get( 'button[aria-label="Close panel"]' ).click();
 		cy.get( 'button[data-label="Post"]' ).click();
+		cy.get( '.classifai-panel' ).click();
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' )
 
 		cy.get( '.edit-post-post-url button' ).click();
