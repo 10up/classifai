@@ -36,14 +36,10 @@ jobs:
       with:
         files: |
           **/*.js
+          **/*.json
 
     - name: Run JS linting
-      run: |
-        if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
-          npx wp-scripts lint-js ${{ steps.changed-files.outputs.all_changed_files }}
-        elif [[ "${{ github.event_name }}" == "push" ]]; then
-          npm run lint:js
-        fi
+      run: npm run lint:js
 
   phpcs:
     name: phpcs
