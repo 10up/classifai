@@ -22,9 +22,6 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 		cy.get( 'button[data-label="Post"]' ).click();
 		cy.get( '.classifai-panel' ).click();
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' )
-
-		cy.get( '.edit-post-post-url button' ).click();
-		cy.get( '.editor-post-url__link' ).click();
 	} );
 
 	it( 'Audio controls are visible if supported by post type', () => {
