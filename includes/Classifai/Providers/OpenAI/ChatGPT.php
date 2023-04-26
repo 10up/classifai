@@ -74,7 +74,7 @@ class ChatGPT extends Provider {
 	public function register() {
 		$settings = $this->get_settings();
 
-		// Check if the current user has permission to generate images.
+		// Check if the current user has permission.
 		$roles      = $settings['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
