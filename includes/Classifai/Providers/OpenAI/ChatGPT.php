@@ -72,28 +72,25 @@ class ChatGPT extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
+			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
+		) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		}
 	}
 
 	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
-		$settings = $this->get_settings();
-
-		// Don't load our custom post excerpt if excerpt functionality isn't turned on.
-		if ( ! isset( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
-			return;
-		}
-
-		// Check if the current user has permission to use the generate excerpt button.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return;
-		}
-
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-post-excerpt',
@@ -101,6 +98,25 @@ class ChatGPT extends Provider {
 			get_asset_info( 'post-excerpt', 'dependencies' ),
 			get_asset_info( 'post-excerpt', 'version' ),
 			true
+		);
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_admin_assets( $hook_suffix = '' ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
 		);
 	}
 
