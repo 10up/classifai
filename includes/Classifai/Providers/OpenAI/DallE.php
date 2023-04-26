@@ -145,7 +145,7 @@ class DallE extends Provider {
 				<p>
 					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
 				</p>
-				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
 			</div>
