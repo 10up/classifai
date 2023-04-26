@@ -34,7 +34,7 @@ wp.media.view.MediaFrame.Select = currentMediaFrame.extend( {
 		routerView.set( {
 			generate: {
 				text: classifaiDalleData.tabText,
-				priority: 60,
+				priority: 30,
 			},
 		} );
 	},
