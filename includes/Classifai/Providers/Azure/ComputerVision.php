@@ -395,6 +395,11 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
+		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
+			$this->read_pdf( $attachment_id );
+			return; // We can exit early, if this is a call for PDF scanning - everything else relates to images.
+		}
+
 		$routes   = [];
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -442,11 +447,6 @@ class ComputerVision extends Provider {
 		if ( filter_input( INPUT_POST, 'rescan-ocr', FILTER_SANITIZE_STRING ) ) {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
-
-		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
-			$this->read_pdf( $attachment_id );
-		}
-
 	}
 
 	/**
