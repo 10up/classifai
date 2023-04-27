@@ -51,8 +51,6 @@ function blocks_styles() {
 		CLASSIFAI_PLUGIN_VERSION
 	);
 
-	$fe_file_name          = 'recommended-content-block-frontend';
-	$frontend_dependencies = ( include CLASSIFAI_PLUGIN_DIR . "/dist/$fe_file_name.asset.php" );
 	wp_enqueue_script(
 		'recommended-content-block-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-frontend.js',
