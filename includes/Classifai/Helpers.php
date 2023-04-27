@@ -618,15 +618,15 @@ function get_asset_info( $slug, $attribute = null ) {
 
 
 /**
- * Sanitizes input variables.
+ * Sanitizes and ensures an input variable is set.
  *
  * @param string  $key               $_GET or $_POST array key.
- * @param boolean $is_get            if the request is $_GET. Default to false.
- * @param string  $sanitize_callback Santize callback. Defaults to `sanitize_text_field`
+ * @param boolean $is_get            If the request is $_GET. Defaults to false.
+ * @param string  $sanitize_callback Sanitize callback. Defaults to `sanitize_text_field`
  *
  * @return string|boolean Sanitized string or `false` as fallback.
  */
-function clean_input( $key, $is_get = false, $sanitize_callback = 'sanitize_text_field' ) {
+function clean_input( string $key = '', boolean $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
 	if ( ! is_callable( $sanitize_callback ) ) {
 		$sanitize_callback = 'sanitize_text_field';
 	}
