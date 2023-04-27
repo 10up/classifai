@@ -615,3 +615,27 @@ function get_asset_info( $slug, $attribute = null ) {
 
 	return $asset;
 }
+
+
+/**
+ * Sanitizes input variables.
+ *
+ * @param string  $key               $_GET or $_POST array key.
+ * @param boolean $is_get            if the request is $_GET. Default to false.
+ * @param string  $sanitize_callback Santize callback. Defaults to `sanitize_text_field`
+ *
+ * @return string|boolean Sanitized string or `false` as fallback.
+ */
+function clean_input( $key, $is_get = false, $sanitize_callback = 'sanitize_text_field' ) {
+	if ( ! is_callable( $sanitize_callback ) ) {
+		$sanitize_callback = 'sanitize_text_field';
+	}
+
+	if ( $is_get ) {
+		return isset( $_GET[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_GET[ $key ] ) ) : '';
+	} else {
+		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
+	}
+
+	return false;
+}
