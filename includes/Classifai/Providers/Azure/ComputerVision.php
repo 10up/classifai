@@ -120,7 +120,6 @@ class ComputerVision extends Provider {
 	public function register() {
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
-		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
