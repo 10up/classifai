@@ -136,8 +136,7 @@ class Read {
 						)
 					),
 					$filesize
-				),
-				$this->attachment_id
+				)
 			);
 		}
 
