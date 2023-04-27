@@ -14,6 +14,7 @@ use function Classifai\get_largest_acceptable_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\attachment_is_pdf;
 use function Classifai\get_asset_info;
+use function Classifai\clean_input;
 
 class ComputerVision extends Provider {
 
@@ -393,6 +394,11 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
+		if ( clean_input( 'rescan-pdf' ) ) {
+			$this->read_pdf( $attachment_id );
+			return; // We can exit early, if this is a call for PDF scanning - everything else relates to images.
+		}
+
 		$routes   = [];
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -408,17 +414,17 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) ) {
+		if ( clean_input( 'rescan-captions' ) ) {
 			$routes[] = 'alt-tags';
-		} elseif ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) ) {
+		} elseif ( clean_input( 'rescan-tags' ) ) {
 			$routes[] = 'image-tags';
-		} elseif ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) ) {
+		} elseif ( clean_input( 'rescan-smart-crop' ) ) {
 			$routes[] = 'smart-crop';
 		}
 
 		if ( in_array( 'smart-crop', $routes, true ) ) {
 			// Are we smart cropping the image?
-			if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) && ! empty( $metadata ) ) {
+			if ( clean_input( 'rescan-smart-crop' ) && ! empty( $metadata ) ) {
 				$this->smart_crop_image( $metadata, $attachment_id );
 			}
 		} else {
@@ -426,25 +432,20 @@ class ComputerVision extends Provider {
 
 			if ( ! is_wp_error( $image_scan ) ) {
 				// Are we updating the captions?
-				if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) && isset( $image_scan->description->captions ) ) {
+				if ( clean_input( 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
 					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 				}
 				// Are we updating the tags?
-				if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) && isset( $image_scan->tags ) ) {
+				if ( clean_input( 'rescan-tags' ) && isset( $image_scan->tags ) ) {
 					$this->generate_image_tags( $image_scan->tags, $attachment_id );
 				}
 			}
 		}
 
 		// Are we updating the OCR text?
-		if ( filter_input( INPUT_POST, 'rescan-ocr', FILTER_SANITIZE_STRING ) ) {
+		if ( clean_input( 'rescan-ocr' ) ) {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
-
-		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
-			$this->read_pdf( $attachment_id );
-		}
-
 	}
 
 	/**
@@ -608,11 +609,17 @@ class ComputerVision extends Provider {
 	 * @param string $image_url Path to the uploaded image.
 	 * @param array  $routes    Routes we are calling.
 	 *
-	 * @return bool|object|\WP_Error
+	 * @return bool|object|WP_Error
 	 */
 	protected function scan_image( $image_url, array $routes = [] ) {
 		$settings = $this->get_settings();
-		$url      = $this->prep_api_url( $routes );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+		}
+
+		$url = $this->prep_api_url( $routes );
 
 		/*
 		 * MS Computer Vision requires full image URL. So, if the file URL is relative,
@@ -791,13 +798,19 @@ class ComputerVision extends Provider {
 	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
-	 * @param array $tags          Array ot tags returned from the API.
+	 * @param array $tags          Array of tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return string|array
+	 * @return string|array|WP_Error
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
-		$rtn = '';
+		$rtn      = '';
+		$settings = $this->get_settings();
+
+		// Don't save tags if the setting is disabled.
+		if ( ! is_array( $settings ) || ! isset( $settings['enable_image_tagging'] ) || '1' !== $settings['enable_image_tagging'] ) {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Image tagging is disabled.', 'classifai' ) );
+		}
 
 		/**
 		 * Filter the tags returned from the API.
@@ -1197,6 +1210,13 @@ class ComputerVision extends Provider {
 	 * @return array|string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+		$route_to_call = strtolower( $route_to_call );
+		// Check to be sure the post both exists and is an attachment.
+		if ( ! get_post( $post_id ) || 'attachment' !== get_post_type( $post_id ) ) {
+			/* translators: %1$s: the attachment ID */
+			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $post_id ), [ 'status' => 404 ] );
+		}
+
 		$metadata = wp_get_attachment_metadata( $post_id );
 
 		if ( 'ocr' === $route_to_call ) {
