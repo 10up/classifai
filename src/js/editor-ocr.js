@@ -1,18 +1,23 @@
-/* global lodash */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-use-before-define */
 /* eslint-disable @wordpress/no-unused-vars-before-return */
-const { select, dispatch, subscribe } = wp.data;
-const { createBlock } = wp.blocks;
-const { apiFetch } = wp;
-const { find, debounce } = lodash;
-const { addFilter } = wp.hooks;
-const { createHigherOrderComponent } = wp.compose;
-const { BlockControls } = wp.blockEditor; // eslint-disable-line no-unused-vars
-const { Button, Modal, Flex, FlexItem, ToolbarGroup, ToolbarButton } =
-	wp.components; // eslint-disable-line no-unused-vars
-const { __ } = wp.i18n;
-const { useState, Fragment } = wp.element; // eslint-disable-line no-unused-vars
+import { select, dispatch, subscribe } from '@wordpress/data';
+import { createBlock } from '@wordpress/blocks';
+import { apiFetch } from '@wordpress/api-fetch';
+import { find, debounce } from 'lodash';
+import { addFilter } from '@wordpress/hooks';
+import { createHigherOrderComponent } from '@wordpress/compose';
+import { BlockControls } from '@wordpress/block-editor';
+import {
+	Button,
+	Modal,
+	Flex,
+	FlexItem,
+	ToolbarGroup,
+	ToolbarButton,
+} from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+import { useState, Fragment } from '@wordpress/element';
 
 /**
  * Icon for insert button.

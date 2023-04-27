@@ -186,7 +186,7 @@ class NLU extends Provider {
 	public function enqueue_editor_assets() {
 		global $post;
 		wp_enqueue_script(
-			'classifai-editor', // Handle.
+			'classifai-editor',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
 			get_asset_info( 'editor', 'dependencies' ),
 			get_asset_info( 'editor', 'version' ),

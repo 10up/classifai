@@ -1,5 +1,5 @@
-const { __ } = wp.i18n;
-const { get } = window.lodash;
+import { __ } from '@wordpress/i18n';
+import { get } from 'lodash';
 
 /**
  * Handle Click for given button.

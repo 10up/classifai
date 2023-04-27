@@ -1,9 +1,9 @@
 /* global ClassifAI */
 
 import { handleClick } from './helpers';
+import { __ } from '@wordpress/i18n';
 
 ( function( $ ) { // eslint-disable-line wrap-iife
-	const { __ } = wp.i18n;
 
 	/**
 	 * Handle click events for Image Processing buttons added to media modal.
