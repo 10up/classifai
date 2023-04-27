@@ -21,23 +21,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Cache node_modules
-      id: cache-node-modules
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-node-modules
-      with:
-        path: node_modules
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-
     - name: Setup node v16 and npm cache
       uses: actions/setup-node@v3
       with:
         node-version: 16
-        cache: 'npm'
+        cache: npm
 
     - name: Install Node dependencies
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm ci --no-optional
 
     - name: Get updated JS files
@@ -52,7 +42,7 @@ jobs:
         if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
           npx wp-scripts lint-js ${{ steps.changed-files.outputs.all_changed_files }}
         elif [[ "${{ github.event_name }}" == "push" ]]; then
-          npm run lint-js
+          npm run lint:js
         fi
 
   phpcs:

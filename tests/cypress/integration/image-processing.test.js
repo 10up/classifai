@@ -1,4 +1,6 @@
-import { getOCRData, getImageData } from '../plugins/functions';
+/* eslint jest/expect-expect: 0 */
+
+import { getOCRData, getImageData, getDalleData } from '../plugins/functions';
 
 describe('Image processing Tests', () => {
 	let imageEditLink = '';
@@ -7,22 +9,22 @@ describe('Image processing Tests', () => {
 		cy.login();
 	});
 
-	it('Can save "Image Processing" settings', () => {
+	it('Can save Computer Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
-		cy.get('#classifai-settings-url')
+		cy.get('#url')
 			.clear()
 			.type('http://e2e-test-image-processing.test');
-		cy.get('#classifai-settings-api_key').clear().type('password');
+		cy.get('#api_key').clear().type('password');
 		cy.get('#computer_vision_enable_image_captions_alt').check();
-		cy.get('#classifai-settings-enable_smart_cropping').check();
-		cy.get('#classifai-settings-enable_ocr').check();
+		cy.get('#enable_smart_cropping').check();
+		cy.get('#enable_ocr').check();
 		cy.get('#submit').click();
 
 		cy.get('.notice').contains('Settings saved.');
 	});
 
-	it('Can see Image processing actions on edit media page and verify Generated data.', () => {
+	it('Can see Computer Vision Image processing actions on edit media page and verify Generated data.', () => {
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
@@ -71,7 +73,7 @@ describe('Image processing Tests', () => {
 			});
 	});
 
-	it('Can see Image processing actions on media model', () => {
+	it('Can see Computer Vision Image processing actions on media model', () => {
 		const imageId = imageEditLink.split('post=')[1]?.split('&')[0];
 		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
 		cy.visit(mediaModelLink);
@@ -84,12 +86,12 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('exist');
 	});
 
-	it('Can disable Image processing features', () => {
+	it('Can disable Computer Vision Image processing features', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		// Disable features
-		cy.get('#classifai-settings-enable_smart_cropping').uncheck();
-		cy.get('#classifai-settings-enable_ocr').uncheck();
+		cy.get('#enable_smart_cropping').uncheck();
+		cy.get('#enable_ocr').uncheck();
 		cy.get('#submit').click();
 
 		// Verify with Image processing features are not present in attachment metabox.
@@ -107,4 +109,163 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('not.exist');
 		cy.get('#classifai-rescan-ocr').should('not.exist');
 	});
+
+	it( 'Can save OpenAI "Image Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#api_key' ).clear().type( 'password' );
+
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#openai_dalle_roles_administrator' ).check();
+		cy.get( '#number' ).select( '2' );
+		cy.get( '#size' ).select( '512x512' );
+		cy.get( '#submit' ).click();
+	} );
+
+	it( 'Can generate images in the media modal', () => {
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
+
+			// Verify tab exists.
+			cy.get( '#menu-item-generate' ).should( 'exist' );
+
+			// Click into the tab and submit a prompt.
+			cy.get( '#menu-item-generate' ).click();
+			cy.get( '.prompt-view .prompt' ).type(
+				'A sunset over the mountains'
+			);
+			cy.get( '.prompt-view .button-generate' ).click();
+
+			// Verify images show up.
+			cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
+		} );
+	} );
+
+	it( 'Can disable image generation feature', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#enable_image_gen' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post disabled',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
+
+			// Verify tab doesn't exist.
+			cy.get( '#menu-item-generate' ).should( 'not.exist' );
+		} );
+	} );
+
+	it( 'Can disable image generation by role', () => {
+		cy.visit(
+			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+		);
+
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#openai_dalle_roles_administrator' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test DALL-E post admin disabled',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the Featured image panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
+
+			// Verify tab doesn't exist.
+			cy.get( '#menu-item-generate' ).should( 'not.exist' );
+		} );
+	} );
 });

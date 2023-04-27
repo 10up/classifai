@@ -206,7 +206,7 @@ class HelpersTest extends \WP_UnitTestCase {
 			wp_get_attachment_metadata( $attachment )['sizes'],
 			computer_vision_max_filesize()
 		);
-		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/33772-1536x864.jpg', date( 'Y' ), date( 'm' ) ), $url );
+		$this->assertEquals( sprintf( '%s/33772-1536x864.jpg', wp_upload_dir()['url'] ), $url );
 
 		$attachment = $this->factory->attachment->create_upload_object( DIR_TESTDATA .'/images/2004-07-22-DSC_0008.jpg' ); // ~109kb image.
 		$url = get_largest_acceptable_image_url(
@@ -215,7 +215,7 @@ class HelpersTest extends \WP_UnitTestCase {
 			wp_get_attachment_metadata( $attachment )['sizes'],
 			computer_vision_max_filesize()
 		);
-		$this->assertEquals( sprintf( 'http://example.org/wp-content/uploads/%s/%s/2004-07-22-DSC_0008.jpg', date( 'Y' ), date( 'm' ) ), $url );
+		$this->assertEquals( sprintf( '%s/2004-07-22-DSC_0008.jpg', wp_upload_dir()['url'] ), $url );
 
 		remove_filter( 'classifai_computer_vision_max_filesize', $set_150kb_max_filesize );
 

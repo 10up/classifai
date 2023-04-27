@@ -1,3 +1,5 @@
+/* eslint jest/expect-expect: 0 */
+
 describe('Admin can login and make sure plugin is activated', () => {
 	before(() => {
 		cy.login();
