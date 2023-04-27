@@ -1,10 +1,10 @@
 /**
  * WordPress dependencies
  */
-const { __ } = wp.i18n;
-const { Button, ExternalLink, TextareaControl } = wp.components;
-const { withSelect, withDispatch } = wp.data;
-const { compose } = wp.compose;
+import { __ } from '@wordpress/i18n';
+import { Button, ExternalLink, TextareaControl } from '@wordpress/components';
+import { withSelect, withDispatch } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
