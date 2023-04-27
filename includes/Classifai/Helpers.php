@@ -626,7 +626,7 @@ function get_asset_info( $slug, $attribute = null ) {
  *
  * @return string|boolean Sanitized string or `false` as fallback.
  */
-function clean_input( string $key = '', boolean $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
+function clean_input( string $key = '', bool $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
 	if ( ! is_callable( $sanitize_callback ) ) {
 		$sanitize_callback = 'sanitize_text_field';
 	}
