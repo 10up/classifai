@@ -95,7 +95,7 @@ class ChatGPT extends Provider {
 		wp_enqueue_script(
 			'classifai-post-excerpt',
 			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-			get_asset_info( 'post-excerpt', 'dependencies' ),
+			array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'post-excerpt', 'version' ),
 			true
 		);
