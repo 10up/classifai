@@ -130,8 +130,9 @@ class Read {
 					'size_error',
 					esc_html(
 						sprintf(
-							// translators: %1$s is a file size
-							__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (currently %1$s, defaults to 4MB).', 'classifai' ),
+							// translators: %1$s is the document file size, %2$s is the current default max filesize
+							__( 'Document (%1$s) does not meet size requirements. Please ensure it is smaller than the maximum threshold (currently %1$s, defaults to 4MB).', 'classifai' ),
+							$filesize,
 							computer_vision_max_filesize()
 						)
 					),
