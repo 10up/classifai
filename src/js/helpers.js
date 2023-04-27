@@ -1,5 +1,6 @@
+/* global lodash */
 import { __ } from '@wordpress/i18n';
-import { get } from 'lodash';
+const { get } = lodash;
 
 /**
  * Handle Click for given button.

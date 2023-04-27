@@ -1,10 +1,10 @@
+/* global lodash */
 /* eslint-disable eqeqeq */
 /* eslint-disable no-use-before-define */
 /* eslint-disable @wordpress/no-unused-vars-before-return */
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 import { apiFetch } from '@wordpress/api-fetch';
-import { find, debounce } from 'lodash';
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockControls } from '@wordpress/block-editor';
@@ -18,6 +18,8 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useState, Fragment } from '@wordpress/element';
+
+const { find, debounce } = lodash;
 
 /**
  * Icon for insert button.
