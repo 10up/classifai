@@ -125,7 +125,20 @@ class Read {
 
 		$filesize = filesize( get_attached_file( $this->attachment_id ) );
 		if ( ! $filesize || $filesize > computer_vision_max_filesize() ) {
-			return $this->log_error( new WP_Error( 'size_error', esc_html__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (defaults to 4MB).', 'classifai' ), $metadata ), $attachment_id );
+			return $this->log_error(
+				new WP_Error(
+					'size_error',
+					esc_html(
+						sprintf(
+							// translators: %1$s is a file size
+							__( 'Document does not meet size requirements. Please ensure it is smaller than the maximum threshold (currently %1$s, defaults to 4MB).', 'classifai' ),
+							computer_vision_max_filesize()
+						)
+					),
+					$filesize
+				),
+				$this->attachment_id
+			);
 		}
 
 		/**
