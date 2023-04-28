@@ -17,6 +17,8 @@ describe('Image processing Tests', () => {
 			.type('http://e2e-test-image-processing.test');
 		cy.get('#api_key').clear().type('password');
 		cy.get('#computer_vision_enable_image_captions_alt').check();
+		cy.get('#computer_vision_enable_image_captions_description').check();
+		cy.get('#enable_image_tagging').check();
 		cy.get('#enable_smart_cropping').check();
 		cy.get('#enable_ocr').check();
 		cy.get('#submit').click();
