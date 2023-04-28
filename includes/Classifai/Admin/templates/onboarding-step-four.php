@@ -14,7 +14,7 @@ $features             = $onboarding->get_features();
 $args = array(
 	'step'       => 4,
 	'title'      => __( 'Welcome to ClassifAI', 'classifai' ),
-	'image'      => 'https://via.placeholder.com/334x334',
+	'image'      => esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/onboarding-4.png' ),
 	'left_link'  => array(
 		'text' => __( 'Adjust ClassifAI settings', 'classifai' ),
 		'url'  => admin_url( 'tools.php?page=classifai' ),
