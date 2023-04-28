@@ -130,10 +130,11 @@ class Read {
 					'size_error',
 					esc_html(
 						sprintf(
-							// translators: %1$s is the document file size, %2$s is the current default max filesize
-							__( 'Document (%1$s) does not meet size requirements. Please ensure it is smaller than the maximum threshold (currently %2$s, defaults to 4MB).', 'classifai' ),
+							// translators: %1$s is the document file size in bytes, %2$s is the current default max filesize in bytes, %3$s is the integer '4 * MB_IN_BYTES'
+							__( 'Document (%1$s bytes) does not meet size requirements. Please ensure it is smaller than the maximum threshold (currently %2$s bytes, defaults to %3$s bytes).', 'classifai' ),
 							! $filesize ? __( 'size not found', 'classifai' ) : $filesize,
-							computer_vision_max_filesize()
+							computer_vision_max_filesize(),
+							4 * MB_IN_BYTES
 						)
 					),
 					$filesize
