@@ -8,7 +8,7 @@ describe('PDF read Tests', () => {
 	});
 
 	it('Can save "PDF scanning" settings', () => {
-		cy.visit('/wp-admin/admin.php?page=image_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		cy.get('#url')
 			.clear()

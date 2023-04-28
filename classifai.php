@@ -65,6 +65,7 @@ if ( file_exists( __DIR__ . '/config.local.php' ) ) {
 }
 
 require_once __DIR__ . '/config.php';
+classifai_define( 'CLASSIFAI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
  * Loads the CLASSIFAI PHP autoloader if possible.

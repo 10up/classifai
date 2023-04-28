@@ -29,6 +29,11 @@ abstract class Provider {
 	 */
 	protected $service;
 
+	/**
+	 * @var array $onboarding The onboarding options for this provider.
+	 */
+	public $onboarding_options;
+
 
 	/**
 	 * Provider constructor.
@@ -43,6 +48,7 @@ abstract class Provider {
 		$this->provider_service_name = $provider_service_name;
 		$this->option_name           = $option_name;
 		$this->service               = $service;
+		$this->onboarding_options    = array();
 	}
 
 	/**
@@ -71,6 +77,35 @@ abstract class Provider {
 		return 'classifai_' . $this->option_name;
 	}
 
+	/**
+	 * Get the onboarding options.
+	 *
+	 * @return array
+	 */
+	public function get_onboarding_options() {
+		$settings      = $this->get_settings();
+		$is_configured = $this->is_configured();
+
+		foreach ( $this->onboarding_options['features'] as $key => $title ) {
+			$enabled = isset( $settings[ $key ] ) ? 1 === absint( $settings[ $key ] ) : false;
+			if ( count( explode( '__', $key ) ) > 1 ) {
+				$keys    = explode( '__', $key );
+				$enabled = isset( $settings[ $keys[0] ][ $keys[1] ] ) ? 1 === absint( $settings[ $keys[0] ][ $keys[1] ] ) : false;
+			}
+			// Handle enable_image_captions
+			if ( 'enable_image_captions' === $key ) {
+				$enabled = isset( $settings['enable_image_captions']['alt'] ) && 'alt' === $settings['enable_image_captions']['alt'];
+			}
+			$enabled = $enabled && $is_configured;
+
+			$this->onboarding_options['features'][ $key ] = array(
+				'title'   => $title,
+				'enabled' => $enabled,
+			);
+		}
+
+		return $this->onboarding_options;
+	}
 
 	/**
 	 * Can the Provider be initalized?
@@ -344,5 +379,21 @@ abstract class Provider {
 	 */
 	public function rest_endpoint_callback( $post_id, $route_to_call ) {
 		return null;
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		$settings = $this->get_settings();
+
+		$is_configured = false;
+		if ( ! empty( $settings ) && ! empty( $settings['authenticated'] ) ) {
+			$is_configured = true;
+		}
+
+		return $is_configured;
 	}
 }

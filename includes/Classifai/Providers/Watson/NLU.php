@@ -69,6 +69,20 @@ class NLU extends Provider {
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'IBM Watson NLU', 'classifai' ),
+			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
+			'features' => array(),
+		);
+
+		$post_types = get_post_types_for_language_settings();
+		foreach ( $post_types as $post_type ) {
+			// translators: %s is the post type label.
+			$this->onboarding_options['features'][ 'post_types__' . $post_type->name ] = sprintf( __( 'Automatically tag %s', 'classifai' ), $post_type->label );
+		}
+
 	}
 
 	/**
@@ -884,5 +898,14 @@ class NLU extends Provider {
 				],
 			)
 		);
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		return get_option( 'classifai_configured', false );
 	}
 }

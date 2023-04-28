@@ -616,6 +616,26 @@ function get_asset_info( $slug, $attribute = null ) {
 	return $asset;
 }
 
+/**
+ * Get the list of registered services.
+ *
+ * @return array Array of services.
+ */
+function get_services_menu() {
+	$services = Plugin::$instance->services;
+	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+		return [];
+	}
+
+	/** @var ServicesManager $service_manager Instance of the services manager class. */
+	$service_manager = $services['service_manager'];
+	$services        = [];
+
+	foreach ( $service_manager->service_classes as $service ) {
+		$services[ $service->get_menu_slug() ] = $service->get_display_name();
+	}
+	return $services;
+}
 
 /**
  * Sanitizes and ensures an input variable is set.

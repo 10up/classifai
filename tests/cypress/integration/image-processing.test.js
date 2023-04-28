@@ -10,7 +10,7 @@ describe('Image processing Tests', () => {
 	});
 
 	it('Can save Computer Vision "Image Processing" settings', () => {
-		cy.visit('/wp-admin/admin.php?page=image_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		cy.get('#url')
 			.clear()
@@ -87,7 +87,7 @@ describe('Image processing Tests', () => {
 	});
 
 	it('Can disable Computer Vision Image processing features', () => {
-		cy.visit('/wp-admin/admin.php?page=image_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		// Disable features
 		cy.get('#enable_smart_cropping').uncheck();
@@ -112,7 +112,7 @@ describe('Image processing Tests', () => {
 
 	it( 'Can save OpenAI "Image Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
 		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
@@ -176,7 +176,7 @@ describe('Image processing Tests', () => {
 
 	it( 'Can disable image generation feature', () => {
 		cy.visit(
-			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
 		);
 
 		cy.get( '#enable_image_gen' ).uncheck();
@@ -223,7 +223,7 @@ describe('Image processing Tests', () => {
 
 	it( 'Can disable image generation by role', () => {
 		cy.visit(
-			'/wp-admin/admin.php?page=image_processing&tab=openai_dalle'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
 		);
 
 		cy.get( '#enable_image_gen' ).check();
