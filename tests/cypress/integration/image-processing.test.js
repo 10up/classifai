@@ -92,12 +92,20 @@ describe('Image processing Tests', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		// Disable features
+		cy.get('#computer_vision_enable_image_captions_description').uncheck();
+		cy.get('#enable_image_tagging').uncheck();
 		cy.get('#enable_smart_cropping').uncheck();
 		cy.get('#enable_ocr').uncheck();
 		cy.get('#submit').click();
 
 		// Verify with Image processing features are not present in attachment metabox.
 		cy.visit(imageEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-captions]').should(
+			'not.exist'
+		);
+		cy.get('.misc-publishing-actions label[for=rescan-tags]').should(
+			'not.exist'
+		);
 		cy.get('.misc-publishing-actions label[for=rescan-ocr]').should(
 			'not.exist'
 		);
@@ -108,6 +116,8 @@ describe('Image processing Tests', () => {
 		// Verify with Image processing features are not present in media model.
 		cy.visit(mediaModelLink);
 		cy.get('.media-modal').should('exist');
+		cy.get('#classifai-rescan-alt-tags').should('not.exist');
+		cy.get('#classifai-rescan-captions').should('not.exist');
 		cy.get('#classifai-rescan-smart-crop').should('not.exist');
 		cy.get('#classifai-rescan-ocr').should('not.exist');
 	});
