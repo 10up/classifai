@@ -234,4 +234,15 @@ class HelpersTest extends \WP_UnitTestCase {
 
 		remove_filter( 'classifai_computer_vision_max_filesize', $set_1kb_max_filesize );
 	}
+
+	public function test_clean_input() {
+		$_POST['classify_test_string'] = '<h1>Hello, world!</h1>';
+		$_GET['classify_test_int']     = -2.4;
+
+		$sanitized_string = clean_input( 'classify_test_string' );
+		$this->assertEquals( $sanitized_string, 'Hello, world!' );
+
+		$sanitized_int = clean_input( 'classify_test_int', true, 'absint' );
+		$this->assertEquals( $sanitized_int, 2 );
+	}
 }

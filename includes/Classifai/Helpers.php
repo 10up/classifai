@@ -636,3 +636,28 @@ function get_services_menu() {
 	}
 	return $services;
 }
+
+/**
+ * Sanitizes and ensures an input variable is set.
+ *
+ * @param string  $key               $_GET or $_POST array key.
+ * @param boolean $is_get            If the request is $_GET. Defaults to false.
+ * @param string  $sanitize_callback Sanitize callback. Defaults to `sanitize_text_field`
+ *
+ * @return string|boolean Sanitized string or `false` as fallback.
+ */
+function clean_input( string $key = '', bool $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
+	if ( ! is_callable( $sanitize_callback ) ) {
+		$sanitize_callback = 'sanitize_text_field';
+	}
+
+	if ( $is_get ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_GET[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_GET[ $key ] ) ) : '';
+	} else {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
+	}
+
+	return false;
+}

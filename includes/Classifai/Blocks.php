@@ -7,6 +7,8 @@
 
 namespace Classifai\Blocks;
 
+use function Classifai\get_asset_info;
+
 /**
  * Set up blocks
  *
@@ -49,13 +51,11 @@ function blocks_styles() {
 		CLASSIFAI_PLUGIN_VERSION
 	);
 
-	$fe_file_name          = 'recommended-content-block-frontend';
-	$frontend_dependencies = ( include CLASSIFAI_PLUGIN_DIR . "/dist/$fe_file_name.asset.php" );
 	wp_enqueue_script(
 		'recommended-content-block-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-frontend.js',
-		$frontend_dependencies['dependencies'],
-		$frontend_dependencies['version'],
+		get_asset_info( 'recommended-content-block-frontend', 'dependencies' ),
+		get_asset_info( 'recommended-content-block-frontend', 'version' ),
 		true
 	);
 

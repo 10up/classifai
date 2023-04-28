@@ -13,6 +13,8 @@ use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\attachment_is_pdf;
+use function Classifai\get_asset_info;
+use function Classifai\clean_input;
 
 class ComputerVision extends Provider {
 
@@ -130,7 +132,6 @@ class ComputerVision extends Provider {
 	public function register() {
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
 		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
-		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
@@ -178,11 +179,8 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			[
-				'wp-block-editor',
-				'wp-blocks',
-			],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'editor-ocr', 'dependencies' ),
+			get_asset_info( 'editor-ocr', 'version' ),
 			true
 		);
 	}
@@ -407,6 +405,11 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Post id for the attachment
 	 */
 	public function maybe_rescan_image( $attachment_id ) {
+		if ( clean_input( 'rescan-pdf' ) ) {
+			$this->read_pdf( $attachment_id );
+			return; // We can exit early, if this is a call for PDF scanning - everything else relates to images.
+		}
+
 		$routes   = [];
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
@@ -422,17 +425,17 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) ) {
+		if ( clean_input( 'rescan-captions' ) ) {
 			$routes[] = 'alt-tags';
-		} elseif ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) ) {
+		} elseif ( clean_input( 'rescan-tags' ) ) {
 			$routes[] = 'image-tags';
-		} elseif ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) ) {
+		} elseif ( clean_input( 'rescan-smart-crop' ) ) {
 			$routes[] = 'smart-crop';
 		}
 
 		if ( in_array( 'smart-crop', $routes, true ) ) {
 			// Are we smart cropping the image?
-			if ( filter_input( INPUT_POST, 'rescan-smart-crop', FILTER_SANITIZE_STRING ) && ! empty( $metadata ) ) {
+			if ( clean_input( 'rescan-smart-crop' ) && ! empty( $metadata ) ) {
 				$this->smart_crop_image( $metadata, $attachment_id );
 			}
 		} else {
@@ -440,25 +443,20 @@ class ComputerVision extends Provider {
 
 			if ( ! is_wp_error( $image_scan ) ) {
 				// Are we updating the captions?
-				if ( filter_input( INPUT_POST, 'rescan-captions', FILTER_SANITIZE_STRING ) && isset( $image_scan->description->captions ) ) {
+				if ( clean_input( 'rescan-captions' ) && isset( $image_scan->description->captions ) ) {
 					$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
 				}
 				// Are we updating the tags?
-				if ( filter_input( INPUT_POST, 'rescan-tags', FILTER_SANITIZE_STRING ) && isset( $image_scan->tags ) ) {
+				if ( clean_input( 'rescan-tags' ) && isset( $image_scan->tags ) ) {
 					$this->generate_image_tags( $image_scan->tags, $attachment_id );
 				}
 			}
 		}
 
 		// Are we updating the OCR text?
-		if ( filter_input( INPUT_POST, 'rescan-ocr', FILTER_SANITIZE_STRING ) ) {
+		if ( clean_input( 'rescan-ocr' ) ) {
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
-
-		if ( filter_input( INPUT_POST, 'rescan-pdf', FILTER_SANITIZE_STRING ) ) {
-			$this->read_pdf( $attachment_id );
-		}
-
 	}
 
 	/**
