@@ -274,7 +274,7 @@ class ComputerVision extends Provider {
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
-			<?php if ( $settings && isset( $settings['enable_image_captions']['description'] ) && '1' === $settings['enable_image_captions']['description'] ) : ?>
+			<?php if ( $settings && isset( $settings['enable_image_captions']['description'] ) && 'description' === $settings['enable_image_captions']['description'] ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-captions">
 						<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>

@@ -96,7 +96,7 @@ class ImageProcessing extends Service {
 			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 			$settings        = get_option( 'classifai_computer_vision' );
 
-			if ( $settings && isset( $settings['enable_image_captions']['description'] ) && '1' === $settings['enable_image_captions']['description'] ) {
+			if ( $settings && isset( $settings['enable_image_captions']['description'] ) && 'description' === $settings['enable_image_captions']['description'] ) {
 				$form_fields['rescan_alt_tags'] = [
 					'label'        => __( 'Descriptive text', 'classifai' ),
 					'input'        => 'html',
