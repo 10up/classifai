@@ -274,34 +274,41 @@ class ComputerVision extends Provider {
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
 		<div class="misc-publishing-actions">
-			<div class="misc-pub-section">
-				<label for="rescan-captions">
-					<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
-					<?php echo esc_html( $captions ); ?>
-				</label>
-			</div>
-			<div class="misc-pub-section">
-				<label for="rescan-tags">
-					<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
-					<?php echo esc_html( $tags ); ?>
-				</label>
-			</div>
-		<?php if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
-			<div class="misc-pub-section">
-				<label for="rescan-ocr">
-					<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
-					<?php echo esc_html( $ocr ); ?>
-				</label>
-			</div>
-		<?php endif; ?>
-		<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
-			<div class="misc-pub-section">
-				<label for="rescan-smart-crop">
-					<input type="checkbox" value="yes" id="rescan-smart-crop" name="rescan-smart-crop"/>
-					<?php echo esc_html( $smart_crop ); ?>
-				</label>
-			</div>
-		<?php endif; ?>
+			<?php if ( $settings && isset( $settings['enable_image_captions']['description'] ) && '1' === $settings['enable_image_captions']['description'] ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-captions">
+						<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
+						<?php echo esc_html( $captions ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $settings && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-tags">
+						<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
+						<?php echo esc_html( $tags ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-ocr">
+						<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
+						<?php echo esc_html( $ocr ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
+				<div class="misc-pub-section">
+					<label for="rescan-smart-crop">
+						<input type="checkbox" value="yes" id="rescan-smart-crop" name="rescan-smart-crop"/>
+						<?php echo esc_html( $smart_crop ); ?>
+					</label>
+				</div>
+			<?php endif; ?>
 		</div>
 		<?php
 	}

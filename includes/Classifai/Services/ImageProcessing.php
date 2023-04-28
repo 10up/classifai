@@ -94,20 +94,25 @@ class ImageProcessing extends Service {
 			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$ocr_text        = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
+			$settings        = get_option( 'classifai_computer_vision' );
 
-			$form_fields['rescan_alt_tags'] = [
-				'label'        => __( 'Descriptive text', 'classifai' ),
-				'input'        => 'html',
-				'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-				'show_in_edit' => false,
-			];
+			if ( $settings && isset( $settings['enable_image_captions']['description'] ) && '1' === $settings['enable_image_captions']['description'] ) {
+				$form_fields['rescan_alt_tags'] = [
+					'label'        => __( 'Descriptive text', 'classifai' ),
+					'input'        => 'html',
+					'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+					'show_in_edit' => false,
+				];
+			}
 
-			$form_fields['rescan_captions'] = [
-				'label'        => __( 'Image tags', 'classifai' ),
-				'input'        => 'html',
-				'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-				'show_in_edit' => false,
-			];
+			if ( $settings && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) {
+				$form_fields['rescan_captions'] = [
+					'label'        => __( 'Image tags', 'classifai' ),
+					'input'        => 'html',
+					'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+					'show_in_edit' => false,
+				];
+			}
 
 			if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
 				$form_fields['rescan_smart_crop'] = [
