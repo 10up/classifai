@@ -97,7 +97,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	public function test_set_image_meta_data() {
 		// Create A settings object
 		$settings = [
-			'enable_image_tagging' => 'no',
+			'url'                   => '',
+			'enable_image_tagging'  => 'no',
 			'enable_image_captions' => array(
 				'alt'         => 0,
 				'caption'     => 0,

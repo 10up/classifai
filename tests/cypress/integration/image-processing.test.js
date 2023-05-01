@@ -92,6 +92,8 @@ describe('Image processing Tests', () => {
 		cy.visit('/wp-admin/admin.php?page=image_processing');
 
 		// Disable features
+		cy.get('#computer_vision_enable_image_captions_alt').uncheck();
+		cy.get('#computer_vision_enable_image_captions_caption').uncheck();
 		cy.get('#computer_vision_enable_image_captions_description').uncheck();
 		cy.get('#enable_image_tagging').uncheck();
 		cy.get('#enable_smart_cropping').uncheck();
