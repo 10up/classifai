@@ -34,6 +34,9 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 
 == Upgrade Notice ==
 
+= 2.1.0 =
+**Note that this release moves the ClassifAI settings to be nested under Tools instead of it's own menu.**
+
 = 1.8.1 =
 **Note that this release bumps the WordPress minimum from 5.6 to 5.7 and the PHP minimum from 7.2 to 7.4.**
 
