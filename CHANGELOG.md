@@ -8,7 +8,6 @@ All notable changes to this project will be documented in this file, per [the Ke
 **Note that this release moves the ClassifAI settings to be nested under Tools instead of it's own menu.**
 
 ### Added
-
 - New user experience when onboarding, making it easier to get ClassifAI setup and configured (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@ryanwelcher](https://github.com/ryanwelcher), [@mehidi258](https://github.com/mehidi258) via [#411](https://github.com/10up/classifai/pull/411)).
 - Add proper attribution to generated images (props [@derweili](https://github.com/derweili), [@dkotter](https://github.com/dkotter) via [#438](https://github.com/10up/classifai/pull/438)).
 - Add the image generation prompt as `alt` text to imported generated images (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#441](https://github.com/10up/classifai/pull/441)).
