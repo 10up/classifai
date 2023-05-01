@@ -269,10 +269,12 @@ abstract class Provider {
 		$default_value = '';
 
 		if ( isset( $setting_index['enable_image_captions'] ) ) {
-			if ( ! is_array( $setting_index['enable_image_captions'] ) && '1' === $setting_index['enable_image_captions'] ) {
-				$default_value = 'alt';
-			} elseif ( ! is_array( $setting_index['enable_image_captions'] ) && 'no' === $setting_index['enable_image_captions'] ) {
-				$default_value = '';
+			if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
+				if ( '1' === $setting_index['enable_image_captions'] ) {
+					$default_value = 'alt';
+				} elseif ( 'no' === $setting_index['enable_image_captions'] ) {
+					$default_value = '';
+				}
 			}
 		}
 
@@ -307,10 +309,13 @@ abstract class Provider {
 			);
 		}
 
-		printf(
-			'<span class="description">%s</span>',
-			esc_html__( 'Choose image fields where the generated captions should be applied.', 'classifai' )
-		);
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description classifai-input-description">%s</span>',
+				esc_html( $args['description'] )
+			);
+		}
 	}
 
 	/**

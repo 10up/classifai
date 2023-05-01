@@ -590,7 +590,7 @@ class ComputerVision extends Provider {
 		$settings   = $this->get_settings();
 		if (
 			'no' !== $settings['enable_image_tagging'] ||
-			empty( $this->get_alt_text_settings() )
+			! empty( $this->get_alt_text_settings() )
 		) {
 
 			// Allow scanning image that are not stored in local storage.
@@ -743,13 +743,17 @@ class ComputerVision extends Provider {
 	protected function prep_api_url( array $routes = [] ) {
 		$settings     = $this->get_settings();
 		$api_features = [];
-		if ( in_array( 'alt-tags', $routes, true ) || ( isset( $settings['enable_image_captions'] ) && 'no' !== $settings['enable_image_captions'] ) ) {
+
+		if ( in_array( 'alt-tags', $routes, true ) || ! empty( $this->get_alt_text_settings() ) ) {
 			$api_features[] = 'Description';
 		}
-		if ( in_array( 'image-tags', $routes, true ) || ( isset( $settings['enable_image_captions'] ) && 'no' !== $settings['enable_image_tagging'] ) ) {
+
+		if ( in_array( 'image-tags', $routes, true ) || ( isset( $settings['enable_image_tagging'] ) && 'no' !== $settings['enable_image_tagging'] ) ) {
 			$api_features[] = 'Tags';
 		}
+
 		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['url'] ) . $this->analyze_url );
+
 		return $endpoint;
 	}
 
@@ -980,7 +984,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_image_captions'],
-				'description'   => __( 'The alt text field will be filled out automatically.', 'classifai' ),
+				'description'   => __( 'Choose image fields where the generated captions should be applied.', 'classifai' ),
 			]
 		);
 		add_settings_field(
