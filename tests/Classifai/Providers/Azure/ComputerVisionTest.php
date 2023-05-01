@@ -98,6 +98,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		// Create A settings object
 		$settings = [
 			'url'                   => '',
+			'api_key'               => '',
 			'enable_image_tagging'  => 'no',
 			'enable_image_captions' => array(
 				'alt'         => 0,
