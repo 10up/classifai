@@ -71,7 +71,6 @@ class ComputerVision extends Provider {
 
 	/**
 	 * Returns an array of fields enabled to be set to store image captions.
-	 * Returns `false` if no fields are selected.
 	 *
 	 * @return array
 	 */
@@ -249,7 +248,7 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( attachment_is_pdf( $post ) && $settings && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+		if ( attachment_is_pdf( $post ) && is_array( $settings ) && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
 			add_meta_box(
 				'attachment_meta_box',
 				__( 'ClassifAI PDF Processing', 'classifai' ),
@@ -267,14 +266,15 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
-		$settings   = get_option( 'classifai_computer_vision' );
+		$settings   = $this->get_settings();
 		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No descriptive text? Rescan image', 'classifai' ) : __( 'Generate descriptive text', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
 		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan for text', 'classifai' ) : __( 'Scan image for text', 'classifai' );
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
+
 		<div class="misc-publishing-actions">
-			<?php if ( $settings && isset( $settings['enable_image_captions']['description'] ) && 'description' === $settings['enable_image_captions']['description'] ) : ?>
+			<?php if ( ! empty( $this->get_alt_text_settings() ) ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-captions">
 						<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
@@ -283,7 +283,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $settings && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) : ?>
+			<?php if ( is_array( $settings ) && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-tags">
 						<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
@@ -292,7 +292,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
+			<?php if ( is_array( $settings ) && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-ocr">
 						<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
@@ -301,7 +301,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
+			<?php if ( is_array( $settings ) && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-smart-crop">
 						<input type="checkbox" value="yes" id="rescan-smart-crop" name="rescan-smart-crop"/>
