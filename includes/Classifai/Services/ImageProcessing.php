@@ -36,7 +36,6 @@ class ImageProcessing extends Service {
 		$this->register_image_tags_taxonomy();
 		add_filter( 'attachment_fields_to_edit', [ $this, 'custom_fields_edit' ] );
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
 	}
 
@@ -61,79 +60,6 @@ class ImageProcessing extends Service {
 			),
 			'before'
 		);
-	}
-
-	/**
-	 * Adds the rescan buttons to the media modal.
-	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_post $post        Post object for the attachment being viewed.
-	 */
-	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
-		$settings = get_option( 'classifai_computer_vision' );
-
-		if ( attachment_is_pdf( $post ) && $settings && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
-			$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$status    = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
-			if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
-				$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
-			} else {
-				$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
-			}
-
-			$form_fields['rescan_pdf'] = [
-				'label'        => __( 'Scan PDF for text', 'classifai' ),
-				'input'        => 'html',
-				'html'         => $html,
-				'show_in_edit' => false,
-			];
-		}
-
-		if ( wp_attachment_is_image( $post ) ) {
-			$alt_tags_text   = empty( get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$ocr_text        = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
-			$settings        = get_option( 'classifai_computer_vision' );
-
-			if ( $settings && isset( $settings['enable_image_captions']['description'] ) && 'description' === $settings['enable_image_captions']['description'] ) {
-				$form_fields['rescan_alt_tags'] = [
-					'label'        => __( 'Descriptive text', 'classifai' ),
-					'input'        => 'html',
-					'html'         => '<button class="button secondary" id="classifai-rescan-alt-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $alt_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-					'show_in_edit' => false,
-				];
-			}
-
-			if ( $settings && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) {
-				$form_fields['rescan_captions'] = [
-					'label'        => __( 'Image tags', 'classifai' ),
-					'input'        => 'html',
-					'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-					'show_in_edit' => false,
-				];
-			}
-
-			if ( $settings && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
-				$form_fields['rescan_smart_crop'] = [
-					'label'        => __( 'Smart thumbnail', 'classifai' ),
-					'input'        => 'html',
-					'html'         => '<button class="button secondary" id="classifai-rescan-smart-crop" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $smart_crop_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-					'show_in_edit' => false,
-				];
-			}
-
-			if ( $settings && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) {
-				$form_fields['rescan_ocr'] = [
-					'label'        => __( 'Scan image for text', 'classifai' ),
-					'input'        => 'html',
-					'html'         => '<button class="button secondary" id="classifai-rescan-ocr" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $ocr_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-					'show_in_edit' => false,
-				];
-			}
-		}
-
-		return $form_fields;
 	}
 
 	/**
