@@ -65,12 +65,18 @@ const GeneratedImage = wp.media.View.extend( {
 						.removeClass( 'button-import' )
 						.addClass( 'button-media-library' )
 						.text( classifaiDalleData.buttonText );
+					self.$( '.button-import-insert' ).remove();
 					self.disableLoadingState();
 				}
 			},
 			onError: function( error ) {
 				self.disableLoadingState();
 				self.$( '.error' ).text( error );
+			},
+			additionalData: {
+				post: wp.media.model.settings.post.id ?? 0,
+				caption: classifaiDalleData.caption,
+				alt_text: this.prompt,
 			},
 		} );
 
