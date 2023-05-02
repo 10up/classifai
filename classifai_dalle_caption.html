@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Action: classifai_smart_cropping_unsuccessful_response - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_dalle_caption - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Action: classifai_smart_cropping_unsuccessful_response</h1>
+    <h1 class="page-title">Filter: classifai_dalle_caption</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_smart_cropping_unsuccessful_response">do_action( 'classifai_smart_cropping_unsuccessful_response', <span class="signature">array|WP_Error, string, array )</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="classifai_dalle_caption">apply_filters( 'classifai_dalle_caption', <span class="signature">$caption )</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Fires when the generateThumbnail smart-cropping API response did not have a 200 status code.</p>
+    <p>Filter the default attribution added to generated images.</p>
 </div>
 
 
@@ -84,10 +84,15 @@
 
         <tr>
             
-                <td class="name"><code>array|WP_Error</code></td>
+                <td class="name"><code>$caption</code></td>
             
 
             <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
             
             </td>
 
@@ -95,43 +100,7 @@
 
             
 
-            <td class="description last"><p>Response data or a WP_Error if the request failed.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>string</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>The request URL with query args added.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>array</code></td>
-            
-
-            <td class="type">
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Array containing the image height and width.</p></td>
+            <td class="description last"><p>Attribution to be added as a caption to the image.</p></td>
         </tr>
 
     
@@ -149,7 +118,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.1.0</li></ul></dd>
     
 
     
@@ -175,7 +144,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line355">line 355</a>
+        <a href="Providers_OpenAI_DallE.php.html">Providers/OpenAI/DallE.php</a>, <a href="Providers_OpenAI_DallE.php.html#line110">line 110</a>
     </li></ul></dd>
     
 
@@ -198,6 +167,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Caption.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">string</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 

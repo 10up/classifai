@@ -139,87 +139,99 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$base_url   = add_query_arg(
+			array(
+				'page' => 'classifai',
+				'tab'  => $this->get_menu_slug(),
+			),
+			admin_url( 'tools.php' )
+		);
 		?>
-		&lt;div class="wrap wrap--nlu">
-			&lt;h2>&lt;?php echo esc_html( $this->display_name ); ?>&lt;/h2>
-			&lt;?php if ( ! empty( $this->provider_classes ) ) : ?>
-			&lt;h2 class="nav-tab-wrapper">
-				&lt;?php foreach ( $this->provider_classes as $provider_class ) : ?>
-					&lt;a href="?page=&lt;?php echo esc_attr( $this->get_menu_slug() ); ?>&amp;tab=&lt;?php echo esc_attr( $provider_class->get_settings_section() ); ?>" class="nav-tab &lt;?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>">&lt;?php echo esc_html( $provider_class->provider_name ); ?>&lt;/a>
-				&lt;?php endforeach; ?>
-			&lt;/h2>
-			&lt;?php endif; ?>
-			&lt;?php settings_errors(); ?>
-			&lt;div class="classifai-nlu-sections">
-				&lt;form method="post" action="options.php">
-				&lt;?php
-					settings_fields( 'classifai_' . $active_tab );
-					do_settings_sections( 'classifai_' . $active_tab );
-					submit_button();
-				?>
-				&lt;/form>
-				&lt;?php if ( isset( $this->provider_classes[0] ) &amp;&amp; ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
-				&lt;div id="classifai-post-preview-app">
+		&lt;div class="classifai-content">
+			&lt;?php
+			include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
+			?>
+			&lt;div class="classifai-wrap wrap wrap--nlu">
+				&lt;h2>&lt;?php echo esc_html( $this->display_name ); ?>&lt;/h2>
+				&lt;?php if ( ! empty( $this->provider_classes ) ) : ?>
+				&lt;h2 class="nav-tab-wrapper">
+					&lt;?php foreach ( $this->provider_classes as $provider_class ) : ?>
+						&lt;a href="&lt;?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab &lt;?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>">&lt;?php echo esc_html( $provider_class->provider_name ); ?>&lt;/a>
+					&lt;?php endforeach; ?>
+				&lt;/h2>
+				&lt;?php endif; ?>
+				&lt;?php settings_errors(); ?>
+				&lt;div class="classifai-nlu-sections">
+					&lt;form method="post" action="options.php">
 					&lt;?php
-						$supported_post_statuses = \Classifai\get_supported_post_statuses();
-						$supported_post_types    = \Classifai\get_supported_post_types();
+						settings_fields( 'classifai_' . $active_tab );
+						do_settings_sections( 'classifai_' . $active_tab );
+						submit_button();
+					?>
+					&lt;/form>
+					&lt;?php if ( isset( $this->provider_classes[0] ) &amp;&amp; ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
+					&lt;div id="classifai-post-preview-app">
+						&lt;?php
+							$supported_post_statuses = \Classifai\get_supported_post_statuses();
+							$supported_post_types    = \Classifai\get_supported_post_types();
 
-						$posts_to_preview = get_posts(
-							array(
-								'post_type'      => $supported_post_types,
-								'post_status'    => $supported_post_statuses,
-								'posts_per_page' => 10,
-							)
-						);
+							$posts_to_preview = get_posts(
+								array(
+									'post_type'      => $supported_post_types,
+									'post_status'    => $supported_post_statuses,
+									'posts_per_page' => 10,
+								)
+							);
 
-						$features = array(
-							'category' => array(
-								'name'    => esc_html__( 'Category', 'classifai' ),
-								'enabled' => \Classifai\get_feature_enabled( 'category' ),
-								'plural'  => 'categories',
-							),
-							'keyword'  => array(
-								'name'    => esc_html__( 'Keyword', 'classifai' ),
-								'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
-								'plural'  => 'keywords',
-							),
-							'entity'   => array(
-								'name'    => esc_html__( 'Entity', 'classifai' ),
-								'enabled' => \Classifai\get_feature_enabled( 'entity' ),
-								'plural'  => 'entities',
-							),
-							'concept'  => array(
-								'name'    => esc_html__( 'Concept', 'classifai' ),
-								'enabled' => \Classifai\get_feature_enabled( 'concept' ),
-								'plural'  => 'concepts',
-							),
-						);
-						?>
+							$features = array(
+								'category' => array(
+									'name'    => esc_html__( 'Category', 'classifai' ),
+									'enabled' => \Classifai\get_feature_enabled( 'category' ),
+									'plural'  => 'categories',
+								),
+								'keyword'  => array(
+									'name'    => esc_html__( 'Keyword', 'classifai' ),
+									'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
+									'plural'  => 'keywords',
+								),
+								'entity'   => array(
+									'name'    => esc_html__( 'Entity', 'classifai' ),
+									'enabled' => \Classifai\get_feature_enabled( 'entity' ),
+									'plural'  => 'entities',
+								),
+								'concept'  => array(
+									'name'    => esc_html__( 'Concept', 'classifai' ),
+									'enabled' => \Classifai\get_feature_enabled( 'concept' ),
+									'plural'  => 'concepts',
+								),
+							);
+							?>
 
-					&lt;?php if ( 'watson_nlu' === $active_tab ) : ?>
-					&lt;h2>&lt;?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?>&lt;/h2>
-					&lt;div id="classifai-post-preview-controls">
-						&lt;select id="classifai-preview-post-selector">
-							&lt;?php foreach ( $posts_to_preview as $post ) : ?>
-								&lt;option value="&lt;?php echo esc_attr( $post->ID ); ?>">&lt;?php echo esc_html( $post->post_title ); ?>&lt;/option>
+						&lt;?php if ( 'watson_nlu' === $active_tab ) : ?>
+						&lt;h2>&lt;?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?>&lt;/h2>
+						&lt;div id="classifai-post-preview-controls">
+							&lt;select id="classifai-preview-post-selector">
+								&lt;?php foreach ( $posts_to_preview as $post ) : ?>
+									&lt;option value="&lt;?php echo esc_attr( $post->ID ); ?>">&lt;?php echo esc_html( $post->post_title ); ?>&lt;/option>
+								&lt;?php endforeach; ?>
+							&lt;/select>
+							&lt;?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
+							&lt;button type="button" class="button" id="get-classifier-preview-data-btn">
+								&lt;span>&lt;?php esc_html_e( 'Preview', 'classifai' ); ?>&lt;/span>
+							&lt;/button>
+						&lt;/div>
+						&lt;div id="classifai-post-preview-wrapper">
+							&lt;?php foreach ( $features as $feature_slug => $feature ) : ?>
+								&lt;div class="tax-row tax-row--&lt;?php echo esc_attr( $feature['plural'] ); ?> &lt;?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
+									&lt;div class="tax-type">&lt;?php echo esc_html( $feature['name'] ); ?>&lt;/div>
+								&lt;/div>
 							&lt;?php endforeach; ?>
-						&lt;/select>
-						&lt;?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
-						&lt;button type="button" class="button" id="get-classifier-preview-data-btn">
-							&lt;span>&lt;?php esc_html_e( 'Preview', 'classifai' ); ?>&lt;/span>
-						&lt;/button>
-					&lt;/div>
-					&lt;div id="classifai-post-preview-wrapper">
-						&lt;?php foreach ( $features as $feature_slug => $feature ) : ?>
-							&lt;div class="tax-row tax-row--&lt;?php echo esc_attr( $feature['plural'] ); ?> &lt;?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-								&lt;div class="tax-type">&lt;?php echo esc_html( $feature['name'] ); ?>&lt;/div>
-							&lt;/div>
-						&lt;?php endforeach; ?>
+						&lt;/div>
+						&lt;?php endif; ?>
 					&lt;/div>
 					&lt;?php endif; ?>
 				&lt;/div>
-				&lt;?php endif; ?>
 			&lt;/div>
 		&lt;/div>
 		&lt;?php
@@ -294,7 +306,7 @@ abstract class Service {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_prompt.html">classifai_chatgpt_prompt</a></li><li><a href="classifai_chatgpt_request_body.html">classifai_chatgpt_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_prompt.html">classifai_chatgpt_prompt</a></li><li><a href="classifai_chatgpt_request_body.html">classifai_chatgpt_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
 </nav>
 
 <br class="clear">
