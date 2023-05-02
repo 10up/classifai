@@ -96,48 +96,29 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		/**
-		 * If the NLU provider is active, add our data using the filter.
-		 *
-		 * If not, enqueue the script and add our data using the inline script.
-		 */
-		$nlu = new NLU( false );
-		if ( $nlu->can_register() ) {
-			add_filter(
-				'classifai_gutenberg_post_data',
-				function( array $post_data = [] ) {
-					$post_data['embeddingsEnabled']          = true;
-					$post_data['supportedEmbeddingTypes']    = $this->supported_post_types();
-					$post_data['supportedEmbeddingStatuses'] = $this->supported_post_statuses();
+		wp_enqueue_script(
+			'classifai-gutenberg-plugin',
+			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
+			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
+			get_asset_info( 'gutenberg-plugin', 'version' ),
+			true
+		);
 
-					return $post_data;
-				}
-			);
-		} else {
-			wp_enqueue_script(
-				'classifai-gutenberg-plugin',
-				CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-				get_asset_info( 'gutenberg-plugin', 'dependencies' ),
-				get_asset_info( 'gutenberg-plugin', 'version' ),
-				true
-			);
-
-			wp_add_inline_script(
-				'classifai-gutenberg-plugin',
-				sprintf(
-					'var classifaiPostData = %s;',
-					wp_json_encode(
-						[
-							'embeddingsEnabled'          => true,
-							'supportedEmbeddingTypes'    => $this->supported_post_types(),
-							'supportedEmbeddingStatuses' => $this->supported_post_statuses(),
-							'noPermissions'              => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-						]
-					)
-				),
-				'before'
-			);
-		}
+		wp_add_inline_script(
+			'classifai-gutenberg-plugin',
+			sprintf(
+				'var classifaiEmbeddingData = %s;',
+				wp_json_encode(
+					[
+						'enabled'              => true,
+						'supportedPostTypes'   => $this->supported_post_types(),
+						'supportedPostStatues' => $this->supported_post_statuses(),
+						'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+					]
+				)
+			),
+			'before'
+		);
 	}
 
 	/**

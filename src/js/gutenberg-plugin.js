@@ -7,7 +7,7 @@ import { Button, Icon, ToggleControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
-const { classifaiPostData } = window;
+const { classifaiEmbeddingData, classifaiPostData } = window;
 
 /**
  * Create the ClassifAI icon
@@ -38,13 +38,13 @@ const ClassifAIToggle = () => {
 			help={
 				'yes' === enabled
 					? __(
-						'ClassifAI language processing is enabled',
-						'classifai'
-					)
+							'ClassifAI language processing is enabled',
+							'classifai'
+					  )
 					: __(
-						'ClassifAI language processing is disabled',
-						'classifai'
-					)
+							'ClassifAI language processing is disabled',
+							'classifai'
+					  )
 			}
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
@@ -194,66 +194,60 @@ const ClassifAIPlugin = () => {
 		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
 	);
 
-	// Ensure the user has proper permissions
-	if (
-		classifaiPostData.noPermissions &&
-		1 === parseInt( classifaiPostData.noPermissions )
-	) {
-		return null;
-	}
+	// Ensure that at least one feature is enabled.
+	const isNLULanguageProcessingEnabled =
+		classifaiPostData && classifaiPostData.NLUEnabled;
 
-	// Ensure that at least one language processing feature is enabled.
-	if ( ! classifaiPostData.NLUEnabled && ! classifaiPostData.embeddingsEnabled ) {
+	const isEmbeddingProcessingEnabled =
+		classifaiEmbeddingData && classifaiEmbeddingData.enabled;
+
+	if ( ! isNLULanguageProcessingEnabled && ! isEmbeddingProcessingEnabled ) {
 		return null;
 	}
 
 	// Ensure we are on a supported post type, checking settings from all features.
-	let postTypeSupported = true;
-	if ( classifaiPostData.embeddingsEnabled ) {
-		if (
-			classifaiPostData.supportedEmbeddingTypes &&
-			! classifaiPostData.supportedEmbeddingTypes.includes( postType )
-		) {
-			postTypeSupported = false;
-		}
-	}
+	const isNLUPostTypeSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostTypes &&
+		classifaiPostData.supportedPostTypes.includes( postType );
 
-	if ( classifaiPostData.NLUEnabled ) {
-		if (
-			classifaiPostData.supportedPostTypes &&
-			! classifaiPostData.supportedPostTypes.includes( postType )
-		) {
-			postTypeSupported = false;
-		}
-	}
+	const isEmbeddingPostTypeSupported =
+		classifaiEmbeddingData &&
+		classifaiEmbeddingData.supportedPostTypes &&
+		classifaiEmbeddingData.supportedPostTypes.includes( postType );
 
-	if ( ! postTypeSupported ) {
+	if ( ! isNLUPostTypeSupported && ! isEmbeddingPostTypeSupported ) {
 		return null;
 	}
 
 	// Ensure we are on a supported post status, checking settings from all features.
-	let postStatusSupported = true;
-	if ( classifaiPostData.embeddingsEnabled ) {
-		if (
-			classifaiPostData.supportedEmbeddingStatuses &&
-			! classifaiPostData.supportedEmbeddingStatuses.includes( postStatus )
-		) {
-			postStatusSupported = false;
-		}
-	}
+	const isNLUPostStatusSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostStatues &&
+		classifaiPostData.supportedPostStatues.includes( postStatus );
 
-	if ( classifaiPostData.NLUEnabled ) {
-		if (
-			classifaiPostData.supportedPostStatues &&
-			! classifaiPostData.supportedPostStatues.includes( postStatus )
-		) {
-			postStatusSupported = false;
-		}
-	}
+	const isEmbeddingPostStatusSupported =
+		classifaiEmbeddingData &&
+		classifaiEmbeddingData.supportedPostStatues &&
+		classifaiEmbeddingData.supportedPostStatues.includes( postStatus );
 
-	if ( ! postStatusSupported ) {
+	if ( ! isNLUPostStatusSupported && ! isEmbeddingPostStatusSupported ) {
 		return null;
 	}
+
+	const userHasNLUPermissions =
+		classifaiPostData &&
+		! (
+			classifaiPostData.noPermissions &&
+			1 === parseInt( classifaiPostData.noPermissions )
+		);
+
+	const userHasEmbeddingPermissions =
+		classifaiEmbeddingData &&
+		! (
+			classifaiEmbeddingData.noPermissions &&
+			1 === parseInt( classifaiEmbeddingData.noPermissions )
+		);
 
 	return (
 		<PluginDocumentSettingPanel
@@ -262,8 +256,14 @@ const ClassifAIPlugin = () => {
 			className="classifai-panel"
 		>
 			<>
-				<ClassifAIToggle />
-				{ classifaiPostData.NLUEnabled && <ClassifAIGenerateTagsButton /> }
+				{ ( userHasNLUPermissions || userHasEmbeddingPermissions ) && (
+					<>
+						<ClassifAIToggle />
+						{ classifaiPostData.NLUEnabled && (
+							<ClassifAIGenerateTagsButton />
+						) }
+					</>
+				) }
 			</>
 		</PluginDocumentSettingPanel>
 	);

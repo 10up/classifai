@@ -219,30 +219,15 @@ class NLU extends Provider {
 			true
 		);
 
-		/**
-		 * Filter the data passed to the Gutenberg plugin.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_gutenberg_post_data
-		 *
-		 * @param {array} $post_data Data we pass to our Gutenberg plugin.
-		 *
-		 * @return {array} Post data.
-		 */
-		$post_data = apply_filters(
-			'classifai_gutenberg_post_data',
+		wp_localize_script(
+			'classifai-gutenberg-plugin',
+			'classifaiPostData',
 			[
 				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
 			]
-		);
-
-		wp_localize_script(
-			'classifai-gutenberg-plugin',
-			'classifaiPostData',
-			$post_data
 		);
 	}
 
