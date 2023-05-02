@@ -52,6 +52,15 @@ class Embeddings extends Provider {
 			'openai_embeddings',
 			$service
 		);
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'OpenAI Embeddings', 'classifai' ),
+			'fields'   => array( 'api-key' ),
+			'features' => array(
+				'enable_classification' => __( 'Classify content within existing term structure', 'classifai' ),
+			),
+		);
 	}
 
 	/**
