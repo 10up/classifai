@@ -318,6 +318,8 @@ class DallE extends Provider {
 
 		if ( isset( $settings['roles'] ) &amp;&amp; is_array( $settings['roles'] ) ) {
 			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		} else {
+			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['number'] ) &amp;&amp; is_numeric( $settings['number'] ) &amp;&amp; (int) $settings['number'] >= 1 &amp;&amp; (int) $settings['number'] &lt;= 10 ) {
