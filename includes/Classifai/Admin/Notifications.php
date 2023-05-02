@@ -23,7 +23,7 @@ class Notifications {
 	 */
 	public function register() {
 		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
-		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ] );
+		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 	}
 
 	/**
@@ -31,9 +31,11 @@ class Notifications {
 	 */
 	public function maybe_render_notices() {
 		$registration_settings = get_option( 'classifai_settings' );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
 
 		if (
-			'classifai_settings' === get_current_screen()->parent_base &&
+			'classifai' === $page &&
 			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';
@@ -48,10 +50,28 @@ class Notifications {
 
 		$needs_setup = get_transient( 'classifai_activation_notice' );
 		if ( $needs_setup ) {
-			printf(
-				'<div class="notice notice-warning"><p><a href="%s">' . esc_html__( 'ClassifAI requires setup', 'classifai' ) . '</a></p></div>',
-				esc_url( admin_url( 'admin.php?page=classifai_settings' ) )
-			);
+			if ( Onboarding::is_onboarding_completed() ) {
+				delete_transient( 'classifai_activation_notice' );
+				return;
+			}
+
+			// Prevent showing the default WordPress "Plugin Activated" notice.
+			unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
+			?>
+			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
+				<div id="classifai-activation-notice">
+					<div class="classifai-logo">
+						<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
+					</div>
+					<h3 class="classifai-activation-message">
+						<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
+					</h3>
+					<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
+						<?php esc_html_e( 'Start setup', 'classifai' ); ?>
+					</a>
+				</div>
+			</div>
+			<?php
 			delete_transient( 'classifai_activation_notice' );
 		}
 	}

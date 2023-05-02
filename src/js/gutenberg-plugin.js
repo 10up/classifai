@@ -1,13 +1,12 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { Button, Icon, ToggleControl } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { registerPlugin } from '@wordpress/plugins';
 
-const { Icon } = wp.components;
-const { useSelect, useDispatch } = wp.data;
-const { PluginDocumentSettingPanel } = wp.editPost;
-const { ToggleControl, Button } = wp.components;
-const { __, sprintf } = wp.i18n;
-const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
 
 /**

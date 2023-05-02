@@ -12,36 +12,26 @@ describe('Admin can login and make sure plugin is activated', () => {
 
 	it('Can see "ClassifAI" menu and Can visit "ClassifAI" settings page.', () => {
 		// Check ClassifAI menu.
-		cy.get('#adminmenu li.toplevel_page_classifai_settings').contains(
+		cy.get('#adminmenu li#menu-tools ul.wp-submenu li').contains(
 			'ClassifAI'
 		);
 
 		// Check Heading
-		cy.visit('/wp-admin/admin.php?page=classifai_settings');
+		cy.visit('/wp-admin/tools.php?page=classifai');
 		cy.get('#wpbody h2').contains('ClassifAI Settings');
 		cy.get('label[for="email"]').contains('Registered Email');
 		cy.get('label[for="license_key"]').contains('Registration Key');
 	});
 
-	it('Can see "Language Processing" menu and Can visit "Language Processing" settings page.', () => {
-		// Check Language Processing menu.
-		cy.get('li.toplevel_page_classifai_settings ul.wp-submenu li')
-			.filter(':contains("Language Processing")')
-			.should('have.length', 1);
-
+	it('Can visit "Language Processing" settings page.', () => {
 		// Check Heading
-		cy.visit('/wp-admin/admin.php?page=language_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing');
 		cy.get('#wpbody h2').contains('Language Processing');
 	});
 
 	it('Can see "Image Processing" menu and Can visit "Image Processing" settings page.', () => {
-		// Check Language Processing menu.
-		cy.get('li.toplevel_page_classifai_settings ul.wp-submenu li')
-			.filter(':contains("Image Processing")')
-			.should('have.length', 1);
-
 		// Check Heading
-		cy.visit('/wp-admin/admin.php?page=image_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 		cy.get('#wpbody h2').contains('Image Processing');
 	});
 });
