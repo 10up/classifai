@@ -37,57 +37,48 @@ class BulkActions {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		$this->register_nlu_hooks();
-		$this->register_embedding_hooks();
-		$this->register_computer_vision_hooks();
+		$this->register_language_processing_hooks();
+		$this->register_image_processing_hooks();
 
 		add_action( 'admin_notices', [ $this, 'bulk_action_admin_notice' ] );
 	}
 
 	/**
-	 * Register bulk actions for the NLU provider.
+	 * Register bulk actions for language processing.
 	 */
-	public function register_nlu_hooks() {
-		$post_types = get_supported_post_types();
+	public function register_language_processing_hooks() {
+		$this->embeddings      = new Embeddings( false );
+		$settings              = $this->embeddings->get_settings();
+		$embeddings_post_types = [];
+		$nlu_post_types        = get_supported_post_types();
+
+		// Set up the save post handler if we have any post types for NLU.
+		if ( ! empty( $nlu_post_types ) ) {
+			$this->save_post_handler = new SavePostHandler();
+		}
+
+		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
+		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
+			$embeddings_post_types = $this->embeddings->supported_post_types();
+		} else {
+			$this->embeddings = null;
+		}
+
+		// Merge our post types together and make them unique.
+		$post_types = array_unique( array_merge( $embeddings_post_types, $nlu_post_types ) );
 
 		if ( empty( $post_types ) ) {
 			return;
 		}
-
-		$this->save_post_handler = new SavePostHandler();
 
 		foreach ( $post_types as $post_type ) {
 			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
 			add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
 
 			if ( is_post_type_hierarchical( $post_type ) ) {
-				add_action( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
+				add_filter( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
 			} else {
-				add_action( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
-			}
-		}
-	}
-
-	/**
-	 * Register bulk actions for the Embeddings provider.
-	 */
-	public function register_embedding_hooks() {
-		$this->embeddings = new Embeddings( false );
-		$settings         = $this->embeddings->get_settings();
-
-		if ( ! isset( $settings['enable_classification'] ) || 1 !== (int) $settings['enable_classification'] ) {
-			$this->embeddings = null;
-			return;
-		}
-
-		foreach ( $this->embeddings->supported_post_types() as $post_type ) {
-			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
-			add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
-
-			if ( is_post_type_hierarchical( $post_type ) ) {
-				add_action( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
-			} else {
-				add_action( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
+				add_filter( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
 			}
 		}
 	}
@@ -95,7 +86,7 @@ class BulkActions {
 	/**
 	 * Register bulk actions for the Computer Vision provider.
 	 */
-	public function register_computer_vision_hooks() {
+	public function register_image_processing_hooks() {
 		$this->computer_vision = new ComputerVision( false );
 
 		add_filter( 'bulk_actions-upload', [ $this, 'register_media_bulk_actions' ] );
