@@ -6,6 +6,7 @@ use Classifai\Plugin;
 use Classifai\Services\ServicesManager;
 
 class Onboarding {
+
 	/**
 	 * @var string $setup_url The admin onboarding URL.
 	 */
@@ -17,7 +18,6 @@ class Onboarding {
 	public function __construct() {
 		$this->setup_url = admin_url( 'admin.php?page=classifai_setup' );
 	}
-
 
 	/**
 	 * Inintialize the class and register the actions needed.
@@ -64,6 +64,7 @@ class Onboarding {
 			),
 		);
 		?>
+
 		<div class="classifai-content classifai-setup-page">
 			<?php
 			include_once 'templates/classifai-header.php';
@@ -143,6 +144,7 @@ class Onboarding {
 			</div>
 
 		</div>
+
 		<?php
 	}
 
@@ -421,12 +423,14 @@ class Onboarding {
 			$display_name = $service->get_display_name();
 			$service_slug = $service->get_menu_slug();
 			$features     = array();
+
 			foreach ( $service->provider_classes as $provider_class ) {
 				$options = $provider_class->get_onboarding_options();
 				if ( ! empty( $options ) && ! empty( $options['features'] ) ) {
 					$features[ $provider_class->get_option_name() ] = $options['features'];
 				}
 			}
+
 			if ( ! empty( $features ) ) {
 				$onboarding_features[ $service_slug ] = array(
 					'title'    => $display_name,
@@ -434,6 +438,7 @@ class Onboarding {
 				);
 			}
 		}
+
 		return $onboarding_features;
 	}
 
@@ -457,6 +462,7 @@ class Onboarding {
 				$providers[ $provider_class->get_option_name() ] = $provider_class;
 			}
 		}
+
 		return $providers;
 	}
 
@@ -535,9 +541,11 @@ class Onboarding {
 			$onboarding_options = array(
 				'step_completed' => $step,
 			);
+
 			if ( 3 === $step ) {
 				$onboarding_options['status'] = 'completed';
 			}
+
 			$this->update_onboarding_options( $onboarding_options );
 
 			// Redirect to next step.
@@ -578,6 +586,7 @@ class Onboarding {
 		$enabled_providers = $this->get_enabled_providers();
 		$keys              = array_keys( $enabled_providers );
 		$index             = array_search( $current_provider, $keys, true );
+
 		if ( false === $index ) {
 			return false;
 		}
@@ -615,11 +624,13 @@ class Onboarding {
 	 */
 	public function has_configured_providers() {
 		$providers = $this->get_providers();
+
 		foreach ( $providers as $provider ) {
 			if ( $provider->is_configured() ) {
 				return true;
 			}
 		}
+
 		return false;
 	}
 
@@ -631,6 +642,7 @@ class Onboarding {
 	public function get_configured_features() {
 		$features            = $this->get_features();
 		$configured_features = array();
+
 		foreach ( $features as $feature ) {
 			foreach ( $feature['features'] as $provider_key => $provider_features ) {
 				foreach ( $provider_features as $feature_key => $feature_options ) {
@@ -640,6 +652,8 @@ class Onboarding {
 				}
 			}
 		}
+
 		return $configured_features;
 	}
+
 }
