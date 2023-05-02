@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/10up/classifai
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:           2.1.0
+ * Version:           2.1.1-dev
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            10up
@@ -16,7 +16,7 @@
  */
 
 /**
- * Require PHP version 7+ - throw an error if the plugin is activated on an older version.
+ * Require PHP version 7.4+ - throw an error if the plugin is activated on an older version.
  *
  * Note that this itself is only PHP5.3+ compatible because of the anonymous callback.
  */
