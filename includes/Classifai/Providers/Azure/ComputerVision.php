@@ -45,6 +45,7 @@ class ComputerVision extends Provider {
 				'enable_image_tagging'  => __( 'Automatically tag images', 'classifai' ),
 				'enable_smart_cropping' => __( 'Smart crop images', 'classifai' ),
 				'enable_ocr'            => __( 'Scan images for text', 'classifai' ),
+				'enable_read_pdf'       => __( 'Scan PDFs for text', 'classifai' ),
 			),
 		);
 	}
@@ -103,7 +104,7 @@ class ComputerVision extends Provider {
 		}
 
 		foreach ( $settings['enable_image_captions'] as $key => $value ) {
-			if ( '0' !== $value ) {
+			if ( 0 !== $value && '0' !== $value ) {
 				$enabled_fields[] = $key;
 			}
 		}
@@ -1162,6 +1163,8 @@ class ComputerVision extends Provider {
 
 		if ( isset( $settings['image_tag_taxonomy'] ) && taxonomy_exists( $settings['image_tag_taxonomy'] ) ) {
 			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
+		} elseif ( taxonomy_exists( 'classifai-image-tags' ) ) {
+			$new_settings['image_tag_taxonomy'] = 'classifai-image-tags';
 		}
 
 		if ( isset( $settings['enable_image_captions'] ) ) {

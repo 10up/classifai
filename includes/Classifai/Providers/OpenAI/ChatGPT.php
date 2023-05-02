@@ -207,6 +207,8 @@ class ChatGPT extends Provider {
 
 		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
 			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		} else {
+			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {

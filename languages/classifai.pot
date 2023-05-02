@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ClassifAI 2.1.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2023-05-02 13:06:34+00:00\n"
+"POT-Creation-Date: 2023-05-02 14:53:01+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -126,16 +126,16 @@ msgstr ""
 msgid "Access AI"
 msgstr ""
 
-#: includes/Classifai/Admin/Onboarding.php:177
+#: includes/Classifai/Admin/Onboarding.php:179
 msgid "Please enable at least one feature to set up ClassifAI."
 msgstr ""
 
-#: includes/Classifai/Admin/Onboarding.php:547
+#: includes/Classifai/Admin/Onboarding.php:555
 #: includes/Classifai/Admin/SavePostHandler.php:292
 msgid "You don't have permission to perform this operation."
 msgstr ""
 
-#: includes/Classifai/Admin/Onboarding.php:607
+#: includes/Classifai/Admin/Onboarding.php:616
 msgid "You are not allowed to access this page."
 msgstr ""
 
@@ -240,7 +240,7 @@ msgid "API Password"
 msgstr ""
 
 #: includes/Classifai/Plugin.php:173
-#: includes/Classifai/Providers/Azure/ComputerVision.php:978
+#: includes/Classifai/Providers/Azure/ComputerVision.php:979
 #: includes/Classifai/Providers/Azure/Personalizer.php:128
 #: includes/Classifai/Providers/OpenAI/OpenAI.php:76
 #: includes/Classifai/Providers/Watson/NLU.php:343
@@ -274,113 +274,117 @@ msgid "Smart crop images"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:47
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1076
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1077
 msgid "Scan images for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:253
+#: includes/Classifai/Providers/Azure/ComputerVision.php:48
+msgid "Scan PDFs for text"
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/ComputerVision.php:254
 msgid "ClassifAI Image Processing"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:264
+#: includes/Classifai/Providers/Azure/ComputerVision.php:265
 msgid "ClassifAI PDF Processing"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:280
+#: includes/Classifai/Providers/Azure/ComputerVision.php:281
 msgid "No descriptive text? Rescan image"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:280
-#: includes/Classifai/Providers/Azure/ComputerVision.php:990
+#: includes/Classifai/Providers/Azure/ComputerVision.php:281
+#: includes/Classifai/Providers/Azure/ComputerVision.php:991
 msgid "Generate descriptive text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:281
+#: includes/Classifai/Providers/Azure/ComputerVision.php:282
 msgid "Rescan image for new tags"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:281
+#: includes/Classifai/Providers/Azure/ComputerVision.php:282
 msgid "Generate image tags"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:282
+#: includes/Classifai/Providers/Azure/ComputerVision.php:283
 msgid "Rescan for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:282
-#: includes/Classifai/Providers/Azure/ComputerVision.php:411
+#: includes/Classifai/Providers/Azure/ComputerVision.php:283
+#: includes/Classifai/Providers/Azure/ComputerVision.php:412
 msgid "Scan image for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:283
+#: includes/Classifai/Providers/Azure/ComputerVision.php:284
 msgid "Regenerate smart thumbnail"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:283
+#: includes/Classifai/Providers/Azure/ComputerVision.php:284
 msgid "Create smart thumbnail"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:333
+#: includes/Classifai/Providers/Azure/ComputerVision.php:334
 msgid "Rescan PDF for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:333
-#: includes/Classifai/Providers/Azure/ComputerVision.php:369
+#: includes/Classifai/Providers/Azure/ComputerVision.php:334
+#: includes/Classifai/Providers/Azure/ComputerVision.php:370
 msgid "Scan PDF for text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:342
-#: includes/Classifai/Providers/Azure/ComputerVision.php:363
+#: includes/Classifai/Providers/Azure/ComputerVision.php:343
+#: includes/Classifai/Providers/Azure/ComputerVision.php:364
 msgid "In progress!"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:360
-#: includes/Classifai/Providers/Azure/ComputerVision.php:379
+#: includes/Classifai/Providers/Azure/ComputerVision.php:361
+#: includes/Classifai/Providers/Azure/ComputerVision.php:380
 msgid "Scan"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:360
-#: includes/Classifai/Providers/Azure/ComputerVision.php:377
+#: includes/Classifai/Providers/Azure/ComputerVision.php:361
 #: includes/Classifai/Providers/Azure/ComputerVision.php:378
 #: includes/Classifai/Providers/Azure/ComputerVision.php:379
+#: includes/Classifai/Providers/Azure/ComputerVision.php:380
 msgid "Rescan"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:377
 #: includes/Classifai/Providers/Azure/ComputerVision.php:378
-#: includes/Classifai/Providers/Azure/ComputerVision.php:380
+#: includes/Classifai/Providers/Azure/ComputerVision.php:379
+#: includes/Classifai/Providers/Azure/ComputerVision.php:381
 msgid "Generate"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:380
+#: includes/Classifai/Providers/Azure/ComputerVision.php:381
 msgid "Regenerate"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:384
+#: includes/Classifai/Providers/Azure/ComputerVision.php:385
 msgid "Descriptive text"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:393
+#: includes/Classifai/Providers/Azure/ComputerVision.php:394
 msgid "Image tags"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:402
+#: includes/Classifai/Providers/Azure/ComputerVision.php:403
 msgid "Smart thumbnail"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:432
+#: includes/Classifai/Providers/Azure/ComputerVision.php:433
 msgid "Nonce could not be verified."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:440
+#: includes/Classifai/Providers/Azure/ComputerVision.php:441
 msgid "Invalid attachment ID."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:447
+#: includes/Classifai/Providers/Azure/ComputerVision.php:448
 msgid "Unauthorized access."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:708
+#: includes/Classifai/Providers/Azure/ComputerVision.php:709
 #: includes/Classifai/Providers/Azure/OCR.php:305
 #: includes/Classifai/Providers/Azure/Read.php:119
 #: includes/Classifai/Services/ImageProcessing.php:295
@@ -388,16 +392,16 @@ msgstr ""
 msgid "Please set up valid authentication with Azure."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:905
+#: includes/Classifai/Providers/Azure/ComputerVision.php:906
 msgid "Image tagging is disabled."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:965
+#: includes/Classifai/Providers/Azure/ComputerVision.php:966
 #: includes/Classifai/Providers/Azure/Personalizer.php:103
 msgid "Endpoint URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:973
+#: includes/Classifai/Providers/Azure/ComputerVision.php:974
 msgid ""
 "Supported protocol and hostname endpoints, e.g., "
 "<code>https://REGION.api.cognitive.microsoft.com</code> or "
@@ -405,137 +409,137 @@ msgid ""
 "different based on your setting choices in Azure."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:998
+#: includes/Classifai/Providers/Azure/ComputerVision.php:999
 msgid "Choose image fields where the generated captions should be applied."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1003
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1004
 msgid "Descriptive text confidence threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1011
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1012
 msgid ""
 "Minimum confidence score for automatically added alt text, numeric value "
 "from 0-100. Recommended to be set to at least 75."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1016
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1017
 msgid "Tag images"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1024
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1025
 msgid "Image tags will be added automatically."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1029
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1030
 msgid "Tag confidence threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1037
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1038
 msgid ""
 "Minimum confidence score for automatically added image tags, numeric value "
 "from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1048
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1049
 msgid "Tag taxonomy"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1060
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1061
 msgid "Enable smart cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1068
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1069
 msgid ""
 "ComputerVision detects and saves the most visually interesting part of your "
 "image (i.e., faces, animals, notable text)."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1084
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1085
 msgid ""
 "OCR detects text in images (e.g., handwritten notes) and saves that as post "
 "content."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1092
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1093
 msgid "Enable scanning PDF"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1100
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1101
 msgid ""
 "Extract visible text from multi-pages PDF documents. Store the result as "
 "the attachment description."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1132
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1133
 #: includes/Classifai/Providers/Azure/Personalizer.php:165
 msgid "Please enter your credentials"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1254
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1257
 #: includes/Classifai/Providers/Azure/Personalizer.php:732
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:259
-#: includes/Classifai/Providers/OpenAI/DallE.php:344
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:261
+#: includes/Classifai/Providers/OpenAI/DallE.php:346
 msgid "Authenticated"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1254
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:259
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:260
-#: includes/Classifai/Providers/OpenAI/DallE.php:344
-#: includes/Classifai/Providers/OpenAI/DallE.php:345
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1257
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:261
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:262
+#: includes/Classifai/Providers/OpenAI/DallE.php:346
+#: includes/Classifai/Providers/OpenAI/DallE.php:347
 #: includes/Classifai/Providers/Watson/NLU.php:748
 #: includes/Classifai/Services/ServicesManager.php:324
 msgid "yes"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1254
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:259
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:260
-#: includes/Classifai/Providers/OpenAI/DallE.php:344
-#: includes/Classifai/Providers/OpenAI/DallE.php:345
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1257
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:261
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:262
+#: includes/Classifai/Providers/OpenAI/DallE.php:346
+#: includes/Classifai/Providers/OpenAI/DallE.php:347
 #: includes/Classifai/Providers/Watson/NLU.php:748
 #: includes/Classifai/Services/ServicesManager.php:324
 msgid "no"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1255
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1258
 #: includes/Classifai/Providers/Azure/Personalizer.php:733
 #: includes/Classifai/Providers/Watson/NLU.php:315
 #: includes/Classifai/Providers/Watson/NLU.php:749
 msgid "API URL"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1256
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1259
 msgid "Caption threshold"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1257
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1260
 msgid "Latest response - Image Scan"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1258
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1261
 msgid "Latest response - Smart Cropping"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1259
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1262
 msgid "Latest response - OCR"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1272
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1275
 #: includes/Classifai/Providers/Azure/Personalizer.php:747
 #: includes/Classifai/Providers/OpenAI/OpenAI.php:166
 #: includes/Classifai/Providers/Watson/NLU.php:766
 msgid "N/A"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1325
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1328
 #: includes/Classifai/Services/ImageProcessing.php:228
 #. translators: %1$s: the attachment ID
 msgid "%1$d is not found or is not an attachment"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:1351
+#: includes/Classifai/Providers/Azure/ComputerVision.php:1354
 msgid "Valid image size not found. Make sure the image is less than 4MB."
 msgstr ""
 
@@ -666,7 +670,7 @@ msgid "Excerpt generation"
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:142
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:260
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:262
 msgid "Generate excerpt"
 msgstr ""
 
@@ -677,9 +681,9 @@ msgid ""
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:159
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:261
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:263
 #: includes/Classifai/Providers/OpenAI/DallE.php:222
-#: includes/Classifai/Providers/OpenAI/DallE.php:346
+#: includes/Classifai/Providers/OpenAI/DallE.php:348
 msgid "Allowed roles"
 msgstr ""
 
@@ -688,7 +692,7 @@ msgid "Choose which roles are allowed to generate excerpts."
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:173
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:262
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:264
 msgid "Excerpt length"
 msgstr ""
 
@@ -699,21 +703,21 @@ msgid ""
 "10-15 words."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:263
-#: includes/Classifai/Providers/OpenAI/DallE.php:349
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:265
+#: includes/Classifai/Providers/OpenAI/DallE.php:351
 #: includes/Classifai/Providers/Watson/NLU.php:753
 msgid "Latest response"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:278
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:280
 msgid "A valid post ID is required to generate an excerpt."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:301
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:303
 msgid "Post ID is required to generate an excerpt."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:309
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:311
 msgid ""
 "Excerpt generation is disabled or OpenAI authentication failed. Please "
 "check your settings."
@@ -734,7 +738,7 @@ msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/DallE.php:134
 #: includes/Classifai/Providers/OpenAI/DallE.php:158
-#: includes/Classifai/Providers/OpenAI/DallE.php:345
+#: includes/Classifai/Providers/OpenAI/DallE.php:347
 msgid "Generate images"
 msgstr ""
 
@@ -789,7 +793,7 @@ msgid ""
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/DallE.php:236
-#: includes/Classifai/Providers/OpenAI/DallE.php:347
+#: includes/Classifai/Providers/OpenAI/DallE.php:349
 msgid "Number of images"
 msgstr ""
 
@@ -800,7 +804,7 @@ msgid ""
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/DallE.php:250
-#: includes/Classifai/Providers/OpenAI/DallE.php:348
+#: includes/Classifai/Providers/OpenAI/DallE.php:350
 msgid "Image size"
 msgstr ""
 
@@ -808,15 +812,15 @@ msgstr ""
 msgid "Size of generated images."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:362
+#: includes/Classifai/Providers/OpenAI/DallE.php:364
 msgid "A prompt is required to generate an image."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:380
+#: includes/Classifai/Providers/OpenAI/DallE.php:382
 msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:384
+#: includes/Classifai/Providers/OpenAI/DallE.php:386
 msgid ""
 "Image generation is disabled or OpenAI authentication failed. Please check "
 "your settings."
