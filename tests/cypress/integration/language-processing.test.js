@@ -294,7 +294,9 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can save OpenAI Embeddings "Language Processing" settings', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_embeddings' );
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 
@@ -308,7 +310,9 @@ describe('Language processing Tests', () => {
 
 	it( 'Can create category and post and category will get auto-assigned', () => {
 		// Remove custom taxonomies so those don't interfere with the test.
-		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
 		cy.get( '#classifai-settings-category' ).uncheck();
 		cy.get( '#classifai-settings-keyword' ).uncheck();
 		cy.get( '#classifai-settings-entity' ).uncheck();
@@ -355,7 +359,7 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_embeddings' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings' );
 		cy.get( '#enable_classification' ).uncheck();
 		cy.get( '#submit' ).click();
 
