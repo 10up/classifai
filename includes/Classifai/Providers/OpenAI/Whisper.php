@@ -6,51 +6,12 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\Tokenizer;
-use Classifai\Watson\Normalizer;
-use function Classifai\get_asset_info;
+use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use WP_Error;
 
 class Whisper extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
-
-	/**
-	 * OpenAI Whisper URL
-	 *
-	 * @var string
-	 */
-	protected $whisper_url = 'https://api.openai.com/v1/audio/';
-
-	/**
-	 * OpenAI Whisper model
-	 *
-	 * @var string
-	 */
-	protected $chatgpt_model = 'whisper-1';
-
-	/**
-	 * Supported file formats
-	 *
-	 * @var array
-	 */
-	protected $file_formats = [
-		'mp3',
-		'mp4',
-		'mpeg',
-		'mpga',
-		'm4a',
-		'wav',
-		'webm',
-	];
-
-	/**
-	 * Maximum file size our model supports
-	 *
-	 * @var int
-	 */
-	protected $max_file_size = 25 * MB_IN_BYTES;
 
 	/**
 	 * OpenAI Whisper constructor.
@@ -96,33 +57,34 @@ class Whisper extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
+		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+	}
+
+	/**
+	 * Start the audio transcription process.
+	 *
+	 * @param int $attachment_id Attachment ID to process.
+	 * @return WP_Error|bool
+	 */
+	public function transcribe_audio( $attachment_id = 0 ) {
 		$settings = $this->get_settings();
 
 		// Check if the current user has permission.
 		$roles      = $settings['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
-		if (
-			( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_transcripts'] ) && 1 === (int) $settings['enable_transcripts'] )
-		) {
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'User role does not have permission.', 'classifai' ) );
 		}
-	}
 
-	/**
-	 * Enqueue the editor scripts.
-	 */
-	public function enqueue_editor_assets() {
-	}
+		// Ensure feature is turned on.
+		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
+		}
 
-	/**
-	 * Enqueue the admin scripts.
-	 *
-	 * @param string $hook_suffix The current admin page.
-	 */
-	public function enqueue_admin_assets( $hook_suffix = '' ) {
+		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
+
+		return $transcribe->process();
 	}
 
 	/**
