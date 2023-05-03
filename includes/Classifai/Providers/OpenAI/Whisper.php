@@ -58,6 +58,7 @@ class Whisper extends Provider {
 	 */
 	public function register() {
 		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
 	}
 
 	/**
@@ -73,7 +74,7 @@ class Whisper extends Provider {
 		$roles      = $settings['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User role does not have permission.', 'classifai' ) );
 		}
 
@@ -85,6 +86,35 @@ class Whisper extends Provider {
 		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
 
 		return $transcribe->process();
+	}
+
+	/**
+	 * Add new buttons to the media modal.
+	 *
+	 * @param array    $form_fields Existing form fields.
+	 * @param \WP_Post $attachment Attachment object.
+	 * @return array
+	 */
+	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
+		$settings   = $this->get_settings();
+		$transcribe = new Transcribe( $attachment->ID, $settings );
+
+		if ( ! $transcribe->should_process( $attachment->ID ) ) {
+			return $form_fields;
+		}
+
+		if ( is_array( $settings ) && isset( $settings['enable_transcripts'] ) && '1' === $settings['enable_transcripts'] ) {
+			$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
+
+			$form_fields['retranscribe'] = [
+				'label'        => __( 'Transcribe audio', 'classifai' ),
+				'input'        => 'html',
+				'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+				'show_in_edit' => false,
+			];
+		}
+
+		return $form_fields;
 	}
 
 	/**
@@ -190,7 +220,7 @@ class Whisper extends Provider {
 		}
 
 		$authenticated     = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_transcript = 1 === intval( $settings['enable_transcript'] ?? 0 );
+		$enable_transcript = 1 === intval( $settings['enable_transcripts'] ?? 0 );
 
 		return [
 			__( 'Authenticated', 'classifai' )        => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),

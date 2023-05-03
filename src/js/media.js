@@ -20,6 +20,9 @@ import { __ } from '@wordpress/i18n';
 			'classifai-rescan-smart-crop'
 		);
 		const readButton = document.getElementById( 'classifai-rescan-pdf' );
+		const transcribeButton = document.getElementById(
+			'classifai-retranscribe'
+		);
 
 		if ( altTagsButton ) {
 			altTagsButton.addEventListener( 'click', ( e ) =>
@@ -127,6 +130,29 @@ import { __ } from '@wordpress/i18n';
 				e.target.setAttribute( 'disabled', 'disabled' );
 				e.target.textContent = __( 'Read API requested!', 'classifai' );
 			} );
+		}
+
+		if (transcribeButton) {
+			transcribeButton.addEventListener('click', (e) =>
+				handleClick({
+					button: e.target,
+					endpoint: '/classifai/v1/openai/generate-transcript/',
+					callback: (resp) => {
+						if (resp) {
+							const textField =
+								document.getElementById(
+									'attachment-details-two-column-description'
+								) ??
+								document.getElementById(
+									'attachment-details-description'
+								);
+							if (textField) {
+								textField.value = resp;
+							}
+						}
+					},
+				})
+			);
 		}
 	};
 
