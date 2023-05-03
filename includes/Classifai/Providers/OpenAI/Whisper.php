@@ -7,6 +7,8 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
+use function Classifai\clean_input;
+
 use WP_Error;
 
 class Whisper extends Provider {
@@ -59,6 +61,8 @@ class Whisper extends Provider {
 	public function register() {
 		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
 	}
 
 	/**
@@ -115,6 +119,75 @@ class Whisper extends Provider {
 		}
 
 		return $form_fields;
+	}
+
+	/**
+	 * Add metabox on single attachment view to allow for transcription.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function setup_attachment_meta_box( $post ) {
+		$settings   = $this->get_settings();
+		$transcribe = new Transcribe( $post->ID, $settings );
+
+		if ( ! $transcribe->should_process( $post->ID ) ) {
+			return;
+		}
+
+		if ( is_array( $settings ) && isset( $settings['enable_transcripts'] ) && '1' === $settings['enable_transcripts'] ) {
+			add_meta_box(
+				'attachment_meta_box',
+				__( 'ClassifAI Audio Processing', 'classifai' ),
+				[ $this, 'attachment_meta_box' ],
+				'attachment',
+				'side',
+				'high'
+			);
+		}
+	}
+
+	/**
+	 * Display the attachment meta box.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function attachment_meta_box( $post ) {
+		$text = empty( get_the_content( null, false, $post ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
+
+		wp_nonce_field( 'classifai_openai_whisper_meta_action', 'classifai_openai_whisper_meta' );
+		?>
+
+		<div class="misc-publishing-actions">
+			<div class="misc-pub-section">
+				<label for="retranscribe">
+					<input type="checkbox" value="yes" id="retranscribe" name="retranscribe"/>
+					<?php echo esc_html( $text ); ?>
+				</label>
+			</div>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Transcribe audio on attachment save, if option is selected.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function maybe_transcribe_audio( $attachment_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['classifai_openai_whisper_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_openai_whisper_meta'] ) ), 'classifai_openai_whisper_meta_action' ) ) {
+			return;
+		}
+
+		if ( clean_input( 'retranscribe' ) ) {
+			// Remove to avoid infinite loop.
+			remove_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
+			$this->transcribe_audio( $attachment_id );
+		}
 	}
 
 	/**
