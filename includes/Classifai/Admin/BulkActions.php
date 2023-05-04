@@ -108,7 +108,7 @@ class BulkActions {
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
 		$computer_vision_settings = $this->computer_vision->get_settings();
-		$whisper_settings         = $this->whisper->get_settings();
+		$whisper_enabled          = $this->whisper->is_feature_enabled();
 
 		if (
 			'no' !== $computer_vision_settings['enable_image_tagging'] ||
@@ -121,7 +121,7 @@ class BulkActions {
 			$bulk_actions['smart_crop'] = __( 'Smart crop', 'classifai' );
 		}
 
-		if ( isset( $whisper_settings['enable_transcripts'] ) && '1' === $whisper_settings['enable_transcripts'] ) {
+		if ( ! is_wp_error( $whisper_enabled ) ) {
 			$bulk_actions['transcribe'] = __( 'Transcribe audio', 'classifai' );
 		}
 
@@ -294,17 +294,20 @@ class BulkActions {
 	 */
 	public function register_media_row_action( $actions, $post ) {
 		$whisper_settings = $this->whisper->get_settings();
+		$whisper_enabled  = $this->whisper->is_feature_enabled( $post->ID );
 
-		if ( isset( $whisper_settings['enable_transcripts'] ) && '1' === $whisper_settings['enable_transcripts'] ) {
-			$transcribe = new Transcribe( $post->ID, $whisper_settings );
+		if ( is_wp_error( $whisper_enabled ) ) {
+			return $actions;
+		}
 
-			if ( $transcribe->should_process( $post->ID ) ) {
-				$actions['transcribe'] = sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=transcribe&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-media' ) ),
-					esc_html__( 'Transcribe', 'classifai' )
-				);
-			}
+		$transcribe = new Transcribe( $post->ID, $whisper_settings );
+
+		if ( $transcribe->should_process( $post->ID ) ) {
+			$actions['transcribe'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=transcribe&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+				esc_html__( 'Transcribe', 'classifai' )
+			);
 		}
 
 		return $actions;

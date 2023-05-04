@@ -66,6 +66,35 @@ class Whisper extends Provider {
 	}
 
 	/**
+	 * Check to see if the feature is enabled and a user has access.
+	 *
+	 * @param int $attachment_id Attachment ID to process.
+	 * @return bool|WP_Error
+	 */
+	public function is_feature_enabled( int $attachment_id = 0 ) {
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
+		}
+
+		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
+		}
+
+		// Ensure feature is turned on.
+		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Start the audio transcription process.
 	 *
 	 * @param int $attachment_id Attachment ID to process.
@@ -73,18 +102,10 @@ class Whisper extends Provider {
 	 */
 	public function transcribe_audio( $attachment_id = 0 ) {
 		$settings = $this->get_settings();
+		$enabled  = $this->is_feature_enabled( $attachment_id );
 
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'User role does not have permission.', 'classifai' ) );
-		}
-
-		// Ensure feature is turned on.
-		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
+		if ( is_wp_error( $enabled ) ) {
+			return $enabled;
 		}
 
 		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
@@ -100,6 +121,12 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
+		$enabled = $this->is_feature_enabled( $attachment->ID );
+
+		if ( is_wp_error( $enabled ) ) {
+			return $form_fields;
+		}
+
 		$settings   = $this->get_settings();
 		$transcribe = new Transcribe( $attachment->ID, $settings );
 
@@ -127,6 +154,12 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
+		$enabled = $this->is_feature_enabled( $post->ID );
+
+		if ( is_wp_error( $enabled ) ) {
+			return;
+		}
+
 		$settings   = $this->get_settings();
 		$transcribe = new Transcribe( $post->ID, $settings );
 
@@ -175,6 +208,12 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_transcribe_audio( $attachment_id ) {
+		$enabled = $this->is_feature_enabled( $attachment_id );
+
+		if ( is_wp_error( $enabled ) ) {
+			return;
+		}
+
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
 			return;
 		}
