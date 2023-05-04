@@ -117,6 +117,7 @@ class Transcribe {
 		/**
 		 * Filter the text result returned from Whisper API.
 		 *
+		 * @since x.x.x
 		 * @hook classifai_whisper_transcribe_result
 		 *
 		 * @param {string} $text Text extracted from the response.
