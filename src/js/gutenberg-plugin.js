@@ -256,7 +256,7 @@ const ClassifAIPlugin = () => {
 				{(userHasNLUPermissions || userHasEmbeddingPermissions) && (
 					<>
 						<ClassifAIToggle />
-						{classifaiPostData.NLUEnabled && (
+						{isNLULanguageProcessingEnabled && (
 							<ClassifAIGenerateTagsButton />
 						)}
 					</>
