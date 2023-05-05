@@ -89,7 +89,7 @@ class ChatGPT extends Provider {
 
 		if (
 			( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
+			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] ) // TODO: move this check into indivdual functions to support multiple features
 		) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
@@ -100,6 +100,12 @@ class ChatGPT extends Provider {
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
 			'classifai-post-excerpt',
@@ -107,6 +113,36 @@ class ChatGPT extends Provider {
 			array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'post-excerpt', 'version' ),
 			true
+		);
+
+		// TODO: only load this when feature is turned on
+		wp_enqueue_script(
+			'classifai-post-status-info',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
+			get_asset_info( 'post-status-info', 'dependencies' ),
+			get_asset_info( 'post-status-info', 'version' ),
+			true
+		);
+
+		wp_add_inline_script(
+			'classifai-post-status-info',
+			sprintf(
+				'var classifaiChatGPTData = %s;',
+				wp_json_encode(
+					[
+						'enabledFeatures' => [ // TODO: set this
+							0 => [
+								'feature'    => 'titles',
+								'path'       => '/classifai/v1/openai/generate-title/',
+								'buttonText' => __( 'Generate titles', 'classifai' ),
+								'modalTitle' => __( 'Select a title', 'classifai' ),
+							],
+						],
+						'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+					]
+				)
+			),
+			'before'
 		);
 	}
 
@@ -286,6 +322,9 @@ class ChatGPT extends Provider {
 		switch ( $route_to_call ) {
 			case 'excerpt':
 				$return = $this->generate_excerpt( $post_id );
+				break;
+			case 'title':
+				$return = [ 'First title', 'Second title' ];
 				break;
 		}
 

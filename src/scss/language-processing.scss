@@ -143,3 +143,24 @@
 		margin-top: 10px;
 	}
 }
+
+.title-modal {
+	.classifai-title {
+		border-bottom: 1px solid #e0e0e0;
+		margin: 1px 0 10px;
+		padding-bottom: 10px;
+
+		&:last-child {
+			border-bottom: none;
+		}
+
+		textarea {
+			width: 100%;
+		}
+
+		button {
+			display: block;
+			margin-top: 8px;
+		}
+	}
+}

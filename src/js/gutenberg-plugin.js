@@ -187,6 +187,10 @@ const ClassifAIGenerateTagsButton = () => {
  * Add the ClassifAI panel to Gutenberg
  */
 const ClassifAIPlugin = () => {
+	if ( ! classifaiPostData ) {
+		return null;
+	}
+
 	const postType = useSelect( ( select ) =>
 		select( 'core/editor' ).getCurrentPostType()
 	);
