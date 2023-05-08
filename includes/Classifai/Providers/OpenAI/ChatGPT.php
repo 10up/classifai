@@ -56,6 +56,7 @@ class ChatGPT extends Provider {
 			'fields'   => array( 'api-key' ),
 			'features' => array(
 				'enable_excerpt' => __( 'Excerpt generation', 'classifai' ),
+				'enable_titles'  => __( 'Title generation', 'classifai' ),
 			),
 		);
 	}
@@ -81,19 +82,8 @@ class ChatGPT extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if (
-			( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] ) // TODO: move this check into indivdual functions to support multiple features
-		) {
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		}
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	/**
@@ -106,44 +96,59 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		// This script removes the core excerpt panel and replaces it with our own.
-		wp_enqueue_script(
-			'classifai-post-excerpt',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-			array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
-			get_asset_info( 'post-excerpt', 'version' ),
-			true
-		);
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$excerpt_roles = $settings['roles'] ?? [];
 
-		// TODO: only load this when feature is turned on
-		wp_enqueue_script(
-			'classifai-post-status-info',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
-			get_asset_info( 'post-status-info', 'dependencies' ),
-			get_asset_info( 'post-status-info', 'version' ),
-			true
-		);
+		if (
+			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
+			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
+		) {
+			// This script removes the core excerpt panel and replaces it with our own.
+			wp_enqueue_script(
+				'classifai-post-excerpt',
+				CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
+				array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
+				get_asset_info( 'post-excerpt', 'version' ),
+				true
+			);
+		}
 
-		wp_add_inline_script(
-			'classifai-post-status-info',
-			sprintf(
-				'var classifaiChatGPTData = %s;',
-				wp_json_encode(
-					[
-						'enabledFeatures' => [ // TODO: set this
-							0 => [
-								'feature'    => 'titles',
-								'path'       => '/classifai/v1/openai/generate-title/',
-								'buttonText' => __( 'Generate titles', 'classifai' ),
-								'modalTitle' => __( 'Select a title', 'classifai' ),
+		$title_roles = $settings['title_roles'] ?? [];
+
+		if (
+			( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
+			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
+		) {
+			wp_enqueue_script(
+				'classifai-post-status-info',
+				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
+				get_asset_info( 'post-status-info', 'dependencies' ),
+				get_asset_info( 'post-status-info', 'version' ),
+				true
+			);
+
+			wp_add_inline_script(
+				'classifai-post-status-info',
+				sprintf(
+					'var classifaiChatGPTData = %s;',
+					wp_json_encode(
+						[
+							'enabledFeatures' => [
+								0 => [
+									'feature'    => 'titles',
+									'path'       => '/classifai/v1/openai/generate-title/',
+									'buttonText' => __( 'Generate titles', 'classifai' ),
+									'modalTitle' => __( 'Select a title', 'classifai' ),
+								],
 							],
-						],
-						'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-					]
-				)
-			),
-			'before'
-		);
+							'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+						]
+					)
+				),
+				'before'
+			);
+		}
 	}
 
 	/**
@@ -171,14 +176,23 @@ class ChatGPT extends Provider {
 	public function setup_fields_sections() {
 		$default_settings = $this->get_default_settings();
 
+		// Add API fields.
 		$this->setup_api_fields( $default_settings['api_key'] );
+
+		// Add excerpt fields.
+		add_settings_section(
+			$this->get_option_name() . '_excerpt',
+			esc_html__( 'Excerpt settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
 
 		add_settings_field(
 			'enable-excerpt',
 			esc_html__( 'Generate excerpt', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_excerpt',
 			[
 				'label_for'     => 'enable_excerpt',
 				'input_type'    => 'checkbox',
@@ -195,7 +209,7 @@ class ChatGPT extends Provider {
 			esc_html__( 'Allowed roles', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_excerpt',
 			[
 				'label_for'      => 'roles',
 				'options'        => $roles,
@@ -209,7 +223,7 @@ class ChatGPT extends Provider {
 			esc_html__( 'Excerpt length', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_excerpt',
 			[
 				'label_for'     => 'length',
 				'input_type'    => 'number',
@@ -217,6 +231,42 @@ class ChatGPT extends Provider {
 				'step'          => 1,
 				'default_value' => $default_settings['length'],
 				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
+			]
+		);
+
+		// Add title fields.
+		add_settings_section(
+			$this->get_option_name() . '_title',
+			esc_html__( 'Title settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
+		add_settings_field(
+			'enable-titles',
+			esc_html__( 'Generate titles', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_title',
+			[
+				'label_for'     => 'enable_titles',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_titles'],
+				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'title-roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_title',
+			[
+				'label_for'      => 'title_roles',
+				'options'        => $roles,
+				'default_values' => $default_settings['title_roles'],
+				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
 			]
 		);
 	}
@@ -253,6 +303,18 @@ class ChatGPT extends Provider {
 			$new_settings['length'] = 55;
 		}
 
+		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
+			$new_settings['enable_titles'] = 'no';
+		} else {
+			$new_settings['enable_titles'] = '1';
+		}
+
+		if ( isset( $settings['title_roles'] ) && is_array( $settings['title_roles'] ) ) {
+			$new_settings['title_roles'] = array_map( 'sanitize_text_field', $settings['title_roles'] );
+		} else {
+			$new_settings['title_roles'] = array_keys( get_editable_roles() ?? [] );
+		}
+
 		return $new_settings;
 	}
 
@@ -275,6 +337,8 @@ class ChatGPT extends Provider {
 			'enable_excerpt' => false,
 			'roles'          => array_keys( get_editable_roles() ?? [] ),
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
+			'enable_titles'  => false,
+			'title_roles'    => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 
@@ -292,13 +356,16 @@ class ChatGPT extends Provider {
 
 		$authenticated  = 1 === intval( $settings['authenticated'] ?? 0 );
 		$enable_excerpt = 1 === intval( $settings['enable_excerpt'] ?? 0 );
+		$enable_titles  = 1 === intval( $settings['enable_titles'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate excerpt', 'classifai' ) => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Excerpt length', 'classifai' )   => $settings['length'] ?? 55,
-			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Authenticated', 'classifai' )           => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Generate excerpt', 'classifai' )        => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles (excerpt)', 'classifai' ) => implode( ', ', $settings['roles'] ?? [] ),
+			__( 'Excerpt length', 'classifai' )          => $settings['length'] ?? 55,
+			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
+			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
 

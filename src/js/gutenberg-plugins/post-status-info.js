@@ -69,7 +69,7 @@ const PostStatusInfo = () => {
 		<PluginPostStatusInfo>
 			{isOpen && (
 				<Modal
-					title={__('Select item', 'classifai')}
+					title={__('Select title', 'classifai')}
 					onRequestClose={closeModal}
 					isFullScreen={false}
 					className="title-modal"
