@@ -53,40 +53,37 @@ const PostStatusInfo = () => {
 
 	const openModal = () => setOpen(true);
 	const closeModal = () => setOpen(false) && setData([]);
+	const buttonClick = async (path) => {
+		setIsLoading(true);
+		openModal();
+		apiFetch({
+			path,
+		}).then((res) => {
+			setData(res);
+			setIsLoading(false);
+		});
+	};
 	const postId = select('core/editor').getCurrentPostId();
 
 	return (
 		<PluginPostStatusInfo>
+			{isOpen && (
+				<Modal
+					title={__('Select item', 'classifai')}
+					onRequestClose={closeModal}
+					isFullScreen={false}
+					className="title-modal"
+				>
+					{isLoading ? <Spinner /> : <RenderData data={data} />}
+				</Modal>
+			)}
 			{classifaiChatGPTData.enabledFeatures.map((feature) => {
 				const path = feature?.path + postId;
 				return (
 					<div key={feature?.feature}>
-						{isOpen && (
-							<Modal
-								title={feature?.modalTitle}
-								onRequestClose={closeModal}
-								isFullScreen={false}
-								className="title-modal"
-							>
-								{isLoading ? (
-									<Spinner />
-								) : (
-									<RenderData data={data} />
-								)}
-							</Modal>
-						)}
 						<Button
 							variant="secondary"
-							onClick={async () => {
-								setIsLoading(true);
-								openModal();
-								apiFetch({
-									path,
-								}).then((res) => {
-									setData(res);
-									setIsLoading(false);
-								});
-							}}
+							onClick={() => buttonClick(path)}
 						>
 							{feature?.buttonText}
 						</Button>
