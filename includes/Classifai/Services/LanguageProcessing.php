@@ -89,6 +89,14 @@ class LanguageProcessing extends Service {
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
 					],
+					'n'  => [
+						'type'              => 'integer',
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+					],
 				],
 				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 			]
@@ -282,7 +290,15 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
 		}
 
-		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'title' ) );
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'title',
+				[
+					'num' => $request->get_param( 'n' ),
+				]
+			)
+		);
 	}
 
 	/**
@@ -312,25 +328,25 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		// $settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
 
-		// // Check if valid authentication is in place.
-		// if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-		// 	return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		// }
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
 
-		// // Check if excerpt generation is turned on.
-		// if ( empty( $settings ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
-		// 	return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
-		// }
+		// Check if title generation is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
+		}
 
-		// // Check if the current user's role is allowed.
-		// $roles      = $settings['roles'] ?? [];
-		// $user_roles = wp_get_current_user()->roles ?? [];
+		// Check if the current user's role is allowed.
+		$roles      = $settings['title_roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
 
-		// if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-		// 	return false;
-		// }
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
 
 		return true;
 	}

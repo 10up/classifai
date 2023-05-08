@@ -269,6 +269,20 @@ class ChatGPT extends Provider {
 				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
 			]
 		);
+
+		add_settings_field(
+			'number-titles',
+			esc_html__( 'Number of titles', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_title',
+			[
+				'label_for'     => 'number_titles',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $default_settings['number_titles'],
+				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -315,6 +329,12 @@ class ChatGPT extends Provider {
 			$new_settings['title_roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
+		if ( isset( $settings['number_titles'] ) && is_numeric( $settings['number_titles'] ) && (int) $settings['number_titles'] >= 1 && (int) $settings['number_titles'] <= 10 ) {
+			$new_settings['number_titles'] = absint( $settings['number_titles'] );
+		} else {
+			$new_settings['number_titles'] = 1;
+		}
+
 		return $new_settings;
 	}
 
@@ -339,6 +359,7 @@ class ChatGPT extends Provider {
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
 			'enable_titles'  => false,
 			'title_roles'    => array_keys( get_editable_roles() ?? [] ),
+			'number_titles'  => 1,
 		];
 	}
 
@@ -365,6 +386,7 @@ class ChatGPT extends Provider {
 			__( 'Excerpt length', 'classifai' )          => $settings['length'] ?? 55,
 			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
+			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
 			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
 		];
 	}
@@ -375,9 +397,10 @@ class ChatGPT extends Provider {
 	 *
 	 * @param int    $post_id The Post Id we're processing.
 	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '' ) {
+	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
 		$route_to_call = strtolower( $route_to_call );
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
@@ -391,7 +414,7 @@ class ChatGPT extends Provider {
 				$return = $this->generate_excerpt( $post_id );
 				break;
 			case 'title':
-				$return = [ 'First title', 'Second title' ];
+				$return = $this->generate_titles( $post_id, $args );
 				break;
 		}
 
@@ -481,6 +504,104 @@ class ChatGPT extends Provider {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Generate titles using ChatGPT.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_titles( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
+		}
+
+		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num' => $settings['number_titles'] ?? 1,
+			]
+		);
+
+		// These checks happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$request = new APIRequest( $settings['api_key'] ?? '' );
+
+		/**
+		 * Filter the prompt we will send to ChatGPT.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_title_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO friendly title for this content. Do not use quotes.', $post_id, $args );
+
+		/**
+		 * Filter the request body before sending to ChatGPT.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_title_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to ChatGPT.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chatgpt_title_request_body',
+			[
+				'model'       => $this->chatgpt_model,
+				'messages'    => [
+					[
+						'role'    => 'user',
+						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15 ) . '',
+					],
+				],
+				'temperature' => 0.2,
+				'n'           => absint( $args['num'] ),
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->chatgpt_url,
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['choices'] ) ) {
+			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from OpenAI.', 'classifai' ) );
+		}
+
+		// Extract out the text response.
+		$return = [];
+		foreach ( $response['choices'] as $choice ) {
+			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+				$return[] = sanitize_text_field( $choice['message']['content'] );
+			}
+		}
+
+		return $return;
 	}
 
 	/**

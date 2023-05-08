@@ -34,9 +34,18 @@ const RenderData = ({ data }) => {
 	);
 };
 
+const RenderError = ({ error }) => {
+	if (!error) {
+		return null;
+	}
+
+	return <div className="error">{error}</div>;
+};
+
 const PostStatusInfo = () => {
 	const [isLoading, setIsLoading] = useState(false);
 	const [isOpen, setOpen] = useState(false);
+	const [error, setError] = useState(false);
 	const [data, setData] = useState([]);
 
 	if (!classifaiChatGPTData || !classifaiChatGPTData.enabledFeatures) {
@@ -52,16 +61,22 @@ const PostStatusInfo = () => {
 	}
 
 	const openModal = () => setOpen(true);
-	const closeModal = () => setOpen(false) && setData([]);
+	const closeModal = () => setOpen(false) && setData([]) && setError(false);
 	const buttonClick = async (path) => {
 		setIsLoading(true);
 		openModal();
 		apiFetch({
 			path,
-		}).then((res) => {
-			setData(res);
-			setIsLoading(false);
-		});
+		}).then(
+			(res) => {
+				setData(res);
+				setIsLoading(false);
+			},
+			(err) => {
+				setError(err?.message);
+				setIsLoading(false);
+			}
+		);
 	};
 	const postId = select('core/editor').getCurrentPostId();
 
@@ -74,7 +89,9 @@ const PostStatusInfo = () => {
 					isFullScreen={false}
 					className="title-modal"
 				>
-					{isLoading ? <Spinner /> : <RenderData data={data} />}
+					{isLoading && <Spinner />}
+					{!isLoading && data && <RenderData data={data} />}
+					{!isLoading && error && <RenderError error={error} />}
 				</Modal>
 			)}
 			{classifaiChatGPTData.enabledFeatures.map((feature) => {
