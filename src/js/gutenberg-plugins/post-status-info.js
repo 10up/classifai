@@ -70,10 +70,12 @@ const PostStatusInfo = () => {
 		}).then(
 			(res) => {
 				setData(res);
+				setError(false);
 				setIsLoading(false);
 			},
 			(err) => {
 				setError(err?.message);
+				setData([]);
 				setIsLoading(false);
 			}
 		);

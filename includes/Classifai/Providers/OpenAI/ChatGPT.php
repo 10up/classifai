@@ -546,7 +546,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO friendly title for this content. Do not use quotes.', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO friendly title for this content. Do not use quotes', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -566,10 +566,10 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15 ) . '',
+						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
 					],
 				],
-				'temperature' => 0.2,
+				'temperature' => 0.4,
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -607,20 +607,21 @@ class ChatGPT extends Provider {
 	/**
 	 * Get our content, trimming if needed.
 	 *
-	 * @param int $post_id Post ID to get content from.
-	 * @param int $excerpt_length Sentence length of final excerpt.
+	 * @param int  $post_id Post ID to get content from.
+	 * @param int  $return_length Word length of returned content.
+	 * @param bool $use_title Whether to use the title or not.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $excerpt_length = 0 ) {
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true ) {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
 		/**
-		 * We first determine how many tokens, roughly, our excerpt will require.
-		 * This is determined by the number of words our excerpt requested and how
+		 * We first determine how many tokens, roughly, our returned content will require.
+		 * This is determined by the number of words we expect to be returned and how
 		 * many tokens are in an average word.
 		 */
-		$excerpt_tokens = $tokenizer->tokens_in_words( $excerpt_length );
+		$return_tokens = $tokenizer->tokens_in_words( $return_length );
 
 		/**
 		 * We then subtract those tokens from the max number of tokens ChatGPT allows
@@ -628,13 +629,24 @@ class ChatGPT extends Provider {
 		 * prompt (13). ChatGPT counts both the tokens in the request and in
 		 * the response towards the max.
 		 */
-		$max_content_tokens = $this->max_tokens - $excerpt_tokens - 13;
+		$max_content_tokens = $this->max_tokens - $return_tokens - 13;
 
 		// Then trim our content, if needed, to stay under the max.
-		$content = $tokenizer->trim_content(
-			$normalizer->normalize( $post_id ),
-			(int) $max_content_tokens
-		);
+		if ( $use_title ) {
+			$content = $tokenizer->trim_content(
+				$normalizer->normalize( $post_id ),
+				(int) $max_content_tokens
+			);
+		} else {
+			$post         = get_post( $post_id );
+			$post_content = apply_filters( 'the_content', $post->post_content );
+			$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
+
+			$content = $tokenizer->trim_content(
+				$normalizer->normalize_content( $post_content, '', $post_id ),
+				(int) $max_content_tokens
+			);
+		}
 
 		/**
 		 * Filter content that will get sent to ChatGPT.
