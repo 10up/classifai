@@ -136,7 +136,7 @@ class ChatGPT extends Provider {
 						[
 							'enabledFeatures' => [
 								0 => [
-									'feature'    => 'titles',
+									'feature'    => 'title',
 									'path'       => '/classifai/v1/openai/generate-title/',
 									'buttonText' => __( 'Generate titles', 'classifai' ),
 									'modalTitle' => __( 'Select a title', 'classifai' ),
@@ -569,7 +569,7 @@ class ChatGPT extends Provider {
 						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
 					],
 				],
-				'temperature' => 0.4,
+				'temperature' => 0.5,
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
