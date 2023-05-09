@@ -343,20 +343,20 @@ describe('Language processing Tests', () => {
 
 			// Click on button and verify modal shows.
 			cy.wrap($panel).find('.classifai-post-status button.title').click();
-			cy.get('.title-modal').should('exist');
+		});
 
-			// Click on button and verify data loads in.
-			cy.get('.title-modal .classifai-title')
-				.first()
-				.find('textarea')
-				.should('have.value', data);
-			cy.get('.title-modal .classifai-title')
-				.first()
-				.find('button')
-				.click();
+		cy.get('.title-modal').should('exist');
 
-			cy.get('.title-modal').should('not.exist');
-			cy.get('.editor-post-title__input').should('have.value', data);
+		// Click on button and verify data loads in.
+		cy.get('.title-modal .classifai-title')
+			.first()
+			.find('textarea')
+			.should('have.value', data);
+		cy.get('.title-modal .classifai-title').first().find('button').click();
+
+		cy.get('.title-modal').should('not.exist');
+		cy.get('.editor-post-title__input').should(($el) => {
+			expect($el.first()).to.contain(data);
 		});
 	});
 
