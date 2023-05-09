@@ -351,14 +351,16 @@ class ChatGPT extends Provider {
 	 * @return array
 	 */
 	private function get_default_settings() {
+		$editable_roles = get_editable_roles() ?? [];
+
 		return [
 			'authenticated'  => false,
 			'api_key'        => '',
 			'enable_excerpt' => false,
-			'roles'          => array_keys( get_editable_roles() ?? [] ),
+			'roles'          => array_keys( $editable_roles ),
 			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
 			'enable_titles'  => false,
-			'title_roles'    => array_keys( get_editable_roles() ?? [] ),
+			'title_roles'    => array_keys( $editable_roles ),
 			'number_titles'  => 1,
 		];
 	}
@@ -448,7 +450,7 @@ class ChatGPT extends Provider {
 		 * Filter the prompt we will send to ChatGPT.
 		 *
 		 * @since 2.0.0
-		 * @hook classifai_chatgpt_prompt
+		 * @hook classifai_chatgpt_excerpt_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
 		 * @param {int} $post_id ID of post we are summarizing.
@@ -456,13 +458,13 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_prompt', 'Provide a kicker for the following text in ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a kicker for the following text in ' . $excerpt_length . ' words', $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
 		 * @since 2.0.0
-		 * @hook classifai_chatgpt_request_body
+		 * @hook classifai_chatgpt_excerpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
 		 * @param {int} $post_id ID of post we are summarizing.
@@ -470,7 +472,7 @@ class ChatGPT extends Provider {
 		 * @return {array} Request body.
 		 */
 		$body = apply_filters(
-			'classifai_chatgpt_request_body',
+			'classifai_chatgpt_excerpt_request_body',
 			[
 				'model'       => $this->chatgpt_model,
 				'messages'    => [

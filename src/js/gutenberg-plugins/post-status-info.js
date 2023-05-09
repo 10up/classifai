@@ -88,7 +88,7 @@ const PostStatusInfo = () => {
 	};
 
 	return (
-		<PluginPostStatusInfo>
+		<PluginPostStatusInfo className="classifai-post-status">
 			{isOpen && (
 				<Modal
 					title={__('Select a title', 'classifai')}
@@ -109,6 +109,7 @@ const PostStatusInfo = () => {
 						supportKeys={feature?.feature}
 					>
 						<Button
+							className={feature?.feature}
 							variant="secondary"
 							onClick={() => buttonClick(path)}
 						>
