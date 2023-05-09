@@ -346,13 +346,14 @@ describe('Language processing Tests', () => {
 			cy.get('.title-modal').should('exist');
 
 			// Click on button and verify data loads in.
-			cy.get('.title-modal').then(($modal) => {
-				const titleContainer = cy.wrap(
-					$modal.find('.classifai-title').first()
-				);
-				titleContainer.find('textarea').should('have.value', data);
-				titleContainer.find('button').click();
-			});
+			cy.get('.title-modal .classifai-title')
+				.first()
+				.find('textarea')
+				.should('have.value', data);
+			cy.get('.title-modal .classifai-title')
+				.first()
+				.find('button')
+				.click();
 
 			cy.get('.title-modal').should('not.exist');
 			cy.get('.editor-post-title__input').should('have.value', data);
