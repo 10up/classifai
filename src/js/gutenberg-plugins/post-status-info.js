@@ -68,7 +68,7 @@ const PostStatusInfo = () => {
 				{dataToRender.map((item, i) => {
 					return (
 						<div className="classifai-title" key={i}>
-							<textarea rows="3">{item}</textarea>
+							<textarea rows="5">{item}</textarea>
 							<Button
 								variant="secondary"
 								onClick={() => {
