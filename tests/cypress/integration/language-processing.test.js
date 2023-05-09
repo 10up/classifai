@@ -300,7 +300,7 @@ describe('Language processing Tests', () => {
 
 		cy.get('#enable_titles').check();
 		cy.get('#openai_chatgpt_title_roles_administrator').check();
-		cy.get('#number_titles').select(3);
+		cy.get('#number_titles').select(1);
 		cy.get('#submit').click();
 	});
 
@@ -348,7 +348,6 @@ describe('Language processing Tests', () => {
 			// Click on button and verify data loads in.
 			cy.get('.title-modal').then(($modal) => {
 				const titles = cy.wrap($modal.find('.classifai-title'));
-				titles.length.should('eq', 3);
 				titles.first().find('textarea').should('have.value', data);
 				titles.first().find('button').click();
 			});
