@@ -3,7 +3,12 @@ import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { Button, Icon, ToggleControl, BaseControl } from '@wordpress/components';
+import {
+	Button,
+	Icon,
+	ToggleControl,
+	BaseControl,
+} from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
