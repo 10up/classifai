@@ -205,15 +205,29 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$current_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$is_credentials_changed = false;
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
-			$new_settings['credentials']['url']     = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
-			$new_settings['credentials']['api_key'] = sanitize_text_field( $settings['credentials']['api_key'] );
-			$new_settings['voices']                 = $this->connect_to_service( $new_settings['credentials'] );
+			$new_url = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
+			$new_key = sanitize_text_field( $settings['credentials']['api_key'] );
+
+			if ( $new_url !== $current_settings['credentials']['url'] || $new_key !== $current_settings['credentials']['api_key'] ) {
+				$is_credentials_changed = true;
+			}
+
+			if ( $is_credentials_changed ) {
+				$current_settings['credentials']['url']     = $new_url;
+				$current_settings['credentials']['api_key'] = $new_key;
+				$current_settings['voices']                 = $this->connect_to_service( $current_settings['credentials'] );
+
+				if ( ! empty( $current_settings['voices'] ) ) {
+					$current_settings['authenticated'] = true;
+				}
+			}
 		} else {
-			$new_settings['credentials']['url']     = '';
-			$new_settings['credentials']['api_key'] = '';
+			$current_settings['credentials']['url']     = '';
+			$current_settings['credentials']['api_key'] = '';
 
 			add_settings_error(
 				$this->get_option_name(),
@@ -228,19 +242,19 @@ class TextToSpeech extends Provider {
 
 		foreach ( $post_types as $post_type ) {
 			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
+				$current_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
 			} else {
-				$new_settings['post_types'][ $post_type->name ] = null;
+				$current_settings['post_types'][ $post_type->name ] = null;
 			}
 		}
 
 		if ( isset( $settings['voice'] ) && ! empty( $settings['voice'] ) ) {
-			$new_settings['voice'] = sanitize_text_field( $settings['voice'] );
+			$current_settings['voice'] = sanitize_text_field( $settings['voice'] );
 		} else {
-			$new_settings['voice'] = '';
+			$current_settings['voice'] = '';
 		}
 
-		return $new_settings;
+		return $current_settings;
 	}
 
 	/**
