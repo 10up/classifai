@@ -1,10 +1,10 @@
 /**
  * WordPress dependencies
  */
-const { __ } = wp.i18n;
-const { withSelect } = wp.data;
-const { PluginPrePublishPanel } = wp.editPost;
-const { Component } = wp.element;
+import { __ } from '@wordpress/i18n';
+import { withSelect } from '@wordpress/data';
+import { PluginPrePublishPanel } from '@wordpress/edit-post';
+import { Component } from '@wordpress/element';
 
 /**
  * Internal dependencies

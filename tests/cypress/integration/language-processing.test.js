@@ -8,7 +8,7 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing' );
 
 		cy.get( '#classifai-settings-watson_url' ).clear().type( 'http://e2e-test-nlu-server.test/' );
 		cy.get( '#classifai-settings-watson_password' ).clear().type( 'password' );
@@ -28,7 +28,7 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can select Watson taxonomies "Language Processing" settings', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing' );
 
 		cy.get( '#classifai-settings-category_taxonomy' ).select( 'watson-category' );
 		cy.get( '#classifai-settings-keyword_taxonomy' ).select( 'watson-keyword' );
@@ -85,7 +85,7 @@ describe('Language processing Tests', () => {
 		const threshold = 75;
 
 		// Update Threshold to 75.
-		cy.visit('/wp-admin/admin.php?page=language_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing');
 
 		cy.get('#classifai-settings-category_threshold')
 			.clear()
@@ -123,7 +123,7 @@ describe('Language processing Tests', () => {
 	// Skiping this until issue get fixed.
 	it.skip('Can create post and tags get created by ClassifAI', () => {
 		const threshold = 75;
-		cy.visit('/wp-admin/admin.php?page=language_processing');
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing');
 
 		cy.get('#classifai-settings-category_taxonomy').select('post_tag');
 		cy.get('#classifai-settings-keyword_taxonomy').select('post_tag');
@@ -153,7 +153,7 @@ describe('Language processing Tests', () => {
 	});
 
 	it( 'Can save OpenAI "Language Processing" settings', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 
@@ -205,7 +205,7 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can disable excerpt generation feature', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
 
 		// Disable features.
 		cy.get( '#enable_excerpt' ).uncheck();
@@ -248,7 +248,7 @@ describe('Language processing Tests', () => {
 	} );
 
 	it( 'Can disable excerpt generation feature by role', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=openai_chatgpt' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
 
 		// Disable admin role.
 		cy.get( '#enable_excerpt' ).check();

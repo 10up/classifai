@@ -71,7 +71,6 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 
 			this.collection.each( this.renderImage, this );
 
-			this.$el.prev().find( '.prompt' ).val( '' );
 			this.$el.prev().find( 'button' ).prop( 'disabled', false );
 		}
 	},

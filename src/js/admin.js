@@ -1,26 +1,73 @@
 /* global ClassifAI */
+import '../scss/admin.scss';
+import tippy from 'tippy.js';
+import 'tippy.js/dist/tippy.css';
+import 'tippy.js/themes/light.css';
 
-( () => {
-	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
+document.addEventListener('DOMContentLoaded', function () {
+	const template = document.getElementById('help-menu-template');
+	if (!template) {
+		return;
+	}
+	const container = document.createElement('div');
+	container.appendChild(document.importNode(template.content, true));
+
+	tippy('.classifai-help', {
+		allowHTML: true,
+		content: container.innerHTML,
+		trigger: 'click', // mouseenter, click, focus; manual.
+		placement: 'bottom-end',
+		arrow: true,
+		animation: 'scale',
+		duration: [250, 200],
+		theme: 'light',
+		interactive: true,
+	});
+});
+
+(() => {
+	const $toggler = document.getElementById('classifai-waston-cred-toggle');
 	const $userField = document.getElementById(
 		'classifai-settings-watson_username'
 	);
 
-	if ( $toggler === null || $userField === null ) {
+	if ($toggler === null || $userField === null) {
 		return;
 	}
 
-	const $userFieldWrapper = $userField.closest( 'tr' );
-	const [ $passwordFieldTitle ] = document
-		.getElementById( 'classifai-settings-watson_password' )
-		.closest( 'tr' )
-		.getElementsByTagName( 'label' );
+	let $userFieldWrapper = null;
+	let $passwordFieldTitle = null;
+	if ($userField.closest('tr')) {
+		$userFieldWrapper = $userField.closest('tr');
+	} else if ($userField.closest('.classifai-setup-form-field')) {
+		$userFieldWrapper = $userField.closest('.classifai-setup-form-field');
+	}
 
-	$toggler.addEventListener( 'click', ( e ) => {
+	if (
+		document
+			.getElementById('classifai-settings-watson_password')
+			.closest('tr')
+	) {
+		[$passwordFieldTitle] = document
+			.getElementById('classifai-settings-watson_password')
+			.closest('tr')
+			.getElementsByTagName('label');
+	} else if (
+		document
+			.getElementById('classifai-settings-watson_password')
+			.closest('.classifai-setup-form-field')
+	) {
+		[$passwordFieldTitle] = document
+			.getElementById('classifai-settings-watson_password')
+			.closest('.classifai-setup-form-field')
+			.getElementsByTagName('label');
+	}
+
+	$toggler.addEventListener('click', (e) => {
 		e.preventDefault();
-		$userFieldWrapper.classList.toggle( 'hidden' );
+		$userFieldWrapper.classList.toggle('hidden');
 
-		if ( $userFieldWrapper.classList.contains( 'hidden' ) ) {
+		if ($userFieldWrapper.classList.contains('hidden')) {
 			$toggler.innerText = ClassifAI.use_password;
 			$passwordFieldTitle.innerText = ClassifAI.api_key;
 			$userField.value = 'apikey';
@@ -29,5 +76,5 @@
 
 		$toggler.innerText = ClassifAI.use_key;
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
-	} );
-} )();
+	});
+})();

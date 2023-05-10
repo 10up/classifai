@@ -9,6 +9,8 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+
+use function Classifai\get_asset_info;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 
@@ -67,6 +69,20 @@ class NLU extends Provider {
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'IBM Watson NLU', 'classifai' ),
+			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
+			'features' => array(),
+		);
+
+		$post_types = get_post_types_for_language_settings();
+		foreach ( $post_types as $post_type ) {
+			// translators: %s is the post type label.
+			$this->onboarding_options['features'][ 'post_types__' . $post_type->name ] = sprintf( __( 'Automatically tag %s', 'classifai' ), $post_type->label );
+		}
+
 	}
 
 	/**
@@ -184,10 +200,10 @@ class NLU extends Provider {
 	public function enqueue_editor_assets() {
 		global $post;
 		wp_enqueue_script(
-			'classifai-editor', // Handle.
+			'classifai-editor',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'editor', 'dependencies' ),
+			get_asset_info( 'editor', 'version' ),
 			true
 		);
 
@@ -198,8 +214,8 @@ class NLU extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
+			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
 
@@ -222,8 +238,8 @@ class NLU extends Provider {
 		wp_enqueue_script(
 			'classifai-language-processing-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'language-processing', 'dependencies' ),
+			get_asset_info( 'language-processing', 'version' ),
 			true
 		);
 
@@ -884,5 +900,14 @@ class NLU extends Provider {
 				],
 			)
 		);
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		return get_option( 'classifai_configured', false );
 	}
 }

@@ -1,16 +1,15 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
-import { store as postAudioStore } from './store/register';
-
+import { useSelect, useDispatch } from '@wordpress/data';
+import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { Button, Icon, ToggleControl, BaseControl } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
+import { store as postAudioStore } from './store/register';
 
-const { useSelect, useDispatch } = wp.data;
-const { PluginDocumentSettingPanel } = wp.editPost;
-const { Icon, ToggleControl, Button, BaseControl } = wp.components;
-const { __, sprintf } = wp.i18n;
-const { registerPlugin } = wp.plugins;
 const { classifaiPostData } = window;
 
 /**

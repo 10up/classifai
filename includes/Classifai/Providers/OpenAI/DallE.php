@@ -33,6 +33,15 @@ class DallE extends Provider {
 			'openai_dalle',
 			$service
 		);
+
+		// Set the onboarding options.
+		$this->onboarding_options = array(
+			'title'    => __( 'OpenAI DALL·E', 'classifai' ),
+			'fields'   => array( 'api-key' ),
+			'features' => array(
+				'enable_image_gen' => __( 'Image generation', 'classifai' ),
+			),
+		);
 	}
 
 	/**
@@ -81,6 +90,14 @@ class DallE extends Provider {
 		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
 			return;
 		}
+
+		wp_enqueue_style(
+			'classifai-image-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			'all'
+		);
 
 		wp_enqueue_script(
 			'classifai-generate-images',
@@ -137,7 +154,7 @@ class DallE extends Provider {
 				<p>
 					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
 				</p>
-				<input type="search" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" />
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
 			</div>
@@ -268,6 +285,8 @@ class DallE extends Provider {
 
 		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
 			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		} else {
+			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {

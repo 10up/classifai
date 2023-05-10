@@ -65,6 +65,7 @@ const GeneratedImage = wp.media.View.extend( {
 						.removeClass( 'button-import' )
 						.addClass( 'button-media-library' )
 						.text( classifaiDalleData.buttonText );
+					self.$( '.button-import-insert' ).remove();
 					self.disableLoadingState();
 				}
 			},
@@ -75,6 +76,7 @@ const GeneratedImage = wp.media.View.extend( {
 			additionalData: {
 				post: wp.media.model.settings.post.id ?? 0,
 				caption: classifaiDalleData.caption,
+				alt_text: this.prompt,
 			},
 		} );
 

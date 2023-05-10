@@ -1,11 +1,11 @@
 /**
  * WordPress dependencies
  */
-const { __ } = wp.i18n;
-const { dispatch } = wp.data;
-const { PluginDocumentSettingPanel } = wp.editPost;
-const { PostExcerptCheck } = wp.editor;
-const { registerPlugin } = wp.plugins;
+import { __ } from '@wordpress/i18n';
+import { dispatch } from '@wordpress/data';
+import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PostExcerptCheck } from '@wordpress/editor';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
