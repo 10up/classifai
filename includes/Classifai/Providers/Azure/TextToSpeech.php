@@ -71,9 +71,9 @@ class TextToSpeech extends Provider {
 	 * Re-connects to the service on page load when the transient expires.
 	 */
 	public function maybe_connect_on_init() {
-		$active_tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_provider = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( 'azure_text_to_speech' !== $active_tab ) {
+		if ( 'azure_text_to_speech' !== $active_provider ) {
 			return;
 		}
 
@@ -214,9 +214,9 @@ class TextToSpeech extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'    => 'post_types',
-				'option_index' => 'post_types',
-				'options'      => $this->get_post_types_select_options(),
+				'label_for'      => 'post_types',
+				'option_index'   => 'post_types',
+				'options'        => $this->get_post_types_select_options(),
 				'default_values' => $default_settings['post-types'],
 			]
 		);
@@ -437,9 +437,9 @@ class TextToSpeech extends Provider {
 		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )             => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )                   => $settings['url'] ?? '',
-			__( 'Latest response - Voices', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
+			__( 'Authenticated', 'classifai' )            => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
+			__( 'API URL', 'classifai' )                  => $settings['url'] ?? '',
+			__( 'Latest response - Voices', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
 		];
 	}
 
@@ -580,8 +580,21 @@ class TextToSpeech extends Provider {
 					</div>
 					<div class='classifai-post-audio-heading'>
 						<?php
-							$list_to_post_text = apply_filters( 'classifai_listen_to_this_post_text', esc_html__( 'Listen to this post', 'classifai' ) );
-							echo esc_html( $list_to_post_text );
+							$listen_to_post_text = sprintf(
+								/**
+								 * Hook to filter the text next to the audio controls on the frontend.
+								 *
+								 * @param string  The text to filter.
+								 * @param integer The Post ID.
+								 *
+								 * @return string
+								 */
+								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $post->ID ),
+								esc_html__( 'Listen to this', 'classifai' ),
+								esc_html( $post->post_type )
+							);
+
+							echo wp_kses_post( $listen_to_post_text );
 						?>
 					</div>
 				</div>
