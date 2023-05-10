@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [2.1.0] - 2023-05-02
+**Note that this release moves the ClassifAI settings to be nested under Tools instead of it's own menu.**
+
+### Added
+- New user experience when onboarding, making it easier to get ClassifAI setup and configured (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@ryanwelcher](https://github.com/ryanwelcher), [@mehidi258](https://github.com/mehidi258) via [#411](https://github.com/10up/classifai/pull/411)).
+- Add proper attribution to generated images (props [@derweili](https://github.com/derweili), [@dkotter](https://github.com/dkotter) via [#438](https://github.com/10up/classifai/pull/438)).
+- Add the image generation prompt as `alt` text to imported generated images (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#441](https://github.com/10up/classifai/pull/441)).
+
+### Fixed
+- Address a PHP notice that is thrown when editing a non-image attachment (props [@av3nger](https://github.com/av3nger), [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#425](https://github.com/10up/classifai/pull/425)).
+- Ensure generated images are assigned properly to their post (props [@derweili](https://github.com/derweili), [@dkotter](https://github.com/dkotter) via [#438](https://github.com/10up/classifai/pull/438)).
+- Remove use of deprecated `FILTER_SANITIZE_STRING` constant (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#442](https://github.com/10up/classifai/pull/442)).
+- Ensure proper CSS is always loaded based on the enabled features (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#441](https://github.com/10up/classifai/pull/441)).
+- Removed a duplicate filter (props [@benlk](https://github.com/benlk), [@dkotter](https://github.com/dkotter) via [#444](https://github.com/10up/classifai/pull/444)).
+- Buttons to generate descriptive text and image tags are no longer displayed when those settings are disabled in Microsoft Azure Image Processing settings (props [@benlk](https://github.com/benlk), [@dkotter](https://github.com/dkotter) via [#445](https://github.com/10up/classifai/pull/445)).
+
+### Changed
+- Use new `get_asset_info` utility for all of our enqueues (props [@Spoygg](https://github.com/Spoygg), [@dkotter](https://github.com/dkotter) via [#421](https://github.com/10up/classifai/pull/421)).
+- Change how we import dependencies in our JS files (props [@Spoygg](https://github.com/Spoygg), [@dkotter](https://github.com/dkotter) via [#421](https://github.com/10up/classifai/pull/421)).
+- Tweaks to the image generation UI (props [@mehidi258](https://github.com/mehidi258), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#441](https://github.com/10up/classifai/pull/441)).
+- When attempting to use Azure to parse a too-large document, the error log message will include the document size and the maximum document size (props [@benlk](https://github.com/benlk), [@dkotter](https://github.com/dkotter) via [#443](https://github.com/10up/classifai/pull/443)).
+
 ## [2.0.0] - 2023-04-04
 ### Added
 - Automatic generation of excerpts using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@zamanq](https://github.com/zamanq), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk) via [#405](https://github.com/10up/classifai/pull/405), [#408](https://github.com/10up/classifai/pull/408)).
@@ -296,6 +318,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[2.1.0]: https://github.com/10up/classifai/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/10up/classifai/compare/1.8.1...2.0.0
 [1.8.1]: https://github.com/10up/classifai/compare/1.8.0...1.8.1
 [1.8.0]: https://github.com/10up/classifai/compare/1.7.3...1.8.0

@@ -615,3 +615,49 @@ function get_asset_info( $slug, $attribute = null ) {
 
 	return $asset;
 }
+
+/**
+ * Get the list of registered services.
+ *
+ * @return array Array of services.
+ */
+function get_services_menu() {
+	$services = Plugin::$instance->services;
+	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
+		return [];
+	}
+
+	/** @var ServicesManager $service_manager Instance of the services manager class. */
+	$service_manager = $services['service_manager'];
+	$services        = [];
+
+	foreach ( $service_manager->service_classes as $service ) {
+		$services[ $service->get_menu_slug() ] = $service->get_display_name();
+	}
+	return $services;
+}
+
+/**
+ * Sanitizes and ensures an input variable is set.
+ *
+ * @param string  $key               $_GET or $_POST array key.
+ * @param boolean $is_get            If the request is $_GET. Defaults to false.
+ * @param string  $sanitize_callback Sanitize callback. Defaults to `sanitize_text_field`
+ *
+ * @return string|boolean Sanitized string or `false` as fallback.
+ */
+function clean_input( string $key = '', bool $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
+	if ( ! is_callable( $sanitize_callback ) ) {
+		$sanitize_callback = 'sanitize_text_field';
+	}
+
+	if ( $is_get ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_GET[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_GET[ $key ] ) ) : '';
+	} else {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
+	}
+
+	return false;
+}
