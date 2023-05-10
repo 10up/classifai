@@ -63,45 +63,6 @@ class TextToSpeech extends Provider {
 			'azure_text_to_speech',
 			$service
 		);
-
-		add_action( 'admin_init', array( $this, 'maybe_connect_on_init' ) );
-	}
-
-	/**
-	 * Re-connects to the service on page load when the transient expires.
-	 */
-	public function maybe_connect_on_init() {
-		$active_provider = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		if ( 'azure_text_to_speech' !== $active_provider ) {
-			return;
-		}
-
-		$settings = $this->get_settings();
-
-		if ( isset( $settings['authenticated'] ) && $settings['authenticated'] ) {
-			return;
-		}
-
-		$credentials = isset( $settings['credentials'] ) ? $settings['credentials'] : array();
-
-		// In case the transient expires, we reconnect to the service.
-		if ( isset( $credentials['url'] ) && isset( $credentials['api_key'] ) ) {
-			if ( ! empty( $credentials['url'] ) && ! empty( $credentials['api_key'] ) ) {
-				$is_connected = $this->connect_to_service(
-					array(
-						'url'     => $credentials['url'],
-						'api_key' => $credentials['api_key'],
-					)
-				);
-
-				$settings['authenticated'] = $is_connected;
-
-				if ( ! is_null( $is_connected ) ) {
-					update_option( 'classifai_azure_text_to_speech', $settings );
-				}
-			}
-		}
 	}
 
 	/**
@@ -244,18 +205,12 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
-		$is_url_changed     = $settings['credentials']['url'] !== $new_settings['credentials']['url'];
-		$is_api_key_changed = $settings['credentials']['api_key'] !== $new_settings['credentials']['api_key'];
-
-		if ( $is_url_changed || $is_api_key_changed ) {
-			delete_transient( 'classifai-azure-speech-to-text-voices' );
-			$new_settings['authenticated'] = false;
-		}
+		$new_settings = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
 			$new_settings['credentials']['url']     = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
 			$new_settings['credentials']['api_key'] = sanitize_text_field( $settings['credentials']['api_key'] );
+			$new_settings['voices']                 = $this->connect_to_service( $new_settings['credentials'] );
 		} else {
 			$new_settings['credentials']['url']     = '';
 			$new_settings['credentials']['api_key'] = '';
@@ -291,11 +246,10 @@ class TextToSpeech extends Provider {
 	/**
 	 * Connects to Azure's Text to Speech service.
 	 *
-	 * @param array   $args             Overridable args.
-	 * @param boolean $ignore_transient Boolean to ignore transient. Used to reconnect to the service.
-	 * @return boolean|null
+	 * @param array $args Overridable args.
+	 * @return array
 	 */
-	public function connect_to_service( array $args = array(), bool $ignore_transient = false ) {
+	public function connect_to_service( array $args = array() ) {
 		$credentials = $this->get_settings( 'credentials' );
 
 		$default = array(
@@ -305,16 +259,9 @@ class TextToSpeech extends Provider {
 
 		$default = array_merge( $default, $args );
 
-		$voices_transient = get_transient( 'classifai-azure-speech-to-text-voices' );
-
-		// Return if transient exists.
-		if ( false !== $voices_transient && $ignore_transient ) {
-			return null;
-		}
-
 		// Return if credentials don't exist.
 		if ( empty( $default['url'] ) || empty( $default['api_key'] ) ) {
-			return false;
+			return array();
 		}
 
 		// Create request arguments.
@@ -356,7 +303,8 @@ class TextToSpeech extends Provider {
 				esc_html__( 'Azure Speech to Text: HTTP request failed.', 'classifai' ),
 				'error'
 			);
-			return false;
+
+			return array();
 		}
 
 		$http_code = wp_remote_retrieve_response_code( $response );
@@ -370,7 +318,7 @@ class TextToSpeech extends Provider {
 				'error'
 			);
 
-			return false;
+			return array();
 		}
 
 		$response_body    = wp_remote_retrieve_body( $response );
@@ -389,9 +337,7 @@ class TextToSpeech extends Provider {
 			}
 		}
 
-		set_transient( 'classifai-azure-speech-to-text-voices', $sanitized_voices, MONTH_IN_SECONDS );
-
-		return true;
+		return $sanitized_voices;
 	}
 
 	/**
@@ -400,14 +346,14 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function get_voices_select_options() {
-		$voices_transient = get_transient( 'classifai-azure-speech-to-text-voices' );
-		$options          = array();
+		$voices  = $this->get_settings( 'voices' );
+		$options = array();
 
-		if ( false === $voices_transient ) {
+		if ( false === $voices ) {
 			return $options;
 		}
 
-		foreach ( $voices_transient as $voice ) {
+		foreach ( $voices as $voice ) {
 			// phpcs is disabled because it throws error for camel case.
 			// phpcs:disable
 			$options[ "{$voice->ShortName}|{$voice->Gender}" ] = sprintf(
@@ -439,7 +385,7 @@ class TextToSpeech extends Provider {
 		return [
 			__( 'Authenticated', 'classifai' )            => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
 			__( 'API URL', 'classifai' )                  => $settings['url'] ?? '',
-			__( 'Latest response - Voices', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai-azure-speech-to-text-voices' ) ),
+			__( 'Latest response - Voices', 'classifai' ) => $this->get_formatted_latest_response( $this->get_settings( 'voices' ) ),
 		];
 	}
 
@@ -452,6 +398,7 @@ class TextToSpeech extends Provider {
 				'url'     => '',
 				'api_key' => '',
 			),
+			'voices'        => array(),
 			'voice'         => '',
 			'authenticated' => false,
 			'post-types'    => array(),
