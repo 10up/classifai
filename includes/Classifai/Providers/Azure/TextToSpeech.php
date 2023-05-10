@@ -287,7 +287,7 @@ class TextToSpeech extends Provider {
 			'api_key' => isset( $credentials['api_key'] ) ? $credentials['api_key'] : '',
 		);
 
-		$default = array_merge( $default, $args );
+		$default = wp_parse_args( $default, $args );
 
 		// Return if credentials don't exist.
 		if ( empty( $default['url'] ) || empty( $default['api_key'] ) ) {
