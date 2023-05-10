@@ -79,6 +79,7 @@ class TextToSpeech extends Provider {
 	 */
 	public function enqueue_editor_assets() {
 		global $post;
+
 		wp_enqueue_script(
 			'classifai-editor', // Handle.
 			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
@@ -88,6 +89,12 @@ class TextToSpeech extends Provider {
 		);
 
 		if ( empty( $post ) ) {
+			return;
+		}
+
+		$supported_post_types = self::get_supported_post_types();
+
+		if ( ! in_array( $post->post_type, $supported_post_types ) ) {
 			return;
 		}
 
