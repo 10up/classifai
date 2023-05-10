@@ -1,7 +1,7 @@
 describe( 'Microsoft Azure - Text to Speech', () => {
 	before( () => {
 		cy.login();
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=azure_text_to_speech' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech' );
 		cy.get( '#azure_text_to_speech_post_types_post' ).check( 'post' );
 		cy.get( '#url' ).clear();
 		cy.get( '#url' ).type( 'https://service.com' );
@@ -56,7 +56,7 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 	} );
 
 	it( 'Disable support for post type Post', () => {
-		cy.visit( '/wp-admin/admin.php?page=language_processing&tab=azure_text_to_speech' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech' );
 		cy.get( '#azure_text_to_speech_post_types_post' ).uncheck( 'post' );
 		cy.get('#submit').click();
 
