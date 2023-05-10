@@ -9,6 +9,7 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+use WP_Error;
 
 use function Classifai\get_asset_info;
 use function Classifai\get_post_types_for_language_settings;
@@ -122,11 +123,7 @@ class NLU extends Provider {
 	 * @return bool
 	 */
 	public function can_register() {
-		if ( $this->nlu_authentication_check_failed( $this->get_settings() ) ) {
-			return false;
-		}
-
-		return true;
+		return $this->is_configured();
 	}
 
 	/**
@@ -600,9 +597,9 @@ class NLU extends Provider {
 	 *
 	 * @param array $settings The list of settings to be saved
 	 *
-	 * @return bool
+	 * @return bool|WP_Error
 	 */
-	protected function nlu_authentication_check_failed( $settings ) {
+	protected function nlu_authentication_check( $settings ) {
 
 		// Check that we have credentials before hitting the API.
 		if ( ! isset( $settings['credentials'] )
@@ -610,7 +607,7 @@ class NLU extends Provider {
 			|| empty( $settings['credentials']['watson_password'] )
 			|| empty( $settings['credentials']['watson_url'] )
 		) {
-			return true;
+			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
 		}
 
 		$request           = new \Classifai\Watson\APIRequest();
@@ -634,15 +631,13 @@ class NLU extends Provider {
 		];
 		$response          = $request->post( $url, $options );
 
-		$is_error = is_wp_error( $response );
-		if ( ! $is_error ) {
+		if ( ! is_wp_error( $response ) ) {
 			update_option( 'classifai_configured', true );
+			return true;
 		} else {
 			delete_option( 'classifai_configured' );
+			return $response;
 		}
-
-		return $is_error;
-
 	}
 
 
@@ -654,14 +649,19 @@ class NLU extends Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		if ( $this->nlu_authentication_check_failed( $settings ) ) {
+		$new_settings  = $this->get_settings();
+		$authenticated = $this->nlu_authentication_check( $settings );
+
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings['authenticated'] = false;
 			add_settings_error(
 				'credentials',
 				'classifai-auth',
-				esc_html__( 'IBM Watson NLU Authentication Failed. Please check credentials.', 'classifai' ),
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings['authenticated'] = true;
 		}
 
 		if ( isset( $settings['credentials']['watson_url'] ) ) {
@@ -903,9 +903,20 @@ class NLU extends Provider {
 	/**
 	 * Returns whether the provider is configured or not.
 	 *
+	 * For backwards compat, we've maintained the use of the
+	 * `classifai_configured` option. We default to looking for
+	 * the `authenticated` setting though.
+	 *
 	 * @return bool
 	 */
 	public function is_configured() {
-		return get_option( 'classifai_configured', false );
+		$is_configured = parent::is_configured();
+
+		if ( ! $is_configured ) {
+			$is_configured = (bool) get_option( 'classifai_configured', false );
+		}
+
+		return $is_configured;
 	}
+
 }
