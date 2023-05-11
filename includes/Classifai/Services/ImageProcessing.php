@@ -51,7 +51,7 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		$provider = find_provider_class( $this->provider_classes, 'Computer Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
 		if ( ! is_wp_error( $provider ) ) {
 			wp_add_inline_script(
 				'classifai-media-script',
@@ -236,7 +236,7 @@ class ImageProcessing extends Service {
 		}
 
 		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes, 'Computer Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {
@@ -304,7 +304,7 @@ class ImageProcessing extends Service {
 	 */
 	public function generate_image( WP_REST_Request $request ) {
 		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes, 'DALL·E' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {

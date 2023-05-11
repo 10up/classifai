@@ -178,7 +178,7 @@ class LanguageProcessing extends Service {
 		$post_id = $request->get_param( 'id' );
 
 		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes, 'DALL·E' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {

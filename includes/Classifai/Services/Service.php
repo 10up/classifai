@@ -123,14 +123,22 @@ abstract class Service {
 			?>
 			<div class="classifai-wrap wrap wrap--nlu">
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
-				<?php if ( ! empty( $this->provider_classes ) ) : ?>
+
+				<?php
+				if ( empty( $this->provider_classes ) ) {
+					echo '<p>' . esc_html__( 'No providers available for this service.', 'classifai' ) . '</p>';
+					return;
+				}
+				?>
+
 				<h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
 						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
 					<?php endforeach; ?>
 				</h2>
-				<?php endif; ?>
+
 				<?php settings_errors(); ?>
+
 				<div class="classifai-nlu-sections">
 					<form method="post" action="options.php">
 					<?php
