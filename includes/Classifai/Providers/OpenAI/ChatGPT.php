@@ -548,7 +548,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write a short SEO friendly title for this content. Do not use quotes', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for this content that will encourage readers to click and read. Use a maximum of 60 characters', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -571,7 +571,7 @@ class ChatGPT extends Provider {
 						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
 					],
 				],
-				'temperature' => 0.5,
+				'temperature' => 0.8,
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
@@ -600,7 +600,7 @@ class ChatGPT extends Provider {
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' \n\r\t\v\x00"\'' ) );
+				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
 			}
 		}
 
