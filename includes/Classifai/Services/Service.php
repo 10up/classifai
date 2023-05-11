@@ -5,6 +5,7 @@
 
 namespace Classifai\Services;
 
+use function Classifai\find_provider_class;
 use WP_Error;
 
 abstract class Service {
@@ -137,7 +138,12 @@ abstract class Service {
 						submit_button();
 					?>
 					</form>
-					<?php if ( isset( $this->provider_classes[0] ) && ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
+					<?php
+					// Find the right provider class.
+					$provider = find_provider_class( $this->provider_classes, 'Natural Language Understanding' );
+
+					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
+						?>
 					<div id="classifai-post-preview-app">
 						<?php
 							$supported_post_statuses = \Classifai\get_supported_post_statuses();
