@@ -94,7 +94,7 @@ class TextToSpeech extends Provider {
 
 		$supported_post_types = self::get_supported_post_types();
 
-		if ( ! in_array( $post->post_type, $supported_post_types ) ) {
+		if ( ! in_array( $post->post_type, $supported_post_types, true ) ) {
 			return;
 		}
 
@@ -235,7 +235,12 @@ class TextToSpeech extends Provider {
 			if ( $is_credentials_changed ) {
 				$current_settings['credentials']['url']     = $new_url;
 				$current_settings['credentials']['api_key'] = $new_key;
-				$current_settings['voices']                 = $this->connect_to_service( $current_settings['credentials'] );
+				$current_settings['voices']                 = $this->connect_to_service(
+					array(
+						'url'     => $new_url,
+						'api_key' => $new_key,
+					)
+				);
 
 				if ( ! empty( $current_settings['voices'] ) ) {
 					$current_settings['authenticated'] = true;
@@ -287,7 +292,7 @@ class TextToSpeech extends Provider {
 			'api_key' => isset( $credentials['api_key'] ) ? $credentials['api_key'] : '',
 		);
 
-		$default = wp_parse_args( $default, $args );
+		$default = wp_parse_args( $args, $default );
 
 		// Return if credentials don't exist.
 		if ( empty( $default['url'] ) || empty( $default['api_key'] ) ) {
