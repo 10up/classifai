@@ -107,7 +107,8 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$base_url   = add_query_arg(
 			array(
 				'page' => 'classifai',
@@ -140,7 +141,7 @@ abstract class Service {
 					</form>
 					<?php
 					// Find the right provider class.
-					$provider = find_provider_class( $this->provider_classes, 'Natural Language Understanding' );
+					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 
 					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
 						?>

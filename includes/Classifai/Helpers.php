@@ -44,9 +44,16 @@ function get_plugin_settings( $service = '', $provider = '' ) {
 		return [];
 	}
 
+	// Ensure we have at least one provider.
+	$providers = $service_manager->service_classes[ $service ]->provider_classes;
+
+	if ( empty( $providers ) ) {
+		return [];
+	}
+
 	// If we want settings for a specific provider, find the proper provider service.
 	if ( ! empty( $provider ) ) {
-		foreach ( $service_manager->service_classes[ $service ]->provider_classes as $provider_class ) {
+		foreach ( $providers as $provider_class ) {
 			if ( $provider_class->provider_service_name === $provider ) {
 				return $provider_class->get_settings();
 			}
@@ -56,7 +63,7 @@ function get_plugin_settings( $service = '', $provider = '' ) {
 	}
 
 	/** @var Provider $provider An instance or extension of the provider abstract class. */
-	$provider = $service_manager->service_classes[ $service ]->provider_classes[0];
+	$provider = $providers[0];
 	return $provider->get_settings();
 }
 
