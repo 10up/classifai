@@ -203,6 +203,32 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 * Ensure this item has content saved.
 * Open the Excerpt panel in the sidebar and click on `Generate Excerpt`
 
+## Set Up Language Processing (via Microsoft Azure)
+
+Note that [Text to Speech](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech) can convert your posts/pages to human speech:
+
+### 1. Sign up for Azure services
+
+- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+- Log into your account and create a new [*Speech Service*](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/overview) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+
+### 2. Configure Microsoft Azure API and Key under ClassifAI > Language Processing > Microsoft Azure
+
+- In the `Endpoint URL` field, enter your `API endpoint`.
+- In the `API Key` field, enter your `KEY 1`.
+- Click **Save Changes** (the page will reload).
+- If connected successfully, a new dropdown with the label "Voices" will be displayed.
+- Select a voice as per your choice.
+- Select a post type that should use this service.
+
+### 3. Using the Text to Speech service
+
+- Assuming the post type selected is "post", create a new post and publish it.
+- After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+- Click the button to preview the generated speech audio for the post.
+
 ## Set Up Image Processing (via Microsoft Azure)
 
 Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
