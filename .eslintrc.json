@@ -20,5 +20,6 @@
 		"File": "readonly",
 		"Headers": "readonly"
 	},
-	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
+	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
+	"ignorePatterns": ["*.json"]
 }
