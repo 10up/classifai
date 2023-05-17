@@ -5,7 +5,6 @@ namespace Classifai;
 use Classifai\Providers\Provider;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
-use Classifai\Providers\Azure\TextToSpeech;
 
 /**
  * Miscellaneous Helper functions to access different parts of the
