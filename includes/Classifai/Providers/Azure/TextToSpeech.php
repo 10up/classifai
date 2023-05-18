@@ -389,6 +389,10 @@ class TextToSpeech extends Provider {
 		}
 
 		foreach ( $voices as $voice ) {
+			if ( ! is_object( $voice ) ) {
+				continue;
+			}
+
 			// phpcs is disabled because it throws error for camel case.
 			// phpcs:disable
 			$options[ "{$voice->ShortName}|{$voice->Gender}" ] = sprintf(
