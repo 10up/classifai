@@ -5,6 +5,7 @@
 
 namespace Classifai\Services;
 
+use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -68,8 +69,13 @@ class Personalizer extends Service {
 			}
 		}
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-		echo $this->provider_classes[0]->render_recommended_content( $attributes );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
+
+		if ( ! is_wp_error( $provider ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo $provider->render_recommended_content( $attributes );
+		}
+
 		exit();
 	}
 
@@ -128,7 +134,6 @@ class Personalizer extends Service {
 		$event_id = $request->get_param( 'eventId' );
 		$reward   = ( '1' === $request->get_param( 'rewarded' ) ) ? 1 : 0;
 		$route    = $request->get_param( 'route' ) ?? false;
-		$provider = '';
 
 		// If no args, respond 404.
 		if ( false === $route ) {
@@ -141,15 +146,11 @@ class Personalizer extends Service {
 			}
 
 			// Find the right provider class.
-			foreach ( $this->provider_classes as $provider_class ) {
-				if ( 'Personalizer' === $provider_class->provider_service_name ) {
-					$provider = $provider_class;
-				}
-			}
+			$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
 
 			// Ensure we have a provider class. Should never happen but :shrug:
-			if ( ! $provider ) {
-				return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+			if ( is_wp_error( $provider ) ) {
+				return $provider;
 			}
 
 			// Send reward to personalizer.

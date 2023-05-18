@@ -5,6 +5,7 @@ namespace Classifai;
 use Classifai\Providers\Provider;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
+use WP_Error;
 
 /**
  * Miscellaneous Helper functions to access different parts of the
@@ -43,9 +44,16 @@ function get_plugin_settings( $service = '', $provider = '' ) {
 		return [];
 	}
 
+	// Ensure we have at least one provider.
+	$providers = $service_manager->service_classes[ $service ]->provider_classes;
+
+	if ( empty( $providers ) ) {
+		return [];
+	}
+
 	// If we want settings for a specific provider, find the proper provider service.
 	if ( ! empty( $provider ) ) {
-		foreach ( $service_manager->service_classes[ $service ]->provider_classes as $provider_class ) {
+		foreach ( $providers as $provider_class ) {
 			if ( $provider_class->provider_service_name === $provider ) {
 				return $provider_class->get_settings();
 			}
@@ -55,7 +63,7 @@ function get_plugin_settings( $service = '', $provider = '' ) {
 	}
 
 	/** @var Provider $provider An instance or extension of the provider abstract class. */
-	$provider = $service_manager->service_classes[ $service ]->provider_classes[0];
+	$provider = $providers[0];
 	return $provider->get_settings();
 }
 
@@ -661,4 +669,27 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
 	}
 
 	return false;
+}
+
+/**
+ * Find the provider class that a service belongs to.
+ *
+ * @param array  $provider_classes Provider classes to look in.
+ * @param string $service_name Service name to look for.
+ * @return Provider|WP_Error
+ */
+function find_provider_class( array $provider_classes = [], string $service_name = '' ) {
+	$provider = '';
+
+	foreach ( $provider_classes as $provider_class ) {
+		if ( $service_name === $provider_class->provider_service_name ) {
+			$provider = $provider_class;
+		}
+	}
+
+	if ( ! $provider ) {
+		return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+	}
+
+	return $provider;
 }

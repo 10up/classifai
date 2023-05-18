@@ -71,20 +71,6 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$options = get_option( $this->get_option_name() );
-		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Register the functionality.
 	 */
 	public function register() {

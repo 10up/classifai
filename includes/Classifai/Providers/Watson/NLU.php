@@ -9,10 +9,11 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
-
-use function Classifai\get_asset_info;
+use function Classifai\get_plugin_settings;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
+use function Classifai\get_asset_info;
+use WP_Error;
 
 class NLU extends Provider {
 
@@ -114,19 +115,6 @@ class NLU extends Provider {
 		];
 
 		update_option( $this->get_option_name(), $settings );
-	}
-
-	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		if ( $this->nlu_authentication_check_failed( $this->get_settings() ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -600,9 +588,9 @@ class NLU extends Provider {
 	 *
 	 * @param array $settings The list of settings to be saved
 	 *
-	 * @return bool
+	 * @return bool|WP_Error
 	 */
-	protected function nlu_authentication_check_failed( $settings ) {
+	protected function nlu_authentication_check( $settings ) {
 
 		// Check that we have credentials before hitting the API.
 		if ( ! isset( $settings['credentials'] )
@@ -610,7 +598,7 @@ class NLU extends Provider {
 			|| empty( $settings['credentials']['watson_password'] )
 			|| empty( $settings['credentials']['watson_url'] )
 		) {
-			return true;
+			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
 		}
 
 		$request           = new \Classifai\Watson\APIRequest();
@@ -634,15 +622,13 @@ class NLU extends Provider {
 		];
 		$response          = $request->post( $url, $options );
 
-		$is_error = is_wp_error( $response );
-		if ( ! $is_error ) {
+		if ( ! is_wp_error( $response ) ) {
 			update_option( 'classifai_configured', true );
+			return true;
 		} else {
 			delete_option( 'classifai_configured' );
+			return $response;
 		}
-
-		return $is_error;
-
 	}
 
 
@@ -654,14 +640,19 @@ class NLU extends Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		if ( $this->nlu_authentication_check_failed( $settings ) ) {
+		$new_settings  = $this->get_settings();
+		$authenticated = $this->nlu_authentication_check( $settings );
+
+		if ( is_wp_error( $authenticated ) ) {
+			$new_settings['authenticated'] = false;
 			add_settings_error(
 				'credentials',
 				'classifai-auth',
-				esc_html__( 'IBM Watson NLU Authentication Failed. Please check credentials.', 'classifai' ),
+				$authenticated->get_error_message(),
 				'error'
 			);
+		} else {
+			$new_settings['authenticated'] = true;
 		}
 
 		if ( isset( $settings['credentials']['watson_url'] ) ) {
@@ -696,10 +687,13 @@ class NLU extends Provider {
 			}
 		}
 
+		$feature_enabled = false;
+
 		foreach ( $this->nlu_features as $feature => $labels ) {
 			// Set the enabled flag.
 			if ( isset( $settings['features'][ $feature ] ) ) {
 				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
+				$feature_enabled                      = true;
 			} else {
 				$new_settings['features'][ $feature ] = null;
 			}
@@ -711,6 +705,20 @@ class NLU extends Provider {
 
 			if ( isset( $settings['features'][ "{$feature}_taxonomy" ] ) ) {
 				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
+			}
+		}
+
+		// Show a warning if the NLU feature and Embeddings feature are both enabled.
+		if ( $feature_enabled ) {
+			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
+
+			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
+				add_settings_error(
+					'features',
+					'conflict',
+					esc_html__( 'OpenAI Embeddings classification is turned on. This may conflict with the NLU classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
+					'warning'
+				);
 			}
 		}
 
@@ -905,9 +913,20 @@ class NLU extends Provider {
 	/**
 	 * Returns whether the provider is configured or not.
 	 *
+	 * For backwards compat, we've maintained the use of the
+	 * `classifai_configured` option. We default to looking for
+	 * the `authenticated` setting though.
+	 *
 	 * @return bool
 	 */
 	public function is_configured() {
-		return get_option( 'classifai_configured', false );
+		$is_configured = parent::is_configured();
+
+		if ( ! $is_configured ) {
+			$is_configured = (bool) get_option( 'classifai_configured', false );
+		}
+
+		return $is_configured;
 	}
+
 }

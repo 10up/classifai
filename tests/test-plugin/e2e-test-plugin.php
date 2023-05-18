@@ -23,6 +23,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/dalle.json' );
 	} elseif ( strpos( $url, 'https://service.com/cognitiveservices/voices/list' ) !== false ) {
@@ -39,6 +41,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			),
 			'body' => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
 		);
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/embeddings.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {

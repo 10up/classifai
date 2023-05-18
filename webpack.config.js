@@ -15,6 +15,7 @@ module.exports = {
 		'language-processing': [ './src/js/language-processing.js' ],
 		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
 		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
+		'post-status-info': [ './src/js/gutenberg-plugins/post-status-info.js' ],
 		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
 		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],

@@ -15,13 +15,13 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as postAudioStore } from './store/register';
 
-const { classifaiPostData } = window;
+const { classifaiEmbeddingData, classifaiPostData } = window;
 
 /**
  * Create the ClassifAI icon
  */
 const ClassifAIIcon = () => (
-	<Icon className="components-panel__icon" icon={ icon } size={ 24 } />
+	<Icon className="components-panel__icon" icon={icon} size={24} />
 );
 
 /**
@@ -30,19 +30,19 @@ const ClassifAIIcon = () => (
  */
 const ClassifAIToggle = () => {
 	// Use the datastore to retrieve all the meta for this post.
-	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
+	const processContent = useSelect((select) =>
+		select('core/editor').getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
 
 	// Use the datastore to tell the post to update the meta.
-	const { editPost } = useDispatch( 'core/editor' );
+	const { editPost } = useDispatch('core/editor');
 	const enabled = 'no' === processContent ? 'no' : 'yes';
 
 	return (
 		<ToggleControl
-			label={ __( 'Process content on update', 'classifai' ) }
+			label={__('Process content on update', 'classifai')}
 			help={
 				'yes' === enabled
 					? __(
@@ -54,10 +54,10 @@ const ClassifAIToggle = () => {
 							'classifai'
 					  )
 			}
-			checked={ 'yes' === enabled }
-			onChange={ ( value ) => {
-				editPost( { classifai_process_content: value ? 'yes' : 'no' } );
-			} }
+			checked={'yes' === enabled}
+			onChange={(value) => {
+				editPost({ classifai_process_content: value ? 'yes' : 'no' });
+			}}
 		/>
 	);
 };
@@ -67,54 +67,51 @@ const ClassifAIToggle = () => {
  *
  * @param {Object} resp
  */
-const buttonClickCallBack = async ( resp ) => {
+const buttonClickCallBack = async (resp) => {
 	const { select, dispatch } = wp.data;
-	const postId = select( 'core/editor' ).getCurrentPostId();
-	const postType = select( 'core/editor' ).getCurrentPostType();
+	const postId = select('core/editor').getCurrentPostId();
+	const postType = select('core/editor').getCurrentPostType();
 	const postTypeLabel =
-		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
+		select('core/editor').getPostTypeLabel() || __('Post', 'classifai');
 
-	if ( resp && resp.terms ) {
+	if (resp && resp.terms) {
 		let updateNeeded = false;
-		const taxonomies = Object.keys( resp.terms );
+		const taxonomies = Object.keys(resp.terms);
 		const taxTerms = {};
-		taxonomies.forEach( ( taxonomy ) => {
+		taxonomies.forEach((taxonomy) => {
 			let tax = taxonomy;
-			if ( 'post_tag' === taxonomy ) {
+			if ('post_tag' === taxonomy) {
 				tax = 'tags';
 			}
-			if ( 'category' === taxonomy ) {
+			if ('category' === taxonomy) {
 				tax = 'categories';
 			}
 
 			const currentTerms =
-				select( 'core/editor' ).getEditedPostAttribute( taxonomy ) ||
-				[];
+				select('core/editor').getEditedPostAttribute(taxonomy) || [];
 			const newTerms = [
 				...currentTerms,
-				...resp.terms[ taxonomy ].map( ( term ) =>
-					Number.parseInt( term )
-				),
-			].filter( ( ele, i, a ) => a.indexOf( ele ) === i );
+				...resp.terms[taxonomy].map((term) => Number.parseInt(term)),
+			].filter((ele, i, a) => a.indexOf(ele) === i);
 
-			if ( newTerms && newTerms.length ) {
+			if (newTerms && newTerms.length) {
 				updateNeeded = true;
-				taxTerms[ tax ] = newTerms;
+				taxTerms[tax] = newTerms;
 			}
-		} );
+		});
 
-		if ( updateNeeded ) {
+		if (updateNeeded) {
 			// Check for edited values in post.
-			const isDirty = await select( 'core/editor' ).isEditedPostDirty();
-			await dispatch( 'core' ).editEntityRecord(
+			const isDirty = await select('core/editor').isEditedPostDirty();
+			await dispatch('core').editEntityRecord(
 				'postType',
 				postType,
 				postId,
 				taxTerms
 			);
 			// If no edited values in post trigger save.
-			if ( ! isDirty ) {
-				await dispatch( 'core' ).saveEditedEntityRecord(
+			if (!isDirty) {
+				await dispatch('core').saveEditedEntityRecord(
 					'postType',
 					postType,
 					postId
@@ -122,10 +119,10 @@ const buttonClickCallBack = async ( resp ) => {
 			}
 
 			// Display success notice.
-			dispatch( 'core/notices' ).createSuccessNotice(
+			dispatch('core/notices').createSuccessNotice(
 				sprintf(
 					/** translators: %s is post type label. */
-					__( '%s classified successfully.', 'classifai' ),
+					__('%s classified successfully.', 'classifai'),
 					postTypeLabel
 				),
 				{ type: 'snackbar' }
@@ -138,54 +135,54 @@ const buttonClickCallBack = async ( resp ) => {
  *  Classify Post Button
  */
 const ClassifAIGenerateTagsButton = () => {
-	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
+	const processContent = useSelect((select) =>
+		select('core/editor').getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
 	// Display classify post button only when process content on update is disabled.
 	const enabled = 'no' === processContent ? 'no' : 'yes';
-	if ( 'yes' === enabled ) {
+	if ('yes' === enabled) {
 		return null;
 	}
 
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postId = wp.data.select('core/editor').getCurrentPostId();
 	const postTypeLabel =
-		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
-		__( 'Post', 'classifai' );
+		wp.data.select('core/editor').getPostTypeLabel() ||
+		__('Post', 'classifai');
 	const buttonText = sprintf(
 		/** translators: %s Post type label */
-		__( 'Classify %s', 'classifai' ),
+		__('Classify %s', 'classifai'),
 		postTypeLabel
 	);
 
 	return (
 		<>
 			<Button
-				variant={ 'secondary' }
-				data-id={ postId }
-				onClick={ ( e ) =>
-					handleClick( {
+				variant={'secondary'}
+				data-id={postId}
+				onClick={(e) =>
+					handleClick({
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
 						buttonText,
-					} )
+					})
 				}
 			>
-				{ buttonText }
+				{buttonText}
 			</Button>
 			<span
 				className="spinner"
-				style={ { display: 'none', float: 'none' } }
+				style={{ display: 'none', float: 'none' }}
 			></span>
 			<span
 				className="error"
-				style={ {
+				style={{
 					display: 'none',
 					color: '#bc0b0b',
 					padding: '5px',
-				} }
+				}}
 			></span>
 		</>
 	);
@@ -452,59 +449,93 @@ wp.data.subscribe( function () {
  * Add the ClassifAI panel to Gutenberg
  */
 const ClassifAIPlugin = () => {
-	const postType = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostType()
+	const postType = useSelect((select) =>
+		select('core/editor').getCurrentPostType()
 	);
-	const postStatus = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
+	const postStatus = useSelect((select) =>
+		select('core/editor').getCurrentPostAttribute('status')
 	);
 
-	const userHasPermissions =
-		classifaiPostData &&
-		! (
-			classifaiPostData.noPermissions &&
-			1 === parseInt( classifaiPostData.noPermissions )
-		);
-	const isLanguageProcessingEnabled =
-		classifaiPostData && classifaiPostData.NLUEnabled;
-	const isPosTypeSupported =
-		classifaiPostData &&
-		classifaiPostData.supportedPostTypes &&
-		classifaiPostData.supportedPostTypes.includes( postType );
-	const isPostStatusSupported =
-		classifaiPostData &&
-		classifaiPostData.supportedPostStatues &&
-		classifaiPostData.supportedPostStatues.includes( postStatus );
-
-	const defaultAudioId = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
-			'classifai_post_audio_id'
-		)
+	const defaultAudioId = useSelect((select) =>
+		select('core/editor').getEditedPostAttribute('classifai_post_audio_id')
 	);
 	const audioId =
-		useSelect( ( select ) => select( postAudioStore ).getAudioId() ) ||
+		useSelect((select) => select(postAudioStore).getAudioId()) ||
 		defaultAudioId;
+
+	// Ensure that at least one feature is enabled.
+	const isNLULanguageProcessingEnabled =
+		classifaiPostData && classifaiPostData.NLUEnabled;
+
+	const isEmbeddingProcessingEnabled =
+		classifaiEmbeddingData && classifaiEmbeddingData.enabled;
+
+	// Ensure we are on a supported post type, checking settings from all features.
+	const isNLUPostTypeSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostTypes &&
+		classifaiPostData.supportedPostTypes.includes(postType);
+
+	const isEmbeddingPostTypeSupported =
+		classifaiEmbeddingData &&
+		classifaiEmbeddingData.supportedPostTypes &&
+		classifaiEmbeddingData.supportedPostTypes.includes(postType);
+
+	// Ensure we are on a supported post status, checking settings from all features.
+	const isNLUPostStatusSupported =
+		classifaiPostData &&
+		classifaiPostData.supportedPostStatues &&
+		classifaiPostData.supportedPostStatues.includes(postStatus);
+
+	const isEmbeddingPostStatusSupported =
+		classifaiEmbeddingData &&
+		classifaiEmbeddingData.supportedPostStatues &&
+		classifaiEmbeddingData.supportedPostStatues.includes(postStatus);
+
+	// Ensure the user has permissions to use the feature.
+	const userHasNLUPermissions =
+		classifaiPostData &&
+		!(
+			classifaiPostData.noPermissions &&
+			1 === parseInt(classifaiPostData.noPermissions)
+		);
+
+	const userHasEmbeddingPermissions =
+		classifaiEmbeddingData &&
+		!(
+			classifaiEmbeddingData.noPermissions &&
+			1 === parseInt(classifaiEmbeddingData.noPermissions)
+		);
+
+	const nluPermissionCheck =
+		userHasNLUPermissions &&
+		isNLULanguageProcessingEnabled &&
+		isNLUPostTypeSupported &&
+		isNLUPostStatusSupported;
+
+	const embeddingsPermissionCheck =
+		userHasEmbeddingPermissions &&
+		isEmbeddingProcessingEnabled &&
+		isEmbeddingPostTypeSupported &&
+		isEmbeddingPostStatusSupported;
 
 	return (
 		<PluginDocumentSettingPanel
-			title={ __( 'ClassifAI', 'classifai' ) }
-			icon={ ClassifAIIcon }
+			title={__('ClassifAI', 'classifai')}
+			icon={ClassifAIIcon}
 			className="classifai-panel"
 		>
 			<>
-				{ userHasPermissions &&
-					isLanguageProcessingEnabled &&
-					isPosTypeSupported &&
-					isPostStatusSupported && (
-						<>
-							<ClassifAIToggle />
-							<ClassifAIGenerateTagsButton />
-						</>
-					) }
+				{(nluPermissionCheck || embeddingsPermissionCheck) && (
+					<>
+						<ClassifAIToggle />
+						{nluPermissionCheck && <ClassifAIGenerateTagsButton />}
+					</>
+				)}
 			</>
-			<ClassifAITSpeechSynthesisToggle audioId={ audioId } />
+			<ClassifAITSpeechSynthesisToggle audioId={audioId} />
 		</PluginDocumentSettingPanel>
 	);
 };
 
-registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );
+registerPlugin('classifai-plugin', { render: ClassifAIPlugin });
