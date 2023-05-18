@@ -154,26 +154,6 @@ trait OpenAI {
 	}
 
 	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param string $transient Transient that holds our data.
-	 * @return string
-	 */
-	private function get_formatted_latest_response( string $transient = '' ) {
-		$data = get_transient( $transient );
-
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
-	}
-
-	/**
 	 * Get available post types to use in settings.
 	 *
 	 * @return array

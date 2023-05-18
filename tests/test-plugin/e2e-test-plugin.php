@@ -27,6 +27,20 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/dalle.json' );
+	} elseif ( strpos( $url, 'https://service.com/cognitiveservices/voices/list' ) !== false ) {
+		return array(
+			'response'    => array(
+				'code' => 200,
+			),
+			'body' => file_get_contents( __DIR__ . '/text-to-speech-voices.json' ),
+		);
+	} elseif ( strpos( $url, 'https://service.com/cognitiveservices/v1' ) !== false ) {
+		return array(
+			'response'    => array(
+				'code' => 200,
+			),
+			'body' => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
+		);
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {

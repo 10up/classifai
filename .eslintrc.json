@@ -12,11 +12,14 @@
 		"ajaxurl": "readonly",
 		"FormData": "readonly",
 		"classifaiMediaVars": "readonly",
+		"classifaiTextToSpeechData": "readonly",
+		"wpApiSettings": "readonly",
 		"classifaiDalleData": "readonly",
 		"Backbone": "readonly",
-		"wpApiSettings": "readonly",
 		"_": "readonly",
-		"File": "readonly"
+		"File": "readonly",
+		"Headers": "readonly"
 	},
-	"extends": ["plugin:@wordpress/eslint-plugin/recommended"]
+	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
+	"ignorePatterns": ["*.json"]
 }

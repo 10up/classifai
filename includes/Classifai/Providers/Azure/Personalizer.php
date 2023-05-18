@@ -720,23 +720,4 @@ class Personalizer extends Provider {
 			__( 'Service Status', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) ),
 		];
 	}
-
-	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param mixed $data Response data to format.
-	 *
-	 * @return string
-	 */
-	private function get_formatted_latest_response( $data ) {
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
-	}
 }

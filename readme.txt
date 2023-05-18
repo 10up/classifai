@@ -17,6 +17,7 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 * Classify your content using [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Automatically generate titles for your content using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
+* Automatically convert your content into audio and provide a read-to-me feature using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
 * Supports Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities)
 * Automatically classify content and images on save
@@ -32,7 +33,7 @@ Enhance your WordPress content with Artificial Intelligence and Machine Learning
 
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
-* To utilize the Computer Vision Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the Computer Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 == Upgrade Notice ==
 

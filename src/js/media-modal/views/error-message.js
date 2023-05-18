@@ -11,7 +11,7 @@ const ErrorMessage = wp.media.View.extend( {
 	 *
 	 * @param {Object} options Options passed to the view.
 	 */
-	initialize: function( options ) {
+	initialize: function ( options ) {
 		this.$el.text( '' );
 		this.render( options.error );
 	},
@@ -21,7 +21,7 @@ const ErrorMessage = wp.media.View.extend( {
 	 *
 	 * @param {string} error Error text.
 	 */
-	render: function( error ) {
+	render: function ( error ) {
 		this.$el.text( error );
 		return this;
 	},
