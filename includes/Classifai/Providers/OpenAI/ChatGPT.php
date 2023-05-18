@@ -533,7 +533,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for this content that will encourage readers to click and read. Use a maximum of 60 characters', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -556,7 +556,7 @@ class ChatGPT extends Provider {
 						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
 					],
 				],
-				'temperature' => 0.8,
+				'temperature' => 0.9,
 				'n'           => absint( $args['num'] ),
 			],
 			$post_id
