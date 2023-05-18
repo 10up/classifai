@@ -30,7 +30,7 @@ class APIRequest {
 	 *
 	 * @param string $api_key OpenAI API key.
 	 */
-	public function __construct( $api_key = '' ) {
+	public function __construct( string $api_key = '' ) {
 		$this->api_key = $api_key;
 	}
 
@@ -41,7 +41,7 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|WP_Error
 	 */
-	public function get( $url, $options = [] ) {
+	public function get( string $url, array $options = [] ) {
 		$this->add_headers( $options );
 		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 	}
@@ -53,7 +53,7 @@ class APIRequest {
 	 * @param array  $options Additional query params.
 	 * @return array|WP_Error
 	 */
-	public function post( $url = '', $options = [] ) {
+	public function post( string $url = '', array $options = [] ) {
 		$options = wp_parse_args(
 			$options,
 			[
@@ -62,6 +62,50 @@ class APIRequest {
 		);
 		$this->add_headers( $options );
 		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+	}
+
+	/**
+	 * Makes an authorized POST request with form data.
+	 *
+	 * @param string $url The OpenAI API URL.
+	 * @param array  $body The body of the request.
+	 * @return array|WP_Error
+	 */
+	public function post_form( string $url = '', array $body = [] ) {
+		$boundary = wp_generate_password( 24, false );
+		$payload  = '';
+
+		// Take all our POST fields and transform them to work with form-data.
+		foreach ( $body as $name => $value ) {
+			$payload .= '--' . $boundary;
+			$payload .= "\r\n";
+
+			if ( 'file' === $name ) {
+				$payload .= 'Content-Disposition: form-data; name="file"; filename="' . basename( $value ) . '"' . "\r\n";
+				$payload .= "\r\n";
+				$payload .= file_get_contents( $value ); // phpcs:ignore
+			} else {
+				$payload .= 'Content-Disposition: form-data; name="' . esc_attr( $name ) .
+					'"' . "\r\n\r\n";
+				$payload .= esc_attr( $value );
+			}
+
+			$payload .= "\r\n";
+		}
+
+		$payload .= '--' . $boundary . '--';
+
+		$options = [
+			'body'    => $payload,
+			'headers' => [
+				'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+			],
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+		];
+
+		$this->add_headers( $options );
+
+		return $this->get_result( wp_remote_post( $url, $options ) );
 	}
 
 	/**
@@ -96,13 +140,18 @@ class APIRequest {
 	 *
 	 * @param array $options The header options, passed by reference.
 	 */
-	public function add_headers( &$options = [] ) {
+	public function add_headers( array &$options = [] ) {
 		if ( empty( $options['headers'] ) ) {
 			$options['headers'] = [];
 		}
 
-		$options['headers']['Authorization'] = $this->get_auth_header();
-		$options['headers']['Content-Type']  = 'application/json';
+		if ( ! isset( $options['headers']['Authorization'] ) ) {
+			$options['headers']['Authorization'] = $this->get_auth_header();
+		}
+
+		if ( ! isset( $options['headers']['Content-Type'] ) ) {
+			$options['headers']['Content-Type'] = 'application/json';
+		}
 	}
 
 	/**

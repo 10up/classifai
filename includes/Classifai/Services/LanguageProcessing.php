@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -23,6 +24,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
+				'Classifai\Providers\OpenAI\Whisper',
 			]
 		);
 	}
@@ -74,6 +76,24 @@ class LanguageProcessing extends Service {
 					],
 				],
 				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-transcript/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_audio_transcript' ],
+				'args'                => [
+					'id' => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Attachment ID to generate transcript for.', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'generate_audio_transcript_permissions_check' ],
 			]
 		);
 	}
@@ -175,19 +195,14 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
-		$provider = '';
+		$post_id = $request->get_param( 'id' );
 
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( ! $provider ) {
-			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
 		}
 
 		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt' ) );
@@ -230,6 +245,78 @@ class LanguageProcessing extends Service {
 		// Check if excerpt generation is turned on.
 		if ( empty( $settings ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+		}
+
+		// Check if the current user's role is allowed.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handle request to generate a transcript for given attachment ID.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_audio_transcript( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$provider      = '';
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'Whisper' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
+
+		return rest_ensure_response( $provider->transcribe_audio( $attachment_id ) );
+	}
+
+	/**
+	 * Check if a given request has access to generate a transcript.
+	 *
+	 * This check ensures we have a valid user with proper capabilities
+	 * making the request, that we are properly authenticated with OpenAI
+	 * and that transcription is turned on.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_audio_transcript_permissions_check( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'Whisper' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Check if transcription is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_transcripts'] ) && 'no' === $settings['enable_transcripts'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcription is not currently enabled.', 'classifai' ) );
 		}
 
 		// Check if the current user's role is allowed.

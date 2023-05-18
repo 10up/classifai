@@ -5,6 +5,7 @@
 
 namespace Classifai\Services;
 
+use function Classifai\find_provider_class;
 use WP_Error;
 
 abstract class Service {
@@ -106,7 +107,8 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $this->provider_classes[0]->get_settings_section(); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$base_url   = add_query_arg(
 			array(
 				'page' => 'classifai',
@@ -121,14 +123,23 @@ abstract class Service {
 			?>
 			<div class="classifai-wrap wrap wrap--nlu">
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
-				<?php if ( ! empty( $this->provider_classes ) ) : ?>
+
+				<?php
+				if ( empty( $this->provider_classes ) ) {
+					echo '<p>' . esc_html__( 'No providers available for this service.', 'classifai' ) . '</p>';
+					echo '</div></div>';
+					return;
+				}
+				?>
+
 				<h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
 						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
 					<?php endforeach; ?>
 				</h2>
-				<?php endif; ?>
+
 				<?php settings_errors(); ?>
+
 				<div class="classifai-nlu-sections">
 					<form method="post" action="options.php">
 					<?php
@@ -137,7 +148,12 @@ abstract class Service {
 						submit_button();
 					?>
 					</form>
-					<?php if ( isset( $this->provider_classes[0] ) && ! empty( $this->provider_classes[0]->can_register() ) ) : ?>
+					<?php
+					// Find the right provider class.
+					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
+
+					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
+						?>
 					<div id="classifai-post-preview-app">
 						<?php
 							$supported_post_statuses = \Classifai\get_supported_post_statuses();

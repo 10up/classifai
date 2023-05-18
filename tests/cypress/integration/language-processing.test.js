@@ -1,6 +1,6 @@
 /* eslint jest/expect-expect: 0 */
 
-import { getChatGPTData } from '../plugins/functions';
+import { getChatGPTData, getWhisperData } from '../plugins/functions';
 
 describe('Language processing Tests', () => {
 	before(() => {
@@ -401,4 +401,97 @@ describe('Language processing Tests', () => {
 			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first label' ).contains( 'Uncategorized' );
 		} );
 	} );
+
+	it('Can save OpenAI Whisper "Language Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		cy.get('#api_key').clear().type('password');
+
+		cy.get('#enable_transcripts').check();
+		cy.get('#openai_whisper_roles_administrator').check();
+		cy.get('#submit').click();
+	});
+
+	let audioEditLink = '';
+	let mediaModalLink = '';
+
+	it('Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
+		cy.visit('/wp-admin/media-new.php');
+		cy.get('#plupload-upload-ui').should('exist');
+		cy.get('#plupload-upload-ui input[type=file]').attachFile('audio.mp3');
+
+		cy.get('#media-items .media-item a.edit-attachment').should('exist');
+		cy.get('#media-items .media-item a.edit-attachment')
+			.invoke('attr', 'href')
+			.then((editLink) => {
+				audioEditLink = editLink;
+				cy.visit(editLink);
+			});
+
+		// Verify metabox has processing actions.
+		cy.get('.postbox-header h2, #attachment_meta_box h2')
+			.first()
+			.contains('ClassifAI Audio Processing');
+		cy.get('.misc-publishing-actions label[for=retranscribe]').contains(
+			'Re-transcribe'
+		);
+
+		// Verify generated data.
+		cy.get('#attachment_content').should('have.value', getWhisperData());
+	});
+
+	it('Can see OpenAI Whisper language processing actions on media model', () => {
+		const audioId = audioEditLink.split('post=')[1]?.split('&')[0];
+		mediaModalLink = `wp-admin/upload.php?item=${audioId}`;
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+
+		// Verify language processing actions.
+		cy.get('#classifai-retranscribe').contains('Re-transcribe');
+	});
+
+	it('Can disable OpenAI Whisper language processing features', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		// Disable features
+		cy.get('#enable_transcripts').uncheck();
+		cy.get('#submit').click();
+
+		// Verify features are not present in attachment metabox.
+		cy.visit(audioEditLink);
+		cy.get('.misc-publishing-actions label[for=retranscribe]').should(
+			'not.exist'
+		);
+
+		// Verify features are not present in media modal.
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+		cy.get('#classifai-retranscribe').should('not.exist');
+	});
+
+	it('Can disable OpenAI Whisper language processing features by role', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		// Disable admin role
+		cy.get('#enable_transcripts').check();
+		cy.get('#openai_whisper_roles_administrator').uncheck();
+		cy.get('#submit').click();
+
+		// Verify features are not present in attachment metabox.
+		cy.visit(audioEditLink);
+		cy.get('.misc-publishing-actions label[for=retranscribe]').should(
+			'not.exist'
+		);
+
+		// Verify features are not present in media modal.
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+		cy.get('#classifai-retranscribe').should('not.exist');
+	});
 });

@@ -61,21 +61,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$settings = $this->get_settings();
-
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
