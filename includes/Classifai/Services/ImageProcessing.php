@@ -9,8 +9,8 @@ use Classifai\Taxonomy\ImageTagTaxonomy;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
-use function Classifai\attachment_is_pdf;
 use function Classifai\get_asset_info;
+use function Classifai\find_provider_class;
 
 class ImageProcessing extends Service {
 
@@ -51,15 +51,18 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		wp_add_inline_script(
-			'classifai-media-script',
-			'const classifaiMediaVars = ' . wp_json_encode(
-				array(
-					'enabledAltTextFields' => $this->provider_classes[0]->get_alt_text_settings() ? $this->provider_classes[0]->get_alt_text_settings() : array(),
-				)
-			),
-			'before'
-		);
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
+		if ( ! is_wp_error( $provider ) ) {
+			wp_add_inline_script(
+				'classifai-media-script',
+				'const classifaiMediaVars = ' . wp_json_encode(
+					array(
+						'enabledAltTextFields' => $provider->get_alt_text_settings() ? $provider->get_alt_text_settings() : array(),
+					)
+				),
+				'before'
+			);
+		}
 	}
 
 	/**
@@ -220,7 +223,6 @@ class ImageProcessing extends Service {
 		$attachment_id = $request->get_param( 'id' );
 		$custom_atts   = $request->get_attributes();
 		$route_to_call = empty( $custom_atts['args']['route'] ) ? false : strtolower( $custom_atts['args']['route'][0] );
-		$provider      = '';
 
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
@@ -234,15 +236,11 @@ class ImageProcessing extends Service {
 		}
 
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'Computer Vision' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( ! $provider ) {
-			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
 		}
 
 		// Call the provider endpoint function
@@ -305,18 +303,12 @@ class ImageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_image( WP_REST_Request $request ) {
-		$provider = '';
-
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'DALL·E' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( ! $provider ) {
-			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
 		}
 
 		return rest_ensure_response(
