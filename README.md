@@ -13,9 +13,11 @@
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up NLU Language Processing](#set-up-language-processing-via-ibm-watson)
-* [Set Up ChatGPT Language Processing](#set-up-language-processing-via-openai)
+* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
+* [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
+* [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
 * [Set Up Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
-* [Set Up DALL·E Image Processing](#set-up-image-processing-via-openai)
+* [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
 * [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
@@ -28,7 +30,8 @@
 * Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Automatically generate titles for your content using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
-* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Automatically generate transcripts of your audio files using [OpenAI's Whisper](https://platform.openai.com/docs/guides/speech-to-text)
+* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
@@ -37,9 +40,9 @@
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Recommended Content | Excerpt Generation | Title Generation |
-| :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-9.png "Example of automatic title generation with OpenAI.") |
+| Language Processing - Tagging | Recommended Content | Excerpt Generation | Audio Transcripts | Title Generation |
+| :-: | :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") |
 
 | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging | Image Processing - Generate Images |
 | :-: | :-: | :-: | :-: |
@@ -50,7 +53,7 @@
 * PHP 7.4+
 * [WordPress](http://wordpress.org) 5.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Computer Vision Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
@@ -59,7 +62,7 @@ Note that there is no cost to using ClassifAI itself. Both IBM Watson and Micros
 
 The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
-The service that powers ClassifAI's ChatGPT Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
+The service that powers ClassifAI's ChatGPT, Embeddings and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
 The service that powers ClassifAI's Computer Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
@@ -135,7 +138,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-### 2. Configure ClassifAI Registration Key under ClassifAI > ClassifAI
+### 2. Configure ClassifAI Registration Key under Tools > ClassifAI
 
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
@@ -151,7 +154,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-### 2. Configure IBM Watson API Keys under ClassifAI > Language Processing > IBM Watson
+### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > IBM Watson
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -179,7 +182,7 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 
 ### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
 
-## Set Up Language Processing (via OpenAI)
+## Set Up Language Processing (via OpenAI ChatGPT)
 
 ### 1. Sign up for OpenAI
 
@@ -188,7 +191,7 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under ClassifAI > Language Processing > OpenAI
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI ChatGPT
 
 * Enter your API Key copied from the above step into the `API Key` field.
 
@@ -208,6 +211,59 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
 
+## Set Up Language Processing (via OpenAI Embeddings)
+
+### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Embeddings
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Language Processing features
+
+* Choose to automatically classify content.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content item
+
+* Create one or more terms within the taxonomy (or taxonomies) chosen in settings.
+* Create a new piece of content that matches the post type and post status chosen in settings.
+* Open the taxonomy panel in the sidebar and see terms that were auto-applied.
+
+## Set Up Language Processing (via OpenAI Whisper)
+
+Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can create a transcript for audio files that meet the following requirements:
+* The file must be presented in mp3, mp4, mpeg, mpga, m4a, wav, or webm format
+* The file size must be less than 25 megabytes (MB)
+
+### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Whisper
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific features
+
+* Choose to enable the ability to automatically generate transcripts from supported audio files.
+* Choose which user roles have access to this ability.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Upload a new audio file
+
+* Upload a new audio file.
+* Check to make sure the transcript was stored in the Description field.
+
 ## Set Up Image Processing (via Microsoft Azure)
 
 Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
@@ -223,7 +279,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under ClassifAI > Image Processing
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing
 
 - In the `Endpoint URL` field, enter your `API endpoint`.
 - In the `API Key` field, enter your `KEY 1`.
@@ -244,7 +300,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under ClassifAI > Image Processing > OpenAI
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > OpenAI
 
 * Enter your API Key copied from the above step into the `API Key` field.
 
@@ -279,7 +335,7 @@ Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-se
 
 For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
 
-### 2. Configure Microsoft Azure API and Key under ClassifAI > Recommended Content
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content
 
 - In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
 - In the `API Key` field, enter your `KEY 1` from Step 1 above.

@@ -2,6 +2,7 @@ import * as nluData from '../../test-plugin/nlu.json';
 import * as chatgptData from '../../test-plugin/chatgpt.json';
 import * as dalleData from '../../test-plugin/dalle.json';
 import * as ocrData from '../../test-plugin/ocr.json';
+import * as whisperData from '../../test-plugin/whisper.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
 import * as pdfData from '../../test-plugin/pdf.json';
 
@@ -50,6 +51,15 @@ export const getChatGPTData = () => {
  */
 export const getDalleData = () => {
 	return dalleData.data;
+};
+
+/**
+ * Get data from test Whisper json file.
+ *
+ * @return {string[]} Whisper data.
+ */
+export const getWhisperData = () => {
+	return whisperData.text;
 };
 
 /**

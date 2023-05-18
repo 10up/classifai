@@ -44,7 +44,7 @@ class ChatGPT extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'OpenAI',
+			'OpenAI ChatGPT',
 			'ChatGPT',
 			'openai_chatgpt',
 			$service
@@ -59,21 +59,6 @@ class ChatGPT extends Provider {
 				'enable_titles'  => __( 'Title generation', 'classifai' ),
 			),
 		);
-	}
-
-	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$settings = $this->get_settings();
-
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
