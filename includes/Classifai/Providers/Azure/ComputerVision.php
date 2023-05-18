@@ -485,7 +485,7 @@ class ComputerVision extends Provider {
 			$image_url = get_largest_acceptable_image_url(
 				get_attached_file( $attachment_id ),
 				wp_get_attachment_url( $attachment_id ),
-				$metadata['sizes'],
+				$metadata['sizes'] ?? [],
 				computer_vision_max_filesize()
 			);
 		}
