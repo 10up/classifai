@@ -118,15 +118,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		return $this->is_configured();
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
