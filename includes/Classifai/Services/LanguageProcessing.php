@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -174,19 +175,14 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
-		$provider = '';
+		$post_id = $request->get_param( 'id' );
 
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( ! $provider ) {
-			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
 		}
 
 		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt' ) );

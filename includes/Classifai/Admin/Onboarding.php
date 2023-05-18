@@ -424,6 +424,10 @@ class Onboarding {
 			$service_slug = $service->get_menu_slug();
 			$features     = array();
 
+			if ( empty( $service->provider_classes ) ) {
+				continue;
+			}
+
 			foreach ( $service->provider_classes as $provider_class ) {
 				$options = $provider_class->get_onboarding_options();
 				if ( ! empty( $options ) && ! empty( $options['features'] ) ) {
@@ -458,6 +462,10 @@ class Onboarding {
 		$providers       = [];
 
 		foreach ( $service_manager->service_classes as $service ) {
+			if ( empty( $service->provider_classes ) ) {
+				continue;
+			}
+
 			foreach ( $service->provider_classes as $provider_class ) {
 				$providers[ $provider_class->get_option_name() ] = $provider_class;
 			}
