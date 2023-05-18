@@ -31,6 +31,7 @@
 * Automatically generate titles for your content using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
 * Automatically generate transcripts of your audio files using [OpenAI's Whisper](https://platform.openai.com/docs/guides/speech-to-text)
+* Automatically convert your content into audio and provide a read-to-me feature using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
@@ -40,11 +41,19 @@
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Recommended Content | Excerpt Generation | Audio Transcripts | Title Generation |
-| :-: | :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") |
+### Language Processing
 
-| Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging | Image Processing - Generate Images |
+| Tagging | Recommended Content | Excerpt Generation |
+| :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
+
+| Audio Transcripts | Title Generation | Text to Speech |
+| :-: | :-: | :-: |
+| ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") | ![Screenshot of ClassifAI text to speech generation](assets/img/screenshot-11.png "Example of automatic text to speech generation with Azure.") |
+
+### Image Processing
+
+| Alt Text | Smart Cropping | Tagging | Generate Images |
 | :-: | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI alt-text](assets/img/screenshot-3.png "Example of an image with Azure Alt Text.") | ![Screenshot of ClassifAI smart coppring](assets/img/screenshot-4.png "Example of an image with Azure Smart Focal Point Cropping.") | ![Screenshot of ClassifAI image tagging](assets/img/screenshot-5.png "Example of an image with Azure Image Tagging.") | ![Screenshot of ClassifAI image generation](assets/img/screenshot-8.png "Example of generating an image using OpenAI.") |
 
@@ -54,7 +63,7 @@
 * [WordPress](http://wordpress.org) 5.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
-* To utilize the Computer Vision Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the Computer Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
 
@@ -65,6 +74,8 @@ The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natura
 The service that powers ClassifAI's ChatGPT, Embeddings and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
 The service that powers ClassifAI's Computer Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+
+The service that powers ClassifAI's Text to Speech Language Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
 
 The service that powers ClassifAI's Recommended Content, Microsoft Azure's Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
@@ -266,29 +277,28 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 ## Set Up Language Processing (via Microsoft Azure)
 
-Note that [Text to Speech](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech) can convert your posts/pages to human speech:
-
 ### 1. Sign up for Azure services
 
-- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
-- Log into your account and create a new [*Speech Service*](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/overview) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
-- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
-- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+* [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+* Log into your account and create a new [*Speech Service*](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/overview) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+* Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+* Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under ClassifAI > Language Processing > Microsoft Azure
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Microsoft Azure
 
-- In the `Endpoint URL` field, enter your `API endpoint`.
-- In the `API Key` field, enter your `KEY 1`.
-- Click **Save Changes** (the page will reload).
-- If connected successfully, a new dropdown with the label "Voices" will be displayed.
-- Select a voice as per your choice.
-- Select a post type that should use this service.
+* In the `Endpoint URL` field, enter your `API endpoint`.
+* In the `API Key` field, enter your `KEY 1`.
+* Click **Save Changes** (the page will reload).
+* If connected successfully, a new dropdown with the label "Voices" will be displayed.
+* Select a voice as per your choice.
+* Select a post type that should use this service.
 
 ### 3. Using the Text to Speech service
 
-- Assuming the post type selected is "post", create a new post and publish it.
-- After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
-- Click the button to preview the generated speech audio for the post.
+* Assuming the post type selected is "post", create a new post and publish it.
+* After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+* Click the button to preview the generated speech audio for the post.
+* View the post on the front-end and see a read-to-me feature has been added
 
 ## Set Up Image Processing (via Microsoft Azure)
 
