@@ -149,6 +149,7 @@ import { __ } from '@wordpress/i18n';
 							}
 						}
 					},
+					buttonText: __('Re-transcribe', 'classifai'),
 				})
 			);
 		}

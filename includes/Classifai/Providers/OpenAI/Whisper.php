@@ -39,21 +39,6 @@ class Whisper extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$settings = $this->get_settings();
-
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
@@ -73,6 +58,11 @@ class Whisper extends Provider {
 	 */
 	public function is_feature_enabled( int $attachment_id = 0 ) {
 		$settings = $this->get_settings();
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
 
 		// Check if the current user has permission.
 		$roles      = $settings['roles'] ?? [];
