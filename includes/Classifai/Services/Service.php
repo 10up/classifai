@@ -127,6 +127,7 @@ abstract class Service {
 				<?php
 				if ( empty( $this->provider_classes ) ) {
 					echo '<p>' . esc_html__( 'No providers available for this service.', 'classifai' ) . '</p>';
+					echo '</div></div>';
 					return;
 				}
 				?>
