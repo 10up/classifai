@@ -14,6 +14,7 @@
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up NLU Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
+* [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
 * [Set Up Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
@@ -29,7 +30,7 @@
 * Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
 * Automatically generate transcripts of your audio files using [OpenAI's Whisper](https://platform.openai.com/docs/guides/speech-to-text)
-* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 * Automatically classify content and images on save
 * Automatically generate alt text and image tags for images
@@ -51,7 +52,7 @@
 * PHP 7.4+
 * [WordPress](http://wordpress.org) 5.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Computer Vision Image Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
@@ -60,7 +61,7 @@ Note that there is no cost to using ClassifAI itself. Both IBM Watson and Micros
 
 The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
-The service that powers ClassifAI's ChatGPT and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
+The service that powers ClassifAI's ChatGPT, Embeddings and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
 The service that powers ClassifAI's Computer Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
@@ -204,6 +205,31 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 * Edit (or create) an item that supports excerpts. Note: only the block editor is supported.
 * Ensure this item has content saved.
 * Open the Excerpt panel in the sidebar and click on `Generate Excerpt`
+
+## Set Up Language Processing (via OpenAI Embeddings)
+
+### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Embeddings
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Language Processing features
+
+* Choose to automatically classify content.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content item
+
+* Create one or more terms within the taxonomy (or taxonomies) chosen in settings.
+* Create a new piece of content that matches the post type and post status chosen in settings.
+* Open the taxonomy panel in the sidebar and see terms that were auto-applied.
 
 ## Set Up Language Processing (via OpenAI Whisper)
 

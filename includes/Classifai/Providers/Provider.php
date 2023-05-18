@@ -83,6 +83,10 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_onboarding_options() {
+		if ( empty( $this->onboarding_options ) || ! isset( $this->onboarding_options['features'] ) ) {
+			return array();
+		}
+
 		$settings      = $this->get_settings();
 		$is_configured = $this->is_configured();
 

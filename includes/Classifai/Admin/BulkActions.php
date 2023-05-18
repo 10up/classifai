@@ -2,6 +2,7 @@
 namespace Classifai\Admin;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use function Classifai\get_supported_post_types;
@@ -31,6 +32,11 @@ class BulkActions {
 	private $computer_vision;
 
 	/**
+	 * @var \Classifai\Providers\OpenAI\Embeddings
+	 */
+	private $embeddings;
+
+	/**
 	 * @var \Classifai\Providers\OpenAI\Whisper
 	 */
 	private $whisper;
@@ -49,15 +55,25 @@ class BulkActions {
 	 * Register bulk actions for language processing.
 	 */
 	public function register_language_processing_hooks() {
-		$nlu_post_types = get_supported_post_types();
+		$this->embeddings      = new Embeddings( false );
+		$settings              = $this->embeddings->get_settings();
+		$embeddings_post_types = [];
+		$nlu_post_types        = get_supported_post_types();
 
 		// Set up the save post handler if we have any post types for NLU.
 		if ( ! empty( $nlu_post_types ) ) {
 			$this->save_post_handler = new SavePostHandler();
 		}
 
+		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
+		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
+			$embeddings_post_types = $this->embeddings->supported_post_types();
+		} else {
+			$this->embeddings = null;
+		}
+
 		// Merge our post types together and make them unique.
-		$post_types = array_unique( array_merge( $nlu_post_types, [] ) );
+		$post_types = array_unique( array_merge( $embeddings_post_types, $nlu_post_types ) );
 
 		if ( empty( $post_types ) ) {
 			return;
@@ -146,6 +162,11 @@ class BulkActions {
 			// Handle NLU classification.
 			if ( is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' ) ) {
 				$this->save_post_handler->classify( $post_id );
+			}
+
+			// Handle OpenAI Embeddings classification.
+			if ( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) ) {
+				$this->embeddings->generate_embeddings_for_post( $post_id );
 			}
 		}
 
@@ -269,7 +290,11 @@ class BulkActions {
 		$post_types = [];
 
 		if ( is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' ) ) {
-			$post_types = get_supported_post_types();
+			$post_types = array_merge( $post_types, get_supported_post_types() );
+		}
+
+		if ( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) ) {
+			$post_types = array_merge( $post_types, $this->embeddings->supported_post_types() );
 		}
 
 		if ( ! in_array( $post->post_type, $post_types, true ) ) {

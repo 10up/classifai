@@ -27,6 +27,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/dalle.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/embeddings.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
