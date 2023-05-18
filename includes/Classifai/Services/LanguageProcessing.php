@@ -429,7 +429,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
+		$roles      = $settings['title_roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
