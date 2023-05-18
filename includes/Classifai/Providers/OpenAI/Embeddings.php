@@ -509,10 +509,11 @@ class Embeddings extends Provider {
 	private function trigger_taxonomy_update( string $taxonomy = '' ) {
 		$terms = get_terms(
 			[
-				'taxonomy'   => $taxonomy,
-				'hide_empty' => false,
-				'fields'     => 'ids',
-				'meta_key'   => 'classifai_openai_embeddings',
+				'taxonomy'     => $taxonomy,
+				'hide_empty'   => false,
+				'fields'       => 'ids',
+				'meta_key'     => 'classifai_openai_embeddings',
+				'meta_compare' => 'NOT EXISTS',
 				// 'number'  => 500, TODO: see if we need a limit here.
 			]
 		);
