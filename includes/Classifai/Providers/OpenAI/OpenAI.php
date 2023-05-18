@@ -191,7 +191,7 @@ trait OpenAI {
 		/**
 		 * Filter post types shown in settings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_settings_post_types
 		 *
 		 * @param {array} $post_types Array of post types to show in settings.
@@ -213,7 +213,7 @@ trait OpenAI {
 		/**
 		 * Filter post statuses shown in settings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_settings_post_statuses
 		 *
 		 * @param {array} $post_statuses Array of post statuses to show in settings.
@@ -241,7 +241,7 @@ trait OpenAI {
 		/**
 		 * Filter taxonomies shown in settings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_settings_taxonomies
 		 *
 		 * @param {array} $supported Array of supported taxonomies.

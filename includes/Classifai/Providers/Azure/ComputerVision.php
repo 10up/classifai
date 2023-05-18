@@ -1303,10 +1303,10 @@ class ComputerVision extends Provider {
 	 *
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
-	 *
+	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
 		$route_to_call = strtolower( $route_to_call );
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $post_id ) || 'attachment' !== get_post_type( $post_id ) ) {

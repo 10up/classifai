@@ -28,6 +28,7 @@
 ## Features
 
 * Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
+* Automatically generate titles for your content using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
 * Automatically generate transcripts of your audio files using [OpenAI's Whisper](https://platform.openai.com/docs/guides/speech-to-text)
 * Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
@@ -39,9 +40,9 @@
 * BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
-| Language Processing - Tagging | Recommended Content | Excerpt Generation | Audio Transcripts |
-| :-: | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") |
+| Language Processing - Tagging | Recommended Content | Excerpt Generation | Audio Transcripts | Title Generation |
+| :-: | :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") |
 
 | Image Processing - Alt Text | Image Processing - Smart Cropping | Image Processing - Tagging | Image Processing - Generate Images |
 | :-: | :-: | :-: | :-: |
@@ -197,14 +198,18 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 ### 3. Enable specific Language Processing features
 
 * Choose to add the ability to generate excerpts.
-* If excerpt generation is configured, set the other options as needed.
+* Choose to add the ability to generate titles.
+* Set the other options as needed.
 * Save changes and ensure a success message is shown. An error will show if API authentication fails.
 
-### 4. Edit a content type that has excerpts enabled
+### 4. Edit a content type to test enabled features
 
-* Edit (or create) an item that supports excerpts. Note: only the block editor is supported.
+* To test excerpt generation, edit (or create) an item that supports excerpts. Note: only the block editor is supported.
 * Ensure this item has content saved.
-* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
+* To test title generation, edit (or create) an item that supports titles. Note: only the block editor is supported.
+* Ensure this item has content saved.
+* Open the Summary panel in the sidebar and click on `Generate titles`.
 
 ## Set Up Language Processing (via OpenAI Embeddings)
 

@@ -385,10 +385,11 @@ abstract class Provider {
 	 *
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
 	 *
 	 * @return mixed
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
 		return null;
 	}
 
