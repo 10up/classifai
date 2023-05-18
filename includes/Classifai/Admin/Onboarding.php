@@ -349,6 +349,9 @@ class Onboarding {
 	public static function render_classifai_setup_settings( $setting_name, $fields ) {
 		global $wp_settings_sections, $wp_settings_fields;
 
+		$onboarding_options = self::get_onboarding_options();
+		$enabled_features   = $onboarding_options['enabled_features'] ?? array();
+
 		if ( ! isset( $wp_settings_fields[ $setting_name ][ $setting_name ] ) ) {
 			return;
 		}
@@ -391,8 +394,13 @@ class Onboarding {
 				call_user_func( $field['callback'], $field['args'] );
 				continue;
 			}
+
+			// Only display the field if the feature is enabled.
+			if ( 'image-tag-taxonomy' === $field_name && ! isset( $enabled_features['classifai_computer_vision']['enable_image_tagging'] ) ) {
+				continue;
+			}
 			?>
-			<div class="classifai-setup-form-field">
+			<div class="classifai-setup-form-field field-<?php echo esc_attr( $field_name ); ?>">
 				<label for="<?php echo esc_attr( $field['args']['label_for'] ); ?>">
 					<?php echo esc_html( $field['title'] ); ?>
 				</label>

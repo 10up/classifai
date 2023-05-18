@@ -39,7 +39,7 @@ class ComputerVision extends Provider {
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
-			'fields'   => array( 'url', 'api-key' ),
+			'fields'   => array( 'url', 'api-key', 'image-tag-taxonomy' ),
 			'features' => array(
 				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
 				'enable_image_tagging'  => __( 'Automatically tag images', 'classifai' ),
