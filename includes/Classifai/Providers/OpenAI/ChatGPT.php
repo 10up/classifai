@@ -524,7 +524,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_chatgpt_title_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
@@ -538,7 +538,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_chatgpt_title_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.

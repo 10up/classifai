@@ -327,7 +327,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter post types supported for embeddings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_post_types
 		 *
 		 * @param {array} $post_types Array of post types to be classified.
@@ -346,7 +346,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter post statuses supported for embeddings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_embeddings_post_statuses
 		 *
 		 * @param {array} $post_types Array of post statuses to be classified.
@@ -365,7 +365,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter taxonomies supported for embeddings.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_embeddings_taxonomies
 		 *
 		 * @param {array} $taxonomies Array of taxonomies to be classified.
@@ -565,7 +565,7 @@ class Embeddings extends Provider {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
@@ -583,7 +583,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to OpenAI.
@@ -667,7 +667,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter content that will get sent to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_openai_embeddings_content
 		 *
 		 * @param {string} $content Content that will be sent to OpenAI.

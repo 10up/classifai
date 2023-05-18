@@ -2,7 +2,7 @@
 /**
  * Transcribe audio files using the OpenAI Whisper API.
  *
- * @since x.x.x
+ * @since 2.2.0
  */
 
 namespace Classifai\Providers\OpenAI\Whisper;
@@ -68,7 +68,7 @@ class Transcribe {
 		/**
 		 * Filter the request body before sending to Whisper.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Whisper.
@@ -117,7 +117,7 @@ class Transcribe {
 		/**
 		 * Filter the text result returned from Whisper API.
 		 *
-		 * @since x.x.x
+		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_result
 		 *
 		 * @param {string} $text Text extracted from the response.
