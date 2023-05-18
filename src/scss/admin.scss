@@ -533,13 +533,27 @@ input.classifai-button {
 
 			.classifai-setup-form-field{
 				margin-top: 40px;
+				&.field-category,
+				&.field-keyword,
+				&.field-entity,
+				&.field-concept {
+					label {
+						margin-bottom: 0;
+					}
+
+					p {
+						margin: 0.5em 0;
+					}
+				}
 			}
 
-			label {
-				display: block;
-				font-weight: 700;
-				text-transform: uppercase;
-				margin-bottom: 20px;
+			.classifai-setup-form-field > {
+				label {
+					display: block;
+					font-weight: 700;
+					text-transform: uppercase;
+					margin-bottom: 20px;
+				}
 			}
 
 			input[type="text"],

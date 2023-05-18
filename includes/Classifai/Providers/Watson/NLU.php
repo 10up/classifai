@@ -73,7 +73,7 @@ class NLU extends Provider {
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'IBM Watson NLU', 'classifai' ),
-			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
+			'fields'   => array_merge( array( 'url', 'username', 'password', 'toggle', 'post-statuses' ), array_keys( $this->nlu_features ) ),
 			'features' => array(),
 		);
 

@@ -401,7 +401,7 @@ class Onboarding {
 			}
 			?>
 			<div class="classifai-setup-form-field field-<?php echo esc_attr( $field_name ); ?>">
-				<label for="<?php echo esc_attr( $field['args']['label_for'] ); ?>">
+				<label for="<?php echo esc_attr( $field['args']['label_for'] ?? '' ); ?>">
 					<?php echo esc_html( $field['title'] ); ?>
 				</label>
 				<?php
