@@ -5,19 +5,18 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [Unreleased] - TBD
 
 ## [2.2.0] - 2023-05-22
-
 ### Added
-- Automatically convert your text content into audio using Microsoft Azure's Text to Speech API; output a "read-to-me" feature on the front-end to play this audio (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#403](https://github.com/10up/classifai/pull/403)).
-- Automatically classify content into your existing taxonomy structure using the OpenAI Embeddings API (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#437](https://github.com/10up/classifai/pull/437)).
-- Automatically create transcripts of audio files using the OpenAI Whisper API (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#451](https://github.com/10up/classifai/pull/451)).
-- Generate SEO-friendly titles automatically using OpenAI's ChatGPT (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#452](https://github.com/10up/classifai/pull/452)).
+- Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using Microsoft Azure's Text to Speech API (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@ravinderk](https://github.com/ravinderk), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter), [@pixeldevsio](https://github.com/pixeldevsio) via [#403](https://github.com/10up/classifai/pull/403)).
+- Classify content into existing taxonomy structure using OpenAI's Embeddings API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul) via [#437](https://github.com/10up/classifai/pull/437)).
+- Create transcripts of audio files using OpenAI's Whisper API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#451](https://github.com/10up/classifai/pull/451)).
+- Generate SEO-friendly titles using OpenAI's ChatGPT API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul) via [#452](https://github.com/10up/classifai/pull/452)).
 
 ### Changed
-- Standardize on how we determine if a Provider is configured (props [@iamdharmesh](https://github.com/iamdharmesh), [@benlk](https://github.com/benlk), [@dkotter](https://github.com/dkotter) via [#455](https://github.com/10up/classifai/pull/455)).
+- Standardize on how we determine if a Provider is configured (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@benlk](https://github.com/benlk) via [#455](https://github.com/10up/classifai/pull/455)).
 
 ### Fixed
-- Avoid extra API requests to the NLU endpoint (props [@iamdharmesh](https://github.com/iamdharmesh), [@benlk](https://github.com/benlk), [@dkotter](https://github.com/dkotter) via [#455](https://github.com/10up/classifai/pull/455)).
-- Ensure the `{$this->menu_slug}_providers` filter works as expected when used to remove Providers (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#456](https://github.com/10up/classifai/pull/456)).
+- Avoid extra API requests to the IBM Watson NLU endpoint (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh), [@benlk](https://github.com/benlk) via [#455](https://github.com/10up/classifai/pull/455)).
+- Ensure the `{$this->menu_slug}_providers` filter works as expected when used to remove Providers (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#456](https://github.com/10up/classifai/pull/456)).
 
 ## [2.1.0] - 2023-05-02
 **Note that this release moves the ClassifAI settings to be nested under Tools instead of it's own menu.**
