@@ -154,6 +154,19 @@ class ChatGPT extends Provider {
 		$roles = get_editable_roles() ?? [];
 		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
 
+		/**
+		 * Filter the allowed WordPress roles for ChatGTP
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_allowed_image_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_chatgpt_allowed_image_roles', $roles, $default_settings );
+
 		add_settings_field(
 			'roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
