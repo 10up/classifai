@@ -108,7 +108,7 @@ abstract class Provider {
 	}
 
 	/**
-	 * Can the Provider be initalized?
+	 * Can the Provider be initialized?
 	 */
 	abstract public function can_register();
 
