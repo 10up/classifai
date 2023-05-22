@@ -55,11 +55,7 @@ class MaybeExcerptPanel extends Component {
 	 */
 	render() {
 		if ( ! this.state.hadExcerptWhenOpeningThePanel ) {
-			return (
-				<ExcerptPanel>
-					{ this.props.children }
-				</ExcerptPanel>
-			);
+			return <ExcerptPanel>{ this.props.children }</ExcerptPanel>;
 		}
 
 		return null;
@@ -68,9 +64,7 @@ class MaybeExcerptPanel extends Component {
 
 export default withSelect( ( select ) => {
 	return {
-		excerpt:
-			select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
-		isPublishPanelOpen:
-			select( 'core/edit-post' ).isPublishSidebarOpened(),
+		excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
+		isPublishPanelOpen: select( 'core/edit-post' ).isPublishSidebarOpened(),
 	};
 } )( MaybeExcerptPanel );

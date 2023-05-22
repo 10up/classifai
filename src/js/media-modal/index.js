@@ -17,7 +17,7 @@ wp.media.view.MediaFrame.Select = currentMediaFrame.extend( {
 	 *
 	 * @see media.controller.Region.render
 	 */
-	bindHandlers: function() {
+	bindHandlers: function () {
 		currentMediaFrame.prototype.bindHandlers.apply( this, arguments );
 
 		this.on( 'content:render:generate', this.generateContent, this );
@@ -28,7 +28,7 @@ wp.media.view.MediaFrame.Select = currentMediaFrame.extend( {
 	 *
 	 * @param {wp.media.view.Router} routerView
 	 */
-	browseRouter: function( routerView ) {
+	browseRouter: function ( routerView ) {
 		currentMediaFrame.prototype.browseRouter.apply( this, arguments );
 
 		routerView.set( {
@@ -42,7 +42,7 @@ wp.media.view.MediaFrame.Select = currentMediaFrame.extend( {
 	/**
 	 * Render callback for the content region in the `generate` mode.
 	 */
-	generateContent: function() {
+	generateContent: function () {
 		this.content.set( new Prompt().render() );
 	},
 } );

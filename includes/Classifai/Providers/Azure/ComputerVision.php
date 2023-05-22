@@ -113,20 +113,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$options = get_option( $this->get_option_name() );
-		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Register the functionality.
 	 */
 	public function register() {
@@ -499,7 +485,7 @@ class ComputerVision extends Provider {
 			$image_url = get_largest_acceptable_image_url(
 				get_attached_file( $attachment_id ),
 				wp_get_attachment_url( $attachment_id ),
-				$metadata['sizes'],
+				$metadata['sizes'] ?? [],
 				computer_vision_max_filesize()
 			);
 		}
@@ -1264,25 +1250,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param mixed $data Response data to format.
-	 *
-	 * @return string
-	 */
-	private function get_formatted_latest_response( $data ) {
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
-	}
-
-	/**
 	 * Filter the SQL clauses of an attachment query to include tags and alt text.
 	 *
 	 * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
@@ -1317,10 +1284,10 @@ class ComputerVision extends Provider {
 	 *
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
-	 *
+	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
 		$route_to_call = strtolower( $route_to_call );
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $post_id ) || 'attachment' !== get_post_type( $post_id ) ) {
