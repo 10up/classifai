@@ -154,23 +154,142 @@ trait OpenAI {
 	}
 
 	/**
-	 * Format the result of most recent request.
+	 * Get available post types to use in settings.
 	 *
-	 * @param string $transient Transient that holds our data.
-	 * @return string
+	 * @return array
 	 */
-	private function get_formatted_latest_response( string $transient = '' ) {
-		$data = get_transient( $transient );
+	public function get_post_types_for_settings() {
+		$post_types     = [];
+		$post_type_objs = get_post_types( [], 'objects' );
+		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
+		unset( $post_type_objs['attachment'] );
 
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
+		foreach ( $post_type_objs as $post_type ) {
+			$post_types[ $post_type->name ] = $post_type->label;
 		}
 
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
+		/**
+		 * Filter post types shown in settings.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_openai_settings_post_types
+		 *
+		 * @param {array} $post_types Array of post types to show in settings.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of post types.
+		 */
+		return apply_filters( 'classifai_openai_settings_post_types', $post_types, $this );
+	}
+
+	/**
+	 * Get available post statuses to use in settings.
+	 *
+	 * @return array
+	 */
+	public function get_post_statuses_for_settings() {
+		$post_statuses = get_post_statuses();
+
+		/**
+		 * Filter post statuses shown in settings.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_openai_settings_post_statuses
+		 *
+		 * @param {array} $post_statuses Array of post statuses to show in settings.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		return apply_filters( 'classifai_openai_settings_post_statuses', $post_statuses, $this );
+	}
+
+	/**
+	 * Get available taxonomies to use in settings.
+	 *
+	 * @return array
+	 */
+	public function get_taxonomies_for_settings() {
+		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
 		}
 
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_openai_settings_taxonomies
+		 *
+		 * @param {array} $supported Array of supported taxonomies.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_openai_settings_taxonomies', $supported, $this );
+	}
+
+	/**
+	 * The list of supported post types.
+	 *
+	 * return array
+	 */
+	public function get_supported_post_types() {
+		$settings   = $this->get_settings();
+		$post_types = [];
+
+		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
+			foreach ( $settings['post_types'] as $post_type => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_types[] = $post_type;
+				}
+			}
+		}
+
+		return $post_types;
+	}
+
+	/**
+	 * The list of supported post statuses.
+	 *
+	 * @return array
+	 */
+	public function get_supported_post_statuses() {
+		$settings      = $this->get_settings();
+		$post_statuses = [];
+
+		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
+			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_statuses[] = $post_status;
+				}
+			}
+		}
+
+		return $post_statuses;
+	}
+
+	/**
+	 * The list of supported taxonomies.
+	 *
+	 * @return array
+	 */
+	public function get_supported_taxonomies() {
+		$settings   = $this->get_settings();
+		$taxonomies = [];
+
+		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {
+			foreach ( $settings['taxonomies'] as $taxonomy => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$taxonomies[] = $taxonomy;
+				}
+			}
+		}
+
+		return $taxonomies;
 	}
 
 }
