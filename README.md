@@ -1,44 +1,46 @@
 # ![ClassifAI](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/logo.svg "ClassifAI")
 
-> Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
+> Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
 [![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.2%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
 ## Table of Contents
+* [Overview](#overview)
 * [Features](#features)
 * [Requirements](#requirements)
 * [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up NLU Language Processing](#set-up-language-processing-via-ibm-watson)
+* [Set Up IBM Watson NLU Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
 * [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
-* [Set Up Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up Azure AI Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
-* [Set Up Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
+* [Set Up Azure Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
 * [Changelog](#changelog)
 * [Contributing](#contributing)
 
+## Overview
+
+Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
+
 ## Features
 
-* Automatically generate a summary of your content and store that as an excerpt using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
-* Automatically generate titles for your content using [OpenAI's ChatGPT](https://platform.openai.com/docs/guides/chat)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E](https://platform.openai.com/docs/guides/images)
-* Automatically generate transcripts of your audio files using [OpenAI's Whisper](https://platform.openai.com/docs/guides/speech-to-text)
-* Automatically convert your content into audio and provide a read-to-me feature using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
-* Classify your content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
-* Supports Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) and Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
-* Automatically classify content and images on save
-* Automatically generate alt text and image tags for images
-* Automatically scan images and PDF files for embedded text and save for use in WordPress
-* [Smartly crop images](https://docs.microsoft.com/en-us/rest/api/computervision/3.1/generate-thumbnail/generate-thumbnail) around a region of interest identified by Computer Vision
-* BETA: Recommend content based on overall site traffic via [Azure Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) (note that we're gathering feedback on this feature and may significantly iterate depending on community input)
+* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
+* Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
+* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
+* Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
+* BETA: Recommend content based on overall site traffic via [Microsoft Azure's Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
+* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ### Language Processing
@@ -186,6 +188,10 @@ IBM Watson endpoint urls with `watsonplatform.net` were deprecated on 26 May 202
 
 For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change.
 
+#### Taxonomy options
+
+IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) can each be stored in existing WordPress taxonomies or a custom Watson taxonomy.
+
 ### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > IBM Watson
 
 - Choose which public post types to classify when saved.
@@ -324,6 +330,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 - Choose to `Generate descriptive text`, `Tag images`, `Enable smart cropping`, and/or `Scan image or PDF for text`.
 - For features that have thresholds or taxonomy settings, set those as well.
+- Image tagging uses Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 
 ### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
