@@ -85,7 +85,7 @@ class Linker {
 	 *
 	 * @param array $categories The list of categories to link
 	 */
-	protected function link_categories( array $categories ): array {
+	public function link_categories( array $categories ): array {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'category' );
 
@@ -137,7 +137,7 @@ class Linker {
 	 *
 	 * @param array $keywords NLU returned keywords
 	 */
-	protected function link_keywords( $keywords ): array {
+	public function link_keywords( $keywords ): array {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'keyword' );
 
@@ -174,7 +174,7 @@ class Linker {
 	 *
 	 * @param array $concepts The NLU returned concepts.
 	 */
-	protected function link_concepts( array $concepts ): array {
+	public function link_concepts( array $concepts ): array {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'concept' );
 
@@ -218,7 +218,7 @@ class Linker {
 	 *
 	 * @param array $entities The entities returned by the NLU api
 	 */
-	protected function link_entities( array $entities ): array {
+	public function link_entities( array $entities ): array {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'entity' );
 
