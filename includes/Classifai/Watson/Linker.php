@@ -39,23 +39,23 @@ class Linker {
 	public function link( $post_id, $output, $options = [] ) {
 		$all_terms = [];
 
-		$terms = $this->link_categories( $post_id, $output['categories'], true );
 		if ( ! empty( $output['categories'] ) ) {
+			$terms = $this->link_categories( $post_id, $output['categories'], true );
 			$all_terms = $terms;
 		}
 
-		$terms = $this->link_keywords( $post_id, $output['keywords'], true );
 		if ( ! empty( $output['keywords'] ) ) {
+			$terms = $this->link_keywords( $post_id, $output['keywords'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
-		$terms = $this->link_concepts( $post_id, $output['concepts'], true );
 		if ( ! empty( $output['concepts'] ) ) {
+			$terms = $this->link_concepts( $post_id, $output['concepts'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
-		$terms = $this->link_entities( $post_id, $output['entities'], true );
 		if ( ! empty( $output['entities'] ) ) {
+			$terms = $this->link_entities( $post_id, $output['entities'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
