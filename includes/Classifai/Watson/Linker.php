@@ -39,7 +39,7 @@ class Linker {
 	public function link( $post_id, $output, $options = [] ) {
 		$all_terms = [];
 
-		$terms = $this->link_categories( $output['categories'] )
+		$terms = $this->link_categories( $output['categories'] );
 		if ( ! empty( $output['categories'] ) ) {
 			$all_terms = $terms;
 		}
