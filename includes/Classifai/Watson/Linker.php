@@ -253,7 +253,7 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = intval( $term['term_id'] );
+						$terms_to_link[] = (int) $term['term_id'];
 
 						if ( ! empty( $entity['disambiguation']['dbpedia_resource'] ) ) {
 							update_term_meta(
