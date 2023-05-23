@@ -9,117 +9,118 @@ import apiFetch from '@wordpress/api-fetch';
 
 const { classifaiChatGPTData } = window;
 
-const RenderError = ({ error }) => {
-	if (!error) {
+const RenderError = ( { error } ) => {
+	if ( ! error ) {
 		return null;
 	}
 
-	return <div className="error">{error}</div>;
+	return <div className="error">{ error }</div>;
 };
 
 const PostStatusInfo = () => {
-	const [isLoading, setIsLoading] = useState(false);
-	const [isOpen, setOpen] = useState(false);
-	const [error, setError] = useState(false);
-	const [data, setData] = useState([]);
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ isOpen, setOpen ] = useState( false );
+	const [ error, setError ] = useState( false );
+	const [ data, setData ] = useState( [] );
 
-	if (!classifaiChatGPTData || !classifaiChatGPTData.enabledFeatures) {
+	if ( ! classifaiChatGPTData || ! classifaiChatGPTData.enabledFeatures ) {
 		return null;
 	}
 
 	// Ensure the user has proper permissions
 	if (
 		classifaiChatGPTData.noPermissions &&
-		1 === parseInt(classifaiChatGPTData.noPermissions)
+		1 === parseInt( classifaiChatGPTData.noPermissions )
 	) {
 		return null;
 	}
 
-	const postId = select('core/editor').getCurrentPostId();
-	const openModal = () => setOpen(true);
-	const closeModal = () => setOpen(false) && setData([]) && setError(false);
+	const postId = select( 'core/editor' ).getCurrentPostId();
+	const openModal = () => setOpen( true );
+	const closeModal = () =>
+		setOpen( false ) && setData( [] ) && setError( false );
 
-	const buttonClick = async (path) => {
-		setIsLoading(true);
+	const buttonClick = async ( path ) => {
+		setIsLoading( true );
 		openModal();
-		apiFetch({
+		apiFetch( {
 			path,
-		}).then(
-			(res) => {
-				setData(res);
-				setError(false);
-				setIsLoading(false);
+		} ).then(
+			( res ) => {
+				setData( res );
+				setError( false );
+				setIsLoading( false );
 			},
-			(err) => {
-				setError(err?.message);
-				setData([]);
-				setIsLoading(false);
+			( err ) => {
+				setError( err?.message );
+				setData( [] );
+				setIsLoading( false );
 			}
 		);
 	};
 
-	const RenderData = ({ data: dataToRender }) => {
-		if (!dataToRender) {
+	const RenderData = ( { data: dataToRender } ) => {
+		if ( ! dataToRender ) {
 			return null;
 		}
 
 		return (
 			<>
-				{dataToRender.map((item, i) => {
+				{ dataToRender.map( ( item, i ) => {
 					return (
-						<div className="classifai-title" key={i}>
-							<textarea rows="5">{item}</textarea>
+						<div className="classifai-title" key={ i }>
+							<textarea rows="5">{ item }</textarea>
 							<Button
 								variant="secondary"
-								onClick={() => {
-									dispatch('core/editor').editPost({
+								onClick={ () => {
+									dispatch( 'core/editor' ).editPost( {
 										title: item,
-									});
+									} );
 									closeModal();
-								}}
+								} }
 							>
-								{__('Select', 'classifai')}
+								{ __( 'Select', 'classifai' ) }
 							</Button>
 						</div>
 					);
-				})}
+				} ) }
 			</>
 		);
 	};
 
 	return (
 		<PluginPostStatusInfo className="classifai-post-status">
-			{isOpen && (
+			{ isOpen && (
 				<Modal
-					title={__('Select a title', 'classifai')}
-					onRequestClose={closeModal}
-					isFullScreen={false}
+					title={ __( 'Select a title', 'classifai' ) }
+					onRequestClose={ closeModal }
+					isFullScreen={ false }
 					className="title-modal"
 				>
-					{isLoading && <Spinner />}
-					{!isLoading && data && <RenderData data={data} />}
-					{!isLoading && error && <RenderError error={error} />}
+					{ isLoading && <Spinner /> }
+					{ ! isLoading && data && <RenderData data={ data } /> }
+					{ ! isLoading && error && <RenderError error={ error } /> }
 				</Modal>
-			)}
-			{classifaiChatGPTData.enabledFeatures.map((feature) => {
+			) }
+			{ classifaiChatGPTData.enabledFeatures.map( ( feature ) => {
 				const path = feature?.path + postId;
 				return (
 					<PostTypeSupportCheck
-						key={feature?.feature}
-						supportKeys={feature?.feature}
+						key={ feature?.feature }
+						supportKeys={ feature?.feature }
 					>
 						<Button
-							className={feature?.feature}
+							className={ feature?.feature }
 							variant="secondary"
-							onClick={() => buttonClick(path)}
+							onClick={ () => buttonClick( path ) }
 						>
-							{feature?.buttonText}
+							{ feature?.buttonText }
 						</Button>
 					</PostTypeSupportCheck>
 				);
-			})}
+			} ) }
 		</PluginPostStatusInfo>
 	);
 };
 
-registerPlugin('classifai-status-info', { render: PostStatusInfo });
+registerPlugin( 'classifai-status-info', { render: PostStatusInfo } );
