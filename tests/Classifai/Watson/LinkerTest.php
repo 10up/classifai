@@ -176,7 +176,7 @@ class LinkerTest extends \WP_UnitTestCase {
 
 
 		$post_id = $this->factory->post->create();
-		$result = $this->linker->link( $post_id, $output );
+		$this->linker->link( $post_id, $output );
 
 		// categories
 		$actual = wp_get_object_terms( $post_id, [ WATSON_CATEGORY_TAXONOMY ] );
