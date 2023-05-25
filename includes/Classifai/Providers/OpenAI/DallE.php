@@ -333,7 +333,7 @@ class DallE extends Provider {
 			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
 			__( 'Number of images', 'classifai' ) => absint( $settings['number'] ?? 1 ),
 			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
-			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),
+			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) ),
 		];
 	}
 

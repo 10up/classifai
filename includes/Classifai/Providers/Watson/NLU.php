@@ -758,20 +758,18 @@ class NLU extends Provider {
 			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
 			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
 			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
-			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response(),
+			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_watson_nlu_latest_response' ) ),
 		];
 	}
 
 	/**
 	 * Format the result of most recent request.
 	 *
-	 * @param string $data Response data to format.
+	 * @param array|WP_Error $data Response data to format.
 	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( string $data = '' ) {
-		$data = get_transient( 'classifai_watson_nlu_latest_response' );
-
+	protected function get_formatted_latest_response( $data ) {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
