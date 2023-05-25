@@ -40,22 +40,22 @@ class Linker {
 		$all_terms = [];
 
 		if ( ! empty( $output['categories'] ) ) {
-			$terms = $this->link_categories( $post_id, $output['categories'], true );
+			$terms     = $this->link_categories( $post_id, $output['categories'], true );
 			$all_terms = $terms;
 		}
 
 		if ( ! empty( $output['keywords'] ) ) {
-			$terms = $this->link_keywords( $post_id, $output['keywords'], true );
+			$terms     = $this->link_keywords( $post_id, $output['keywords'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['concepts'] ) ) {
-			$terms = $this->link_concepts( $post_id, $output['concepts'], true );
+			$terms     = $this->link_concepts( $post_id, $output['concepts'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['entities'] ) ) {
-			$terms = $this->link_entities( $post_id, $output['entities'], true );
+			$terms     = $this->link_entities( $post_id, $output['entities'], true );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
@@ -86,6 +86,8 @@ class Linker {
 	 * @param int   $post_id The id of the post to link
 	 * @param array $categories The list of categories to link
 	 * @param bool  $return_terms Whether to return the terms to link or not
+	 *
+	 * @return array The terms to link
 	 */
 	public function link_categories( int $post_id, array $categories, bool $return_terms = false ): array {
 		$terms_to_link = [];
@@ -139,6 +141,8 @@ class Linker {
 	 * @param int   $post_id The id of the post to link
 	 * @param array $keywords NLU returned keywords
 	 * @param bool  $return_terms Whether to return the terms to link or not
+	 *
+	 * @return array The terms to link
 	 */
 	public function link_keywords( int $post_id, array $keywords, bool $return_terms = false ): array {
 		$terms_to_link = [];
@@ -183,6 +187,8 @@ class Linker {
 	 * @param int   $post_id The id of the post to link
 	 * @param array $concepts The NLU returned concepts.
 	 * @param bool  $return_terms Whether to return the terms to link or not
+	 *
+	 * @return array The terms to link
 	 */
 	public function link_concepts( int $post_id, array $concepts, bool $return_terms = false ): array {
 		$terms_to_link = [];
@@ -234,6 +240,8 @@ class Linker {
 	 * @param int   $post_id The id of the post to link
 	 * @param array $entities The entities returned by the NLU api
 	 * @param bool  $return_terms Whether to return the terms to link or not
+	 *
+	 * @return array The terms to link
 	 */
 	public function link_entities( int $post_id, array $entities, bool $return_terms = false ): array {
 		$terms_to_link = [];
