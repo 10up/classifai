@@ -34,7 +34,7 @@ class Linker {
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $options Unused.
 	 *
-	 * @return void
+	 * @return array The terms that were linked.
 	 */
 	public function link( $post_id, $output, $options = [] ) {
 		$all_terms = [];
@@ -59,11 +59,13 @@ class Linker {
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
-		if ( $all_terms ) {
+		if ( ! empty( $all_terms ) ) {
 			foreach ( $all_terms as $taxonomy => $terms ) {
 				wp_set_object_terms( $post_id, $terms, $taxonomy, false );
 			}
 		}
+
+		return $all_terms;
 	}
 
 	/* helpers */
@@ -133,7 +135,7 @@ class Linker {
 			}
 		}
 
-		return $terms_to_link;
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -187,7 +189,7 @@ class Linker {
 			}
 		}
 
-		return $terms_to_link;
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -248,7 +250,7 @@ class Linker {
 			}
 		}
 
-		return $terms_to_link;
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -320,7 +322,7 @@ class Linker {
 			}
 		}
 
-		return $terms_to_link;
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
