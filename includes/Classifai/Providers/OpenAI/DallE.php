@@ -22,6 +22,13 @@ class DallE extends Provider {
 	protected $dalle_url = 'https://api.openai.com/v1/images/generations';
 
 	/**
+	 * Maximum number of characters a prompt can have
+	 *
+	 * @var int
+	 */
+	public $max_prompt_chars = 1000;
+
+	/**
 	 * OpenAI DALL·E constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -139,7 +146,7 @@ class DallE extends Provider {
 				<p>
 					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
 			</div>
@@ -382,6 +389,11 @@ class DallE extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+
+		// If our prompt exceeds the max length, throw an error.
+		if ( mb_strlen( $prompt ) > $this->max_prompt_chars ) {
+			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
+		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
