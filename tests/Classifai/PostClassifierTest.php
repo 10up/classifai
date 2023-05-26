@@ -6,6 +6,7 @@ use Classifai\Taxonomy\TaxonomyFactory;
 
 class PostClassifierTest extends \WP_UnitTestCase {
 
+	/* @var PostClassifier $classifier */
 	public $classifier;
 
 	function set_up() {
