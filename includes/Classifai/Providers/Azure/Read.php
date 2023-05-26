@@ -188,10 +188,10 @@ class Read {
 		 * @since 1.5.0
 		 * @hook classifai_azure_read_after_request
 		 *
-		 * @param array|WP_Error Response data or a WP_Error if the request failed.
-		 * @param string The request URL with query args added.
-		 * @param int The document ID.
-		 * @param string The document URL.
+		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+		 * @param {string} The request URL with query args added.
+		 * @param {int} The document ID.
+		 * @param {string} The document URL.
 		 */
 		do_action( 'classifai_azure_read_after_request', $response, $url, $this->attachment_id, $document_url );
 

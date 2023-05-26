@@ -326,8 +326,8 @@ class OCR {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_after_request
 		 *
-		 * @param array|WP_Error Response data or a WP_Error if the request failed.
-		 * @param string The attachment URL.
+		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+		 * @param {string} The attachment URL.
 		 */
 		do_action( 'classifai_ocr_after_request', $response, $url );
 
@@ -349,8 +349,8 @@ class OCR {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_unsuccessful_response
 				 *
-				 * @param array|WP_Error Response data or a WP_Error if the request failed.
-				 * @param string The attachment URL.
+				 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+				 * @param {string} The attachment URL.
 				 */
 				do_action( 'classifai_ocr_unsuccessful_response', $response, $url );
 

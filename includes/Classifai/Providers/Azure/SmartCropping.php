@@ -337,9 +337,9 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_after_request
 		 *
-		 * @param array|WP_Error Response data or a WP_Error if the request failed.
-		 * @param string The request URL with query args added.
-		 * @param array  Array containing the image height and width.
+		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+		 * @param {string} The request URL with query args added.
+		 * @param {array}  Array containing the image height and width.
 		 */
 		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
@@ -361,9 +361,9 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_unsuccessful_response
 		 *
-		 * @param array|WP_Error Response data or a WP_Error if the request failed.
-		 * @param string The request URL with query args added.
-		 * @param array  Array containing the image height and width.
+		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+		 * @param {string} The request URL with query args added.
+		 * @param {array}  Array containing the image height and width.
 		 */
 		do_action( 'classifai_smart_cropping_unsuccessful_response', $response, $url, $data );
 
