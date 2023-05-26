@@ -328,7 +328,7 @@ class Whisper extends Provider {
 			__( 'Authenticated', 'classifai' )        => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate transcripts', 'classifai' ) => $enable_transcript ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles', 'classifai' )        => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( 'classifai_openai_whisper_latest_response' ),
+			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) ),
 		];
 	}
 

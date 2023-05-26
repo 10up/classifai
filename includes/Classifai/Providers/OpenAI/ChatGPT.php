@@ -374,7 +374,7 @@ class ChatGPT extends Provider {
 			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
 			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
-			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
 		];
 	}
 
