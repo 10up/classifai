@@ -659,11 +659,11 @@ class ComputerVision extends Provider {
 		 * @since 1.6.0
 		 * @hook classifai_should_ocr_scan_image
 		 *
-		 * @param bool  $should_ocr_scan Whether to run OCR scanning. The default value is set in ComputerVision settings.
-		 * @param array $metadata        Image metadata.
-		 * @param int   $attachment_id   The attachment ID.
+		 * @param {bool}  $should_ocr_scan Whether to run OCR scanning. The default value is set in ComputerVision settings.
+		 * @param {array} $metadata        Image metadata.
+		 * @param {int}   $attachment_id   The attachment ID.
 		 *
-		 * @return bool Whether to run OCR scanning.
+		 * @return {bool} Whether to run OCR scanning.
 		 */
 		if ( ! $force && ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
 			return $metadata;

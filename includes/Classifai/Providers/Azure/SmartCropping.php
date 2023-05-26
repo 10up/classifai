@@ -103,7 +103,7 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_crop_max_pixel_dimension
 		 *
-		 * @param {int} max The max width/height in pixels.
+		 * @param {int} $max The max width/height in pixels. Default 1024.
 		 *
 		 * @return {int} Filtered max dimension in pixels.
 		 */
@@ -264,10 +264,13 @@ class SmartCropping {
 		 * the original file in the file system.
 		 *
 		 * @since 1.5.0
+		 * @hook classifai_smart_cropping_thumb_file_name
 		 *
-		 * @param string Default file name.
-		 * @param int    The ID of the attachment being processed.
-		 * @param array  Width and height data for the image.
+		 * @param {string} Default file name.
+		 * @param {int}    The ID of the attachment being processed.
+		 * @param {array}  Width and height data for the image.
+		 *
+		 * @return {string} Filtered file name.
 		 */
 		$new_thumb_file_name = apply_filters(
 			'classifai_smart_cropping_thumb_file_name',
