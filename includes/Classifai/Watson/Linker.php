@@ -40,22 +40,22 @@ class Linker {
 		$all_terms = [];
 
 		if ( ! empty( $output['categories'] ) ) {
-			$terms     = $this->link_categories( $post_id, $output['categories'] );
+			$terms     = $this->link_categories( $post_id, $output['categories'], false );
 			$all_terms = $terms;
 		}
 
 		if ( ! empty( $output['keywords'] ) ) {
-			$terms     = $this->link_keywords( $post_id, $output['keywords'] );
+			$terms     = $this->link_keywords( $post_id, $output['keywords'], false );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['concepts'] ) ) {
-			$terms     = $this->link_concepts( $post_id, $output['concepts'] );
+			$terms     = $this->link_concepts( $post_id, $output['concepts'], false );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['entities'] ) ) {
-			$terms     = $this->link_entities( $post_id, $output['entities'] );
+			$terms     = $this->link_entities( $post_id, $output['entities'], false );
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
@@ -87,11 +87,11 @@ class Linker {
 	 *
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $categories The list of categories to link
-	 * @param bool  $link_terms Whether link terms to post or return terms.
+	 * @param bool  $link_categories Whether link categories to post or return array of term ids.
 	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_categories( int $post_id, array $categories, bool $link_terms = false ) {
+	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'category' );
 
@@ -127,7 +127,7 @@ class Linker {
 			return [];
 		}
 
-		if ( $link_terms ) {
+		if ( $link_categories ) {
 			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 
 			if ( is_wp_error( $result ) ) {
@@ -150,11 +150,11 @@ class Linker {
 	 *
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $keywords NLU returned keywords
-	 * @param bool  $link_terms Whether link terms to post or return terms.
+	 * @param bool  $link_keywords Whether link keywords to post or return array of term ids.
 	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_keywords( int $post_id, array $keywords, bool $link_terms = false ) {
+	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'keyword' );
 
@@ -181,7 +181,7 @@ class Linker {
 			return [];
 		}
 
-		if ( $link_terms ) {
+		if ( $link_keywords ) {
 			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 
 			if ( is_wp_error( $result ) ) {
@@ -204,11 +204,11 @@ class Linker {
 	 *
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $concepts The NLU returned concepts.
-	 * @param bool  $link_terms Whether link terms to post or return terms.
+	 * @param bool  $link_concepts Whether link concepts to post or return array of term ids.
 	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_concepts( int $post_id, array $concepts, bool $link_terms = false ) {
+	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'concept' );
 
@@ -242,7 +242,7 @@ class Linker {
 			return [];
 		}
 
-		if ( $link_terms ) {
+		if ( $link_concepts ) {
 			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 
 			if ( is_wp_error( $result ) ) {
@@ -265,11 +265,11 @@ class Linker {
 	 *
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $entities The entities returned by the NLU api
-	 * @param bool  $link_terms Whether link terms to post or return terms.
+	 * @param bool  $link_entities Whether link entities to post or return array of term ids.
 	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_entities( int $post_id, array $entities, bool $link_terms = false ) {
+	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'entity' );
 
@@ -314,7 +314,7 @@ class Linker {
 			return [];
 		}
 
-		if ( $link_terms ) {
+		if ( $link_entities ) {
 			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
 
 			if ( is_wp_error( $result ) ) {

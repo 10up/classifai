@@ -26,7 +26,7 @@ class LinkerTest extends \WP_UnitTestCase {
 		];
 
 		$post_id = $this->factory->post->create();
-		$this->linker->link_categories( $post_id, $categories, true );
+		$this->linker->link_categories( $post_id, $categories );
 
 		$actual = wp_get_object_terms( $post_id, [ WATSON_CATEGORY_TAXONOMY ] );
 		$actual = array_map( function( $term ) {
@@ -49,7 +49,7 @@ class LinkerTest extends \WP_UnitTestCase {
 		];
 
 		$post_id = $this->factory->post->create();
-		$this->linker->link_keywords( $post_id, $keywords, true );
+		$this->linker->link_keywords( $post_id, $keywords );
 
 		$actual = wp_get_object_terms( $post_id, [ WATSON_KEYWORD_TAXONOMY ] );
 		$actual = array_map( function( $term ) {
@@ -74,7 +74,7 @@ class LinkerTest extends \WP_UnitTestCase {
 		];
 
 		$post_id = $this->factory->post->create();
-		$this->linker->link_concepts( $post_id, $concepts, true );
+		$this->linker->link_concepts( $post_id, $concepts );
 
 		$actual = wp_get_object_terms( $post_id, [ WATSON_CONCEPT_TAXONOMY ] );
 		$actual = array_map( function( $term ) {
@@ -107,7 +107,7 @@ class LinkerTest extends \WP_UnitTestCase {
 		];
 
 		$post_id = $this->factory->post->create();
-		$this->linker->link_entities( $post_id, $entities, true );
+		$this->linker->link_entities( $post_id, $entities );
 
 		$actual = wp_get_object_terms( $post_id, [ WATSON_ENTITY_TAXONOMY ] );
 		$actual = array_map( function( $term ) {
