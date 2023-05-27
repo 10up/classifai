@@ -524,7 +524,7 @@ class TextToSpeech extends Provider {
 
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
-			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.js',
 			get_asset_info( 'post-audio-controls', 'dependencies' ),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			true
@@ -532,7 +532,7 @@ class TextToSpeech extends Provider {
 
 		wp_enqueue_style(
 			'classifai-post-audio-player-css',
-			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.css',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.css',
 			array(),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
