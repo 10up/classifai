@@ -68,6 +68,38 @@ The following WP-CLI commands are supported by ClassifAI:
 
     default: `false`
 
+* `wp classifai text_to_speech <post_ids> [--post_type=<post_type>] [--post_status=<post_status>] [--per_page=<per_page>]`
+
+  Batch generation of text-to-speech data using Microsoft Azure's Text to Speech API.
+
+  * `<post_ids>`: A comma-delimited list of post IDs to generate text-to-speech for. Used if post_type is `false` or absent.
+
+    default: `null`
+
+  * `[--post_type=<post_type>]`: Batch process items belonging to this post type. If `false` or absent, will rely on `post_ids`.
+
+    default: `false`
+
+    options:
+
+    * any post type name
+
+  * `[--post_status=<post_status>]`: Batch process items that have this post status. Defaults to `publish`.
+
+    default: `publish`
+
+    options:
+
+    * any post status name
+
+  * `[--per_page=<per_page>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
+
+    default: `100`
+
+    options:
+
+    * N, max number of items to process at a time
+
 ### Image Processing Commands
 
 * `wp classifai image <attachment_ids> [--limit=<int>] [--skip=<skip>] [--force]`
