@@ -10,7 +10,7 @@ const currentPostFrame = wp.media.view.MediaFrame.Post;
  * Extend the core MediaFrame.Select view.
  *
  * We do this in order to add our new tab and
- * the content for that tab.
+ * the content for that tab in the block editor.
  */
 wp.media.view.MediaFrame.Select = currentMediaSelectFrame.extend( {
 	/**
