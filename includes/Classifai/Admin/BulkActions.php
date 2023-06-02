@@ -268,6 +268,7 @@ class BulkActions {
 
 		$classified     = ! empty( $_GET['bulk_classified'] ) ? intval( wp_unslash( $_GET['bulk_classified'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$text_to_speech = ! empty( $_GET['bulk_text_to_speech'] ) ? intval( wp_unslash( $_GET['bulk_text_to_speech'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$post_type      = ! empty( $_GET['post_type'] ) ? wp_unslash( $_GET['post_type'] ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$scanned        = ! empty( $_GET['bulk_scanned'] ) ? intval( wp_unslash( $_GET['bulk_scanned'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$cropped        = ! empty( $_GET['bulk_cropped'] ) ? intval( wp_unslash( $_GET['bulk_cropped'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$transcribed    = ! empty( $_GET['bulk_transcribed'] ) ? intval( wp_unslash( $_GET['bulk_transcribed'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -278,11 +279,11 @@ class BulkActions {
 
 		if ( $classified ) {
 			$classified_posts_count = $classified;
-			$post_type              = 'post';
+			$post_type              = $post_type;
 			$action                 = __( 'Classified', 'classifai' );
 		} elseif ( $text_to_speech ) {
 			$classified_posts_count = $text_to_speech;
-			$post_type              = 'post';
+			$post_type              = $post_type;
 			$action                 = __( 'Text to speech conversion done for', 'classifai' );
 		} elseif ( $scanned ) {
 			$classified_posts_count = $scanned;
@@ -344,15 +345,23 @@ class BulkActions {
 			$post_types = array_merge( $post_types, $this->embeddings->supported_post_types() );
 		}
 
-		if ( ! in_array( $post->post_type, $post_types, true ) ) {
-			return $actions;
+		if ( in_array( $post->post_type, $post_types, true ) ) {
+			$actions['classify'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=classify&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+				esc_html__( 'Classify', 'classifai' )
+			);
 		}
 
-		$actions['classify'] = sprintf(
-			'<a href="%s">%s</a>',
-			esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=classify&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-			esc_html__( 'Classify', 'classifai' )
-		);
+		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) ) {
+			if ( in_array( $post->post_type, $this->text_to_speech->get_supported_post_types(), true ) ) {
+				$actions['text_to_speech'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+					esc_html__( 'Text to speech', 'classifai' )
+				);
+			}
+		}
 
 		return $actions;
 	}
