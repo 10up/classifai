@@ -250,7 +250,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		// If we have a post type specified, process all items in that type.
 		if ( ! empty( $opts['post_type'] ) ) {
-			\WP_CLI::log( sprintf( 'Starting processing of %s items in batches of %d', $opts['post_type'], $opts['per_page'] ) );
+			\WP_CLI::log( sprintf( 'Starting processing of "%s" post types that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
 
 			$paged = 1;
 
@@ -260,7 +260,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'post_type'        => $opts['post_type'],
 						'posts_per_page'   => $opts['per_page'],
 						'paged'            => $paged,
-						'post_status'      => 'publish',
+						'post_status'      => $opts['post_status'],
 						'suppress_filters' => 'false',
 						'fields'           => 'ids',
 					)
