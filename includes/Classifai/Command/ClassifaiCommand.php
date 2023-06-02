@@ -280,7 +280,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				$this->inmemory_cleanup();
 
-				\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				if ( $total ) {
+					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				}
 
 				$paged ++;
 			} while ( $total );
