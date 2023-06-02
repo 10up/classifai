@@ -47,10 +47,10 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^3.1.0",
-    "jsdoc": "^3.6.3",
+    "jsdoc": "^4.0.2",
     "lint-staged": "^9.5.0",
     "node-wp-i18n": "^1.2.3",
-    "svg-react-loader": "^0.4.6",
+    "svg-react-loader": "^0.4.0",
     "webpack": "^5.76.0",
     "webpack-cli": "^4.10.0",
     "wp-hookdoc": "^0.2.0"
