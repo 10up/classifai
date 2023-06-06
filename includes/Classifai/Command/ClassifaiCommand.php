@@ -299,8 +299,17 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
 
 			foreach ( $post_ids as $post_id ) {
+				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
 					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
+					$errors ++;
+					continue;
+				}
+
+				// Ensure we have a valid post type.
+				$post_type = get_post_type( $post_id );
+				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
+					\WP_CLI::log( sprintf( 'The "%s" post type is not enabled for Text to Speech processing', $post_type ) );
 					$errors ++;
 					continue;
 				}
