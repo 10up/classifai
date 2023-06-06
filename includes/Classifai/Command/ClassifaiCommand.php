@@ -236,6 +236,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		];
 
 		$opts               = wp_parse_args( $opts, $defaults );
+		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
 		$allowed_post_types = TextToSpeech::get_supported_post_types();
 
 		$count  = 0;
@@ -251,7 +252,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			}
 
 			// Only allow processing post statuses that are valid for a particular post type.
-			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_status'] ), true ) ) {
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) ) {
 				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
 			}
 
