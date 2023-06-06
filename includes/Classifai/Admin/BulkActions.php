@@ -126,11 +126,17 @@ class BulkActions {
 	public function register_bulk_actions( $bulk_actions ) {
 		$nlu_post_types = get_supported_post_types();
 
-		if ( ! empty( $nlu_post_types ) || is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) ) {
+		if (
+			! empty( $nlu_post_types ) ||
+			( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) && ! empty( $this->embeddings->supported_post_types() ) )
+		) {
 			$bulk_actions['classify'] = __( 'Classify', 'classifai' );
 		}
 
-		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) ) {
+		if (
+			is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) &&
+			in_array( get_current_screen()->post_type, $this->text_to_speech->get_supported_post_types(), true )
+		) {
 			$bulk_actions['text_to_speech'] = __( 'Text to speech', 'classifai' );
 		}
 
