@@ -68,7 +68,7 @@ The following WP-CLI commands are supported by ClassifAI:
 
     default: `false`
 
-* `wp classifai text_to_speech <post_ids> [--post_type=<post_type>] [--post_status=<post_status>] [--per_page=<per_page>]`
+* `wp classifai text_to_speech <post_ids> [--post_type=<post_type>] [--post_status=<post_status>] [--per_page=<per_page>] [--dry-run=<bool>]`
 
   Batch generation of text-to-speech data using Microsoft Azure's Text to Speech API.
 
