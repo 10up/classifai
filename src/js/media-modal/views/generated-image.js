@@ -1,7 +1,7 @@
 /* eslint object-shorthand: 0 */
 
-const { uploadMedia } = wp.mediaUtils;
-const { cleanForSlug } = wp.url;
+import { uploadMedia } from '@wordpress/media-utils';
+import { cleanForSlug } from '@wordpress/url';
 
 /**
  * View to render a single generated image.

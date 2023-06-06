@@ -87,7 +87,7 @@ class DallE extends Provider {
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			[ 'jquery', 'wp-api' ],
+			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
 			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
