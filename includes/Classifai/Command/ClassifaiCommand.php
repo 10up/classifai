@@ -222,8 +222,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--post_status=<post_status>]
 	 * : Batch process items that have this post status. Default publish
 
-	 * [--per_page=<per_page>]
+	 * [--per_page=<int>]
 	 * : How many items should be processed at a time. Default 100
+	 *
+	 * [--dry-run=<bool>]
+	 * : Whether to run as a dry-run. Default true
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
@@ -243,6 +246,21 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$errors = 0;
 
 		$save_post_handler = new SavePostHandler();
+
+		// Determine if this is a dry run or not.
+		if ( isset( $opts['dry-run'] ) ) {
+			if ( 'false' === $opts['dry-run'] ) {
+				$dry_run = false;
+			} else {
+				$dry_run = (bool) $opts['dry-run'];
+			}
+		} else {
+			$dry_run = true;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
 
 		// If we have a post type specified, process all items in that type.
 		if ( ! empty( $opts['post_type'] ) ) {
@@ -274,11 +292,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$total = count( $posts );
 
 				foreach ( $posts as $post_id ) {
-					$result = $save_post_handler->synthesize_speech( $post_id );
+					if ( ! $dry_run ) {
+						$result = $save_post_handler->synthesize_speech( $post_id );
 
-					if ( is_wp_error( $result ) ) {
-						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-						$errors ++;
+						if ( is_wp_error( $result ) ) {
+							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
+							$errors ++;
+						}
 					}
 
 					$count ++;
@@ -320,11 +340,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					continue;
 				}
 
-				$result = $save_post_handler->synthesize_speech( $post_id );
+				if ( ! $dry_run ) {
+					$result = $save_post_handler->synthesize_speech( $post_id );
 
-				if ( is_wp_error( $result ) ) {
-					\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-					$errors ++;
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
+						$errors ++;
+					}
 				}
 
 				$progress_bar->tick();
@@ -334,7 +356,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$progress_bar->finish();
 		}
 
-		\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
+		if ( ! $dry_run ) {
+			\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
+		} else {
+			\WP_CLI::success( sprintf( '%d items would have been processed', $count ) );
+		}
+
 		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
 	}
 

@@ -92,13 +92,22 @@ The following WP-CLI commands are supported by ClassifAI:
 
     * any post status name
 
-  * `[--per_page=<per_page>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
+  * `[--per_page=<int>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
 
     default: `100`
 
     options:
 
     * N, max number of items to process at a time
+
+  * `[--dry-run=<bool>]`: Whether to run as a dry-run. Defaults to `true`, so will run in dry-run mode unless this is set to `false`.
+
+    default: `true`
+
+    options:
+
+    * `true` to run in dry-run mode
+    * `false` to run in normal mode
 
 ### Image Processing Commands
 
