@@ -292,13 +292,19 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				\WP_CLI::error( 'Please specify a comma-delimited list of post IDs to process' );
 			}
 
-			$post_ids = explode( ',', $args[0] );
+			$post_ids = array_map( 'absint', explode( ',', $args[0] ) );
 
 			\WP_CLI::log( sprintf( 'Starting processing of %s items', count( $post_ids ) ) );
 
 			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
 
 			foreach ( $post_ids as $post_id ) {
+				if ( ! get_post( $post_id ) ) {
+					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
+					$errors ++;
+					continue;
+				}
+
 				$result = $save_post_handler->synthesize_speech( $post_id );
 
 				if ( is_wp_error( $result ) ) {
@@ -314,7 +320,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
-		\WP_CLI::success( sprintf( '%d items had errors', $errors ) );
+		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
 	}
 
 	/**
