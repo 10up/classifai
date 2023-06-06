@@ -311,16 +311,9 @@ class ImageProcessing extends Service {
 			return $provider;
 		}
 
-		$prompt = $request->get_param( 'prompt' );
-
-		// If our prompt exceeds the max length, throw an error.
-		if ( mb_strlen( $prompt ) > $provider->max_prompt_chars ) {
-			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
-		}
-
 		return rest_ensure_response(
 			$provider->generate_image_callback(
-				$prompt,
+				$request->get_param( 'prompt' ),
 				[
 					'num'    => $request->get_param( 'n' ),
 					'size'   => $request->get_param( 'size' ),
