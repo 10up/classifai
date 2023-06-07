@@ -21,12 +21,8 @@
     "env:stop": "wp-env stop",
     "postenv:start": "./tests/bin/initialize.sh",
     "archive": "composer archive --file=$npm_package_name --format=zip",
-    "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release",
+    "prepare": "husky install"
   },
   "lint-staged": {
     "*.php": [
