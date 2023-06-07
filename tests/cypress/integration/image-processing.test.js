@@ -5,9 +5,6 @@ import { getOCRData, getImageData, getDalleData } from '../plugins/functions';
 describe('Image processing Tests', () => {
 	let imageEditLink = '';
 	let mediaModelLink = '';
-	before(() => {
-		cy.login();
-	});
 
 	it('Can save Computer Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
