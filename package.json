@@ -37,9 +37,9 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.1.0",
-    "@wordpress/env": "^5.16.0",
-    "@wordpress/scripts": "^26.5.0",
-    "cypress": "^11.2.0",
+    "@wordpress/env": "^8.1.0",
+    "@wordpress/scripts": "^26.6.0",
+    "cypress": "^12.13.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^8.0.3",
@@ -52,7 +52,7 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
-    "@wordpress/icons": "^9.25.0",
+    "@wordpress/icons": "^9.26.0",
     "choices.js": "^10.2.0",
     "tippy.js": "^6.3.7"
   }
