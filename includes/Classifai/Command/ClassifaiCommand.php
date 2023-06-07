@@ -274,7 +274,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
 			}
 
-			\WP_CLI::log( sprintf( 'Starting processing of "%s" post types that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
+			\WP_CLI::log( sprintf( 'Starting processing of "%s" post type items that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
 
 			$paged = 1;
 
