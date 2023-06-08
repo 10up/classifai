@@ -43,7 +43,7 @@
     "cypress-file-upload": "^5.0.8",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^8.0.3",
-    "jsdoc": "^4.0.2",
+    "jsdoc": "^3.6.11",
     "lint-staged": "^13.2.2",
     "node-wp-i18n": "^1.2.7",
     "svg-react-loader": "^0.4.6",
