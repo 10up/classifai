@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_openai_settings_post_types - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_azure_read_retry_interval - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_openai_settings_post_types</h1>
+    <h1 class="page-title">Filter: classifai_azure_read_retry_interval</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_openai_settings_post_types">apply_filters( 'classifai_openai_settings_post_types', <span class="signature">$post_types, $this )</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="classifai_azure_read_retry_interval">apply_filters( 'classifai_azure_read_retry_interval', <span class="signature">$seconds )</span><span class="type-signature"> &rarr; {int}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter post types shown in settings.</p>
+    <p>Filters the Read retry interval.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$post_types</code></td>
+                <td class="name"><code>$seconds</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">int</span>
 
 
             
@@ -100,30 +100,7 @@
 
             
 
-            <td class="description last"><p>Array of post types to show in settings.</p></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>$this</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"><p>Current instance of the class.</p></td>
+            <td class="description last"><p>How many seconds should the interval be? Default 60.</p></td>
         </tr>
 
     
@@ -141,7 +118,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>2.2.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>1.7.0</li></ul></dd>
     
 
     
@@ -167,7 +144,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_OpenAI_OpenAI.php.html">Providers/OpenAI/OpenAI.php</a>, <a href="Providers_OpenAI_OpenAI.php.html#line171">line 171</a>
+        <a href="Providers_Azure_Read.php.html">Providers/Azure/Read.php</a>, <a href="Providers_Azure_Read.php.html#line256">line 256</a>
     </li></ul></dd>
     
 
@@ -194,7 +171,7 @@
 
         
 <div class="param-desc">
-    <p>Array of post types.</p>
+    <p>Filtered interval.</p>
 </div>
 
 
@@ -205,7 +182,7 @@
     </dt>
     <dd>
         
-<span class="param-type">array</span>
+<span class="param-type">int</span>
 
 
     </dd>

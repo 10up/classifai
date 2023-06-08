@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_openai_settings_post_types - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_disable_post_to_audio_block - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_openai_settings_post_types</h1>
+    <h1 class="page-title">Filter: classifai_disable_post_to_audio_block</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_openai_settings_post_types">apply_filters( 'classifai_openai_settings_post_types', <span class="signature">$post_types, $this )</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="classifai_disable_post_to_audio_block">apply_filters( 'classifai_disable_post_to_audio_block', <span class="signature">$is_disabled, $post_id )</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter post types shown in settings.</p>
+    <p>Filter to disable the rendering of the Text to Speech block.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$post_types</code></td>
+                <td class="name"><code>$is_disabled</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">bool</span>
 
 
             
@@ -100,20 +100,20 @@
 
             
 
-            <td class="description last"><p>Array of post types to show in settings.</p></td>
+            <td class="description last"><p>Whether to disable the display or not. By default - false.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>$this</code></td>
+                <td class="name"><code>$post_id</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">bool</span>
 
 
             
@@ -123,7 +123,7 @@
 
             
 
-            <td class="description last"><p>Current instance of the class.</p></td>
+            <td class="description last"><p>Post ID.</p></td>
         </tr>
 
     
@@ -167,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_OpenAI_OpenAI.php.html">Providers/OpenAI/OpenAI.php</a>, <a href="Providers_OpenAI_OpenAI.php.html#line171">line 171</a>
+        <a href="Providers_Azure_TextToSpeech.php.html">Providers/Azure/TextToSpeech.php</a>, <a href="Providers_Azure_TextToSpeech.php.html#line504">line 504</a>
     </li></ul></dd>
     
 
@@ -194,7 +194,7 @@
 
         
 <div class="param-desc">
-    <p>Array of post types.</p>
+    <p>Whether the audio block should be shown.</p>
 </div>
 
 
@@ -205,7 +205,7 @@
     </dt>
     <dd>
         
-<span class="param-type">array</span>
+<span class="param-type">bool</span>
 
 
     </dd>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_openai_settings_post_types - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_listen_to_this_post_text - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_openai_settings_post_types</h1>
+    <h1 class="page-title">Filter: classifai_listen_to_this_post_text</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_openai_settings_post_types">apply_filters( 'classifai_openai_settings_post_types', <span class="signature">$post_types, $this )</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="classifai_listen_to_this_post_text">apply_filters( 'classifai_listen_to_this_post_text', <span class="signature">The, Post )</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter post types shown in settings.</p>
+    <p>Hook to filter the text next to the audio controls on the frontend.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$post_types</code></td>
+                <td class="name"><code>The</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">string</span>
 
 
             
@@ -100,20 +100,20 @@
 
             
 
-            <td class="description last"><p>Array of post types to show in settings.</p></td>
+            <td class="description last"><p>text to filter.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>$this</code></td>
+                <td class="name"><code>Post</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">int</span>
 
 
             
@@ -123,7 +123,7 @@
 
             
 
-            <td class="description last"><p>Current instance of the class.</p></td>
+            <td class="description last"><p>ID.</p></td>
         </tr>
 
     
@@ -167,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_OpenAI_OpenAI.php.html">Providers/OpenAI/OpenAI.php</a>, <a href="Providers_OpenAI_OpenAI.php.html#line171">line 171</a>
+        <a href="Providers_Azure_TextToSpeech.php.html">Providers/Azure/TextToSpeech.php</a>, <a href="Providers_Azure_TextToSpeech.php.html#line560">line 560</a>
     </li></ul></dd>
     
 
@@ -194,7 +194,7 @@
 
         
 <div class="param-desc">
-    <p>Array of post types.</p>
+    <p>Filtered text.</p>
 </div>
 
 
@@ -205,7 +205,7 @@
     </dt>
     <dd>
         
-<span class="param-type">array</span>
+<span class="param-type">string</span>
 
 
     </dd>
