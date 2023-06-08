@@ -184,7 +184,8 @@ class SavePostHandler {
 			);
 		}
 
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		// We skip the user cap check if running under WP-CLI.
+		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_user_not_authorized',
 				esc_html__( 'Unauthorized user.', 'classifai' )
