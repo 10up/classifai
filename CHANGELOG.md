@@ -7,9 +7,9 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [2.2.1] - 2023-06-12
 ### Added
 - Ability to generate images in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#471](https://github.com/10up/classifai/pull/471)).
-- Ability to trigger text-to-speech generation in bulk (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#477](https://github.com/10up/classifai/pull/477)).
-- Ability to trigger text-to-speech generation on an individual item from the post lists screen (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#477](https://github.com/10up/classifai/pull/477)).
-- Custom `WP-CLI` command that can be used to generate Text to Speech data in bulk (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#478](https://github.com/10up/classifai/pull/478)).
+- Ability to trigger Text-to-Speech generation in bulk (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#477](https://github.com/10up/classifai/pull/477)).
+- Ability to trigger Text-to-Speech generation on an individual item from the post lists screen (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#477](https://github.com/10up/classifai/pull/477)).
+- Custom `WP-CLI` command,`text_to_speech`, that can be used to generate Text-to-Speech data in bulk (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#478](https://github.com/10up/classifai/pull/478)).
 
 ### Changed
 - Tweak the prompt that is used to generate excerpts (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#468](https://github.com/10up/classifai/pull/468)).
