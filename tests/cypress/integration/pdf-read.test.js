@@ -3,9 +3,6 @@
 import { getPDFData } from '../plugins/functions';
 
 describe('PDF read Tests', () => {
-	before(() => {
-		cy.login();
-	});
 
 	it('Can save "PDF scanning" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
