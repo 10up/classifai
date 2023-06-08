@@ -502,10 +502,15 @@ class TextToSpeech extends Provider {
 		}
 
 		/**
-		 * Filter to disable Text to Speech synthesis for a post by post ID.
+		 * Filter to disable the rendering of the Text to Speech block.
 		 *
-		 * @param boolean 'is_disabled' Boolean to toggle the service. By default - false.
-		 * @param boolean 'post_id'     Post ID.
+		 * @since 2.2.0
+		 * @hook classifai_disable_post_to_audio_block
+		 *
+		 * @param {bool} $is_disabled Whether to disable the display or not. By default - false.
+		 * @param {bool} $post_id     Post ID.
+		 *
+		 * @return {bool} Whether the audio block should be shown.
 		 */
 		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
 			return $content;
@@ -519,7 +524,7 @@ class TextToSpeech extends Provider {
 
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
-			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.js',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.js',
 			get_asset_info( 'post-audio-controls', 'dependencies' ),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			true
@@ -527,7 +532,7 @@ class TextToSpeech extends Provider {
 
 		wp_enqueue_style(
 			'classifai-post-audio-player-css',
-			CLASSIFAI_PLUGIN_URL . '/dist/post-audio-controls.css',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.css',
 			array(),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
@@ -555,10 +560,13 @@ class TextToSpeech extends Provider {
 								/**
 								 * Hook to filter the text next to the audio controls on the frontend.
 								 *
-								 * @param string  The text to filter.
-								 * @param integer The Post ID.
+								 * @since 2.2.0
+								 * @hook classifai_listen_to_this_post_text
 								 *
-								 * @return string
+								 * @param {string} The text to filter.
+								 * @param {int}    Post ID.
+								 *
+								 * @return {string} Filtered text.
 								 */
 								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $post->ID ),
 								esc_html__( 'Listen to this', 'classifai' ),

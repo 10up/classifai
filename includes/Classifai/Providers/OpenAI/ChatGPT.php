@@ -374,7 +374,7 @@ class ChatGPT extends Provider {
 			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
 			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
-			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( 'classifai_openai_chatgpt_latest_response' ),
+			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
 		];
 	}
 
@@ -443,7 +443,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a kicker for the following text in ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a teaser for the following text using a maximum of ' . $excerpt_length . ' words', $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -485,7 +485,8 @@ class ChatGPT extends Provider {
 		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
 			foreach ( $response['choices'] as $choice ) {
 				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					$response = sanitize_text_field( $choice['message']['content'] );
+					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
 				}
 			}
 		}

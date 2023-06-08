@@ -46,7 +46,7 @@ function register_blocks() {
 function blocks_styles() {
 	wp_enqueue_style(
 		'recommended-content-block-style',
-		CLASSIFAI_PLUGIN_URL . '/dist/recommended-content-block-frontend.css',
+		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-frontend.css',
 		[],
 		CLASSIFAI_PLUGIN_VERSION
 	);
