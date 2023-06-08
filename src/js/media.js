@@ -15,25 +15,25 @@ import { __ } from '@wordpress/i18n';
 		const imageTagsButton = document.getElementById(
 			'classifai-rescan-image-tags'
 		);
-		const ocrScanButton = document.getElementById('classifai-rescan-ocr');
+		const ocrScanButton = document.getElementById( 'classifai-rescan-ocr' );
 		const smartCropButton = document.getElementById(
 			'classifai-rescan-smart-crop'
 		);
-		const readButton = document.getElementById('classifai-rescan-pdf');
+		const readButton = document.getElementById( 'classifai-rescan-pdf' );
 		const transcribeButton = document.getElementById(
 			'classifai-retranscribe'
 		);
 
-		if (altTagsButton) {
-			altTagsButton.addEventListener('click', (e) =>
-				handleClick({
+		if ( altTagsButton ) {
+			altTagsButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/alt-tags/',
-					callback: (resp) => {
+					callback: ( resp ) => {
 						const { enabledAltTextFields } = classifaiMediaVars;
 
-						if (resp) {
-							if (enabledAltTextFields.includes('alt')) {
+						if ( resp ) {
+							if ( enabledAltTextFields.includes( 'alt' ) ) {
 								const textField =
 									document.getElementById(
 										'attachment-details-two-column-alt-text'
@@ -42,12 +42,12 @@ import { __ } from '@wordpress/i18n';
 										'attachment-details-alt-text'
 									);
 
-								if (textField) {
+								if ( textField ) {
 									textField.value = resp;
 								}
 							}
 
-							if (enabledAltTextFields.includes('caption')) {
+							if ( enabledAltTextFields.includes( 'caption' ) ) {
 								const textField =
 									document.getElementById(
 										'attachment-details-two-column-caption'
@@ -56,12 +56,14 @@ import { __ } from '@wordpress/i18n';
 										'attachment-details-caption'
 									);
 
-								if (textField) {
+								if ( textField ) {
 									textField.value = resp;
 								}
 							}
 
-							if (enabledAltTextFields.includes('description')) {
+							if (
+								enabledAltTextFields.includes( 'description' )
+							) {
 								const textField =
 									document.getElementById(
 										'attachment-details-two-column-description'
@@ -70,32 +72,32 @@ import { __ } from '@wordpress/i18n';
 										'attachment-details-description'
 									);
 
-								if (textField) {
+								if ( textField ) {
 									textField.value = resp;
 								}
 							}
 						}
 					},
-				})
+				} )
 			);
 		}
 
-		if (imageTagsButton) {
-			imageTagsButton.addEventListener('click', (e) =>
-				handleClick({
+		if ( imageTagsButton ) {
+			imageTagsButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/image-tags/',
-				})
+				} )
 			);
 		}
 
-		if (ocrScanButton) {
-			ocrScanButton.addEventListener('click', (e) =>
-				handleClick({
+		if ( ocrScanButton ) {
+			ocrScanButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/ocr/',
-					callback: (resp) => {
-						if (resp) {
+					callback: ( resp ) => {
+						if ( resp ) {
 							const textField =
 								document.getElementById(
 									'attachment-details-two-column-description'
@@ -103,40 +105,40 @@ import { __ } from '@wordpress/i18n';
 								document.getElementById(
 									'attachment-details-description'
 								);
-							if (textField) {
+							if ( textField ) {
 								textField.value = resp;
 							}
 						}
 					},
-				})
+				} )
 			);
 		}
 
-		if (smartCropButton) {
-			smartCropButton.addEventListener('click', (e) =>
-				handleClick({
+		if ( smartCropButton ) {
+			smartCropButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/smart-crop/',
-				})
+				} )
 			);
 		}
 
-		if (readButton) {
-			readButton.addEventListener('click', (e) => {
-				const postID = e.target.getAttribute('data-id');
-				wp.apiRequest({ path: `/classifai/v1/read-pdf/${postID}` });
-				e.target.setAttribute('disabled', 'disabled');
-				e.target.textContent = __('Read API requested!', 'classifai');
-			});
+		if ( readButton ) {
+			readButton.addEventListener( 'click', ( e ) => {
+				const postID = e.target.getAttribute( 'data-id' );
+				wp.apiRequest( { path: `/classifai/v1/read-pdf/${ postID }` } );
+				e.target.setAttribute( 'disabled', 'disabled' );
+				e.target.textContent = __( 'Read API requested!', 'classifai' );
+			} );
 		}
 
-		if (transcribeButton) {
-			transcribeButton.addEventListener('click', (e) =>
-				handleClick({
+		if ( transcribeButton ) {
+			transcribeButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
 					button: e.target,
 					endpoint: '/classifai/v1/openai/generate-transcript/',
-					callback: (resp) => {
-						if (resp) {
+					callback: ( resp ) => {
+						if ( resp ) {
 							const textField =
 								document.getElementById(
 									'attachment-details-two-column-description'
@@ -144,13 +146,13 @@ import { __ } from '@wordpress/i18n';
 								document.getElementById(
 									'attachment-details-description'
 								);
-							if (textField) {
+							if ( textField ) {
 								textField.value = resp;
 							}
 						}
 					},
-					buttonText: __('Re-transcribe', 'classifai'),
-				})
+					buttonText: __( 'Re-transcribe', 'classifai' ),
+				} )
 			);
 		}
 	};
@@ -159,15 +161,15 @@ import { __ } from '@wordpress/i18n';
 	 * Check the PDF Scanner status and disable button if in progress.
 	 */
 	const checkPdfReadStatus = () => {
-		const readButton = document.getElementById('classifai-rescan-pdf');
+		const readButton = document.getElementById( 'classifai-rescan-pdf' );
 
-		if (!readButton) {
+		if ( ! readButton ) {
 			return;
 		}
 
-		const postId = readButton.getAttribute('data-id');
+		const postId = readButton.getAttribute( 'data-id' );
 
-		$.ajax({
+		$.ajax( {
 			url: ajaxurl,
 			type: 'POST',
 			data: {
@@ -175,38 +177,38 @@ import { __ } from '@wordpress/i18n';
 				attachment_id: postId,
 				nonce: ClassifAI.ajax_nonce,
 			},
-			success: (resp) => {
-				if (resp?.success) {
-					if (resp?.data?.running) {
-						readButton.setAttribute('disabled', 'disabled');
+			success: ( resp ) => {
+				if ( resp?.success ) {
+					if ( resp?.data?.running ) {
+						readButton.setAttribute( 'disabled', 'disabled' );
 						readButton.textContent = __(
 							'In progress!',
 							'classifai'
 						);
-					} else if (resp?.data?.read) {
-						readButton.textContent = __('Rescan', 'classifai');
+					} else if ( resp?.data?.read ) {
+						readButton.textContent = __( 'Rescan', 'classifai' );
 					}
 				}
 			},
-		});
+		} );
 	};
 
-	$(document).ready(function () {
-		if (wp.media) {
-			wp.media.view.Modal.prototype.on('open', function () {
-				wp.media.frame.on('selection:toggle', handleButtonsClick);
-				wp.media.frame.on('selection:toggle', checkPdfReadStatus);
-			});
+	$( document ).ready( function () {
+		if ( wp.media ) {
+			wp.media.view.Modal.prototype.on( 'open', function () {
+				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
+				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
+			} );
 		}
 
-		if (wp.media.frame) {
-			wp.media.frame.on('edit:attachment', handleButtonsClick);
-			wp.media.frame.on('edit:attachment', checkPdfReadStatus);
+		if ( wp.media.frame ) {
+			wp.media.frame.on( 'edit:attachment', handleButtonsClick );
+			wp.media.frame.on( 'edit:attachment', checkPdfReadStatus );
 		}
 
 		// For new uploaded media.
-		if (wp.Uploader && wp.Uploader.queue) {
-			wp.Uploader.queue.on('reset', handleButtonsClick);
+		if ( wp.Uploader && wp.Uploader.queue ) {
+			wp.Uploader.queue.on( 'reset', handleButtonsClick );
 		}
-	});
-})(jQuery);
+	} );
+} )( jQuery );

@@ -397,11 +397,11 @@ abstract class Provider {
 	/**
 	 * Format the result of most recent request.
 	 *
-	 * @param string $data Response data to format.
+	 * @param array|WP_Error $data Response data to format.
 	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( string $data = '' ) {
+	protected function get_formatted_latest_response( $data ) {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}

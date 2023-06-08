@@ -4,7 +4,7 @@ Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft A
 Requires at least: 5.7
 Tested up to:      6.2
 Requires PHP:      7.4
-Stable tag:        2.2.0
+Stable tag:        2.2.1
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -13,6 +13,8 @@ Supercharge WordPress Content Workflows and Engagement with Artificial Intellige
 == Description ==
 
 Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
+
+*You can learn more about ClassifAI's features at [ClassifAIPlugin.com](https://classifaiplugin.com/) and documentation at the [ClassifAI documentation site](https://10up.github.io/classifai/).*
 
 **Features**
 

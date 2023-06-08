@@ -3,9 +3,6 @@
 import { getChatGPTData, getWhisperData } from '../plugins/functions';
 
 describe('Language processing Tests', () => {
-	before(() => {
-		cy.login();
-	} );
 
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
 		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing' );

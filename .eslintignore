@@ -2,4 +2,5 @@ dist
 node_modules
 tests/*
 vendor/*
-webpack.config.js
+bin/*
+hookdocs/*

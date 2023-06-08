@@ -314,7 +314,7 @@ class Embeddings extends Provider {
 			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
 			__( 'Taxonomies', 'classifai' )             => implode( ', ', $settings['taxonomies'] ?? [] ),
 			__( 'Number of terms', 'classifai' )        => $settings['number'] ?? 1,
-			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( 'classifai_openai_embeddings_latest_response' ),
+			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) ),
 		];
 	}
 
