@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [2.2.1] - 2023-06-12
+## [2.2.1] - 2023-06-08
 ### Added
 - Ability to generate images in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#471](https://github.com/10up/classifai/pull/471)).
 - Ability to trigger Text-to-Speech generation in bulk (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#477](https://github.com/10up/classifai/pull/477)).
