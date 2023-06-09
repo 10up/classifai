@@ -143,3 +143,28 @@
 		margin-top: 10px;
 	}
 }
+
+.title-modal {
+	.components-modal__content {
+		display: flex;
+		flex-wrap: wrap;
+		align-content: flex-start;
+		gap: 20px;
+	}
+
+	.classifai-title {
+		width: 300px;
+		max-width: 100%;
+		margin: 1px 0 10px;
+		padding-bottom: 10px;
+
+		textarea {
+			width: 100%;
+		}
+
+		button {
+			display: block;
+			margin-top: 8px;
+		}
+	}
+}

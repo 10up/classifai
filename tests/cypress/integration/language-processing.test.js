@@ -1,11 +1,8 @@
 /* eslint jest/expect-expect: 0 */
 
-import { getChatGPTData } from '../plugins/functions';
+import { getChatGPTData, getWhisperData } from '../plugins/functions';
 
 describe('Language processing Tests', () => {
-	before(() => {
-		cy.login();
-	} );
 
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
 		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing' );
@@ -152,8 +149,10 @@ describe('Language processing Tests', () => {
 		cy.verifyPostTaxonomyTerms('tags', threshold / 100);
 	});
 
-	it( 'Can save OpenAI "Language Processing" settings', () => {
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+	it( 'Can save OpenAI ChatGPT "Language Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 
@@ -290,4 +289,365 @@ describe('Language processing Tests', () => {
 				.should( 'not.exist' );
 		} );
 	} );
+
+	it( 'Can save OpenAI Embeddings "Language Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+
+		cy.get( '#api_key' ).clear().type( 'password' );
+
+		cy.get( '#enable_classification' ).check();
+		cy.get( '#openai_embeddings_post_types_post' ).check();
+		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#number' ).clear().type( 1 );
+		cy.get( '#submit' ).click();
+	} );
+
+	it( 'Can create category and post and category will get auto-assigned', () => {
+		// Remove custom taxonomies so those don't interfere with the test.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get( '#classifai-settings-category' ).uncheck();
+		cy.get( '#classifai-settings-keyword' ).uncheck();
+		cy.get( '#classifai-settings-entity' ).uncheck();
+		cy.get( '#classifai-settings-concept' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test term.
+		cy.deleteAllTerms( 'category' );
+		cy.createTerm( 'Test', 'category' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test embeddings',
+			content: 'Test embeddings content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the category panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Ensure our test category is checked.
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first input' ).should( 'be.checked' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first label' ).contains( 'Test' );
+		} );
+	} );
+
+	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings' );
+		cy.get( '#enable_classification' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Create test term.
+		cy.deleteAllTerms( 'category' );
+		cy.createTerm( 'Test', 'category' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test embeddings disabled',
+			content: 'Test embeddings content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the category panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Ensure our test category is not checked.
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first input' ).should( 'be.checked' );
+			cy.wrap( $panel ).find( '.editor-post-taxonomies__hierarchical-terms-list .editor-post-taxonomies__hierarchical-terms-choice:first label' ).contains( 'Uncategorized' );
+		} );
+	} );
+
+	it('Can save OpenAI ChatGPT "Language Processing" title settings', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		cy.get('#api_key').clear().type('password');
+		cy.get('#enable_titles').check();
+		cy.get('#openai_chatgpt_title_roles_administrator').check();
+		cy.get('#number_titles').select(1);
+		cy.get('#submit').click();
+	});
+
+	it('Can see the generate titles button in a post', () => {
+		const data = getChatGPTData();
+
+		// Create test post.
+		cy.createPost({
+			title: 'Test ChatGPT generate titles',
+			content: 'Test content',
+		});
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get('body').then(($body) => {
+			if ($body.find(closePanelSelector).length > 0) {
+				cy.get(closePanelSelector).click();
+			}
+		});
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the summary panel.
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+		cy.get(panelButtonSelector).then(($panelButton) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents('.components-panel__body');
+
+			// Open panel.
+			if (!$panel.hasClass('is-opened')) {
+				cy.wrap($panelButton).click();
+			}
+
+			// Verify button exists.
+			cy.wrap($panel)
+				.find('.classifai-post-status button.title')
+				.should('exist');
+
+			// Click on button and verify modal shows.
+			cy.wrap($panel).find('.classifai-post-status button.title').click();
+		});
+
+		cy.get('.title-modal').should('exist');
+
+		// Click on button and verify data loads in.
+		cy.get('.title-modal .classifai-title')
+			.first()
+			.find('textarea')
+			.should('have.value', data);
+		cy.get('.title-modal .classifai-title').first().find('button').click();
+
+		cy.get('.title-modal').should('not.exist');
+		cy.get('.editor-post-title__input').should(($el) => {
+			expect($el.first()).to.contain(data);
+		});
+	});
+
+	it('Can disable title generation feature', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		// Disable features.
+		cy.get('#enable_titles').uncheck();
+		cy.get('#submit').click();
+
+		// Create test post.
+		cy.createPost({
+			title: 'Test ChatGPT generate titles disabled',
+			content: 'Test content',
+		});
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get('body').then(($body) => {
+			if ($body.find(closePanelSelector).length > 0) {
+				cy.get(closePanelSelector).click();
+			}
+		});
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the summary panel.
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+		cy.get(panelButtonSelector).then(($panelButton) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents('.components-panel__body');
+
+			// Open panel.
+			if (!$panel.hasClass('is-opened')) {
+				cy.wrap($panelButton).click();
+			}
+
+			// Verify button doesn't exist.
+			cy.wrap($panel)
+				.find('.classifai-post-status button.title')
+				.should('not.exist');
+		});
+	});
+
+	it('Can disable title generation feature by role', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		// Disable admin role.
+		cy.get('#enable_titles').uncheck();
+		cy.get('#openai_chatgpt_title_roles_administrator').uncheck();
+		cy.get('#submit').click();
+
+		// Create test post.
+		cy.createPost({
+			title: 'Test ChatGPT generate titles role disabled',
+			content: 'Test content',
+		});
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get('body').then(($body) => {
+			if ($body.find(closePanelSelector).length > 0) {
+				cy.get(closePanelSelector).click();
+			}
+		});
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the summary panel.
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+		cy.get(panelButtonSelector).then(($panelButton) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents('.components-panel__body');
+
+			// Open panel.
+			if (!$panel.hasClass('is-opened')) {
+				cy.wrap($panelButton).click();
+			}
+
+			// Verify button doesn't exist.
+			cy.wrap($panel)
+				.find('.classifai-post-status button.title')
+				.should('not.exist');
+		});
+	});
+
+	it('Can save OpenAI Whisper "Language Processing" settings', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		cy.get('#api_key').clear().type('password');
+
+		cy.get('#enable_transcripts').check();
+		cy.get('#openai_whisper_roles_administrator').check();
+		cy.get('#submit').click();
+	});
+
+	let audioEditLink = '';
+	let mediaModalLink = '';
+
+	it('Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
+		cy.visit('/wp-admin/media-new.php');
+		cy.get('#plupload-upload-ui').should('exist');
+		cy.get('#plupload-upload-ui input[type=file]').attachFile('audio.mp3');
+
+		cy.get('#media-items .media-item a.edit-attachment').should('exist');
+		cy.get('#media-items .media-item a.edit-attachment')
+			.invoke('attr', 'href')
+			.then((editLink) => {
+				audioEditLink = editLink;
+				cy.visit(editLink);
+			});
+
+		// Verify metabox has processing actions.
+		cy.get('.postbox-header h2, #attachment_meta_box h2')
+			.first()
+			.contains('ClassifAI Audio Processing');
+		cy.get('.misc-publishing-actions label[for=retranscribe]').contains(
+			'Re-transcribe'
+		);
+
+		// Verify generated data.
+		cy.get('#attachment_content').should('have.value', getWhisperData());
+	});
+
+	it('Can see OpenAI Whisper language processing actions on media model', () => {
+		const audioId = audioEditLink.split('post=')[1]?.split('&')[0];
+		mediaModalLink = `wp-admin/upload.php?item=${audioId}`;
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+
+		// Verify language processing actions.
+		cy.get('#classifai-retranscribe').contains('Re-transcribe');
+	});
+
+	it('Can disable OpenAI Whisper language processing features', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		// Disable features
+		cy.get('#enable_transcripts').uncheck();
+		cy.get('#submit').click();
+
+		// Verify features are not present in attachment metabox.
+		cy.visit(audioEditLink);
+		cy.get('.misc-publishing-actions label[for=retranscribe]').should(
+			'not.exist'
+		);
+
+		// Verify features are not present in media modal.
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+		cy.get('#classifai-retranscribe').should('not.exist');
+	});
+
+	it('Can disable OpenAI Whisper language processing features by role', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+
+		// Disable admin role
+		cy.get('#enable_transcripts').check();
+		cy.get('#openai_whisper_roles_administrator').uncheck();
+		cy.get('#submit').click();
+
+		// Verify features are not present in attachment metabox.
+		cy.visit(audioEditLink);
+		cy.get('.misc-publishing-actions label[for=retranscribe]').should(
+			'not.exist'
+		);
+
+		// Verify features are not present in media modal.
+		cy.visit(mediaModalLink);
+		cy.get('.media-modal').should('exist');
+		cy.get('#classifai-retranscribe').should('not.exist');
+	});
 });

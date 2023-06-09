@@ -1,11 +1,11 @@
-const defaultConfig = require('@wordpress/scripts/config/webpack.config');
-const path = require('path');
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const path = require( 'path' );
 
 module.exports = {
 	...defaultConfig,
 	output: {
 		...defaultConfig.output,
-		path: path.resolve(__dirname, 'dist'),
+		path: path.resolve( __dirname, 'dist' ),
 	},
 	entry: {
 		editor: [ './src/js/editor.js' ],
@@ -14,8 +14,16 @@ module.exports = {
 		admin: [ './src/js/admin.js' ],
 		'language-processing': [ './src/js/language-processing.js' ],
 		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
-		'recommended-content-block': [ './includes/Classifai/Blocks/recommended-content-block/index.js' ],
-		'recommended-content-block-frontend': [ './includes/Classifai/Blocks/recommended-content-block/frontend.js' ],
+		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
+		'post-status-info': [
+			'./src/js/gutenberg-plugins/post-status-info.js',
+		],
+		'recommended-content-block': [
+			'./includes/Classifai/Blocks/recommended-content-block/index.js',
+		],
+		'recommended-content-block-frontend': [
+			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
+		],
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
 	},
@@ -24,13 +32,15 @@ module.exports = {
 			...defaultConfig.module.rules,
 			{
 				test: /\.svg$/,
-				use: [{
-					loader: 'svg-react-loader'
-				}]
-			}
+				use: [
+					{
+						loader: 'svg-react-loader',
+					},
+				],
+			},
 		],
 	},
 	externals: {
-		react: 'React'
+		react: 'React',
 	},
 };

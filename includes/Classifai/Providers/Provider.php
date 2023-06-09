@@ -83,6 +83,10 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_onboarding_options() {
+		if ( empty( $this->onboarding_options ) || ! isset( $this->onboarding_options['features'] ) ) {
+			return array();
+		}
+
 		$settings      = $this->get_settings();
 		$is_configured = $this->is_configured();
 
@@ -110,7 +114,9 @@ abstract class Provider {
 	/**
 	 * Can the Provider be initialized?
 	 */
-	abstract public function can_register();
+	public function can_register() {
+		return $this->is_configured();
+	}
 
 	/**
 	 * Register the functionality for the Provider.
@@ -164,7 +170,8 @@ abstract class Provider {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_input( $args ) {
-		$setting_index = $this->get_settings();
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 
@@ -205,7 +212,7 @@ abstract class Provider {
 			type="<?php echo esc_attr( $type ); ?>"
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
@@ -379,11 +386,31 @@ abstract class Provider {
 	 *
 	 * @param int    $post_id       The Post Id we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
 	 *
 	 * @return mixed
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call ) {
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
 		return null;
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param array|WP_Error $data Response data to format.
+	 *
+	 * @return string
+	 */
+	protected function get_formatted_latest_response( $data ) {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 
 	/**

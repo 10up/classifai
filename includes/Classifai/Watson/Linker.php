@@ -33,25 +33,39 @@ class Linker {
 	 * @param int   $post_id The post to link to.
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $options Unused.
-
-	 * @return void
+	 *
+	 * @return array The terms that were linked.
 	 */
 	public function link( $post_id, $output, $options = [] ) {
+		$all_terms = [];
+
 		if ( ! empty( $output['categories'] ) ) {
-			$this->link_categories( $post_id, $output['categories'] );
+			$terms     = $this->link_categories( $post_id, $output['categories'], false );
+			$all_terms = $terms;
 		}
 
 		if ( ! empty( $output['keywords'] ) ) {
-			$this->link_keywords( $post_id, $output['keywords'] );
+			$terms     = $this->link_keywords( $post_id, $output['keywords'], false );
+			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['concepts'] ) ) {
-			$this->link_concepts( $post_id, $output['concepts'] );
+			$terms     = $this->link_concepts( $post_id, $output['concepts'], false );
+			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
 		if ( ! empty( $output['entities'] ) ) {
-			$this->link_entities( $post_id, $output['entities'] );
+			$terms     = $this->link_entities( $post_id, $output['entities'], false );
+			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
+
+		if ( ! empty( $all_terms ) ) {
+			foreach ( $all_terms as $taxonomy => $terms ) {
+				wp_set_object_terms( $post_id, $terms, $taxonomy, false );
+			}
+		}
+
+		return $all_terms;
 	}
 
 	/* helpers */
@@ -71,11 +85,13 @@ class Linker {
 	 *
 	 * Eg:- /animals/pets/cats
 	 *
-	 * @param int   $post_id The id of the post to link
+	 * @param int   $post_id The id of the post to link.
 	 * @param array $categories The list of categories to link
-	 * @return void
+	 * @param bool  $link_categories Whether link categories to post or return array of term ids.
+	 *
+	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_categories( $post_id, $categories ) {
+	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'category' );
 
@@ -91,30 +107,35 @@ class Linker {
 						$term = get_term_by( 'name', $part, $taxonomy );
 
 						if ( false === $term ) {
-							$term = wp_insert_term(
-								$part,
-								$taxonomy,
-								[
-									'parent' => $parent,
-								]
-							);
+							$term = wp_insert_term( $part, $taxonomy, [ 'parent' => $parent ] );
 
 							if ( ! is_wp_error( $term ) ) {
-								$parent          = intval( $term['term_id'] );
-								$terms_to_link[] = intval( $term['term_id'] );
+								$parent          = (int) $term['term_id'];
+								$terms_to_link[] = (int) $term['term_id'];
 							}
 						} else {
-							$parent          = intval( $term->term_id );
-							$terms_to_link[] = intval( $term->term_id );
+							$parent          = $term->term_id;
+							$terms_to_link[] = $term->term_id;
 						}
 					}
 				}
 			}
 		}
 
-		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+		// Exit if there are not any term to link.
+		if ( empty( $terms_to_link ) ) {
+			return [];
 		}
+
+		if ( $link_categories ) {
+			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -127,11 +148,13 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int   $post_id The post to link to
+	 * @param int   $post_id The id of the post to link.
 	 * @param array $keywords NLU returned keywords
-	 * @return void
+	 * @param bool  $link_keywords Whether link keywords to post or return array of term ids.
+	 *
+	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_keywords( $post_id, $keywords ) {
+	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'keyword' );
 
@@ -145,17 +168,28 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = intval( $term['term_id'] );
+						$terms_to_link[] = (int) $term['term_id'];
 					}
 				} else {
-					$terms_to_link[] = intval( $term->term_id );
+					$terms_to_link[] = $term->term_id;
 				}
 			}
 		}
 
-		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+		// Exit if there are not any term to link.
+		if ( empty( $terms_to_link ) ) {
+			return [];
 		}
+
+		if ( $link_keywords ) {
+			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -168,11 +202,13 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int   $post_id  The post to link to.
+	 * @param int   $post_id The id of the post to link.
 	 * @param array $concepts The NLU returned concepts.
-	 * @return void
+	 * @param bool  $link_concepts Whether link concepts to post or return array of term ids.
+	 *
+	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_concepts( $post_id, $concepts ) {
+	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'concept' );
 
@@ -185,25 +221,36 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = intval( $term['term_id'] );
+						$terms_to_link[] = (int) $term['term_id'];
 
 						if ( ! empty( $concept['dbpedia_resource'] ) ) {
 							update_term_meta(
-								intval( $term['term_id'] ),
+								(int) $term['term_id'],
 								'dbpedia_resource',
 								$concept['dbpedia_resource']
 							);
 						}
 					}
 				} else {
-					$terms_to_link[] = intval( $term->term_id );
+					$terms_to_link[] = $term->term_id;
 				}
 			}
 		}
 
-		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+		// Exit if there are not any term to link.
+		if ( empty( $terms_to_link ) ) {
+			return [];
 		}
+
+		if ( $link_concepts ) {
+			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**
@@ -216,11 +263,13 @@ class Linker {
 	 *   ...
 	 * ]
 	 *
-	 * @param int   $post_id The post to link to
+	 * @param int   $post_id The id of the post to link.
 	 * @param array $entities The entities returned by the NLU api
-	 * @return void
+	 * @param bool  $link_entities Whether link entities to post or return array of term ids.
+	 *
+	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
-	public function link_entities( $post_id, $entities ) {
+	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
 		$terms_to_link = [];
 		$taxonomy      = \Classifai\get_feature_taxonomy( 'entity' );
 
@@ -238,31 +287,42 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = intval( $term['term_id'] );
+						$terms_to_link[] = (int) $term['term_id'];
 
 						if ( ! empty( $entity['disambiguation']['dbpedia_resource'] ) ) {
 							update_term_meta(
-								intval( $term['term_id'] ),
+								(int) $term['term_id'],
 								'dbpedia_resource',
 								$entity['disambiguation']['dbpedia_resource']
 							);
 
 							update_term_meta(
-								intval( $term['term_id'] ),
+								(int) $term['term_id'],
 								'type',
 								$entity['type']
 							);
 						}
 					}
 				} else {
-					$terms_to_link[] = intval( $term->term_id );
+					$terms_to_link[] = $term->term_id;
 				}
 			}
 		}
 
-		if ( ! empty( $terms_to_link ) ) {
-			wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+		// Exit if there are not any term to link.
+		if ( empty( $terms_to_link ) ) {
+			return [];
 		}
+
+		if ( $link_entities ) {
+			$result = wp_set_object_terms( $post_id, $terms_to_link, $taxonomy, false );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return [ $taxonomy => $terms_to_link ];
 	}
 
 	/**

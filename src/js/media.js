@@ -20,6 +20,9 @@ import { __ } from '@wordpress/i18n';
 			'classifai-rescan-smart-crop'
 		);
 		const readButton = document.getElementById( 'classifai-rescan-pdf' );
+		const transcribeButton = document.getElementById(
+			'classifai-retranscribe'
+		);
 
 		if ( altTagsButton ) {
 			altTagsButton.addEventListener( 'click', ( e ) =>
@@ -128,6 +131,30 @@ import { __ } from '@wordpress/i18n';
 				e.target.textContent = __( 'Read API requested!', 'classifai' );
 			} );
 		}
+
+		if ( transcribeButton ) {
+			transcribeButton.addEventListener( 'click', ( e ) =>
+				handleClick( {
+					button: e.target,
+					endpoint: '/classifai/v1/openai/generate-transcript/',
+					callback: ( resp ) => {
+						if ( resp ) {
+							const textField =
+								document.getElementById(
+									'attachment-details-two-column-description'
+								) ??
+								document.getElementById(
+									'attachment-details-description'
+								);
+							if ( textField ) {
+								textField.value = resp;
+							}
+						}
+					},
+					buttonText: __( 'Re-transcribe', 'classifai' ),
+				} )
+			);
+		}
 	};
 
 	/**
@@ -166,9 +193,9 @@ import { __ } from '@wordpress/i18n';
 		} );
 	};
 
-	$( document ).ready( function() {
+	$( document ).ready( function () {
 		if ( wp.media ) {
-			wp.media.view.Modal.prototype.on( 'open', function() {
+			wp.media.view.Modal.prototype.on( 'open', function () {
 				wp.media.frame.on( 'selection:toggle', handleButtonsClick );
 				wp.media.frame.on( 'selection:toggle', checkPdfReadStatus );
 			} );

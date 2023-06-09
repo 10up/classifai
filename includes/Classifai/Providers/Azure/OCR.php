@@ -122,10 +122,10 @@ class OCR {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_approved_media_types
 		 *
-		 * @param array $media_types   The media types to process.
-		 * @param int   $attachment_id The attachment ID.
+		 * @param {array} $media_types   The media types to process.
+		 * @param {int}   $attachment_id The attachment ID.
 		 *
-		 * @return array Filtered media types.
+		 * @return {array} Filtered media types.
 		 */
 		$approved_media_types = apply_filters( 'classifai_ocr_approved_media_types', $this->media_to_process, $attachment_id );
 
@@ -145,11 +145,11 @@ class OCR {
 			 * @since 1.6.0
 			 * @hook classifai_ocr_tags
 			 *
-			 * @param array       $tags          Tags to look for. Default handwriting and text.
-			 * @param int         $attachment_id The attachment ID.
-			 * @param bool|object $scan          Previosly run scan.
+			 * @param {array}       $tags          Tags to look for. Default handwriting and text.
+			 * @param {int}         $attachment_id The attachment ID.
+			 * @param {bool|object} $scan          Previously run scan.
 			 *
-			 * @return array Filtered tags.
+			 * @return {array} Filtered tags.
 			 */
 			$tags = apply_filters( 'classifai_ocr_tags', [ 'handwriting', 'text' ], $attachment_id, $this->scan );
 
@@ -159,11 +159,11 @@ class OCR {
 			 * @since 1.6.0
 			 * @hook classifai_ocr_tag_confidence
 			 *
-			 * @param int         $confidence    The mininum confidence level. Default 90.
-			 * @param int         $attachment_id The attachment ID.
-			 * @param bool|object $scan          Previosly run scan.
+			 * @param {int}         $confidence    The minimum confidence level. Default 90.
+			 * @param {int}         $attachment_id The attachment ID.
+			 * @param {bool|object} $scan          Previously run scan.
 			 *
-			 * @return int Confidence level.
+			 * @return {int} Confidence level.
 			 */
 			$tag_confidence = apply_filters( 'classifai_ocr_tag_confidence', 90, $attachment_id, $this->scan );
 
@@ -181,11 +181,11 @@ class OCR {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_should_process
 		 *
-		 * @param bool        $process       Whether to run OCR processing or not.
-		 * @param int         $attachment_id The attachment ID.
-		 * @param bool|object $scan          Previosly run scan.
+		 * @param {bool}        $process       Whether to run OCR processing or not.
+		 * @param {int}         $attachment_id The attachment ID.
+		 * @param {bool|object} $scan          Previously run scan.
 		 *
-		 * @return bool Whether this attachment should have OCR processing.
+		 * @return {bool} Whether this attachment should have OCR processing.
 		 */
 		return apply_filters( 'classifai_ocr_should_process', $process, $attachment_id, $this->scan );
 	}
@@ -246,10 +246,10 @@ class OCR {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_text
 				 *
-				 * @param string $text The returned text data.
-				 * @param object $scan The full scan results from the API.
+				 * @param {string} $text The returned text data.
+				 * @param {object} $scan The full scan results from the API.
 				 *
-				 * @return string The filtered text data.
+				 * @return {string} The filtered text data.
 				 */
 				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $scan );
 
@@ -267,13 +267,13 @@ class OCR {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_text_post_args
 				 *
-				 * @param string $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
-				 * @param int    $attachment_id ID of the attachment post.
-				 * @param object $scan          The full scan results from the API.
-				 * @param string $text          The text data to be saved.
-				 * @param object $scan          The full scan results from the API.
+				 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
+				 * @param {int}    $attachment_id ID of the attachment post.
+				 * @param {object} $scan          The full scan results from the API.
+				 * @param {string} $text          The text data to be saved.
+				 * @param {object} $scan          The full scan results from the API.
 				 *
-				 * @return string The filtered text data.
+				 * @return {string} The filtered text data.
 				 */
 				$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $text, $scan );
 
@@ -326,8 +326,8 @@ class OCR {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_after_request
 		 *
-		 * @param array|WP_Error Response data or a WP_Error if the request failed.
-		 * @param string The attachment URL.
+		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+		 * @param {string} The attachment URL.
 		 */
 		do_action( 'classifai_ocr_after_request', $response, $url );
 
@@ -336,7 +336,7 @@ class OCR {
 
 			if ( isset( $body->message ) ) {
 				$error_message = $body->message;
-			} else if ( isset( $body->error->message ) ) {
+			} elseif ( isset( $body->error->message ) ) {
 				$error_message = $body->error->message;
 			} else {
 				$error_message = false;
@@ -349,8 +349,8 @@ class OCR {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_unsuccessful_response
 				 *
-				 * @param array|WP_Error Response data or a WP_Error if the request failed.
-				 * @param string The attachment URL.
+				 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
+				 * @param {string} The attachment URL.
 				 */
 				do_action( 'classifai_ocr_unsuccessful_response', $response, $url );
 

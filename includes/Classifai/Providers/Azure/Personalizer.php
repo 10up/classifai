@@ -71,20 +71,6 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$options = get_option( $this->get_option_name() );
-		if ( empty( $options ) || ( isset( $options['authenticated'] ) && false === $options['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
 	 * Register the functionality.
 	 */
 	public function register() {
@@ -733,24 +719,5 @@ class Personalizer extends Provider {
 			__( 'API URL', 'classifai' )        => $settings['url'] ?? '',
 			__( 'Service Status', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) ),
 		];
-	}
-
-	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param mixed $data Response data to format.
-	 *
-	 * @return string
-	 */
-	private function get_formatted_latest_response( $data ) {
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
 	}
 }
