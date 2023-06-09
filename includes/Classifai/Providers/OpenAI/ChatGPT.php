@@ -62,6 +62,41 @@ class ChatGPT extends Provider {
 	}
 
 	/**
+	 * Determine if the current user can access the feature
+	 *
+	 * @param {string} $feature Feature to check.
+	 *
+	 * @return bool
+	 */
+	public function user_can_access( $feature ) {
+		$access   = false;
+		$settings = $this->get_settings();
+
+		if (
+			! empty( $settings ) &&
+			isset( $settings['authenticated'] ) &&
+			false !== $settings['authenticated'] &&
+			isset( $settings[ $feature ] ) &&
+			'no' !== $settings[ $feature ]
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to a ChatGPT generate feature
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_user_can_{$feature}
+		 *
+		 * @param {bool} $access Current access value.
+		 * @param {object} $user Current user object.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, wp_get_current_user() );
+	}
+
+	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
@@ -436,7 +471,7 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
+		if ( ! $this->user_can_access( 'enable_excerpt' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -529,7 +564,7 @@ class ChatGPT extends Provider {
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
+		if ( ! $this->user_can_access( 'enable_titles' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
