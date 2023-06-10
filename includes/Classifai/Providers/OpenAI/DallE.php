@@ -52,11 +52,13 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Determine if the current user can access the feature
+	 * Determine if the current user can access a feature
+	 *
+	 * @param {string} $feature Feature to check.
 	 *
 	 * @return bool
 	 */
-	public function user_can_access() {
+	public function user_can_access( $feature ) {
 		$access   = false;
 		$settings = $this->get_settings();
 
@@ -66,7 +68,7 @@ class DallE extends Provider {
 
 		if ( current_user_can( 'upload_files' )
 			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] ) ) {
+			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] ) ) {
 			$access = true;
 		}
 
@@ -74,7 +76,7 @@ class DallE extends Provider {
 		 * Filter to override permission to the image gen feature for DALL·E
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_dalle_user_can_image_gen
+		 * @hook classifai_openai_dalle_user_can_{$feature}
 		 *
 		 * @param {bool} $access  Current access value.
 		 * @param {array} $roles  Array of arrays containing role information.
@@ -82,7 +84,7 @@ class DallE extends Provider {
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( 'classifai_openai_dalle_user_can_image_gen', $access, $roles, wp_get_current_user() );
+		return apply_filters( "classifai_openai_dalle_user_can_{$feature}", $access, $roles, wp_get_current_user() );
 	}
 
 	/**
@@ -91,7 +93,7 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( $this->user_can_access() ) {
+		if ( $this->user_can_access( 'enable_image_gen' ) ) {
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
@@ -405,7 +407,7 @@ class DallE extends Provider {
 
 		// These checks already ran in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( ! $this->user_can_access() ) {
+		if ( ! $this->user_can_access( 'enable_image_gen' ) ) {
 			// Note that we purposely leave off the textdomain here as this is the same error
 			// message core uses, so we want translations to load from there.
 			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
