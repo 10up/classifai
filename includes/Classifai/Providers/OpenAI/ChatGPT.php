@@ -64,11 +64,12 @@ class ChatGPT extends Provider {
 	/**
 	 * Determine if the current user can access the feature
 	 *
-	 * @param {string} $feature Feature to check.
+	 * @param {string} $feature       Feature to check.
+	 * @param {array}  $feature_roles Roles that have access to the feature.
 	 *
 	 * @return bool
 	 */
-	public function user_can_access( $feature ) {
+	public function user_can_access( $feature, $feature_roles = [] ) {
 		$access   = false;
 		$settings = $this->get_settings();
 
@@ -88,12 +89,13 @@ class ChatGPT extends Provider {
 		 * @since x.x.x
 		 * @hook classifai_chatgpt_user_can_{$feature}
 		 *
-		 * @param {bool} $access Current access value.
+		 * @param {bool}   $access Current access value.
+		 * @param {array}  $feature_roles Roles that have access to the feature.
 		 * @param {object} $user Current user object.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, wp_get_current_user() );
+		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, $feature_roles, wp_get_current_user() );
 	}
 
 	/**
@@ -122,7 +124,7 @@ class ChatGPT extends Provider {
 
 		if (
 			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
-			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
+			&& $this->user_can_access( 'enable_excerpt', $excerpt_roles )
 		) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
@@ -138,7 +140,7 @@ class ChatGPT extends Provider {
 
 		if (
 			( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
+			&& $this->user_can_access( 'enable_titles', $title_roles )
 		) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
