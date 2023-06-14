@@ -52,6 +52,14 @@ class TextToSpeech extends Provider {
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
 
 	/**
+	 * Meta key to get/set the audio hash that helps to indicate if there is any need
+	 * for the audio file to be regenerated or not.
+	 *
+	 * @var string
+	 */
+	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
+
+	/**
 	 * Azure Text to Speech constructor.
 	 *
 	 * @param string $service The service this class belongs to.
