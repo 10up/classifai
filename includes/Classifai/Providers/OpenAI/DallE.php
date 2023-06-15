@@ -136,22 +136,10 @@ class DallE extends Provider {
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view">
 				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
-					} else {
-						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
-					}
-					?>
+					<?php esc_html_e( _n( 'Enter a prompt below to generate an image.', 'Enter a prompt below to generate images.', number_format_i18n( $number_of_images, 0 ), 'classifai' ) ); ?>
 				</p>
 				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
-					} else {
-						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
-					}
-					?>
+					<?php esc_html_e( _n( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', number_format_i18n( $number_of_images, 0 ), 'classifai' ) ); ?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
