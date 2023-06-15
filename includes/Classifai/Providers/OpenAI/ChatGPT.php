@@ -69,6 +69,71 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'add_meta_boxes', [ $this, 'replace_classic_editor_excerpt' ] );
+	}
+
+	/**
+	 * Replace the Classic Editor Excerpt meta box
+	 * There are no content filters available, there's no other option here.
+	 */
+	public function replace_classic_editor_excerpt() {
+		$post_type = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( post_type_supports( $post_type, 'excerpt' ) ) {
+			// Default meta box is registered in register_and_do_post_meta_boxes()
+			remove_meta_box( 'postexcerpt', null, 'normal' );
+			// Note: the text-domain is missing for `Excerpt` because this is set in WP core
+			add_meta_box( 'classifaipostexcerpt', __( 'Excerpt' ), [ $this, 'classifai_post_excerpt_meta_box' ], null, 'normal', 'core', array( '__back_compat_meta_box' => true ) );
+		}
+	}
+
+	/**
+	 * Custom excerpt meta field
+	 * Note: most of this is copied from post_excerpt_meta_box()
+	 *
+	 * @param WP_Post $post Current post object.
+	 */
+	public function classifai_post_excerpt_meta_box( $post ) {
+		global $pagenow;
+
+		$is_new_post = 'post-new.php' === $pagenow;
+		$has_excerpt = false;
+
+		// We need a post ID to look up an excerpt, a brand new post doesn't have one
+		if ( ! $is_new_post ) {
+			$has_excerpt = '' !== get_the_excerpt( $post->ID );
+		}
+
+		$button_text = __( 'Generate excerpt', 'classifai' );
+		if ( $has_excerpt ) {
+			$button_text = __( 'Re-generate excerpt', 'classifai' );
+		}
+
+		?>
+		<label class="screen-reader-text" for="excerpt">
+			<?php
+			/* translators: Hidden accessibility text. */
+			_e( 'Excerpt' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction
+			?>
+		</label><textarea rows="1" cols="40" name="excerpt" id="excerpt"><?php echo esc_html( $post->post_excerpt ); // textarea_escaped ?></textarea>
+
+		<p>
+			<?php
+			printf(
+				/* translators: %s: Documentation URL. */
+				__( 'Excerpts are optional hand-crafted summaries of your content that can be used in your theme. <a href="%s">Learn more about manual excerpts</a>.' ),  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				__( 'https://wordpress.org/documentation/article/what-is-an-excerpt-classic-editor/' )  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			);
+			?>
+		</p>
+
+		<?php if ( $is_new_post ) { ?>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary alignright clearfix" disabled><?php echo esc_html( $button_text ); ?></button>
+			<p><strong><?php esc_html_e( 'Add some content and save as a draft to enable excerpt generation.', 'classifai' ); ?></strong></p>
+		<?php } else { ?>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary alignright clearfix"><?php echo esc_html( $button_text ); ?></button>
+			<?php
+		}
 	}
 
 	/**
@@ -144,6 +209,40 @@ class ChatGPT extends Provider {
 	public function enqueue_admin_assets( $hook_suffix = '' ) {
 		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
 			return;
+		}
+
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$excerpt_roles = $settings['roles'] ?? [];
+
+		if (
+			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
+			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
+		) {
+
+			$_post_id = isset( $_GET['post'] ) ? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) : false;
+
+			if ( $_post_id ) {
+
+				wp_enqueue_script(
+					'classifai-post-excerpt-classic-editor',
+					CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					true
+				);
+				wp_localize_script(
+					'classifai-post-excerpt-classic-editor',
+					'classifai_generate_excerpt',
+					array(
+						'endpoint_url'            => esc_url( get_rest_url( null, "/classifai/v1/openai/generate-excerpt/{$_post_id}" ) ),
+						'script_debug'            => defined( 'SCRIPT_DEBUG' ) ? SCRIPT_DEBUG : false,
+						'generate_excerpt_text'   => __( 'Generate excerpt', 'classifai' ),
+						'regenerate_excerpt_text' => __( 'Re-generate excerpt', 'classifai' ),
+						'nonce'                   => wp_create_nonce( 'wp_rest' ),
+					)
+				);
+			}
 		}
 
 		wp_enqueue_style(
