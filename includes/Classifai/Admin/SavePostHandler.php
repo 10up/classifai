@@ -198,10 +198,10 @@ class SavePostHandler {
 		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
 		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
 		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
-		if ( ! empty( $content_hash ) ) {
-			if ( md5( $post_content ) === $content_hash ) {
-				return $saved_attachment_id;
-			}
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+			return $saved_attachment_id;
 		}
 
 		$voice        = $settings['voice'] ?? '';
