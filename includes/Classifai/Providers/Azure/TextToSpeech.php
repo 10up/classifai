@@ -501,6 +501,11 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		$is_audio_enabled = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
+		if ( 'no' === $is_audio_enabled ) {
+			return $content;
+		}
+
 		/**
 		 * Filter to disable the rendering of the Text to Speech block.
 		 *
