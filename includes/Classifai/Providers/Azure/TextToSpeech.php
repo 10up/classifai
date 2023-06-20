@@ -530,6 +530,12 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		$audio_attachment_url = wp_get_attachment_url( $audio_attachment_id );
+
+		if ( ! $audio_attachment_url ) {
+			return $content;
+		}
+
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.js',
@@ -546,12 +552,11 @@ class TextToSpeech extends Provider {
 			'all'
 		);
 
-		$audio_timestamp      = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
-		$audio_attachment_url = sprintf(
-			'%1$s?ver=%2$s',
-			wp_get_attachment_url( $audio_attachment_id ),
-			filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT )
-		);
+		$audio_timestamp = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
+
+		if ( $audio_timestamp ) {
+			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
+		}
 
 		ob_start();
 

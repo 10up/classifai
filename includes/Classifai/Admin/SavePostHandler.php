@@ -200,8 +200,14 @@ class SavePostHandler {
 		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
 
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
-		if ( $saved_attachment_id && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
-			return $saved_attachment_id;
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
 		}
 
 		$voice        = $settings['voice'] ?? '';
