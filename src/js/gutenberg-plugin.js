@@ -356,7 +356,7 @@ const ClassifAITSpeechSynthesisToggle = ( props ) => {
 	return (
 		<>
 			<ToggleControl
-				label={ __( 'Generate audio for this post.', 'classifai' ) }
+				label={ __( 'Enable audio generation', 'classifai' ) }
 				help={
 					isFeatureSupported
 						? __(
