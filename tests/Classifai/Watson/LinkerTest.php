@@ -4,6 +4,7 @@ namespace Classifai\Watson;
 
 class LinkerTest extends \WP_UnitTestCase {
 
+	/* @var Linker $linker */
 	public $linker;
 
 	function set_up() {

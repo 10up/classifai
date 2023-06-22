@@ -4,7 +4,7 @@
  * declared here instead of a Class.
  */
 
-$plugin_version = '2.1.0';
+$plugin_version = '2.2.1';
 
 if ( file_exists( __DIR__ . '/.commit' ) ) {
 	$plugin_version .= '-' . file_get_contents( __DIR__ . '/.commit' );

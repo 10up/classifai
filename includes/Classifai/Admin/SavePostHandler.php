@@ -2,6 +2,9 @@
 
 namespace Classifai\Admin;
 
+use \Classifai\Providers\Azure\TextToSpeech;
+use \Classifai\Watson\Normalizer;
+
 /**
  * Classifies Posts based on the current ClassifAI configuration.
  */
@@ -165,6 +168,158 @@ class SavePostHandler {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Synthesizes speech from the post title and content.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool|int|WP_Error
+	 */
+	public function synthesize_speech( $post_id ) {
+		if ( empty( $post_id ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_post_id_missing',
+				esc_html__( 'Post ID missing.', 'classifai' )
+			);
+		}
+
+		// We skip the user cap check if running under WP-CLI.
+		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_user_not_authorized',
+				esc_html__( 'Unauthorized user.', 'classifai' )
+			);
+		}
+
+		$normalizer          = new Normalizer();
+		$settings            = \Classifai\get_plugin_settings( 'language_processing', TextToSpeech::FEATURE_NAME );
+		$post                = get_post( $post_id );
+		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
+		}
+
+		$voice        = $settings['voice'] ?? '';
+		$voice_data   = explode( '|', $voice );
+		$voice_name   = '';
+		$voice_gender = '';
+
+		// Extract the voice name and gender from the option value.
+		if ( 2 === count( $voice_data ) ) {
+			$voice_name   = $voice_data[0];
+			$voice_gender = $voice_data[1];
+
+			// Return error if voice is not set in settings.
+		} else {
+			return new \WP_Error(
+				'azure_text_to_speech_voice_information_missing',
+				esc_html__( 'Voice data not set.', 'classifai' )
+			);
+		}
+
+		// Create the request body to synthesize speech from text.
+		$request_body = sprintf(
+			"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+			$voice_gender,
+			$voice_name,
+			$post_content
+		);
+
+		// Request parameters.
+		$request_params = array(
+			'method'  => 'POST',
+			'body'    => $request_body,
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $settings['credentials']['api_key'],
+				'Content-Type'              => 'application/ssml+xml',
+				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
+			),
+		);
+
+		$remote_url = sprintf( '%s%s', $settings['credentials']['url'], TextToSpeech::API_PATH );
+		$response   = wp_remote_post( $remote_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK !== $code ) {
+			return new \WP_Error(
+				'azure_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
+
+		// If audio already exists for this post, delete it.
+		if ( $saved_attachment_id ) {
+			wp_delete_attachment( $saved_attachment_id, true );
+			delete_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY );
+		}
+
+		// The audio file name.
+		$audio_file_name = sprintf(
+			'post-as-audio-%1$s.mp3',
+			$post_id
+		);
+
+		// Upload the audio stream as an .mp3 file.
+		$file_data = wp_upload_bits(
+			$audio_file_name,
+			null,
+			$response_body
+		);
+
+		if ( isset( $file_data['error'] ) && ! empty( $file_data['error'] ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_upload_bits_failure',
+				esc_html( $file_data['error'] )
+			);
+		}
+
+		// Insert the audio file as attachment.
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid'           => $file_data['file'],
+				'post_title'     => $audio_file_name,
+				'post_mime_type' => $file_data['type'],
+			),
+			$file_data['file'],
+			$post_id
+		);
+
+		// Return error if creation of attachment fails.
+		if ( ! $attachment_id ) {
+			return new \WP_Error(
+				'azure_text_to_speech_resource_creation_failure',
+				esc_html__( 'Audio creation failed.', 'classifai' )
+			);
+		}
+
+		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
+
+		return $attachment_id;
 	}
 
 	/**

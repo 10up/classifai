@@ -35,6 +35,27 @@
 				display: block;
 				float: left;
 				margin-right: 10px;
+
+				&.is-tertiary {
+					padding: 6px;
+					background: transparent;
+					border: 0;
+					color: #007cba;
+					cursor: pointer;
+					white-space: nowrap;
+					outline: 1px solid transparent;
+
+					&:hover:not(:disabled) {
+						box-shadow: inset 0 0 0 1px #006ba1;
+						color: #006ba1;
+					}
+
+					&:active:not(:disabled) {
+						background: #ddd;
+						box-shadow: none;
+						color: #006ba1;
+					}
+				}
 			}
 
 			.spinner {

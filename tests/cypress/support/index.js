@@ -14,12 +14,13 @@
 // ***********************************************************
 import 'cypress-file-upload';
 import '@10up/cypress-wp-utils';
+import 'cypress-plugin-tab';
 
 // Import commands.js using ES2015 syntax:
 import './commands';
 
-beforeEach(() => {
-	Cypress.Cookies.defaults({
-		preserve: /^wordpress.*?/,
-	});
-});
+beforeEach( () => {
+	cy.session( 'login', cy.login, {
+		cacheAcrossSpecs: true,
+	} );
+} );

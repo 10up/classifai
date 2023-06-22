@@ -19,7 +19,7 @@ const Prompt = wp.media.View.extend( {
 	/**
 	 * Render the view.
 	 */
-	render: function() {
+	render: function () {
 		this.$el.html( this.template() );
 
 		return this;
@@ -33,7 +33,7 @@ const Prompt = wp.media.View.extend( {
 	 *
 	 * @param {Object} event
 	 */
-	promptRequest: function( event ) {
+	promptRequest: function ( event ) {
 		let prompt = '';
 
 		if ( event.which === 13 ) {

@@ -36,6 +36,7 @@ jobs:
       with:
         files: |
           **/*.js
+          **/*.json
 
     - name: Run JS linting
       run: |

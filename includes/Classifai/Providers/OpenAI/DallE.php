@@ -22,6 +22,13 @@ class DallE extends Provider {
 	protected $dalle_url = 'https://api.openai.com/v1/images/generations';
 
 	/**
+	 * Maximum number of characters a prompt can have
+	 *
+	 * @var int
+	 */
+	public $max_prompt_chars = 1000;
+
+	/**
 	 * OpenAI DALL·E constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -42,21 +49,6 @@ class DallE extends Provider {
 				'enable_image_gen' => __( 'Image generation', 'classifai' ),
 			),
 		);
-	}
-
-	/**
-	 * Can the functionality be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		$settings = $this->get_settings();
-
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
@@ -102,7 +94,7 @@ class DallE extends Provider {
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			[ 'jquery', 'wp-api' ],
+			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
 			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
@@ -154,7 +146,7 @@ class DallE extends Provider {
 				<p>
 					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
 				<span class="error"></span>
 			</div>
@@ -348,7 +340,7 @@ class DallE extends Provider {
 			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
 			__( 'Number of images', 'classifai' ) => absint( $settings['number'] ?? 1 ),
 			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
-			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( 'classifai_openai_dalle_latest_response' ),
+			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) ),
 		];
 	}
 
@@ -397,6 +389,11 @@ class DallE extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+
+		// If our prompt exceeds the max length, throw an error.
+		if ( mb_strlen( $prompt ) > $this->max_prompt_chars ) {
+			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
+		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
