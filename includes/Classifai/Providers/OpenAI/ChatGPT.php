@@ -69,6 +69,26 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'edit_form_before_permalink', [ $this, 'regster_generated_titles_template' ] );
+	}
+
+	/**
+	 * Returns localised data for title generation.
+	 */
+	public function get_localised_vars() {
+		global $post;
+
+		return [
+			'enabledFeatures' => [
+				0 => [
+					'feature'    => 'title',
+					'path'       => '/classifai/v1/openai/generate-title/',
+					'buttonText' => __( 'Generate titles', 'classifai' ),
+					'modalTitle' => __( 'Select a title', 'classifai' ),
+				],
+			],
+			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+		];
 	}
 
 	/**
@@ -117,19 +137,7 @@ class ChatGPT extends Provider {
 				'classifai-post-status-info',
 				sprintf(
 					'var classifaiChatGPTData = %s;',
-					wp_json_encode(
-						[
-							'enabledFeatures' => [
-								0 => [
-									'feature'    => 'title',
-									'path'       => '/classifai/v1/openai/generate-title/',
-									'buttonText' => __( 'Generate titles', 'classifai' ),
-									'modalTitle' => __( 'Select a title', 'classifai' ),
-								],
-							],
-							'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-						]
-					)
+					wp_json_encode( $this->get_localised_vars() )
 				),
 				'before'
 			);
@@ -146,6 +154,27 @@ class ChatGPT extends Provider {
 			return;
 		}
 
+		$screen = get_current_screen();
+
+		if ( $screen && ! $screen->is_block_editor() ) {
+			wp_enqueue_script(
+				'classifai-generate-title-classic-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+				array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+				get_asset_info( 'generate-title-classic', 'version' ),
+				true
+			);
+
+			wp_add_inline_script(
+				'classifai-generate-title-classic-js',
+				sprintf(
+					'var classifaiChatGPTData = %s;',
+					wp_json_encode( $this->get_localised_vars() )
+				),
+				'before'
+			);
+		}
+
 		wp_enqueue_style(
 			'classifai-language-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
@@ -153,6 +182,22 @@ class ChatGPT extends Provider {
 			CLASSIFAI_PLUGIN_VERSION,
 			'all'
 		);
+	}
+
+	/**
+	 * HTML template for title generation result popup.
+	 */
+	public function regster_generated_titles_template() {
+		?>
+		<div id="classifai-openai__results" style="display: none;">
+			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
+			<div id="classifai-openai__modal" style="opacity: 0;">
+				<h2 id="classifai-openai__results-title"></h2>
+				<div id="classifai-openai__results-content">
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
