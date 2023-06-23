@@ -69,7 +69,7 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'edit_form_before_permalink', [ $this, 'regster_generated_titles_template' ] );
+		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
 
 	/**
@@ -155,11 +155,12 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$screen        = get_current_screen();
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
+		$screen      = get_current_screen();
+		$settings    = $this->get_settings();
+		$user_roles  = wp_get_current_user()->roles ?? [];
 		$title_roles = $settings['title_roles'] ?? [];
 
+		// Load the assets for the classic editor.
 		if (
 			$screen && ! $screen->is_block_editor()
 			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
@@ -203,7 +204,7 @@ class ChatGPT extends Provider {
 	/**
 	 * HTML template for title generation result popup.
 	 */
-	public function regster_generated_titles_template() {
+	public function register_generated_titles_template() {
 		?>
 		<div id="classifai-openai__results" style="display: none;">
 			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
