@@ -72,17 +72,16 @@ let scriptData = classifaiChatGPTData.enabledFeatures.reduce( ( acc, cur ) => ( 
 				spinnerEl.hide();
 				isProcessing = false;
 
-				result.forEach( ( title, index ) => {
+				result.forEach( ( title ) => {
 					$( '<textarea>', {
 						text: title
 					} )
-					.wrap( `<div class="classifai-openai__result-item" data-result-item-index="${index}" />` )
+					.wrap( `<div class="classifai-openai__result-item" />` )
 					.parent()
 					.append( $( '<button />', {
 						text: scriptData.title.selectBtnText,
 						type: 'button',
 						'class': 'button classifai-openai__select-title',
-						'data-result-title-index': index
 					} ) )
 					.appendTo( '#classifai-openai__results-content' );
 				} );
