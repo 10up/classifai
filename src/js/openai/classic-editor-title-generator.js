@@ -1,9 +1,8 @@
 import apiFetch from '@wordpress/api-fetch';
+import '../../scss/openai/classic-editor-title-generator.scss';
 
 const classifaiChatGPTData = window.classifaiChatGPTData || {};
 let scriptData = classifaiChatGPTData.enabledFeatures.reduce( ( acc, cur ) => ( { [ cur.feature ] : cur } ), {} );
-
-console.log(scriptData)
 
 ( function( $ ) {
 	$( document ).ready( () => {
@@ -12,15 +11,15 @@ console.log(scriptData)
 		}
 	} );
 
+	/**
+	 * This function is solely responsibe for rendering, generating
+	 * and applying the generated title for the classic editor.
+	 */
 	function generateTitleInit() {
-		// Adds button to the UI.
-		// $( '<a>', {
-		// 	href: '#',
-		// 	id: 'classifai-openai__title-generate-btn',
-		// 	text: scriptData?.title?.buttonText ?? '',
-		// 	class: 'button',
-		// } ).appendTo( '#titlewrap' );
+		// Boolean indicating whether title generation is in progress.
+		let isProcessing = false;
 
+		// Creates and appens the "Generate titles" button.
 		$( '<span />', {
 			text: scriptData?.title?.buttonText ?? '',
 			'class': 'classifai-openai__title-generate-btn--text',
@@ -31,15 +30,29 @@ console.log(scriptData)
 			'class': 'classifai-openai__title-generate-btn--spinner',
 		} ) )
 		.appendTo( '#titlewrap' )
-	
+
+		// The current post ID.
 		const postId = $( '#post_ID' ).val();
 
+		// Callback to hide the popup.
 		const hidePopup = () => {
 			$( '#classifai-openai__results' ).removeClass( 'classifai-openai--fade-in' ).delay(300).fadeOut(0);
 		}
 
-		const generateTitle = ( e ) => {
-			e.preventDefault();
+		// Callback to apply the title from the result to the post title.
+		const applyTitle = ( e ) => {
+			const selectBtnEl = $( e.target );
+			const textarea = selectBtnEl.closest( '.classifai-openai__result-item' ).find( 'textarea' );
+
+			$( '#title' ).val( textarea.val() ).trigger( 'input' );
+			hidePopup();
+		}
+
+		// Callback to generate the title.
+		const generateTitle = () => {
+			if ( isProcessing ) {
+				return;
+			}
 
 			$( '#classifai-openai__results-content' ).html( '' );
 			const generateTextEl = $( '.classifai-openai__title-generate-btn--text' );
@@ -47,6 +60,7 @@ console.log(scriptData)
 
 			generateTextEl.css( 'opacity', '0' );
 			spinnerEl.show();
+			isProcessing = true;
 
 			const path = scriptData.title?.path + postId;
 
@@ -56,17 +70,19 @@ console.log(scriptData)
 			.then( ( result ) => {
 				generateTextEl.css( 'opacity', '1' );
 				spinnerEl.hide();
+				isProcessing = false;
 
-				result.forEach( ( title ) => {
+				result.forEach( ( title, index ) => {
 					$( '<textarea>', {
 						text: title
 					} )
-					.wrap( '<div class="classifai-openai__result-item" />' )
+					.wrap( `<div class="classifai-openai__result-item" data-result-item-index="${index}" />` )
 					.parent()
 					.append( $( '<button />', {
-						text: 'Select',
+						text: scriptData.title.selectBtnText,
 						type: 'button',
 						'class': 'button classifai-openai__select-title',
+						'data-result-title-index': index
 					} ) )
 					.appendTo( '#classifai-openai__results-content' );
 				} );
@@ -75,9 +91,17 @@ console.log(scriptData)
 			} );
 		};
 
+		// Event handler registration to generate the title.
 		$( document ).on( 'click', '#classifai-openai__title-generate-btn', generateTitle );
-		$( document ).on( 'click', '#classifai-openai__overlay', hidePopup )
 
+		// Event handler registration to hide the popup.
+		$( document ).on( 'click', '#classifai-openai__overlay', hidePopup );
+		$( document ).on( 'click', '#classifai-openai__close-modal-button', hidePopup );
+
+		// Event handler registration to apply the selected title to the post title.
+		$( document ).on( 'click', '.classifai-openai__select-title', applyTitle );
+
+		// Sets the modal title.
 		const resultWrapper = $( '#classifai-openai__results' );
 		resultWrapper
 			.find( '#classifai-openai__results-title' )

@@ -81,10 +81,11 @@ class ChatGPT extends Provider {
 		return [
 			'enabledFeatures' => [
 				0 => [
-					'feature'    => 'title',
-					'path'       => '/classifai/v1/openai/generate-title/',
-					'buttonText' => __( 'Generate titles', 'classifai' ),
-					'modalTitle' => __( 'Select a title', 'classifai' ),
+					'feature'       => 'title',
+					'path'          => '/classifai/v1/openai/generate-title/',
+					'buttonText'    => __( 'Generate titles', 'classifai' ),
+					'modalTitle'    => __( 'Select a title', 'classifai' ),
+					'selectBtnText' => __( 'Select', 'classifai' ),
 				],
 			],
 			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
@@ -154,9 +155,24 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$screen = get_current_screen();
+		$screen        = get_current_screen();
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$title_roles = $settings['title_roles'] ?? [];
 
-		if ( $screen && ! $screen->is_block_editor() ) {
+		if (
+			$screen && ! $screen->is_block_editor()
+			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
+			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
+		) {
+			wp_enqueue_style(
+				'classifai-generate-title-classic-css',
+				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+				[],
+				CLASSIFAI_PLUGIN_VERSION,
+				'all'
+			);
+
 			wp_enqueue_script(
 				'classifai-generate-title-classic-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
@@ -193,6 +209,7 @@ class ChatGPT extends Provider {
 			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
 			<div id="classifai-openai__modal" style="opacity: 0;">
 				<h2 id="classifai-openai__results-title"></h2>
+				<div id="classifai-openai__close-modal-button"></div>
 				<div id="classifai-openai__results-content">
 				</div>
 			</div>

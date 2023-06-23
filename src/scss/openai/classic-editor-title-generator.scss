@@ -34,7 +34,7 @@
 		position: fixed;
 		top: 100px;
 		left: 50%;
-		transform: translate(-50%, 0);
+		transform: translate(-50%, -10%);
 		z-index: 99999;
 		background: #fff;
 		width: 100%;
@@ -55,6 +55,25 @@
 		padding: 1rem;
 		padding-bottom: 1.5rem;
 		gap: 1rem;
+	}
+
+	&__close-modal-button {
+		position: fixed;
+		top: 0.5rem;
+		right: 0.5rem;
+		width: 40px;
+		height: 40px;
+		cursor: pointer;
+
+		&:before {
+			content: "\f335";
+			display: block;
+			font-family: dashicons;
+			font-size: 3rem;
+			top: 0.5rem;
+			right: 0;
+			position: relative;
+		}
 	}
 }
 
@@ -82,12 +101,12 @@
 
 		#classifai-openai__modal {
 			opacity: 1 !important;
-			transition: opacity 0.3s ease !important;
+			transform: translate(-50%, 0) !important;
+			transition: opacity 0.3s ease, transform 0.3s ease !important;
 		}
 	}
 
 	&__title-generate-btn--spinner {
-
 		&:before {
 			display: block;
 			animation: rotation 2s infinite linear;
