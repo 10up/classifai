@@ -52,6 +52,7 @@
 
 	&__results-content {
 		display: flex;
+		flex-flow: row wrap;
 		padding: 1rem;
 		padding-bottom: 1.5rem;
 		gap: 1rem;
@@ -81,6 +82,7 @@
 	&__result-item {
 		flex-grow: 1;
 		flex-basis: 0;
+		min-width: 25%;
 
 		textarea {
 			display: block;
