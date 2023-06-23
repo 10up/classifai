@@ -711,7 +711,7 @@ function get_all_post_statuses() {
 	/*
 	 * We unset the following because we want to limit the post
 	 * statuses to the ones returned by `get_post_statuses()` and
-	 * any custom post statuses registered using `register_post_type()`
+	 * any custom post statuses registered using `register_post_status()`
 	 */
 	unset(
 		$all_statuses['future'],
@@ -723,9 +723,6 @@ function get_all_post_statuses() {
 		$all_statuses['request-failed'],
 		$all_statuses['request-completed']
 	);
-
-	// Some labels don't begin with upper case.
-	$all_statuses = array_map( 'ucwords', $all_statuses );
 
 	/*
 	 * There is a minor difference in the label for 'pending' status between

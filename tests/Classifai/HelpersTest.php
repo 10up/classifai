@@ -269,6 +269,9 @@ class HelpersTest extends \WP_UnitTestCase {
 	public function test_get_post_statuses() {
 		$all_statuses  = get_all_post_statuses();
 		$core_statuses = get_post_statuses();
+
+		// This tells that $all_status contains all statuses that
+		// are present in $core_statuses.
 		$statuses_diff = array_diff( $core_statuses, $all_statuses );
 		$this->assertEquals( 0, count( $statuses_diff ) );
 		$this->assertArrayHasKey( 'unread', $all_statuses );
