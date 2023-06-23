@@ -225,7 +225,7 @@ function get_post_types_for_language_settings() {
  * @return array
  */
 function get_post_statuses_for_language_settings() {
-	$post_statuses = get_post_statuses();
+	$post_statuses = get_all_post_statuses();
 
 	/**
 	 * Filter post statuses shown in language processing settings.
@@ -692,4 +692,58 @@ function find_provider_class( array $provider_classes = [], string $service_name
 	}
 
 	return $provider;
+}
+
+/**
+ * Returns core and custom post types.
+ *
+ * @return array
+ */
+function get_all_post_statuses() {
+	$all_statuses = wp_list_pluck(
+		get_post_stati(
+			[],
+			'objects'
+		),
+		'label'
+	);
+
+	/*
+	 * We unset the following because we want to limit the post
+	 * statuses to the ones returned by `get_post_statuses()` and
+	 * any custom post statuses registered using `register_post_type()`
+	 */
+	unset(
+		$all_statuses['future'],
+		$all_statuses['trash'],
+		$all_statuses['auto-draft'],
+		$all_statuses['inherit'],
+		$all_statuses['request-pending'],
+		$all_statuses['request-confirmed'],
+		$all_statuses['request-failed'],
+		$all_statuses['request-completed']
+	);
+
+	// Some labels don't begin with upper case.
+	$all_statuses = array_map( 'ucwords', $all_statuses );
+
+	/*
+	 * There is a minor difference in the label for 'pending' status between
+	 * `get_post_statuses()` and `get_post_stati()`.
+	 *
+	 * `get_post_stati()` has the label as `Pending` whereas
+	 * `get_post_statuses()` has the label as `Pending Review`.
+	 *
+	 * So we normalise it here.
+	 */
+	if ( isset( $all_statuses['pending'] ) ) {
+		$all_statuses['pending'] = esc_html__( 'Pending Review', 'classifai' );
+	}
+
+	/**
+	 * Hook to filter post statuses.
+	 *
+	 * @param array $all_statuses Array of post statuses.
+	 */
+	return apply_filters( 'get_all_post_statuses', $all_statuses );
 }
