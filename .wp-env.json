@@ -1,10 +1,13 @@
 {
-  "plugins": [".", "./tests/test-plugin"],
+  "plugins": [".", "./tests/test-plugin", "https://downloads.wordpress.org/plugin/classic-editor.zip"],
   "env": {
     "tests": {
       "mappings": {
         "wp-cli.yml": "./tests/bin/wp-cli.yml"
       }
     }
+  },
+  "lifecycleScripts": {
+    "afterStart": "bash ./tests/bin/initialize.sh"
   }
 }
