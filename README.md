@@ -226,7 +226,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test excerpt generation, edit (or create) an item that supports excerpts. Note: only the block editor is supported.
 * Ensure this item has content saved.
 * Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
-* To test title generation, edit (or create) an item that supports titles. Note: only the block editor is supported.
+* To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
 
