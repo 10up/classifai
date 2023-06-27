@@ -69,12 +69,20 @@ const PostStatusInfo = () => {
 				{ dataToRender.map( ( item, i ) => {
 					return (
 						<div className="classifai-title" key={ i }>
-							<textarea rows="5">{ item }</textarea>
+							<textarea
+								rows="5"
+								onChange={ ( e ) => {
+									dataToRender[ i ] = e.target.value;
+									setData( dataToRender );
+								} }
+							>
+								{ item }
+							</textarea>
 							<Button
 								variant="secondary"
 								onClick={ () => {
 									dispatch( 'core/editor' ).editPost( {
-										title: item,
+										title: data[ i ],
 									} );
 									closeModal();
 								} }

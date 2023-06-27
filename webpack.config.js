@@ -26,6 +26,9 @@ module.exports = {
 		],
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
+		'generate-title-classic': [
+			'./src/js/openai/classic-editor-title-generator.js',
+		],
 	},
 	module: {
 		rules: [
