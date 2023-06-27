@@ -6,6 +6,23 @@ namespace Classifai;
  * @group helpers
  */
 class HelpersTest extends \WP_UnitTestCase {
+
+	/**
+	 * Set up method.
+	 */
+	public function set_up() {
+		register_post_status( 'unread', array(
+			'label'                     => _x( 'Unread', 'post' ),
+			'public'                    => true,
+			'exclude_from_search'       => false,
+			'show_in_admin_all_list'    => true,
+			'show_in_admin_status_list' => true,
+			'label_count'               => _n_noop( 'Unread <span class="count">(%s)</span>', 'Unread <span class="count">(%s)</span>' ),
+		) );
+
+		parent::set_up();
+	}
+
 	/**
 	 * Tear down method.
 	 */
@@ -244,5 +261,19 @@ class HelpersTest extends \WP_UnitTestCase {
 
 		$sanitized_int = clean_input( 'classify_test_int', true, 'absint' );
 		$this->assertEquals( $sanitized_int, 2 );
+	}
+
+	/**
+	 * Tests for the get_post_statuses method.
+	 */
+	public function test_get_post_statuses() {
+		$all_statuses  = get_all_post_statuses();
+		$core_statuses = get_post_statuses();
+
+		// This tells that $all_status contains all statuses that
+		// are present in $core_statuses.
+		$statuses_diff = array_diff( $core_statuses, $all_statuses );
+		$this->assertEquals( 0, count( $statuses_diff ) );
+		$this->assertArrayHasKey( 'unread', $all_statuses );
 	}
 }
