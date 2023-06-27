@@ -695,7 +695,7 @@ function find_provider_class( array $provider_classes = [], string $service_name
 }
 
 /**
- * Returns core and custom post types.
+ * Get core and custom post statuses.
  *
  * @return array
  */
@@ -740,7 +740,12 @@ function get_all_post_statuses() {
 	/**
 	 * Hook to filter post statuses.
 	 *
-	 * @param array $all_statuses Array of post statuses.
+	 * @since 2.2.2
+	 * @hook classifai_all_post_statuses
+	 *
+	 * @param {array} $all_statuses Array of post statuses.
+	 *
+	 * @return {array} Array of post statuses.
 	 */
-	return apply_filters( 'get_all_post_statuses', $all_statuses );
+	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
