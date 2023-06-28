@@ -541,7 +541,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		// Ensure the attachment meets the requirements for processing.
 		if ( ! $transcribe->should_process( $attachment_id ) ) {
-			\WP_CLI::log( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type and size meet requirements.', $attachment_id ) );
+			\WP_CLI::log( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ) );
 			return false;
 		}
 

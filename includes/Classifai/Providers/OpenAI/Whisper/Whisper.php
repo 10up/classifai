@@ -41,7 +41,7 @@ trait Whisper {
 	 *
 	 * @var int
 	 */
-	protected $max_file_size = 25 * MB_IN_BYTES;
+	public $max_file_size = 25 * MB_IN_BYTES;
 
 	/**
 	 * Builds the API url.
