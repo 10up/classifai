@@ -26,7 +26,7 @@ trait Whisper {
 	 *
 	 * @var array
 	 */
-	protected $file_formats = [
+	public $file_formats = [
 		'mp3',
 		'mp4',
 		'mpeg',
