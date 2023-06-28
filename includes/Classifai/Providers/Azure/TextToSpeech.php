@@ -52,6 +52,14 @@ class TextToSpeech extends Provider {
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
 
 	/**
+	 * Meta key to get/set the audio hash that helps to indicate if there is any need
+	 * for the audio file to be regenerated or not.
+	 *
+	 * @var string
+	 */
+	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
+
+	/**
 	 * Azure Text to Speech constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -151,7 +159,7 @@ class TextToSpeech extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['credentials']['url'],
-				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>REGION</code> with the region you selected for the resource in Azure.', 'classifai' ),
 			]
 		);
 
@@ -501,6 +509,11 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		$is_audio_enabled = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
+		if ( 'no' === $is_audio_enabled ) {
+			return $content;
+		}
+
 		/**
 		 * Filter to disable the rendering of the Text to Speech block.
 		 *
@@ -522,6 +535,12 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		$audio_attachment_url = wp_get_attachment_url( $audio_attachment_id );
+
+		if ( ! $audio_attachment_url ) {
+			return $content;
+		}
+
 		wp_enqueue_script(
 			'classifai-post-audio-player-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.js',
@@ -538,12 +557,11 @@ class TextToSpeech extends Provider {
 			'all'
 		);
 
-		$audio_timestamp      = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
-		$audio_attachment_url = sprintf(
-			'%1$s?ver=%2$s',
-			wp_get_attachment_url( $audio_attachment_id ),
-			filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT )
-		);
+		$audio_timestamp = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
+
+		if ( $audio_timestamp ) {
+			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
+		}
 
 		ob_start();
 

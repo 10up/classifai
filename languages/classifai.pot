@@ -2,9 +2,9 @@
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 2.2.1\n"
+"Project-Id-Version: ClassifAI 2.2.2\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2023-06-08 18:55:19+00:00\n"
+"POT-Creation-Date: 2023-06-28 15:21:39+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -155,7 +155,7 @@ msgid "Please enable at least one feature to set up ClassifAI."
 msgstr ""
 
 #: includes/Classifai/Admin/Onboarding.php:563
-#: includes/Classifai/Admin/SavePostHandler.php:433
+#: includes/Classifai/Admin/SavePostHandler.php:447
 msgid "You don't have permission to perform this operation."
 msgstr ""
 
@@ -176,24 +176,24 @@ msgstr ""
 msgid "Unauthorized user."
 msgstr ""
 
-#: includes/Classifai/Admin/SavePostHandler.php:213
+#: includes/Classifai/Admin/SavePostHandler.php:227
 msgid "Voice data not set."
 msgstr ""
 
-#: includes/Classifai/Admin/SavePostHandler.php:254
+#: includes/Classifai/Admin/SavePostHandler.php:268
 msgid "HTTP request unsuccessful."
 msgstr ""
 
-#: includes/Classifai/Admin/SavePostHandler.php:301
+#: includes/Classifai/Admin/SavePostHandler.php:314
 msgid "Audio creation failed."
 msgstr ""
 
-#: includes/Classifai/Admin/SavePostHandler.php:366
+#: includes/Classifai/Admin/SavePostHandler.php:380
 #: includes/Classifai/Providers/Watson/NLU.php:834
 msgid "Post"
 msgstr ""
 
-#: includes/Classifai/Admin/SavePostHandler.php:375
+#: includes/Classifai/Admin/SavePostHandler.php:389
 #. translators: %s is post type label.
 msgid "%s classified successfully."
 msgstr ""
@@ -285,6 +285,10 @@ msgstr ""
 msgid "Provider class not found."
 msgstr ""
 
+#: includes/Classifai/Helpers.php:737
+msgid "Pending Review"
+msgstr ""
+
 #: includes/Classifai/Plugin.php:172
 msgid "API Password"
 msgstr ""
@@ -292,8 +296,8 @@ msgstr ""
 #: includes/Classifai/Plugin.php:173
 #: includes/Classifai/Providers/Azure/ComputerVision.php:965
 #: includes/Classifai/Providers/Azure/Personalizer.php:114
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:160
-#: includes/Classifai/Providers/OpenAI/OpenAI.php:76
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:168
+#: includes/Classifai/Providers/OpenAI/OpenAI.php:78
 #: includes/Classifai/Providers/Watson/NLU.php:331
 msgid "API Key"
 msgstr ""
@@ -449,12 +453,11 @@ msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:952
 #: includes/Classifai/Providers/Azure/Personalizer.php:89
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:145
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:153
 msgid "Endpoint URL"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:960
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:154
 msgid ""
 "Supported protocol and hostname endpoints, e.g., "
 "<code>https://REGION.api.cognitive.microsoft.com</code> or "
@@ -531,8 +534,8 @@ msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:1243
 #: includes/Classifai/Providers/Azure/Personalizer.php:718
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:410
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:370
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:418
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:433
 #: includes/Classifai/Providers/OpenAI/DallE.php:338
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:311
 #: includes/Classifai/Providers/OpenAI/Whisper.php:328
@@ -540,9 +543,9 @@ msgid "Authenticated"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:1243
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:370
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:371
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:374
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:433
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:434
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:437
 #: includes/Classifai/Providers/OpenAI/DallE.php:338
 #: includes/Classifai/Providers/OpenAI/DallE.php:339
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:311
@@ -555,9 +558,9 @@ msgid "yes"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:1243
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:370
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:371
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:374
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:433
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:434
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:437
 #: includes/Classifai/Providers/OpenAI/DallE.php:338
 #: includes/Classifai/Providers/OpenAI/DallE.php:339
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:311
@@ -571,7 +574,7 @@ msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:1244
 #: includes/Classifai/Providers/Azure/Personalizer.php:719
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:411
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:419
 #: includes/Classifai/Providers/Watson/NLU.php:303
 #: includes/Classifai/Providers/Watson/NLU.php:757
 msgid "API URL"
@@ -661,12 +664,12 @@ msgid "Error in send reward to personalizer: "
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Personalizer.php:718
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:410
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:418
 msgid "Yes"
 msgstr ""
 
 #: includes/Classifai/Providers/Azure/Personalizer.php:718
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:410
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:418
 msgid "No"
 msgstr ""
 
@@ -719,49 +722,56 @@ msgstr ""
 msgid "The Read result is invalid."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:69
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:77
 msgid "Microsoft Azure Text to Speech"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:72
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:80
 msgid "Generate speech for post content"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:174
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:162
+msgid ""
+"Text to Speech region endpoint, e.g., "
+"<code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace "
+"<code>REGION</code> with the region you selected for the resource in Azure."
+msgstr ""
+
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:182
 msgid "Post Types"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:189
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:197
 msgid "Voice"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:241
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:249
 msgid ""
 "One or more credentials required to connect to the Azure Text to Speech "
 "service is empty."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:323
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:331
 msgid "Azure Speech to Text: HTTP request failed."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:337
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:345
 msgid "Connection to Azure Text to Speech failed."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:412
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:420
 msgid "Latest response - Voices"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:553
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:571
 msgid "Play audio"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:553
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:571
 msgid "Pause audio"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:572
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:590
 msgid "Listen to this"
 msgstr ""
 
@@ -781,33 +791,37 @@ msgstr ""
 msgid "Title generation"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:126
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:232
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:374
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:86
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:295
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:437
 msgid "Generate titles"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:127
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:87
 msgid "Select a title"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:170
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:88
+msgid "Select"
+msgstr ""
+
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:233
 msgid "Excerpt settings"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:177
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:371
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:240
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:434
 msgid "Generate excerpt"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:185
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:248
 msgid ""
 "A button will be added to the excerpt panel that can be used to generate an "
 "excerpt."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:194
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:246
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:257
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:309
 #: includes/Classifai/Providers/OpenAI/DallE.php:214
 #: includes/Classifai/Providers/OpenAI/DallE.php:340
 #: includes/Classifai/Providers/OpenAI/Whisper.php:249
@@ -815,54 +829,54 @@ msgstr ""
 msgid "Allowed roles"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:202
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:265
 msgid "Choose which roles are allowed to generate excerpts."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:208
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:373
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:271
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:436
 msgid "Excerpt length"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:218
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:281
 msgid ""
 "How many words should the excerpt be? Note that the final result may not "
 "exactly match this. In testing, ChatGPT tended to exceed this number by "
 "10-15 words."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:225
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:288
 msgid "Title settings"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:240
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:303
 msgid ""
 "A button will be added to the status panel that can be used to generate "
 "titles."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:254
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:317
 msgid "Choose which roles are allowed to generate titles."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:260
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:376
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:323
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:439
 msgid "Number of titles"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:268
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:331
 msgid "Number of titles that will be generated in one request."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:372
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:435
 msgid "Allowed roles (excerpt)"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:375
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:438
 msgid "Allowed roles (titles)"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:377
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:440
 #: includes/Classifai/Providers/OpenAI/DallE.php:343
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:317
 #: includes/Classifai/Providers/OpenAI/Whisper.php:331
@@ -870,31 +884,31 @@ msgstr ""
 msgid "Latest response"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:393
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:456
 msgid "A valid post ID is required to generate an excerpt."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:419
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:482
 msgid "Post ID is required to generate an excerpt."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:427
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:490
 msgid ""
 "Excerpt generation is disabled or OpenAI authentication failed. Please "
 "check your settings."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:506
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:569
 msgid "Post ID is required to generate titles."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:520
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:583
 msgid ""
 "Title generation is disabled or OpenAI authentication failed. Please check "
 "your settings."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/ChatGPT.php:581
+#: includes/Classifai/Providers/OpenAI/ChatGPT.php:644
 msgid "No choices were returned from OpenAI."
 msgstr ""
 
@@ -1089,19 +1103,19 @@ msgstr ""
 msgid "No data returned from OpenAI."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/OpenAI.php:37
+#: includes/Classifai/Providers/OpenAI/OpenAI.php:39
 #. translators: %1$s is replaced with the OpenAI sign up URL
 msgid ""
 "Don't have an OpenAI account yet? <a title=\"Sign up for an OpenAI "
 "account\" href=\"%1$s\">Sign up for one</a> in order to get your API key."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/OpenAI.php:69
+#: includes/Classifai/Providers/OpenAI/OpenAI.php:71
 #. translators: %1$s: the provider service name
 msgid "API key has been prefilled from your %1$s settings."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/OpenAI.php:135
+#: includes/Classifai/Providers/OpenAI/OpenAI.php:137
 msgid "Please enter your OpenAI API key."
 msgstr ""
 
@@ -1567,6 +1581,12 @@ msgstr ""
 msgid "Watson Keywords"
 msgstr ""
 
+#: tests/Classifai/HelpersTest.php:20
+msgid "Unread <span class=\"count\">(%s)</span>"
+msgid_plural "Unread <span class=\"count\">(%s)</span>"
+msgstr[0] ""
+msgstr[1] ""
+
 #. Plugin URI of the plugin/theme
 msgid "https://github.com/10up/classifai"
 msgstr ""
@@ -1583,4 +1603,9 @@ msgstr ""
 
 #. Author URI of the plugin/theme
 msgid "https://10up.com"
+msgstr ""
+
+#: tests/Classifai/HelpersTest.php:15
+msgctxt "post"
+msgid "Unread"
 msgstr ""
