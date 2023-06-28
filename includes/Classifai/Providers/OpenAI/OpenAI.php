@@ -8,6 +8,8 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
+use function Classifai\get_all_post_statuses;
+
 trait OpenAI {
 
 	/**
@@ -188,7 +190,7 @@ trait OpenAI {
 	 * @return array
 	 */
 	public function get_post_statuses_for_settings() {
-		$post_statuses = get_post_statuses();
+		$post_statuses = get_all_post_statuses();
 
 		/**
 		 * Filter post statuses shown in settings.

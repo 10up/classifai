@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [2.2.2] - 2023-06-28
+### Added
+- Support for generating post titles in the Classic Editor using OpenAI's ChatGPT API (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#506](https://github.com/10up/classifai/pull/506)).
+- New utility method to retrieve all post statuses (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#507](https://github.com/10up/classifai/pull/507)).
+
+### Changed
+- Optimized calls to the Microsoft Azure Text to Speech API (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#487](https://github.com/10up/classifai/pull/487)).
+- When the Text to Speech option is toggled off, hide the Text to Speech audio button on the single post level (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#494](https://github.com/10up/classifai/pull/494)).
+
+### Fixed
+- Ensure any edits made to generated titles persist when that title is inserted (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#509](https://github.com/10up/classifai/pull/509)).
+- Ensure we show all post statuses in our settings instead of just the core post ones (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#507](https://github.com/10up/classifai/pull/507)).
+
 ## [2.2.1] - 2023-06-08
 ### Added
 - Ability to generate images in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#471](https://github.com/10up/classifai/pull/471)).
@@ -356,6 +369,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[2.2.2]: https://github.com/10up/classifai/compare/2.2.1...2.2.2
 [2.2.1]: https://github.com/10up/classifai/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/10up/classifai/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/10up/classifai/compare/2.0.0...2.1.0
