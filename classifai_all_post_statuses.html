@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Source: Watson/Normalizer.php - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_all_post_statuses - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,96 +21,184 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Source: Watson/Normalizer.php</h1>
+    <h1 class="page-title">Filter: classifai_all_post_statuses</h1>
 	
 
     
 
 
 
+
+<section>
+
+<header>
+    <h2></h2>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>&lt;?php
+</header>
 
-namespace Classifai\Watson;
+<article>
+    <div class="container-overview">
+    
+        
 
-/**
- * Normalize takes the post_content within a post and cleans it up for
- * sending to the Watson NLU API. Shortcodes, appreviations, HTML tags
- * are all stripped out here.
- *
- * A 'classifai_normalize' filter is provided to extend this to add
- * metadata or to perform additional cleanup.
- */
-class Normalizer {
+    
 
-	/**
-	 * Creates a plain text normalized version of the post's content.
-	 * The post title is also included in the content to improve
-	 * accuracy.
-	 *
-	 * @param int $post_id The post to normalize
-	 * @return string
-	 */
-	public function normalize( $post_id ) {
-		$post         = get_post( $post_id );
-		$post_content = apply_filters( 'the_content', $post->post_content );
-		$post_title   = apply_filters( 'the_title', $post->post_title );
+    <h4 class="name" id="classifai_all_post_statuses">apply_filters( 'classifai_all_post_statuses', <span class="signature">$all_statuses )</span><span class="type-signature"> &rarr; {array}</span></h4>
 
-		/* Strip shortcodes but keep internal caption text */
-		$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
+    
 
-		$post_content = $this->normalize_content( $post_content, $post_title, $post_id );
 
-		return $post_content;
-	}
 
-	/**
-	 * Normalizes post_content into plain text.
-	 *
-	 * @param string $post_content The post content.
-	 * @param string $post_title   The post title. Optional: append to content to improve accuracy.
-	 * @param int    $post_id      The post id. Optional.
-	 */
-	public function normalize_content( $post_content, $post_title = '', $post_id = false ) {
-		/* Strip HTML entities */
-		$post_content = preg_replace( '/&amp;#?[a-z0-9]{2,8};/i', '', $post_content );
+<div class="description">
+    <p>Hook to filter post statuses.</p>
+</div>
 
-		/* Strip abbreviations */
-		$post_content = preg_replace( '/[A-Z][A-Z]+/', '', $post_content );
 
-		/* Replace HTML linebreaks with newlines */
-		$post_content = preg_replace( '#&lt;br\s?/?>#', "\n\n", $post_content );
 
-		/* Strip all HTML tags */
-		$post_content = wp_strip_all_tags( $post_content );
 
-		if ( ! empty( $post_title ) ) {
-			/* Include title to improve relevancy */
-			$post_content = $post_title . ".\n\n" . $post_content;
-		}
 
-		/**
-		 * Filters the normalized content to allow for additional cleanup.
-		 *
-		 * @since 0.1.0
-		 * @hook classifai_normalize
-		 *
-		 * @param {string} $post_content The normalized post content.
-		 * @param {int}    $post_id      The ID of the post whose content is being normalized.
-		 *
-		 * @return {string} The filtered normalized post content.
-		 */
-		$post_content = apply_filters( 'classifai_normalize', trim( $post_content ), $post_id );
 
-		return $post_content;
-	}
 
-}
-</code></pre>
-        </article>
-    </section>
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>$all_statuses</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Array of post statuses.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+    <dt class="tag-since">Since:</dt>
+    <dd class="tag-since"><ul class="dummy"><li>2.2.2</li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="Helpers.php.html">Helpers.php</a>, <a href="Helpers.php.html#line740">line 740</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    <p>Array of post statuses.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">array</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+    
+    </div>
+
+    
+</article>
+
+</section>
 
 
 
