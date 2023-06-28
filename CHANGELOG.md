@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 ### Changed
 - Optimized calls to the Microsoft Azure Text to Speech API (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#487](https://github.com/10up/classifai/pull/487)).
 - When the Text to Speech option is toggled off, hide the Text to Speech audio button on the single post level (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#494](https://github.com/10up/classifai/pull/494)).
+- Update instructions on setting the proper endpoint URL for Azure Text to Speech (props [@dkotter](https://github.com/dkotter), [@ocean90](https://github.com/ocean90) via [#512](https://github.com/10up/classifai/pull/512)).
 
 ### Fixed
 - Ensure any edits made to generated titles persist when that title is inserted (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#509](https://github.com/10up/classifai/pull/509)).
