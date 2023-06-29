@@ -139,7 +139,7 @@ class Metabox {
 		}
 
 		$classifai_process_content = isset( $_POST['_classifai_process_content'] ) ? sanitize_key( wp_unslash( $_POST['_classifai_process_content'] ) ) : '';
-	
+
 		if ( 'yes' !== $classifai_process_content ) {
 			update_post_meta( $post_id, '_classifai_process_content', 'no' );
 		} else {
