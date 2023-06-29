@@ -425,6 +425,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		// If we have a post type specified, process all items in that type.
 		if ( ! empty( $opts['post_type'] ) ) {
+			// Only allow processing post types that are enabled in settings.
+			if ( ! in_array( $opts['post_type'], get_post_types(), true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post type is not a valid post type', $opts['post_type'] ) );
+			}
+
+			// Only allow processing post statuses that are valid for a particular post type.
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
+			}
+
 			\WP_CLI::log( sprintf( 'Starting processing of "%s" post type items that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
 
 			$paged = 1;
