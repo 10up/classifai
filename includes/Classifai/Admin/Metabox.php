@@ -55,8 +55,8 @@ class Metabox {
 	 */
 	public function add_metabox( $post_type ) {
 
-		$this->post_type       = $post_type;
-		$settings              = $this->embeddings->get_settings();
+		$this->post_type = $post_type;
+		$settings        = $this->embeddings->get_settings();
 
 		// Set up the embeddings metabox if the feature is enabled.
 		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
@@ -84,7 +84,7 @@ class Metabox {
 	public function render_metabox( $post ) {
 
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
-		$checked                   = $classifai_process_content === 'no' ? '' : 'checked="checked"'; 
+		$checked = 'no' === $classifai_process_content ? '' : 'checked="checked"'; 
 
 		// Add nonce.
 		wp_nonce_field( 'classifai_embeddings_save_posts', '_nonce' );
@@ -92,7 +92,7 @@ class Metabox {
 		<div class='classifai-metabox classifai-metabox-embeddings'>
 			<p>
 				<label for="classifai-process-content" class="classifai-preview-toggle">
-					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo $checked; ?> />
+					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
 					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
 				</label>
 			</p>
