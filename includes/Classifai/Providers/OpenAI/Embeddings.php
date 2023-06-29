@@ -387,7 +387,7 @@ class Embeddings extends Provider {
 		}
 
 		// Ensure the user has permissions to edit.
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 			return;
 		}
 
@@ -453,7 +453,7 @@ class Embeddings extends Provider {
 
 			// Get embedding similarity for each term.
 			foreach ( $terms as $term_id ) {
-				if ( ! current_user_can( 'assign_term', $term_id ) ) {
+				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 					continue;
 				}
 
