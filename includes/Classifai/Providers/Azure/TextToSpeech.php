@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\Azure;
 
+use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
 use stdClass;
 use WP_Http;
@@ -587,14 +588,13 @@ class TextToSpeech extends Provider {
 		}
 
 		if ( isset( $_POST['classifai_synthesize_speech'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['classifai_synthesize_speech'] ) ) ) {
-			$process_content = 'yes';
+			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'yes' );
+
+			$save_post_handler = new SavePostHandler();
+			$save_post_handler->synthesize_speech( $post_id );
 		} else {
-			$process_content = 'no';
+			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'no' );
 		}
-
-		update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, sanitize_text_field( $process_content ) );
-
-		// TODO: synthesize speech here if needed
 	}
 
 	/**
