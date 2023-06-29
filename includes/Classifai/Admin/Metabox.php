@@ -116,10 +116,10 @@ class Metabox {
 		}
 
 		// Add nonce for security and authentication.
-		$nonce_action = 'classifai_embeddings_save_terms';
+		$nonce_action = 'classifai_embeddings_save_posts';
 
 		// Check if nonce is valid.
-		if ( ! wp_verify_nonce( $_POST['_nonce'], $nonce_action ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_nonce'] ) ), $nonce_action ) ) {
 			return;
 		}
 
@@ -138,10 +138,12 @@ class Metabox {
 			return;
 		}
 
-		$classifai_process_content = isset( $_POST['_classifai_process_content'] ) ? esc_url_raw( wp_unslash( $_POST['_classifai_process_content'] ) ) : '';
-
+		$classifai_process_content = isset( $_POST['_classifai_process_content'] ) ? sanitize_key( wp_unslash( $_POST['_classifai_process_content'] ) ) : '';
+	
 		if ( 'yes' !== $classifai_process_content ) {
 			update_post_meta( $post_id, '_classifai_process_content', 'no' );
+		} else {
+			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
 		}
 	}
 }
