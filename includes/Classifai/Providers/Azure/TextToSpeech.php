@@ -523,7 +523,7 @@ class TextToSpeech extends Provider {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
-		$process_content = get_post_meta( $post->ID, 'classifai_synthesize_speech', true );
+		$process_content = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
 		$process_content = ( 'no' === $process_content ) ? 'no' : 'yes';
 
 		$post_type       = get_post_type_object( get_post_type( $post ) );
@@ -531,11 +531,13 @@ class TextToSpeech extends Provider {
 		if ( $post_type ) {
 			$post_type_label = $post_type->labels->singular_name;
 		}
+
+		$audio_id = get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
 		?>
 
 		<p>
-			<label for="_classifai_process_content">
-				<input type="checkbox" value="yes" id="_classifai_process_content" name="classifai_synthesize_speech" <?php checked( $process_content, 'yes' ); ?> />
+			<label for="classifai_synthesize_speech">
+				<input type="checkbox" value="yes" id="classifai_synthesize_speech" name="classifai_synthesize_speech" <?php checked( $process_content, 'yes' ); ?> />
 				<?php esc_html_e( 'Enable audio generation', 'classifai' ); ?>
 			</label>
 			<span class="description">
@@ -545,18 +547,24 @@ class TextToSpeech extends Provider {
 				?>
 			</span>
 		</p>
-		<div class="classifai-clasify-post-wrapper" style="display: none;">
-			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . esc_attr( $post->ID ) ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
-				<?php
-				/* translators: %s Post type label */
-				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
-				?>
-			</a>
-		</div>
 
 		<?php
+		if ( $audio_id && wp_get_attachment_url( $audio_id ) ) {
+			$cache_busting_url = add_query_arg(
+				[
+					'ver' => time(),
+				],
+				wp_get_attachment_url( $audio_id )
+			);
+			?>
 
-		// TODO: add preview button here if needed
+			<p>
+				<audio id="classifai-audio-preview" controls controlslist="nodownload" src="<?php echo esc_url( $cache_busting_url ); ?>"></audio>
+			</p>
+
+			<?php
+		}
+
 	}
 
 	/**
@@ -584,7 +592,7 @@ class TextToSpeech extends Provider {
 			$process_content = 'no';
 		}
 
-		update_post_meta( $post_id, 'classifai_synthesize_speech', sanitize_text_field( $process_content ) );
+		update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, sanitize_text_field( $process_content ) );
 
 		// TODO: synthesize speech here if needed
 	}
