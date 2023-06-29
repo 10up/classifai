@@ -84,7 +84,7 @@ class Metabox {
 	public function render_metabox( $post ) {
 
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
-		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"'; 
+		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
 
 		// Add nonce.
 		wp_nonce_field( 'classifai_embeddings_save_posts', '_nonce' );
