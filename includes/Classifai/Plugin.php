@@ -135,6 +135,7 @@ class Plugin {
 			'debug_info'    => new Admin\DebugInfo(),
 			'bulk_actions'  => new Admin\BulkActions(),
 			'updater'       => new Admin\Update(),
+			'metabox'       => new Admin\Metabox(),
 		];
 
 		foreach ( $this->admin_helpers as $instance ) {
