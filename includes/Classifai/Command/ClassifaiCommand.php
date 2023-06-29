@@ -10,6 +10,7 @@ use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Providers\OpenAI\Embeddings;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -535,6 +536,162 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::error( "Cropped $total_success images, $total_errors errors." );
 		}
 
+	}
+
+	/**
+	 * Batch trigger generation of OpenAI embeddings depending on passed-in settings.
+	 *
+	 * ## Options
+	 *
+	 * [<post_ids>]
+	 * : Comma-delimited list of post IDs to generate for
+	 *
+	 * [--post_type=<post_type>]
+	 * : Batch process items belonging to this post type. If not used, relies on post_ids in args
+	 *
+	 * [--post_status=<post_status>]
+	 * : Batch process items that have this post status. Default publish
+
+	 * [--per_page=<int>]
+	 * : How many items should be processed at a time. Default 100
+	 *
+	 * [--dry-run=<bool>]
+	 * : Whether to run as a dry-run. Default true
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function embeddings( $args = [], $opts = [] ) {
+		$defaults = [
+			'post_type'   => false,
+			'post_status' => 'publish',
+			'per_page'    => 100,
+		];
+
+		$embeddings         = new Embeddings( false );
+		$opts               = wp_parse_args( $opts, $defaults );
+		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
+		$allowed_post_types = $embeddings->supported_post_types();
+
+		$count  = 0;
+		$errors = 0;
+
+		// Determine if this is a dry run or not.
+		if ( isset( $opts['dry-run'] ) ) {
+			if ( 'false' === $opts['dry-run'] ) {
+				$dry_run = false;
+			} else {
+				$dry_run = (bool) $opts['dry-run'];
+			}
+		} else {
+			$dry_run = true;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
+
+		// If we have a post type specified, process all items in that type.
+		if ( ! empty( $opts['post_type'] ) ) {
+			// Only allow processing post types that are enabled in settings.
+			if ( $opts['post_type'] && ! in_array( $opts['post_type'], $allowed_post_types, true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $opts['post_type'] ) );
+			}
+
+			// Only allow processing post statuses that are valid for a particular post type.
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
+			}
+
+			\WP_CLI::log( sprintf( 'Starting processing of "%s" post type items that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
+
+			$paged = 1;
+
+			do {
+				$posts = get_posts(
+					array(
+						'post_type'        => $opts['post_type'],
+						'posts_per_page'   => $opts['per_page'],
+						'paged'            => $paged,
+						'post_status'      => $opts['post_status'],
+						'suppress_filters' => 'false',
+						'fields'           => 'ids',
+					)
+				);
+				$total = count( $posts );
+
+				foreach ( $posts as $post_id ) {
+					if ( ! $dry_run ) {
+						$result = $embeddings->generate_embeddings_for_post( $post_id );
+
+						if ( is_wp_error( $result ) ) {
+							\WP_CLI::log( sprintf( 'Error while processing item ID %s', $post_id ) );
+							$errors ++;
+						}
+					}
+
+					$count ++;
+				}
+
+				$this->inmemory_cleanup();
+
+				if ( $total ) {
+					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				}
+
+				$paged ++;
+			} while ( $total );
+		} else {
+			// If no post type is specified, we have to have a list of post IDs.
+			if ( ! isset( $args[0] ) ) {
+				\WP_CLI::error( 'Please specify a comma-delimited list of post IDs to process' );
+			}
+
+			$post_ids = array_map( 'absint', explode( ',', $args[0] ) );
+
+			\WP_CLI::log( sprintf( 'Starting processing of %s items', count( $post_ids ) ) );
+
+			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
+
+			foreach ( $post_ids as $post_id ) {
+				// Ensure we have a valid post ID.
+				if ( ! get_post( $post_id ) ) {
+					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
+					$errors ++;
+					continue;
+				}
+
+				// Ensure we have a valid post type.
+				$post_type = get_post_type( $post_id );
+				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
+					\WP_CLI::log( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ) );
+					$errors ++;
+					continue;
+				}
+
+				if ( ! $dry_run ) {
+					$result = $embeddings->generate_embeddings_for_post( $post_id );
+
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::log( sprintf( 'Error while processing item ID %s', $post_id ) );
+						$errors ++;
+					}
+				}
+
+				$progress_bar->tick();
+				$count ++;
+			}
+
+			$progress_bar->finish();
+		}
+
+		if ( ! $dry_run ) {
+			\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
+		} else {
+			\WP_CLI::success( sprintf( '%d items would have been processed', $count ) );
+		}
+
+		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
 	}
 
 	/**
