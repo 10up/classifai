@@ -383,6 +383,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--per_page=<int>]
 	 * : How many items should be processed at a time. Default 100
 	 *
+	 * [--force=<bool>]
+	 * : Whether to process items that already have an excerpt set. Default false
+	 *
 	 * [--dry-run=<bool>]
 	 * : Whether to run as a dry-run. Default true
 	 *
@@ -394,6 +397,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_type'   => false,
 			'post_status' => 'publish',
 			'per_page'    => 100,
+			'force'       => false,
 		];
 
 		$opts             = wp_parse_args( $opts, $defaults );
@@ -433,26 +437,33 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						'paged'            => $paged,
 						'post_status'      => $opts['post_status'],
 						'suppress_filters' => 'false',
-						'fields'           => 'ids',
 					)
 				);
 				$total = count( $posts );
 
-				foreach ( $posts as $post_id ) {
-					$result = $chat_gpt->generate_excerpt( (int) $post_id );
+				foreach ( $posts as $post ) {
+					// Don't process if an item has an existing excerpt and we aren't forcing it.
+					if ( '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
+						\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post->ID ) );
+						$errors ++;
+						continue;
+					}
 
-					\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post_id, $result ) );
+					$result = $chat_gpt->generate_excerpt( (int) $post->ID );
 
 					if ( is_wp_error( $result ) ) {
-						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
+						\WP_CLI::log( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ) );
 						$errors ++;
+						continue;
 					}
+
+					\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post->ID, $result ) );
 
 					// Update excerpt if not doing a dry run and we have a valid result.
 					if ( ! $dry_run && ! is_wp_error( $result ) ) {
 						wp_update_post(
 							array(
-								'ID'           => $post_id,
+								'ID'           => $post->ID,
 								'post_excerpt' => $result,
 							)
 						);
@@ -482,14 +493,24 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
 
 			foreach ( $post_ids as $post_id ) {
+				$post = get_post( $post_id );
+
+				// Don't process if an item has an existing excerpt and we aren't forcing it.
+				if ( $post && '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
+					\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post_id ) );
+					$errors ++;
+					continue;
+				}
+
 				$result = $chat_gpt->generate_excerpt( (int) $post_id );
 
-				\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post_id, $result ) );
-
 				if ( is_wp_error( $result ) ) {
-					\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
+					\WP_CLI::log( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ) );
 					$errors ++;
+					continue;
 				}
+
+				\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post_id, $result ) );
 
 				// Update excerpt if not doing a dry run and we have a valid result.
 				if ( ! $dry_run && ! is_wp_error( $result ) ) {
