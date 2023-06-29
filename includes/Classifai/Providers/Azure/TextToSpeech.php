@@ -130,6 +130,8 @@ class TextToSpeech extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
@@ -490,6 +492,101 @@ class TextToSpeech extends Provider {
 				],
 			)
 		);
+	}
+
+	/**
+	 * Add meta box to post types that support speech synthesis.
+	 *
+	 * @param string $post_type Post type.
+	 */
+	public function add_meta_box( $post_type ) {
+		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+			return;
+		}
+
+		\add_meta_box(
+			'classifai-text-to-speech-meta-box',
+			__( 'ClassifAI Text to Speech Processing', 'classifai' ),
+			[ $this, 'render_meta_box' ],
+			null,
+			'side',
+			'low',
+			array( '__back_compat_meta_box' => true )
+		);
+	}
+
+	/**
+	 * Render meta box content.
+	 *
+	 * @param \WP_Post $post WP_Post object.
+	 */
+	public function render_meta_box( $post ) {
+		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
+
+		$process_content = get_post_meta( $post->ID, 'classifai_synthesize_speech', true );
+		$process_content = ( 'no' === $process_content ) ? 'no' : 'yes';
+
+		$post_type       = get_post_type_object( get_post_type( $post ) );
+		$post_type_label = esc_html__( 'Post', 'classifai' );
+		if ( $post_type ) {
+			$post_type_label = $post_type->labels->singular_name;
+		}
+		?>
+
+		<p>
+			<label for="_classifai_process_content">
+				<input type="checkbox" value="yes" id="_classifai_process_content" name="classifai_synthesize_speech" <?php checked( $process_content, 'yes' ); ?> />
+				<?php esc_html_e( 'Enable audio generation', 'classifai' ); ?>
+			</label>
+			<span class="description">
+				<?php
+				/* translators: %s Post type label */
+				printf( esc_html__( 'ClassifAI will generate audio for this %s when it is published or updated', 'classifai' ), esc_html( $post_type_label ) );
+				?>
+			</span>
+		</p>
+		<div class="classifai-clasify-post-wrapper" style="display: none;">
+			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . esc_attr( $post->ID ) ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
+				<?php
+				/* translators: %s Post type label */
+				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
+				?>
+			</a>
+		</div>
+
+		<?php
+
+		// TODO: add preview button here if needed
+	}
+
+	/**
+	 * Process the meta box save.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function save_post_metadata( $post_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['classifai_text_to_speech_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_text_to_speech_meta'] ) ), 'classifai_text_to_speech_meta_action' ) ) {
+			return;
+		}
+
+		$supported_post_types = $this->get_supported_post_types();
+		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['classifai_synthesize_speech'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['classifai_synthesize_speech'] ) ) ) {
+			$process_content = 'yes';
+		} else {
+			$process_content = 'no';
+		}
+
+		update_post_meta( $post_id, 'classifai_synthesize_speech', sanitize_text_field( $process_content ) );
+
+		// TODO: synthesize speech here if needed
 	}
 
 	/**
