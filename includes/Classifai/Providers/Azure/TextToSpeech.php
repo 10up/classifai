@@ -159,7 +159,7 @@ class TextToSpeech extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['credentials']['url'],
-				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>REGION</code> with the region you selected for the resource in Azure.', 'classifai' ),
+				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 			]
 		);
 
