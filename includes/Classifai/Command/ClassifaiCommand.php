@@ -403,8 +403,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$opts             = wp_parse_args( $opts, $defaults );
 		$opts['per_page'] = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
 
-		$count  = 0;
-		$errors = 0;
+		$count   = 0;
+		$errors  = 0;
+		$skipped = 0;
 
 		$chat_gpt = new ChatGPT( false );
 
@@ -455,14 +456,14 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					// Don't process if an item has an existing excerpt and we aren't forcing it.
 					if ( '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 						\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post->ID ) );
-						$errors ++;
+						$skipped ++;
 						continue;
 					}
 
 					$result = $chat_gpt->generate_excerpt( (int) $post->ID );
 
 					if ( is_wp_error( $result ) ) {
-						\WP_CLI::log( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ) );
+						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
 						$errors ++;
 						continue;
 					}
@@ -508,14 +509,14 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Don't process if an item has an existing excerpt and we aren't forcing it.
 				if ( $post && '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 					\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post_id ) );
-					$errors ++;
+					$skipped ++;
 					continue;
 				}
 
 				$result = $chat_gpt->generate_excerpt( (int) $post_id );
 
 				if ( is_wp_error( $result ) ) {
-					\WP_CLI::log( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ) );
+					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
 					$errors ++;
 					continue;
 				}
@@ -545,6 +546,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::success( sprintf( '%d items would have been processed', $count ) );
 		}
 
+		\WP_CLI::log( sprintf( '%d items were skipped', $skipped ) );
 		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
 	}
 
