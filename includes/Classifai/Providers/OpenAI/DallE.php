@@ -83,6 +83,8 @@ class DallE extends Provider {
 			return;
 		}
 
+		wp_enqueue_media();
+
 		wp_enqueue_style(
 			'classifai-image-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
