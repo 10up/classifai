@@ -568,10 +568,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'per_page'    => 100,
 		];
 
-		$embeddings         = new Embeddings( false );
-		$opts               = wp_parse_args( $opts, $defaults );
-		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
-		$allowed_post_types = $embeddings->supported_post_types();
+		$embeddings          = new Embeddings( false );
+		$opts                = wp_parse_args( $opts, $defaults );
+		$opts['per_page']    = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
+		$allowed_post_types  = $embeddings->supported_post_types();
+		$allowed_post_status = $embeddings->supported_post_statuses();
 
 		$count  = 0;
 		$errors = 0;
@@ -599,7 +600,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			}
 
 			// Only allow processing post statuses that are valid for a particular post type.
-			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) ) {
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) || ! in_array( $opts['post_status'], $allowed_post_status, true ) ) {
 				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
 			}
 
