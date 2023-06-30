@@ -109,6 +109,47 @@ The following WP-CLI commands are supported by ClassifAI:
     * `true` to run in dry-run mode
     * `false` to run in normal mode
 
+* `wp classifai embeddings <post_ids> [--post_type=<post_type>] [--post_status=<post_status>] [--per_page=<per_page>] [--dry-run=<bool>]`
+
+  Batch classification of items using the OpenAI Embeddings API.
+
+  * `<post_ids>`: A comma-delimited list of post IDs to classify. Used if `post_type` is `false` or absent.
+
+    default: `null`
+
+  * `[--post_type=<post_type>]`: Batch process items belonging to this post type. If `false` or absent, will rely on `post_ids`.
+
+    default: `false`
+
+    options:
+
+    * any post type name
+
+  * `[--post_status=<post_status>]`: Batch process items that have this post status. Defaults to `publish`.
+
+    default: `publish`
+
+    options:
+
+    * any post status name
+
+  * `[--per_page=<int>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
+
+    default: `100`
+
+    options:
+
+    * N, max number of items to process at a time
+
+  * `[--dry-run=<bool>]`: Whether to run as a dry-run. Defaults to `true`, so will run in dry-run mode unless this is set to `false`.
+
+    default: `true`
+
+    options:
+
+    * `true` to run in dry-run mode
+    * `false` to run in normal mode
+
 ### Image Processing Commands
 
 * `wp classifai image <attachment_ids> [--limit=<int>] [--skip=<skip>] [--force]`
@@ -152,46 +193,3 @@ The following WP-CLI commands are supported by ClassifAI:
 * `wp classifai reset`
 
   Restores the plugin configuration to factory defaults. Any API credentials will need to be re-entered after this is ran.
-
-### OpenAI Embeddings Commands
-
-* `wp classifai embeddings <post_ids> [--post_type=<post_type>] [--post_status=<post_status>] [--per_page=<per_page>] [--dry-run=<bool>]`
-
-  Batch post OpenAI embeddings.
-
-  * `<post_ids>`: A comma-delimited list of post IDs to generate text-to-speech for. Used if post_type is `false` or absent.
-
-    default: `null`
-
-  * `[--post_type=<post_type>]`: Batch process items belonging to this post type. If `false` or absent, will rely on `post_ids`.
-
-    default: `false`
-
-    options:
-
-    * any post type name
-
-  * `[--post_status=<post_status>]`: Batch process items that have this post status. Defaults to `publish`.
-
-    default: `publish`
-
-    options:
-
-    * any post status name
-
-  * `[--per_page=<int>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
-
-    default: `100`
-
-    options:
-
-    * N, max number of items to process at a time
-
-  * `[--dry-run=<bool>]`: Whether to run as a dry-run. Defaults to `true`, so will run in dry-run mode unless this is set to `false`.
-
-    default: `true`
-
-    options:
-
-    * `true` to run in dry-run mode
-    * `false` to run in normal mode
