@@ -539,12 +539,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	}
 
 	/**
-	 * Batch trigger generation of OpenAI embeddings depending on passed-in settings.
+	 * Batch classify content using the OpenAI Embeddings API depending on passed-in settings.
 	 *
 	 * ## Options
 	 *
 	 * [<post_ids>]
-	 * : Comma-delimited list of post IDs to generate for
+	 * : Comma-delimited list of post IDs to classify
 	 *
 	 * [--post_type=<post_type>]
 	 * : Batch process items belonging to this post type. If not used, relies on post_ids in args
@@ -626,7 +626,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						$result = $embeddings->generate_embeddings_for_post( $post_id );
 
 						if ( is_wp_error( $result ) ) {
-							\WP_CLI::log( sprintf( 'Error while processing item ID %s', $post_id ) );
+							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
 							$errors ++;
 						}
 					}
@@ -657,7 +657,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			foreach ( $post_ids as $post_id ) {
 				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
-					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
+					\WP_CLI::error( sprintf( 'Item ID %d does not exist', $post_id ), false );
 					$errors ++;
 					continue;
 				}
@@ -665,7 +665,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Ensure we have a valid post type.
 				$post_type = get_post_type( $post_id );
 				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
-					\WP_CLI::log( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ) );
+					\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ), false );
 					$errors ++;
 					continue;
 				}
@@ -674,7 +674,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					$result = $embeddings->generate_embeddings_for_post( $post_id );
 
 					if ( is_wp_error( $result ) ) {
-						\WP_CLI::log( sprintf( 'Error while processing item ID %s', $post_id ) );
+						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
 						$errors ++;
 					}
 				}
