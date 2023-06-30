@@ -72,6 +72,10 @@ class Plugin {
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
+		// Initialize the classifAI Generate Image media dashboard.
+		$onboarding = new Admin\GenerateImage();
+		$onboarding->init();
+
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
@@ -131,10 +135,10 @@ class Plugin {
 		}
 
 		$this->admin_helpers = [
-			'notifications' => new Admin\Notifications(),
-			'debug_info'    => new Admin\DebugInfo(),
-			'bulk_actions'  => new Admin\BulkActions(),
-			'updater'       => new Admin\Update(),
+			'notifications'  => new Admin\Notifications(),
+			'debug_info'     => new Admin\DebugInfo(),
+			'bulk_actions'   => new Admin\BulkActions(),
+			'updater'        => new Admin\Update(),
 		];
 
 		foreach ( $this->admin_helpers as $instance ) {

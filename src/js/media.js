@@ -210,5 +210,14 @@ import { __ } from '@wordpress/i18n';
 		if ( wp.Uploader && wp.Uploader.queue ) {
 			wp.Uploader.queue.on( 'reset', handleButtonsClick );
 		}
+
+		if ( wp.media.frame ) {
+			const frame = wp.media( {
+				frame: 'post',
+				title: 'Generate Image',
+				multiple: false,
+			} );
+			frame.open();
+		}
 	} );
 } )( jQuery );

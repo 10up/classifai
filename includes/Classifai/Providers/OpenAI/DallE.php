@@ -79,7 +79,7 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'media_page_classifai_generate_image' !== $hook_suffix ) {
 			return;
 		}
 
