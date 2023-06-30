@@ -410,6 +410,16 @@ class BulkActions {
 			);
 		}
 
+		if ( is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) ) {
+			if ( in_array( $post->post_type, array_keys( get_post_types_for_language_settings() ), true ) ) {
+				$actions['generate_excerpt'] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=generate_excerpt&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+					esc_html__( 'Generate excerpt', 'classifai' )
+				);
+			}
+		}
+
 		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) ) {
 			if ( in_array( $post->post_type, $this->text_to_speech->get_supported_post_types(), true ) ) {
 				$actions['text_to_speech'] = sprintf(
