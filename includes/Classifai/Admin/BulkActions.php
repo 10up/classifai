@@ -3,9 +3,11 @@ namespace Classifai\Admin;
 
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
+use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_supported_post_types;
 
 /**
@@ -31,6 +33,11 @@ class BulkActions {
 	 * @var \Classifai\Providers\Azure\ComputerVision
 	 */
 	private $computer_vision;
+
+	/**
+	 * @var \Classifai\Providers\OpenAI\ChatGPT
+	 */
+	private $chat_gpt;
 
 	/**
 	 * @var \Classifai\Providers\OpenAI\Embeddings
@@ -61,16 +68,33 @@ class BulkActions {
 	 * Register bulk actions for language processing.
 	 */
 	public function register_language_processing_hooks() {
-		$this->embeddings          = new Embeddings( false );
+		$this->chat_gpt       = new ChatGPT( false );
+		$this->embeddings     = new Embeddings( false );
+		$this->text_to_speech = new TextToSpeech( false );
+
+		$user_roles                = wp_get_current_user()->roles ?? [];
 		$embedding_settings        = $this->embeddings->get_settings();
 		$embeddings_post_types     = [];
 		$nlu_post_types            = get_supported_post_types();
-		$this->text_to_speech      = new TextToSpeech( false );
 		$text_to_speech_post_types = $this->text_to_speech->get_supported_post_types();
+		$chat_gpt_post_types       = [];
+		$chat_gpt_settings         = $this->chat_gpt->get_settings();
 
 		// Set up the save post handler if we have any post types.
 		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
 			$this->save_post_handler = new SavePostHandler();
+		}
+
+		// Set up the ChatGPT post types if the feature is enabled. Otherwise clear our handler.
+		if (
+			isset( $chat_gpt_settings['enable_excerpt'] ) &&
+			1 === (int) $chat_gpt_settings['enable_excerpt'] &&
+			! empty( $chat_gpt_settings['roles'] ) &&
+			empty( array_diff( $user_roles, $chat_gpt_settings['roles'] ) )
+		) {
+			$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
+		} else {
+			$this->chat_gpt = null;
 		}
 
 		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
@@ -86,7 +110,7 @@ class BulkActions {
 		}
 
 		// Merge our post types together and make them unique.
-		$post_types = array_unique( array_merge( $embeddings_post_types, $nlu_post_types, $text_to_speech_post_types ) );
+		$post_types = array_unique( array_merge( $chat_gpt_post_types, $embeddings_post_types, $nlu_post_types, $text_to_speech_post_types ) );
 
 		if ( empty( $post_types ) ) {
 			return;
@@ -131,6 +155,13 @@ class BulkActions {
 			( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) && ! empty( $this->embeddings->supported_post_types() ) )
 		) {
 			$bulk_actions['classify'] = __( 'Classify', 'classifai' );
+		}
+
+		if (
+			is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) &&
+			in_array( get_current_screen()->post_type, array_keys( get_post_types_for_language_settings() ), true )
+		) {
+			$bulk_actions['generate_excerpt'] = __( 'Generate excerpt', 'classifai' );
 		}
 
 		if (
@@ -184,7 +215,7 @@ class BulkActions {
 	public function bulk_action_handler( $redirect_to, $doaction, $post_ids ) {
 		if (
 			empty( $post_ids ) ||
-			! in_array( $doaction, [ 'classify', 'text_to_speech' ], true )
+			! in_array( $doaction, [ 'classify', 'generate_excerpt', 'text_to_speech' ], true )
 		) {
 			return $redirect_to;
 		}
@@ -206,6 +237,21 @@ class BulkActions {
 				}
 			}
 
+			if ( 'generate_excerpt' === $doaction ) {
+				if ( is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) ) {
+					$action  = 'excerpt_generated';
+					$excerpt = $this->chat_gpt->generate_excerpt( $post_id );
+					if ( ! is_wp_error( $excerpt ) ) {
+						wp_update_post(
+							[
+								'ID'           => $post_id,
+								'post_excerpt' => $excerpt,
+							]
+						);
+					}
+				}
+			}
+
 			if ( 'text_to_speech' === $doaction ) {
 				// Handle Azure Text to Speech generation.
 				if (
@@ -218,7 +264,7 @@ class BulkActions {
 			}
 		}
 
-		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_text_to_speech', 'bulk_scanned', 'bulk_cropped', 'bulk_transcribed' ], $redirect_to );
+		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_excerpt_generated', 'bulk_text_to_speech', 'bulk_scanned', 'bulk_cropped', 'bulk_transcribed' ], $redirect_to );
 		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $post_ids ), $redirect_to );
 
 		return esc_url_raw( $redirect_to );
@@ -273,13 +319,14 @@ class BulkActions {
 	public function bulk_action_admin_notice() {
 
 		$classified     = ! empty( $_GET['bulk_classified'] ) ? intval( wp_unslash( $_GET['bulk_classified'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$excerpts       = ! empty( $_GET['bulk_excerpt_generated'] ) ? intval( wp_unslash( $_GET['bulk_excerpt_generated'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$text_to_speech = ! empty( $_GET['bulk_text_to_speech'] ) ? intval( wp_unslash( $_GET['bulk_text_to_speech'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$post_type      = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$scanned        = ! empty( $_GET['bulk_scanned'] ) ? intval( wp_unslash( $_GET['bulk_scanned'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$cropped        = ! empty( $_GET['bulk_cropped'] ) ? intval( wp_unslash( $_GET['bulk_cropped'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$transcribed    = ! empty( $_GET['bulk_transcribed'] ) ? intval( wp_unslash( $_GET['bulk_transcribed'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( ! $classified && ! $text_to_speech && ! $scanned && ! $cropped && ! $transcribed ) {
+		if ( ! $classified && ! $excerpts && ! $text_to_speech && ! $scanned && ! $cropped && ! $transcribed ) {
 			return;
 		}
 
@@ -287,6 +334,10 @@ class BulkActions {
 			$classified_posts_count = $classified;
 			$post_type              = $post_type;
 			$action                 = __( 'Classified', 'classifai' );
+		} elseif ( $excerpts ) {
+			$classified_posts_count = $excerpts;
+			$post_type              = $post_type;
+			$action                 = __( 'Excerpts generated for', 'classifai' );
 		} elseif ( $text_to_speech ) {
 			$classified_posts_count = $text_to_speech;
 			$post_type              = $post_type;
