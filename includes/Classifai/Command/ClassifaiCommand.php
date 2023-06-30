@@ -438,7 +438,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					$result = $transcribe->process();
 
 					if ( is_wp_error( $result ) ) {
-						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ) );
+						\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
 						$errors ++;
 					}
 				}
@@ -490,7 +490,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						$result = $transcribe->process();
 
 						if ( is_wp_error( $result ) ) {
-							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ) );
+							\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
 							$errors ++;
 						}
 					}
@@ -529,25 +529,25 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	private function should_transcribe_attachment( $attachment, int $attachment_id, Transcribe $transcribe, bool $force = false ) {
 		// Ensure we have a valid ID.
 		if ( ! $attachment ) {
-			\WP_CLI::log( sprintf( 'Item ID %d does not exist', $attachment_id ) );
+			\WP_CLI::error( sprintf( 'Item ID %d does not exist', $attachment_id ), false );
 			return false;
 		}
 
 		// Ensure we have a valid post type.
 		if ( 'attachment' !== $attachment->post_type ) {
-			\WP_CLI::log( sprintf( 'The "%s" post type is not supported for audio transcription processing', $attachment->post_type ) );
+			\WP_CLI::error( sprintf( 'The "%s" post type is not supported for audio transcription processing', $attachment->post_type ), false );
 			return false;
 		}
 
 		// Ensure the attachment meets the requirements for processing.
 		if ( ! $transcribe->should_process( $attachment_id ) ) {
-			\WP_CLI::log( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ) );
+			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ), false );
 			return false;
 		}
 
 		// Don't process if the attachment already has a transcription, unless force is set.
 		if ( '' !== trim( $attachment->post_content ) && ! $force ) {
-			\WP_CLI::log( sprintf( 'Item ID %d already has a transcription and the force option hasn\'t been set. Skipping...', $attachment_id ) );
+			\WP_CLI::error( sprintf( 'Item ID %d already has a transcription and the force option hasn\'t been set. Skipping...', $attachment_id ), false );
 			return false;
 		}
 
