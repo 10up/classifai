@@ -550,7 +550,7 @@ class TextToSpeech extends Provider {
 		</p>
 
 		<?php
-		if ( $audio_id && wp_get_attachment_url( $audio_id ) ) {
+		if ( 'yes' === $process_content && $audio_id && wp_get_attachment_url( $audio_id ) ) {
 			$cache_busting_url = add_query_arg(
 				[
 					'ver' => time(),
