@@ -717,14 +717,15 @@ class Embeddings extends Provider {
 
 		// Set up the embeddings metabox if the feature is enabled.
 		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
-			$classic_post_types = get_post_types( [ 'show_in_rest' => false ], 'names', 'and' );
-			$post_types         = apply_filters( 'classifai_embeddings_classic_types', array_intersect( $this->supported_post_types(), $classic_post_types ) );
+			if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+				return;
+			}
 
-			add_meta_box(
+			\add_meta_box(
 				'classifai_embeddings_metabox',
 				__( 'ClassifAI', 'classifai' ),
 				array( $this, 'render_metabox' ),
-				$post_types,
+				null,
 				'side',
 				'default',
 				[
