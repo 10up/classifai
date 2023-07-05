@@ -728,7 +728,7 @@ class Embeddings extends Provider {
 				'side',
 				'default',
 				[
-					'__back_compat_meta_box' => true
+					'__back_compat_meta_box' => true,
 				]
 			);
 		}
