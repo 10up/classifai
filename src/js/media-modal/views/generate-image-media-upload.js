@@ -39,7 +39,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		frame.on( 'close', function () {
 			// eslint-disable-next-line no-undef
 			if ( classifaiGenerateImages ) {
-				window.location.href = classifaiGenerateImages[ 'upload_url' ]; // eslint-disable-line no-undef
+				window.location.href = classifaiGenerateImages[ 'upload_url' ]; // eslint-disable-line no-undef, dot-notation
 			}
 		} );
 
@@ -51,7 +51,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					.get( 'selection' )
 					.first()
 					.toJSON();
-				window.location.href = `${ classifaiGenerateImages[ 'upload_url' ] }?item=${ attachment[ 'id' ] }`; // eslint-disable-line no-undef
+				window.location.href = `${ classifaiGenerateImages[ 'upload_url' ] }?item=${ attachment[ 'id' ] }`; // eslint-disable-line no-undef, dot-notation
 			}
 		} );
 
