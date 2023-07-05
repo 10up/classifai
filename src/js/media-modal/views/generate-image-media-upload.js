@@ -14,9 +14,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			const uploadImageTab = frame.$el.find(
 				'.media-menu-item#menu-item-upload'
 			);
-			const browseImageTab = frame.$el.find(
-				'.media-menu-item#menu-item-browse'
-			);
 			const generateImageTab = frame.$el.find(
 				'.media-menu-item#menu-item-generate'
 			);
@@ -24,10 +21,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			// Remove unwanted items
 			if ( uploadImageTab.length ) {
 				uploadImageTab.hide();
-			}
-
-			if ( browseImageTab.length ) {
-				// browseImageTab.hide();
 			}
 
 			// Open Generate Image Tab
