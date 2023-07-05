@@ -32,7 +32,7 @@ class GenerateImage {
 			return;
 		}
 
-		$action   = isset( $_GET[ 'action' ] ) ? sanitize_key( $_GET[ 'action' ] ) : '';
+		$action = isset( $_GET['action'] ) ? sanitize_key( $_GET['action'] ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if (
 			'classifai-generate-image' === $action
 			&& $this->dalle->can_generate_image()
@@ -46,7 +46,9 @@ class GenerateImage {
 				true
 			);
 
-			wp_localize_script( 'classifai-generate-images-media-upload', 'classifaiGenerateImages',
+			wp_localize_script(
+				'classifai-generate-images-media-upload',
+				'classifaiGenerateImages',
 				[
 					'upload_url' => esc_url( admin_url( 'upload.php' ) ),
 				]
