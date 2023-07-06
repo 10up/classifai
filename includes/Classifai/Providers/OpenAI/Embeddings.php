@@ -713,26 +713,21 @@ class Embeddings extends Provider {
 	 * @param string $post_type Post type name.
 	 */
 	public function add_metabox( $post_type ) {
-		$settings = $this->get_settings();
-
-		// Set up the embeddings metabox if the feature is enabled.
-		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
-			if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
-				return;
-			}
-
-			\add_meta_box(
-				'classifai_embeddings_metabox',
-				__( 'ClassifAI', 'classifai' ),
-				array( $this, 'render_metabox' ),
-				null,
-				'side',
-				'default',
-				[
-					'__back_compat_meta_box' => true,
-				]
-			);
+		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+			return;
 		}
+
+		\add_meta_box(
+			'classifai_language_processing_metabox',
+			__( 'ClassifAI Language Processing', 'classifai' ),
+			array( $this, 'render_metabox' ),
+			null,
+			'side',
+			'default',
+			[
+				'__back_compat_meta_box' => true,
+			]
+		);
 	}
 
 	/**
@@ -747,6 +742,7 @@ class Embeddings extends Provider {
 		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
 
 		// Add nonce.
+		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
 		wp_nonce_field( 'classifai_embeddings_save_posts', '_nonce' );
 		?>
 		<div class='classifai-metabox classifai-metabox-embeddings'>
@@ -755,9 +751,6 @@ class Embeddings extends Provider {
 					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
 					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
 				</label>
-			</p>
-			<p class="howto">
-				<?php esc_html_e( 'ClassifAI language processing is enabled', 'classifai' ); ?>
 			</p>
 		</div>
 		<?php
@@ -776,10 +769,10 @@ class Embeddings extends Provider {
 		}
 
 		// Add nonce for security and authentication.
-		$nonce_action = 'classifai_embeddings_save_posts';
+		$nonce_action = 'classifai_language_processing_meta_action';
 
 		// Check if nonce is valid.
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['_nonce'] ) ), $nonce_action ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), $nonce_action ) ) {
 			return;
 		}
 

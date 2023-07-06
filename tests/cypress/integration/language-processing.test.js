@@ -399,6 +399,34 @@ describe('Language processing Tests', () => {
 		} );
 	} );
 
+	it( 'Can see the enable button in a post (Classic Editor)', () => {
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#activate-classic-editor' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+
+		cy.get( '#enable_classification' ).check();
+		cy.get( '#openai_embeddings_post_types_post' ).check();
+		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#number' ).clear().type( 1 );
+		cy.get( '#submit' ).click();
+
+		cy.classicCreatePost( {
+			title: 'Embeddings test classic',
+			content: "This feature uses OpenAI's Embeddings capabilities.",
+			postType: 'post',
+		} );
+
+		cy.get( '#classifai_language_processing_metabox' ).should( 'exist' );
+		cy.get( '#classifai-process-content' ).check();
+
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
 	it('Can save OpenAI ChatGPT "Language Processing" title settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -677,21 +705,4 @@ describe('Language processing Tests', () => {
 		cy.get('.media-modal').should('exist');
 		cy.get('#classifai-retranscribe').should('not.exist');
 	});
-
-	it( 'Can see the enable button in a post (Classic Editor)', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
-
-		cy.classicCreatePost( {
-			title: 'Embeddings test classic',
-			content: "This feature uses OpenAI's Embeddings capabilities.",
-			postType: 'post',
-		} );
-
-		cy.get( '#classifai_embeddings_metabox' ).should( 'exist' );
-		cy.get( '#classifai-process-content' ).check();
-
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
-	} );
 });
