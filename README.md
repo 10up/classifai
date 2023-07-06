@@ -406,6 +406,12 @@ ClassifAI connects your WordPress site directly to your account with specific se
 
 Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the NLU Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
 
+### Should I alert my site's users that AI tools are being used?
+
+We recommend that you are transparent with your users that AI tools are being used.  This can be done by adding a notice to your site's Privacy Policy or similar page. Sample copy is provided below:
+
+> This site makes use of Artificial Intelligence tools that may include image generation, post title and excerpt generation, image alt text generation, post and media tagging, text-to-speech audio generation, speech-to-text transcript generation, image smart focal point cropping, media text recognition, and recommended content.
+
 ## Support Level
 
 **Active:** 10up is actively working on this, and we expect to continue work for the foreseeable future including keeping tested up to the most recent version of WordPress.  Bug reports, feature requests, questions, and pull requests are welcome.
