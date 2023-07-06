@@ -410,7 +410,7 @@ Whatever options you have selected in the Category, Keyword, Entity, and Concept
 
 We recommend that you are transparent with your users that AI tools are being used.  This can be done by adding a notice to your site's Privacy Policy or similar page. Sample copy is provided below:
 
-> This site makes use of Artificial Intelligence tools that may include image generation, post title and excerpt generation, image alt text generation, post and media tagging, text-to-speech audio generation, speech-to-text transcript generation, image smart focal point cropping, media text recognition, and recommended content.
+> This site makes use of Artificial Intelligence tools to help with tasks like language processing, image processing, and content recommendations.
 
 ## Support Level
 
