@@ -36,6 +36,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'init' ], 20 );
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
+		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
@@ -142,6 +143,17 @@ class Plugin {
 				$instance->register();
 			}
 		}
+	}
+
+	/**
+	 * Adds information to the privacy policy.
+	 */
+	public function add_privacy_policy_content() {
+		$content  = '<p class="privacy-policy-tutorial">' . __( 'ClassifAI provides integrations with various AI providers. We recommend that you are transparent with your users that these AI tools are being used.', 'classifai' ) . '</p>';
+		$content .= '<strong class="privacy-policy-tutorial">' . __( 'Suggested text:', 'classifai' ) . '</strong> ';
+		$content .= esc_html__( 'This site makes use of Artificial Intelligence tools that may include image generation, post title and excerpt generation, image alt text generation, post and media tagging, text-to-speech audio generation, speech-to-text transcript generation, image smart focal point cropping, media text recognition, and recommended content.', 'classifai' );
+
+		wp_add_privacy_policy_content( 'ClassifAI', wp_kses_post( wpautop( $content, false ) ) );
 	}
 
 	/**
