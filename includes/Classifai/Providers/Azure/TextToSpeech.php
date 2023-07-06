@@ -607,7 +607,7 @@ class TextToSpeech extends Provider {
 
 		$_post = get_post();
 
-		if ( ! $_post instanceof \WP_Post) {
+		if ( ! $_post instanceof \WP_Post ) {
 			return $content;
 		}
 
@@ -654,22 +654,30 @@ class TextToSpeech extends Provider {
 		}
 
 		/**
-		 * Filters the audio player markup / styles / scripts before display.
+		 * Filters the audio player markup before display.
 		 *
-		 * Returning a non-false value from the filter will effectively short-circuit retrieval
-		 * and return the passed value appended to the current state of content.
+		 * Returning a non-false value from the filter will short-circuit building
+		 * the block markup and instead will return the custom markup appended to
+		 * the post content.
 		 *
-		 * @since 2.2.1
+		 * Note that by using this filter, the custom CSS and JS files will no longer
+		 * be enqueued, so you'll be responsible for either loading them yourself or
+		 * loading custom ones.
 		 *
+		 * @since 2.2.3
+		 *
+		 * @param {bool}     $markup                Audio markup to use. By default false.
 		 * @param {string}   $content               Content of the current post.
-		 * @param {WP_Post}  $_post                 The Post Object.
-		 * @param {int}      $audio_attachment_id   The ID to audio attachment.
+		 * @param {WP_Post}  $_post                 The Post object.
+		 * @param {int}      $audio_attachment_id   The audio attachment ID.
 		 * @param {string}   $audio_attachment_url  The URL to the audio attachment file.
+		 *
+		 * @return {bool|string} Custom audio block markup. Will be appended to the post content.
 		 */
-		$audio = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $post, $audio_attachment_id, $audio_attachment_url );
+		$markup = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $_post, $audio_attachment_id, $audio_attachment_url );
 
-		if ( false !== $audio ) {
-			return (string) $audio . $content;
+		if ( false !== $markup ) {
+			return (string) $markup . $content;
 		}
 
 		wp_enqueue_script(
