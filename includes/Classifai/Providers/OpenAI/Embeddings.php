@@ -77,6 +77,8 @@ class Embeddings extends Provider {
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
 			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
+			add_action( 'save_post', [ $this, 'save_metabox' ] );
 		}
 	}
 
@@ -703,6 +705,99 @@ class Embeddings extends Provider {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Add metabox.
+	 *
+	 * @param string $post_type Post type name.
+	 */
+	public function add_metabox( $post_type ) {
+		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+			return;
+		}
+
+		\add_meta_box(
+			'classifai_language_processing_metabox',
+			__( 'ClassifAI Language Processing', 'classifai' ),
+			array( $this, 'render_metabox' ),
+			null,
+			'side',
+			'default',
+			[
+				'__back_compat_meta_box' => true,
+			]
+		);
+	}
+
+	/**
+	 * Render metabox.
+	 *
+	 * @param WP_POST $post A WordPress post instance.
+	 * @return void
+	 */
+	public function render_metabox( $post ) {
+
+		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
+		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
+
+		// Add nonce.
+		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
+		wp_nonce_field( 'classifai_embeddings_save_posts', '_nonce' );
+		?>
+		<div class='classifai-metabox classifai-metabox-embeddings'>
+			<p>
+				<label for="classifai-process-content" class="classifai-preview-toggle">
+					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
+					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
+				</label>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Handles saving the metabox.
+	 *
+	 * @param int $post_id Current post ID.
+	 * @return void
+	 */
+	public function save_metabox( $post_id ) {
+
+		if ( empty( $_POST['classifai_language_processing_meta'] ) ) {
+			return;
+		}
+
+		// Add nonce for security and authentication.
+		$nonce_action = 'classifai_language_processing_meta_action';
+
+		// Check if nonce is valid.
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), $nonce_action ) ) {
+			return;
+		}
+
+		// Check if user has permissions to save data.
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
+			return;
+		}
+
+		// Check if not an autosave.
+		if ( wp_is_post_autosave( $post_id ) ) {
+			return;
+		}
+
+		// Check if not a revision.
+		if ( wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		$classifai_process_content = isset( $_POST['_classifai_process_content'] ) ? sanitize_key( wp_unslash( $_POST['_classifai_process_content'] ) ) : '';
+
+		if ( 'yes' !== $classifai_process_content ) {
+			update_post_meta( $post_id, '_classifai_process_content', 'no' );
+		} else {
+			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
+		}
 	}
 
 }
