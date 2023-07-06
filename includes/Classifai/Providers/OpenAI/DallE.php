@@ -22,6 +22,13 @@ class DallE extends Provider {
 	protected $dalle_url = 'https://api.openai.com/v1/images/generations';
 
 	/**
+	 * Maximum number of characters a prompt can have
+	 *
+	 * @var int
+	 */
+	public $max_prompt_chars = 1000;
+
+	/**
 	 * OpenAI DALL·E constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -79,6 +86,8 @@ class DallE extends Provider {
 		$settings         = $this->get_settings();
 		$number_of_images = absint( $settings['number'] );
 
+		wp_enqueue_media();
+
 		wp_enqueue_style(
 			'classifai-image-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
@@ -90,7 +99,7 @@ class DallE extends Provider {
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			[ 'jquery', 'wp-api' ],
+			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
 			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
@@ -156,7 +165,7 @@ class DallE extends Provider {
 					}
 					?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
 				<button type="button" class="button button-secondary button-large button-generate">
 					<?php
 					if ( $number_of_images > 1 ) {
@@ -416,6 +425,11 @@ class DallE extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+
+		// If our prompt exceeds the max length, throw an error.
+		if ( mb_strlen( $prompt ) > $this->max_prompt_chars ) {
+			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
+		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
