@@ -152,6 +152,16 @@ class LanguageProcessing extends Service {
 				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-post-excerpt/',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'generate_post_excerpt' ],
+				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+			]
+		);
 	}
 
 	/**
@@ -251,7 +261,8 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id      = $request->get_param( 'id' );
+		$post_content = $request->get_param( 'post_content' );
 
 		// Find the right provider class.
 		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
@@ -261,7 +272,7 @@ class LanguageProcessing extends Service {
 			return $provider;
 		}
 
-		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt' ) );
+		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt', [ 'post_content' => $post_content ] ) );
 	}
 
 	/**

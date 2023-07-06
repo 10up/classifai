@@ -5,11 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Button, ExternalLink, TextareaControl } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-
-/**
- * Internal dependencies
- */
-import { handleClick } from '../helpers';
+import { useState } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * PostExcerpt component.
@@ -23,14 +20,40 @@ import { handleClick } from '../helpers';
  * @param {Function} props.onUpdateExcerpt Callback to update the post excerpt.
  */
 function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ error, setError ] = useState( false );
+	const [ data, setData ] = useState( excerpt );
+
 	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postContent =
+		select( 'core/editor' ).getEditedPostAttribute( 'content' );
 	const buttonText =
 		'' === excerpt
 			? __( 'Generate excerpt', 'classifai' )
 			: __( 'Re-generate excerpt', 'classifai' );
 	const isPublishPanelOpen =
 		select( 'core/edit-post' ).isPublishSidebarOpened();
+
+	const buttonClick = async ( path ) => {
+		setIsLoading( true );
+		apiFetch( {
+			path,
+			method: 'POST',
+			data: { id: postId, post_content: postContent },
+		} ).then(
+			( res ) => {
+				setData( res );
+				setError( false );
+				setIsLoading( false );
+			},
+			( err ) => {
+				setError( err?.message );
+				setData( [] );
+				setIsLoading( false );
+			}
+		);
+	};
 
 	return (
 		<div className="editor-post-excerpt">
@@ -43,7 +66,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				}
 				className="editor-post-excerpt__textarea"
 				onChange={ ( value ) => onUpdateExcerpt( value ) }
-				value={ excerpt }
+				value={ data }
 			/>
 			{ ! isPublishPanelOpen && (
 				<ExternalLink
@@ -56,30 +79,31 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			) }
 			<Button
 				variant={ 'secondary' }
+				disabled={ isLoading }
 				data-id={ postId }
-				onClick={ ( e ) =>
-					handleClick( {
-						button: e.target,
-						endpoint: '/classifai/v1/openai/generate-excerpt/',
-						callback: onUpdateExcerpt,
-						buttonText,
-					} )
+				onClick={ () =>
+					buttonClick( '/classifai/v1/openai/generate-post-excerpt/' )
 				}
 			>
 				{ buttonText }
 			</Button>
-			<span
-				className="spinner"
-				style={ { display: 'none', float: 'none' } }
-			></span>
-			<span
-				className="error"
-				style={ {
-					display: 'none',
-					color: '#bc0b0b',
-					paddingTop: '5px',
-				} }
-			></span>
+			{ isLoading && (
+				<span
+					className="spinner is-active"
+					style={ { float: 'none' } }
+				></span>
+			) }
+			{ error && (
+				<span
+					className="error"
+					style={ {
+						color: '#bc0b0b',
+						paddingTop: '5px',
+					} }
+				>
+					{ error }
+				</span>
+			) }
 		</div>
 	);
 }
