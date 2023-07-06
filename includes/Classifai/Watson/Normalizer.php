@@ -17,7 +17,7 @@ class Normalizer {
 	 * The post title is also included in the content to improve
 	 * accuracy.
 	 *
-	 * @param int $post_id The post to normalize
+	 * @param int    $post_id The post to normalize
 	 * @param string $post_content The post content to normalize
 	 * @return string
 	 */

@@ -459,7 +459,7 @@ class LanguageProcessing extends Service {
 	public function generate_post_title( WP_REST_Request $request ) {
 		$post_id      = $request->get_param( 'id' );
 		$post_content = $request->get_param( 'post_content' );
-		$provider = '';
+		$provider     = '';
 
 		// Find the right provider class.
 		foreach ( $this->provider_classes as $provider_class ) {

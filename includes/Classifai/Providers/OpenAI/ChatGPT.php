@@ -475,7 +475,7 @@ class ChatGPT extends Provider {
 	/**
 	 * Generate an excerpt using ChatGPT.
 	 *
-	 * @param int $post_id The Post ID we're processing
+	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
@@ -671,7 +671,7 @@ class ChatGPT extends Provider {
 	 * @param int  $post_id Post ID to get content from.
 	 * @param int  $return_length Word length of returned content.
 	 * @param bool $use_title Whether to use the title or not.
-	 * @param bool $post_content The post content.
+	 * @param string $post_content The post content.
 	 * @return string
 	 */
 	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ) {
@@ -694,7 +694,7 @@ class ChatGPT extends Provider {
 		$max_content_tokens = $this->max_tokens - $return_tokens - 13;
 
 		if ( empty( $post_content ) ) {
-			$post = get_post( $post_id );
+			$post         = get_post( $post_id );
 			$post_content = apply_filters( 'the_content', $post->post_content );
 		}
 
