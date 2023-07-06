@@ -668,9 +668,9 @@ class ChatGPT extends Provider {
 	/**
 	 * Get our content, trimming if needed.
 	 *
-	 * @param int  $post_id Post ID to get content from.
-	 * @param int  $return_length Word length of returned content.
-	 * @param bool $use_title Whether to use the title or not.
+	 * @param int    $post_id Post ID to get content from.
+	 * @param int    $return_length Word length of returned content.
+	 * @param bool   $use_title Whether to use the title or not.
 	 * @param string $post_content The post content.
 	 * @return string
 	 */
