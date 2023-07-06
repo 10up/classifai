@@ -764,7 +764,7 @@ class Embeddings extends Provider {
 	 */
 	public function save_metabox( $post_id ) {
 
-		if ( empty( $_POST['_nonce'] ) ) {
+		if ( empty( $_POST['classifai_language_processing_meta'] ) ) {
 			return;
 		}
 
