@@ -142,6 +142,16 @@ class LanguageProcessing extends Service {
 				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-post-title/',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'generate_post_title' ],
+				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+			]
+		);
 	}
 
 	/**
@@ -436,7 +446,8 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_title( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id      = $request->get_param( 'id' );
+		$post_content = $request->get_param( 'post_content' );
 		$provider = '';
 
 		// Find the right provider class.
@@ -456,7 +467,8 @@ class LanguageProcessing extends Service {
 				$post_id,
 				'title',
 				[
-					'num' => $request->get_param( 'n' ),
+					'num'          => $request->get_param( 'n' ),
+					'post_content' => $post_content,
 				]
 			)
 		);
