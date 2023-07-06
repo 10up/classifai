@@ -140,34 +140,42 @@ class DallE extends Provider {
 			<div class="prompt-view">
 				<p>
 					<?php
-						if ( $number_of_images > 1 ) {
-							esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
-						} else {
-							esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
-						}
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
+					} else {
+						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
+					}
 					?>
 				</p>
 				<p>
 					<?php
-						if ( $number_of_images > 1 ) {
-							esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
-						} else {
-							esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
-						}
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
+					} else {
+						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
+					}
 					?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4"></textarea>
-				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-generate">
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Generate images', 'classifai' );
+					} else {
+						esc_html_e( 'Generate image', 'classifai' );
+					}
+					?>
+				</button>
 				<span class="error"></span>
 			</div>
 			<div class="generated-images">
 				<h2 class="prompt-text hidden">
 					<?php
-						if ( $number_of_images > 1 ) {
-							esc_html_e( 'Images generated from prompt:', 'classifai' );
-						} else {
-							esc_html_e( 'Image generated from prompt:', 'classifai' );
-						}
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Images generated from prompt:', 'classifai' );
+					} else {
+						esc_html_e( 'Image generated from prompt:', 'classifai' );
+					}
 					?>
 					<span></span>
 				</h2>
