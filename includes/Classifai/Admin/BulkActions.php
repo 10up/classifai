@@ -5,6 +5,7 @@ use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\TextToSpeech;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
+use Classifai\Providers\OpenAI\Moderation;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use function Classifai\get_post_types_for_language_settings;
@@ -40,6 +41,11 @@ class BulkActions {
 	private $chat_gpt;
 
 	/**
+	 * @var \Classifai\Providers\OpenAI\Moderation
+	 */
+	private $moderation;
+
+	/**
 	 * @var \Classifai\Providers\OpenAI\Embeddings
 	 */
 	private $embeddings;
@@ -69,6 +75,7 @@ class BulkActions {
 	 */
 	public function register_language_processing_hooks() {
 		$this->chat_gpt       = new ChatGPT( false );
+		$this->moderation     = new Moderation( false );
 		$this->embeddings     = new Embeddings( false );
 		$this->text_to_speech = new TextToSpeech( false );
 
@@ -79,6 +86,8 @@ class BulkActions {
 		$text_to_speech_post_types = $this->text_to_speech->get_supported_post_types();
 		$chat_gpt_post_types       = [];
 		$chat_gpt_settings         = $this->chat_gpt->get_settings();
+		$moderation_post_types     = [];
+		$moderation_settings       = $this->moderation->get_settings();
 
 		// Set up the save post handler if we have any post types.
 		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
@@ -104,17 +113,35 @@ class BulkActions {
 			$this->embeddings = null;
 		}
 
+		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
+		if ( isset( $moderation_settings['enable_moderation'] ) && 1 === (int) $moderation_settings['enable_moderation'] ) {
+			$moderation_post_types = $this->moderation->get_supported_post_types();
+		} else {
+			$this->moderation = null;
+		}
+
 		// Clear our TextToSpeech handler if no post types are set up.
 		if ( empty( $text_to_speech_post_types ) ) {
 			$this->text_to_speech = null;
 		}
 
 		// Merge our post types together and make them unique.
-		$post_types = array_unique( array_merge( $chat_gpt_post_types, $embeddings_post_types, $nlu_post_types, $text_to_speech_post_types ) );
+		$post_types = array_unique(
+			array_merge(
+				$chat_gpt_post_types,
+				$embeddings_post_types,
+				$nlu_post_types,
+				$text_to_speech_post_types,
+				$moderation_post_types
+			)
+		);
 
 		if ( empty( $post_types ) ) {
 			return;
 		}
+
+		add_filter( 'bulk_actions-edit-comments', [ $this, 'register_bulk_actions_comments' ] );
+		add_filter( 'handle_bulk_actions-edit-comments', [ $this, 'bulk_action_handler_comments' ], 10, 3 );
 
 		foreach ( $post_types as $post_type ) {
 			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
@@ -126,6 +153,57 @@ class BulkActions {
 				add_filter( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
 			}
 		}
+	}
+
+	/**
+	 * Register bulk actions for comments
+	 *
+	 * @param array $bulk_actions Bulk actions
+	 * @return array
+	 */
+	public function register_bulk_actions_comments( $bulk_actions ) {
+		if (
+			is_a( $this->moderation, '\Classifai\Providers\OpenAI\Moderation' )
+		) {
+			$bulk_actions['moderate'] = __( 'Moderate', 'classifai' );
+		}
+
+		return $bulk_actions;
+	}
+
+	/**
+	 * Handle processing bulk actions for comments.
+	 *
+	 * @param string $redirect_to Redirect URL after bulk actions.
+	 * @param string $doaction    Action ID.
+	 * @param array  $comment_ids Comment ids to apply bulk actions to.
+	 *
+	 * @return string
+	 */
+	public function bulk_action_handler_comments( $redirect_to, $doaction, $comment_ids ) {
+		if (
+			empty( $comment_ids ) ||
+			! in_array( $doaction, [ 'moderate' ], true )
+		) {
+			return $redirect_to;
+		}
+
+		$action = '';
+
+		foreach ( $comment_ids as $comment_id ) {
+			if ( 'moderate' === $doaction ) {
+				// Handle OpenAI Embeddings classification.
+				if ( is_a( $this->moderation, '\Classifai\Providers\OpenAI\Moderation' ) ) {
+					$action = 'moderate';
+					$this->moderation->moderate_comment( $comment_id );
+				}
+			}
+		}
+
+		$redirect_to = remove_query_arg( [ 'bulk_moderate' ], $redirect_to );
+		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $comment_ids ), $redirect_to );
+
+		return esc_url_raw( $redirect_to );
 	}
 
 	/**
