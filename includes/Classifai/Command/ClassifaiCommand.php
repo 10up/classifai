@@ -511,12 +511,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! $dry_run ) {
-			\WP_CLI::success( sprintf( '%d items had transcriptions added', $count ) );
+			\WP_CLI::log( '-------- Finished! --------' );
+			\WP_CLI::log( sprintf( '%d items had transcriptions added', $count ) );
 		} else {
-			\WP_CLI::success( sprintf( '%d items would have had transcriptions added', $count ) );
+			\WP_CLI::log( '-------- Finished! --------' );
+			\WP_CLI::log( sprintf( '%d items would have had transcriptions added', $count ) );
 		}
 
-		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
+		if ( $errors > 0 ) {
+			\WP_CLI::error( sprintf( '%d items had errors', $errors ), false );
+		}
 	}
 
 	/**
