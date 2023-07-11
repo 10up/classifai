@@ -18,6 +18,9 @@ module.exports = {
 		'post-status-info': [
 			'./src/js/gutenberg-plugins/post-status-info.js',
 		],
+		'content-resizing-plugin': [
+			'./src/js/gutenberg-plugins/content-resizing-plugin.js',
+		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
