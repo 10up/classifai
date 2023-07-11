@@ -382,6 +382,20 @@ class ChatGPT extends Provider {
 				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
 			]
 		);
+
+		add_settings_field(
+			'number-resize-content',
+			esc_html__( 'Number of suggestions', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'number_resize_content',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $default_settings['number_resize_content'],
+				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -446,6 +460,12 @@ class ChatGPT extends Provider {
 			$new_settings['resize_content_roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
+		if ( isset( $settings['number_resize_content'] ) && is_numeric( $settings['number_resize_content'] ) && (int) $settings['number_resize_content'] >= 1 && (int) $settings['number_resize_content'] <= 10 ) {
+			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
+		} else {
+			$new_settings['number_resize_content'] = 1;
+		}
+
 		return $new_settings;
 	}
 
@@ -475,6 +495,7 @@ class ChatGPT extends Provider {
 			'number_titles'         => 1,
 			'enable_resize_content' => false,
 			'resize_content_roles'  => array_keys( $editable_roles ),
+			'number_resize_content' => 1,
 		];
 	}
 
@@ -503,6 +524,7 @@ class ChatGPT extends Provider {
 			__( 'Allowed roles (titles)', 'classifai' )         => implode( ', ', $settings['title_roles'] ?? [] ),
 			__( 'Number of titles', 'classifai' )               => absint( $settings['number_titles'] ?? 1 ),
 			__( 'Allowed roles (resize content)', 'classifai' ) => implode( ', ', $settings['resize_content_roles'] ?? [] ),
+			__( 'Number of suggestions', 'classifai' )          => absint( $settings['number_resize_content'] ?? 1 ),
 			__( 'Latest response', 'classifai' )                => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
 		];
 	}
@@ -738,6 +760,13 @@ class ChatGPT extends Provider {
 		}
 
 		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num' => $settings['number_resize_content'] ?? 1,
+			]
+		);
+
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		/**
@@ -752,7 +781,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_resize_content_prompt', 'Expand on the following content a little', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_resize_content_prompt', 'Shrink this content a little', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -776,6 +805,7 @@ class ChatGPT extends Provider {
 					],
 				],
 				'temperature' => 0.9,
+				'n'           => absint( $args['num'] ),
 			],
 			$post_id
 		);

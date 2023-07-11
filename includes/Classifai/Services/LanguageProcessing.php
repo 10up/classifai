@@ -142,6 +142,16 @@ class LanguageProcessing extends Service {
 				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'resize-content',
+			[
+				'methods'             => WP_REST_Server::EDITABLE,
+				'callback'            => [ $this, 'resize_content' ],
+				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
+			]
+		);
 	}
 
 	/**
@@ -512,4 +522,72 @@ class LanguageProcessing extends Service {
 		return true;
 	}
 
+	/**
+	 * Handle request to resize content.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function resize_content( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+		$provider = '';
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
+
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'resize_content',
+				[
+					'content'     => $request->get_param( 'content' ),
+					'resize_type' => $request->get_param( 'resize_type' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to resize content.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function resize_content_permissions_check( WP_REST_Request $request ) {
+		return true;
+		$post_id = $request->get_param( 'id' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// @todo revisit this page.
+
+		return true;
+	}
 }
