@@ -621,10 +621,10 @@ class TextToSpeech extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_disable_post_to_audio_block
 		 *
-		 * @param  {bool}    $is_disabled  Whether to disable the display or not. By default - false.
-		 * @param  {WP_Post} $_post        The Post Object.
+		 * @param  {bool}    $is_disabled Whether to disable the display or not. By default - false.
+		 * @param  {WP_Post} $_post       The Post object.
 		 *
-		 * @return {bool}                  Whether the audio block should be shown.
+		 * @return {bool} Whether the audio block should be shown.
 		 */
 		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $_post ) ) {
 			return $content;
@@ -656,23 +656,24 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filters the audio player markup before display.
 		 *
-		 * Returning a non-false value from the filter will short-circuit building
-		 * the block markup and instead will return the custom markup appended to
-		 * the post content.
+		 * Returning a non-false value from this filter will short-circuit building
+		 * the block markup and instead will return your custom markup prepended to
+		 * the post_content.
 		 *
 		 * Note that by using this filter, the custom CSS and JS files will no longer
 		 * be enqueued, so you'll be responsible for either loading them yourself or
 		 * loading custom ones.
 		 *
+		 * @hook classifai_pre_render_post_audio_controls
 		 * @since 2.2.3
 		 *
-		 * @param {bool}     $markup                Audio markup to use. By default false.
-		 * @param {string}   $content               Content of the current post.
-		 * @param {WP_Post}  $_post                 The Post object.
-		 * @param {int}      $audio_attachment_id   The audio attachment ID.
-		 * @param {string}   $audio_attachment_url  The URL to the audio attachment file.
+		 * @param {bool|string} $markup               Audio markup to use. Defaults to false.
+		 * @param {string}      $content              Content of the current post.
+		 * @param {WP_Post}     $_post                The Post object.
+		 * @param {int}         $audio_attachment_id  The audio attachment ID.
+		 * @param {string}      $audio_attachment_url The URL to the audio attachment file.
 		 *
-		 * @return {bool|string} Custom audio block markup. Will be appended to the post content.
+		 * @return {bool|string} Custom audio block markup. Will be prepended to the post content.
 		 */
 		$markup = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $_post, $audio_attachment_id, $audio_attachment_url );
 
