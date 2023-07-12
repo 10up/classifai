@@ -355,7 +355,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Add title fields.
+		// Add resizing content fields.
 		add_settings_section(
 			$this->get_option_name() . '_resize_content_settings',
 			esc_html__( 'Resizing content settings', 'classifai' ),
@@ -787,7 +787,6 @@ class ChatGPT extends Provider {
 		 * Filter the prompt we will send to ChatGPT.
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_chatgpt_resize_content_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
 		 * @param {int} $post_id ID of post we are summarizing.

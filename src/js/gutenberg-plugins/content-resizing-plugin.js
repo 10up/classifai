@@ -225,7 +225,7 @@ const ContentResizingPlugin = () => {
 				resetStates();
 			} }
 		>
-			<p>{ __( 'Click on a row to apply it:' ) }</p>
+			<p>{ __( 'Click on a row to apply:' ) }</p>
 			<div className='classifai-content-resize__result-wrapper'>
 				<table className='classifai-content-resize__result-table'>
 					<thead>

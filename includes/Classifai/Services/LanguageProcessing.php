@@ -586,7 +586,18 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// @todo revisit this page.
+		// Check if title generation is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_resize_content'] ) && 'no' === $settings['enable_resize_content'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
+		}
+
+		// Check if the current user's role is allowed.
+		$roles      = $settings['resize_content_roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
 
 		return true;
 	}
