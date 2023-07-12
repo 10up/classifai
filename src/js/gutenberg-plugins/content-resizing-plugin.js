@@ -3,28 +3,30 @@ import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { select, dispatch, useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { createReduxStore, register } from '@wordpress/data';
-import { Modal, Button } from '@wordpress/components';
+import { Modal, Spinner } from '@wordpress/components';
 import { count as getWordCount, count as getCharacterCount } from '@wordpress/wordcount';
 import { __ } from '@wordpress/i18n';
 
 import '../../scss/content-resizing-plugin.scss';
 
+/**
+ * Custom store to access common data in a block and a higer order
+ * component created through filters.
+ */
 const DEFAULT_STATE = {
 	clientId: '',
-	isResizing: false,
 };
 
 const resizeContentStore = createReduxStore( 'resize-content-store', {
 	reducer( state = DEFAULT_STATE, action ) {
 		switch ( action.type ) {
-			case 'IS_RESIZING':
+			case 'SET_CLIENT_ID':
 				return {
 					...state,
-					isResizing: action.isResizing,
 					clientId: action.clientId,
 				};
 		}
@@ -32,18 +34,14 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 		return state;
 	},
 	actions: {
-		setIsResizing( clientId, isResizing ) {
+		setClientId( clientId ) {
 			return {
-				type: 'IS_RESIZING',
-				isResizing,
+				type: 'SET_CLIENT_ID',
 				clientId,
 			};
 		},
 	},
 	selectors: {
-		isResizing( state ) {
-			return state.isResizing;
-		},
 		getClientId( state ) {
 			return state.clientId;
 		}
@@ -53,37 +51,115 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 register( resizeContentStore );
 
 const ContentResizingPlugin = () => {
+	// Holds the original text of the block being procesed.
 	const [ ogText, setOgText ] = useState( '' );
+
+	// Holds the currently selected block data.
+	const [ selectedBlock, setSelectedBlock ] = useState( null );
+
+	// Holds the start selection index of the content selected in a block.
+	// Defaults to `0` in cause the block is selected but no text is selected.
+	const [ startIndex, setStartIndex ] = useState( 0 );
+
+	// Holds the end selection index of the content selected in a block.
+	// Defaults to `null` in cause the block is selected but no text is selected.
+	const [ endIndex, setEndIndex ] = useState( null );
+
+	// Holds the GPT response array.
 	const [ textArray, setTextArray ] = useState( [] );
-	const { isMultiBlocksSelected, isResizing } = useSelect( ( select ) => {
+
+	// Holds the selected text content within the block.
+	// If no text was selected, then this value is the same as `ogText`.
+	const [ selectedText, setSelectedText ] = useState( '' );
+
+	// Holds details of whether to `shrink` or `grow` the content.
+	const [ resizeType, setResizeType ] = useState( 'grow' );
+
+	// Indicates if content resixing is in progress.
+	const [ isResizing, setIsResizing ] = useState( false );
+
+	// Indicates if the modal window with the result is open/closed.
+	const [ isModalOpen, setIsModalOpen ] = useState( false );
+
+	// Indicates if multiple blocks are selected.
+	const { isMultiBlocksSelected } = useSelect( ( select ) => {
 		return {
 			isMultiBlocksSelected: select( blockEditorStore ).hasMultiSelection(),
-			isResizing: select( resizeContentStore ).isResizing(),
 		}
 	} );
 
-	async function resizeContent( resize_type = 'grow' ) {
-		const { startIndex, endIndex, selectedText, block, ogText: originalText } = getSelectedText();
-		const textArray = await getResizedContent( block.clientId, selectedText, resize_type );
-		setTextArray( textArray );
-		setOgText( originalText );
+	// Resets to default states.
+	function resetStates() {
+		setSelectedBlock( null );
+		setStartIndex( 0 );
+		setEndIndex( null );
+		setTextArray( [] );
+		setSelectedText( '' );
+		setIsModalOpen( false );
 	}
 
-	function selectSuggestion( suggestionText = '' ) {
-		updateContent( block, startIndex, endIndex, suggestionText );
+	/**
+	 * Triggered when either `Grow content` or `Shrink content` is clicked from
+	 * the Block's "more options" menu.
+	 *
+	 * @param {string} __resizeType The type of resizing. `grow` or `shrink`.
+	 * @returns {void}
+	 */
+	async function resizeContent( __resizeType = 'grow' ) {
+		const start = select( blockEditorStore ).getSelectionStart();
+		const end   = select( blockEditorStore ).getSelectionEnd();
+		const block = select( blockEditorStore ).getSelectedBlock();
+
+		let blockContent = block.attributes.content;
+		let blockContentPlainText = toPlainText( blockContent );
+
+		setResizeType( __resizeType );
+
+		if ( 0 === end.offset - start.offset ) {
+			setSelectedBlock( block );
+			setStartIndex( 0 );
+			setEndIndex( null );
+			setSelectedText( blockContentPlainText );
+			setOgText( blockContentPlainText );
+			setIsResizing( true );
+			return;
+		}
+
+		setSelectedBlock( block );
+		setStartIndex( start.offset );
+		setEndIndex( end.offset );
+		setSelectedText( blockContentPlainText.substring( start.offset, end.offset ) );
+		setOgText( blockContentPlainText );
+		setIsResizing( true );
 	}
 
-	async function getResizedContent( clientId = '', content = '', resize_type = 'grow' ) {
+	// Triggers AJAX request to resize the content.
+	useEffect( () => {
+		if ( isResizing ) {
+			( async () => {
+				const textArray = await getResizedContent();
+				setTextArray( textArray );
+				setIsModalOpen( true );
+			} )();
+		}
+	}, [ isResizing ] );
+
+	/**
+	 * The AJAX callback that returns with an array of suggestion.
+	 *
+	 * @returns {Array}
+	 */
+	async function getResizedContent() {
 		let textArray = [];
 		const apiUrl = `${ wpApiSettings.root }classifai/v1/openai/resize-content`;
 		const postId = select( editorStore ).getCurrentPostId();
 		const formData = new FormData();
 
 		formData.append( 'id', postId );
-		formData.append( 'content', content );
-		formData.append( 'resize_type', resize_type );
+		formData.append( 'content', selectedText );
+		formData.append( 'resize_type', resizeType );
 
-		dispatch( resizeContentStore ).setIsResizing( clientId, true );
+		dispatch( resizeContentStore ).setClientId( selectedBlock.clientId );
 
 		const response = await fetch(
 			apiUrl,
@@ -95,9 +171,14 @@ const ContentResizingPlugin = () => {
 
 		if ( 200 === response.status ) {
 			textArray = await response.json();
+		} else {
+			setIsResizing( false );
+			dispatch( resizeContentStore ).setClientId( '' );
+			resetStates();
 		}
 
-		dispatch( resizeContentStore ).setIsResizing( clientId, false );
+		setIsResizing( false );
+		dispatch( resizeContentStore ).setClientId( '' );
 
 		return textArray;
 	}
@@ -110,91 +191,64 @@ const ContentResizingPlugin = () => {
 	 * @param {Number} endIndex The ending index of the selection.
 	 * @param {string} updateWith The content that will be used to replace the selection.
 	 */
-	function updateContent( block, startIndex, endIndex, updateWith ) {
-		const fullBlockContent = toPlainText( block.attributes.content );
+	function updateContent( updateWith ) {
+		const fullBlockContent = toPlainText( ogText );
 		const beforeReplaceable = fullBlockContent.substring( 0, startIndex );
 		const afterReplaceable = fullBlockContent.substring( endIndex );
 		const updatedContent = beforeReplaceable + updateWith + afterReplaceable;
 
 		dispatch( blockEditorStore ).updateBlockAttributes(
-			block.clientId,
+			selectedBlock.clientId,
 			{
 				content: endIndex ? updatedContent : updateWith
 			}
 		)
 
-		dispatch( blockEditorStore ).selectionChange( block.clientId, 'content', startIndex, startIndex + updateWith.length );
+		dispatch( blockEditorStore ).selectionChange( selectedBlock.clientId, 'content', startIndex, startIndex + updateWith.length );
+		resetStates();
 	}
 
-	function getSelectedText() {
-		const start = select( blockEditorStore ).getSelectionStart();
-		const end   = select( blockEditorStore ).getSelectionEnd();
-		const block = select( blockEditorStore ).getSelectedBlock();
-
-		let blockContent = block.attributes.content;
-		let blockContentPlainText = toPlainText( blockContent );
-
-		if ( 0 === end.offset - start.offset ) {
-			return {
-				block,
-				startIndex: 0,
-				endIndex: null,
-				selectedText: blockContentPlainText,
-				ogText: blockContentPlainText,
-			};
-		}
-
-		return {
-			block,
-			startIndex: start.offset,
-			endIndex: end.offset,
-			selectedText: blockContentPlainText.substring( start.offset, end.offset ),
-			ogText: blockContentPlainText,
-		}
-	}
-
+	// We don't want to use the reszing feature when multiple blocks are selected.
+	// Nor do we want to use it when a block's content resizing is under process.
 	if ( isMultiBlocksSelected || isResizing ) {
 		return null;
 	}
 
-	const suggestionModal = ! isResizing && textArray.length && (
+	// Result Modal JSX.
+	const suggestionModal = ! isResizing && textArray.length && isModalOpen && (
 		<Modal
-			title={ __( 'Select a suggestion', 'classifai' ) }
+			title={ __( 'Suggestions', 'classifai' ) }
 			isFullScreen={ false }
-			className="title-modal"
+			className="classifai-content-resize__suggestion-modal"
+			onRequestClose={ () => {
+				setIsModalOpen( false );
+				resetStates();
+			} }
 		>
+			<p>{ __( 'Click on a row to apply it:' ) }</p>
 			<div className='classifai-content-resize__result-wrapper'>
 				<table className='classifai-content-resize__result-table'>
 					<thead>
 						<th>{ __( 'Suggestion', 'classifai' ) }</th>
 						<th className='classifai-content-resize__stat-header'>{ __( 'Stats', 'classifai' ) }</th>
-						<th>{ __( 'Action', 'classifai' ) }</th>
 					</thead>
 					<tbody>
 						{
 							textArray.map( ( textItem, index ) => {
-								const ogWordCount = getWordCount( ogText, 'words' );
-								const ogCharCount = getCharacterCount( ogText, 'characters_including_spaces' );
+								const selectedTextWordCount = getWordCount( selectedText, 'words' );
+								const selectedTextCharCount = getCharacterCount( selectedText, 'characters_including_spaces' );
 								const suggestionWordCount = getWordCount( textItem, 'words' );
 								const suggestionCharCount = getCharacterCount( textItem, 'characters_including_spaces' );
 
-								const wordDiff = suggestionWordCount - ogWordCount;
-								const charDiff = suggestionCharCount - ogCharCount;
+								const wordDiff = suggestionWordCount - selectedTextWordCount;
+								const charDiff = suggestionCharCount - selectedTextCharCount;
 
 								return (
-									<tr key={ index }>
+									<tr key={ index } onClick={ () => updateContent( textItem ) }>
 										<td>{ textItem }</td>
 										<td>
 											<ResizeStat count={ wordDiff } />
 											<ResizeStat count={ charDiff } countEntity='character' />
-										</td>
-										<td className='classifai-content-resize__action'>
-											<Button
-												variant='secondary'
-												onClick={ () => selectSuggestion( textItem ) }
-											>
-												{ __( 'Select', 'classifai' ) }
-											</Button>
 										</td>
 									</tr>
 								)
@@ -254,21 +308,25 @@ const ResizeStat = ( { count = 0, countEntity = 'word' } ) => {
 		<div className='classifai-content-resize__grow-stat'>
 			{
 				'word' === countEntity
-				? <strong>+{ count }</strong> + __( 'words', 'classifai' )
-				: <strong>+{ count }</strong> + __( 'characters', 'classifai' )
+				? <><strong>+{ count }</strong> { __( 'words', 'classifai' ) }</>
+				: <><strong>+{ count }</strong> { __( 'characters', 'classifai' ) }</>
 			}
 		</div>
 	)
 };
 
-
+/**
+ * Strips-off all the HTML from a string and returns plain-text.
+ * @param {string} html Content with HTML.
+ * @returns {string}
+ */
 function toPlainText( html ) {
-	// Manually handle BR tags as line breaks prior to `stripHTML` call
+	// Manually handle BR tags as line breaks prior to `stripHTML` call.
 	html = html.replace( /<br>/g, '\n' );
 
 	const plainText = stripHTML( html ).trim();
 
-	// Merge any consecutive line breaks
+	// Merge any consecutive line breaks.
 	return plainText.replace( /\n\n+/g, '\n\n' );
 }
 
@@ -276,13 +334,15 @@ registerPlugin( 'tenup-openai-expand-reduce-content', {
 	render: ContentResizingPlugin,
 } );
 
+/**
+ * Adds an overlay on the block under process.
+ */
 const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 	return ( props ) => {
-		const { isResizing, currentClientId } = useSelect( ( select ) => {
-			const isResizing = select( resizeContentStore ).isResizing();
+		const { currentClientId } = useSelect( ( select ) => {
 			const currentClientId = select( resizeContentStore ).getClientId();
 
-			return { isResizing, currentClientId }
+			return { currentClientId }
 		} );
 
 		if ( currentClientId !== props.clientId ) {
@@ -293,13 +353,15 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 			return <BlockEdit { ...props } />;
 		}
 
-		if ( ! isResizing ) {
-			return <BlockEdit { ...props } />;
-		}
-
 		return (
 			<>
-				<div style={ { background: 'red' } }>
+				<div style={ { position: 'relative' } }>
+					<div className='classifai-content-resize__overlay'>
+						<div>
+							<Spinner />
+							{ __( 'Processing content...' ) }
+						</div>
+					</div>
 					<BlockEdit { ...props } />
 				</div>
 			</>
