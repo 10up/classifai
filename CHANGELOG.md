@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [2.2.3] - 2023-07-13
+### Added
+- Support classification using OpenAI Embeddings in the Classic Editor (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter) via [#515](https://github.com/10up/classifai/pull/515)).
+- Support our Text to Speech capability in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#518](https://github.com/10up/classifai/pull/518)).
+- Custom `WP-CLI` command that can be used to generate audio transcriptions in bulk (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#514](https://github.com/10up/classifai/pull/514)).
+- Custom `WP-CLI` command that can be used to generate excerpts in bulk (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#516](https://github.com/10up/classifai/pull/516)).
+- Custom `WP-CLI` command that can be used to run Embeddings processing (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter) via [#521](https://github.com/10up/classifai/pull/521)).
+- Ability to generate excerpts in bulk using the `Bulk actions` dropdown (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#523](https://github.com/10up/classifai/pull/523)).
+- Ability to generate excerpts on an individual item from the post lists screen (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#523](https://github.com/10up/classifai/pull/523)).
+- New filter that provides ability to override Audio Player Controls markup (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@dkotter](https://github.com/dkotter) via [#528](https://github.com/10up/classifai/pull/528)).
+- Provide sample copy that can be added to a site's Privacy Policy, letting site visitors know AI tools are in use (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#529](https://github.com/10up/classifai/pull/529)).
+
+### Changed
+- Add singular labels when a single image is selected for generation (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#482](https://github.com/10up/classifai/pull/482)).
+
+### Fixed
+- Ensure we don't throw any JS errors in our image generation file (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#522](https://github.com/10up/classifai/pull/522)).
+- Update Text to Speech helper text (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#519](https://github.com/10up/classifai/pull/519)).
+
 ## [2.2.2] - 2023-06-28
 ### Added
 - Support for generating post titles in the Classic Editor using OpenAI's ChatGPT API (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#506](https://github.com/10up/classifai/pull/506)).
@@ -370,6 +389,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[2.2.3]: https://github.com/10up/classifai/compare/2.2.2...2.2.3
 [2.2.2]: https://github.com/10up/classifai/compare/2.2.1...2.2.2
 [2.2.1]: https://github.com/10up/classifai/compare/2.2.0...2.2.1
 [2.2.0]: https://github.com/10up/classifai/compare/2.1.0...2.2.0
