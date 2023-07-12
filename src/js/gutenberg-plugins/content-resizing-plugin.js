@@ -8,7 +8,10 @@ import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { createReduxStore, register } from '@wordpress/data';
 import { Modal, Button } from '@wordpress/components';
+import { count as getWordCount, count as getCharacterCount } from '@wordpress/wordcount';
 import { __ } from '@wordpress/i18n';
+
+import '../../scss/content-resizing-plugin.scss';
 
 const DEFAULT_STATE = {
 	clientId: '',
@@ -50,6 +53,7 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 register( resizeContentStore );
 
 const ContentResizingPlugin = () => {
+	const [ ogText, setOgText ] = useState( '' );
 	const [ textArray, setTextArray ] = useState( [] );
 	const { isMultiBlocksSelected, isResizing } = useSelect( ( select ) => {
 		return {
@@ -59,10 +63,14 @@ const ContentResizingPlugin = () => {
 	} );
 
 	async function resizeContent( resize_type = 'grow' ) {
-		const { startIndex, endIndex, selectedText, block } = getSelectedText();
+		const { startIndex, endIndex, selectedText, block, ogText: originalText } = getSelectedText();
 		const textArray = await getResizedContent( block.clientId, selectedText, resize_type );
 		setTextArray( textArray );
-		updateContent( block, startIndex, endIndex, textArray[0] );
+		setOgText( originalText );
+	}
+
+	function selectSuggestion( suggestionText = '' ) {
+		updateContent( block, startIndex, endIndex, suggestionText );
 	}
 
 	async function getResizedContent( clientId = '', content = '', resize_type = 'grow' ) {
@@ -132,6 +140,7 @@ const ContentResizingPlugin = () => {
 				startIndex: 0,
 				endIndex: null,
 				selectedText: blockContentPlainText,
+				ogText: blockContentPlainText,
 			};
 		}
 
@@ -140,16 +149,12 @@ const ContentResizingPlugin = () => {
 			startIndex: start.offset,
 			endIndex: end.offset,
 			selectedText: blockContentPlainText.substring( start.offset, end.offset ),
+			ogText: blockContentPlainText,
 		}
 	}
 
 	if ( isMultiBlocksSelected || isResizing ) {
 		return null;
-	}
-
-	const tableBorderStyle = {
-		border: '1px solid black',
-		borderCollapse: 'collapse',
 	}
 
 	const suggestionModal = ! isResizing && textArray.length && (
@@ -158,22 +163,42 @@ const ContentResizingPlugin = () => {
 			isFullScreen={ false }
 			className="title-modal"
 		>
-			<div style={ { minWidth: '700px' } }>
-				<table style={ { ...tableBorderStyle, width: '100%' } }>
+			<div className='classifai-content-resize__result-wrapper'>
+				<table className='classifai-content-resize__result-table'>
 					<thead>
-						<th style={ tableBorderStyle }>{ __( 'Suggestion', 'classifai' ) }</th>
-						<th style={ tableBorderStyle }>{ __( 'Stats', 'classifai' ) }</th>
-						<th style={ tableBorderStyle }>{ __( 'Select?', 'classifai' ) }</th>
+						<th>{ __( 'Suggestion', 'classifai' ) }</th>
+						<th className='classifai-content-resize__stat-header'>{ __( 'Stats', 'classifai' ) }</th>
+						<th>{ __( 'Action', 'classifai' ) }</th>
 					</thead>
 					<tbody>
 						{
-							textArray.map( ( textItem, index ) => (
-								<tr key={ index }>
-									<td style={ tableBorderStyle }><textarea style={ { width: '100%' } }>{ textItem }</textarea></td>
-									<td style={ tableBorderStyle }></td>
-									<td style={ tableBorderStyle }><Button variant='secondary'>{ __( 'Select', 'classifai' ) }</Button></td>
-								</tr>
-							) )
+							textArray.map( ( textItem, index ) => {
+								const ogWordCount = getWordCount( ogText, 'words' );
+								const ogCharCount = getCharacterCount( ogText, 'characters_including_spaces' );
+								const suggestionWordCount = getWordCount( textItem, 'words' );
+								const suggestionCharCount = getCharacterCount( textItem, 'characters_including_spaces' );
+
+								const wordDiff = suggestionWordCount - ogWordCount;
+								const charDiff = suggestionCharCount - ogCharCount;
+
+								return (
+									<tr key={ index }>
+										<td>{ textItem }</td>
+										<td>
+											<ResizeStat count={ wordDiff } />
+											<ResizeStat count={ charDiff } countEntity='character' />
+										</td>
+										<td className='classifai-content-resize__action'>
+											<Button
+												variant='secondary'
+												onClick={ () => selectSuggestion( textItem ) }
+											>
+												{ __( 'Select', 'classifai' ) }
+											</Button>
+										</td>
+									</tr>
+								)
+							} )
 						}
 					</tbody>
 				</table>
@@ -199,6 +224,43 @@ const ContentResizingPlugin = () => {
 		</>
 	)
 };
+
+const ResizeStat = ( { count = 0, countEntity = 'word' } ) => {
+	if ( 0 === count ) {
+		return (
+			<div>
+				{
+					'word' === countEntity
+					? __( 'No change in word count.', 'classifai' )
+					: __( 'No change in character count.', 'classifai' )
+				}
+			</div>
+		)
+	}
+
+	if ( count < 0 ) {
+		return (
+			<div className='classifai-content-resize__shrink-stat'>
+				{
+					'word' === countEntity
+					? <><strong>{ count }</strong> { __( 'words', 'classifai' ) }</>
+					: <><strong>{ count }</strong> { __( 'characters', 'classifai' ) }</>
+				}
+			</div>
+		)
+	}
+
+	return (
+		<div className='classifai-content-resize__grow-stat'>
+			{
+				'word' === countEntity
+				? <strong>+{ count }</strong> + __( 'words', 'classifai' )
+				: <strong>+{ count }</strong> + __( 'characters', 'classifai' )
+			}
+		</div>
+	)
+};
+
 
 function toPlainText( html ) {
 	// Manually handle BR tags as line breaks prior to `stripHTML` call
