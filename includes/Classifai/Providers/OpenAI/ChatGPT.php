@@ -151,11 +151,19 @@ class ChatGPT extends Provider {
 			&& ( isset( $settings['enable_resize_content'] ) && 1 === (int) $settings['enable_resize_content'] )
 		) {
 			wp_enqueue_script(
-				'classifai-content-resizing-plugin',
+				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
 				get_asset_info( 'content-resizing-plugin', 'dependencies' ),
 				get_asset_info( 'content-resizing-plugin', 'version' ),
 				true
+			);
+
+			wp_enqueue_style(
+				'classifai-content-resizing-plugin-css',
+				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
+				[],
+				CLASSIFAI_PLUGIN_VERSION,
+				'all'
 			);
 		}
 	}
@@ -769,6 +777,12 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
+		if ( 'shrink' === $args['resize_type'] ) {
+			$prompt = 'Decrease the word count in the following content by a small margin.';
+		} else {
+			$prompt = 'Increase the word count in the following content by a small margin.';
+		}
+
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
@@ -781,7 +795,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_resize_content_prompt', 'Shrink this content a little', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
