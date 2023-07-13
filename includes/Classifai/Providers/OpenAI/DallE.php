@@ -108,7 +108,7 @@ class DallE extends Provider {
 			'classifai-inserter-media-category',
 			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
 			get_asset_info( 'inserter-media-category', 'dependencies' ),
-			get_asset_info( 'media-modal', 'version' ),
+			get_asset_info( 'inserter-media-category', 'version' ),
 			true
 		);
 
