@@ -188,6 +188,14 @@ class Plugin {
 				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
 			]
 		);
+
+		wp_enqueue_script(
+			'classifai-commands',
+			CLASSIFAI_PLUGIN_URL . 'dist/commands.js',
+			get_asset_info( 'commands', 'dependencies' ),
+			get_asset_info( 'commands', 'version' ),
+			true
+		);
 	}
 
 	/**

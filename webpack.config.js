@@ -29,6 +29,7 @@ module.exports = {
 		'generate-title-classic': [
 			'./src/js/openai/classic-editor-title-generator.js',
 		],
+		commands: [ './src/js/gutenberg-plugins/commands.js' ],
 	},
 	module: {
 		rules: [
