@@ -27,18 +27,22 @@ const PostExcerpt = () => {
 		label: __( 'Generate excerpt', 'classifai' ),
 		icon: edit,
 		callback: ( { close } ) => {
-			const button = document.querySelector(
-				'.editor-post-excerpt button'
-			);
+			dispatch( 'core/edit-post' )
+				.toggleEditorPanelOpened( 'post-excerpt' )
+				.then( () => {
+					const button = document.querySelector(
+						'.editor-post-excerpt button'
+					);
 
-			close();
+					close();
 
-			if ( button ) {
-				button.scrollIntoView( {
-					block: 'center',
+					if ( button ) {
+						button.scrollIntoView( {
+							block: 'center',
+						} );
+						button.click();
+					}
 				} );
-				button.click();
-			}
 		},
 	} );
 

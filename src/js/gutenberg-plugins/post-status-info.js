@@ -1,8 +1,10 @@
+import { useCommand } from '@wordpress/commands';
 import { dispatch, select } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { PostTypeSupportCheck } from '@wordpress/editor';
 import { Button, Modal, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { edit } from '@wordpress/icons';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
@@ -18,6 +20,30 @@ const RenderError = ( { error } ) => {
 };
 
 const PostStatusInfo = () => {
+	useCommand( {
+		name: 'classifai/generate-titles',
+		label: __( 'Generate titles', 'classifai' ),
+		icon: edit,
+		callback: ( { close } ) => {
+			dispatch( 'core/edit-post' )
+				.toggleEditorPanelOpened( 'post-status' )
+				.then( () => {
+					const button = document.querySelector(
+						'.classifai-post-status button'
+					);
+
+					close();
+
+					if ( button ) {
+						button.scrollIntoView( {
+							block: 'center',
+						} );
+						button.click();
+					}
+				} );
+		},
+	} );
+
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
 	const [ error, setError ] = useState( false );
