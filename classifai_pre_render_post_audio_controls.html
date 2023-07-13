@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_chatgpt_excerpt_request_body - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_pre_render_post_audio_controls - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_chatgpt_excerpt_request_body</h1>
+    <h1 class="page-title">Filter: classifai_pre_render_post_audio_controls</h1>
 	
 
     
@@ -43,14 +43,20 @@
 
     
 
-    <h4 class="name" id="classifai_chatgpt_excerpt_request_body">apply_filters( 'classifai_chatgpt_excerpt_request_body', <span class="signature">$body, $post_id )</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="classifai_pre_render_post_audio_controls">apply_filters( 'classifai_pre_render_post_audio_controls', <span class="signature">$markup, $content, $_post, $audio_attachment_id, $audio_attachment_url )</span><span class="type-signature"> &rarr; {bool|string}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter the request body before sending to ChatGPT.</p>
+    <p>Filters the audio player markup before display.</p>
+<p>Returning a non-false value from this filter will short-circuit building
+the block markup and instead will return your custom markup prepended to
+the post_content.</p>
+<p>Note that by using this filter, the custom CSS and JS files will no longer
+be enqueued, so you'll be responsible for either loading them yourself or
+loading custom ones.</p>
 </div>
 
 
@@ -84,13 +90,16 @@
 
         <tr>
             
-                <td class="name"><code>$body</code></td>
+                <td class="name"><code>$markup</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">bool</span>
+|
+
+<span class="param-type">string</span>
 
 
             
@@ -100,14 +109,60 @@
 
             
 
-            <td class="description last"><p>Request body that will be sent to ChatGPT.</p></td>
+            <td class="description last"><p>Audio markup to use. Defaults to false.</p></td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>$post_id</code></td>
+                <td class="name"><code>$content</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Content of the current post.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$_post</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">WP_Post</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The Post object.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$audio_attachment_id</code></td>
             
 
             <td class="type">
@@ -123,7 +178,30 @@
 
             
 
-            <td class="description last"><p>ID of post we are summarizing.</p></td>
+            <td class="description last"><p>The audio attachment ID.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$audio_attachment_url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The URL to the audio attachment file.</p></td>
         </tr>
 
     
@@ -141,7 +219,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.2.3</li></ul></dd>
     
 
     
@@ -167,7 +245,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_OpenAI_ChatGPT.php.html">Providers/OpenAI/ChatGPT.php</a>, <a href="Providers_OpenAI_ChatGPT.php.html#line511">line 511</a>
+        <a href="Providers_Azure_TextToSpeech.php.html">Providers/Azure/TextToSpeech.php</a>, <a href="Providers_Azure_TextToSpeech.php.html#line656">line 656</a>
     </li></ul></dd>
     
 
@@ -194,7 +272,7 @@
 
         
 <div class="param-desc">
-    <p>Request body.</p>
+    <p>Custom audio block markup. Will be prepended to the post content.</p>
 </div>
 
 
@@ -205,7 +283,10 @@
     </dt>
     <dd>
         
-<span class="param-type">array</span>
+<span class="param-type">bool</span>
+|
+
+<span class="param-type">string</span>
 
 
     </dd>
