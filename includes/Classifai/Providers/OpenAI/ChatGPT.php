@@ -101,7 +101,7 @@ class ChatGPT extends Provider {
 
 		// We need a post ID to look up an excerpt, a brand new post doesn't have one
 		if ( ! $is_new_post ) {
-			$has_excerpt = '' !== get_the_excerpt( $post->ID );
+			$has_excerpt = '' !== $post->post_excerpt;
 		}
 
 		$button_text = __( 'Generate excerpt', 'classifai' );
@@ -128,10 +128,10 @@ class ChatGPT extends Provider {
 		</p>
 
 		<?php if ( $is_new_post ) { ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary alignright clearfix" disabled><?php echo esc_html( $button_text ); ?></button>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary" disabled><?php echo esc_html( $button_text ); ?></button>
 			<p><strong><?php esc_html_e( 'Add some content and save as a draft to enable excerpt generation.', 'classifai' ); ?></strong></p>
 		<?php } else { ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary alignright clearfix"><?php echo esc_html( $button_text ); ?></button>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary"><?php echo esc_html( $button_text ); ?></button>
 			<?php
 		}
 	}
@@ -220,7 +220,7 @@ class ChatGPT extends Provider {
 			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
 		) {
 
-			$_post_id = isset( $_GET['post'] ) ? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) : false;
+			$_post_id = isset( $_GET['post'] ) ? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			if ( $_post_id ) {
 
@@ -233,13 +233,13 @@ class ChatGPT extends Provider {
 				);
 				wp_localize_script(
 					'classifai-post-excerpt-classic-editor',
-					'classifai_generate_excerpt',
+					'classifaiGenerateExcerpt',
 					array(
-						'endpoint_url'            => esc_url( get_rest_url( null, "/classifai/v1/openai/generate-excerpt/{$_post_id}" ) ),
-						'script_debug'            => defined( 'SCRIPT_DEBUG' ) ? SCRIPT_DEBUG : false,
-						'generate_excerpt_text'   => __( 'Generate excerpt', 'classifai' ),
-						'regenerate_excerpt_text' => __( 'Re-generate excerpt', 'classifai' ),
-						'nonce'                   => wp_create_nonce( 'wp_rest' ),
+						'endpointUrl'           => esc_url( get_rest_url( null, "/classifai/v1/openai/generate-excerpt/{$_post_id}" ) ),
+						'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) ? SCRIPT_DEBUG : false,
+						'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
+						'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
+						'nonce'                 => wp_create_nonce( 'wp_rest' ),
 					)
 				);
 			}

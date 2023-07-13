@@ -1,10 +1,4 @@
 
-/**
- * This is the main webpack entry point for compiling STAT Comments plugin JS.
- */
-
-console.log('Classifai Generate Excerpt Debug: Script Loaded');
-
 /* Variables */
 const classifaiGenerateExcerptButtonID = 'classifai-generate-excerpt';
 const classifaiGenerateExcerptButtonElement = document.getElementById(classifaiGenerateExcerptButtonID);
@@ -13,8 +7,10 @@ const classifaiGenerateExcerptTextareaElement = document.getElementById(classifa
 let classifarGenerateExcerptDebug = false;
 let classifaiGenerateExcerptText;
 
-if (classifai_generate_excerpt && classifai_generate_excerpt.script_debug) {
-	classifarGenerateExcerptDebug = classifai_generate_excerpt.script_debug;
+// Note: classifarGenerateExcerptDebug is set by the SCRIPT_DEBUG constant
+// Errors are only logged to console when SCRIPT_DEBUG is defined with value: TRUE
+if (classifaiGenerateExcerpt && classifaiGenerateExcerpt.scriptDebug) {
+	classifarGenerateExcerptDebug = classifaiGenerateExcerpt.scriptDebug;
 }
 
 /* Generate excerpt when the button is clicked */
@@ -30,16 +26,16 @@ if (null !== classifaiGenerateExcerptButtonElement) {
 function classifaiExcerptGenerate() {
 
 	// Confirm the endpoint URL is available; excerpt generation cannot function without this.
-	if (!classifai_generate_excerpt || false === classifai_generate_excerpt.endpoint_url) {
+	if (!classifaiGenerateExcerpt || false === classifaiGenerateExcerpt.endpointUrl) {
 		classifarGenerateExcerptDebug && console.log('Classifai Generate Excerpt Debug: Endpoint URL not set!');
 		return;
 	}
 
 	classifaiGenerateExcerptButtonElement.disabled = true;
 
-	fetch(classifai_generate_excerpt.endpoint_url, {
+	fetch(classifaiGenerateExcerpt.endpointUrl, {
 		headers: {
-			'X-WP-Nonce': classifai_generate_excerpt.nonce
+			'X-WP-Nonce': classifaiGenerateExcerpt.nonce
 		}
 	})
 		.then((response) => response.json())
@@ -50,7 +46,7 @@ function classifaiExcerptGenerate() {
 
 			if (classifaiGenerateExcerptText) {
 				classifaiGenerateExcerptTextareaElement.textContent = classifaiGenerateExcerptText
-				classifaiGenerateExcerptButtonElement.value = classifai_generate_excerpt.regenerate_excerpt_text;
+				classifaiGenerateExcerptButtonElement.value = classifaiGenerateExcerpt.regenerateExcerptText;
 			}
 		})
 		.catch((error) => {
