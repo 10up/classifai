@@ -1,23 +1,68 @@
-import { useCommand } from '@wordpress/commands';
-import { settings } from '@wordpress/icons';
+import { useCommandLoader } from '@wordpress/commands';
+import { edit, settings } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
-/**
- * Any general ClassifAI commands can go here.
- *
- * For commands specific to a certain feature,
- * those should probably be placed with the
- * rest of the functionality for that feature.
- */
 const Commands = () => {
-	useCommand( {
-		name: 'classifai/settings',
-		label: __( 'ClassifAI settings', 'classifai' ),
-		icon: settings,
-		callback: () => {
-			document.location.href = 'tools.php?page=classifai';
-		},
+	const getCommandLoader = () => {
+		const commands = [];
+		const excerptButton = document.querySelector(
+			'.editor-post-excerpt button'
+		);
+		const titleButton = document.querySelector(
+			'.classifai-post-status button'
+		);
+
+		// Command to open the ClassifAI settings page.
+		commands.push( {
+			name: 'classifai/settings',
+			label: __( 'ClassifAI settings', 'classifai' ),
+			icon: settings,
+			callback: () => {
+				document.location.href = 'tools.php?page=classifai';
+			},
+		} );
+
+		// Command to generate an excerpt.
+		if ( excerptButton ) {
+			commands.push( {
+				name: 'classifai/generate-excerpt',
+				label: __( 'Generate excerpt', 'classifai' ),
+				icon: edit,
+				callback: ( { close } ) => {
+					close();
+
+					excerptButton.scrollIntoView( {
+						block: 'center',
+					} );
+					excerptButton.click();
+				},
+			} );
+		}
+
+		// Command to generate titles.
+		if ( titleButton ) {
+			commands.push( {
+				name: 'classifai/generate-titles',
+				label: __( 'Generate titles', 'classifai' ),
+				icon: edit,
+				callback: ( { close } ) => {
+					close();
+
+					titleButton.scrollIntoView( {
+						block: 'center',
+					} );
+					titleButton.click();
+				},
+			} );
+		}
+
+		return { commands };
+	};
+
+	useCommandLoader( {
+		name: 'classifai',
+		hook: getCommandLoader,
 	} );
 
 	return null;
