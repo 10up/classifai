@@ -27,7 +27,7 @@ module.exports = {
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
 		'inserter-media-category': [
-			'./src/js/gutenberg-plugins/inserter-media-category.js'
+			'./src/js/gutenberg-plugins/inserter-media-category.js',
 		],
 		'generate-title-classic': [
 			'./src/js/openai/classic-editor-title-generator.js',
