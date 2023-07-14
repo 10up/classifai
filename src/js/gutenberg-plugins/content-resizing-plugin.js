@@ -1,6 +1,4 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
-import { registerPlugin } from '@wordpress/plugins';
-import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
 import { store as blockEditorStore, BlockControls } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import {
