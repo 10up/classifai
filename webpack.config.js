@@ -29,6 +29,9 @@ module.exports = {
 		'generate-title-classic': [
 			'./src/js/openai/classic-editor-title-generator.js',
 		],
+		'generate-image-media-upload': [
+			'./src/js/media-modal/views/generate-image-media-upload.js',
+		],
 	},
 	module: {
 		rules: [

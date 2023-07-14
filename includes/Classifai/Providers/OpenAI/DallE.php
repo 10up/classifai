@@ -57,20 +57,28 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if (
-			current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
-		) {
+		if ( $this->is_feature_enabled() ) {
+			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
+	}
+
+	/**
+	 * Registers a Media > Generate Image submenu
+	 */
+	public function register_generate_media_page() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		add_submenu_page(
+			'upload.php',
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			'upload_files',
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			''
+		);
 	}
 
 	/**
@@ -79,7 +87,7 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'upload.php' !== $hook_suffix ) {
 			return;
 		}
 
@@ -134,6 +142,28 @@ class DallE extends Provider {
 				'caption'    => $caption,
 			]
 		);
+
+		if ( 'upload.php' === $hook_suffix ) {
+			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'classifai-generate-image' === $action ) {
+				wp_enqueue_script(
+					'classifai-generate-images-media-upload',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+					[ 'jquery' ],
+					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					true
+				);
+
+				wp_localize_script(
+					'classifai-generate-images-media-upload',
+					'classifaiGenerateImages',
+					[
+						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+					]
+				);
+			}
+		}
 	}
 
 	/**
@@ -481,6 +511,29 @@ class DallE extends Provider {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Checks whether we can generate images.
+	 *
+	 * @return bool
+	 */
+	public function is_feature_enabled() {
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			current_user_can( 'upload_files' )
+			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
+			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 }
