@@ -331,6 +331,26 @@ class ChatGPT extends Provider {
 				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
 			]
 		);
+
+		// Add language settings
+		add_settings_section(
+			$this->get_option_name() . '_lang',
+			esc_html__( 'Language settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
+		add_settings_field(
+			'language',
+			esc_html__( 'Language', 'classifai' ),
+			[ $this, 'render_language' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_lang',
+			[
+				'label_for'     => 'language',
+				'default_value' => $default_settings['language'],
+			]
+		);
 	}
 
 	/**
@@ -383,6 +403,12 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
+		if ( isset( $settings['language'] ) ) {
+			$new_settings['language'] = sanitize_text_field( $settings['language'] );
+		} else {
+			$new_settings['language'] = 'en';
+		}
+
 		return $new_settings;
 	}
 
@@ -410,6 +436,7 @@ class ChatGPT extends Provider {
 			'enable_titles'  => false,
 			'title_roles'    => array_keys( $editable_roles ),
 			'number_titles'  => 1,
+			'language'       => 'en',
 		];
 	}
 
@@ -491,6 +518,7 @@ class ChatGPT extends Provider {
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
+		$language       = isset( $settings['language'] ) && 'en' !== $settings['language'] ? ' in ' . sanitize_text_field( $settings['language'] ) . ' language' : '';
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
@@ -506,7 +534,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a teaser for the following text using a maximum of ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a teaser for the following text using a maximum of ' . $excerpt_length . ' words' . $language, $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -570,6 +598,7 @@ class ChatGPT extends Provider {
 		}
 
 		$settings = $this->get_settings();
+		$language = isset( $settings['language'] ) && 'en' !== $settings['language'] ? ' in ' . sanitize_text_field( $settings['language'] ) . ' language' : '';
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
@@ -597,7 +626,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters' . $language, $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.

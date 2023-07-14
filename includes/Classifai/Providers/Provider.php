@@ -361,6 +361,33 @@ abstract class Provider {
 	}
 
 	/**
+	 * Renders language selection
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_language( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+
+		// Check for a default value
+		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
+
+		$languages = \get_available_languages( WP_LANG_DIR );
+		wp_dropdown_languages(
+			array(
+				'name'                        => 'classifai_'. esc_attr( $this->option_name ) .'['. esc_attr( $args['label_for'] ) .']',
+				'id'                          => 'site-language',
+				'selected'                    => $saved,
+				'languages'                   => $languages,
+			)
+		);
+
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
 	 * Set up the fields for each section.
 	 */
 	abstract public function setup_fields_sections();
