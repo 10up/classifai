@@ -189,13 +189,15 @@ class Plugin {
 			]
 		);
 
-		wp_enqueue_script(
-			'classifai-commands',
-			CLASSIFAI_PLUGIN_URL . 'dist/commands.js',
-			get_asset_info( 'commands', 'dependencies' ),
-			get_asset_info( 'commands', 'version' ),
-			true
-		);
+		if ( wp_script_is( 'wp-commands', 'registered' ) ) {
+			wp_enqueue_script(
+				'classifai-commands',
+				CLASSIFAI_PLUGIN_URL . 'dist/commands.js',
+				get_asset_info( 'commands', 'dependencies' ),
+				get_asset_info( 'commands', 'version' ),
+				true
+			);
+		}
 	}
 
 	/**

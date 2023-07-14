@@ -68,4 +68,6 @@ const Commands = () => {
 	return null;
 };
 
-registerPlugin( 'classifai-commands', { render: Commands } );
+if ( 'function' === typeof useCommandLoader ) {
+	registerPlugin( 'classifai-commands', { render: Commands } );
+}
