@@ -65,22 +65,30 @@ class ChatGPT extends Provider {
 	 * Determine if the current user can access the feature
 	 *
 	 * @param {string} $feature       Feature to check.
-	 * @param {array}  $feature_roles Roles that have access to the feature.
 	 *
 	 * @return bool
 	 */
-	public function user_can_access( $feature, $feature_roles = [] ) {
-		$access   = false;
-		$settings = $this->get_settings();
+	public function user_can_access( $feature ) {
+		$access        = false;
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$feature_roles = [];
 
+		$role_keys = [
+			'enable_excerpt' => 'roles',
+			'enable_titles'  => 'title_roles',
+		];
+
+		if ( isset( $role_keys[ $feature ] ) ) {
+			$feature_roles = $settings[ $role_keys[ $feature ] ] ?? [];
+		}
+
+		// Check if user has access to the feature
 		if (
-			! empty( $settings ) &&
-			isset( $settings[ $feature ] ) &&
-			'no' !== $settings[ $feature ]
+			! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) )
 		) {
 			$access = true;
 		}
-
 		/**
 		 * Filter to override permission to a ChatGPT generate feature
 		 *
@@ -116,14 +124,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$excerpt_roles = $settings['roles'] ?? [];
-
-		if (
-			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
-			&& $this->user_can_access( 'enable_excerpt', $excerpt_roles )
-		) {
+		if ( $this->user_can_access( 'enable_excerpt' ) ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -134,12 +135,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		$title_roles = $settings['title_roles'] ?? [];
-
-		if (
-			( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& $this->user_can_access( 'enable_titles', $title_roles )
-		) {
+		if ( $this->user_can_access( 'enable_titles' ) ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
