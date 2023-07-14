@@ -346,8 +346,8 @@ import '../scss/language-processing.scss';
 	}
 } )();
 
-// Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
 document.addEventListener( 'DOMContentLoaded', function () {
+	// Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
 	const classifaiNLUCheckbox = document.getElementById(
 		'_classifai_process_content'
 	);
@@ -363,5 +363,25 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			}
 		} );
 		classifaiNLUCheckbox.dispatchEvent( new Event( 'change' ) );
+	}
+
+	// Display audio preview only when "Enable audio generation" is checked (Classic Editor).
+	const classifaiAudioGenerationCheckbox = document.getElementById(
+		'classifai_synthesize_speech'
+	);
+	const classifaiAudioPreview = document.getElementById(
+		'classifai-audio-preview'
+	);
+	if ( classifaiAudioGenerationCheckbox && classifaiAudioPreview ) {
+		classifaiAudioGenerationCheckbox.addEventListener(
+			'change',
+			function () {
+				if ( this.checked === true ) {
+					classifaiAudioPreview.style.display = 'block';
+				} else {
+					classifaiAudioPreview.style.display = 'none';
+				}
+			}
+		);
 	}
 } );

@@ -73,6 +73,11 @@ class DallE extends Provider {
 			return;
 		}
 
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		wp_enqueue_media();
+
 		wp_enqueue_style(
 			'classifai-image-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
@@ -113,7 +118,7 @@ class DallE extends Provider {
 			'classifaiDalleData',
 			[
 				'endpoint'   => 'classifai/v1/openai/generate-image',
-				'tabText'    => esc_html__( 'Generate images', 'classifai' ),
+				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
 				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
 				'caption'    => $caption,
@@ -125,23 +130,54 @@ class DallE extends Provider {
 	 * Print the templates we need for our media modal integration.
 	 */
 	public function print_media_templates() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view">
 				<p>
-					<?php esc_html_e( 'Enter a prompt below to generate images.', 'classifai' ); ?>
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
+					} else {
+						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
+					}
+					?>
 				</p>
 				<p>
-					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
+					} else {
+						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
+					}
+					?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
-				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-generate">
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Generate images', 'classifai' );
+					} else {
+						esc_html_e( 'Generate image', 'classifai' );
+					}
+					?>
+				</button>
 				<span class="error"></span>
 			</div>
 			<div class="generated-images">
-				<h2 class="prompt-text hidden"><?php esc_html_e( 'Images generated from prompt: ', 'classifai' ); ?><span></span></h2>
+				<h2 class="prompt-text hidden">
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Images generated from prompt:', 'classifai' );
+					} else {
+						esc_html_e( 'Image generated from prompt:', 'classifai' );
+					}
+					?>
+					<span></span>
+				</h2>
 				<span class="spinner"></span>
 				<ul></ul>
 			</div>
