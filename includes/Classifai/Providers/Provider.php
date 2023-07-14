@@ -375,7 +375,7 @@ abstract class Provider {
 		$languages = \get_available_languages( WP_LANG_DIR );
 		wp_dropdown_languages(
 			array(
-				'name'      => 'classifai_'. esc_attr( $this->option_name ) .'['. esc_attr( $args['label_for'] ) .']',
+				'name'      => 'classifai_' . esc_attr( $this->option_name ) . '[' . esc_attr( $args['label_for'] ) . ']',
 				'id'        => 'site-language',
 				'selected'  => $saved,
 				'languages' => $languages,
