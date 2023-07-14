@@ -57,7 +57,7 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( $this->can_generate_image() ) {
+		if ( $this->is_feature_enabled() ) {
 			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
@@ -518,7 +518,7 @@ class DallE extends Provider {
 	 *
 	 * @return bool
 	 */
-	public function can_generate_image() {
+	public function is_feature_enabled() {
 		$settings = $this->get_settings();
 
 		// Check if the current user has permission to generate images.
