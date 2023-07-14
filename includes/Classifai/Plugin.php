@@ -73,10 +73,6 @@ class Plugin {
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
-		// Initialize the classifAI Generate Image media dashboard.
-		$onboarding = new Admin\GenerateImage();
-		$onboarding->init();
-
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *

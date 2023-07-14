@@ -4,8 +4,8 @@ import { __ } from '@wordpress/i18n';
 document.addEventListener( 'DOMContentLoaded', function () {
 	if ( wp.media ) {
 		const frame = wp.media( {
-			title: __( 'Generate Images', 'classifai' ),
-			button: { text: __( 'View Details', 'classifai' ) },
+			title: __( 'Generate images', 'classifai' ),
+			button: { text: __( 'View details', 'classifai' ) },
 			multiple: false,
 			frame: 'select',
 		} );

@@ -58,9 +58,27 @@ class DallE extends Provider {
 	 */
 	public function register() {
 		if ( $this->can_generate_image() ) {
+			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
+	}
+
+	/**
+	 * Registers a Media > Generate Image submenu
+	 */
+	public function register_generate_media_page() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		add_submenu_page(
+			'upload.php',
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			'upload_files',
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			''
+		);
 	}
 
 	/**
@@ -124,6 +142,28 @@ class DallE extends Provider {
 				'caption'    => $caption,
 			]
 		);
+
+		if ( 'upload.php' === $hook_suffix ) {
+			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'classifai-generate-image' === $action ) {
+				wp_enqueue_script(
+					'classifai-generate-images-media-upload',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+					[ 'jquery' ],
+					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					true
+				);
+
+				wp_localize_script(
+					'classifai-generate-images-media-upload',
+					'classifaiGenerateImages',
+					[
+						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+					]
+				);
+			}
+		}
 	}
 
 	/**
@@ -474,7 +514,7 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Checks whether the current screen can generate image
+	 * Checks whether we can generate images.
 	 *
 	 * @return bool
 	 */
