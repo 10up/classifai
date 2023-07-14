@@ -27,7 +27,7 @@ const Commands = () => {
 		if ( excerptButton ) {
 			commands.push( {
 				name: 'classifai/generate-excerpt',
-				label: __( 'Generate excerpt', 'classifai' ),
+				label: __( 'ClassifAI: Generate excerpt', 'classifai' ),
 				icon: edit,
 				callback: ( { close } ) => {
 					close();
@@ -44,7 +44,7 @@ const Commands = () => {
 		if ( titleButton ) {
 			commands.push( {
 				name: 'classifai/generate-titles',
-				label: __( 'Generate titles', 'classifai' ),
+				label: __( 'ClassifAI: Generate titles', 'classifai' ),
 				icon: edit,
 				callback: ( { close } ) => {
 					close();
