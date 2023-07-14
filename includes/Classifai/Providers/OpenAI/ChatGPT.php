@@ -75,8 +75,6 @@ class ChatGPT extends Provider {
 
 		if (
 			! empty( $settings ) &&
-			isset( $settings['authenticated'] ) &&
-			false !== $settings['authenticated'] &&
 			isset( $settings[ $feature ] ) &&
 			'no' !== $settings[ $feature ]
 		) {
