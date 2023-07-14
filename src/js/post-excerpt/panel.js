@@ -55,6 +55,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				</ExternalLink>
 			) }
 			<Button
+				className="classifai-post-excerpt"
 				variant={ 'secondary' }
 				data-id={ postId }
 				onClick={ ( e ) =>

@@ -7,10 +7,10 @@ const Commands = () => {
 	const getCommandLoader = () => {
 		const commands = [];
 		const excerptButton = document.querySelector(
-			'.editor-post-excerpt button'
+			'.editor-post-excerpt button.classifai-post-excerpt'
 		);
 		const titleButton = document.querySelector(
-			'.classifai-post-status button'
+			'.classifai-post-status button.title'
 		);
 
 		// Command to open the ClassifAI settings page.
