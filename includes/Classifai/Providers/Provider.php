@@ -370,15 +370,15 @@ abstract class Provider {
 		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 
 		// Check for a default value
-		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
+		$saved = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
 
 		$languages = \get_available_languages( WP_LANG_DIR );
 		wp_dropdown_languages(
 			array(
-				'name'                        => 'classifai_'. esc_attr( $this->option_name ) .'['. esc_attr( $args['label_for'] ) .']',
-				'id'                          => 'site-language',
-				'selected'                    => $saved,
-				'languages'                   => $languages,
+				'name'      => 'classifai_'. esc_attr( $this->option_name ) .'['. esc_attr( $args['label_for'] ) .']',
+				'id'        => 'site-language',
+				'selected'  => $saved,
+				'languages' => $languages,
 			)
 		);
 
