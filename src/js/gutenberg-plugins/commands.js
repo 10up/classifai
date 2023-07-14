@@ -1,5 +1,5 @@
 import { useCommandLoader } from '@wordpress/commands';
-import { edit, settings } from '@wordpress/icons';
+import { edit, image, settings } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 
@@ -53,6 +53,19 @@ const Commands = () => {
 						block: 'center',
 					} );
 					titleButton.click();
+				},
+			} );
+		}
+
+		// Command to go to the image generation page.
+		if ( typeof classifaiDalleData !== 'undefined' ) {
+			commands.push( {
+				name: 'classifai/generate-image',
+				label: __( 'ClassifAI: Generate image', 'classifai' ),
+				icon: image,
+				callback: () => {
+					document.location.href =
+						'upload.php?action=classifai-generate-image';
 				},
 			} );
 		}
