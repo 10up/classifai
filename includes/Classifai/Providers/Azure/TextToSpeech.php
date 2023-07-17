@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\Azure;
 
+use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
 use stdClass;
 use WP_Http;
@@ -50,6 +51,14 @@ class TextToSpeech extends Provider {
 	 * @var string
 	 */
 	const AUDIO_TIMESTAMP_KEY = '_classifai_post_audio_timestamp';
+
+	/**
+	 * Meta key to get/set the audio hash that helps to indicate if there is any need
+	 * for the audio file to be regenerated or not.
+	 *
+	 * @var string
+	 */
+	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
 
 	/**
 	 * Azure Text to Speech constructor.
@@ -122,6 +131,8 @@ class TextToSpeech extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
@@ -151,7 +162,7 @@ class TextToSpeech extends Provider {
 				'label_for'     => 'url',
 				'input_type'    => 'text',
 				'default_value' => $default_settings['credentials']['url'],
-				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 			]
 		);
 
@@ -485,19 +496,122 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Add meta box to post types that support speech synthesis.
+	 *
+	 * @param string $post_type Post type.
+	 */
+	public function add_meta_box( $post_type ) {
+		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+			return;
+		}
+
+		\add_meta_box(
+			'classifai-text-to-speech-meta-box',
+			__( 'ClassifAI Text to Speech Processing', 'classifai' ),
+			[ $this, 'render_meta_box' ],
+			null,
+			'side',
+			'low',
+			array( '__back_compat_meta_box' => true )
+		);
+	}
+
+	/**
+	 * Render meta box content.
+	 *
+	 * @param \WP_Post $post WP_Post object.
+	 */
+	public function render_meta_box( $post ) {
+		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
+
+		$process_content = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
+		$process_content = ( 'no' === $process_content ) ? 'no' : 'yes';
+
+		$post_type       = get_post_type_object( get_post_type( $post ) );
+		$post_type_label = esc_html__( 'Post', 'classifai' );
+		if ( $post_type ) {
+			$post_type_label = $post_type->labels->singular_name;
+		}
+
+		$audio_id = get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+		?>
+
+		<p>
+			<label for="classifai_synthesize_speech">
+				<input type="checkbox" value="yes" id="classifai_synthesize_speech" name="classifai_synthesize_speech" <?php checked( $process_content, 'yes' ); ?> />
+				<?php esc_html_e( 'Enable audio generation', 'classifai' ); ?>
+			</label>
+			<span class="description">
+				<?php
+				/* translators: %s Post type label */
+				printf( esc_html__( 'ClassifAI will generate audio for this %s when it is published or updated', 'classifai' ), esc_html( $post_type_label ) );
+				?>
+			</span>
+		</p>
+
+		<?php
+		if ( 'yes' === $process_content && $audio_id && wp_get_attachment_url( $audio_id ) ) {
+			$cache_busting_url = add_query_arg(
+				[
+					'ver' => time(),
+				],
+				wp_get_attachment_url( $audio_id )
+			);
+			?>
+
+			<p>
+				<audio id="classifai-audio-preview" controls controlslist="nodownload" src="<?php echo esc_url( $cache_busting_url ); ?>"></audio>
+			</p>
+
+			<?php
+		}
+
+	}
+
+	/**
+	 * Process the meta box save.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function save_post_metadata( $post_id ) {
+		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
+			return;
+		}
+
+		if ( empty( $_POST['classifai_text_to_speech_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_text_to_speech_meta'] ) ), 'classifai_text_to_speech_meta_action' ) ) {
+			return;
+		}
+
+		$supported_post_types = $this->get_supported_post_types();
+		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
+			return;
+		}
+
+		if ( isset( $_POST['classifai_synthesize_speech'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['classifai_synthesize_speech'] ) ) ) {
+			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'yes' );
+
+			$save_post_handler = new SavePostHandler();
+			$save_post_handler->synthesize_speech( $post_id );
+		} else {
+			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'no' );
+		}
+	}
+
+	/**
 	 * Adds audio controls to the post that has speech sythesis enabled.
 	 *
 	 * @param string $content Post content.
 	 * @return string
 	 */
 	public function render_post_audio_controls( $content ) {
-		global $post;
 
-		if ( ! $post ) {
+		$_post = get_post();
+
+		if ( ! $_post instanceof \WP_Post ) {
 			return $content;
 		}
 
-		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {
+		if ( ! in_array( $_post->post_type, self::get_supported_post_types(), true ) ) {
 			return $content;
 		}
 
@@ -507,19 +621,64 @@ class TextToSpeech extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_disable_post_to_audio_block
 		 *
-		 * @param {bool} $is_disabled Whether to disable the display or not. By default - false.
-		 * @param {bool} $post_id     Post ID.
+		 * @param  {bool}    $is_disabled Whether to disable the display or not. By default - false.
+		 * @param  {WP_Post} $_post       The Post object.
 		 *
 		 * @return {bool} Whether the audio block should be shown.
 		 */
-		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
+		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $_post ) ) {
 			return $content;
 		}
 
-		$audio_attachment_id = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+		$is_audio_enabled = get_post_meta( $_post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
+		if ( 'no' === $is_audio_enabled ) {
+			return $content;
+		}
+
+		$audio_attachment_id = (int) get_post_meta( $_post->ID, self::AUDIO_ID_KEY, true );
 
 		if ( ! $audio_attachment_id ) {
 			return $content;
+		}
+
+		$audio_attachment_url = wp_get_attachment_url( $audio_attachment_id );
+
+		if ( ! $audio_attachment_url ) {
+			return $content;
+		}
+
+		$audio_timestamp = (int) get_post_meta( $_post->ID, self::AUDIO_TIMESTAMP_KEY, true );
+
+		if ( $audio_timestamp ) {
+			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
+		}
+
+		/**
+		 * Filters the audio player markup before display.
+		 *
+		 * Returning a non-false value from this filter will short-circuit building
+		 * the block markup and instead will return your custom markup prepended to
+		 * the post_content.
+		 *
+		 * Note that by using this filter, the custom CSS and JS files will no longer
+		 * be enqueued, so you'll be responsible for either loading them yourself or
+		 * loading custom ones.
+		 *
+		 * @hook classifai_pre_render_post_audio_controls
+		 * @since 2.2.3
+		 *
+		 * @param {bool|string} $markup               Audio markup to use. Defaults to false.
+		 * @param {string}      $content              Content of the current post.
+		 * @param {WP_Post}     $_post                The Post object.
+		 * @param {int}         $audio_attachment_id  The audio attachment ID.
+		 * @param {string}      $audio_attachment_url The URL to the audio attachment file.
+		 *
+		 * @return {bool|string} Custom audio block markup. Will be prepended to the post content.
+		 */
+		$markup = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $_post, $audio_attachment_id, $audio_attachment_url );
+
+		if ( false !== $markup ) {
+			return (string) $markup . $content;
 		}
 
 		wp_enqueue_script(
@@ -536,13 +695,6 @@ class TextToSpeech extends Provider {
 			array(),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
-		);
-
-		$audio_timestamp      = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
-		$audio_attachment_url = sprintf(
-			'%1$s?ver=%2$s',
-			wp_get_attachment_url( $audio_attachment_id ),
-			filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT )
 		);
 
 		ob_start();
@@ -568,9 +720,9 @@ class TextToSpeech extends Provider {
 								 *
 								 * @return {string} Filtered text.
 								 */
-								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $post->ID ),
+								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $_post->ID ),
 								esc_html__( 'Listen to this', 'classifai' ),
-								esc_html( $post->post_type )
+								esc_html( $_post->post_type )
 							);
 
 							echo wp_kses_post( $listen_to_post_text );

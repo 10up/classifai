@@ -93,10 +93,28 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( $this->user_can_access( 'enable_image_gen' ) ) {
+		if ( $this->is_feature_enabled() ) {
+			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
+	}
+
+	/**
+	 * Registers a Media > Generate Image submenu
+	 */
+	public function register_generate_media_page() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		add_submenu_page(
+			'upload.php',
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			'upload_files',
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			''
+		);
 	}
 
 	/**
@@ -105,9 +123,14 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'upload.php' !== $hook_suffix ) {
 			return;
 		}
+
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		wp_enqueue_media();
 
 		wp_enqueue_style(
 			'classifai-image-processing-style',
@@ -149,35 +172,88 @@ class DallE extends Provider {
 			'classifaiDalleData',
 			[
 				'endpoint'   => 'classifai/v1/openai/generate-image',
-				'tabText'    => esc_html__( 'Generate images', 'classifai' ),
+				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
 				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
 				'buttonText' => esc_html__( 'Select image', 'classifai' ),
 				'caption'    => $caption,
 			]
 		);
+
+		if ( 'upload.php' === $hook_suffix ) {
+			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'classifai-generate-image' === $action ) {
+				wp_enqueue_script(
+					'classifai-generate-images-media-upload',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+					[ 'jquery' ],
+					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					true
+				);
+
+				wp_localize_script(
+					'classifai-generate-images-media-upload',
+					'classifaiGenerateImages',
+					[
+						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+					]
+				);
+			}
+		}
 	}
 
 	/**
 	 * Print the templates we need for our media modal integration.
 	 */
 	public function print_media_templates() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view">
 				<p>
-					<?php esc_html_e( 'Enter a prompt below to generate images.', 'classifai' ); ?>
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
+					} else {
+						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
+					}
+					?>
 				</p>
 				<p>
-					<?php esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' ); ?>
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
+					} else {
+						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
+					}
+					?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
-				<button type="button" class="button button-secondary button-large button-generate"><?php esc_html_e( 'Generate images', 'classifai' ); ?></button>
+				<button type="button" class="button button-secondary button-large button-generate">
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Generate images', 'classifai' );
+					} else {
+						esc_html_e( 'Generate image', 'classifai' );
+					}
+					?>
+				</button>
 				<span class="error"></span>
 			</div>
 			<div class="generated-images">
-				<h2 class="prompt-text hidden"><?php esc_html_e( 'Images generated from prompt: ', 'classifai' ); ?><span></span></h2>
+				<h2 class="prompt-text hidden">
+					<?php
+					if ( $number_of_images > 1 ) {
+						esc_html_e( 'Images generated from prompt:', 'classifai' );
+					} else {
+						esc_html_e( 'Image generated from prompt:', 'classifai' );
+					}
+					?>
+					<span></span>
+				</h2>
 				<span class="spinner"></span>
 				<ul></ul>
 			</div>
@@ -484,6 +560,29 @@ class DallE extends Provider {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Checks whether we can generate images.
+	 *
+	 * @return bool
+	 */
+	public function is_feature_enabled() {
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			current_user_can( 'upload_files' )
+			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
+			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 
 }

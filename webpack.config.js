@@ -26,6 +26,13 @@ module.exports = {
 		],
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
+		'generate-title-classic': [
+			'./src/js/openai/classic-editor-title-generator.js',
+		],
+		commands: [ './src/js/gutenberg-plugins/commands.js' ],
+		'generate-image-media-upload': [
+			'./src/js/media-modal/views/generate-image-media-upload.js',
+		],
 	},
 	module: {
 		rules: [
