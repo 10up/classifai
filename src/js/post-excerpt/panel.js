@@ -22,7 +22,6 @@ import apiFetch from '@wordpress/api-fetch';
 function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ error, setError ] = useState( false );
-	const [ data, setData ] = useState( excerpt );
 
 	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
@@ -40,16 +39,15 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		apiFetch( {
 			path,
 			method: 'POST',
-			data: { id: postId, post_content: postContent },
+			data: { id: postId, content: postContent },
 		} ).then(
 			( res ) => {
-				setData( res );
+				onUpdateExcerpt( res );
 				setError( false );
 				setIsLoading( false );
 			},
 			( err ) => {
 				setError( err?.message );
-				setData( [] );
 				setIsLoading( false );
 			}
 		);
@@ -66,7 +64,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				}
 				className="editor-post-excerpt__textarea"
 				onChange={ ( value ) => onUpdateExcerpt( value ) }
-				value={ data }
+				value={ excerpt }
 			/>
 			{ ! isPublishPanelOpen && (
 				<ExternalLink
@@ -82,7 +80,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				disabled={ isLoading }
 				data-id={ postId }
 				onClick={ () =>
-					buttonClick( '/classifai/v1/openai/generate-post-excerpt/' )
+					buttonClick( '/classifai/v1/openai/generate-excerpt/' )
 				}
 			>
 				{ buttonText }
@@ -93,11 +91,12 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					style={ { float: 'none' } }
 				></span>
 			) }
-			{ error && (
+			{ error && ! isLoading && (
 				<span
 					className="error"
 					style={ {
 						color: '#bc0b0b',
+						display: 'inline-block',
 						paddingTop: '5px',
 					} }
 				>

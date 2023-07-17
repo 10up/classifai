@@ -48,7 +48,7 @@ const PostStatusInfo = () => {
 		apiFetch( {
 			path,
 			method: 'POST',
-			data: { id: postId, post_content: postContent },
+			data: { id: postId, content: postContent },
 		} ).then(
 			( res ) => {
 				setData( res );
@@ -115,7 +115,7 @@ const PostStatusInfo = () => {
 				</Modal>
 			) }
 			{ classifaiChatGPTData.enabledFeatures.map( ( feature ) => {
-				const path = feature?.path_post;
+				const path = feature?.path;
 				return (
 					<PostTypeSupportCheck
 						key={ feature?.feature }

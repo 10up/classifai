@@ -65,19 +65,35 @@ class LanguageProcessing extends Service {
 
 		register_rest_route(
 			'classifai/v1/openai',
-			'generate-excerpt/(?P<id>\d+)',
+			'generate-excerpt(?:/(?P<id>\d+))?',
 			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_excerpt' ],
-				'args'                => [
-					'id' => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
+						],
 					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
 				],
-				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				],
 			]
 		);
 
@@ -119,47 +135,43 @@ class LanguageProcessing extends Service {
 
 		register_rest_route(
 			'classifai/v1/openai',
-			'generate-title/(?P<id>\d+)',
+			'generate-title(?:/(?P<id>\d+))?',
 			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_title' ],
-				'args'                => [
-					'id' => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
+						],
+						'n'  => [
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'maximum'           => 10,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+						],
 					],
-					'n'  => [
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'maximum'           => 10,
-						'sanitize_callback' => 'absint',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
-					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 				],
-				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
-			]
-		);
-
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-post-title/',
-			[
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'generate_post_title' ],
-				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
-			]
-		);
-
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-post-excerpt/',
-			[
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'generate_post_excerpt' ],
-				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+				],
 			]
 		);
 	}
@@ -261,8 +273,8 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
-		$post_id      = $request->get_param( 'id' );
-		$post_content = $request->get_param( 'post_content' );
+		$post_id = $request->get_param( 'id' );
+		$content = $request->get_param( 'content' );
 
 		// Find the right provider class.
 		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
@@ -272,7 +284,7 @@ class LanguageProcessing extends Service {
 			return $provider;
 		}
 
-		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt', [ 'post_content' => $post_content ] ) );
+		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt', [ 'content' => $content ] ) );
 	}
 
 	/**
@@ -457,9 +469,8 @@ class LanguageProcessing extends Service {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_title( WP_REST_Request $request ) {
-		$post_id      = $request->get_param( 'id' );
-		$post_content = $request->get_param( 'post_content' );
-		$provider     = '';
+		$post_id  = $request->get_param( 'id' );
+		$provider = '';
 
 		// Find the right provider class.
 		foreach ( $this->provider_classes as $provider_class ) {
@@ -478,8 +489,8 @@ class LanguageProcessing extends Service {
 				$post_id,
 				'title',
 				[
-					'num'          => $request->get_param( 'n' ),
-					'post_content' => $post_content,
+					'num'     => $request->get_param( 'n' ),
+					'content' => $request->get_param( 'content' ),
 				]
 			)
 		);

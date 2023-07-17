@@ -83,7 +83,6 @@ class ChatGPT extends Provider {
 				0 => [
 					'feature'       => 'title',
 					'path'          => '/classifai/v1/openai/generate-title/',
-					'path_post'     => '/classifai/v1/openai/generate-post-title/',
 					'buttonText'    => __( 'Generate titles', 'classifai' ),
 					'modalTitle'    => __( 'Select a title', 'classifai' ),
 					'selectBtnText' => __( 'Select', 'classifai' ),
@@ -488,7 +487,7 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'post_content' => '',
+				'content' => '',
 			]
 		);
 
@@ -534,7 +533,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length, true, $args['post_content'] ) . '',
+						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length, true, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0,
@@ -581,8 +580,8 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'          => $settings['number_titles'] ?? 1,
-				'post_content' => '',
+				'num'     => $settings['number_titles'] ?? 1,
+				'content' => '',
 			]
 		);
 
@@ -626,7 +625,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['post_content'] ) . '',
+						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0.9,
