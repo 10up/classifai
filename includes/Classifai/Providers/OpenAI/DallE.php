@@ -52,42 +52,6 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Determine if the current user can access a feature
-	 *
-	 * @param {string} $feature Feature to check.
-	 *
-	 * @return bool
-	 */
-	public function user_can_access( $feature ) {
-		$access   = false;
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] ) ) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to the image gen feature for DALL·E
-		 *
-		 * @since x.x.x
-		 * @hook classifai_openai_dalle_user_can_{$feature}
-		 *
-		 * @param {bool} $access  Current access value.
-		 * @param {array} $roles  Array of arrays containing role information.
-		 * @param {object} $user  Current user object.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_openai_dalle_user_can_{$feature}", $access, $roles, wp_get_current_user() );
-	}
-
-	/**
 	 * Register what we need for the provider.
 	 *
 	 * This only fires if can_register returns true.
@@ -314,7 +278,7 @@ class DallE extends Provider {
 		/**
 		 * Filter the allowed WordPress roles for DALL·E
 		 *
-		 * @since x.x.x
+		 * @since 2.3.0
 		 * @hook classifai_openai_dalle_allowed_image_roles
 		 *
 		 * @param {array} $roles            Array of arrays containing role information.
@@ -483,7 +447,7 @@ class DallE extends Provider {
 
 		// These checks already ran in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( ! $this->user_can_access( 'enable_image_gen' ) ) {
+		if ( ! $this->is_feature_enabled() ) {
 			// Note that we purposely leave off the textdomain here as this is the same error
 			// message core uses, so we want translations to load from there.
 			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
@@ -568,6 +532,7 @@ class DallE extends Provider {
 	 * @return bool
 	 */
 	public function is_feature_enabled() {
+		$access   = false;
 		$settings = $this->get_settings();
 
 		// Check if the current user has permission to generate images.
@@ -579,10 +544,21 @@ class DallE extends Provider {
 			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
 			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
 		) {
-			return true;
+			$access = true;
 		}
 
-		return false;
+		/**
+		 * Filter to override permission to use the image gen feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_feature_enabled
+		 *
+		 * @param {bool} $access  Current access value.
+		 * @param {array} $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_openai_dalle_feature_enabled', $access, $settings );
 	}
 
 }
