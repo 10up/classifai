@@ -201,10 +201,10 @@ class TextToSpeech extends Provider {
 			$this->get_option_name(),
 			$this->get_option_name(),
 			[
-				'label_for'      => 'default',
-				'input_type'     => 'checkbox',
-				'default_value'  => $default_settings['default'],
-				'description'    => esc_html__( 'Enables the toggle to generate audio on posts by default.', 'classifai' ),
+				'label_for'     => 'default',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['default'],
+				'description'   => esc_html__( 'Enables the toggle to generate audio on posts by default.', 'classifai' ),
 			]
 		);
 
@@ -513,8 +513,8 @@ class TextToSpeech extends Provider {
 			array(
 				'get_callback'    => function( $object ) use ( $settings ) {
 					$process_content = get_post_meta( $object['id'], self::SYNTHESIZE_SPEECH_KEY, true );
-					if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes'], true ) ) {
-						$process_content =  ( 'no' === $settings['default'] ) ? 'no' : 'yes';
+					if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes' ], true ) ) {
+						$process_content = ( 'no' === $settings['default'] ) ? 'no' : 'yes';
 					}
 					return $process_content;
 				},
@@ -575,9 +575,9 @@ class TextToSpeech extends Provider {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
 		$process_content = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
-		if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes'], true ) ) {
+		if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes' ], true ) ) {
 			$default         = $this->get_settings( 'default' );
-			$process_content =  ( 'no' === $default ) ? 'no' : 'yes';
+			$process_content = ( 'no' === $default ) ? 'no' : 'yes';
 		}
 
 		$post_type       = get_post_type_object( get_post_type( $post ) );
