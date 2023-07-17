@@ -299,7 +299,14 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
+		}
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -314,24 +321,14 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
-
 		// Check if valid authentication is in place.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if excerpt generation is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'enable_excerpt' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
 		}
 
 		return true;
@@ -508,7 +505,9 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -523,24 +522,14 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
-
 		// Check if valid authentication is in place.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if title generation is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['title_roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'enable_titles' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
