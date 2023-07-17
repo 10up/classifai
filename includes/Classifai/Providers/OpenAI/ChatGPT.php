@@ -461,7 +461,7 @@ class ChatGPT extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'excerpt':
-				$return = $this->generate_excerpt( $post_id );
+				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 			case 'title':
 				$return = $this->generate_titles( $post_id, $args );
@@ -474,15 +474,22 @@ class ChatGPT extends Provider {
 	/**
 	 * Generate an excerpt using ChatGPT.
 	 *
-	 * @param int $post_id The Post ID we're processing
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0 ) {
+	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
 		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+			]
+		);
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -526,7 +533,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length ) . '',
+						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length, true, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0,
@@ -573,7 +580,8 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num' => $settings['number_titles'] ?? 1,
+				'num'     => $settings['number_titles'] ?? 1,
+				'content' => '',
 			]
 		);
 
@@ -617,7 +625,7 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
+						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0.9,
@@ -659,12 +667,13 @@ class ChatGPT extends Provider {
 	/**
 	 * Get our content, trimming if needed.
 	 *
-	 * @param int  $post_id Post ID to get content from.
-	 * @param int  $return_length Word length of returned content.
-	 * @param bool $use_title Whether to use the title or not.
+	 * @param int    $post_id Post ID to get content from.
+	 * @param int    $return_length Word length of returned content.
+	 * @param bool   $use_title Whether to use the title or not.
+	 * @param string $post_content The post content.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true ) {
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ) {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -683,17 +692,20 @@ class ChatGPT extends Provider {
 		 */
 		$max_content_tokens = $this->max_tokens - $return_tokens - 13;
 
+		if ( empty( $post_content ) ) {
+			$post         = get_post( $post_id );
+			$post_content = apply_filters( 'the_content', $post->post_content );
+		}
+
+		$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
+
 		// Then trim our content, if needed, to stay under the max.
 		if ( $use_title ) {
 			$content = $tokenizer->trim_content(
-				$normalizer->normalize( $post_id ),
+				$normalizer->normalize( $post_id, $post_content ),
 				(int) $max_content_tokens
 			);
 		} else {
-			$post         = get_post( $post_id );
-			$post_content = apply_filters( 'the_content', $post->post_content );
-			$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
-
 			$content = $tokenizer->trim_content(
 				$normalizer->normalize_content( $post_content, '', $post_id ),
 				(int) $max_content_tokens
