@@ -194,6 +194,20 @@ class TextToSpeech extends Provider {
 			]
 		);
 
+		add_settings_field(
+			'default',
+			esc_html__( 'Enabled by default', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'default',
+				'input_type'     => 'checkbox',
+				'default_value'  => $default_settings['default'],
+				'description'    => esc_html__( 'Enables the toggle to generate audio on posts by default.', 'classifai' ),
+			]
+		);
+
 		if ( ! empty( $voices_options ) ) {
 			add_settings_field(
 				'voice',
@@ -262,6 +276,19 @@ class TextToSpeech extends Provider {
 				$current_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
 			} else {
 				$current_settings['post_types'][ $post_type->name ] = null;
+			}
+		}
+
+		$checkbox_settings = [
+			'default',
+		];
+
+		foreach ( $checkbox_settings as $checkbox_setting ) {
+
+			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
+				$current_settings[ $checkbox_setting ] = 'no';
+			} else {
+				$current_settings[ $checkbox_setting ] = '1';
 			}
 		}
 
@@ -436,8 +463,28 @@ class TextToSpeech extends Provider {
 			'voices'        => array(),
 			'voice'         => '',
 			'authenticated' => false,
+			'default'       => true,
 			'post-types'    => array(),
 		];
+	}
+
+	/**
+	 * Helper to get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -464,9 +511,12 @@ class TextToSpeech extends Provider {
 			$supported_post_types,
 			'classifai_synthesize_speech',
 			array(
-				'get_callback'    => function( $object ) {
+				'get_callback'    => function( $object ) use ( $settings ) {
 					$process_content = get_post_meta( $object['id'], self::SYNTHESIZE_SPEECH_KEY, true );
-					return ( 'no' === $process_content ) ? 'no' : 'yes';
+					if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes'], true ) ) {
+						$process_content =  ( 'no' === $settings['default'] ) ? 'no' : 'yes';
+					}
+					return $process_content;
 				},
 				'update_callback' => function ( $value, $object ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
@@ -525,7 +575,10 @@ class TextToSpeech extends Provider {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
 		$process_content = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
-		$process_content = ( 'no' === $process_content ) ? 'no' : 'yes';
+		if ( empty( $process_content ) || ! in_array( $process_content, [ 'no', 'yes'], true ) ) {
+			$default         = $this->get_settings( 'default' );
+			$process_content =  ( 'no' === $default ) ? 'no' : 'yes';
+		}
 
 		$post_type       = get_post_type_object( get_post_type( $post ) );
 		$post_type_label = esc_html__( 'Post', 'classifai' );
