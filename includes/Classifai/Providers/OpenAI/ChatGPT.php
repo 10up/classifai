@@ -64,11 +64,10 @@ class ChatGPT extends Provider {
 	/**
 	 * Determine if the current user can access the feature
 	 *
-	 * @param {string} $feature       Feature to check.
-	 *
+	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function user_can_access( $feature ) {
+	public function is_feature_enabled( string $feature = '' ) {
 		$access        = false;
 		$settings      = $this->get_settings();
 		$user_roles    = wp_get_current_user()->roles ?? [];
@@ -83,25 +82,26 @@ class ChatGPT extends Provider {
 			$feature_roles = $settings[ $role_keys[ $feature ] ] ?? [];
 		}
 
-		// Check if user has access to the feature
+		// Check if user has access to the feature and the feature is turned on.
 		if (
-			! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) )
+			( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) )
+			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] )
 		) {
 			$access = true;
 		}
+
 		/**
-		 * Filter to override permission to a ChatGPT generate feature
+		 * Filter to override permission to a ChatGPT generate feature.
 		 *
-		 * @since x.x.x
+		 * @since 2.3.0
 		 * @hook classifai_chatgpt_user_can_{$feature}
 		 *
-		 * @param {bool}   $access Current access value.
-		 * @param {array}  $feature_roles Roles that have access to the feature.
-		 * @param {object} $user Current user object.
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, $feature_roles, wp_get_current_user() );
+		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, $settings );
 	}
 
 	/**
@@ -145,7 +145,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->user_can_access( 'enable_excerpt' ) ) {
+		if ( $this->is_feature_enabled( 'enable_excerpt' ) ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -156,7 +156,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->user_can_access( 'enable_titles' ) ) {
+		if ( $this->is_feature_enabled( 'enable_titles' ) ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -286,7 +286,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the allowed WordPress roles for ChatGTP
 		 *
-		 * @since x.x.x
+		 * @since 2.3.0
 		 * @hook classifai_chatgpt_allowed_roles
 		 *
 		 * @param {array} $roles            Array of arrays containing role information.
@@ -530,7 +530,7 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'enable_excerpt' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -623,7 +623,7 @@ class ChatGPT extends Provider {
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( ! $this->user_can_access( 'enable_titles' ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
