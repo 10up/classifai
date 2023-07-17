@@ -94,14 +94,14 @@ class ChatGPT extends Provider {
 		 * Filter to override permission to a ChatGPT generate feature.
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_chatgpt_user_can_{$feature}
+		 * @hook classifai_openai_chatgpt_{$feature}
 		 *
 		 * @param {bool}  $access Current access value.
 		 * @param {array} $settings Current feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_chatgpt_user_can_{$feature}", $access, $settings );
+		return apply_filters( "classifai_openai_chatgpt_{$feature}", $access, $settings );
 	}
 
 	/**

@@ -551,14 +551,14 @@ class DallE extends Provider {
 		 * Filter to override permission to use the image gen feature.
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_feature_enabled
+		 * @hook classifai_openai_dalle_enable_image_gen
 		 *
 		 * @param {bool} $access  Current access value.
 		 * @param {array} $settings Feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( 'classifai_openai_dalle_feature_enabled', $access, $settings );
+		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
 	}
 
 }
