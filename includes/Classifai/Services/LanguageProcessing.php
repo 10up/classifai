@@ -150,6 +150,26 @@ class LanguageProcessing extends Service {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'resize_content' ],
 				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
+				'args'                => [
+					'id'          => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
+					],
+					'content'     => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
+					],
+					'resize_type' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The type of resize operation. "grow" or "shrink".', 'classifai' ),
+					],
+				],
 			]
 		);
 	}
