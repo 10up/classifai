@@ -1,6 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import { registerPlugin } from '@wordpress/plugins';
-import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
 import { store as blockEditorStore, BlockControls } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import {
@@ -14,8 +13,6 @@ import { useState, useEffect } from '@wordpress/element';
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import {
-	Button,
-	Icon,
 	Modal,
 	Spinner,
 	ToolbarGroup,
@@ -445,7 +442,7 @@ wp.hooks.addFilter(
 
 const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 	return ( props ) => {
-		const { currentClientId, isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
+		const { isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
 			return {
 				isMultiBlocksSelected: __select( blockEditorStore ).hasMultiSelection(),
 				currentClientId: __select( resizeContentStore ).getClientId(),
@@ -460,7 +457,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 		return (
 			<>
 				{
-					! resizingType ? (
+					! resizingType && ! isMultiBlocksSelected ? (
 						<BlockControls>
 							<ToolbarGroup>
 								<ToolbarItem>
