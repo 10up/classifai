@@ -69,7 +69,7 @@ class Moderation extends Provider {
 
 		if ( 'moderation_flags' === $column_name ) {
 			$flags = get_comment_meta( $comment_id, 'classifai_moderation_flags', true );
-			echo '<div style="text-align: center">' . implode( ', ', esc_html( $flags ) ) . '</div>';
+			echo '<div style="text-align: center">' . esc_html( implode( ', ', $flags ) ) . '</div>';
 		}
 	}
 
