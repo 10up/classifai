@@ -1,7 +1,7 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import { registerPlugin } from '@wordpress/plugins';
 import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
-import { store as blockEditorStore } from '@wordpress/block-editor';
+import { store as blockEditorStore, BlockControls } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import {
 	select,
@@ -13,7 +13,17 @@ import {
 import { useState, useEffect } from '@wordpress/element';
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { Modal, Spinner } from '@wordpress/components';
+import {
+	Button,
+	Icon,
+	Modal,
+	Spinner,
+	ToolbarGroup,
+	ToolbarItem,
+	DropdownMenu,
+	MenuGroup,
+	MenuItem,
+} from '@wordpress/components';
 import {
 	count as getWordCount,
 	count as getCharacterCount,
@@ -22,12 +32,19 @@ import { __ } from '@wordpress/i18n';
 
 import '../../scss/content-resizing-plugin.scss';
 
+const aiIconSvg = (
+	<svg width="20" height="15" viewBox="0 0 61 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path fillRule="evenodd" clipRule="evenodd" d="M3.51922 0C1.57575 0 0 1.5842 0 3.53846V42.4615C0 44.4158 1.57575 46 3.51922 46H57.4808C59.4243 46 61 44.4158 61 42.4615V3.53846C61 1.5842 59.4243 0 57.4808 0H3.51922ZM16.709 8.13836H21.4478L33.58 39.5542H27.524L24.0318 30.5144H13.9699L10.5169 39.5542H4.55669L16.709 8.13836ZM19.0894 16.7007C18.9846 17.041 18.878 17.3735 18.7702 17.698L18.7582 17.7344L15.9976 25.1398H22.1464L19.4013 17.6851L19.0894 16.7007ZM40.3164 8.13836H52.9056V12.1528L49.4929 12.9715V34.6306L52.9056 35.41V39.4338H40.3164V35.41L43.7291 34.6306V12.9715L40.3164 12.1528V8.13836Z" fill="#f82d2c"/>
+	</svg>
+);
+
 /**
  * Custom store to access common data in a block and a higer order
  * component created through filters.
  */
 const DEFAULT_STATE = {
 	clientId: '',
+	resizingType: null,
 };
 
 const resizeContentStore = createReduxStore( 'resize-content-store', {
@@ -37,6 +54,12 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 				return {
 					...state,
 					clientId: action.clientId,
+				};
+
+			case 'SET_RESIZING_TYPE':
+				return {
+					...state,
+					resizingType: action.resizingType,
 				};
 		}
 
@@ -49,10 +72,19 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 				clientId,
 			};
 		},
+		setResizingType( resizingType ) {
+			return {
+				type: 'SET_RESIZING_TYPE',
+				resizingType,
+			};
+		},
 	},
 	selectors: {
 		getClientId( state ) {
 			return state.clientId;
+		},
+		getResizingType( state ) {
+			return state.resizingType;
 		},
 	},
 } );
@@ -81,9 +113,6 @@ const ContentResizingPlugin = () => {
 	// If no text was selected, then this value is the same as `ogText`.
 	const [ selectedText, setSelectedText ] = useState( '' );
 
-	// Holds details of whether to `shrink` or `grow` the content.
-	const [ resizeType, setResizeType ] = useState( 'grow' );
-
 	// Indicates if content resixing is in progress.
 	const [ isResizing, setIsResizing ] = useState( false );
 
@@ -91,12 +120,33 @@ const ContentResizingPlugin = () => {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
 	// Indicates if multiple blocks are selected.
-	const { isMultiBlocksSelected } = useSelect( ( __select ) => {
+	const { isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
 		return {
 			isMultiBlocksSelected:
 				__select( blockEditorStore ).hasMultiSelection(),
+			resizingType:
+				__select( resizeContentStore ).getResizingType(),
 		};
 	} );
+
+	useEffect( () => {
+		if ( resizingType ) {
+			( async () => {
+				await resizeContent();
+			} )();
+		}
+	}, [ resizingType ] );
+
+	// Triggers AJAX request to resize the content.
+	useEffect( () => {
+		if ( isResizing ) {
+			( async () => {
+				const __textArray = await getResizedContent();
+				setTextArray( __textArray );
+				setIsModalOpen( true );
+			} )();
+		}
+	}, [ isResizing ] );
 
 	// Resets to default states.
 	function resetStates() {
@@ -106,24 +156,22 @@ const ContentResizingPlugin = () => {
 		setTextArray( [] );
 		setSelectedText( '' );
 		setIsModalOpen( false );
+		dispatch( resizeContentStore ).setResizingType( null );
 	}
 
 	/**
 	 * Triggered when either `Grow content` or `Shrink content` is clicked from
 	 * the Block's "more options" menu.
 	 *
-	 * @param {string} __resizeType The type of resizing. `grow` or `shrink`.
 	 * @return {void}
 	 */
-	async function resizeContent( __resizeType = 'grow' ) {
+	async function resizeContent() {
 		const start = select( blockEditorStore ).getSelectionStart();
 		const end = select( blockEditorStore ).getSelectionEnd();
 		const block = select( blockEditorStore ).getSelectedBlock();
 
 		const blockContent = block.attributes.content;
 		const blockContentPlainText = toPlainText( blockContent );
-
-		setResizeType( __resizeType );
 
 		if ( 0 === end.offset - start.offset ) {
 			setSelectedBlock( block );
@@ -145,17 +193,6 @@ const ContentResizingPlugin = () => {
 		setIsResizing( true );
 	}
 
-	// Triggers AJAX request to resize the content.
-	useEffect( () => {
-		if ( isResizing ) {
-			( async () => {
-				const __textArray = await getResizedContent();
-				setTextArray( __textArray );
-				setIsModalOpen( true );
-			} )();
-		}
-	}, [ isResizing ] );
-
 	/**
 	 * The AJAX callback that returns with an array of suggestion.
 	 *
@@ -169,7 +206,7 @@ const ContentResizingPlugin = () => {
 
 		formData.append( 'id', postId );
 		formData.append( 'content', selectedText );
-		formData.append( 'resize_type', resizeType );
+		formData.append( 'resize_type', resizingType );
 
 		dispatch( resizeContentStore ).setClientId( selectedBlock.clientId );
 
@@ -244,10 +281,12 @@ const ContentResizingPlugin = () => {
 			<div className="classifai-content-resize__result-wrapper">
 				<table className="classifai-content-resize__result-table">
 					<thead>
-						<th>{ __( 'Suggestion', 'classifai' ) }</th>
-						<th className="classifai-content-resize__stat-header">
-							{ __( 'Stats', 'classifai' ) }
-						</th>
+						<tr>
+							<th>{ __( 'Suggestion', 'classifai' ) }</th>
+							<th className="classifai-content-resize__stat-header">
+								{ __( 'Stats', 'classifai' ) }
+							</th>
+						</tr>
 					</thead>
 					<tbody>
 						{ textArray.map( ( textItem, index ) => {
@@ -295,23 +334,7 @@ const ContentResizingPlugin = () => {
 		</Modal>
 	);
 
-	return (
-		<>
-			{ suggestionModal }
-			<PluginBlockSettingsMenuItem
-				allowedBlocks={ [ 'core/paragraph' ] }
-				icon="smiley"
-				label={ __( 'Grow content', 'classifai' ) }
-				onClick={ () => resizeContent( 'grow' ) }
-			/>
-			<PluginBlockSettingsMenuItem
-				allowedBlocks={ [ 'core/paragraph' ] }
-				icon="smiley"
-				label={ __( 'Shrink content', 'classifai' ) }
-				onClick={ () => resizeContent( 'shrink' ) }
-			/>
-		</>
-	);
+	return suggestionModal;
 };
 
 const ResizeStat = ( { count = 0, countEntity = 'word' } ) => {
@@ -418,4 +441,77 @@ wp.hooks.addFilter(
 	'editor.BlockEdit',
 	'resize-content/lock-block-editing',
 	withInspectorControls
+);
+
+const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
+	return ( props ) => {
+		const { currentClientId, isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
+			return {
+				isMultiBlocksSelected: __select( blockEditorStore ).hasMultiSelection(),
+				currentClientId: __select( resizeContentStore ).getClientId(),
+				resizingType: __select( resizeContentStore ).getResizingType(),
+			};
+		} );
+
+		if ( 'core/paragraph' !== props.name ) {
+			return <BlockEdit { ...props } />;
+		}
+
+		return (
+			<>
+				{
+					! resizingType ? (
+						<BlockControls>
+							<ToolbarGroup>
+								<ToolbarItem>
+									{
+										( prop ) => (
+											<DropdownMenu
+												icon={ () => aiIconSvg }
+												popoverProps={
+													{
+														className: 'is-alternate'
+													}
+												}
+											>
+												{
+													( { onClose } ) => (
+														<MenuGroup>
+															<MenuItem
+																onClick={ () => {
+																	dispatch( resizeContentStore ).setResizingType( 'grow' )
+																	onClose();
+																} }
+															>
+																{ __( 'Grow content', 'classifai' ) }
+															</MenuItem>
+															<MenuItem
+																onClick={ () => {
+																	dispatch( resizeContentStore ).setResizingType( 'shrink' )
+																	onClose();
+																} }
+															>
+																{ __( 'Shrink content', 'classifai' ) }
+															</MenuItem>
+														</MenuGroup>
+													)
+												}
+											</DropdownMenu>
+										)
+									}
+								</ToolbarItem>
+							</ToolbarGroup>
+						</BlockControls>
+					) : null
+				}
+				<BlockEdit { ...props } />
+			</>
+		);
+	};
+}, 'withBlockControl' );
+
+wp.hooks.addFilter(
+	'editor.BlockEdit',
+	'resize-content/lock-block-editing',
+	withBlockControls
 );
