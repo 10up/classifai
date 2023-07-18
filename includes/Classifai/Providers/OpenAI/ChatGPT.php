@@ -373,7 +373,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'enable_resize_content',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s more options menu.', 'classifai' ),
+				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
 			]
 		);
 

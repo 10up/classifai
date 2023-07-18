@@ -147,7 +147,7 @@ class LanguageProcessing extends Service {
 			'classifai/v1/openai',
 			'resize-content',
 			[
-				'methods'             => WP_REST_Server::EDITABLE,
+				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => [ $this, 'resize_content' ],
 				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
 			]
@@ -563,7 +563,6 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function resize_content_permissions_check( WP_REST_Request $request ) {
-		return true;
 		$post_id = $request->get_param( 'id' );
 
 		// Ensure we have a logged in user that can edit the item.
@@ -586,7 +585,7 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if title generation is turned on.
+		// Check if resize content feature is turned on.
 		if ( empty( $settings ) || ( isset( $settings['enable_resize_content'] ) && 'no' === $settings['enable_resize_content'] ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
 		}
