@@ -204,7 +204,7 @@ class TextToSpeech extends Provider {
 				'label_for'     => 'default',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['default'],
-				'description'   => esc_html__( 'Enables the toggle to generate audio on posts by default.', 'classifai' ),
+				'description'   => esc_html__( 'Determines if audio generation is on by default for individual items.', 'classifai' ),
 			]
 		);
 
