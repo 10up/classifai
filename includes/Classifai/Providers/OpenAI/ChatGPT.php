@@ -398,7 +398,10 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once( ABSPATH . 'wp-admin/includes/user.php' );
+		}
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [

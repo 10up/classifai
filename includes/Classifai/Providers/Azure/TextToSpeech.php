@@ -454,7 +454,7 @@ class TextToSpeech extends Provider {
 	/**
 	 * Returns the default settings.
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
 		return [
 			'credentials'   => array(
 				'url'     => '',
@@ -466,25 +466,6 @@ class TextToSpeech extends Provider {
 			'default'       => true,
 			'post-types'    => array(),
 		];
-	}
-
-	/**
-	 * Helper to get the settings and allow for settings default values.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 *
-	 * @return string|array|mixed
-	 */
-	public function get_settings( $index = false ) {
-		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
-		$settings = wp_parse_args( $settings, $defaults );
-
-		if ( $index && isset( $settings[ $index ] ) ) {
-			return $settings[ $index ];
-		}
-
-		return $settings;
 	}
 
 	/**
