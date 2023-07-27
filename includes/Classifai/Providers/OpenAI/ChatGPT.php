@@ -532,6 +532,7 @@ class ChatGPT extends Provider {
 			array_filter( $args ),
 			[
 				'content' => '',
+				'title'   => get_the_title( $post_id ),
 			]
 		);
 
