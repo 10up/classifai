@@ -112,7 +112,7 @@ abstract class Provider {
 	}
 
 	/**
-	 * Can the Provider be initalized?
+	 * Can the Provider be initialized?
 	 */
 	public function can_register() {
 		return $this->is_configured();
