@@ -36,6 +36,8 @@ const PostStatusInfo = () => {
 	}
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postContent =
+		select( 'core/editor' ).getEditedPostAttribute( 'content' );
 	const openModal = () => setOpen( true );
 	const closeModal = () =>
 		setOpen( false ) && setData( [] ) && setError( false );
@@ -45,6 +47,8 @@ const PostStatusInfo = () => {
 		openModal();
 		apiFetch( {
 			path,
+			method: 'POST',
+			data: { id: postId, content: postContent },
 		} ).then(
 			( res ) => {
 				setData( res );
@@ -111,7 +115,7 @@ const PostStatusInfo = () => {
 				</Modal>
 			) }
 			{ classifaiChatGPTData.enabledFeatures.map( ( feature ) => {
-				const path = feature?.path + postId;
+				const path = feature?.path;
 				return (
 					<PostTypeSupportCheck
 						key={ feature?.feature }

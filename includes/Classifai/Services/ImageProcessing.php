@@ -333,29 +333,22 @@ class ImageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_image_permissions_check() {
-		// Ensure we have a logged in user that can upload files.
-		if ( ! current_user_can( 'upload_files' ) ) {
-			return false;
-		}
-
+		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
 		$settings = \Classifai\get_plugin_settings( 'image_processing', 'DALL·E' );
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
+		}
 
 		// Check if valid authentication is in place.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if image generation is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_image_gen'] ) && 'no' === $settings['enable_image_gen'] ) ) {
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
 		}
 
 		return true;
