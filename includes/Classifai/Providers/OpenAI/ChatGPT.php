@@ -414,6 +414,10 @@ class ChatGPT extends Provider {
 			]
 		);
 
+		$content_resize_roles = $roles;
+
+		unset( $content_resize_roles['contributor'], $content_resize_roles['subscriber'] );
+
 		add_settings_field(
 			'resize-content-roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
@@ -422,7 +426,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_resize_content_settings',
 			[
 				'label_for'      => 'resize_content_roles',
-				'options'        => $roles,
+				'options'        => $content_resize_roles,
 				'default_values' => $default_settings['resize_content_roles'],
 				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
 			]
