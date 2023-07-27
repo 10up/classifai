@@ -74,8 +74,9 @@ class ChatGPT extends Provider {
 		$feature_roles = [];
 
 		$role_keys = [
-			'enable_excerpt' => 'roles',
-			'enable_titles'  => 'title_roles',
+			'enable_excerpt'        => 'roles',
+			'enable_titles'         => 'title_roles',
+			'enable_resize_content' => 'resize_content_roles',
 		];
 
 		if ( isset( $role_keys[ $feature ] ) ) {
@@ -175,12 +176,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		$resize_content_roles = $settings['resize_content_roles'] ?? [];
-
-		if (
-			( ! empty( $resize_content_roles ) && empty( array_diff( $user_roles, $resize_content_roles ) ) )
-			&& ( isset( $settings['enable_resize_content'] ) && 1 === (int) $settings['enable_resize_content'] )
-		) {
+		if ( $this->is_feature_enabled( 'enable_resize_content' ) ) {
 			wp_enqueue_script(
 				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
@@ -209,16 +205,13 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$screen      = get_current_screen();
-		$settings    = $this->get_settings();
-		$user_roles  = wp_get_current_user()->roles ?? [];
-		$title_roles = $settings['title_roles'] ?? [];
+		$screen   = get_current_screen();
+		$settings = $this->get_settings();
 
 		// Load the assets for the classic editor.
 		if (
 			$screen && ! $screen->is_block_editor()
-			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
+			&& $this->is_feature_enabled( 'enable_titles' )
 		) {
 			wp_enqueue_style(
 				'classifai-generate-title-classic-css',
