@@ -488,7 +488,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 										{ ( { onClose } ) => (
 											<MenuGroup>
 												<MenuItem
-													className='classifai-resize-content-btn__grow'
+													className="classifai-resize-content-btn__grow"
 													onClick={ () => {
 														dispatch(
 															resizeContentStore
@@ -504,7 +504,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													) }
 												</MenuItem>
 												<MenuItem
-													className='classifai-resize-content-btn__shrink'
+													className="classifai-resize-content-btn__shrink"
 													onClick={ () => {
 														dispatch(
 															resizeContentStore
