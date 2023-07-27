@@ -558,7 +558,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', sprintf( 'Summarize the following message using a maximum of %d words. Ensure this summary pairs well with the following text: %s.', $excerpt_length, get_the_title( $post_id ) ), $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', sprintf( 'Summarize the following message using a maximum of %d words. Ensure this summary pairs well with the following text: %s.', $excerpt_length, $args['title'] ), $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
