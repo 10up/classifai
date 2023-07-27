@@ -26,11 +26,6 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
 			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
 			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
-			$result   = [
-				'code' => 200,
-				'message' => [],
-				'data' => null,
-			];
 
 			if ( str_contains( $prompt, 'Increase the word' ) || str_contains( $prompt, 'Decrease the word' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content.json' );
