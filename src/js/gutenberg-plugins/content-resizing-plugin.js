@@ -484,10 +484,12 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 										popoverProps={ {
 											className: 'is-alternate',
 										} }
+										className="classifai-resize-content-btn"
 									>
 										{ ( { onClose } ) => (
 											<MenuGroup>
 												<MenuItem
+													className='classifai-resize-content-btn__grow'
 													onClick={ () => {
 														dispatch(
 															resizeContentStore
@@ -503,6 +505,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													) }
 												</MenuItem>
 												<MenuItem
+													className='classifai-resize-content-btn__shrink'
 													onClick={ () => {
 														dispatch(
 															resizeContentStore

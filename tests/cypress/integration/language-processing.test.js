@@ -705,4 +705,49 @@ describe('Language processing Tests', () => {
 		cy.get('.media-modal').should('exist');
 		cy.get('#classifai-retranscribe').should('not.exist');
 	});
+
+	it( 'Resize content feature can grow and shrink content', () => {
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+
+		cy.get( '#enable_resize_content' ).check();
+		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.createPost({
+			title: 'Resize content',
+			content: 'Hello, world.',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.classifai-resize-content-btn__grow' ).click();
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+7 words' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+40 characters' )
+		cy.get( '.classifai-content-resize__result-table tbody tr' ).first().click();
+		cy.get( '.wp-block-paragraph' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+
+		cy.createPost({
+			title: 'Resize content',
+			content: 'Start with the basic building block of one narrative to begin with the editorial process.',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.classifai-resize-content-btn__shrink' ).click();
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-6 words' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-36 characters' )
+		cy.get( '.classifai-content-resize__result-table tbody tr' ).first().click();
+		cy.get( '.wp-block-paragraph' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+	} );
+
+	it( 'Disabling Resize content feature by role does not render buttons in the UI', () => {
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		cy.createPost({
+			title: 'Expand content',
+			content: 'Are the resizing options hidden?',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).should( 'not.exist' );
+	} );
 });

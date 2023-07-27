@@ -19,6 +19,24 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
+		$body_json = isset( $parsed_args['body'] ) ? wp_unslash( $parsed_args['body'] ) : false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
+			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
+			$result   = [
+				'code' => 200,
+				'message' => [],
+				'data' => null,
+			];
+
+			if ( str_contains( $prompt, 'Increase the word' ) || str_contains( $prompt, 'Decrease the word' ) ) {
+				$response = file_get_contents( __DIR__ . '/resize-content.json' );
+				return classifai_test_prepare_response( $response );
+			}
+		}
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
