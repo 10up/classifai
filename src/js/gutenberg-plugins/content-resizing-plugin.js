@@ -123,13 +123,12 @@ const ContentResizingPlugin = () => {
 	// If no text was selected, then this value is the same as `ogText`.
 	const [ selectedText, setSelectedText ] = useState( '' );
 
-	// Indicates if content resixing is in progress.
+	// Indicates if content resizing is in progress.
 	const [ isResizing, setIsResizing ] = useState( false );
 
 	// Indicates if the modal window with the result is open/closed.
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
-	// Indicates if multiple blocks are selected.
 	const { isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
 		return {
 			isMultiBlocksSelected:
@@ -138,6 +137,7 @@ const ContentResizingPlugin = () => {
 		};
 	} );
 
+	// Sets required states before resizing content.
 	useEffect( () => {
 		if ( resizingType ) {
 			( async () => {
