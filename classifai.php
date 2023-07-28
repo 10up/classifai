@@ -16,32 +16,6 @@
  */
 
 /**
- * Require PHP version 7.4+ - throw an error if the plugin is activated on an older version.
- *
- * Note that this itself is only PHP5.3+ compatible because of the anonymous callback.
- */
-register_activation_hook(
-	__FILE__,
-	function() {
-		if ( version_compare( PHP_VERSION, '7.4.0', '<' ) ) {
-			wp_die(
-				sprintf(
-					wp_kses(
-						/* translators: PHP Update guide URL */
-						__( 'ClassifAI requires PHP version 7.4. <a href="%s">Click here</a> to learn how to update your PHP version.', 'classifai' ),
-						array(
-							'a' => array( 'href' => array() ),
-						)
-					),
-					esc_url( 'https://wordpress.org/support/update-php/' )
-				),
-				esc_html__( 'Error Activating', 'classifai' )
-			);
-		}
-	}
-);
-
-/**
  * Small wrapper around PHP's define function. The defined constant is
  * ignored if it has already been defined. This allows the
  * config.local.php to override any constant in config.php.
