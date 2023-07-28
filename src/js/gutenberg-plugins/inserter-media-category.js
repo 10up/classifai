@@ -1,8 +1,10 @@
+import apiFetch from '@wordpress/api-fetch';
 import { dispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
+import { addQueryArgs } from '@wordpress/url';
 
-const { classifaiDalleData, wpApiSettings } = window;
+const { classifaiDalleData } = window;
 
 const RegisterInserterMediaCategory = () => {
 	const { inserterMediaCategories } = useSelect(
@@ -39,36 +41,31 @@ const RegisterInserterMediaCategory = () => {
 			search_items: __( 'Enter a prompt', 'classifai' ),
 		},
 		mediaType: 'image',
-		async fetch( { search = '' } ) {
+		fetch: async ( { search = '' } ) => {
 			if ( ! search ) {
 				return [];
 			}
 
-			const url = new URL(
-				wpApiSettings.root + classifaiDalleData.endpoint
-			);
-			url.searchParams.set( 'prompt', search );
-			url.searchParams.set( 'format', 'b64_json' );
+			const images = await apiFetch( {
+				path: addQueryArgs( classifaiDalleData.endpoint, {
+					prompt: search,
+					format: 'b64_json',
+				} ),
+				method: 'GET',
+			} )
+				.then( ( response ) =>
+					response.map( ( item ) => ( {
+						title: search,
+						url: `data:image/png;base64,${ item.url }`,
+						previewUrl: `data:image/png;base64,${ item.url }`,
+						id: undefined,
+						alt: search,
+						caption: classifaiDalleData.caption,
+					} ) )
+				)
+				.catch( () => [] );
 
-			const response = await window.fetch( url, {
-				headers: {
-					'X-WP-Nonce': wpApiSettings.nonce,
-				},
-			} );
-
-			if ( response.ok ) {
-				const jsonResponse = await response.json();
-				return jsonResponse.map( ( item ) => ( {
-					title: search,
-					url: `data:image/png;base64,${ item.url }`,
-					previewUrl: `data:image/png;base64,${ item.url }`,
-					id: undefined,
-					alt: search,
-					caption: classifaiDalleData.caption,
-				} ) );
-			}
-
-			return [];
+			return images;
 		},
 		isExternalResource: true,
 	} );
