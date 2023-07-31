@@ -89,7 +89,13 @@ class LanguageProcessing extends Service {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
+							'description'       => esc_html__( 'Content to summarize into an excerpt.', 'classifai' ),
+						],
+						'title'   => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
 						],
 					],
 					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
@@ -275,6 +281,7 @@ class LanguageProcessing extends Service {
 	public function generate_post_excerpt( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
 		$content = $request->get_param( 'content' );
+		$title   = $request->get_param( 'title' );
 
 		// Find the right provider class.
 		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
@@ -284,7 +291,16 @@ class LanguageProcessing extends Service {
 			return $provider;
 		}
 
-		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt', [ 'content' => $content ] ) );
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'excerpt',
+				[
+					'content' => $content,
+					'title'   => $title,
+				]
+			)
+		);
 	}
 
 	/**
