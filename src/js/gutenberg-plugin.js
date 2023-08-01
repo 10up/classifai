@@ -14,7 +14,8 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
 
-const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } = window;
+const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
+	window;
 
 /**
  * Create the ClassifAI icon
@@ -192,8 +193,6 @@ const ClassifAIGenerateTagsButton = () => {
 
 /**
  * ClassifAI Text to Audio component.
- *
- * @param {Object} props Props object.
  */
 const ClassifAITTS = () => {
 	// State of the audio being previewed in PluginDocumentSettingPanel.
@@ -216,8 +215,10 @@ const ClassifAITTS = () => {
 	);
 
 	// Post type label.
-	const postTypeLabel = useSelect( ( select ) =>
-		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' )
+	const postTypeLabel = useSelect(
+		( select ) =>
+			select( 'core/editor' ).getPostTypeLabel() ||
+			__( 'Post', 'classifai' )
 	);
 
 	// Says whether speech synthesis is in progress.
@@ -253,12 +254,12 @@ const ClassifAITTS = () => {
 	const { isSavingPost } = useSelect( ( select ) => {
 		return {
 			isSavingPost: select( 'core/editor' ).isSavingPost(),
-		}
+		};
 	} );
 	const { isAutosavingPost } = useSelect( ( select ) => {
 		return {
 			isSavingPost: select( 'core/editor' ).isAutosavingPost(),
-		}
+		};
 	} );
 
 	// Handles playing/pausing post audio during preview.
@@ -289,19 +290,27 @@ const ClassifAITTS = () => {
 
 	useEffect( () => {
 		// Code to run during post saving is in process.
-		if ( isSavingPost && !isAutosavingPost && ! isPostSavingInProgress.current ) {
+		if (
+			isSavingPost &&
+			! isAutosavingPost &&
+			! isPostSavingInProgress.current
+		) {
 			isPostSavingInProgress.current = true;
 			if ( isSynthesizeSpeech ) {
 				wp.data.dispatch( postAudioStore ).setIsProcessing( true );
 			}
 		}
 
-		if ( ! isSavingPost && ! isAutosavingPost && isPostSavingInProgress.current ) {
+		if (
+			! isSavingPost &&
+			! isAutosavingPost &&
+			isPostSavingInProgress.current
+		) {
 			// Code to run after post is done saving.
 			isPostSavingInProgress.current = false;
 			wp.data.dispatch( postAudioStore ).setIsProcessing( false );
 		}
-	}, [ isSavingPost ] );
+	}, [ isSavingPost, isAutosavingPost, isSynthesizeSpeech ] );
 
 	// Fetches the latest audio file to avoid disk cache.
 	const cacheBustingUrl = `${ sourceUrl }?ver=${ timestamp }`;
@@ -318,16 +327,14 @@ const ClassifAITTS = () => {
 		<>
 			<ToggleControl
 				label={ __( 'Enable audio generation', 'classifai' ) }
-				help={
-					sprintf(
+				help={ sprintf(
 					/** translators: %s is post type label. */
 					__(
 						'ClassifAI will generate audio for this %s when it is published or updated.',
 						'classifai'
 					),
-						postTypeLabel
-					)
-				}
+					postTypeLabel
+				) }
 				checked={ isSynthesizeSpeech }
 				onChange={ ( value ) => {
 					wp.data.dispatch( 'core/editor' ).editPost( {
@@ -341,12 +348,10 @@ const ClassifAITTS = () => {
 				<>
 					<ToggleControl
 						label={ __( 'Display audio controls', 'classifai' ) }
-						help={
-							__(
-								'Controls the display of the audio player on the front-end.',
-								'classifai'
-							)
-						}
+						help={ __(
+							'Controls the display of the audio player on the front-end.',
+							'classifai'
+						) }
 						checked={ displayGeneratedAudio }
 						onChange={ ( value ) => {
 							wp.data.dispatch( 'core/editor' ).editPost( {
@@ -361,7 +366,10 @@ const ClassifAITTS = () => {
 						help={
 							isProcessingAudio
 								? ''
-								: __( 'Preview the generated audio.', 'classifai' )
+								: __(
+										'Preview the generated audio.',
+										'classifai'
+								  )
 						}
 					>
 						<Button
@@ -472,9 +480,7 @@ const ClassifAIPlugin = () => {
 						) }
 					</>
 				) }
-				{ classifaiTTSEnabled && (
-					<ClassifAITTS />
-				) }
+				{ classifaiTTSEnabled && <ClassifAITTS /> }
 			</>
 		</PluginDocumentSettingPanel>
 	);
