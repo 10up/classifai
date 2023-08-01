@@ -153,7 +153,7 @@ abstract class Provider {
 	 * @return string|array|mixed
 	 */
 	public function get_settings( $index = false ) {
-		$defaults = [];
+		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
 		$settings = wp_parse_args( $settings, $defaults );
 
@@ -162,6 +162,13 @@ abstract class Provider {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns the default settings.
+	 */
+	public function get_default_settings() {
+		return [];
 	}
 
 	/**

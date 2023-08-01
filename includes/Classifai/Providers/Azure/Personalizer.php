@@ -62,7 +62,7 @@ class Personalizer extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
 		return [
 			'authenticated' => false,
 			'url'           => '',
