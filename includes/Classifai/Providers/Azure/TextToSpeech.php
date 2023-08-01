@@ -188,7 +188,7 @@ class TextToSpeech extends Provider {
 				'label_for'      => 'post_types',
 				'option_index'   => 'post_types',
 				'options'        => $this->get_post_types_select_options(),
-				'default_values' => $default_settings['post-types'],
+				'default_values' => $default_settings['post_types'],
 			]
 		);
 
@@ -238,6 +238,9 @@ class TextToSpeech extends Provider {
 
 				if ( ! empty( $current_settings['voices'] ) ) {
 					$current_settings['authenticated'] = true;
+				} else {
+					$current_settings['voices'] = [];
+					$current_settings['authenticated'] = false;
 				}
 			}
 		} else {
@@ -434,7 +437,7 @@ class TextToSpeech extends Provider {
 			'voices'        => array(),
 			'voice'         => '',
 			'authenticated' => false,
-			'post-types'    => array(),
+			'post_types'    => array(),
 		];
 	}
 

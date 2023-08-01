@@ -217,7 +217,8 @@ const ClassifAITTS = () => {
 	// Post type label.
 	const postTypeLabel = useSelect(
 		( select ) =>
-			select( 'core/editor' ).getPostTypeLabel() ||
+			( typeof select( 'core/editor' ).getPostTypeLabel !== 'undefined' &&
+				select( 'core/editor' ).getPostTypeLabel() ) ||
 			__( 'Post', 'classifai' )
 	);
 
