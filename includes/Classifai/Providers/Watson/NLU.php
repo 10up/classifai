@@ -28,6 +28,11 @@ class NLU extends Provider {
 	public $save_post_handler;
 
 	/**
+	 * @var $nlu_features array The list of NLU features
+	 */
+	protected $nlu_features = [];
+
+	/**
 	 * Watson NLU constructor.
 	 *
 	 * @param string $service The service this class belongs to.

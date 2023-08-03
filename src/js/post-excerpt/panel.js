@@ -27,6 +27,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postContent =
 		select( 'core/editor' ).getEditedPostAttribute( 'content' );
+	const postTitle = select( 'core/editor' ).getEditedPostAttribute( 'title' );
 	const buttonText =
 		'' === excerpt
 			? __( 'Generate excerpt', 'classifai' )
@@ -39,7 +40,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		apiFetch( {
 			path,
 			method: 'POST',
-			data: { id: postId, content: postContent },
+			data: { id: postId, content: postContent, title: postTitle },
 		} ).then(
 			( res ) => {
 				onUpdateExcerpt( res );
