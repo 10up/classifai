@@ -239,7 +239,7 @@ class TextToSpeech extends Provider {
 				if ( ! empty( $current_settings['voices'] ) ) {
 					$current_settings['authenticated'] = true;
 				} else {
-					$current_settings['voices'] = [];
+					$current_settings['voices']        = [];
 					$current_settings['authenticated'] = false;
 				}
 			}
@@ -268,8 +268,6 @@ class TextToSpeech extends Provider {
 
 		if ( isset( $settings['voice'] ) && ! empty( $settings['voice'] ) ) {
 			$current_settings['voice'] = sanitize_text_field( $settings['voice'] );
-		} else {
-			$current_settings['voice'] = '';
 		}
 
 		return $current_settings;
@@ -452,6 +450,17 @@ class TextToSpeech extends Provider {
 	 * @return {bool}                     The initial state of audio generation. Default true.
 	 */
 	public function get_audio_generation_initial_state( $post = null ) {
+		/**
+		 * Initial state of the audio generation toggle when no audio already exists for the post.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_audio_generation_initial_state
+		 *
+		 * @param  {bool}    $state Initial state of audio generation toggle on a post. Default true.
+		 * @param  {WP_Post} $post  The current Post object.
+		 *
+		 * @return {bool}           Initial state the audio generation toggle should be set to when no audio exists.
+		 */
 		return apply_filters( 'classifai_audio_generation_initial_state', true, get_post( $post ) );
 	}
 
@@ -466,6 +475,17 @@ class TextToSpeech extends Provider {
 	 * @return {bool}                    The subsequenet state of audio generation. Default false.
 	 */
 	public function get_audio_generation_subsequent_state( $post = null ) {
+		/**
+		 * Subsequent state of the audio generation toggle when audio exists for the post.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_audio_generation_subsequent_state
+		 *
+		 * @param  {bool}    $state Subsequent state of audio generation toggle on a post. Default false.
+		 * @param  {WP_Post} $post  The current Post object.
+		 *
+		 * @return {bool}           Subsequent state the audio generation toggle should be set to when audio exists.
+		 */
 		return apply_filters( 'classifai_audio_generation_subsequent_state', false, get_post( $post ) );
 	}
 
