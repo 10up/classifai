@@ -444,10 +444,10 @@ class TextToSpeech extends Provider {
 	 *
 	 * Fetch the initial state of audio generation prior to the audio existing for the post.
 	 *
-	 * @param  {int|WP_Post|null} $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 * @param  int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
 	 *                                    return the current global post inside the loop. A numerically valid post ID that
 	 *                                    points to a non-existent post returns `null`. Defaults to global $post.
-	 * @return {bool}                     The initial state of audio generation. Default true.
+	 * @return bool                     The initial state of audio generation. Default true.
 	 */
 	public function get_audio_generation_initial_state( $post = null ) {
 		/**
@@ -469,10 +469,10 @@ class TextToSpeech extends Provider {
 	 *
 	 * Fetch the subsequent state of audio generation once audio is generated for the post.
 	 *
-	 * @param {int|WP_Post|null} $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 * @param int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
 	 *                                   return the current global post inside the loop. A numerically valid post ID that
 	 *                                   points to a non-existent post returns `null`. Defaults to global $post.
-	 * @return {bool}                    The subsequenet state of audio generation. Default false.
+	 * @return bool                    The subsequent state of audio generation. Default false.
 	 */
 	public function get_audio_generation_subsequent_state( $post = null ) {
 		/**

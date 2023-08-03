@@ -166,6 +166,8 @@ abstract class Provider {
 
 	/**
 	 * Returns the default settings.
+	 *
+	 * @return array
 	 */
 	public function get_default_settings() {
 		return [];
