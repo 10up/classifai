@@ -532,6 +532,7 @@ class ChatGPT extends Provider {
 			array_filter( $args ),
 			[
 				'content' => '',
+				'title'   => get_the_title( $post_id ),
 			]
 		);
 
@@ -557,7 +558,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a teaser for the following text using a maximum of ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', sprintf( 'Summarize the following message using a maximum of %d words. Ensure this summary pairs well with the following text: %s.', $excerpt_length, $args['title'] ), $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -576,11 +577,15 @@ class ChatGPT extends Provider {
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
 					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
 						'role'    => 'user',
-						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length, true, $args['content'] ) . '',
+						'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '',
 					],
 				],
-				'temperature' => 0,
+				'temperature' => 0.9,
 			],
 			$post_id
 		);
@@ -649,7 +654,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -668,8 +673,12 @@ class ChatGPT extends Provider {
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
 					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
+						'content' => $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0.9,
@@ -731,10 +740,10 @@ class ChatGPT extends Provider {
 		/**
 		 * We then subtract those tokens from the max number of tokens ChatGPT allows
 		 * in a single request, as well as subtracting out the number of tokens in our
-		 * prompt (13). ChatGPT counts both the tokens in the request and in
+		 * prompt (~50). ChatGPT counts both the tokens in the request and in
 		 * the response towards the max.
 		 */
-		$max_content_tokens = $this->max_tokens - $return_tokens - 13;
+		$max_content_tokens = $this->max_tokens - $return_tokens - 50;
 
 		if ( empty( $post_content ) ) {
 			$post         = get_post( $post_id );
