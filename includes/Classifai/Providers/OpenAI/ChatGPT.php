@@ -55,8 +55,9 @@ class ChatGPT extends Provider {
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
-				'enable_excerpt' => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'  => __( 'Title generation', 'classifai' ),
+				'enable_excerpt'         => __( 'Excerpt generation', 'classifai' ),
+				'enable_titles'          => __( 'Title generation', 'classifai' ),
+				'enable_resize_content'  => __( 'Content Resizing', 'classifai' ),
 			),
 		);
 	}
