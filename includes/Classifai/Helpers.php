@@ -279,7 +279,7 @@ function get_supported_post_types() {
 /**
  * The list of post types that TTS supports.
  *
- * return array Supported Post Types.
+ * @return array Supported Post Types.
  */
 function get_tts_supported_post_types() {
 	$classifai_settings = get_plugin_settings( 'language_processing', Azure\TextToSpeech::FEATURE_NAME );
