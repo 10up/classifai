@@ -837,9 +837,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = 'Decrease the word count in the following content by a small margin.';
+			$prompt = 'Decrease the content length no more than 2 to 4 sentences.';
 		} else {
-			$prompt = 'Increase the word count in the following content by a small margin.';
+			$prompt = 'Increase the content length no more than 2 to 4 sentences.';
 		}
 
 		/**
@@ -872,8 +872,12 @@ class ChatGPT extends Provider {
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
 					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . esc_html( $args['content'] ) . '',
+						'content' => esc_html( $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0.9,
