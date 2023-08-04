@@ -19,4 +19,4 @@ indent_style = space
 indent_size = 2
 
 [{*.txt,wp-config-sample.php}]
-end_of_line = crlf
+end_of_line = lf
