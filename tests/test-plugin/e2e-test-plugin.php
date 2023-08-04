@@ -29,7 +29,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
 			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
 
-			if ( str_contains( $prompt, 'Increase the word' ) || str_contains( $prompt, 'Decrease the word' ) ) {
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content.json' );
 				return classifai_test_prepare_response( $response );
 			}
