@@ -7,7 +7,7 @@
 
 namespace Classifai\Admin;
 
-use Puc_v4_Factory;
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 /**
  * Plugin update class.
@@ -24,7 +24,7 @@ class Update {
 	/**
 	 * The update checker object.
 	 *
-	 * @var Puc_v4p13_Plugin_UpdateChecker
+	 * @var YahnisElsts\PluginUpdateChecker\v5p1\Vcs\PluginUpdateChecker
 	 */
 	protected $updater;
 
@@ -34,7 +34,7 @@ class Update {
 	 * @return bool
 	 */
 	public function can_register() {
-		return class_exists( '\Puc_v4_Factory' ) && self::license_check();
+		return class_exists( '\YahnisElsts\PluginUpdateChecker\v5\PucFactory' ) && self::license_check();
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Update {
 	 * @return void
 	 */
 	public function init() {
-		$this->updater = Puc_v4_Factory::buildUpdateChecker(
+		$this->updater = PucFactory::buildUpdateChecker(
 			self::$repo_url,
 			CLASSIFAI_PLUGIN,
 			'classifai'
