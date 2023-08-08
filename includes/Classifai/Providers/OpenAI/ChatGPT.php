@@ -406,7 +406,7 @@ class ChatGPT extends Provider {
 		if ( isset( $settings['language'] ) ) {
 			$new_settings['language'] = sanitize_text_field( $settings['language'] );
 		} else {
-			$new_settings['language'] = 'en';
+			$new_settings['language'] = sanitize_text_field( str_replace( '-', '_', get_bloginfo( 'language' ) ) );
 		}
 
 		return $new_settings;
@@ -436,7 +436,7 @@ class ChatGPT extends Provider {
 			'enable_titles'  => false,
 			'title_roles'    => array_keys( $editable_roles ),
 			'number_titles'  => 1,
-			'language'       => 'en',
+			'language'       => sanitize_text_field( str_replace( '-', '_', get_bloginfo( 'language' ) ) ),
 		];
 	}
 
