@@ -10,6 +10,7 @@ use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_supported_post_types;
+use function Classifai\get_tts_supported_post_types;
 
 /**
  * Handle bulk actions.
@@ -77,13 +78,12 @@ class BulkActions {
 		$this->chat_gpt       = new ChatGPT( false );
 		$this->moderation     = new Moderation( false );
 		$this->embeddings     = new Embeddings( false );
-		$this->text_to_speech = new TextToSpeech( false );
 
 		$user_roles                = wp_get_current_user()->roles ?? [];
 		$embedding_settings        = $this->embeddings->get_settings();
 		$embeddings_post_types     = [];
 		$nlu_post_types            = get_supported_post_types();
-		$text_to_speech_post_types = $this->text_to_speech->get_supported_post_types();
+		$text_to_speech_post_types = get_tts_supported_post_types();
 		$chat_gpt_post_types       = [];
 		$chat_gpt_settings         = $this->chat_gpt->get_settings();
 		$moderation_post_types     = [];
@@ -118,11 +118,6 @@ class BulkActions {
 			$moderation_post_types = $this->moderation->get_supported_post_types();
 		} else {
 			$this->moderation = null;
-		}
-
-		// Clear our TextToSpeech handler if no post types are set up.
-		if ( empty( $text_to_speech_post_types ) ) {
-			$this->text_to_speech = null;
 		}
 
 		// Merge our post types together and make them unique.

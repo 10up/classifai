@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/10up/classifai
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:           2.2.3
+ * Version:           2.3.0-dev
  * Requires at least: 5.7
  * Requires PHP:      7.4
  * Author:            10up
@@ -16,30 +16,47 @@
  */
 
 /**
- * Require PHP version 7.4+ - throw an error if the plugin is activated on an older version.
+ * Get the minimum version of PHP required by this plugin.
  *
- * Note that this itself is only PHP5.3+ compatible because of the anonymous callback.
+ * @return string Minimum version required.
  */
-register_activation_hook(
-	__FILE__,
-	function() {
-		if ( version_compare( PHP_VERSION, '7.4.0', '<' ) ) {
-			wp_die(
-				sprintf(
-					wp_kses(
-						/* translators: PHP Update guide URL */
-						__( 'ClassifAI requires PHP version 7.4. <a href="%s">Click here</a> to learn how to update your PHP version.', 'classifai' ),
-						array(
-							'a' => array( 'href' => array() ),
+function classifai_minimum_php_requirement() {
+	return '7.4';
+}
+
+/**
+ * Whether PHP installation meets the minimum requirements
+ *
+ * @return bool True if meets minimum requirements, false otherwise.
+ */
+function classifai_site_meets_php_requirements() {
+	return version_compare( phpversion(), classifai_minimum_php_requirement(), '>=' );
+}
+
+// Ensuring our PHP version requirement is met first before loading plugin.
+if ( ! classifai_site_meets_php_requirements() ) {
+	add_action(
+		'admin_notices',
+		function() {
+			?>
+			<div class="notice notice-error">
+				<p>
+					<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: Minimum required PHP version */
+							__( 'ClassifAI requires PHP version %s or later. Please upgrade PHP or disable the plugin.', 'classifai' ),
+							esc_html( classifai_minimum_php_requirement() )
 						)
-					),
-					esc_url( 'https://wordpress.org/support/update-php/' )
-				),
-				esc_html__( 'Error Activating', 'classifai' )
-			);
+					);
+					?>
+				</p>
+			</div>
+			<?php
 		}
-	}
-);
+	);
+	return;
+}
 
 /**
  * Small wrapper around PHP's define function. The defined constant is

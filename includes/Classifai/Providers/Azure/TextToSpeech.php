@@ -11,6 +11,7 @@ use stdClass;
 use WP_Http;
 
 use function Classifai\get_post_types_for_language_settings;
+use function Classifai\get_tts_supported_post_types;
 use function Classifai\get_asset_info;
 
 class TextToSpeech extends Provider {
@@ -30,12 +31,11 @@ class TextToSpeech extends Provider {
 	const API_PATH = 'cognitiveservices/v1';
 
 	/**
-	 * Meta key to store data indicating whether Text to Speech is enabled for
-	 * the current post.
+	 * Meta key to hide/unhide already generated audio file.
 	 *
 	 * @var string
 	 */
-	const SYNTHESIZE_SPEECH_KEY = '_classifai_synthesize_speech';
+	const DISPLAY_GENERATED_AUDIO = '_classifai_display_generated_audio';
 
 	/**
 	 * Meta key to get/set the ID of the speech audio file.
@@ -87,21 +87,13 @@ class TextToSpeech extends Provider {
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
-		global $post;
-
-		wp_enqueue_script(
-			'classifai-editor', // Handle.
-			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			array( 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post' ),
-			CLASSIFAI_PLUGIN_VERSION,
-			true
-		);
+		$post = get_post();
 
 		if ( empty( $post ) ) {
 			return;
 		}
 
-		$supported_post_types = self::get_supported_post_types();
+		$supported_post_types = get_tts_supported_post_types();
 
 		if ( ! in_array( $post->post_type, $supported_post_types, true ) ) {
 			return;
@@ -115,13 +107,13 @@ class TextToSpeech extends Provider {
 			true
 		);
 
-		wp_localize_script(
+		wp_add_inline_script(
 			'classifai-gutenberg-plugin',
-			'classifaiTextToSpeechData',
-			[
-				'supportedPostTypes' => self::get_supported_post_types(),
-				'noPermissions'      => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-			]
+			sprintf(
+				'var classifaiTTSEnabled = %d;',
+				true
+			),
+			'before'
 		);
 	}
 
@@ -133,6 +125,12 @@ class TextToSpeech extends Provider {
 		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+
+		$supported_post_type = get_tts_supported_post_types();
+		foreach ( get_tts_supported_post_types() as $post_type ) {
+			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+		}
+
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
@@ -190,7 +188,7 @@ class TextToSpeech extends Provider {
 				'label_for'      => 'post_types',
 				'option_index'   => 'post_types',
 				'options'        => $this->get_post_types_select_options(),
-				'default_values' => $default_settings['post-types'],
+				'default_values' => $default_settings['post_types'],
 			]
 		);
 
@@ -240,6 +238,9 @@ class TextToSpeech extends Provider {
 
 				if ( ! empty( $current_settings['voices'] ) ) {
 					$current_settings['authenticated'] = true;
+				} else {
+					$current_settings['voices']        = [];
+					$current_settings['authenticated'] = false;
 				}
 			}
 		} else {
@@ -267,8 +268,6 @@ class TextToSpeech extends Provider {
 
 		if ( isset( $settings['voice'] ) && ! empty( $settings['voice'] ) ) {
 			$current_settings['voice'] = sanitize_text_field( $settings['voice'] );
-		} else {
-			$current_settings['voice'] = '';
 		}
 
 		return $current_settings;
@@ -427,7 +426,7 @@ class TextToSpeech extends Provider {
 	/**
 	 * Returns the default settings.
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
 		return [
 			'credentials'   => array(
 				'url'     => '',
@@ -436,44 +435,108 @@ class TextToSpeech extends Provider {
 			'voices'        => array(),
 			'voice'         => '',
 			'authenticated' => false,
-			'post-types'    => array(),
+			'post_types'    => array(),
 		];
 	}
 
 	/**
-	 * Add `classifai_synthesize_speech` to rest API for view/edit.
+	 * Initial audio generation state.
+	 *
+	 * Fetch the initial state of audio generation prior to the audio existing for the post.
+	 *
+	 * @param  int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 *                                    return the current global post inside the loop. A numerically valid post ID that
+	 *                                    points to a non-existent post returns `null`. Defaults to global $post.
+	 * @return bool                     The initial state of audio generation. Default true.
+	 */
+	public function get_audio_generation_initial_state( $post = null ) {
+		/**
+		 * Initial state of the audio generation toggle when no audio already exists for the post.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_audio_generation_initial_state
+		 *
+		 * @param  {bool}    $state Initial state of audio generation toggle on a post. Default true.
+		 * @param  {WP_Post} $post  The current Post object.
+		 *
+		 * @return {bool}           Initial state the audio generation toggle should be set to when no audio exists.
+		 */
+		return apply_filters( 'classifai_audio_generation_initial_state', true, get_post( $post ) );
+	}
+
+	/**
+	 * Subsequent audio generation state.
+	 *
+	 * Fetch the subsequent state of audio generation once audio is generated for the post.
+	 *
+	 * @param int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 *                                   return the current global post inside the loop. A numerically valid post ID that
+	 *                                   points to a non-existent post returns `null`. Defaults to global $post.
+	 * @return bool                    The subsequent state of audio generation. Default false.
+	 */
+	public function get_audio_generation_subsequent_state( $post = null ) {
+		/**
+		 * Subsequent state of the audio generation toggle when audio exists for the post.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_audio_generation_subsequent_state
+		 *
+		 * @param  {bool}    $state Subsequent state of audio generation toggle on a post. Default false.
+		 * @param  {WP_Post} $post  The current Post object.
+		 *
+		 * @return {bool}           Subsequent state the audio generation toggle should be set to when audio exists.
+		 */
+		return apply_filters( 'classifai_audio_generation_subsequent_state', false, get_post( $post ) );
+	}
+
+	/**
+	 * Add audio related fields to rest API for view/edit.
 	 */
 	public function add_synthesize_speech_meta_to_rest_api() {
-		$settings             = $this->get_settings();
-		$supported_post_types = $settings['post_types'] ?? array();
-
-		$supported_post_types = array_keys(
-			array_filter(
-				$supported_post_types,
-				function( $post_type ) {
-					return ! is_null( $post_type );
-				}
-			)
-		);
-
-		if ( empty( $supported_post_types ) ) {
-			return;
-		}
+		$supported_post_types = get_tts_supported_post_types();
 
 		register_rest_field(
 			$supported_post_types,
 			'classifai_synthesize_speech',
 			array(
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], self::SYNTHESIZE_SPEECH_KEY, true );
-					return ( 'no' === $process_content ) ? 'no' : 'yes';
+				'get_callback' => function( $object ) {
+					$audio_id = get_post_meta( $object['id'], self::AUDIO_ID_KEY, true );
+					if (
+						( $this->get_audio_generation_initial_state( $object['id'] ) && ! $audio_id ) ||
+						( $this->get_audio_generation_subsequent_state( $object['id'] ) && $audio_id )
+					) {
+						return true;
+					} else {
+						return false;
+					}
 				},
-				'update_callback' => function ( $value, $object ) {
-					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, self::SYNTHESIZE_SPEECH_KEY, $value );
+				'schema'       => [
+					'type'    => 'boolean',
+					'context' => [ 'view', 'edit' ],
+				],
+			)
+		);
+
+		register_rest_field(
+			$supported_post_types,
+			'classifai_display_generated_audio',
+			array(
+				'get_callback'    => function( $object ) {
+					// Default to display the audio if available.
+					if ( metadata_exists( 'post', $object['id'], self::DISPLAY_GENERATED_AUDIO ) ) {
+						return (bool) get_post_meta( $object['id'], self::DISPLAY_GENERATED_AUDIO, true );
+					}
+					return true;
+				},
+				'update_callback' => function( $value, $object ) {
+					if ( $value ) {
+						delete_post_meta( $object->ID, self::DISPLAY_GENERATED_AUDIO );
+					} else {
+						update_post_meta( $object->ID, self::DISPLAY_GENERATED_AUDIO, false );
+					}
 				},
 				'schema'          => [
-					'type'    => 'string',
+					'type'    => 'boolean',
 					'context' => [ 'view', 'edit' ],
 				],
 			)
@@ -496,12 +559,41 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Handles audio generation on rest updates / inserts.
+	 *
+	 * @param WP_Post         $post     Inserted or updated post object.
+	 * @param WP_REST_Request $request  Request object.
+	 */
+	public function rest_handle_audio( $post, $request ) {
+
+		$audio_id = get_post_meta( $request->get_param( 'id' ), self::AUDIO_ID_KEY, true );
+
+		// Since we have dynamic generation option agnostic to meta saves we need a flag to differentiate audio generation accurately
+		$process_content = false;
+		if (
+			( $this->get_audio_generation_initial_state( $post ) && ! $audio_id ) ||
+			( $this->get_audio_generation_subsequent_state( $post ) && $audio_id )
+		) {
+			$process_content = true;
+		}
+
+		// Add/Update audio if it was requested.
+		if (
+			( $process_content && null === $request->get_param( 'classifai_synthesize_speech' ) ) ||
+			true === $request->get_param( 'classifai_synthesize_speech' )
+		) {
+			$save_post_handler = new SavePostHandler();
+			$save_post_handler->synthesize_speech( $request->get_param( 'id' ) );
+		}
+	}
+
+	/**
 	 * Add meta box to post types that support speech synthesis.
 	 *
 	 * @param string $post_type Post type.
 	 */
 	public function add_meta_box( $post_type ) {
-		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+		if ( ! in_array( $post_type, get_tts_supported_post_types(), true ) ) {
 			return;
 		}
 
@@ -511,7 +603,7 @@ class TextToSpeech extends Provider {
 			[ $this, 'render_meta_box' ],
 			null,
 			'side',
-			'low',
+			'high',
 			array( '__back_compat_meta_box' => true )
 		);
 	}
@@ -524,38 +616,65 @@ class TextToSpeech extends Provider {
 	public function render_meta_box( $post ) {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
-		$process_content = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
-		$process_content = ( 'no' === $process_content ) ? 'no' : 'yes';
+		$source_url = false;
+		$audio_id   = get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+		if ( $audio_id ) {
+			$source_url = wp_get_attachment_url( $audio_id );
+		}
 
-		$post_type       = get_post_type_object( get_post_type( $post ) );
+		$process_content = false;
+		if (
+			( $this->get_audio_generation_initial_state( $post ) && ! $audio_id ) ||
+			( $this->get_audio_generation_subsequent_state( $post ) && $audio_id )
+		) {
+			$process_content = true;
+		}
+
+		$display_audio = true;
+		if ( metadata_exists( 'post', $post->ID, self::DISPLAY_GENERATED_AUDIO ) &&
+			! (bool) get_post_meta( $post->ID, self::DISPLAY_GENERATED_AUDIO, true ) ) {
+			$display_audio = false;
+		}
+
 		$post_type_label = esc_html__( 'Post', 'classifai' );
+		$post_type       = get_post_type_object( get_post_type( $post ) );
 		if ( $post_type ) {
 			$post_type_label = $post_type->labels->singular_name;
 		}
 
-		$audio_id = get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
 		?>
-
 		<p>
 			<label for="classifai_synthesize_speech">
-				<input type="checkbox" value="yes" id="classifai_synthesize_speech" name="classifai_synthesize_speech" <?php checked( $process_content, 'yes' ); ?> />
+				<input type="checkbox" value="1" id="classifai_synthesize_speech" name="classifai_synthesize_speech" <?php checked( $process_content ); ?> />
 				<?php esc_html_e( 'Enable audio generation', 'classifai' ); ?>
 			</label>
 			<span class="description">
 				<?php
 				/* translators: %s Post type label */
-				printf( esc_html__( 'ClassifAI will generate audio for this %s when it is published or updated', 'classifai' ), esc_html( $post_type_label ) );
+				printf( esc_html__( 'ClassifAI will generate audio for this %s when it is published or updated.', 'classifai' ), esc_html( $post_type_label ) );
+				?>
+			</span>
+		</p>
+
+		<p<?php echo $source_url ? '' : ' class="hidden"'; ?>>
+			<label for="classifai_display_generated_audio">
+				<input type="checkbox" value="1" id="classifai_display_generated_audio" name="classifai_display_generated_audio" <?php checked( $display_audio ); ?> />
+				<?php esc_html_e( 'Display audio controls', 'classifai' ); ?>
+			</label>
+			<span class="description">
+				<?php
+				esc_html__( 'Controls the display of the audio player on the front-end.', 'classifai' );
 				?>
 			</span>
 		</p>
 
 		<?php
-		if ( 'yes' === $process_content && $audio_id && wp_get_attachment_url( $audio_id ) ) {
+		if ( $source_url ) {
 			$cache_busting_url = add_query_arg(
 				[
 					'ver' => time(),
 				],
-				wp_get_attachment_url( $audio_id )
+				$source_url
 			);
 			?>
 
@@ -574,6 +693,11 @@ class TextToSpeech extends Provider {
 	 * @param int $post_id Post ID.
 	 */
 	public function save_post_metadata( $post_id ) {
+
+		if ( ! in_array( get_post_type( $post_id ), get_tts_supported_post_types(), true ) ) {
+			return;
+		}
+
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
 			return;
 		}
@@ -582,18 +706,15 @@ class TextToSpeech extends Provider {
 			return;
 		}
 
-		$supported_post_types = $this->get_supported_post_types();
-		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
-			return;
+		if ( ! isset( $_POST['classifai_display_generated_audio'] ) ) {
+			update_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO, false );
+		} else {
+			delete_post_meta( $post_id, self::DISPLAY_GENERATED_AUDIO );
 		}
 
-		if ( isset( $_POST['classifai_synthesize_speech'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['classifai_synthesize_speech'] ) ) ) {
-			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'yes' );
-
+		if ( isset( $_POST['classifai_synthesize_speech'] ) ) {
 			$save_post_handler = new SavePostHandler();
 			$save_post_handler->synthesize_speech( $post_id );
-		} else {
-			update_post_meta( $post_id, self::SYNTHESIZE_SPEECH_KEY, 'no' );
 		}
 	}
 
@@ -611,7 +732,7 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
-		if ( ! in_array( $_post->post_type, self::get_supported_post_types(), true ) ) {
+		if ( ! in_array( $_post->post_type, get_tts_supported_post_types(), true ) ) {
 			return $content;
 		}
 
@@ -630,8 +751,9 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
-		$is_audio_enabled = get_post_meta( $_post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
-		if ( 'no' === $is_audio_enabled ) {
+		// Respect the audio display settings of the post.
+		if ( metadata_exists( 'post', $_post->ID, self::DISPLAY_GENERATED_AUDIO ) &&
+			! (bool) get_post_meta( $_post->ID, self::DISPLAY_GENERATED_AUDIO, true ) ) {
 			return $content;
 		}
 
@@ -750,26 +872,6 @@ class TextToSpeech extends Provider {
 		}
 
 		return $options;
-	}
-
-	/**
-	 * Returns supported post types for Azure Text to Speech.
-	 *
-	 * @todo Move this to a more generic method during refactoring of the plugin.
-	 * @return array
-	 */
-	public static function get_supported_post_types() {
-		$settings             = \Classifai\get_plugin_settings( 'language_processing', self::FEATURE_NAME );
-		$supported_post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : array();
-
-		return array_keys(
-			array_filter(
-				$supported_post_types,
-				function( $post_type ) {
-					return '0' !== $post_type;
-				}
-			)
-		);
 	}
 
 }

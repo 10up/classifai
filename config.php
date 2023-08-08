@@ -16,8 +16,9 @@ classifai_define( 'CLASSIFAI_PLUGIN_VERSION', $plugin_version );
 classifai_define( 'CLASSIFAI_PLUGIN_DIR', __DIR__ );
 classifai_define( 'CLASSIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
-// API
-classifai_define( 'WATSON_NLU_VERSION', '2018-03-19' );
+// API - https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-release-notes#active-version-dates
+classifai_define( 'WATSON_NLU_VERSION', '2022-08-10' );
+
 // Taxonomies
 classifai_define( 'WATSON_CATEGORY_TAXONOMY', 'watson-category' );
 classifai_define( 'WATSON_KEYWORD_TAXONOMY', 'watson-keyword' );

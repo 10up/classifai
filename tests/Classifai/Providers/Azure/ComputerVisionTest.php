@@ -81,14 +81,30 @@ class ComputerVisionTest extends WP_UnitTestCase {
 
 
 	/**
-	 * Ensure that settings returns empty array of the `classifai_computer_vision` is not set.
+	 * Ensure that settings returns default settings array if the `classifai_computer_vision` is not set.
 	 */
 	public function test_no_computer_vision_option_set() {
 		delete_option( 'classifai_computer_vision' );
 
 		$settings = $this->get_computer_vision()->get_settings();
 
-		$this->assertSame( $settings, array() );
+		$this->assertSame( $settings, [
+			'valid'                 => false,
+			'url'                   => '',
+			'api_key'               => '',
+			'enable_image_captions' => array(
+				'alt'         => 0,
+				'caption'     => 0,
+				'description' => 0,
+			),
+			'enable_image_tagging'  => true,
+			'enable_smart_cropping' => false,
+			'enable_ocr'            => false,
+			'enable_read_pdf'       => false,
+			'caption_threshold'     => 75,
+			'tag_threshold'         => 70,
+			'image_tag_taxonomy'    => 'classifai-image-tags',
+		] );
 	}
 
 	/**
