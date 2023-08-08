@@ -10,6 +10,10 @@ use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Providers\OpenAI\Whisper;
+use Classifai\Providers\OpenAI\Whisper\Transcribe;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\OpenAI\Embeddings;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -366,6 +370,381 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	}
 
 	/**
+	 * Batch trigger generation of audio transcriptions depending on passed-in settings.
+	 *
+	 * ## Options
+	 *
+	 * [<attachment_ids>]
+	 * : Comma-delimited list of attachments IDs to generate transcriptions for
+	 *
+	 * [--per_page=<int>]
+	 * : How many items should be processed at a time. Default 100
+	 *
+	 * [--force=<bool>]
+	 * : Whether to process audio files that already have a transcription set. Default false
+	 *
+	 * [--dry-run=<bool>]
+	 * : Whether to run as a dry-run. Default true
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function transcribe_audio( $args = [], $opts = [] ) {
+		$defaults = [
+			'per_page' => 100,
+			'force'    => false,
+		];
+
+		$opts             = wp_parse_args( $opts, $defaults );
+		$opts['per_page'] = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
+
+		$count  = 0;
+		$errors = 0;
+
+		$whisper  = new Whisper( false );
+		$settings = $whisper->get_settings();
+
+		// Determine if this is a dry run or not.
+		if ( isset( $opts['dry-run'] ) ) {
+			if ( 'false' === $opts['dry-run'] ) {
+				$dry_run = false;
+			} else {
+				$dry_run = (bool) $opts['dry-run'];
+			}
+		} else {
+			$dry_run = true;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
+
+		// Process the passed in attachment IDs.
+		if ( ! empty( $args[0] ) ) {
+			$attachment_ids = array_map( 'absint', explode( ',', $args[0] ) );
+
+			\WP_CLI::log( sprintf( 'Starting processing of %s items', count( $attachment_ids ) ) );
+
+			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $attachment_ids ) );
+
+			foreach ( $attachment_ids as $attachment_id ) {
+				$attachment = get_post( $attachment_id );
+				$transcribe = new Transcribe( $attachment_id, $settings );
+
+				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
+					$errors ++;
+					continue;
+				}
+
+				if ( ! $dry_run ) {
+					$result = $transcribe->process();
+
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
+						$errors ++;
+					}
+				}
+
+				$progress_bar->tick();
+				$count ++;
+			}
+
+			$progress_bar->finish();
+		} else {
+			\WP_CLI::log( sprintf( 'Starting processing of attachment items in batches of %d', $opts['per_page'] ) );
+
+			$paged      = 1;
+			$mime_types = [];
+			$transcribe = new Transcribe( 1, [] );
+
+			// Get all the mime types for the file formats we support.
+			foreach ( wp_get_mime_types() as $extensions => $mime ) {
+				foreach ( explode( '|', $extensions ) as $ext ) {
+					if ( in_array( $ext, $transcribe->file_formats, true ) ) {
+						$mime_types[] = $mime;
+					}
+				}
+			}
+
+			do {
+				$attachments = get_posts(
+					array(
+						'post_type'        => 'attachment',
+						'posts_per_page'   => $opts['per_page'],
+						'post_mime_type'   => array_unique( $mime_types ),
+						'paged'            => $paged,
+						'suppress_filters' => 'false',
+						'fields'           => 'ids',
+					)
+				);
+				$total       = count( $attachments );
+
+				foreach ( $attachments as $attachment_id ) {
+					$attachment = get_post( $attachment_id );
+					$transcribe = new Transcribe( $attachment_id, $settings );
+
+					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
+						$errors ++;
+						continue;
+					}
+
+					if ( ! $dry_run ) {
+						$result = $transcribe->process();
+
+						if ( is_wp_error( $result ) ) {
+							\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
+							$errors ++;
+						}
+					}
+
+					$count ++;
+				}
+
+				$this->inmemory_cleanup();
+
+				if ( $total ) {
+					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				}
+
+				$paged ++;
+			} while ( $total );
+		}
+
+		if ( ! $dry_run ) {
+			\WP_CLI::log( '-------- Finished! --------' );
+			\WP_CLI::log( sprintf( '%d items had transcriptions added', $count ) );
+		} else {
+			\WP_CLI::log( '-------- Finished! --------' );
+			\WP_CLI::log( sprintf( '%d items would have had transcriptions added', $count ) );
+		}
+
+		if ( $errors > 0 ) {
+			\WP_CLI::error( sprintf( '%d items had errors', $errors ), false );
+		}
+	}
+
+	/**
+	 * Batch trigger generation of excerpts depending on passed-in settings.
+	 *
+	 * ## Options
+	 *
+	 * [<post_ids>]
+	 * : Comma-delimited list of post IDs to generate excerpts for
+	 *
+	 * [--post_type=<post_type>]
+	 * : Batch process items belonging to this post type. If not used, relies on post_ids in args
+	 *
+	 * [--post_status=<post_status>]
+	 * : Batch process items that have this post status. Default publish
+
+	 * [--per_page=<int>]
+	 * : How many items should be processed at a time. Default 100
+	 *
+	 * [--force=<bool>]
+	 * : Whether to process items that already have an excerpt set. Default false
+	 *
+	 * [--dry-run=<bool>]
+	 * : Whether to run as a dry-run. Default true
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function generate_excerpt( $args = [], $opts = [] ) {
+		$defaults = [
+			'post_type'   => false,
+			'post_status' => 'publish',
+			'per_page'    => 100,
+			'force'       => false,
+		];
+
+		$opts             = wp_parse_args( $opts, $defaults );
+		$opts['per_page'] = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
+
+		$count   = 0;
+		$errors  = 0;
+		$skipped = 0;
+
+		$chat_gpt = new ChatGPT( false );
+
+		// Determine if this is a dry run or not.
+		if ( isset( $opts['dry-run'] ) ) {
+			if ( 'false' === $opts['dry-run'] ) {
+				$dry_run = false;
+			} else {
+				$dry_run = (bool) $opts['dry-run'];
+			}
+		} else {
+			$dry_run = true;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
+
+		// If we have a post type specified, process all items in that type.
+		if ( ! empty( $opts['post_type'] ) ) {
+			// Only allow processing post types that are enabled in settings.
+			if ( ! in_array( $opts['post_type'], get_post_types(), true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post type is not a valid post type', $opts['post_type'] ) );
+			}
+
+			// Only allow processing post statuses that are valid for a particular post type.
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
+			}
+
+			\WP_CLI::log( sprintf( 'Starting processing of "%s" post type items that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
+
+			$paged = 1;
+
+			do {
+				$posts = get_posts(
+					array(
+						'post_type'        => $opts['post_type'],
+						'posts_per_page'   => $opts['per_page'],
+						'paged'            => $paged,
+						'post_status'      => $opts['post_status'],
+						'suppress_filters' => 'false',
+					)
+				);
+				$total = count( $posts );
+
+				foreach ( $posts as $post ) {
+					// Don't process if an item has an existing excerpt and we aren't forcing it.
+					if ( '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
+						\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post->ID ) );
+						$skipped ++;
+						continue;
+					}
+
+					$result = $chat_gpt->generate_excerpt( (int) $post->ID );
+
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
+						$errors ++;
+						continue;
+					}
+
+					\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post->ID, $result ) );
+
+					// Update excerpt if not doing a dry run and we have a valid result.
+					if ( ! $dry_run && ! is_wp_error( $result ) ) {
+						wp_update_post(
+							array(
+								'ID'           => $post->ID,
+								'post_excerpt' => $result,
+							)
+						);
+					}
+
+					$count ++;
+				}
+
+				$this->inmemory_cleanup();
+
+				if ( $total ) {
+					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				}
+
+				$paged ++;
+			} while ( $total );
+		} else {
+			// If no post type is specified, we have to have a list of post IDs.
+			if ( ! isset( $args[0] ) ) {
+				\WP_CLI::error( 'Please specify a comma-delimited list of post IDs to process' );
+			}
+
+			$post_ids = array_map( 'absint', explode( ',', $args[0] ) );
+
+			\WP_CLI::log( sprintf( 'Starting processing of %s items', count( $post_ids ) ) );
+
+			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
+
+			foreach ( $post_ids as $post_id ) {
+				$post = get_post( $post_id );
+
+				// Don't process if an item has an existing excerpt and we aren't forcing it.
+				if ( $post && '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
+					\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post_id ) );
+					$skipped ++;
+					continue;
+				}
+
+				$result = $chat_gpt->generate_excerpt( (int) $post_id );
+
+				if ( is_wp_error( $result ) ) {
+					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
+					$errors ++;
+					continue;
+				}
+
+				\WP_CLI::log( sprintf( 'Excerpt returned for item ID %d: %s', $post_id, $result ) );
+
+				// Update excerpt if not doing a dry run and we have a valid result.
+				if ( ! $dry_run && ! is_wp_error( $result ) ) {
+					wp_update_post(
+						array(
+							'ID'           => $post_id,
+							'post_excerpt' => $result,
+						)
+					);
+				}
+
+				$progress_bar->tick();
+				$count ++;
+			}
+
+			$progress_bar->finish();
+		}
+
+		if ( ! $dry_run ) {
+			\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
+		} else {
+			\WP_CLI::success( sprintf( '%d items would have been processed', $count ) );
+		}
+
+		\WP_CLI::log( sprintf( '%d items were skipped', $skipped ) );
+		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
+	}
+
+	/**
+	 * Determine if an attachment should be transcribed.
+	 *
+	 * @param \WP_Post|null $attachment Attachment we are processing.
+	 * @param int           $attachment_id Attachment ID.
+	 * @param Transcribe    $transcribe Transcribe instance.
+	 * @param boolean       $force Whether to force processing.
+	 * @return boolean
+	 */
+	private function should_transcribe_attachment( $attachment, int $attachment_id, Transcribe $transcribe, bool $force = false ) {
+		// Ensure we have a valid ID.
+		if ( ! $attachment ) {
+			\WP_CLI::error( sprintf( 'Item ID %d does not exist', $attachment_id ), false );
+			return false;
+		}
+
+		// Ensure we have a valid post type.
+		if ( 'attachment' !== $attachment->post_type ) {
+			\WP_CLI::error( sprintf( 'The "%s" post type is not supported for audio transcription processing', $attachment->post_type ), false );
+			return false;
+		}
+
+		// Ensure the attachment meets the requirements for processing.
+		if ( ! $transcribe->should_process( $attachment_id ) ) {
+			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ), false );
+			return false;
+		}
+
+		// Don't process if the attachment already has a transcription, unless force is set.
+		if ( '' !== trim( $attachment->post_content ) && ! $force ) {
+			\WP_CLI::error( sprintf( 'Item ID %d already has a transcription and the force option hasn\'t been set. Skipping...', $attachment_id ), false );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Batch classifies attachments(s) using the current ClassifAI configuration.
 	 *
 	 * ## Options
@@ -535,6 +914,163 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::error( "Cropped $total_success images, $total_errors errors." );
 		}
 
+	}
+
+	/**
+	 * Batch classify content using the OpenAI Embeddings API depending on passed-in settings.
+	 *
+	 * ## Options
+	 *
+	 * [<post_ids>]
+	 * : Comma-delimited list of post IDs to classify
+	 *
+	 * [--post_type=<post_type>]
+	 * : Batch process items belonging to this post type. If not used, relies on post_ids in args
+	 *
+	 * [--post_status=<post_status>]
+	 * : Batch process items that have this post status. Default publish
+
+	 * [--per_page=<int>]
+	 * : How many items should be processed at a time. Default 100
+	 *
+	 * [--dry-run=<bool>]
+	 * : Whether to run as a dry-run. Default true
+	 *
+	 * @param array $args Arguments.
+	 * @param array $opts Options.
+	 */
+	public function embeddings( $args = [], $opts = [] ) {
+		$defaults = [
+			'post_type'   => false,
+			'post_status' => 'publish',
+			'per_page'    => 100,
+		];
+
+		$embeddings          = new Embeddings( false );
+		$opts                = wp_parse_args( $opts, $defaults );
+		$opts['per_page']    = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
+		$allowed_post_types  = $embeddings->supported_post_types();
+		$allowed_post_status = $embeddings->supported_post_statuses();
+
+		$count  = 0;
+		$errors = 0;
+
+		// Determine if this is a dry run or not.
+		if ( isset( $opts['dry-run'] ) ) {
+			if ( 'false' === $opts['dry-run'] ) {
+				$dry_run = false;
+			} else {
+				$dry_run = (bool) $opts['dry-run'];
+			}
+		} else {
+			$dry_run = true;
+		}
+
+		if ( $dry_run ) {
+			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
+
+		// If we have a post type specified, process all items in that type.
+		if ( ! empty( $opts['post_type'] ) ) {
+			// Only allow processing post types that are enabled in settings.
+			if ( $opts['post_type'] && ! in_array( $opts['post_type'], $allowed_post_types, true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $opts['post_type'] ) );
+			}
+
+			// Only allow processing post statuses that are valid for a particular post type.
+			if ( ! in_array( $opts['post_status'], get_available_post_statuses( $opts['post_type'] ), true ) || ! in_array( $opts['post_status'], $allowed_post_status, true ) ) {
+				\WP_CLI::error( sprintf( 'The "%s" post status is not valid for the "%s" post type', $opts['post_status'], $opts['post_type'] ) );
+			}
+
+			\WP_CLI::log( sprintf( 'Starting processing of "%s" post type items that have the "%s" status in batches of %d', $opts['post_type'], $opts['post_status'], $opts['per_page'] ) );
+
+			$paged = 1;
+
+			do {
+				$posts = get_posts(
+					array(
+						'post_type'        => $opts['post_type'],
+						'posts_per_page'   => $opts['per_page'],
+						'paged'            => $paged,
+						'post_status'      => $opts['post_status'],
+						'suppress_filters' => 'false',
+						'fields'           => 'ids',
+					)
+				);
+				$total = count( $posts );
+
+				foreach ( $posts as $post_id ) {
+					if ( ! $dry_run ) {
+						$result = $embeddings->generate_embeddings_for_post( $post_id );
+
+						if ( is_wp_error( $result ) ) {
+							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
+							$errors ++;
+						}
+					}
+
+					$count ++;
+				}
+
+				$this->inmemory_cleanup();
+
+				if ( $total ) {
+					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
+				}
+
+				$paged ++;
+			} while ( $total );
+		} else {
+			// If no post type is specified, we have to have a list of post IDs.
+			if ( ! isset( $args[0] ) ) {
+				\WP_CLI::error( 'Please specify a comma-delimited list of post IDs to process' );
+			}
+
+			$post_ids = array_map( 'absint', explode( ',', $args[0] ) );
+
+			\WP_CLI::log( sprintf( 'Starting processing of %s items', count( $post_ids ) ) );
+
+			$progress_bar = \WP_CLI\Utils\make_progress_bar( 'Processing ...', count( $post_ids ) );
+
+			foreach ( $post_ids as $post_id ) {
+				// Ensure we have a valid post ID.
+				if ( ! get_post( $post_id ) ) {
+					\WP_CLI::error( sprintf( 'Item ID %d does not exist', $post_id ), false );
+					$errors ++;
+					continue;
+				}
+
+				// Ensure we have a valid post type.
+				$post_type = get_post_type( $post_id );
+				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
+					\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ), false );
+					$errors ++;
+					continue;
+				}
+
+				if ( ! $dry_run ) {
+					$result = $embeddings->generate_embeddings_for_post( $post_id );
+
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
+						$errors ++;
+					}
+				}
+
+				$progress_bar->tick();
+				$count ++;
+			}
+
+			$progress_bar->finish();
+		}
+
+		if ( ! $dry_run ) {
+			\WP_CLI::success( sprintf( '%d items have been processed', $count ) );
+		} else {
+			\WP_CLI::success( sprintf( '%d items would have been processed', $count ) );
+		}
+
+		\WP_CLI::log( sprintf( '%d items had errors', $errors ) );
 	}
 
 	/**

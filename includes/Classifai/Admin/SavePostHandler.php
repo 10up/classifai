@@ -192,10 +192,24 @@ class SavePostHandler {
 			);
 		}
 
-		$normalizer   = new Normalizer();
-		$settings     = \Classifai\get_plugin_settings( 'language_processing', TextToSpeech::FEATURE_NAME );
-		$post         = get_post( $post_id );
-		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		$normalizer          = new Normalizer();
+		$settings            = \Classifai\get_plugin_settings( 'language_processing', TextToSpeech::FEATURE_NAME );
+		$post                = get_post( $post_id );
+		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
+		}
+
 		$voice        = $settings['voice'] ?? '';
 		$voice_data   = explode( '|', $voice );
 		$voice_name   = '';
@@ -255,8 +269,6 @@ class SavePostHandler {
 			);
 		}
 
-		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
-
 		// If audio already exists for this post, delete it.
 		if ( $saved_attachment_id ) {
 			wp_delete_attachment( $saved_attachment_id, true );
@@ -291,7 +303,8 @@ class SavePostHandler {
 				'post_title'     => $audio_file_name,
 				'post_mime_type' => $file_data['type'],
 			),
-			$file_data['file']
+			$file_data['file'],
+			$post_id
 		);
 
 		// Return error if creation of attachment fails.
@@ -304,6 +317,7 @@ class SavePostHandler {
 
 		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, absint( $attachment_id ) );
 		update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
 
 		return $attachment_id;
 	}

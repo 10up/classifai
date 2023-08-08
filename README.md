@@ -19,6 +19,7 @@
 * [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
 * [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
+* [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
 * [Set Up Azure AI Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
 * [Set Up Azure Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
@@ -226,7 +227,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test excerpt generation, edit (or create) an item that supports excerpts. Note: only the block editor is supported.
 * Ensure this item has content saved.
 * Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
-* To test title generation, edit (or create) an item that supports titles. Note: only the block editor is supported.
+* To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
 
@@ -288,14 +289,14 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 ### 1. Sign up for Azure services
 
 * [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
-* Log into your account and create a new [*Speech Service*](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/overview) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
-* Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
+* Log into your account and create a new [*Speech Service*](https://portal.azure.com/#view/Microsoft_Azure_ProjectOxford/CognitiveServicesHub/~/overview) if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+* Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Location/Region` for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
 ### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Microsoft Azure
 
-* In the `Endpoint URL` field, enter your `API endpoint`.
-* In the `API Key` field, enter your `KEY 1`.
+* In the `Endpoint URL` field, enter the following URL, replacing `LOCATION` with the `Location/Region` you found above: `https://LOCATION.tts.speech.microsoft.com/`.
+* In the `API Key` field, enter your `KEY 1` copied from above.
 * Click **Save Changes** (the page will reload).
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice as per your choice.
@@ -404,6 +405,12 @@ ClassifAI connects your WordPress site directly to your account with specific se
 ### How can I view the taxonomies that are generated from the NLU Language Processing?
 
 Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the NLU Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
+
+### Should I alert my site's users that AI tools are being used?
+
+We recommend that you are transparent with your users that AI tools are being used.  This can be done by adding a notice to your site's Privacy Policy or similar page. Sample copy is provided below:
+
+> This site makes use of Artificial Intelligence tools to help with tasks like language processing, image processing, and content recommendations.
 
 ## Support Level
 

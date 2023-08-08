@@ -62,6 +62,49 @@ class ChatGPT extends Provider {
 	}
 
 	/**
+	 * Determine if the current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature = '' ) {
+		$access        = false;
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$feature_roles = [];
+
+		$role_keys = [
+			'enable_excerpt' => 'roles',
+			'enable_titles'  => 'title_roles',
+		];
+
+		if ( isset( $role_keys[ $feature ] ) ) {
+			$feature_roles = $settings[ $role_keys[ $feature ] ] ?? [];
+		}
+
+		// Check if user has access to the feature and the feature is turned on.
+		if (
+			( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) )
+			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to a ChatGPT generate feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_chatgpt_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_openai_chatgpt_{$feature}", $access, $settings );
+	}
+
+	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
@@ -91,7 +134,7 @@ class ChatGPT extends Provider {
 	 * Custom excerpt meta field
 	 * Note: most of this is copied from post_excerpt_meta_box()
 	 *
-	 * @param WP_Post $post Current post object.
+	 * @param \WP_Post $post Current post object.
 	 */
 	public function classifai_post_excerpt_meta_box( $post ) {
 		global $pagenow;
@@ -134,6 +177,27 @@ class ChatGPT extends Provider {
 			<button id="classifai-generate-excerpt" type="button" class="button button-primary"><?php echo esc_html( $button_text ); ?></button>
 			<?php
 		}
+		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
+	}
+
+	/**
+	 * Returns localised data for title generation.
+	 */
+	public function get_localised_vars() {
+		global $post;
+
+		return [
+			'enabledFeatures' => [
+				0 => [
+					'feature'       => 'title',
+					'path'          => '/classifai/v1/openai/generate-title/',
+					'buttonText'    => __( 'Generate titles', 'classifai' ),
+					'modalTitle'    => __( 'Select a title', 'classifai' ),
+					'selectBtnText' => __( 'Select', 'classifai' ),
+				],
+			],
+			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+		];
 	}
 
 	/**
@@ -146,14 +210,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$excerpt_roles = $settings['roles'] ?? [];
-
-		if (
-			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
-			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
-		) {
+		if ( $this->is_feature_enabled( 'enable_excerpt' ) ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -164,12 +221,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		$title_roles = $settings['title_roles'] ?? [];
-
-		if (
-			( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
-		) {
+		if ( $this->is_feature_enabled( 'enable_titles' ) ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -182,19 +234,7 @@ class ChatGPT extends Provider {
 				'classifai-post-status-info',
 				sprintf(
 					'var classifaiChatGPTData = %s;',
-					wp_json_encode(
-						[
-							'enabledFeatures' => [
-								0 => [
-									'feature'    => 'title',
-									'path'       => '/classifai/v1/openai/generate-title/',
-									'buttonText' => __( 'Generate titles', 'classifai' ),
-									'modalTitle' => __( 'Select a title', 'classifai' ),
-								],
-							],
-							'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-						]
-					)
+					wp_json_encode( $this->get_localised_vars() )
 				),
 				'before'
 			);
@@ -212,18 +252,21 @@ class ChatGPT extends Provider {
 		}
 
 		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
 		$excerpt_roles = $settings['roles'] ?? [];
+		$screen        = get_current_screen();
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$title_roles   = $settings['title_roles'] ?? [];
 
 		if (
 			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
 			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
 		) {
-
-			$_post_id = isset( $_GET['post'] ) ? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) : false; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$_post_id = isset( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				: false;
 
 			if ( $_post_id ) {
-
 				wp_enqueue_script(
 					'classifai-post-excerpt-classic-editor',
 					CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
@@ -234,15 +277,52 @@ class ChatGPT extends Provider {
 				wp_localize_script(
 					'classifai-post-excerpt-classic-editor',
 					'classifaiGenerateExcerpt',
-					array(
-						'endpointUrl'           => esc_url( get_rest_url( null, "/classifai/v1/openai/generate-excerpt/{$_post_id}" ) ),
+					[
+						'endpointUrl'           => esc_url(
+							get_rest_url(
+								null,
+								"/classifai/v1/openai/generate-excerpt/{$_post_id}"
+							)
+						),
 						'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) ? SCRIPT_DEBUG : false,
 						'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
 						'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
 						'nonce'                 => wp_create_nonce( 'wp_rest' ),
-					)
+					]
 				);
 			}
+		}
+
+		// Load the assets for the classic editor.
+		if (
+			$screen && ! $screen->is_block_editor()
+			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
+			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
+		) {
+			wp_enqueue_style(
+				'classifai-generate-title-classic-css',
+				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+				[],
+				CLASSIFAI_PLUGIN_VERSION,
+				'all'
+			);
+
+			wp_enqueue_script(
+				'classifai-generate-title-classic-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+				array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+				get_asset_info( 'generate-title-classic', 'version' ),
+				true
+			);
+
+			wp_add_inline_script(
+				'classifai-generate-title-classic-js',
+				sprintf(
+					'var classifaiChatGPTData = %s;',
+					wp_json_encode( $this->get_localised_vars() )
+				),
+				'before'
+			);
 		}
 
 		wp_enqueue_style(
@@ -252,6 +332,23 @@ class ChatGPT extends Provider {
 			CLASSIFAI_PLUGIN_VERSION,
 			'all'
 		);
+	}
+
+	/**
+	 * HTML template for title generation result popup.
+	 */
+	public function register_generated_titles_template() {
+		?>
+		<div id="classifai-openai__results" style="display: none;">
+			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
+			<div id="classifai-openai__modal" style="opacity: 0;">
+				<h2 id="classifai-openai__results-title"></h2>
+				<div id="classifai-openai__close-modal-button"></div>
+				<div id="classifai-openai__results-content">
+				</div>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -287,6 +384,19 @@ class ChatGPT extends Provider {
 
 		$roles = get_editable_roles() ?? [];
 		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ChatGTP
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_chatgpt_allowed_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
 
 		add_settings_field(
 			'roles',
@@ -434,7 +544,10 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [
@@ -497,7 +610,7 @@ class ChatGPT extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'excerpt':
-				$return = $this->generate_excerpt( $post_id );
+				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 			case 'title':
 				$return = $this->generate_titles( $post_id, $args );
@@ -510,19 +623,27 @@ class ChatGPT extends Provider {
 	/**
 	 * Generate an excerpt using ChatGPT.
 	 *
-	 * @param int $post_id The Post Id we're processing
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args Arguments passed in.
 	 * @return string|WP_Error
 	 */
-	public function generate_excerpt( int $post_id = 0 ) {
+	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate an excerpt.', 'classifai' ) );
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
 		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+				'title'   => get_the_title( $post_id ),
+			]
+		);
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'enable_excerpt' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -542,7 +663,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', 'Provide a teaser for the following text using a maximum of ' . $excerpt_length . ' words', $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', sprintf( 'Summarize the following message using a maximum of %d words. Ensure this summary pairs well with the following text: %s.', $excerpt_length, $args['title'] ), $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -561,11 +682,15 @@ class ChatGPT extends Provider {
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
 					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
 						'role'    => 'user',
-						'content' => $prompt . ': ' . $this->get_content( $post_id, $excerpt_length ) . '',
+						'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '',
 					],
 				],
-				'temperature' => 0,
+				'temperature' => 0.9,
 			],
 			$post_id
 		);
@@ -609,13 +734,14 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num' => $settings['number_titles'] ?? 1,
+				'num'     => $settings['number_titles'] ?? 1,
+				'content' => '',
 			]
 		);
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -633,7 +759,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -652,8 +778,12 @@ class ChatGPT extends Provider {
 				'model'       => $this->chatgpt_model,
 				'messages'    => [
 					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
 						'role'    => 'user',
-						'content' => esc_html( $prompt ) . ': ' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false ) . '',
+						'content' => $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
 					],
 				],
 				'temperature' => 0.9,
@@ -695,12 +825,13 @@ class ChatGPT extends Provider {
 	/**
 	 * Get our content, trimming if needed.
 	 *
-	 * @param int  $post_id Post ID to get content from.
-	 * @param int  $return_length Word length of returned content.
-	 * @param bool $use_title Whether to use the title or not.
+	 * @param int    $post_id Post ID to get content from.
+	 * @param int    $return_length Word length of returned content.
+	 * @param bool   $use_title Whether to use the title or not.
+	 * @param string $post_content The post content.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true ) {
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ) {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -714,22 +845,25 @@ class ChatGPT extends Provider {
 		/**
 		 * We then subtract those tokens from the max number of tokens ChatGPT allows
 		 * in a single request, as well as subtracting out the number of tokens in our
-		 * prompt (13). ChatGPT counts both the tokens in the request and in
+		 * prompt (~50). ChatGPT counts both the tokens in the request and in
 		 * the response towards the max.
 		 */
-		$max_content_tokens = $this->max_tokens - $return_tokens - 13;
+		$max_content_tokens = $this->max_tokens - $return_tokens - 50;
+
+		if ( empty( $post_content ) ) {
+			$post         = get_post( $post_id );
+			$post_content = apply_filters( 'the_content', $post->post_content );
+		}
+
+		$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
 
 		// Then trim our content, if needed, to stay under the max.
 		if ( $use_title ) {
 			$content = $tokenizer->trim_content(
-				$normalizer->normalize( $post_id ),
+				$normalizer->normalize( $post_id, $post_content ),
 				(int) $max_content_tokens
 			);
 		} else {
-			$post         = get_post( $post_id );
-			$post_content = apply_filters( 'the_content', $post->post_content );
-			$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
-
 			$content = $tokenizer->trim_content(
 				$normalizer->normalize_content( $post_content, '', $post_id ),
 				(int) $max_content_tokens

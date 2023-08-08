@@ -28,6 +28,11 @@ class NLU extends Provider {
 	public $save_post_handler;
 
 	/**
+	 * @var $nlu_features array The list of NLU features
+	 */
+	protected $nlu_features = [];
+
+	/**
 	 * Watson NLU constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -807,7 +812,7 @@ class NLU extends Provider {
 		$post_status          = get_post_status( $post );
 		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
 			add_meta_box(
-				'classifai-nlu-meta-box',
+				'classifai_language_processing_metabox',
 				__( 'ClassifAI Language Processing', 'classifai' ),
 				[ $this, 'render_classifai_meta_box' ],
 				null,

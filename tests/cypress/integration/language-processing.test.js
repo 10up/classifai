@@ -399,6 +399,34 @@ describe('Language processing Tests', () => {
 		} );
 	} );
 
+	it( 'Can see the enable button in a post (Classic Editor)', () => {
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#activate-classic-editor' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+
+		cy.get( '#enable_classification' ).check();
+		cy.get( '#openai_embeddings_post_types_post' ).check();
+		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#number' ).clear().type( 1 );
+		cy.get( '#submit' ).click();
+
+		cy.classicCreatePost( {
+			title: 'Embeddings test classic',
+			content: "This feature uses OpenAI's Embeddings capabilities.",
+			postType: 'post',
+		} );
+
+		cy.get( '#classifai_language_processing_metabox' ).should( 'exist' );
+		cy.get( '#classifai-process-content' ).check();
+
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
 	it('Can save OpenAI ChatGPT "Language Processing" title settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -465,6 +493,33 @@ describe('Language processing Tests', () => {
 		cy.get('.editor-post-title__input').should(($el) => {
 			expect($el.first()).to.contain(data);
 		});
+	});
+
+	it('Can see the generate titles button in a post (Classic Editor)', () => {
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#activate-classic-editor' ).click();
+
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+		cy.get( '#enable_titles' ).check();
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData();
+
+		cy.visit( '/wp-admin/post-new.php' );
+
+		cy.get( '#classifai-openai__title-generate-btn' ).click();
+		cy.get( '#classifai-openai__modal' ).should( 'be.visible' );
+		cy.get( '.classifai-openai__result-item' )
+			.first()
+			.find('textarea')
+			.should('have.value', data);
+
+		cy.get( '.classifai-openai__select-title' ).first().click();
+		cy.get( '#classifai-openai__modal' ).should( 'not.be.visible' );
+		cy.get('#title').should( 'have.value', data );
+
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get('#deactivate-classic-editor').click();
 	});
 
 	it('Can disable title generation feature', () => {
