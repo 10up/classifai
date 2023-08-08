@@ -604,18 +604,14 @@ class TextToSpeech extends Provider {
 	 * @return string
 	 */
 	public function render_post_audio_controls( $content ) {
-		global $post;
 
-		if ( ! $post ) {
+		$_post = get_post();
+
+		if ( ! $_post instanceof \WP_Post ) {
 			return $content;
 		}
 
-		if ( ! in_array( $post->post_type, self::get_supported_post_types(), true ) ) {
-			return $content;
-		}
-
-		$is_audio_enabled = get_post_meta( $post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
-		if ( 'no' === $is_audio_enabled ) {
+		if ( ! in_array( $_post->post_type, self::get_supported_post_types(), true ) ) {
 			return $content;
 		}
 
@@ -625,16 +621,21 @@ class TextToSpeech extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_disable_post_to_audio_block
 		 *
-		 * @param {bool} $is_disabled Whether to disable the display or not. By default - false.
-		 * @param {bool} $post_id     Post ID.
+		 * @param  {bool}    $is_disabled Whether to disable the display or not. By default - false.
+		 * @param  {WP_Post} $_post       The Post object.
 		 *
 		 * @return {bool} Whether the audio block should be shown.
 		 */
-		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $post->ID ) ) {
+		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $_post ) ) {
 			return $content;
 		}
 
-		$audio_attachment_id = (int) get_post_meta( $post->ID, self::AUDIO_ID_KEY, true );
+		$is_audio_enabled = get_post_meta( $_post->ID, self::SYNTHESIZE_SPEECH_KEY, true );
+		if ( 'no' === $is_audio_enabled ) {
+			return $content;
+		}
+
+		$audio_attachment_id = (int) get_post_meta( $_post->ID, self::AUDIO_ID_KEY, true );
 
 		if ( ! $audio_attachment_id ) {
 			return $content;
@@ -644,6 +645,40 @@ class TextToSpeech extends Provider {
 
 		if ( ! $audio_attachment_url ) {
 			return $content;
+		}
+
+		$audio_timestamp = (int) get_post_meta( $_post->ID, self::AUDIO_TIMESTAMP_KEY, true );
+
+		if ( $audio_timestamp ) {
+			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
+		}
+
+		/**
+		 * Filters the audio player markup before display.
+		 *
+		 * Returning a non-false value from this filter will short-circuit building
+		 * the block markup and instead will return your custom markup prepended to
+		 * the post_content.
+		 *
+		 * Note that by using this filter, the custom CSS and JS files will no longer
+		 * be enqueued, so you'll be responsible for either loading them yourself or
+		 * loading custom ones.
+		 *
+		 * @hook classifai_pre_render_post_audio_controls
+		 * @since 2.2.3
+		 *
+		 * @param {bool|string} $markup               Audio markup to use. Defaults to false.
+		 * @param {string}      $content              Content of the current post.
+		 * @param {WP_Post}     $_post                The Post object.
+		 * @param {int}         $audio_attachment_id  The audio attachment ID.
+		 * @param {string}      $audio_attachment_url The URL to the audio attachment file.
+		 *
+		 * @return {bool|string} Custom audio block markup. Will be prepended to the post content.
+		 */
+		$markup = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $_post, $audio_attachment_id, $audio_attachment_url );
+
+		if ( false !== $markup ) {
+			return (string) $markup . $content;
 		}
 
 		wp_enqueue_script(
@@ -661,12 +696,6 @@ class TextToSpeech extends Provider {
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
 		);
-
-		$audio_timestamp = (int) get_post_meta( $post->ID, self::AUDIO_TIMESTAMP_KEY, true );
-
-		if ( $audio_timestamp ) {
-			$audio_attachment_url = add_query_arg( 'ver', filter_var( $audio_timestamp, FILTER_SANITIZE_NUMBER_INT ), $audio_attachment_url );
-		}
 
 		ob_start();
 
@@ -691,9 +720,9 @@ class TextToSpeech extends Provider {
 								 *
 								 * @return {string} Filtered text.
 								 */
-								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $post->ID ),
+								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $_post->ID ),
 								esc_html__( 'Listen to this', 'classifai' ),
-								esc_html( $post->post_type )
+								esc_html( $_post->post_type )
 							);
 
 							echo wp_kses_post( $listen_to_post_text );
