@@ -92,12 +92,18 @@ class Moderation extends Provider {
 	 * @return void
 	 */
 	public function maybe_moderate_comment() {
-		$action     = $_GET['a'] ?? null;
-		$comment_id = $_GET['c'] ?? null;
+		$action     = sanitize_text_field( $_GET['a'] ) ?? null;
+		$comment_id = sanitize_text_field( $_GET['c'] ) ?? null;
+		$nonce      = sanitize_text_field( $_GET['nonce'] ) ?? null;
 
-		if ( 'moderate' === $action && $comment_id ) {
+		if (
+			'moderate' === $action &&
+			$comment_id &&
+			wp_verify_nonce( $nonce, 'moderate_comment' )
+		) {
 			$this->moderate_comment( $comment_id );
 			wp_redirect( '/wp-admin/edit-comments.php' );
+			exit;
 		}
 	}
 
@@ -109,9 +115,11 @@ class Moderation extends Provider {
 	 * @return mixed
 	 */
 	public function comment_row_actions( $actions, $comment ) {
+		$nonce = wp_create_nonce( 'moderate_comment' );
+
 		$actions['moderate'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			"edit-comments.php?a=moderate&amp;c={$comment->comment_ID}",
+			"edit-comments.php?a=moderate&amp;c={$comment->comment_ID}&amp;nonce={$nonce}",
 			esc_attr__( 'Moderate this comment' ),
 			__( 'Moderate' )
 		);
@@ -176,7 +184,7 @@ class Moderation extends Provider {
 					'Content-Type'  => 'application/json',
 					'Authorization' => 'Bearer ' . $api_key,
 				],
-				'body'    => json_encode(
+				'body'    => wp_json_encode(
 					[
 						'input' => $comment->comment_content,
 					]
