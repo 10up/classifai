@@ -17,12 +17,13 @@ class Normalizer {
 	 * The post title is also included in the content to improve
 	 * accuracy.
 	 *
-	 * @param int $post_id The post to normalize
+	 * @param int    $post_id The post to normalize
+	 * @param string $post_content The post content to normalize
 	 * @return string
 	 */
-	public function normalize( $post_id ) {
+	public function normalize( $post_id, $post_content = '' ) {
 		$post         = get_post( $post_id );
-		$post_content = apply_filters( 'the_content', $post->post_content );
+		$post_content = empty( $post_content ) ? apply_filters( 'the_content', $post->post_content ) : $post_content;
 		$post_title   = apply_filters( 'the_title', $post->post_title );
 
 		/* Strip shortcodes but keep internal caption text */
