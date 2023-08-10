@@ -31,14 +31,14 @@ class ComputerVision extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Computer Vision',
+			'AI Vision',
 			'computer_vision',
 			$service
 		);
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
+			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
 				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),

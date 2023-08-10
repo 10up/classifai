@@ -97,7 +97,7 @@ class Personalizer extends Provider {
 				'description'   => sprintf(
 					wp_kses(
 						// translators: 1 - link to create a Personalizer resource.
-						__( 'Azure Cognitive Service Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
+						__( 'Azure AI Vision Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
 						array(
 							'a' => array(
 								'href'   => array(),
@@ -119,7 +119,7 @@ class Personalizer extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
-				'description'   => __( 'Azure Cognitive Service Personalizer Key.', 'classifai' ),
+				'description'   => __( 'Azure AI Vision Personalizer Key.', 'classifai' ),
 			]
 		);
 	}
@@ -310,7 +310,7 @@ class Personalizer extends Provider {
 
 		if ( is_wp_error( $response ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( __( 'Failed to contact Azure Cognitive Service Personalizer: ', 'classifai' ) . $response->get_error_message() );
+			error_log( __( 'Failed to contact Azure AI Vision Personalizer: ', 'classifai' ) . $response->get_error_message() );
 			return array(
 				'response' => (object) array(),
 				'actions'  => $action_ids,
