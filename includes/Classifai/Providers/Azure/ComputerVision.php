@@ -21,7 +21,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = 'vision/v3.0/analyze';
+	protected $analyze_url = 'vision/v3.2/analyze';
 
 	/**
 	 * ComputerVision constructor.
@@ -1322,6 +1322,8 @@ class ComputerVision extends Provider {
 		}
 
 		$image_scan_results = $this->scan_image( $image_url, [ $route_to_call ] );
+
+		print_r( $image_scan_results );
 
 		if ( is_wp_error( $image_scan_results ) ) {
 			return $image_scan_results;
