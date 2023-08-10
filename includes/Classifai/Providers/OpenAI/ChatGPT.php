@@ -157,6 +157,31 @@ class ChatGPT extends Provider {
 			'core',
 			array( '__back_compat_meta_box' => true )
 		);
+
+		// Register assets.
+		wp_enqueue_script(
+			'classifai-post-excerpt-classic-editor',
+			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
+			[],
+			CLASSIFAI_PLUGIN_VERSION,
+			true
+		);
+		wp_localize_script(
+			'classifai-post-excerpt-classic-editor',
+			'classifaiGenerateExcerpt',
+			[
+				'endpointUrl'           => esc_url(
+					get_rest_url(
+						null,
+						"/classifai/v1/openai/generate-excerpt/{$post->ID}"
+					)
+				),
+				'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG,
+				'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
+				'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
+				'nonce'                 => wp_create_nonce( 'wp_rest' ),
+			]
+		);
 	}
 
 	/**
@@ -290,52 +315,15 @@ class ChatGPT extends Provider {
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
-	public function enqueue_admin_assets( $hook_suffix = '' ) {
+	public function enqueue_admin_assets( string $hook_suffix = '' ): void {
 		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
 			return;
 		}
 
-		$settings      = $this->get_settings();
-		$excerpt_roles = $settings['roles'] ?? [];
 		$screen        = get_current_screen();
 		$settings      = $this->get_settings();
 		$user_roles    = wp_get_current_user()->roles ?? [];
 		$title_roles   = $settings['title_roles'] ?? [];
-
-		if (
-			( ! empty( $excerpt_roles ) && empty( array_diff( $user_roles, $excerpt_roles ) ) )
-			&& ( isset( $settings['enable_excerpt'] ) && 1 === (int) $settings['enable_excerpt'] )
-		) {
-			$_post_id = isset( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				? filter_var( $_GET['post'], FILTER_VALIDATE_INT ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				: false;
-
-			if ( $_post_id ) {
-				wp_enqueue_script(
-					'classifai-post-excerpt-classic-editor',
-					CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
-					[],
-					CLASSIFAI_PLUGIN_VERSION,
-					true
-				);
-				wp_localize_script(
-					'classifai-post-excerpt-classic-editor',
-					'classifaiGenerateExcerpt',
-					[
-						'endpointUrl'           => esc_url(
-							get_rest_url(
-								null,
-								"/classifai/v1/openai/generate-excerpt/{$_post_id}"
-							)
-						),
-						'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) ? SCRIPT_DEBUG : false,
-						'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
-						'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
-						'nonce'                 => wp_create_nonce( 'wp_rest' ),
-					]
-				);
-			}
-		}
 
 		// Load the assets for the classic editor.
 		if (
