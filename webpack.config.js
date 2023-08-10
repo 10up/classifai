@@ -25,8 +25,8 @@ module.exports = {
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
 		'post-excerpt': ['./src/js/post-excerpt/index.js'],
-		'post-excerpt-classic-editor': ['./src/js/post-excerpt-classic-editor/index.js'],
 		'media-modal': ['./src/js/media-modal/index.js'],
+		'generate-excerpt-classic': ['./src/js/openai/classic-editor-excerpt-generator.js'],
 		'generate-title-classic': [
 			'./src/js/openai/classic-editor-title-generator.js',
 		],
