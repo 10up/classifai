@@ -6,8 +6,6 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Watson\Normalizer;
 use WP_Post;
 use function Classifai\get_asset_info;
