@@ -315,15 +315,15 @@ class ChatGPT extends Provider {
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
-	public function enqueue_admin_assets( string $hook_suffix = '' ): void {
+	public function enqueue_admin_assets( $hook_suffix = '' ) {
 		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
 			return;
 		}
 
-		$screen        = get_current_screen();
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$title_roles   = $settings['title_roles'] ?? [];
+		$screen      = get_current_screen();
+		$settings    = $this->get_settings();
+		$user_roles  = wp_get_current_user()->roles ?? [];
+		$title_roles = $settings['title_roles'] ?? [];
 
 		// Load the assets for the classic editor.
 		if (
