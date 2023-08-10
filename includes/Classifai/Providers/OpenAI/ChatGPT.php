@@ -187,25 +187,40 @@ class ChatGPT extends Provider {
 			/* translators: Hidden accessibility text. */
 			_e( 'Excerpt' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction
 			?>
-		</label><textarea rows="1" cols="40" name="excerpt" id="excerpt"><?php echo esc_html( $post->post_excerpt ); // textarea_escaped ?></textarea>
+		</label><textarea rows="1" cols="40" name="excerpt"
+			id="excerpt"><?php echo esc_html( $post->post_excerpt ); // textarea_escaped ?></textarea>
 
 		<p>
 			<?php
 			printf(
 				/* translators: %s: Documentation URL. */
-				__( 'Excerpts are optional hand-crafted summaries of your content that can be used in your theme. <a href="%s">Learn more about manual excerpts</a>.' ),  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				__( 'Excerpts are optional hand-crafted summaries of your content that can be used in your theme. <a href="%s">Learn more about manual excerpts</a>.' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				__( 'https://wordpress.org/documentation/article/what-is-an-excerpt-classic-editor/' )  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			);
 			?>
 		</p>
 
-		<?php if ( $is_new_post ) { ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary" disabled><?php echo esc_html( $button_text ); ?></button>
-			<p><strong><?php esc_html_e( 'Add some content and save as a draft to enable excerpt generation.', 'classifai' ); ?></strong></p>
-		<?php } else { ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary"><?php echo esc_html( $button_text ); ?></button>
+		<?php if ( $is_new_post ) : ?>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary" disabled>
+				<?php echo esc_html( $button_text ); ?>
+			</button>
+			<p>
+				<strong>
+					<?php
+					esc_html_e(
+						'Add some content and save as a draft to enable excerpt generation.',
+						'classifai'
+					);
+					?>
+				</strong>
+			</p>
+		<?php else : ?>
+			<button id="classifai-generate-excerpt" type="button" class="button button-primary">
+				<?php echo esc_html( $button_text ); ?>
+			</button>
 			<?php
-		}
+		endif;
+
 		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
 
