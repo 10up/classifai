@@ -112,16 +112,19 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'add_meta_boxes', [ $this, 'replace_classic_editor_excerpt' ] );
+		add_action( 'add_meta_boxes', [ $this, 'add_support_for_classic_editor' ] );
 	}
 
 	/**
-	 * Replace the Classic Editor Excerpt meta box
-	 * There are no content filters available, there's no other option here.
+	 * Add support for classic editor.
+	 *
+	 * This function does following:
+	 * - Replace the Classic Editor Excerpt meta box. There are no content filters available, there's no other option here.
+	 * - Print the generated titles template for modal that is used by "Generate titles" feature.
 	 *
 	 * @since x.x.x
 	 */
-	public function replace_classic_editor_excerpt(): void {
+	public function add_support_for_classic_editor(): void {
 		global $post;
 
 		// Bail if the feature is not enabled, or we don't have a post.
@@ -139,49 +142,50 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		// Bail if the post type doesn't support excerpts.
-		if ( ! post_type_supports( $post->post_type, 'excerpt' ) ) {
-			return;
+		if ( post_type_supports( $post->post_type, 'title' ) ) {
+			add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 		}
 
-		// Default meta box is registered in register_and_do_post_meta_boxes()
-		remove_meta_box( 'postexcerpt', null, 'normal' );
+		if ( post_type_supports( $post->post_type, 'excerpt' ) ) {
+			// Default meta box is registered in register_and_do_post_meta_boxes()
+			remove_meta_box( 'postexcerpt', null, 'normal' );
 
-		// Note: the text-domain is missing for `Excerpt` because this is set in WP core
-		add_meta_box(
-			'classifaipostexcerpt',
-			__( 'Excerpt' ),
-			[ $this, 'classifai_post_excerpt_meta_box' ],
-			null,
-			'normal',
-			'core',
-			array( '__back_compat_meta_box' => true )
-		);
+			// Note: the text-domain is missing for `Excerpt` because this is set in WP core
+			add_meta_box(
+				'classifaipostexcerpt',
+				__( 'Excerpt' ),
+				[ $this, 'classifai_post_excerpt_meta_box' ],
+				null,
+				'normal',
+				'core',
+				array( '__back_compat_meta_box' => true )
+			);
 
-		// Register assets.
-		wp_enqueue_script(
-			'classifai-post-excerpt-classic-editor',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
-			true
-		);
-		wp_localize_script(
-			'classifai-post-excerpt-classic-editor',
-			'classifaiGenerateExcerpt',
-			[
-				'endpointUrl'           => esc_url(
-					get_rest_url(
-						null,
-						"/classifai/v1/openai/generate-excerpt/{$post->ID}"
-					)
-				),
-				'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG,
-				'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
-				'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
-				'nonce'                 => wp_create_nonce( 'wp_rest' ),
-			]
-		);
+			// Register assets.
+			wp_enqueue_script(
+				'classifai-post-excerpt-classic-editor',
+				CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt-classic-editor.js',
+				[],
+				CLASSIFAI_PLUGIN_VERSION,
+				true
+			);
+			wp_localize_script(
+				'classifai-post-excerpt-classic-editor',
+				'classifaiGenerateExcerpt',
+				[
+					'endpointUrl'           => esc_url(
+						get_rest_url(
+							null,
+							"/classifai/v1/openai/generate-excerpt/{$post->ID}"
+						)
+					),
+					'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG,
+					'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
+					'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
+					'nonce'                 => wp_create_nonce( 'wp_rest' ),
+				]
+			);
+		}
 	}
 
 	/**
