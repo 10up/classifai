@@ -9,8 +9,10 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Watson\Normalizer;
+use WP_Post;
 use function Classifai\get_asset_info;
 use WP_Error;
+use function Classifai\get_post_types_for_language_settings;
 
 class ChatGPT extends Provider {
 
@@ -118,23 +120,52 @@ class ChatGPT extends Provider {
 	/**
 	 * Replace the Classic Editor Excerpt meta box
 	 * There are no content filters available, there's no other option here.
+	 *
+	 * @since x.x.x
 	 */
-	public function replace_classic_editor_excerpt() {
-		$post_type = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	public function replace_classic_editor_excerpt(): void {
+		global $post;
 
-		if ( post_type_supports( $post_type, 'excerpt' ) ) {
-			// Default meta box is registered in register_and_do_post_meta_boxes()
-			remove_meta_box( 'postexcerpt', null, 'normal' );
-			// Note: the text-domain is missing for `Excerpt` because this is set in WP core
-			add_meta_box( 'classifaipostexcerpt', __( 'Excerpt' ), [ $this, 'classifai_post_excerpt_meta_box' ], null, 'normal', 'core', array( '__back_compat_meta_box' => true ) );
+		// Bail if the feature is not enabled, or we don't have a post.
+		if (
+			! ( $post instanceof WP_Post )
+			|| ! $this->is_feature_enabled( 'enable_excerpt' )
+		) {
+			return;
 		}
+
+		$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
+
+		// Only replace the meta box on the post types we support.
+		if ( ! in_array( $post->post_type, $chat_gpt_post_types, true ) ) {
+			return;
+		}
+
+		// Bail if the post type doesn't support excerpts.
+		if ( ! post_type_supports( $post->post_type, 'excerpt' ) ) {
+			return;
+		}
+
+		// Default meta box is registered in register_and_do_post_meta_boxes()
+		remove_meta_box( 'postexcerpt', null, 'normal' );
+
+		// Note: the text-domain is missing for `Excerpt` because this is set in WP core
+		add_meta_box(
+			'classifaipostexcerpt',
+			__( 'Excerpt' ),
+			[ $this, 'classifai_post_excerpt_meta_box' ],
+			null,
+			'normal',
+			'core',
+			array( '__back_compat_meta_box' => true )
+		);
 	}
 
 	/**
 	 * Custom excerpt meta field
 	 * Note: most of this is copied from post_excerpt_meta_box()
 	 *
-	 * @param \WP_Post $post Current post object.
+	 * @param WP_Post $post Current post object.
 	 */
 	public function classifai_post_excerpt_meta_box( $post ) {
 		global $pagenow;
