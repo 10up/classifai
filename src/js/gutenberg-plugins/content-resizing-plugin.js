@@ -1,6 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import { registerPlugin } from '@wordpress/plugins';
-import { registerFormatType } from '@wordpress/rich-text';
 import {
 	store as blockEditorStore,
 	BlockControls,
@@ -24,6 +23,7 @@ import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem,
+	Button
 } from '@wordpress/components';
 import {
 	count as getWordCount,
@@ -256,6 +256,7 @@ const ContentResizingPlugin = () => {
 							<th className="classifai-content-resize__stat-header">
 								{ __( 'Stats', 'classifai' ) }
 							</th>
+							<th>{ __( 'Action', 'classifai' ) }</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -285,7 +286,6 @@ const ContentResizingPlugin = () => {
 							return (
 								<tr
 									key={ index }
-									onClick={ () => updateContent( textItem ) }
 								>
 									<td>{ textItem }</td>
 									<td>
@@ -293,6 +293,14 @@ const ContentResizingPlugin = () => {
 										<ResizeStat
 											count={ charDiff }
 											countEntity="character"
+										/>
+									</td>
+									<td>
+										<Button
+											text={ __( 'Select', 'classifai' ) }
+											variant='secondary'
+											onClick={ () => updateContent( textItem ) }
+											tabIndex="0"
 										/>
 									</td>
 								</tr>
@@ -396,6 +404,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 				<div style={ { position: 'relative' } }>
 					<div className="classifai-content-resize__overlay">
 						<div>
+							<Spinner />
 							{ __( 'Resizing content…' ) }
 						</div>
 					</div>
@@ -459,7 +468,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													} }
 												>
 													{ __(
-														'Expand on this',
+														'Expand this text',
 														'classifai'
 													) }
 												</MenuItem>
@@ -475,7 +484,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													} }
 												>
 													{ __(
-														'Make this more concise',
+														'Condense this text',
 														'classifai'
 													) }
 												</MenuItem>
