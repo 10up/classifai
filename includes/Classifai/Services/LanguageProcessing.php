@@ -6,7 +6,6 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
-use Classifai\Providers\Azure\TextToSpeech;
 use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -420,7 +419,7 @@ class LanguageProcessing extends Service {
 
 		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
 			$post_type = get_post_type( $post_id );
-			$supported = TextToSpeech::get_supported_post_types();
+			$supported = \Classifai\get_tts_supported_post_types();
 
 			// Check if processing allowed.
 			if ( ! in_array( $post_type, $supported, true ) ) {
