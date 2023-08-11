@@ -719,8 +719,14 @@ class ComputerVision extends Provider {
 		if ( ! is_wp_error( $request ) ) {
 			$body = json_decode( wp_remote_retrieve_body( $request ) );
 
-			if ( 200 !== wp_remote_retrieve_response_code( $request ) && isset( $body->message ) ) {
-				$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
+			if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
+				if ( isset( $body->error ) ) {
+					$rtn = new WP_Error( $body->error->code ?? 'error', $body->error->message ?? esc_html__( 'An error occurred.', 'classifai' ), $body );
+				} elseif ( isset( $body->message ) ) {
+					$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
+				} else {
+					$rtn = new WP_Error( 'error', esc_html__( 'An error occurred.', 'classifai' ), $body );
+				}
 			} else {
 				$rtn = $body;
 			}
