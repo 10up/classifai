@@ -1323,8 +1323,6 @@ class ComputerVision extends Provider {
 
 		$image_scan_results = $this->scan_image( $image_url, [ $route_to_call ] );
 
-		print_r( $image_scan_results );
-
 		if ( is_wp_error( $image_scan_results ) ) {
 			return $image_scan_results;
 		}
