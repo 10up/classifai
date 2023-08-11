@@ -1,5 +1,6 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 import { registerPlugin } from '@wordpress/plugins';
+import { registerFormatType } from '@wordpress/rich-text';
 import {
 	store as blockEditorStore,
 	BlockControls,
@@ -103,25 +104,13 @@ register( resizeContentStore );
 
 const ContentResizingPlugin = () => {
 	// Holds the original text of the block being procesed.
-	const [ ogText, setOgText ] = useState( '' );
+	const [ blockContentAsPlainText, setBlockContentAsPlainText ] = useState( '' );
 
 	// Holds the currently selected block data.
 	const [ selectedBlock, setSelectedBlock ] = useState( null );
 
-	// Holds the start selection index of the content selected in a block.
-	// Defaults to `0` in cause the block is selected but no text is selected.
-	const [ startIndex, setStartIndex ] = useState( 0 );
-
-	// Holds the end selection index of the content selected in a block.
-	// Defaults to `null` in cause the block is selected but no text is selected.
-	const [ endIndex, setEndIndex ] = useState( null );
-
 	// Holds the GPT response array.
 	const [ textArray, setTextArray ] = useState( [] );
-
-	// Holds the selected text content within the block.
-	// If no text was selected, then this value is the same as `ogText`.
-	const [ selectedText, setSelectedText ] = useState( '' );
 
 	// Indicates if content resizing is in progress.
 	const [ isResizing, setIsResizing ] = useState( false );
@@ -160,10 +149,7 @@ const ContentResizingPlugin = () => {
 	// Resets to default states.
 	function resetStates() {
 		setSelectedBlock( null );
-		setStartIndex( 0 );
-		setEndIndex( null );
 		setTextArray( [] );
-		setSelectedText( '' );
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
 	}
@@ -175,30 +161,11 @@ const ContentResizingPlugin = () => {
 	 * @return {void}
 	 */
 	async function resizeContent() {
-		const start = select( blockEditorStore ).getSelectionStart();
-		const end = select( blockEditorStore ).getSelectionEnd();
 		const block = select( blockEditorStore ).getSelectedBlock();
-
-		const blockContent = block.attributes.content;
-		const blockContentPlainText = toPlainText( blockContent );
-
-		if ( 0 === end.offset - start.offset ) {
-			setSelectedBlock( block );
-			setStartIndex( 0 );
-			setEndIndex( null );
-			setSelectedText( blockContentPlainText );
-			setOgText( blockContentPlainText );
-			setIsResizing( true );
-			return;
-		}
+		const blockContent = block.attributes.content ?? '';
 
 		setSelectedBlock( block );
-		setStartIndex( start.offset );
-		setEndIndex( end.offset );
-		setSelectedText(
-			blockContentPlainText.substring( start.offset, end.offset )
-		);
-		setOgText( blockContentPlainText );
+		setBlockContentAsPlainText( toPlainText( blockContent ) );
 		setIsResizing( true );
 	}
 
@@ -214,7 +181,7 @@ const ContentResizingPlugin = () => {
 		const formData = new FormData();
 
 		formData.append( 'id', postId );
-		formData.append( 'content', selectedText );
+		formData.append( 'content', blockContentAsPlainText );
 		formData.append( 'resize_type', resizingType );
 
 		dispatch( resizeContentStore ).setClientId( selectedBlock.clientId );
@@ -247,24 +214,18 @@ const ContentResizingPlugin = () => {
 	 * @param {string} updateWith The content that will be used to replace the selection.
 	 */
 	function updateContent( updateWith ) {
-		const fullBlockContent = toPlainText( ogText );
-		const beforeReplaceable = fullBlockContent.substring( 0, startIndex );
-		const afterReplaceable = fullBlockContent.substring( endIndex );
-		const updatedContent =
-			beforeReplaceable + updateWith + afterReplaceable;
-
 		dispatch( blockEditorStore ).updateBlockAttributes(
 			selectedBlock.clientId,
 			{
-				content: endIndex ? updatedContent : updateWith,
+				content: updateWith,
 			}
 		);
 
 		dispatch( blockEditorStore ).selectionChange(
 			selectedBlock.clientId,
 			'content',
-			startIndex,
-			startIndex + updateWith.length
+			0,
+			updateWith.length
 		);
 		resetStates();
 	}
@@ -300,11 +261,11 @@ const ContentResizingPlugin = () => {
 					<tbody>
 						{ textArray.map( ( textItem, index ) => {
 							const selectedTextWordCount = getWordCount(
-								selectedText,
+								blockContentAsPlainText,
 								'words'
 							);
 							const selectedTextCharCount = getCharacterCount(
-								selectedText,
+								blockContentAsPlainText,
 								'characters_including_spaces'
 							);
 							const suggestionWordCount = getWordCount(
@@ -435,8 +396,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 				<div style={ { position: 'relative' } }>
 					<div className="classifai-content-resize__overlay">
 						<div>
-							<Spinner />
-							{ __( 'Processing content…' ) }
+							{ __( 'Resizing content…' ) }
 						</div>
 					</div>
 					<BlockEdit { ...props } />
@@ -474,7 +434,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 		return (
 			<>
 				{ ! resizingType && ! isMultiBlocksSelected ? (
-					<BlockControls>
+					<BlockControls group="other">
 						<ToolbarGroup>
 							<ToolbarItem>
 								{ () => (
@@ -499,7 +459,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													} }
 												>
 													{ __(
-														'Grow content',
+														'Expand on this',
 														'classifai'
 													) }
 												</MenuItem>
@@ -515,7 +475,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 													} }
 												>
 													{ __(
-														'Shrink content',
+														'Make this more concise',
 														'classifai'
 													) }
 												</MenuItem>
