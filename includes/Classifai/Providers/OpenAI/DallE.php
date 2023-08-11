@@ -112,6 +112,14 @@ class DallE extends Provider {
 			true
 		);
 
+		wp_enqueue_script(
+			'classifai-inserter-media-category',
+			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
+			get_asset_info( 'inserter-media-category', 'dependencies' ),
+			get_asset_info( 'inserter-media-category', 'version' ),
+			true
+		);
+
 		/**
 		 * Filter the default attribution added to generated images.
 		 *
