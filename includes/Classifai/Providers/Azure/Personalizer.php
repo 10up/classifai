@@ -35,7 +35,7 @@ class Personalizer extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Personalizer',
+			'AI Personalizer',
 			'personalizer',
 			$service
 		);

@@ -1053,7 +1053,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_smart_cropping'],
 				'description'   => __(
-					'ComputerVision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
+					'AI Vision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
 					'classifai'
 				),
 			]

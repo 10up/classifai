@@ -22,7 +22,7 @@
 * [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
 * [Set Up Azure AI Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
-* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
+* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
@@ -41,9 +41,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
-* BETA: Recommend content based on overall site traffic via [Microsoft Azure AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
-* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
-* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
+* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ### Language Processing
