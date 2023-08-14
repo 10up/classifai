@@ -69,7 +69,7 @@ class Personalizer extends Service {
 			}
 		}
 
-		$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Personalizer' );
 
 		if ( ! is_wp_error( $provider ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -146,7 +146,7 @@ class Personalizer extends Service {
 			}
 
 			// Find the right provider class.
-			$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
+			$provider = find_provider_class( $this->provider_classes ?? [], 'AI Personalizer' );
 
 			// Ensure we have a provider class. Should never happen but :shrug:
 			if ( is_wp_error( $provider ) ) {
