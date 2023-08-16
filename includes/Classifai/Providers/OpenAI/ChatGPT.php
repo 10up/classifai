@@ -112,7 +112,7 @@ class ChatGPT extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
