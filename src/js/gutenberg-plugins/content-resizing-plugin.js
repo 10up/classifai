@@ -17,7 +17,6 @@ import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import {
 	Modal,
-	Spinner,
 	ToolbarGroup,
 	ToolbarItem,
 	DropdownMenu,
@@ -102,6 +101,8 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 
 register( resizeContentStore );
 
+let isProcessAnimating = false;
+
 const ContentResizingPlugin = () => {
 	// Holds the original text of the block being procesed.
 	const [ blockContentAsPlainText, setBlockContentAsPlainText ] = useState( '' );
@@ -152,6 +153,7 @@ const ContentResizingPlugin = () => {
 		setTextArray( [] );
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
+		isProcessAnimating = false;
 	}
 
 	/**
@@ -380,6 +382,52 @@ registerPlugin( 'tenup-openai-expand-reduce-content', {
 	render: ContentResizingPlugin,
 } );
 
+const colorsArray = [
+	'#ff595e',
+	'#ffca3a',
+	'#8ac926',
+	'#1982c4',
+	'#6a4c93'
+];
+
+function processAnimation( content = '' ) {
+	if ( isProcessAnimating ) {
+		return;
+	}
+
+	const charArray = content.split( ' ' );
+	const randomWordIndexes = getRandomIndexesFromArray( charArray, charArray.length / 4 );
+	const formattedCharArray = charArray.map( ( char, index ) => {
+		if ( randomWordIndexes.includes( index ) ) {
+			const randomColorIndex = Math.floor( Math.random() * 5 );
+			return `<span class="classifai-content-resize__blot" style="background-color: ${ colorsArray[ randomColorIndex ] }">${ char }</span>`;
+		} else {
+			return char;
+		}
+	} );
+
+	document.getElementById( 'classifai-content-resize__mock-content' ).innerHTML = formattedCharArray.join( ' ' );
+
+	setTimeout(() => {
+		requestAnimationFrame( () => processAnimation( content ) );
+	}, 1000 / 3 );
+}
+
+function getRandomIndexesFromArray( arr = [], maxIndexes = 10 ) {
+	const indexes = Array.from( { length: arr.length }, ( _, index) => index ); // Create an array of all indexes
+	const randomIndexes = [];
+
+	while ( randomIndexes.length < maxIndexes ) {
+		const randomIndex = Math.floor( Math.random() * indexes.length );
+
+		if (!randomIndexes.includes(randomIndex)) {
+			randomIndexes.push( randomIndex );
+		}
+	}
+
+	return randomIndexes;
+}
+
 /**
  * Adds an overlay on the block under process.
  */
@@ -399,14 +447,23 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 			return <BlockEdit { ...props } />;
 		}
 
+		const __plainTextContent = toPlainText( props.attributes.content );
+
+		if ( ! isProcessAnimating ) {
+			requestAnimationFrame( () => processAnimation( __plainTextContent ) );
+			console.log('hello')
+		}
+
 		return (
 			<>
 				<div style={ { position: 'relative' } }>
 					<div className="classifai-content-resize__overlay">
-						<div>
-							<Spinner />
-							{ __( 'Resizing content…' ) }
+						<div className='classifai-content-resize__overlay-text'>
+							{ __( 'Processing data...', 'classifai' ) }
 						</div>
+					</div>
+					<div id='classifai-content-resize__mock-content'>
+						{ __plainTextContent }
 					</div>
 					<BlockEdit { ...props } />
 				</div>
