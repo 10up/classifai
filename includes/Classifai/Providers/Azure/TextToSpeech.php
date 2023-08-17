@@ -732,6 +732,10 @@ class TextToSpeech extends Provider {
 			return $content;
 		}
 
+		if ( ! is_singular( $_post->post_type ) ) {
+			return $content;
+		}
+
 		if ( ! in_array( $_post->post_type, get_tts_supported_post_types(), true ) ) {
 			return $content;
 		}
