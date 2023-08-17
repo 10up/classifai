@@ -7,7 +7,6 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
-use WP_Post;
 use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\get_post_types_for_language_settings;
