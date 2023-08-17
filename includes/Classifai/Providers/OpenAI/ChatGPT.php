@@ -8,8 +8,8 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
 use WP_Post;
-use function Classifai\get_asset_info;
 use WP_Error;
+use function Classifai\get_asset_info;
 use function Classifai\get_post_types_for_language_settings;
 
 class ChatGPT extends Provider {
@@ -112,144 +112,6 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_support_for_classic_editor' ] );
-	}
-
-	/**
-	 * Add support for classic editor.
-	 *
-	 * This function does following:
-	 * - Replace the Classic Editor Excerpt meta box. There are no content filters available, there's no other option here.
-	 * - Print the generated titles template for modal that is used by "Generate titles" feature.
-	 *
-	 * @since x.x.x
-	 */
-	public function add_support_for_classic_editor(): void {
-		global $post;
-
-		// Bail if the feature is not enabled, or we don't have a post.
-		if (
-			! ( $post instanceof WP_Post )
-			|| ! $this->is_feature_enabled( 'enable_excerpt' )
-		) {
-			return;
-		}
-
-		$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
-
-		// Only replace the meta box on the post types we support.
-		if ( ! in_array( $post->post_type, $chat_gpt_post_types, true ) ) {
-			return;
-		}
-
-		if ( post_type_supports( $post->post_type, 'title' ) ) {
-			add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
-		}
-
-		if ( post_type_supports( $post->post_type, 'excerpt' ) ) {
-			// Default meta box is registered in register_and_do_post_meta_boxes()
-			remove_meta_box( 'postexcerpt', null, 'normal' );
-
-			// Note: the text-domain is missing for `Excerpt` because this is set in WP core
-			add_meta_box(
-				'classifaipostexcerpt',
-				__( 'Excerpt' ),
-				[ $this, 'classifai_post_excerpt_meta_box' ],
-				null,
-				'normal',
-				'core',
-				array( '__back_compat_meta_box' => true )
-			);
-
-			// Register assets.
-			wp_enqueue_script(
-				'classifai-post-excerpt-classic-editor',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-				[],
-				CLASSIFAI_PLUGIN_VERSION,
-				true
-			);
-			wp_localize_script(
-				'classifai-post-excerpt-classic-editor',
-				'classifaiGenerateExcerpt',
-				[
-					'endpointUrl'           => esc_url(
-						get_rest_url(
-							null,
-							"/classifai/v1/openai/generate-excerpt/{$post->ID}"
-						)
-					),
-					'scriptDebug'           => defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG,
-					'generateExcerptText'   => __( 'Generate excerpt', 'classifai' ),
-					'regenerateExcerptText' => __( 'Re-generate excerpt', 'classifai' ),
-					'nonce'                 => wp_create_nonce( 'wp_rest' ),
-				]
-			);
-		}
-	}
-
-	/**
-	 * Custom excerpt meta field
-	 * Note: most of this is copied from post_excerpt_meta_box()
-	 *
-	 * @param WP_Post $post Current post object.
-	 */
-	public function classifai_post_excerpt_meta_box( $post ) {
-		global $pagenow;
-
-		$is_new_post = 'post-new.php' === $pagenow;
-		$has_excerpt = false;
-
-		// We need a post ID to look up an excerpt, a brand new post doesn't have one
-		if ( ! $is_new_post ) {
-			$has_excerpt = '' !== $post->post_excerpt;
-		}
-
-		$button_text = __( 'Generate excerpt', 'classifai' );
-		if ( $has_excerpt ) {
-			$button_text = __( 'Re-generate excerpt', 'classifai' );
-		}
-
-		?>
-		<label class="screen-reader-text" for="excerpt">
-			<?php
-			/* translators: Hidden accessibility text. */
-			_e( 'Excerpt' ); // phpcs:ignore WordPress.Security.EscapeOutput.UnsafePrintingFunction
-			?>
-		</label><textarea rows="1" cols="40" name="excerpt"
-			id="excerpt"><?php echo esc_html( $post->post_excerpt ); // textarea_escaped ?></textarea>
-
-		<p>
-			<?php
-			printf(
-				/* translators: %s: Documentation URL. */
-				__( 'Excerpts are optional hand-crafted summaries of your content that can be used in your theme. <a href="%s">Learn more about manual excerpts</a>.' ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				__( 'https://wordpress.org/documentation/article/what-is-an-excerpt-classic-editor/' )  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			);
-			?>
-		</p>
-
-		<?php if ( $is_new_post ) : ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary" disabled>
-				<?php echo esc_html( $button_text ); ?>
-			</button>
-			<p>
-				<strong>
-					<?php
-					esc_html_e(
-						'Add some content and save as a draft to enable excerpt generation.',
-						'classifai'
-					);
-					?>
-				</strong>
-			</p>
-		<?php else : ?>
-			<button id="classifai-generate-excerpt" type="button" class="button button-primary">
-				<?php echo esc_html( $button_text ); ?>
-			</button>
-			<?php
-		endif;
-
 		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
 
@@ -330,35 +192,72 @@ class ChatGPT extends Provider {
 		$title_roles = $settings['title_roles'] ?? [];
 
 		// Load the assets for the classic editor.
-		if (
-			$screen && ! $screen->is_block_editor()
-			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
-		) {
-			wp_enqueue_style(
-				'classifai-generate-title-classic-css',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-				[],
-				CLASSIFAI_PLUGIN_VERSION,
-				'all'
-			);
+		if ( $screen && ! $screen->is_block_editor() ) {
+			if (
+				post_type_supports( $screen->post_type, 'title' ) &&
+				$this->is_feature_enabled( 'enable_titles' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
 
-			wp_enqueue_script(
-				'classifai-generate-title-classic-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-				array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-				get_asset_info( 'generate-title-classic', 'version' ),
-				true
-			);
+				wp_enqueue_script(
+					'classifai-generate-title-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+					array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-title-classic', 'version' ),
+					true
+				);
 
-			wp_add_inline_script(
-				'classifai-generate-title-classic-js',
-				sprintf(
-					'var classifaiChatGPTData = %s;',
-					wp_json_encode( $this->get_localised_vars() )
-				),
-				'before'
-			);
+				wp_add_inline_script(
+					'classifai-generate-title-classic-js',
+					sprintf(
+						'var classifaiChatGPTData = %s;',
+						wp_json_encode( $this->get_localised_vars() )
+					),
+					'before'
+				);
+			}
+
+			if (
+				post_type_supports( $screen->post_type, 'excerpt' ) &&
+				$this->is_feature_enabled( 'enable_excerpt' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
+
+				wp_enqueue_script(
+					'classifai-generate-excerpt-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
+					array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-excerpt-classic', 'version' ),
+					true
+				);
+
+				wp_add_inline_script(
+					'classifai-generate-excerpt-classic-js',
+					sprintf(
+						'var classifaiGenerateExcerpt = %s;',
+						wp_json_encode(
+							[
+								'path'           => '/classifai/v1/openai/generate-excerpt/',
+								'buttonText'     => __( 'Generate excerpt', 'classifai' ),
+								'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
+							]
+						)
+					),
+					'before'
+				);
+			}
 		}
 
 		wp_enqueue_style(
