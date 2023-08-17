@@ -238,7 +238,7 @@ The following WP-CLI commands are supported by ClassifAI:
 
 * `wp classifai image <attachment_ids> [--limit=<int>] [--skip=<skip>] [--force]`
 
-  Directly add description "alt text" and tags to attachment(s) using Azure AI Computer Vision API.
+  Directly add description "alt text" and tags to attachment(s) using Azure AI Vision API.
 
   * `<attachment_ids>`: Comma delimited list of Attachment IDs to classify.
 
@@ -256,7 +256,7 @@ The following WP-CLI commands are supported by ClassifAI:
 
 * `wp classifai crop <attachment_ids> [--limit=<limit>] [--skip=<skip>]`
 
-  Batch crop image(s) using Azure AI Computer Vision API.
+  Batch crop image(s) using Azure AI Vision API.
 
   * `<attachment_ids>`: Comma delimited list of Attachment IDs to crop.
 
