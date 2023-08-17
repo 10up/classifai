@@ -87,7 +87,9 @@ class Update {
 
 			// Adding the plugin info to the `no_update` property is required
 			// for the enable/disable auto-update links to appear correctly in the UI.
-			$transient->no_update[ $update->filename ] = $update;
+			if ( $update ) {
+				$transient->no_update[ $update->filename ] = $update;
+			}
 		}
 
 		return $transient;
