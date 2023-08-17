@@ -203,6 +203,35 @@ describe('Language processing Tests', () => {
 		} );
 	} );
 
+	it( 'Can see the generate excerpt button in a post (Classic Editor)', () => {
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#activate-classic-editor' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData();
+
+		cy.classicCreatePost( {
+			title: 'Excerpt test classic',
+			content: 'Test GPT content.',
+			postType: 'post',
+		} );
+
+		// Verify button exists.
+		cy.get( '#classifai-openai__excerpt-generate-btn' ).should( 'exist' );
+
+		// Click on button and verify data loads in.
+		cy.get( '#classifai-openai__excerpt-generate-btn' ).click();
+		cy.get( '#excerpt' ).should( 'have.value', data );
+
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
 	it( 'Can disable excerpt generation feature', () => {
 		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
 
