@@ -62,26 +62,29 @@
 		height: calc( 100% + 2 * $offset );
 		z-index: 10;
 		backdrop-filter: blur(4px);
-		background-color: rgba(0, 0, 0, 0.5);
+		background-color: rgba(0, 0, 0, 0.2);
 		border-radius: 8px;
 	}
 
 	&__overlay-text {
 		color: #fff;
-		font-size: 1.5rem;
-		background-color: rgba( 0, 0, 0, 0.5 );
+		font-size: 1rem;
+		background-color: rgba(0, 0, 0, 0.5);
 		padding: 0.5rem;
 		border-radius: 5px;
 	}
 
 	&__blot {
-		color: rgba(0, 0, 0, 0);
+		color: rgba(0, 0, 0, 0.5);
 		background-color: rgba(0, 0, 0, 1);
-		animation: blotIn 0.5s linear;
+		animation: blotIn 0.75s ease-in;
 	}
 }
 
 @keyframes blotIn {
+	95% {
+		background-color: inherit;
+	}
 	100% {
 		background-color: rgba(0, 0, 0, 0);
 	}

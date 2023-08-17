@@ -383,11 +383,9 @@ registerPlugin( 'tenup-openai-expand-reduce-content', {
 } );
 
 const colorsArray = [
-	'#ff595e',
-	'#ffca3a',
-	'#8ac926',
-	'#1982c4',
-	'#6a4c93'
+	'#8c2525',
+	'#ca4444',
+	'#303030',
 ];
 
 function processAnimation( content = '' ) {
@@ -410,7 +408,7 @@ function processAnimation( content = '' ) {
 
 	setTimeout(() => {
 		requestAnimationFrame( () => processAnimation( content ) );
-	}, 1000 / 3 );
+	}, 1000 / 1.35 );
 }
 
 function getRandomIndexesFromArray( arr = [], maxIndexes = 10 ) {
