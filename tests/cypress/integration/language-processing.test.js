@@ -221,6 +221,10 @@ describe('Language processing Tests', () => {
 			postType: 'post',
 		} );
 
+		// Ensure excerpt metabox is shown.
+		cy.get( '#show-settings-link' ).click();
+		cy.get( '#postexcerpt-hide' ).check( { force: true } );
+
 		// Verify button exists.
 		cy.get( '#classifai-openai__excerpt-generate-btn' ).should( 'exist' );
 
