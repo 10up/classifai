@@ -30,6 +30,47 @@ waitFor( isInserterOpened ).then( () =>
 	)
 );
 
+const debounce = ( func, timeout = 250 ) => {
+	let timer;
+  
+	return (...args) => {
+		clearTimeout( timer );
+  
+		return new Promise( ( resolve ) => {
+			timer = setTimeout( () => {
+				resolve( func.apply( this, args ) );
+			}, timeout );
+		} );
+	};
+}
+
+const imageFetcher = async ( { search = ''} ) =>  {
+	if ( ! search ) {
+		return [];
+	}
+
+	const images = await apiFetch( {
+		path: addQueryArgs( classifaiDalleData.endpoint, {
+			prompt: search,
+			format: 'b64_json',
+		} ),
+		method: 'GET',
+	} )
+		.then( ( response ) =>
+			response.map( ( item ) => ( {
+				title: search,
+				url: `data:image/png;base64,${ item.url }`,
+				previewUrl: `data:image/png;base64,${ item.url }`,
+				id: undefined,
+				alt: search,
+				caption: classifaiDalleData.caption,
+			} ) )
+		)
+		.catch( () => [] );
+
+	return images;
+}
+
 const registerGenerateImageMediaCategory = () => ( {
 	name: 'classifai-generate-image',
 	labels: {
@@ -37,31 +78,6 @@ const registerGenerateImageMediaCategory = () => ( {
 		search_items: __( 'Enter a prompt', 'classifai' ),
 	},
 	mediaType: 'image',
-	fetch: async ( { search = '' } ) => {
-		if ( ! search ) {
-			return [];
-		}
-
-		const images = await apiFetch( {
-			path: addQueryArgs( classifaiDalleData.endpoint, {
-				prompt: search,
-				format: 'b64_json',
-			} ),
-			method: 'GET',
-		} )
-			.then( ( response ) =>
-				response.map( ( item ) => ( {
-					title: search,
-					url: `data:image/png;base64,${ item.url }`,
-					previewUrl: `data:image/png;base64,${ item.url }`,
-					id: undefined,
-					alt: search,
-					caption: classifaiDalleData.caption,
-				} ) )
-			)
-			.catch( () => [] );
-
-		return images;
-	},
+	fetch: debounce( imageFetcher, 700 ),
 	isExternalResource: true,
 } );
