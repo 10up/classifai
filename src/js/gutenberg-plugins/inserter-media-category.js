@@ -30,21 +30,32 @@ waitFor( isInserterOpened ).then( () =>
 	)
 );
 
+/**
+ * A slightly modified debounced function to add delay
+ * to an already debounced function.
+ *
+ * {@link https://github.com/10up/classifai/issues/561}
+ * {@link https://github.com/10up/classifai/pull/535}
+ *
+ * @param {Function} func    The function to be debounced.
+ * @param {number}   timeout The delay in milliseconds.
+ * @return {Function} The debounced function.
+ */
 const debounce = ( func, timeout = 250 ) => {
 	let timer;
-  
-	return (...args) => {
+
+	return ( ...args ) => {
 		clearTimeout( timer );
-  
+
 		return new Promise( ( resolve ) => {
 			timer = setTimeout( () => {
 				resolve( func.apply( this, args ) );
 			}, timeout );
 		} );
 	};
-}
+};
 
-const imageFetcher = async ( { search = ''} ) =>  {
+const imageFetcher = async ( { search = '' } ) => {
 	if ( ! search ) {
 		return [];
 	}
@@ -69,7 +80,7 @@ const imageFetcher = async ( { search = ''} ) =>  {
 		.catch( () => [] );
 
 	return images;
-}
+};
 
 const registerGenerateImageMediaCategory = () => ( {
 	name: 'classifai-generate-image',
