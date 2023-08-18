@@ -6,7 +6,7 @@ describe('Image processing Tests', () => {
 	let imageEditLink = '';
 	let mediaModelLink = '';
 
-	it('Can save Computer Vision "Image Processing" settings', () => {
+	it('Can save Azure AI Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		cy.get('#url')
@@ -23,7 +23,7 @@ describe('Image processing Tests', () => {
 		cy.get('.notice').contains('Settings saved.');
 	});
 
-	it('Can see Computer Vision Image processing actions on edit media page and verify Generated data.', () => {
+	it('Can see Azure AI Vision Image processing actions on edit media page and verify Generated data.', () => {
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
@@ -72,7 +72,7 @@ describe('Image processing Tests', () => {
 			});
 	});
 
-	it('Can see Computer Vision Image processing actions on media model', () => {
+	it('Can see Azure AI Vision Image processing actions on media model', () => {
 		const imageId = imageEditLink.split('post=')[1]?.split('&')[0];
 		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
 		cy.visit(mediaModelLink);
@@ -85,7 +85,7 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('exist');
 	});
 
-	it('Can disable Computer Vision Image processing features', () => {
+	it('Can disable Azure AI Vision Image processing features', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		// Disable features

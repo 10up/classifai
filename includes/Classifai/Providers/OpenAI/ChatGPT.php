@@ -6,11 +6,9 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Watson\Normalizer;
-use function Classifai\get_asset_info;
 use WP_Error;
+use function Classifai\get_asset_info;
 
 class ChatGPT extends Provider {
 
@@ -192,35 +190,72 @@ class ChatGPT extends Provider {
 		$title_roles = $settings['title_roles'] ?? [];
 
 		// Load the assets for the classic editor.
-		if (
-			$screen && ! $screen->is_block_editor()
-			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
-		) {
-			wp_enqueue_style(
-				'classifai-generate-title-classic-css',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-				[],
-				CLASSIFAI_PLUGIN_VERSION,
-				'all'
-			);
+		if ( $screen && ! $screen->is_block_editor() ) {
+			if (
+				post_type_supports( $screen->post_type, 'title' ) &&
+				$this->is_feature_enabled( 'enable_titles' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
 
-			wp_enqueue_script(
-				'classifai-generate-title-classic-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-				array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-				get_asset_info( 'generate-title-classic', 'version' ),
-				true
-			);
+				wp_enqueue_script(
+					'classifai-generate-title-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+					array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-title-classic', 'version' ),
+					true
+				);
 
-			wp_add_inline_script(
-				'classifai-generate-title-classic-js',
-				sprintf(
-					'var classifaiChatGPTData = %s;',
-					wp_json_encode( $this->get_localised_vars() )
-				),
-				'before'
-			);
+				wp_add_inline_script(
+					'classifai-generate-title-classic-js',
+					sprintf(
+						'var classifaiChatGPTData = %s;',
+						wp_json_encode( $this->get_localised_vars() )
+					),
+					'before'
+				);
+			}
+
+			if (
+				post_type_supports( $screen->post_type, 'excerpt' ) &&
+				$this->is_feature_enabled( 'enable_excerpt' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
+
+				wp_enqueue_script(
+					'classifai-generate-excerpt-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
+					array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-excerpt-classic', 'version' ),
+					true
+				);
+
+				wp_add_inline_script(
+					'classifai-generate-excerpt-classic-js',
+					sprintf(
+						'var classifaiGenerateExcerpt = %s;',
+						wp_json_encode(
+							[
+								'path'           => '/classifai/v1/openai/generate-excerpt/',
+								'buttonText'     => __( 'Generate excerpt', 'classifai' ),
+								'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
+							]
+						)
+					),
+					'before'
+				);
+			}
 		}
 
 		wp_enqueue_style(
@@ -442,7 +477,10 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [

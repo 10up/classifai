@@ -95,3 +95,14 @@ function classifai_test_prepare_response( $response ) {
 if ( ! defined( 'FS_METHOD' ) ) {
 	define( 'FS_METHOD', 'direct' );
 }
+
+// Load our recommended content block to force the non-iframe editor.
+// Cypress fails to run correctly when the editor is iframed.
+add_action(
+	'admin_init',
+	function() {
+		if ( function_exists( 'Classifai\Blocks\setup' ) ) {
+			Classifai\Blocks\setup();
+		}
+	}
+);

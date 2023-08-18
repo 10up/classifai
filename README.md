@@ -2,7 +2,7 @@
 
 > Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.2%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.3%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
@@ -20,9 +20,9 @@
 * [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
 * [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
-* [Set Up Azure AI Computer Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
+* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
-* [Set Up Azure Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-personalizer)
+* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
 * [Support](#support-level)
@@ -41,16 +41,16 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
-* BETA: Recommend content based on overall site traffic via [Microsoft Azure's Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
-* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
-* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's Computer Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
+* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ### Language Processing
 
 | Tagging | Recommended Content | Excerpt Generation |
 | :-: | :-: | :-: |
-| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
+| ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure AI Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
 
 | Audio Transcripts | Title Generation | Text to Speech |
 | :-: | :-: | :-: |
@@ -68,7 +68,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * [WordPress](http://wordpress.org) 5.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
-* To utilize the Computer Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 ## Pricing
 
@@ -78,11 +78,11 @@ The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natura
 
 The service that powers ClassifAI's ChatGPT, Embeddings and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
-The service that powers ClassifAI's Computer Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+The service that powers ClassifAI's Azure AI Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 The service that powers ClassifAI's Text to Speech Language Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
 
-The service that powers ClassifAI's Recommended Content, Microsoft Azure's Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
+The service that powers ClassifAI's Recommended Content, Microsoft Azure AI Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
 ## Installation
 
@@ -311,7 +311,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 ## Set Up Image Processing (via Microsoft Azure)
 
-Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
+Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
 - The image must be presented in JPEG, PNG, GIF, or BMP format
 - The file size of the image must be less than 4 megabytes (MB)
 - The dimensions of the image must be greater than 50 x 50 pixels
@@ -320,7 +320,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 ### 1. Sign up for Azure services
 
 - [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
-- Log into your account and create a new [*Computer Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
+- Log into your account and create a new [*Azure AI Vision*](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/CognitiveServices_MP/dontDiscardJourney/true/launchingContext/%7B%22source%22%3A%22Resources%20Microsoft.CognitiveServices%2Faccounts%22%7D/resetMenuId/) Service if you do not already have one.  It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
@@ -365,7 +365,7 @@ Note that [Computer Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Once images are generated, choose one or more images to import into your media library
 * Choose one image to insert into the content
 
-## Set Up Recommended Content (via Microsoft Azure Personalizer)
+## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
 
 Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to ensure Personalizer learns effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
 
