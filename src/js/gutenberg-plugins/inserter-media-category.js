@@ -89,6 +89,6 @@ const registerGenerateImageMediaCategory = () => ( {
 		search_items: __( 'Enter a prompt', 'classifai' ),
 	},
 	mediaType: 'image',
-	fetch: debounce( imageFetcher, 700 ),
+	fetch: debounce( imageFetcher, 2500 ),
 	isExternalResource: true,
 } );
