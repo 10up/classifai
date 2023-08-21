@@ -24,7 +24,7 @@ jobs:
     - name: Setup node v16 and npm cache
       uses: actions/setup-node@v3
       with:
-        node-version: 16
+        node-version-file: .nvmrc
         cache: npm
 
     - name: Install Node dependencies
@@ -32,7 +32,7 @@ jobs:
 
     - name: Get updated JS files
       id: changed-files
-      uses: tj-actions/changed-files@v35
+      uses: tj-actions/changed-files@v37
       with:
         files: |
           **/*.js
@@ -78,7 +78,7 @@ jobs:
 
     - name: Get updated PHP files
       id: changed-files
-      uses: tj-actions/changed-files@v35
+      uses: tj-actions/changed-files@v37
       with:
         files: |
           **/*.php
@@ -97,11 +97,41 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: VIPCS check
-      uses: 10up/wpcs-action@stable
+    - name: Set standard 10up cache directories
+      run: |
+        composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
+
+    - name: Prepare composer cache
+      uses: actions/cache@v3
       with:
-        enable_warnings: true
-        standard: 'WordPress-VIP-Go'
-        excludes: 'tests'
+        path: ${{ env.COMPOSER_CACHE }}
+        key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          composer-${{ env.COMPOSER_VERSION }}-
+
+    - name: Set PHP version
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        coverage: none
+        tools: composer:v2
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Get updated PHP files
+      id: changed-files
+      uses: tj-actions/changed-files@v37
+      with:
+        files: |
+          **/*.php
+
+    - name: PHPCS check
+      run: |
+        if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} ---standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          ./vendor/bin/phpcs . --standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
+        fi
