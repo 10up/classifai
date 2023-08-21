@@ -108,7 +108,7 @@ abstract class Service {
 	 */
 	public function render_settings_page() {
 		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$base_url   = add_query_arg(
 			array(
 				'page' => 'classifai',

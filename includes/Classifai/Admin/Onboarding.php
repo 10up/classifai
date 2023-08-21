@@ -170,7 +170,7 @@ class Onboarding {
 		switch ( $step ) {
 			case 1:
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( $_POST['classifai-features'] ) : array();
+				$enabled_features = isset( $_POST['classifai-features'] ) ? $this->classifai_sanitize( wp_unslash( $_POST['classifai-features'] ) ) : array();
 
 				if ( empty( $enabled_features ) ) {
 					add_settings_error(
@@ -228,7 +228,7 @@ class Onboarding {
 
 			case 2:
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$classifai_settings = isset( $_POST['classifai_settings'] ) ? $this->classifai_sanitize( $_POST['classifai_settings'] ) : array();
+				$classifai_settings = isset( $_POST['classifai_settings'] ) ? $this->classifai_sanitize( wp_unslash( $_POST['classifai_settings'] ) ) : array();
 
 				// Save the ClassifAI settings.
 				update_option( 'classifai_settings', $classifai_settings );
@@ -256,7 +256,7 @@ class Onboarding {
 				}
 
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$form_data = isset( $_POST[ $provider_option ] ) ? $this->classifai_sanitize( $_POST[ $provider_option ] ) : array();
+				$form_data = isset( $_POST[ $provider_option ] ) ? $this->classifai_sanitize( wp_unslash( $_POST[ $provider_option ] ) ) : array();
 
 				$settings     = $provider->get_settings();
 				$options      = self::get_onboarding_options();
@@ -543,7 +543,7 @@ class Onboarding {
 	 * Handle skip setup step.
 	 */
 	public function handle_skip_setup_step() {
-		if ( ! empty( $_GET['classifai_skip_step_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['classifai_skip_step_nonce'] ), 'classifai_skip_step_action' ) ) {
+		if ( ! empty( $_GET['classifai_skip_step_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['classifai_skip_step_nonce'] ) ), 'classifai_skip_step_action' ) ) {
 			$step = isset( $_GET['step'] ) ? absint( $_GET['step'] ) : 1;
 
 			$onboarding_options = array(

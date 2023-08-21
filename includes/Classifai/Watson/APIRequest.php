@@ -136,7 +136,7 @@ class APIRequest {
 		$username = $this->get_username();
 		$password = $this->get_password();
 
-		return base64_encode( $username . ':' . $password );
+		return base64_encode( $username . ':' . $password ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
 	/**

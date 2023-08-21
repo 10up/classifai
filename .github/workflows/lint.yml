@@ -86,9 +86,9 @@ jobs:
     - name: PHPCS check
       run: |
         if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
-          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} --runtime-set testVersion 7.4-
+          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} -s --runtime-set testVersion 7.4-
         elif [[ "${{ github.event_name }}" == "push" ]]; then
-          ./vendor/bin/phpcs . --runtime-set testVersion 7.4-
+          ./vendor/bin/phpcs . -s --runtime-set testVersion 7.4-
         fi
 
   vipcs:
@@ -131,7 +131,7 @@ jobs:
     - name: PHPCS check
       run: |
         if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
-          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} ---standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
+          ./vendor/bin/phpcs ${{ steps.changed-files.outputs.all_changed_files }} -s --standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
         elif [[ "${{ github.event_name }}" == "push" ]]; then
-          ./vendor/bin/phpcs . --standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
+          ./vendor/bin/phpcs . -s --extensions=php --standard=WordPress-VIP-Go --runtime-set testVersion 7.4-
         fi
