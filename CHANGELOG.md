@@ -33,6 +33,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Ensure we define a class property before using it to avoid PHP deprecation notices (props [@dkotter](https://github.com/dkotter), [@ankitguptaindia](https://github.com/ankitguptaindia), [@Sidsector9](https://github.com/Sidsector9) via [#548](https://github.com/10up/classifai/pull/548)).
 - Prevent TTS audio markup leakage into places using excerpts (like archives) (props [@joshuaabenazer](https://github.com/joshuaabenazer), [@dkotter](https://github.com/dkotter) via [#558](https://github.com/10up/classifai/pull/558)).
 - Make sure our E2E tests work properly on WordPress 6.3 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#562](https://github.com/10up/classifai/pull/562)).
+- Add a longer delay around image generation in the Media Inserter (props [@Sidsector9](https://github.com/joshuaabenazer), [@dkotter](https://github.com/dkotter) via [#569](https://github.com/10up/classifai/pull/569)).
 
 ### Security
 - Bump `word-wrap` from 1.2.3 to 1.2.4 (props [@dependabot[bot]](https://github.com/apps/dependabot) via [#542](https://github.com/10up/classifai/pull/542)).
