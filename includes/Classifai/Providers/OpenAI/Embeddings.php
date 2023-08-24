@@ -444,7 +444,7 @@ class Embeddings extends Provider {
 					'taxonomy'   => $tax,
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings',
+					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					// 'number'  => 500, TODO: see if we need a limit here.
 				]
 			);
@@ -499,7 +499,7 @@ class Embeddings extends Provider {
 				'taxonomy'     => $taxonomy,
 				'hide_empty'   => false,
 				'fields'       => 'ids',
-				'meta_key'     => 'classifai_openai_embeddings',
+				'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'NOT EXISTS',
 				// 'number'  => 500, TODO: see if we need a limit here.
 			]

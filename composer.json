@@ -11,7 +11,7 @@
   "license": "GPLv2",
   "require": {
     "php": ">=7.4",
-    "yahnis-elsts/plugin-update-checker": "4.13",
+    "yahnis-elsts/plugin-update-checker": "5.1",
     "ua-parser/uap-php": "dev-master"
   },
   "autoload": {
@@ -28,7 +28,7 @@
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
-    "lint": "phpcs . --runtime-set testVersion 7.2-",
+    "lint": "phpcs . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf ."
   },
   "minimum-stability": "dev",
