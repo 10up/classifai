@@ -203,7 +203,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		$options['headers']['x-api-key'] = MERCURY_PARSER_API_KEY;
 		$options['timeout']              = 60; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 
-		$request_url = 'https://mercury.postlight.com/parser?url=' . urlencode( $url );
+		$request_url = 'https://mercury.postlight.com/parser?url=' . rawurlencode( $url );
 		$response    = wp_remote_get( $request_url, $options ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
 		if ( ! is_wp_error( $response ) ) {

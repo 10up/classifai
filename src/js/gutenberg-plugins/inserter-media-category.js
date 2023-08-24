@@ -30,6 +30,58 @@ waitFor( isInserterOpened ).then( () =>
 	)
 );
 
+/**
+ * A slightly modified debounced function to add delay
+ * to an already debounced function.
+ *
+ * {@link https://github.com/10up/classifai/issues/561}
+ * {@link https://github.com/10up/classifai/pull/535}
+ *
+ * @param {Function} func    The function to be debounced.
+ * @param {number}   timeout The delay in milliseconds.
+ * @return {Function} The debounced function.
+ */
+const debounce = ( func, timeout = 250 ) => {
+	let timer;
+
+	return ( ...args ) => {
+		clearTimeout( timer );
+
+		return new Promise( ( resolve ) => {
+			timer = setTimeout( () => {
+				resolve( func.apply( this, args ) );
+			}, timeout );
+		} );
+	};
+};
+
+const imageFetcher = async ( { search = '' } ) => {
+	if ( ! search ) {
+		return [];
+	}
+
+	const images = await apiFetch( {
+		path: addQueryArgs( classifaiDalleData.endpoint, {
+			prompt: search,
+			format: 'b64_json',
+		} ),
+		method: 'GET',
+	} )
+		.then( ( response ) =>
+			response.map( ( item ) => ( {
+				title: search,
+				url: `data:image/png;base64,${ item.url }`,
+				previewUrl: `data:image/png;base64,${ item.url }`,
+				id: undefined,
+				alt: search,
+				caption: classifaiDalleData.caption,
+			} ) )
+		)
+		.catch( () => [] );
+
+	return images;
+};
+
 const registerGenerateImageMediaCategory = () => ( {
 	name: 'classifai-generate-image',
 	labels: {
@@ -37,31 +89,6 @@ const registerGenerateImageMediaCategory = () => ( {
 		search_items: __( 'Enter a prompt', 'classifai' ),
 	},
 	mediaType: 'image',
-	fetch: async ( { search = '' } ) => {
-		if ( ! search ) {
-			return [];
-		}
-
-		const images = await apiFetch( {
-			path: addQueryArgs( classifaiDalleData.endpoint, {
-				prompt: search,
-				format: 'b64_json',
-			} ),
-			method: 'GET',
-		} )
-			.then( ( response ) =>
-				response.map( ( item ) => ( {
-					title: search,
-					url: `data:image/png;base64,${ item.url }`,
-					previewUrl: `data:image/png;base64,${ item.url }`,
-					id: undefined,
-					alt: search,
-					caption: classifaiDalleData.caption,
-				} ) )
-			)
-			.catch( () => [] );
-
-		return images;
-	},
+	fetch: debounce( imageFetcher, 2500 ),
 	isExternalResource: true,
 } );
