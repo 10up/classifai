@@ -53,9 +53,9 @@ class ChatGPT extends Provider {
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
-				'enable_excerpt'         => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'          => __( 'Title generation', 'classifai' ),
-				'enable_resize_content'  => __( 'Content Resizing', 'classifai' ),
+				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
+				'enable_titles'         => __( 'Title generation', 'classifai' ),
+				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
 		);
 	}
@@ -605,16 +605,16 @@ class ChatGPT extends Provider {
 		$enable_titles  = 1 === intval( $settings['enable_titles'] ?? 0 );
 
 		return [
-			__( 'Authenticated', 'classifai' )                  => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate excerpt', 'classifai' )               => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (excerpt)', 'classifai' )        => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Excerpt length', 'classifai' )                 => $settings['length'] ?? 55,
-			__( 'Generate titles', 'classifai' )                => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (titles)', 'classifai' )         => implode( ', ', $settings['title_roles'] ?? [] ),
-			__( 'Number of titles', 'classifai' )               => absint( $settings['number_titles'] ?? 1 ),
-			__( 'Allowed roles (resize content)', 'classifai' ) => implode( ', ', $settings['resize_content_roles'] ?? [] ),
-			__( 'Number of suggestions', 'classifai' )          => absint( $settings['number_resize_content'] ?? 1 ),
-			__( 'Latest response', 'classifai' )                => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
+			__( 'Authenticated', 'classifai' )           => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Generate excerpt', 'classifai' )        => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles (excerpt)', 'classifai' ) => implode( ', ', $settings['roles'] ?? [] ),
+			__( 'Excerpt length', 'classifai' )          => $settings['length'] ?? 55,
+			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
+			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
+			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
+			__( 'Allowed roles (resize)', 'classifai' )  => implode( ', ', $settings['resize_content_roles'] ?? [] ),
+			__( 'Number of suggestions', 'classifai' )   => absint( $settings['number_resize_content'] ?? 1 ),
+			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
 		];
 	}
 
@@ -882,12 +882,12 @@ class ChatGPT extends Provider {
 		}
 
 		/**
-		 * Filter the prompt we will send to ChatGPT.
+		 * Filter the resize prompt we will send to ChatGPT.
 		 *
 		 * @since 2.3.0
 		 *
-		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {string} $prompt Resize prompt we are sending to ChatGPT. Gets added as a system prompt.
+		 * @param {int} $post_id ID of post.
 		 * @param {array} $args Arguments passed to endpoint.
 		 *
 		 * @return {string} Prompt.
@@ -895,13 +895,13 @@ class ChatGPT extends Provider {
 		$prompt = apply_filters( 'classifai_chatgpt_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
 		/**
-		 * Filter the request body before sending to ChatGPT.
+		 * Filter the resize request body before sending to ChatGPT.
 		 *
 		 * @since 2.3.0
 		 * @hook classifai_chatgpt_resize_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
-		 * @param {int}   $post_id ID of post we are summarizing.
+		 * @param {int}   $post_id ID of post.
 		 *
 		 * @return {array} Request body.
 		 */

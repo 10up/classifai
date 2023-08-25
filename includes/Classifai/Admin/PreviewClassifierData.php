@@ -18,7 +18,7 @@ class PreviewClassifierData {
 	 * Returns classifier data for previewing.
 	 */
 	public function get_post_classifier_preview_data() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
@@ -42,15 +42,15 @@ class PreviewClassifierData {
 	 * Searches and returns posts.
 	 */
 	public function get_post_search_results() {
-		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : false;
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
-		$search_term   = isset( $_POST['search'] ) ? sanitize_text_field( $_POST['search'] ) : '';
-		$post_types    = isset( $_POST['post_types'] ) ? explode( ',', sanitize_text_field( $_POST['post_types'] ) ) : 'post';
-		$post_statuses = isset( $_POST['post_status'] ) ? explode( ',', sanitize_text_field( $_POST['post_status'] ) ) : 'publish';
+		$search_term   = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+		$post_types    = isset( $_POST['post_types'] ) ? explode( ',', sanitize_text_field( wp_unslash( $_POST['post_types'] ) ) ) : 'post';
+		$post_statuses = isset( $_POST['post_status'] ) ? explode( ',', sanitize_text_field( wp_unslash( $_POST['post_status'] ) ) ) : 'publish';
 
 		$posts = get_posts(
 			array(

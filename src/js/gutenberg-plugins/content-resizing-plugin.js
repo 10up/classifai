@@ -22,7 +22,7 @@ import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem,
-	Button
+	Button,
 } from '@wordpress/components';
 import {
 	count as getWordCount,
@@ -105,7 +105,8 @@ let isProcessAnimating = false;
 
 const ContentResizingPlugin = () => {
 	// Holds the original text of the block being procesed.
-	const [ blockContentAsPlainText, setBlockContentAsPlainText ] = useState( '' );
+	const [ blockContentAsPlainText, setBlockContentAsPlainText ] =
+		useState( '' );
 
 	// Holds the currently selected block data.
 	const [ selectedBlock, setSelectedBlock ] = useState( null );
@@ -145,7 +146,7 @@ const ContentResizingPlugin = () => {
 				setIsModalOpen( true );
 			} )();
 		}
-	}, [ isResizing ] );
+	}, [ isResizing, getResizedContent ] );
 
 	// Resets to default states.
 	function resetStates() {
@@ -286,9 +287,7 @@ const ContentResizingPlugin = () => {
 								suggestionCharCount - selectedTextCharCount;
 
 							return (
-								<tr
-									key={ index }
-								>
+								<tr key={ index }>
 									<td>{ textItem }</td>
 									<td>
 										<ResizeStat count={ wordDiff } />
@@ -300,8 +299,10 @@ const ContentResizingPlugin = () => {
 									<td>
 										<Button
 											text={ __( 'Select', 'classifai' ) }
-											variant='secondary'
-											onClick={ () => updateContent( textItem ) }
+											variant="secondary"
+											onClick={ () =>
+												updateContent( textItem )
+											}
 											tabIndex="0"
 										/>
 									</td>
@@ -382,11 +383,7 @@ registerPlugin( 'tenup-openai-expand-reduce-content', {
 	render: ContentResizingPlugin,
 } );
 
-const colorsArray = [
-	'#8c2525',
-	'#ca4444',
-	'#303030',
-];
+const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];
 
 function processAnimation( content = '' ) {
 	if ( isProcessAnimating ) {
@@ -394,31 +391,38 @@ function processAnimation( content = '' ) {
 	}
 
 	const charArray = content.split( ' ' );
-	const randomWordIndexes = getRandomIndexesFromArray( charArray, charArray.length / 4 );
+	const randomWordIndexes = getRandomIndexesFromArray(
+		charArray,
+		charArray.length / 4
+	);
 	const formattedCharArray = charArray.map( ( char, index ) => {
 		if ( randomWordIndexes.includes( index ) ) {
 			const randomColorIndex = Math.floor( Math.random() * 5 );
 			return `<span class="classifai-content-resize__blot" style="background-color: ${ colorsArray[ randomColorIndex ] }">${ char }</span>`;
-		} else {
-			return char;
 		}
+
+		return char;
 	} );
 
-	document.getElementById( 'classifai-content-resize__mock-content' ).innerHTML = formattedCharArray.join( ' ' );
+	if ( document.getElementById( 'classifai-content-resize__mock-content' ) ) {
+		document.getElementById(
+			'classifai-content-resize__mock-content'
+		).innerHTML = formattedCharArray.join( ' ' );
+	}
 
-	setTimeout(() => {
+	setTimeout( () => {
 		requestAnimationFrame( () => processAnimation( content ) );
 	}, 1000 / 1.35 );
 }
 
 function getRandomIndexesFromArray( arr = [], maxIndexes = 10 ) {
-	const indexes = Array.from( { length: arr.length }, ( _, index) => index ); // Create an array of all indexes
+	const indexes = Array.from( { length: arr.length }, ( _, index ) => index ); // Create an array of all indexes
 	const randomIndexes = [];
 
 	while ( randomIndexes.length < maxIndexes ) {
 		const randomIndex = Math.floor( Math.random() * indexes.length );
 
-		if (!randomIndexes.includes(randomIndex)) {
+		if ( ! randomIndexes.includes( randomIndex ) ) {
 			randomIndexes.push( randomIndex );
 		}
 	}
@@ -448,19 +452,20 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 		const __plainTextContent = toPlainText( props.attributes.content );
 
 		if ( ! isProcessAnimating ) {
-			requestAnimationFrame( () => processAnimation( __plainTextContent ) );
-			console.log('hello')
+			requestAnimationFrame( () =>
+				processAnimation( __plainTextContent )
+			);
 		}
 
 		return (
 			<>
 				<div style={ { position: 'relative' } }>
 					<div className="classifai-content-resize__overlay">
-						<div className='classifai-content-resize__overlay-text'>
-							{ __( 'Processing data...', 'classifai' ) }
+						<div className="classifai-content-resize__overlay-text">
+							{ __( 'Processing data…', 'classifai' ) }
 						</div>
 					</div>
-					<div id='classifai-content-resize__mock-content'>
+					<div id="classifai-content-resize__mock-content">
 						{ __plainTextContent }
 					</div>
 					<BlockEdit { ...props } />
