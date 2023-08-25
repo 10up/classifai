@@ -55,6 +55,7 @@ const aiIconSvg = (
 const DEFAULT_STATE = {
 	clientId: '',
 	resizingType: null,
+	isResizing: false,
 };
 
 const resizeContentStore = createReduxStore( 'resize-content-store', {
@@ -70,6 +71,12 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 				return {
 					...state,
 					resizingType: action.resizingType,
+				};
+
+			case 'SET_IS_RESIZING':
+				return {
+					...state,
+					isResizing: action.isResizing,
 				};
 		}
 
@@ -88,6 +95,12 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 				resizingType,
 			};
 		},
+		setIsResizing( isResizing ) {
+			return {
+				type: 'SET_IS_RESIZING',
+				isResizing,
+			};
+		},
 	},
 	selectors: {
 		getClientId( state ) {
@@ -96,12 +109,13 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 		getResizingType( state ) {
 			return state.resizingType;
 		},
+		getIsResizing( state ) {
+			return state.isResizing;
+		},
 	},
 } );
 
 register( resizeContentStore );
-
-let isProcessAnimating = false;
 
 const ContentResizingPlugin = () => {
 	// Holds the original text of the block being procesed.
@@ -114,19 +128,19 @@ const ContentResizingPlugin = () => {
 	// Holds the GPT response array.
 	const [ textArray, setTextArray ] = useState( [] );
 
-	// Indicates if content resizing is in progress.
-	const [ isResizing, setIsResizing ] = useState( false );
-
 	// Indicates if the modal window with the result is open/closed.
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
-	const { isMultiBlocksSelected, resizingType } = useSelect( ( __select ) => {
-		return {
-			isMultiBlocksSelected:
-				__select( blockEditorStore ).hasMultiSelection(),
-			resizingType: __select( resizeContentStore ).getResizingType(),
-		};
-	} );
+	const { isMultiBlocksSelected, resizingType, isResizing } = useSelect(
+		( __select ) => {
+			return {
+				isMultiBlocksSelected:
+					__select( blockEditorStore ).hasMultiSelection(),
+				resizingType: __select( resizeContentStore ).getResizingType(),
+				isResizing: __select( resizeContentStore ).getIsResizing(),
+			};
+		}
+	);
 
 	// Sets required states before resizing content.
 	useEffect( () => {
@@ -139,14 +153,14 @@ const ContentResizingPlugin = () => {
 
 	// Triggers AJAX request to resize the content.
 	useEffect( () => {
-		if ( isResizing ) {
+		if ( isResizing && selectedBlock ) {
 			( async () => {
 				const __textArray = await getResizedContent();
 				setTextArray( __textArray );
 				setIsModalOpen( true );
 			} )();
 		}
-	}, [ isResizing, getResizedContent ] );
+	}, [ isResizing, selectedBlock ] );
 
 	// Resets to default states.
 	function resetStates() {
@@ -154,7 +168,6 @@ const ContentResizingPlugin = () => {
 		setTextArray( [] );
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
-		isProcessAnimating = false;
 	}
 
 	/**
@@ -169,7 +182,7 @@ const ContentResizingPlugin = () => {
 
 		setSelectedBlock( block );
 		setBlockContentAsPlainText( toPlainText( blockContent ) );
-		setIsResizing( true );
+		dispatch( resizeContentStore ).setIsResizing( true );
 	}
 
 	/**
@@ -200,12 +213,12 @@ const ContentResizingPlugin = () => {
 		if ( 200 === response.status ) {
 			__textArray = await response.json();
 		} else {
-			setIsResizing( false );
+			dispatch( resizeContentStore ).setIsResizing( false );
 			dispatch( resizeContentStore ).setClientId( '' );
 			resetStates();
 		}
 
-		setIsResizing( false );
+		dispatch( resizeContentStore ).setIsResizing( false );
 		dispatch( resizeContentStore ).setClientId( '' );
 
 		return __textArray;
@@ -385,8 +398,11 @@ registerPlugin( 'tenup-openai-expand-reduce-content', {
 
 const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];
 
+let timeoutId = 0;
+
 function processAnimation( content = '' ) {
-	if ( isProcessAnimating ) {
+	if ( ! select( resizeContentStore ).getIsResizing() ) {
+		clearTimeout( timeoutId );
 		return;
 	}
 
@@ -410,7 +426,7 @@ function processAnimation( content = '' ) {
 		).innerHTML = formattedCharArray.join( ' ' );
 	}
 
-	setTimeout( () => {
+	timeoutId = setTimeout( () => {
 		requestAnimationFrame( () => processAnimation( content ) );
 	}, 1000 / 1.35 );
 }
@@ -451,7 +467,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 
 		const __plainTextContent = toPlainText( props.attributes.content );
 
-		if ( ! isProcessAnimating ) {
+		if ( select( resizeContentStore ).getIsResizing() ) {
 			requestAnimationFrame( () =>
 				processAnimation( __plainTextContent )
 			);
