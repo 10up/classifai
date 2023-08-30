@@ -7,6 +7,7 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Admin\SavePostHandler;
 use Classifai\Providers\Provider;
+use \Classifai\Watson\Normalizer;
 use stdClass;
 use WP_Http;
 
@@ -132,7 +133,7 @@ class TextToSpeech extends Provider {
 		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
-		add_action( 'batch_synthesis_check_status', [ $this, 'check_batch_status' ] );
+		add_action( 'batch_synthesis_check_status', [ $this, 'check_batch_status' ], 10, 2 );
 
 		$supported_post_type = get_tts_supported_post_types();
 		foreach ( get_tts_supported_post_types() as $post_type ) {
@@ -140,6 +141,7 @@ class TextToSpeech extends Provider {
 		}
 
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		add_filter( 'cron_schedules', [ $this, 'add_60_seconds_cron' ] ); // phpcs:ignore WordPress.WP.CronInterval.CronSchedulesInterval
 	}
 
 	/**
@@ -934,6 +936,22 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Add 60 second cron schedule.
+	 *
+	 * @param array $schedules Array of cron schedules
+	 *
+	 * @return array
+	 */
+	public function add_60_seconds_cron( $schedules ) {
+		$schedules['every_minute'] = array(
+			'interval' => 60,
+			'display'  => esc_html__( 'Every Minute', 'classifai' ),
+		);
+
+		return $schedules;
+	}
+
+	/**
 	 * Performs normal synthesis.
 	 *
 	 * @param int    $post_id      Post ID.
@@ -1065,7 +1083,7 @@ class TextToSpeech extends Provider {
 					'concatenateResult'       => false,
 					'decompressOutputFiles'   => false,
 				),
-				'inputs'       => array(
+				'inputs'      => array(
 					array(
 						'text' => sprintf(
 							"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
@@ -1102,7 +1120,7 @@ class TextToSpeech extends Provider {
 		$code = wp_remote_retrieve_response_code( $response );
 
 		// return error if HTTP status code is not 200.
-		if ( \WP_Http::OK <= $code && $code <= \WP_Http::IM_USED ) {
+		if ( ! ( $code >= \WP_Http::OK && $code < \WP_Http::IM_USED ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_unsuccessful_request',
 				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
@@ -1117,7 +1135,9 @@ class TextToSpeech extends Provider {
 				'batch_id' => $response['id'],
 				'post_id'  => $post_id,
 			];
-			wp_schedule_event( time() + 30, 'hourly', 'batch_synthesis_check_status', $scheduler_args );
+
+			wp_schedule_single_event( time() + 30, 'batch_synthesis_check_status', $scheduler_args );
+			$this->increase_batch_attempt( $post_id );
 		}
 	}
 
@@ -1128,6 +1148,24 @@ class TextToSpeech extends Provider {
 	 * @param int    $post_id  Post ID.
 	 */
 	public function check_batch_status( $batch_id, $post_id ) {
+		$scheduler_args = [
+			'batch_id' => $batch_id,
+			'post_id'  => $post_id,
+		];
+
+		// Unschedule the status checker if it has crossed the maximum number of attempts.
+		// Avoids infinite checking.
+		if ( $this->get_max_check_batch_status_attempts() < $this->get_batch_attempt( $post_id ) ) {
+			$timestamp = wp_next_scheduled( 'batch_synthesis_check_status', $scheduler_args );
+
+			if ( $timestamp ) {
+				wp_unschedule_event( $timestamp, 'batch_synthesis_check_status', $scheduler_args );
+			}
+
+			delete_post_meta( $post_id, '_classifai_batch_attempt' );
+			return;
+		}
+
 		$settings = $this->get_settings();
 
 		// Request parameters.
@@ -1140,7 +1178,7 @@ class TextToSpeech extends Provider {
 		);
 
 		$remote_url = sprintf( '%s%s/%s', $settings['credentials']['batch_synthesis_url'], self::BATCH_SYNTHESIS_API_PATH, $batch_id );
-		$response   = wp_remote_post( $remote_url, $request_params );
+		$response   = wp_remote_get( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
 			return new \WP_Error(
@@ -1152,7 +1190,7 @@ class TextToSpeech extends Provider {
 		$code = wp_remote_retrieve_response_code( $response );
 
 		// return error if HTTP status code is not 200.
-		if ( \WP_Http::OK === $code ) {
+		if ( \WP_Http::OK !== $code ) {
 			return new \WP_Error(
 				'azure_text_to_speech_unsuccessful_request',
 				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
@@ -1160,19 +1198,146 @@ class TextToSpeech extends Provider {
 		}
 
 		$response_body = wp_remote_retrieve_body( $response );
-		$response      = json_decode( $response_body );
+		$response      = json_decode( $response_body, true );
 
 		if ( is_array( $response ) && isset( $response['status'] ) && 'Succeeded' === $response['status'] ) {
-			$this->insert_audio_as_attachment( $response['outputs']['result'] );
+			$this->insert_audio_as_attachment( $post_id, $batch_id, $response['outputs']['result'] );
+		} else {
+			// Reschedule if the status is not `Succeeded`.
+			wp_schedule_single_event( time(), 'batch_synthesis_check_status', $scheduler_args );
+			$this->increase_batch_attempt( $post_id );
 		}
 	}
 
 	/**
 	 * Downloads the audio ZIP and saves as an attachment.
 	 *
+	 * @param string $post_id          Post ID.
+	 * @param string $batch_id         The batch ID.
 	 * @param string $zip_download_url URL of the aduio ZIP to download.
 	 */
-	public function insert_audio_as_attachment( $zip_download_url ) {
+	public function insert_audio_as_attachment( $post_id, $batch_id, $zip_download_url ) {
+		global $wp_filesystem;
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		WP_Filesystem();
 
+		$zip_path = sprintf(
+			'%1$s/audio-as-zip-%2$s.zip',
+			wp_upload_dir()['path'],
+			$post_id
+		);
+
+		$extracted_directory_path = sprintf(
+			'%1$s/audio-as-zip-extracted-%2$s',
+			wp_upload_dir()['path'],
+			$post_id
+		);
+
+		// Delete any existing directory or ZIP downloads for the current post.
+		$wp_filesystem->delete( $zip_path );
+		$wp_filesystem->delete( $extracted_directory_path, true );
+
+		$response = wp_remote_get(
+			$zip_download_url,
+			array(
+				'timeout'  => 300,
+				'stream'   => true,
+				'filename' => $zip_path,
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $response );
+
+		if ( \WP_Http::OK !== $code ) {
+			return new \WP_Error(
+				'azure_batch_synthesis_zip_download_failed',
+				esc_html__( 'Zip download failed.', 'classifai' )
+			);
+		}
+
+		// Extract the ZIP.
+		$has_extracted = unzip_file(
+			$zip_path,
+			$extracted_directory_path
+		);
+
+		if ( is_wp_error( $has_extracted ) ) {
+			return new \WP_Error(
+				'azure_batch_synthesis_zip_extraction_failed',
+				esc_html__( 'Zip extraction failed.', 'classifai' )
+			);
+		}
+
+		$extracted_file_path = $extracted_directory_path . '/0001.mp3';
+		$mimes               = wp_check_filetype( $extracted_file_path );
+		$mime                = $mimes['type'] ?? '';
+
+		// Insert the audio file as attachment.
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid'           => $extracted_file_path,
+				'post_title'     => '0001-' . $post_id . 'mp3',
+				'post_mime_type' => $mime,
+			),
+			$extracted_file_path,
+			$post_id
+		);
+
+		// Return error if creation of attachment fails.
+		if ( ! $attachment_id ) {
+			return new \WP_Error(
+				'azure_text_to_speech_resource_creation_failure',
+				esc_html__( 'Audio creation failed.', 'classifai' )
+			);
+		}
+
+		$scheduler_args = [
+			'batch_id' => $batch_id,
+			'post_id'  => $post_id,
+		];
+
+		$normalizer   = new Normalizer();
+		$post         = get_post( $post_id );
+		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		$timestamp    = wp_next_scheduled( 'batch_synthesis_check_status', $scheduler_args );
+
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'batch_synthesis_check_status', $scheduler_args );
+			delete_post_meta( $post_id, '_classifai_batch_attempt' );
+		}
+
+		update_post_meta( $post_id, self::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
+	}
+
+	/**
+	 * Gets the number of attempts made to check status of the batch.
+	 *
+	 * @param int $post_id Post ID.
+	 *
+	 * @return int
+	 */
+	public function get_batch_attempt( $post_id ) {
+		return (int) get_post_meta( $post_id, '_classifai_batch_attempt', true );
+	}
+
+	/**
+	 * Increases the batch counter by 1.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function increase_batch_attempt( $post_id ) {
+		$attempt = $this->get_batch_attempt( $post_id );
+		update_post_meta( $post_id, '_classifai_batch_attempt', $attempt + 1 );
+	}
+
+	/**
+	 * Returns the maximum number of attempts to check on the batch status.
+	 *
+	 * @return int
+	 */
+	public function get_max_check_batch_status_attempts() {
+		return apply_filters( 'classifai_get_max_check_batch_status_attempts', 3 );
 	}
 }
