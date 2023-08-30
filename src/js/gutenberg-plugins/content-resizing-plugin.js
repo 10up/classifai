@@ -15,15 +15,7 @@ import {
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import {
-	Modal,
-	ToolbarGroup,
-	ToolbarItem,
-	DropdownMenu,
-	MenuGroup,
-	MenuItem,
-	Button,
-} from '@wordpress/components';
+import { Modal, ToolbarDropdownMenu, Button } from '@wordpress/components';
 import {
 	count as getWordCount,
 	count as getCharacterCount,
@@ -525,56 +517,33 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 			<>
 				{ ! resizingType && ! isMultiBlocksSelected ? (
 					<BlockControls group="other">
-						<ToolbarGroup>
-							<ToolbarItem>
-								{ () => (
-									<DropdownMenu
-										icon={ () => aiIconSvg }
-										popoverProps={ {
-											className: 'is-alternate',
-										} }
-										className="classifai-resize-content-btn"
-									>
-										{ ( { onClose } ) => (
-											<MenuGroup>
-												<MenuItem
-													className="classifai-resize-content-btn__grow"
-													onClick={ () => {
-														dispatch(
-															resizeContentStore
-														).setResizingType(
-															'grow'
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Expand this text',
-														'classifai'
-													) }
-												</MenuItem>
-												<MenuItem
-													className="classifai-resize-content-btn__shrink"
-													onClick={ () => {
-														dispatch(
-															resizeContentStore
-														).setResizingType(
-															'shrink'
-														);
-														onClose();
-													} }
-												>
-													{ __(
-														'Condense this text',
-														'classifai'
-													) }
-												</MenuItem>
-											</MenuGroup>
-										) }
-									</DropdownMenu>
-								) }
-							</ToolbarItem>
-						</ToolbarGroup>
+						<ToolbarDropdownMenu
+							icon={ aiIconSvg }
+							controls={ [
+								{
+									title: __(
+										'Expand this text',
+										'classifai'
+									),
+									onClick: () => {
+										dispatch(
+											resizeContentStore
+										).setResizingType( 'grow' );
+									},
+								},
+								{
+									title: __(
+										'Condense this text',
+										'classifai'
+									),
+									onClick: () => {
+										dispatch(
+											resizeContentStore
+										).setResizingType( 'shrink' );
+									},
+								},
+							] }
+						/>
 					</BlockControls>
 				) : null }
 				<BlockEdit { ...props } />
