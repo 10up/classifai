@@ -132,6 +132,7 @@ class TextToSpeech extends Provider {
 		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+		add_action( 'batch_synthesis_check_status', [ $this, 'check_batch_status' ] );
 
 		$supported_post_type = get_tts_supported_post_types();
 		foreach ( get_tts_supported_post_types() as $post_type ) {
@@ -1049,31 +1050,32 @@ class TextToSpeech extends Provider {
 	 * @param string $post_content Normalized post content
 	 */
 	public function batch_synthesize( $post_id, $voice_gender, $voice_name, $post_content ) {
-		$saved_attachment_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
-		$settings            = $this->get_settings();
+		$settings = $this->get_settings();
 
 		// Create the request body to synthesize speech from text.
-		$request_body = array(
-			'displayName' => 'batch synthesis sample',
-			'description' => 'my ssml test',
-			'textType'    => 'SSML',
-			'properties'  => array(
-				'outputFormat'            => 'audio-16khz-128kbitrate-mono-mp3',
-				'wordBoundaryEnabled'     => false,
-				'sentenceBoundaryEnabled' => false,
-				'concatenateResult'       => false,
-				'decompressOutputFiles'   => false,
-			),
-			'inputs'       => array(
-				array(
-					'text' => sprintf(
-						"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
-						$voice_gender,
-						$voice_name,
-						$post_content
+		$request_body = wp_json_encode(
+			array(
+				'displayName' => 'batch synthesis sample',
+				'description' => 'my ssml test',
+				'textType'    => 'SSML',
+				'properties'  => array(
+					'outputFormat'            => 'audio-16khz-128kbitrate-mono-mp3',
+					'wordBoundaryEnabled'     => false,
+					'sentenceBoundaryEnabled' => false,
+					'concatenateResult'       => false,
+					'decompressOutputFiles'   => false,
+				),
+				'inputs'       => array(
+					array(
+						'text' => sprintf(
+							"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+							$voice_gender,
+							$voice_name,
+							$post_content
+						),
 					),
 				),
-			),
+			)
 		);
 
 		// Request parameters.
@@ -1097,15 +1099,80 @@ class TextToSpeech extends Provider {
 			);
 		}
 
-		$code          = wp_remote_retrieve_response_code( $response );
-		$response_body = wp_remote_retrieve_body( $response );
+		$code = wp_remote_retrieve_response_code( $response );
 
 		// return error if HTTP status code is not 200.
-		if ( \WP_Http::OK !== $code ) {
+		if ( \WP_Http::OK <= $code && $code <= \WP_Http::IM_USED ) {
 			return new \WP_Error(
 				'azure_text_to_speech_unsuccessful_request',
 				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
 			);
 		}
+
+		$response_body = wp_remote_retrieve_body( $response );
+		$response      = json_decode( $response_body, true );
+
+		if ( is_array( $response ) && isset( $response['status'] ) && 'Succeeded' !== $response['status'] ) {
+			$scheduler_args = [
+				'batch_id' => $response['id'],
+				'post_id'  => $post_id,
+			];
+			wp_schedule_event( time() + 30, 'hourly', 'batch_synthesis_check_status', $scheduler_args );
+		}
+	}
+
+	/**
+	 * Checks the status of the current batch.
+	 *
+	 * @param string $batch_id The ID of the current batch.
+	 * @param int    $post_id  Post ID.
+	 */
+	public function check_batch_status( $batch_id, $post_id ) {
+		$settings = $this->get_settings();
+
+		// Request parameters.
+		$request_params = array(
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $settings['credentials']['batch_synthesis_api_key'],
+				'Content-Type'              => 'application/json',
+			),
+		);
+
+		$remote_url = sprintf( '%s%s/%s', $settings['credentials']['batch_synthesis_url'], self::BATCH_SYNTHESIS_API_PATH, $batch_id );
+		$response   = wp_remote_post( $remote_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code = wp_remote_retrieve_response_code( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK === $code ) {
+			return new \WP_Error(
+				'azure_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
+
+		$response_body = wp_remote_retrieve_body( $response );
+		$response      = json_decode( $response_body );
+
+		if ( is_array( $response ) && isset( $response['status'] ) && 'Succeeded' === $response['status'] ) {
+			$this->insert_audio_as_attachment( $response['outputs']['result'] );
+		}
+	}
+
+	/**
+	 * Downloads the audio ZIP and saves as an attachment.
+	 *
+	 * @param string $zip_download_url URL of the aduio ZIP to download.
+	 */
+	public function insert_audio_as_attachment( $zip_download_url ) {
+
 	}
 }
