@@ -179,6 +179,35 @@ class TextToSpeech extends Provider {
 		);
 
 		add_settings_field(
+			'batch-synthesis-url',
+			esc_html__( 'Batch Synthesis Endpoint URL', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'option_index'  => 'credentials',
+				'label_for'     => 'batch_synthesis_url',
+				'input_type'    => 'text',
+				'default_value' => $default_settings['credentials']['batch_synthesis_url'],
+				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.customvoice.api.speech.microsoft.com/api/texttospeech/3.1-preview1/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'batch-synthesis-api-key',
+			esc_html__( 'Batch Synthesis API Key', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'option_index'  => 'credentials',
+				'label_for'     => 'batch_synthesis_api_key',
+				'input_type'    => 'password',
+				'default_value' => $default_settings['credentials']['batch_synthesis_api_key'],
+			]
+		);
+
+		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
@@ -268,6 +297,11 @@ class TextToSpeech extends Provider {
 
 		if ( isset( $settings['voice'] ) && ! empty( $settings['voice'] ) ) {
 			$current_settings['voice'] = sanitize_text_field( $settings['voice'] );
+		}
+
+		if ( ! empty( $settings['credentials']['batch_synthesis_url'] ) && ! empty( $settings['credentials']['batch_synthesis_api_key'] ) ) {
+			$current_settings['credentials']['batch_synthesis_url']     = $settings['credentials']['batch_synthesis_url'];
+			$current_settings['credentials']['batch_synthesis_api_key'] = $settings['credentials']['batch_synthesis_api_key'];
 		}
 
 		return $current_settings;
@@ -429,8 +463,10 @@ class TextToSpeech extends Provider {
 	public function get_default_settings() {
 		return [
 			'credentials'   => array(
-				'url'     => '',
-				'api_key' => '',
+				'url'                     => '',
+				'api_key'                 => '',
+				'batch_synthesis_url'     => '',
+				'batch_synthesis_api_key' => '',
 			),
 			'voices'        => array(),
 			'voice'         => '',
