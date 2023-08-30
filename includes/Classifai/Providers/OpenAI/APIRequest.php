@@ -57,7 +57,7 @@ class APIRequest {
 		$options = wp_parse_args(
 			$options,
 			[
-				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'timeout' => 60,
 			]
 		);
 		$this->add_headers( $options );
