@@ -19,6 +19,7 @@
     "env": "wp-env",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release",
     "prepare": "husky install"
@@ -35,7 +36,7 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@10up/cypress-wp-utils": "^0.1.0",
+    "@10up/cypress-wp-utils": "^0.2.0",
     "@wordpress/env": "^8.1.0",
     "@wordpress/scripts": "^26.6.0",
     "cypress": "^12.14.0",
