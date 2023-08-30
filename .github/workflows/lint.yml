@@ -100,7 +100,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: VIPCS check
-      uses: 10up/wpcs-action@fix/install-vipcs
+      uses: 10up/wpcs-action@stable
       with:
         enable_warnings: true
         standard: 'WordPress-VIP-Go'
