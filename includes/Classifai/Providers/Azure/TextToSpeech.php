@@ -914,4 +914,134 @@ class TextToSpeech extends Provider {
 		return $options;
 	}
 
+	/**
+	 * Returns true if batch synthesis is required instead of normal.
+	 *
+	 * @param string $post_content Post content.
+	 *
+	 * @return boolean
+	 */
+	public static function is_batch_synthesis_required( $post_content = '' ) {
+		return true;
+	}
+
+	/**
+	 * Performs normal synthesis.
+	 *
+	 * @param int    $post_id      Post ID.
+	 * @param string $voice_gender Gender of the voice.
+	 * @param string $voice_name   Name of the voice.
+	 * @param string $post_content Normalized post content
+	 *
+	 * @return integer Attachment ID.
+	 */
+	public function normal_synthesize( $post_id, $voice_gender, $voice_name, $post_content ) {
+		$saved_attachment_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
+		$settings            = $this->get_settings();
+
+		// Create the request body to synthesize speech from text.
+		$request_body = sprintf(
+			"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+			$voice_gender,
+			$voice_name,
+			$post_content
+		);
+
+		// Request parameters.
+		$request_params = array(
+			'method'  => 'POST',
+			'body'    => $request_body,
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $settings['credentials']['api_key'],
+				'Content-Type'              => 'application/ssml+xml',
+				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
+			),
+		);
+
+		$remote_url = sprintf( '%s%s', $settings['credentials']['url'], self::API_PATH );
+		$response   = wp_remote_post( $remote_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK !== $code ) {
+			return new \WP_Error(
+				'azure_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
+
+		// If audio already exists for this post, delete it.
+		if ( $saved_attachment_id ) {
+			wp_delete_attachment( $saved_attachment_id, true );
+			delete_post_meta( $post_id, self::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY );
+		}
+
+		// The audio file name.
+		$audio_file_name = sprintf(
+			'post-as-audio-%1$s.mp3',
+			$post_id
+		);
+
+		// Upload the audio stream as an .mp3 file.
+		$file_data = wp_upload_bits(
+			$audio_file_name,
+			null,
+			$response_body
+		);
+
+		if ( isset( $file_data['error'] ) && ! empty( $file_data['error'] ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_upload_bits_failure',
+				esc_html( $file_data['error'] )
+			);
+		}
+
+		// Insert the audio file as attachment.
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid'           => $file_data['file'],
+				'post_title'     => $audio_file_name,
+				'post_mime_type' => $file_data['type'],
+			),
+			$file_data['file'],
+			$post_id
+		);
+
+		// Return error if creation of attachment fails.
+		if ( ! $attachment_id ) {
+			return new \WP_Error(
+				'azure_text_to_speech_resource_creation_failure',
+				esc_html__( 'Audio creation failed.', 'classifai' )
+			);
+		}
+
+		update_post_meta( $post_id, self::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Performs batch synthesis.
+	 *
+	 * @param int    $post_id      Post ID.
+	 * @param string $voice_gender Gender of the voice.
+	 * @param string $voice_name   Name of the voice.
+	 * @param string $post_content Normalized post content
+	 */
+	public function batch_synthesize( $post_id, $voice_gender, $voice_name, $post_content ) {
+
+	}
 }
