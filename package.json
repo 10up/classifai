@@ -19,6 +19,7 @@
     "env": "wp-env",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release",
     "prepare": "husky install"
