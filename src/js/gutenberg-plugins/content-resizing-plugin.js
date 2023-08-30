@@ -12,7 +12,7 @@ import {
 	createReduxStore,
 	register,
 } from '@wordpress/data';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { __unstableStripHTML as stripHTML } from '@wordpress/dom';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import {
@@ -400,7 +400,11 @@ const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];
 
 let timeoutId = 0;
 
-function processAnimation( content = '' ) {
+function processAnimation( content = '', wrapperRef ) {
+	if ( ! wrapperRef ) {
+		return;
+	}
+
 	if ( ! select( resizeContentStore ).getIsResizing() ) {
 		clearTimeout( timeoutId );
 		return;
@@ -420,14 +424,10 @@ function processAnimation( content = '' ) {
 		return char;
 	} );
 
-	if ( document.getElementById( 'classifai-content-resize__mock-content' ) ) {
-		document.getElementById(
-			'classifai-content-resize__mock-content'
-		).innerHTML = formattedCharArray.join( ' ' );
-	}
+	wrapperRef.current.innerHTML = formattedCharArray.join( ' ' );
 
 	timeoutId = setTimeout( () => {
-		requestAnimationFrame( () => processAnimation( content ) );
+		requestAnimationFrame( () => processAnimation( content, wrapperRef ) );
 	}, 1000 / 1.35 );
 }
 
@@ -457,6 +457,8 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 			};
 		} );
 
+		const mockWrapper = useRef();
+
 		if ( currentClientId !== props.clientId ) {
 			return <BlockEdit { ...props } />;
 		}
@@ -469,7 +471,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 
 		if ( select( resizeContentStore ).getIsResizing() ) {
 			requestAnimationFrame( () =>
-				processAnimation( __plainTextContent )
+				processAnimation( __plainTextContent, mockWrapper )
 			);
 		}
 
@@ -481,7 +483,7 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 							{ __( 'Processing data…', 'classifai' ) }
 						</div>
 					</div>
-					<div id="classifai-content-resize__mock-content">
+					<div id="classifai-content-resize__mock-content" ref={ mockWrapper }>
 						{ __plainTextContent }
 					</div>
 					<BlockEdit { ...props } />
