@@ -483,7 +483,10 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 							{ __( 'Processing data…', 'classifai' ) }
 						</div>
 					</div>
-					<div id="classifai-content-resize__mock-content" ref={ mockWrapper }>
+					<div
+						id="classifai-content-resize__mock-content"
+						ref={ mockWrapper }
+					>
 						{ __plainTextContent }
 					</div>
 					<BlockEdit { ...props } />
