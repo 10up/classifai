@@ -61,7 +61,7 @@ class APIRequest {
 			]
 		);
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		return $this->get_result( wp_remote_post( $url, $options ) );
 	}
 
 	/**
