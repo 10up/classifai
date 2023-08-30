@@ -31,6 +31,13 @@ class TextToSpeech extends Provider {
 	const API_PATH = 'cognitiveservices/v1';
 
 	/**
+	 * Azure's Text to Speechbatch synthesis endpoint path.
+	 *
+	 * @var string
+	 */
+	const BATCH_SYNTHESIS_API_PATH = 'batchsynthesis';
+
+	/**
 	 * Meta key to hide/unhide already generated audio file.
 	 *
 	 * @var string
@@ -1042,6 +1049,63 @@ class TextToSpeech extends Provider {
 	 * @param string $post_content Normalized post content
 	 */
 	public function batch_synthesize( $post_id, $voice_gender, $voice_name, $post_content ) {
+		$saved_attachment_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
+		$settings            = $this->get_settings();
 
+		// Create the request body to synthesize speech from text.
+		$request_body = array(
+			'displayName' => 'batch synthesis sample',
+			'description' => 'my ssml test',
+			'textType'    => 'SSML',
+			'properties'  => array(
+				'outputFormat'            => 'audio-16khz-128kbitrate-mono-mp3',
+				'wordBoundaryEnabled'     => false,
+				'sentenceBoundaryEnabled' => false,
+				'concatenateResult'       => false,
+				'decompressOutputFiles'   => false,
+			),
+			'inputs'       => array(
+				array(
+					'text' => sprintf(
+						"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+						$voice_gender,
+						$voice_name,
+						$post_content
+					),
+				),
+			),
+		);
+
+		// Request parameters.
+		$request_params = array(
+			'method'  => 'POST',
+			'body'    => $request_body,
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $settings['credentials']['batch_synthesis_api_key'],
+				'Content-Type'              => 'application/json',
+			),
+		);
+
+		$remote_url = sprintf( '%s%s', $settings['credentials']['batch_synthesis_url'], self::BATCH_SYNTHESIS_API_PATH );
+		$response   = wp_remote_post( $remote_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK !== $code ) {
+			return new \WP_Error(
+				'azure_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
 	}
 }
