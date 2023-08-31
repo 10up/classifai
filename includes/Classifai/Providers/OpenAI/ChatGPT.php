@@ -916,7 +916,7 @@ class ChatGPT extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => esc_html( $args['content'] ) . '',
+						'content' => esc_html( $args['content'] ),
 					],
 				],
 				'temperature' => 0.9,
