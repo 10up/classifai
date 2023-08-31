@@ -10,5 +10,5 @@
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
 	</rule>
 
-	<exclude-pattern>*/dist/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
 </ruleset>

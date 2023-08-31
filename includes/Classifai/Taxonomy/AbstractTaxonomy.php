@@ -111,18 +111,66 @@ abstract class AbstractTaxonomy {
 		$labels = array(
 			'name'                       => $plural_label, // Already translated via get_plural_label().
 			'singular_name'              => $singular_label, // Already translated via get_singular_label().
-			'search_items'               => sprintf( __( 'Search %s', 'classifai' ), $plural_label ),
-			'popular_items'              => sprintf( __( 'Popular %s', 'classifai' ), $plural_label ),
-			'all_items'                  => sprintf( __( 'All %s', 'classifai' ), $plural_label ),
-			'edit_item'                  => sprintf( __( 'Edit %s', 'classifai' ), $singular_label ),
-			'update_item'                => sprintf( __( 'Update %s', 'classifai' ), $singular_label ),
-			'add_new_item'               => sprintf( __( 'Add New %s', 'classifai' ), $singular_label ),
-			'new_item_name'              => sprintf( __( 'New %s Name', 'classifai' ), $singular_label ),
-			'separate_items_with_commas' => sprintf( __( 'Separate %s with commas', 'classifai' ), strtolower( $plural_label ) ),
-			'add_or_remove_items'        => sprintf( __( 'Add or remove %s', 'classifai' ), strtolower( $plural_label ) ),
-			'choose_from_most_used'      => sprintf( __( 'Choose from the most used %s', 'classifai' ), strtolower( $plural_label ) ),
-			'not_found'                  => sprintf( __( 'No %s found.', 'classifai' ), strtolower( $plural_label ) ),
-			'not_found_in_trash'         => sprintf( __( 'No %s found in Trash.', 'classifai' ), strtolower( $plural_label ) ),
+			'search_items'               => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'Search %s', 'classifai' ),
+				$plural_label
+			),
+			'popular_items'              => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'Popular %s', 'classifai' ),
+				$plural_label
+			),
+			'all_items'                  => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'All %s', 'classifai' ),
+				$plural_label
+			),
+			'edit_item'                  => sprintf(
+				/* translators: %s: Singular taxonomy label */
+				__( 'Edit %s', 'classifai' ),
+				$singular_label
+			),
+			'update_item'                => sprintf(
+				/* translators: %s: Singular taxonomy label */
+				__( 'Update %s', 'classifai' ),
+				$singular_label
+			),
+			'add_new_item'               => sprintf(
+				/* translators: %s: Singular taxonomy label */
+				__( 'Add New %s', 'classifai' ),
+				$singular_label
+			),
+			'new_item_name'              => sprintf(
+				/* translators: %s: Singular taxonomy label */
+				__( 'New %s Name', 'classifai' ),
+				$singular_label
+			),
+			'separate_items_with_commas' => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'Separate %s with commas', 'classifai' ),
+				strtolower( $plural_label )
+			),
+			'add_or_remove_items'        => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'Add or remove %s', 'classifai' ),
+				strtolower( $plural_label )
+			),
+			'choose_from_most_used'      => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'Choose from the most used %s', 'classifai' ),
+				strtolower( $plural_label )
+			),
+			'not_found'                  => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'No %s found.', 'classifai' ),
+				strtolower( $plural_label )
+			),
+			'not_found_in_trash'         => sprintf(
+				/* translators: %s: Plural taxonomy label */
+				__( 'No %s found in Trash.', 'classifai' ),
+				strtolower( $plural_label )
+			),
 		);
 
 		return $labels;

@@ -523,7 +523,7 @@ describe('Language processing Tests', () => {
 		cy.get('.title-modal .classifai-title').first().find('button').click();
 
 		cy.get('.title-modal').should('not.exist');
-		cy.get('.editor-post-title__input').should(($el) => {
+		cy.getBlockEditor().find('.editor-post-title__input').should(($el) => {
 			expect($el.first()).to.contain(data);
 		});
 	});
