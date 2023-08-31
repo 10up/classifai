@@ -37,6 +37,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 * Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
@@ -52,9 +53,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure AI Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") |
 
-| Audio Transcripts | Title Generation | Text to Speech |
-| :-: | :-: | :-: |
-| ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") | ![Screenshot of ClassifAI text to speech generation](assets/img/screenshot-11.png "Example of automatic text to speech generation with Azure.") |
+| Audio Transcripts | Title Generation | Expand or Condense Text | Text to Speech |
+| :-: | :-: | :-: | :-: |
+| ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") | ![Screenshot of ClassifAI expand/condense text feature](assets/img/screenshot-12.png "Example of expanding or condensing text with OpenAI.") | ![Screenshot of ClassifAI text to speech generation](assets/img/screenshot-11.png "Example of automatic text to speech generation with Azure.") |
 
 ### Image Processing
 
@@ -219,6 +220,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 * Choose to add the ability to generate excerpts.
 * Choose to add the ability to generate titles.
+* Choose to add the ability to resize content.
 * Set the other options as needed.
 * Save changes and ensure a success message is shown. An error will show if API authentication fails.
 
@@ -230,6 +232,10 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content resizing, edit (or create) an item. Note: only the block editor is supported.
+* Add a paragraph block with some content.
+* With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
+* In the modal that pops up, select one of the options.
 
 ## Set Up Language Processing (via OpenAI Embeddings)
 
