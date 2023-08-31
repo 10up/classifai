@@ -752,7 +752,7 @@ describe('Language processing Tests', () => {
 		});
 
 		cy.get( '.classifai-resize-content-btn' ).click();
-		cy.get( '.classifai-resize-content-btn__grow' ).click();
+		cy.get( '.components-button' ).contains( 'Expand this text' ).click();
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+7 words' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+40 characters' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();
@@ -764,7 +764,7 @@ describe('Language processing Tests', () => {
 		});
 
 		cy.get( '.classifai-resize-content-btn' ).click();
-		cy.get( '.classifai-resize-content-btn__shrink' ).click();
+		cy.get( '.components-button' ).contains( 'Condense this text' ).click();
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-6 words' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-36 characters' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();

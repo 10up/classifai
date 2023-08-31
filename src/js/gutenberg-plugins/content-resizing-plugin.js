@@ -517,6 +517,7 @@ const withBlockControls = createHigherOrderComponent( ( BlockEdit ) => {
 					<BlockControls group="other">
 						<ToolbarDropdownMenu
 							icon={ aiIconSvg }
+							className="classifai-resize-content-btn"
 							controls={ [
 								{
 									title: __(
