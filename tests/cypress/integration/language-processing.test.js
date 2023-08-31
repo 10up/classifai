@@ -756,7 +756,7 @@ describe('Language processing Tests', () => {
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+7 words' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+40 characters' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();
-		cy.get( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+		cy.getBlockEditor().find( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
 
 		cy.createPost({
 			title: 'Resize content',
@@ -768,7 +768,7 @@ describe('Language processing Tests', () => {
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-6 words' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-36 characters' )
 		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();
-		cy.get( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+		cy.getBlockEditor().find( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
 	} );
 
 	it( 'Disabling Resize content feature by role does not render buttons in the UI', () => {
