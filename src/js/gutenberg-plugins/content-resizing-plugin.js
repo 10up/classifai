@@ -247,6 +247,7 @@ const ContentResizingPlugin = () => {
 	// Result Modal JSX.
 	const suggestionModal = ! isResizing && textArray.length && isModalOpen && (
 		<Modal
+			title={ __( 'Select a suggestion', 'classifai' ) }
 			isFullScreen={ false }
 			className="classifai-content-resize__suggestion-modal"
 			onRequestClose={ () => {
