@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [2.3.0] - 2023-08-21
 ### Added
+- Ability to resize (expand or condense) text content using OpenAI's ChatGPT API. (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@jakemgold](https://github.com/jakemgold) via [#532](https://github.com/10up/classifai/pull/532)).
 - Ability to generate excerpts when using the Classic Editor (props [@jamesmorrison](https://github.com/jamesmorrison), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#491](https://github.com/10up/classifai/pull/491)).
 - Ability to generate images directly in the Media Library, instead of at a post level, by going to `Media > Generate Images` (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter) via [#524](https://github.com/10up/classifai/pull/524)).
 - New `POST` endpoints for title and excerpt generation (props [@phpbits](https://github.com/phpbits), [@dkotter](https://github.com/dkotter) via [#525](https://github.com/10up/classifai/pull/525)).
