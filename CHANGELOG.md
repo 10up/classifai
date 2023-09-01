@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [2.3.0] - 2023-08-21
+## [2.3.0] - 2023-09-05
 **Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
 
 ### Added
