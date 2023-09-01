@@ -5,6 +5,8 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [Unreleased] - TBD
 
 ## [2.3.0] - 2023-08-21
+**Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
+
 ### Added
 - Ability to resize (expand or condense) text content using OpenAI's ChatGPT API. (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@jakemgold](https://github.com/jakemgold) via [#532](https://github.com/10up/classifai/pull/532)).
 - Ability to generate excerpts when using the Classic Editor (props [@jamesmorrison](https://github.com/jamesmorrison), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#491](https://github.com/10up/classifai/pull/491)).
@@ -29,6 +31,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Bump WordPress "tested up to" version to 6.3 (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#556](https://github.com/10up/classifai/pull/556)).
 - Update the references of the renamed Computer Vision API to Azure AI Vision (props [@kmgalanakis](https://github.com/kmgalanakis), [@dkotter](https://github.com/dkotter) via [#560](https://github.com/10up/classifai/pull/560)).
 - Update the Release GitHub Action workflow files to fix an issue where release archives were not being attached (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#565](https://github.com/10up/classifai/pull/565)).
+- Bump WordPress minimum from 5.7 to 5.8 (props [@Sidsector9](https://github.com/Sidsector9) via [#532](https://github.com/10up/classifai/pull/532)).
 
 ### Fixed
 - Ensure we define a class property before using it to avoid PHP deprecation notices (props [@dkotter](https://github.com/dkotter), [@ankitguptaindia](https://github.com/ankitguptaindia), [@Sidsector9](https://github.com/Sidsector9) via [#548](https://github.com/10up/classifai/pull/548)).
