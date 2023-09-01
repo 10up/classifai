@@ -5,7 +5,7 @@
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
  * Version:           2.3.0-dev
- * Requires at least: 5.7
+ * Requires at least: 5.8
  * Requires PHP:      7.4
  * Author:            10up
  * Author URI:        https://10up.com
