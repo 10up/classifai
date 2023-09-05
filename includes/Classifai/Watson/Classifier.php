@@ -44,7 +44,7 @@ class Classifier {
 	/**
 	 * Classifies the text specified using IBM Watson NLU API.
 	 *
-	 * https://www.ibm.com/watson/developercloud/natural-language-understanding/api/v1/#post-analyze
+	 * https://cloud.ibm.com/apidocs/natural-language-understanding#analyze
 	 *
 	 * @param string $text The plain text to classify
 	 * @param array  $options NLU classification options

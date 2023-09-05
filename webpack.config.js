@@ -18,6 +18,9 @@ module.exports = {
 		'post-status-info': [
 			'./src/js/gutenberg-plugins/post-status-info.js',
 		],
+		'content-resizing-plugin': [
+			'./src/js/gutenberg-plugins/content-resizing-plugin.js',
+		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
@@ -26,8 +29,18 @@ module.exports = {
 		],
 		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
+		'inserter-media-category': [
+			'./src/js/gutenberg-plugins/inserter-media-category.js',
+		],
+		'generate-excerpt-classic': [
+			'./src/js/openai/classic-editor-excerpt-generator.js',
+		],
 		'generate-title-classic': [
 			'./src/js/openai/classic-editor-title-generator.js',
+		],
+		commands: [ './src/js/gutenberg-plugins/commands.js' ],
+		'generate-image-media-upload': [
+			'./src/js/media-modal/views/generate-image-media-upload.js',
 		],
 	},
 	module: {

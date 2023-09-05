@@ -6,7 +6,6 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
-use Classifai\Providers\Azure\TextToSpeech;
 use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -65,19 +64,41 @@ class LanguageProcessing extends Service {
 
 		register_rest_route(
 			'classifai/v1/openai',
-			'generate-excerpt/(?P<id>\d+)',
+			'generate-excerpt(?:/(?P<id>\d+))?',
 			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_excerpt' ],
-				'args'                => [
-					'id' => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
+						],
 					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
 				],
-				'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to summarize into an excerpt.', 'classifai' ),
+						],
+						'title'   => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				],
 			]
 		);
 
@@ -119,27 +140,73 @@ class LanguageProcessing extends Service {
 
 		register_rest_route(
 			'classifai/v1/openai',
-			'generate-title/(?P<id>\d+)',
+			'generate-title(?:/(?P<id>\d+))?',
 			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_title' ],
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
+						],
+						'n'  => [
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'maximum'           => 10,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+				],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'resize-content',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'resize_content' ],
+				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
 				'args'                => [
-					'id' => [
+					'id'          => [
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
+						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
 					],
-					'n'  => [
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'maximum'           => 10,
-						'sanitize_callback' => 'absint',
+					'content'     => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
+					],
+					'resize_type' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The type of resize operation. "grow" or "shrink".', 'classifai' ),
 					],
 				],
-				'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
 			]
 		);
 	}
@@ -242,6 +309,8 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_post_excerpt( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
+		$content = $request->get_param( 'content' );
+		$title   = $request->get_param( 'title' );
 
 		// Find the right provider class.
 		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
@@ -251,7 +320,16 @@ class LanguageProcessing extends Service {
 			return $provider;
 		}
 
-		return rest_ensure_response( $provider->rest_endpoint_callback( $post_id, 'excerpt' ) );
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'excerpt',
+				[
+					'content' => $content,
+					'title'   => $title,
+				]
+			)
+		);
 	}
 
 	/**
@@ -266,7 +344,14 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( is_wp_error( $provider ) ) {
+			return $provider;
+		}
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -281,24 +366,14 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
-
 		// Check if valid authentication is in place.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if excerpt generation is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_excerpt'] ) && 'no' === $settings['enable_excerpt'] ) ) {
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'enable_excerpt' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
 		}
 
 		return true;
@@ -344,7 +419,7 @@ class LanguageProcessing extends Service {
 
 		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
 			$post_type = get_post_type( $post_id );
-			$supported = TextToSpeech::get_supported_post_types();
+			$supported = \Classifai\get_tts_supported_post_types();
 
 			// Check if processing allowed.
 			if ( ! in_array( $post_type, $supported, true ) ) {
@@ -456,7 +531,8 @@ class LanguageProcessing extends Service {
 				$post_id,
 				'title',
 				[
-					'num' => $request->get_param( 'n' ),
+					'num'     => $request->get_param( 'n' ),
+					'content' => $request->get_param( 'content' ),
 				]
 			)
 		);
@@ -474,6 +550,77 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'enable_titles' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handle request to resize content.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function resize_content( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+		$provider = '';
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
+
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'resize_content',
+				[
+					'content'     => $request->get_param( 'content' ),
+					'resize_type' => $request->get_param( 'resize_type' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to resize content.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function resize_content_permissions_check( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
 
 		// Ensure we have a logged in user that can edit the item.
@@ -496,13 +643,13 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if title generation is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_titles'] ) && 'no' === $settings['enable_titles'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
+		// Check if resize content feature is turned on.
+		if ( empty( $settings ) || ( isset( $settings['enable_resize_content'] ) && 'no' === $settings['enable_resize_content'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
 		}
 
 		// Check if the current user's role is allowed.
-		$roles      = $settings['title_roles'] ?? [];
+		$roles      = $settings['resize_content_roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
@@ -511,5 +658,4 @@ class LanguageProcessing extends Service {
 
 		return true;
 	}
-
 }

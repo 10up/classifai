@@ -6,7 +6,7 @@ describe('Image processing Tests', () => {
 	let imageEditLink = '';
 	let mediaModelLink = '';
 
-	it('Can save Computer Vision "Image Processing" settings', () => {
+	it('Can save Azure AI Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		cy.get('#url')
@@ -23,7 +23,7 @@ describe('Image processing Tests', () => {
 		cy.get('.notice').contains('Settings saved.');
 	});
 
-	it('Can see Computer Vision Image processing actions on edit media page and verify Generated data.', () => {
+	it('Can see Azure AI Vision Image processing actions on edit media page and verify Generated data.', () => {
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
@@ -72,7 +72,7 @@ describe('Image processing Tests', () => {
 			});
 	});
 
-	it('Can see Computer Vision Image processing actions on media model', () => {
+	it('Can see Azure AI Vision Image processing actions on media model', () => {
 		const imageId = imageEditLink.split('post=')[1]?.split('&')[0];
 		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
 		cy.visit(mediaModelLink);
@@ -85,7 +85,7 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('exist');
 	});
 
-	it('Can disable Computer Vision Image processing features', () => {
+	it('Can disable Azure AI Vision Image processing features', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
 		// Disable features
@@ -193,6 +193,10 @@ describe('Image processing Tests', () => {
 		cy.get( '#enable_image_gen' ).uncheck();
 		cy.get( '#submit' ).click();
 
+		cy.get(
+			`.wp-has-current-submenu.wp-menu-open li a:contains("Generate Images")`
+		).should( 'not.exist' );
+
 		// Create test post.
 		cy.createPost( {
 			title: 'Test DALL-E post disabled',
@@ -241,6 +245,10 @@ describe('Image processing Tests', () => {
 		cy.get( '#openai_dalle_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
+		cy.get(
+			`.wp-has-current-submenu.wp-menu-open li a:contains("Generate Images")`
+		).should( 'not.exist' );
+
 		// Create test post.
 		cy.createPost( {
 			title: 'Test DALL-E post admin disabled',
@@ -279,4 +287,30 @@ describe('Image processing Tests', () => {
 			cy.get( '#menu-item-generate' ).should( 'not.exist' );
 		} );
 	} );
-});
+
+	it( 'Can generate image directly in media library', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
+		);
+
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#openai_dalle_roles_administrator' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.visit( '/wp-admin/upload.php' );
+		cy.get(
+			`.wp-has-current-submenu.wp-menu-open li a:contains("Generate Images")`
+		).click();
+
+		// Verify tab exists.
+		cy.get( '#menu-item-generate' ).should( 'exist' );
+
+		// Click into the tab and submit a prompt.
+		cy.get( '#menu-item-generate' ).click();
+		cy.get( '.prompt-view .prompt' ).type( 'A sunset over the mountains' );
+		cy.get( '.prompt-view .button-generate' ).click();
+
+		// Verify images show up.
+		cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
+	} );
+} );
