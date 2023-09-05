@@ -57,20 +57,28 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if (
-			current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
-		) {
+		if ( $this->is_feature_enabled() ) {
+			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
+	}
+
+	/**
+	 * Registers a Media > Generate Image submenu
+	 */
+	public function register_generate_media_page() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		add_submenu_page(
+			'upload.php',
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			'upload_files',
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			''
+		);
 	}
 
 	/**
@@ -79,7 +87,7 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'upload.php' !== $hook_suffix ) {
 			return;
 		}
 
@@ -101,6 +109,14 @@ class DallE extends Provider {
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
 			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
 			get_asset_info( 'media-modal', 'version' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'classifai-inserter-media-category',
+			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
+			get_asset_info( 'inserter-media-category', 'dependencies' ),
+			get_asset_info( 'inserter-media-category', 'version' ),
 			true
 		);
 
@@ -134,6 +150,28 @@ class DallE extends Provider {
 				'caption'    => $caption,
 			]
 		);
+
+		if ( 'upload.php' === $hook_suffix ) {
+			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'classifai-generate-image' === $action ) {
+				wp_enqueue_script(
+					'classifai-generate-images-media-upload',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+					[ 'jquery' ],
+					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					true
+				);
+
+				wp_localize_script(
+					'classifai-generate-images-media-upload',
+					'classifaiGenerateImages',
+					[
+						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+					]
+				);
+			}
+		}
 	}
 
 	/**
@@ -245,6 +283,19 @@ class DallE extends Provider {
 		);
 		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
 
+		/**
+		 * Filter the allowed WordPress roles for DALL·E
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_allowed_image_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
+
 		add_settings_field(
 			'roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
@@ -344,7 +395,7 @@ class DallE extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
 		return [
 			'authenticated'    => false,
 			'api_key'          => '',
@@ -404,7 +455,7 @@ class DallE extends Provider {
 
 		// These checks already ran in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( ! current_user_can( 'upload_files' ) ) {
+		if ( ! $this->is_feature_enabled() ) {
 			// Note that we purposely leave off the textdomain here as this is the same error
 			// message core uses, so we want translations to load from there.
 			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
@@ -481,6 +532,41 @@ class DallE extends Provider {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Checks whether we can generate images.
+	 *
+	 * @return bool
+	 */
+	public function is_feature_enabled() {
+		$access   = false;
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			current_user_can( 'upload_files' )
+			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
+			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to use the image gen feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_enable_image_gen
+		 *
+		 * @param {bool} $access  Current access value.
+		 * @param {array} $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
 	}
 
 }

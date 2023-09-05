@@ -3,7 +3,7 @@
         'name' => '10up/classifai',
         'pretty_version' => 'dev-trunk',
         'version' => 'dev-trunk',
-        'reference' => '2aca3ab901b733038023d65e4f7fcd1cbc262c04',
+        'reference' => '1742dc0109ff82f708f47633782dca5b179e362c',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '10up/classifai' => array(
             'pretty_version' => 'dev-trunk',
             'version' => 'dev-trunk',
-            'reference' => '2aca3ab901b733038023d65e4f7fcd1cbc262c04',
+            'reference' => '1742dc0109ff82f708f47633782dca5b179e362c',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'composer/ca-bundle' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '4c679186f2aca4ab6a0f1b0b9cf9252decb44d0b',
+            'reference' => '90d087e988ff194065333d16bc5cf649872d9cdb',
             'type' => 'library',
             'install_path' => __DIR__ . '/./ca-bundle',
             'aliases' => array(
@@ -42,9 +42,9 @@
             'dev_requirement' => false,
         ),
         'yahnis-elsts/plugin-update-checker' => array(
-            'pretty_version' => 'v4.13',
-            'version' => '4.13.0.0',
-            'reference' => '6eb27a6911e0e0880d09e5b11f577d3f688f7da7',
+            'pretty_version' => 'v5.1',
+            'version' => '5.1.0.0',
+            'reference' => '48b03e93c9c2587f9276dce00ce2b6d94c1190d2',
             'type' => 'library',
             'install_path' => __DIR__ . '/../yahnis-elsts/plugin-update-checker',
             'aliases' => array(),

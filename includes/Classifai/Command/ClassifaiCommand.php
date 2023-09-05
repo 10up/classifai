@@ -164,7 +164,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! empty( $opts['input'] ) ) {
-			$text = file_get_contents( $opts['input'] );
+			$text = file_get_contents( $opts['input'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
@@ -1156,7 +1156,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_type'      => ! empty( $opts['post_type'] ) ? $opts['post_type'] : 'any',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
-			'posts_per_page' => -1,
+			'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
 		];
 
 		\WP_CLI::log( 'Fetching posts to classify ...' );

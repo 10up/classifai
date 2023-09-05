@@ -50,26 +50,26 @@ class Personalizer extends Service {
 		}
 
 		$attributes = array(
-			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( $_POST['displayLayout'] ) : 'grid',
-			'contentPostType'        => sanitize_text_field( $_POST['contentPostType'] ),
+			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( wp_unslash( $_POST['displayLayout'] ) ) : 'grid',
+			'contentPostType'        => sanitize_text_field( wp_unslash( $_POST['contentPostType'] ) ),
 			'excludeId'              => isset( $_POST['excludeId'] ) ? absint( $_POST['excludeId'] ) : 0,
-			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( $_POST['displayPostExcerpt'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( $_POST['displayAuthor'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( $_POST['displayPostDate'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( $_POST['displayFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
-			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( $_POST['addLinkToFeaturedImage'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( wp_unslash( $_POST['displayPostExcerpt'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( wp_unslash( $_POST['displayAuthor'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( wp_unslash( $_POST['displayPostDate'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['displayFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
+			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['addLinkToFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
 			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
 		);
 
 		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
 			foreach ( $_POST['taxQuery'] as $key => $value ) {
 				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
 			}
 		}
 
-		$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Personalizer' );
 
 		if ( ! is_wp_error( $provider ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -146,7 +146,7 @@ class Personalizer extends Service {
 			}
 
 			// Find the right provider class.
-			$provider = find_provider_class( $this->provider_classes ?? [], 'Personalizer' );
+			$provider = find_provider_class( $this->provider_classes ?? [], 'AI Personalizer' );
 
 			// Ensure we have a provider class. Should never happen but :shrug:
 			if ( is_wp_error( $provider ) ) {
