@@ -90,20 +90,28 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if (
-			current_user_can( 'upload_files' )
-			&amp;&amp; ( ! empty( $roles ) &amp;&amp; empty( array_diff( $user_roles, $roles ) ) )
-			&amp;&amp; ( isset( $settings['enable_image_gen'] ) &amp;&amp; 1 === (int) $settings['enable_image_gen'] )
-		) {
+		if ( $this->is_feature_enabled() ) {
+			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
 			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 		}
+	}
+
+	/**
+	 * Registers a Media > Generate Image submenu
+	 */
+	public function register_generate_media_page() {
+		$settings         = $this->get_settings();
+		$number_of_images = absint( $settings['number'] );
+
+		add_submenu_page(
+			'upload.php',
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+			'upload_files',
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			''
+		);
 	}
 
 	/**
@@ -112,7 +120,7 @@ class DallE extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix &amp;&amp; 'post-new.php' !== $hook_suffix ) {
+		if ( 'post.php' !== $hook_suffix &amp;&amp; 'post-new.php' !== $hook_suffix &amp;&amp; 'upload.php' !== $hook_suffix ) {
 			return;
 		}
 
@@ -134,6 +142,14 @@ class DallE extends Provider {
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
 			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
 			get_asset_info( 'media-modal', 'version' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'classifai-inserter-media-category',
+			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
+			get_asset_info( 'inserter-media-category', 'dependencies' ),
+			get_asset_info( 'inserter-media-category', 'version' ),
 			true
 		);
 
@@ -167,6 +183,28 @@ class DallE extends Provider {
 				'caption'    => $caption,
 			]
 		);
+
+		if ( 'upload.php' === $hook_suffix ) {
+			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+			if ( 'classifai-generate-image' === $action ) {
+				wp_enqueue_script(
+					'classifai-generate-images-media-upload',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+					[ 'jquery' ],
+					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					true
+				);
+
+				wp_localize_script(
+					'classifai-generate-images-media-upload',
+					'classifaiGenerateImages',
+					[
+						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+					]
+				);
+			}
+		}
 	}
 
 	/**
@@ -278,6 +316,19 @@ class DallE extends Provider {
 		);
 		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
 
+		/**
+		 * Filter the allowed WordPress roles for DALL·E
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_allowed_image_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
+
 		add_settings_field(
 			'roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
@@ -377,7 +428,7 @@ class DallE extends Provider {
 	 *
 	 * @return array
 	 */
-	private function get_default_settings() {
+	public function get_default_settings() {
 		return [
 			'authenticated'    => false,
 			'api_key'          => '',
@@ -437,7 +488,7 @@ class DallE extends Provider {
 
 		// These checks already ran in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( ! current_user_can( 'upload_files' ) ) {
+		if ( ! $this->is_feature_enabled() ) {
 			// Note that we purposely leave off the textdomain here as this is the same error
 			// message core uses, so we want translations to load from there.
 			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
@@ -516,6 +567,41 @@ class DallE extends Provider {
 		return $response;
 	}
 
+	/**
+	 * Checks whether we can generate images.
+	 *
+	 * @return bool
+	 */
+	public function is_feature_enabled() {
+		$access   = false;
+		$settings = $this->get_settings();
+
+		// Check if the current user has permission to generate images.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if (
+			current_user_can( 'upload_files' )
+			&amp;&amp; ( ! empty( $roles ) &amp;&amp; empty( array_diff( $user_roles, $roles ) ) )
+			&amp;&amp; ( isset( $settings['enable_image_gen'] ) &amp;&amp; 1 === (int) $settings['enable_image_gen'] )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to use the image gen feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_enable_image_gen
+		 *
+		 * @param {bool} $access  Current access value.
+		 * @param {array} $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
+	}
+
 }
 </code></pre>
         </article>
@@ -535,7 +621,7 @@ class DallE extends Provider {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_post_statuses.html">classifai_openai_embeddings_post_statuses</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_embeddings_taxonomies.html">classifai_openai_embeddings_taxonomies</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_audio_generation_initial_state.html">classifai_audio_generation_initial_state</a></li><li><a href="classifai_audio_generation_subsequent_state.html">classifai_audio_generation_subsequent_state</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_allowed_roles.html">classifai_chatgpt_allowed_roles</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_resize_content_request_body.html">classifai_chatgpt_resize_content_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_chatgpt_%257B$feature%257D.html">classifai_openai_chatgpt_{$feature}</a></li><li><a href="classifai_openai_dalle_allowed_image_roles.html">classifai_openai_dalle_allowed_image_roles</a></li><li><a href="classifai_openai_dalle_enable_image_gen.html">classifai_openai_dalle_enable_image_gen</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_post_statuses.html">classifai_openai_embeddings_post_statuses</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_embeddings_taxonomies.html">classifai_openai_embeddings_taxonomies</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
 </nav>
 
 <br class="clear">

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_dalle_prompt - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_chatgpt_resize_content_request_body - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_dalle_prompt</h1>
+    <h1 class="page-title">Filter: classifai_chatgpt_resize_content_request_body</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_dalle_prompt">apply_filters( 'classifai_dalle_prompt', <span class="signature">$prompt )</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id="classifai_chatgpt_resize_content_request_body">apply_filters( 'classifai_chatgpt_resize_content_request_body', <span class="signature">$body, $post_id )</span><span class="type-signature"> &rarr; {array}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filter the prompt we will send to DALL·E.</p>
+    <p>Filter the resize request body before sending to ChatGPT.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$prompt</code></td>
+                <td class="name"><code>$body</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">array</span>
 
 
             
@@ -100,7 +100,30 @@
 
             
 
-            <td class="description last"><p>Prompt we are sending to DALL·E.</p></td>
+            <td class="description last"><p>Request body that will be sent to ChatGPT.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$post_id</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">int</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>ID of post.</p></td>
         </tr>
 
     
@@ -118,7 +141,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>2.0.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.3.0</li></ul></dd>
     
 
     
@@ -144,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_OpenAI_DallE.php.html">Providers/OpenAI/DallE.php</a>, <a href="Providers_OpenAI_DallE.php.html#line468">line 468</a>
+        <a href="Providers_OpenAI_ChatGPT.php.html">Providers/OpenAI/ChatGPT.php</a>, <a href="Providers_OpenAI_ChatGPT.php.html#line897">line 897</a>
     </li></ul></dd>
     
 
@@ -171,7 +194,7 @@
 
         
 <div class="param-desc">
-    <p>Prompt.</p>
+    <p>Request body.</p>
 </div>
 
 
@@ -182,7 +205,7 @@
     </dt>
     <dd>
         
-<span class="param-type">string</span>
+<span class="param-type">array</span>
 
 
     </dd>
