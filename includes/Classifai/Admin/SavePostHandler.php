@@ -228,9 +228,12 @@ class SavePostHandler {
 			);
 		}
 
+		// (SSML) document used for text-to-speech (TTS) conversion
+		$ssml_tag = "<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>";
+
 		// Create the request body to synthesize speech from text.
 		$request_body = sprintf(
-			"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+			apply_filters( 'classifai_azure_text_to_speech_ssml_tag', $ssml_tag ),
 			$voice_gender,
 			$voice_name,
 			$post_content
