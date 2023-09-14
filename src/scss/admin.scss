@@ -100,7 +100,8 @@ input.classifai-button {
 	}
 
 	&:focus {
-		box-shadow: 0 0 0 1px #fff, 0 0 0 3px var(--classifai-admin-theme-color-darker-10);
+		box-shadow: 0 0 0 1px #fff,
+			0 0 0 3px var(--classifai-admin-theme-color-darker-10);
 	}
 
 	&:active {
@@ -263,17 +264,18 @@ input.classifai-button {
 		position: relative;
 
 		&:after {
-			transition: all .3s cubic-bezier(1, 0, 0, 1);
+			transition: all 0.3s cubic-bezier(1, 0, 0, 1);
 			will-change: transform, box-shadow, opacity;
 			position: absolute;
-			content: '';
+			content: "";
 			height: 3px;
 			bottom: 0px;
 			left: 0px;
 			right: 0px;
 			border-radius: 3px 3px 0px 0px;
 			background: var(--classifai-admin-theme-color);
-			box-shadow: 0px 4px 10px 3px rgba(var(--classifai-admin-theme-color--rgb), .15);
+			box-shadow: 0px 4px 10px 3px
+				rgba(var(--classifai-admin-theme-color--rgb), 0.15);
 			opacity: 0;
 			transform: scale(0, 1);
 		}
@@ -483,7 +485,7 @@ input.classifai-button {
 			clear: both;
 
 			span.dashicons.dashicons-yes-alt {
-				color: #48BE1E;
+				color: #48be1e;
 			}
 
 			span.dashicons.dashicons-dismiss {
@@ -520,7 +522,6 @@ input.classifai-button {
 		}
 
 		@media screen and (max-width: 767px) {
-
 			.classifai-step1-content,
 			.classifai-step4-content {
 				max-width: 100%;
@@ -533,10 +534,8 @@ input.classifai-button {
 		}
 
 		.classifai-setup-form {
-
 			.classifai-step3-content & {
 				margin: 0 auto;
-				max-width: 480px;
 			}
 
 			.classifai-setup-form-field {
@@ -565,25 +564,43 @@ input.classifai-button {
 
 		.classifai-step3-content {
 			margin: 0 auto;
+			max-width: 840px;
+			width: 100%;
 
 			.classifai-setup-title {
 				text-align: center;
 				margin-bottom: 12px;
 			}
 
-			.classifai-setup-form,
-			.classifai-setup-footer {
-				margin: 0 auto;
-				max-width: 480px;
+			.classifai-setup-form {
+				padding-left: 48px;
+				width: 70%;
+				box-sizing: border-box;
+
+				@media screen and (max-width: 782px) {
+					padding-left: 18px;
+				}
+
+				@media screen and (max-width: 600px) {
+					width: 100%;
+					padding-left: 0px;
+					margin-bottom: 20px;
+				}
 			}
 
 			.classifai-setup-footer {
-				margin-top: 40px;
+				margin-top: 0px;
 			}
 		}
 
 		.classifai-tabs {
 			display: block;
+			width: 30%;
+			box-sizing: border-box;
+
+			@media screen and (max-width: 600px) {
+				width: 100%;
+			}
 
 			&.tabs-center {
 				margin: auto;
@@ -598,12 +615,11 @@ input.classifai-button {
 			a.tab {
 				text-decoration: none;
 				position: relative;
-				display: inline-block;
-				transition: all ease .3s;
+				display: block;
+				transition: all ease 0.3s;
 				padding: 16px 12px;
 				transform: translate3d(0, 0, 0);
 				color: #1d2327;
-				white-space: nowrap;
 				cursor: pointer;
 				font-size: 14px;
 
@@ -615,24 +631,10 @@ input.classifai-button {
 					color: var(--classifai-admin-theme-color);
 				}
 
-				&:after {
-					transition: all .3s cubic-bezier(1, 0, 0, 1);
-					will-change: transform, box-shadow, opacity;
-					position: absolute;
-					content: '';
-					height: 3px;
-					bottom: 0px;
-					left: 0px;
-					right: 0px;
-					border-radius: 3px 3px 0px 0px;
-					background: var(--classifai-admin-theme-color);
-					box-shadow: 0px 4px 10px 3px rgba(var(--classifai-admin-theme-color--rgb), .15);
-					opacity: 0;
-					transform: scale(0, 1);
-				}
-
 				&.active {
-					color: var(--classifai-admin-theme-color);
+					background: #f0f0f0;
+					box-shadow: none;
+					border-radius: 4px;
 					font-weight: 600;
 
 					&:after {
@@ -641,6 +643,12 @@ input.classifai-button {
 					}
 				}
 			}
+		}
+
+		.classifai-providers-wrapper {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
 		}
 
 		p.classifai-setup-error {
@@ -691,7 +699,7 @@ input.classifai-button {
 		transition: left 0.25s;
 	}
 
-	.classifai-toggle-checkbox:checked+& {
+	.classifai-toggle-checkbox:checked + & {
 		background: var(--classifai-admin-theme-color);
 		border-color: var(--classifai-admin-theme-color);
 

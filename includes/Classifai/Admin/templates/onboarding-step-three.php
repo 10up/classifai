@@ -31,34 +31,35 @@ $args = array(
 // Header
 require_once 'onboarding-header.php';
 ?>
-
-<div class="classifai-tabs tabs-center">
-	<?php
-	foreach ( $enabled_providers as $key => $provider ) {
-		$provider_url = add_query_arg( 'tab', $key, $base_url );
-		$is_active    = ( $current_provider === $key ) ? 'active' : '';
-		?>
-		<a href="<?php echo esc_url( $provider_url ); ?>" class="tab <?php echo esc_attr( $is_active ); ?>">
-			<?php echo esc_html( $provider['title'] ); ?>
-		</a>
+<div class="classifai-providers-wrapper">
+	<div class="classifai-tabs tabs-center">
 		<?php
-	}
-	?>
-</div>
-<div class="classifai-setup-form">
-	<input name="classifai-setup-provider" type="hidden" value="<?php echo esc_attr( $current_provider ); ?>" />
-	<?php
-	// Load the appropriate provider settings.
-	if ( ! empty( $current_provider ) && ! empty( $enabled_providers ) ) {
-		Classifai\Admin\Onboarding::render_classifai_setup_settings( $current_provider, $enabled_providers[ $current_provider ]['fields'] );
-	} else {
+		foreach ( $enabled_providers as $key => $provider ) {
+			$provider_url = add_query_arg( 'tab', $key, $base_url );
+			$is_active    = ( $current_provider === $key ) ? 'active' : '';
+			?>
+			<a href="<?php echo esc_url( $provider_url ); ?>" class="tab <?php echo esc_attr( $is_active ); ?>">
+				<?php echo esc_html( $provider['title'] ); ?>
+			</a>
+			<?php
+		}
 		?>
-		<p class="classifai-setup-error">
-			<?php esc_html_e( 'No features are enabled.', 'classifai' ); ?>
-		</p>
+	</div>
+	<div class="classifai-setup-form">
+		<input name="classifai-setup-provider" type="hidden" value="<?php echo esc_attr( $current_provider ); ?>" />
 		<?php
-	}
-	?>
+		// Load the appropriate provider settings.
+		if ( ! empty( $current_provider ) && ! empty( $enabled_providers ) ) {
+			Classifai\Admin\Onboarding::render_classifai_setup_settings( $current_provider, $enabled_providers[ $current_provider ]['fields'] );
+		} else {
+			?>
+			<p class="classifai-setup-error">
+				<?php esc_html_e( 'No features are enabled.', 'classifai' ); ?>
+			</p>
+			<?php
+		}
+		?>
+	</div>
 </div>
 
 <?php
