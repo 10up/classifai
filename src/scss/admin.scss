@@ -291,6 +291,11 @@ input.classifai-button {
 			}
 		}
 	}
+
+	span.classifai-input-description {
+		display: block;
+		margin-top: 8px;
+	}
 }
 
 .classifai-setup {
@@ -603,7 +608,6 @@ input.classifai-button {
 			}
 
 			&.tabs-center {
-				margin: auto;
 				margin-bottom: 24px;
 			}
 
