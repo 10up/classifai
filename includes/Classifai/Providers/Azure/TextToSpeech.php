@@ -67,7 +67,7 @@ class TextToSpeech extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'Microsoft Azure',
+			self::FEATURE_NAME,
 			self::FEATURE_NAME,
 			'azure_text_to_speech',
 			$service

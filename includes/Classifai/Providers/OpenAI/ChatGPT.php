@@ -42,7 +42,7 @@ class ChatGPT extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'OpenAI ChatGPT',
+			'Content Generation',
 			'ChatGPT',
 			'openai_chatgpt',
 			$service

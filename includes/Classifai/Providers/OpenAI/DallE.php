@@ -35,7 +35,7 @@ class DallE extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'OpenAI',
+			'Image Generation',
 			'DALL·E',
 			'openai_dalle',
 			$service

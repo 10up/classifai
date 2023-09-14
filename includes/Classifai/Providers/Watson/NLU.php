@@ -39,7 +39,7 @@ class NLU extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'IBM Watson',
+			'Classify Content (Watson NLU)',
 			'Natural Language Understanding',
 			'watson_nlu',
 			$service

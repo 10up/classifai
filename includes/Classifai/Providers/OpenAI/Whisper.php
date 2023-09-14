@@ -22,7 +22,7 @@ class Whisper extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'OpenAI Whisper',
+			'Speech to Text',
 			'Whisper',
 			'openai_whisper',
 			$service

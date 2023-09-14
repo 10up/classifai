@@ -30,7 +30,7 @@ class ComputerVision extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'Microsoft Azure',
+			'Image Processing',
 			'AI Vision',
 			'computer_vision',
 			$service
