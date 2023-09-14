@@ -30,7 +30,7 @@ class Whisper extends Provider {
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI Whisper', 'classifai' ),
+			'title'    => __( 'Speech to Text', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
 				'enable_transcripts' => __( 'Generate transcripts from audio files', 'classifai' ),

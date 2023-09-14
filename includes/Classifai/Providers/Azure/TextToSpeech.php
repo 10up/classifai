@@ -75,7 +75,7 @@ class TextToSpeech extends Provider {
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure Text to Speech', 'classifai' ),
+			'title'    => __( 'Text to Speech', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
 				'authenticated' => __( 'Generate speech for post content', 'classifai' ),

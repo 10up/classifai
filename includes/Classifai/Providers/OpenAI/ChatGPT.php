@@ -50,7 +50,7 @@ class ChatGPT extends Provider {
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
+			'title'    => __( 'Content Generation', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
 				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
