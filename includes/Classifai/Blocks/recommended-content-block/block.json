@@ -8,8 +8,7 @@
   "category": "classifai-blocks",
   "attributes": {
     "contentPostType": {
-      "type": "string",
-      "default": "post"
+      "type": "string"
     },
     "taxQuery": {
       "type": "object"
@@ -48,6 +47,10 @@
     },
     "excludeId": {
       "type": "number"
+    },
+    "useAssignedTerms": {
+      "type": "boolean",
+      "default": true
     }
   },
   "supports": {
