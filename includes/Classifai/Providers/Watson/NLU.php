@@ -39,7 +39,7 @@ class NLU extends Provider {
 	 */
 	public function __construct( $service ) {
 		parent::__construct(
-			'Classify Content (Watson NLU)',
+			'Classify Content (IBM Watson)',
 			'Natural Language Understanding',
 			'watson_nlu',
 			$service
@@ -78,7 +78,7 @@ class NLU extends Provider {
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Classify Content (Watson NLU)', 'classifai' ),
+			'title'    => __( 'Classify Content (IBM Watson)', 'classifai' ),
 			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
 			'features' => array(),
 		);
