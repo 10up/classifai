@@ -22,8 +22,8 @@ class LanguageProcessing extends Service {
 			'language_processing',
 			[
 				'Classifai\Providers\Watson\NLU',
-				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
+				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Whisper',
 				'Classifai\Providers\Azure\TextToSpeech',
 			]
