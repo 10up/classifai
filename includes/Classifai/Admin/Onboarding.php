@@ -391,8 +391,9 @@ class Onboarding {
 				call_user_func( $field['callback'], $field['args'] );
 				continue;
 			}
+			$field_class = isset( $field['args']['class'] ) ? $field['args']['class'] : '';
 			?>
-			<div class="classifai-setup-form-field">
+			<div class="classifai-setup-form-field <?php echo esc_attr( $field_class ); ?>">
 				<label for="<?php echo esc_attr( $field['args']['label_for'] ); ?>">
 					<?php echo esc_html( $field['title'] ); ?>
 				</label>
