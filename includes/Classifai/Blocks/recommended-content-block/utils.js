@@ -86,3 +86,43 @@ export const useTaxonomies = ( postType ) => {
 	);
 	return taxonomies;
 };
+
+/**
+ * Hook that returns the data associated with a post.
+ */
+export const usePostData = () => {
+	const { postTypesTaxonomiesMap } = usePostTypes();
+	const currentPostId = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostId()
+	);
+	const currentPostType = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostType()
+	);
+
+	const postTerms = useSelect(
+		( select ) => {
+			const terms = {};
+			if ( currentPostId && currentPostType ) {
+				const postTypesTaxonomies = postTypesTaxonomiesMap
+					? postTypesTaxonomiesMap[ currentPostType ]
+					: [];
+				postTypesTaxonomies.forEach( ( tax ) => {
+					terms[ tax ] =
+						select( 'core' )
+							.getEntityRecords( 'taxonomy', tax, {
+								post: currentPostId,
+							} )
+							?.map( ( e ) => e.id ) || [];
+				} );
+			}
+
+			return terms;
+		},
+		[ currentPostId, currentPostType, postTypesTaxonomiesMap ]
+	);
+	return {
+		postId: currentPostId,
+		postType: currentPostType,
+		postTerms,
+	};
+};

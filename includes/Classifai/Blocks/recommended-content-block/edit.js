@@ -17,10 +17,10 @@ import {
 	InspectorControls,
 } from '@wordpress/block-editor';
 import { list, grid } from '@wordpress/icons';
-import { useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 import ServerSideRender from '@wordpress/server-side-render';
 import TaxonomyControls from './inspector-controls/taxonomy-controls';
-import { usePostTypes } from './utils';
+import { usePostData, usePostTypes } from './utils';
 
 /**
  * Edit component.
@@ -54,20 +54,40 @@ const RecommendedContentBlockEdit = ( props ) => {
 		displayPostDate,
 		displayPostExcerpt,
 		addLinkToFeaturedImage,
+		useAssignedTerms,
 	} = attributes;
-	const postId = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostId()
-	);
+
 	const blockProps = useBlockProps();
 	const { postTypesTaxonomiesMap, postTypesSelectOptions } = usePostTypes();
+	const { postId, postType, postTerms } = usePostData();
+	const supportedTaxonomies =
+		postTypesTaxonomiesMap && contentPostType
+			? postTypesTaxonomiesMap[ contentPostType ]
+			: [];
+
+	// Set current post type as default value for `contentPostType` attribute.
+	useEffect( () => {
+		if ( ! contentPostType ) {
+			if ( postType ) {
+				const updates = { contentPostType: postType };
+				// Mark `useAssignedTerms` as true on add block.
+				updates.useAssignedTerms = true;
+				setAttributes( updates );
+			} else {
+				// Fallback to `post` post type.
+				setAttributes( { contentPostType: 'post' } );
+			}
+		}
+	}, [ contentPostType, postType, setAttributes ] );
+
 	const onPostTypeChange = ( newValue ) => {
 		const updateQuery = { contentPostType: newValue };
 		// We need to dynamically update the `taxQuery` property,
 		// by removing any not supported taxonomies from the query.
-		const supportedTaxonomies = postTypesTaxonomiesMap[ newValue ];
+		const newSupportedTaxonomies = postTypesTaxonomiesMap[ newValue ];
 		const updatedTaxQuery = Object.entries( taxQuery || {} ).reduce(
 			( accumulator, [ taxonomySlug, terms ] ) => {
-				if ( supportedTaxonomies.includes( taxonomySlug ) ) {
+				if ( newSupportedTaxonomies.includes( taxonomySlug ) ) {
 					accumulator[ taxonomySlug ] = terms;
 				}
 				return accumulator;
@@ -78,6 +98,40 @@ const RecommendedContentBlockEdit = ( props ) => {
 		updateQuery.taxQuery = !! Object.keys( updatedTaxQuery ).length
 			? updatedTaxQuery
 			: undefined;
+		if (
+			useAssignedTerms === undefined &&
+			newValue === postType &&
+			newSupportedTaxonomies.length > 0
+		) {
+			updateQuery.useAssignedTerms = true;
+		} else if ( useAssignedTerms === true && newValue !== postType ) {
+			updateQuery.useAssignedTerms = false;
+		}
+		setAttributes( updateQuery );
+	};
+
+	const onUseAssignedTermsChange = ( newValue ) => {
+		const updateQuery = { useAssignedTerms: newValue };
+		if ( postType ) {
+			if ( ! newValue ) {
+				updateQuery.taxQuery = taxQuery || {};
+				supportedTaxonomies.forEach( ( tax ) => {
+					if (
+						! updateQuery.taxQuery[ tax ] ||
+						! updateQuery.taxQuery[ tax ].length
+					) {
+						updateQuery.taxQuery[ tax ] = postTerms[ tax ] || [];
+					}
+				} );
+			} else {
+				updateQuery.taxQuery = taxQuery;
+				supportedTaxonomies.forEach( ( tax ) => {
+					if ( updateQuery.taxQuery && updateQuery.taxQuery[ tax ] ) {
+						delete updateQuery.taxQuery[ tax ];
+					}
+				} );
+			}
+		}
 		setAttributes( updateQuery );
 	};
 
@@ -113,7 +167,19 @@ const RecommendedContentBlockEdit = ( props ) => {
 							onChange={ onPostTypeChange }
 						/>
 					) }
-					{ postTypesSelectOptions && (
+					{ postTypesSelectOptions &&
+						supportedTaxonomies.length > 0 &&
+						postType === contentPostType && (
+							<ToggleControl
+								label={ __(
+									'Use assigned terms',
+									'classifai'
+								) }
+								checked={ useAssignedTerms }
+								onChange={ onUseAssignedTermsChange }
+							/>
+						) }
+					{ postTypesSelectOptions && ! useAssignedTerms && (
 						<TaxonomyControls
 							onChange={ setAttributes }
 							query={ attributes }
@@ -227,6 +293,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 						numberOfItems,
 						taxQuery,
 						excludeId: postId || 0,
+						useAssignedTerms,
 					} }
 				/>
 			) }
