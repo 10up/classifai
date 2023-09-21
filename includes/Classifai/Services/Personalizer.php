@@ -60,6 +60,7 @@ class Personalizer extends Service {
 			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['addLinkToFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
 			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
+			'useAssignedTerms'       => isset( $_POST['useAssignedTerms'] ) ? filter_var( wp_unslash( $_POST['useAssignedTerms'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
 		);
 
 		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {

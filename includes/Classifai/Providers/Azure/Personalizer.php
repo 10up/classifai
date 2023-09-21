@@ -178,7 +178,25 @@ class Personalizer extends Provider {
 	 * @return array recent actions based on block attributes.
 	 */
 	protected function get_recent_actions( $attributes ) {
-		$post_type      = $attributes['contentPostType'];
+		$post_type          = $attributes['contentPostType'];
+		$use_assigned_terms = isset( $attributes['useAssignedTerms'] ) ? $attributes['useAssignedTerms'] : false;
+
+		// Prepare taxQuery if useAssignedTerms is true.
+		if ( $use_assigned_terms && ! empty( $attributes['excludeId'] ) ) {
+			$post = get_post( $attributes['excludeId'] );
+			if ( $post ) {
+				$taxonomies = get_object_taxonomies( $post->post_type, 'names' );
+				foreach ( $taxonomies as $taxonomy ) {
+					// Get the terms related to post.
+					$terms = get_the_terms( $post, $taxonomy );
+
+					if ( ! empty( $terms ) ) {
+						$attributes['taxQuery'][ $taxonomy ] = wp_list_pluck( $terms, 'term_id' );
+					}
+				}
+			}
+		}
+
 		$key_attributes = array(
 			'terms' => isset( $attributes['taxQuery'] ) ? $attributes['taxQuery'] : array(),
 		);
