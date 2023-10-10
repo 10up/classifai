@@ -6,11 +6,9 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Watson\Normalizer;
-use function Classifai\get_asset_info;
 use WP_Error;
+use function Classifai\get_asset_info;
 
 class ChatGPT extends Provider {
 
@@ -55,8 +53,9 @@ class ChatGPT extends Provider {
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
 			'fields'   => array( 'api-key' ),
 			'features' => array(
-				'enable_excerpt' => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'  => __( 'Title generation', 'classifai' ),
+				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
+				'enable_titles'         => __( 'Title generation', 'classifai' ),
+				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
 		);
 	}
@@ -74,8 +73,9 @@ class ChatGPT extends Provider {
 		$feature_roles = [];
 
 		$role_keys = [
-			'enable_excerpt' => 'roles',
-			'enable_titles'  => 'title_roles',
+			'enable_excerpt'        => 'roles',
+			'enable_titles'         => 'title_roles',
+			'enable_resize_content' => 'resize_content_roles',
 		];
 
 		if ( isset( $role_keys[ $feature ] ) ) {
@@ -110,7 +110,7 @@ class ChatGPT extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
@@ -174,6 +174,24 @@ class ChatGPT extends Provider {
 				'before'
 			);
 		}
+
+		if ( $this->is_feature_enabled( 'enable_resize_content' ) ) {
+			wp_enqueue_script(
+				'classifai-content-resizing-plugin-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
+				get_asset_info( 'content-resizing-plugin', 'dependencies' ),
+				get_asset_info( 'content-resizing-plugin', 'version' ),
+				true
+			);
+
+			wp_enqueue_style(
+				'classifai-content-resizing-plugin-css',
+				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
+				[],
+				CLASSIFAI_PLUGIN_VERSION,
+				'all'
+			);
+		}
 	}
 
 	/**
@@ -186,41 +204,76 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$screen      = get_current_screen();
-		$settings    = $this->get_settings();
-		$user_roles  = wp_get_current_user()->roles ?? [];
-		$title_roles = $settings['title_roles'] ?? [];
+		$screen   = get_current_screen();
+		$settings = $this->get_settings();
 
 		// Load the assets for the classic editor.
-		if (
-			$screen && ! $screen->is_block_editor()
-			&& ( ! empty( $title_roles ) && empty( array_diff( $user_roles, $title_roles ) ) )
-			&& ( isset( $settings['enable_titles'] ) && 1 === (int) $settings['enable_titles'] )
-		) {
-			wp_enqueue_style(
-				'classifai-generate-title-classic-css',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-				[],
-				CLASSIFAI_PLUGIN_VERSION,
-				'all'
-			);
+		if ( $screen && ! $screen->is_block_editor() ) {
+			if (
+				post_type_supports( $screen->post_type, 'title' ) &&
+				$this->is_feature_enabled( 'enable_titles' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
 
-			wp_enqueue_script(
-				'classifai-generate-title-classic-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-				array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-				get_asset_info( 'generate-title-classic', 'version' ),
-				true
-			);
+				wp_enqueue_script(
+					'classifai-generate-title-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+					array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-title-classic', 'version' ),
+					true
+				);
 
-			wp_add_inline_script(
-				'classifai-generate-title-classic-js',
-				sprintf(
-					'var classifaiChatGPTData = %s;',
-					wp_json_encode( $this->get_localised_vars() )
-				),
-				'before'
-			);
+				wp_add_inline_script(
+					'classifai-generate-title-classic-js',
+					sprintf(
+						'var classifaiChatGPTData = %s;',
+						wp_json_encode( $this->get_localised_vars() )
+					),
+					'before'
+				);
+			}
+
+			if (
+				post_type_supports( $screen->post_type, 'excerpt' ) &&
+				$this->is_feature_enabled( 'enable_excerpt' )
+			) {
+				wp_enqueue_style(
+					'classifai-generate-title-classic-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+					[],
+					CLASSIFAI_PLUGIN_VERSION,
+					'all'
+				);
+
+				wp_enqueue_script(
+					'classifai-generate-excerpt-classic-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
+					array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-excerpt-classic', 'version' ),
+					true
+				);
+
+				wp_add_inline_script(
+					'classifai-generate-excerpt-classic-js',
+					sprintf(
+						'var classifaiGenerateExcerpt = %s;',
+						wp_json_encode(
+							[
+								'path'           => '/classifai/v1/openai/generate-excerpt/',
+								'buttonText'     => __( 'Generate excerpt', 'classifai' ),
+								'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
+							]
+						)
+					),
+					'before'
+				);
+			}
 		}
 
 		wp_enqueue_style(
@@ -375,6 +428,60 @@ class ChatGPT extends Provider {
 				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
 			]
 		);
+
+		// Add resizing content fields.
+		add_settings_section(
+			$this->get_option_name() . '_resize_content_settings',
+			esc_html__( 'Resizing content settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
+		add_settings_field(
+			'enable-resize-content',
+			esc_html__( 'Enable content resizing', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'enable_resize_content',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_resize_content'],
+				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
+			]
+		);
+
+		$content_resize_roles = $roles;
+
+		unset( $content_resize_roles['contributor'], $content_resize_roles['subscriber'] );
+
+		add_settings_field(
+			'resize-content-roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'      => 'resize_content_roles',
+				'options'        => $content_resize_roles,
+				'default_values' => $default_settings['resize_content_roles'],
+				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'number-resize-content',
+			esc_html__( 'Number of suggestions', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'number_resize_content',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $default_settings['number_resize_content'],
+				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -427,6 +534,24 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
+		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
+			$new_settings['enable_resize_content'] = 'no';
+		} else {
+			$new_settings['enable_resize_content'] = '1';
+		}
+
+		if ( isset( $settings['resize_content_roles'] ) && is_array( $settings['resize_content_roles'] ) ) {
+			$new_settings['resize_content_roles'] = array_map( 'sanitize_text_field', $settings['resize_content_roles'] );
+		} else {
+			$new_settings['resize_content_roles'] = array_keys( get_editable_roles() ?? [] );
+		}
+
+		if ( isset( $settings['number_resize_content'] ) && is_numeric( $settings['number_resize_content'] ) && (int) $settings['number_resize_content'] >= 1 && (int) $settings['number_resize_content'] <= 10 ) {
+			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
+		} else {
+			$new_settings['number_resize_content'] = 1;
+		}
+
 		return $new_settings;
 	}
 
@@ -449,14 +574,17 @@ class ChatGPT extends Provider {
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [
-			'authenticated'  => false,
-			'api_key'        => '',
-			'enable_excerpt' => false,
-			'roles'          => array_keys( $editable_roles ),
-			'length'         => (int) apply_filters( 'excerpt_length', 55 ),
-			'enable_titles'  => false,
-			'title_roles'    => array_keys( $editable_roles ),
-			'number_titles'  => 1,
+			'authenticated'         => false,
+			'api_key'               => '',
+			'enable_excerpt'        => false,
+			'roles'                 => array_keys( $editable_roles ),
+			'length'                => (int) apply_filters( 'excerpt_length', 55 ),
+			'enable_titles'         => false,
+			'title_roles'           => array_keys( $editable_roles ),
+			'number_titles'         => 1,
+			'enable_resize_content' => false,
+			'resize_content_roles'  => array_keys( $editable_roles ),
+			'number_resize_content' => 1,
 		];
 	}
 
@@ -484,6 +612,8 @@ class ChatGPT extends Provider {
 			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
 			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
+			__( 'Allowed roles (resize)', 'classifai' )  => implode( ', ', $settings['resize_content_roles'] ?? [] ),
+			__( 'Number of suggestions', 'classifai' )   => absint( $settings['number_resize_content'] ?? 1 ),
 			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
 		];
 	}
@@ -512,6 +642,9 @@ class ChatGPT extends Provider {
 				break;
 			case 'title':
 				$return = $this->generate_titles( $post_id, $args );
+				break;
+			case 'resize_content':
+				$return = $this->resize_content( $post_id, $args );
 				break;
 		}
 
@@ -710,6 +843,109 @@ class ChatGPT extends Provider {
 
 		// Extract out the text response.
 		$return = [];
+		foreach ( $response['choices'] as $choice ) {
+			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Resizes content.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function resize_content( int $post_id, array $args = array() ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
+		}
+
+		$settings = $this->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num' => $settings['number_resize_content'] ?? 1,
+			]
+		);
+
+		$request = new APIRequest( $settings['api_key'] ?? '' );
+
+		if ( 'shrink' === $args['resize_type'] ) {
+			$prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+		} else {
+			$prompt = 'Increase the content length no more than 2 to 4 sentences.';
+		}
+
+		/**
+		 * Filter the resize prompt we will send to ChatGPT.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param {string} $prompt Resize prompt we are sending to ChatGPT. Gets added as a system prompt.
+		 * @param {int} $post_id ID of post.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chatgpt_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the resize request body before sending to ChatGPT.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_chatgpt_resize_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to ChatGPT.
+		 * @param {int}   $post_id ID of post.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chatgpt_resize_content_request_body',
+			[
+				'model'       => $this->chatgpt_model,
+				'messages'    => [
+					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => esc_html( $args['content'] ),
+					],
+				],
+				'temperature' => 0.9,
+				'n'           => absint( $args['num'] ),
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->chatgpt_url,
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['choices'] ) ) {
+			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from OpenAI.', 'classifai' ) );
+		}
+
+		// Extract out the text response.
+		$return = [];
+
 		foreach ( $response['choices'] as $choice ) {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.

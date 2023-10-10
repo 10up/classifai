@@ -203,6 +203,39 @@ describe('Language processing Tests', () => {
 		} );
 	} );
 
+	it( 'Can see the generate excerpt button in a post (Classic Editor)', () => {
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#activate-classic-editor' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData();
+
+		cy.classicCreatePost( {
+			title: 'Excerpt test classic',
+			content: 'Test GPT content.',
+			postType: 'post',
+		} );
+
+		// Ensure excerpt metabox is shown.
+		cy.get( '#show-settings-link' ).click();
+		cy.get( '#postexcerpt-hide' ).check( { force: true } );
+
+		// Verify button exists.
+		cy.get( '#classifai-openai__excerpt-generate-btn' ).should( 'exist' );
+
+		// Click on button and verify data loads in.
+		cy.get( '#classifai-openai__excerpt-generate-btn' ).click();
+		cy.get( '#excerpt' ).should( 'have.value', data );
+
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
 	it( 'Can disable excerpt generation feature', () => {
 		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
 
@@ -490,7 +523,7 @@ describe('Language processing Tests', () => {
 		cy.get('.title-modal .classifai-title').first().find('button').click();
 
 		cy.get('.title-modal').should('not.exist');
-		cy.get('.editor-post-title__input').should(($el) => {
+		cy.getBlockEditor().find('.editor-post-title__input').should(($el) => {
 			expect($el.first()).to.contain(data);
 		});
 	});
@@ -705,4 +738,49 @@ describe('Language processing Tests', () => {
 		cy.get('.media-modal').should('exist');
 		cy.get('#classifai-retranscribe').should('not.exist');
 	});
+
+	it( 'Resize content feature can grow and shrink content', () => {
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+
+		cy.get( '#enable_resize_content' ).check();
+		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.createPost({
+			title: 'Resize content',
+			content: 'Hello, world.',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Expand this text' ).click();
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+7 words' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat' ).should( 'contain.text', '+40 characters' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();
+		cy.getBlockEditor().find( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+
+		cy.createPost({
+			title: 'Resize content',
+			content: 'Start with the basic building block of one narrative to begin with the editorial process.',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Condense this text' ).click();
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-6 words' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat' ).should( 'contain.text', '-36 characters' )
+		cy.get( '.classifai-content-resize__result-table tbody tr:first button' ).click();
+		cy.getBlockEditor().find( '[data-type="core/paragraph"]' ).should( 'contain.text', 'Start with the basic building block of one narrative.' );
+	} );
+
+	it( 'Disabling Resize content feature by role does not render buttons in the UI', () => {
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt' );
+		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		cy.createPost({
+			title: 'Expand content',
+			content: 'Are the resizing options hidden?',
+		});
+
+		cy.get( '.classifai-resize-content-btn' ).should( 'not.exist' );
+	} );
 });

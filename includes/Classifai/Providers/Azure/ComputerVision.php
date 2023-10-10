@@ -31,14 +31,14 @@ class ComputerVision extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Computer Vision',
+			'AI Vision',
 			'computer_vision',
 			$service
 		);
 
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
+			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
 				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
@@ -1053,7 +1053,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_smart_cropping'],
 				'description'   => __(
-					'ComputerVision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
+					'AI Vision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
 					'classifai'
 				),
 			]

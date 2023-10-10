@@ -4,10 +4,10 @@
  * declared here instead of a Class.
  */
 
-$plugin_version = '2.2.3';
+$plugin_version = '2.3.0';
 
 if ( file_exists( __DIR__ . '/.commit' ) ) {
-	$plugin_version .= '-' . file_get_contents( __DIR__ . '/.commit' );
+	$plugin_version .= '-' . file_get_contents( __DIR__ . '/.commit' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 }
 
 // Useful global constants
