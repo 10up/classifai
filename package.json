@@ -42,6 +42,7 @@
     "cypress": "^13.1.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-plugin-tab": "^1.0.5",
+    "cypress-mochawesome-reporter": "^3.0.1",
     "husky": "^8.0.3",
     "jsdoc": "^3.6.11",
     "lint-staged": "^13.2.2",
