@@ -75,9 +75,9 @@ class BulkActions {
 	 * Register bulk actions for language processing.
 	 */
 	public function register_language_processing_hooks() {
-		$this->chat_gpt       = new ChatGPT( false );
-		$this->moderation     = new Moderation( false );
-		$this->embeddings     = new Embeddings( false );
+		$this->chat_gpt   = new ChatGPT( false );
+		$this->moderation = new Moderation( false );
+		$this->embeddings = new Embeddings( false );
 
 		$user_roles                = wp_get_current_user()->roles ?? [];
 		$embedding_settings        = $this->embeddings->get_settings();
