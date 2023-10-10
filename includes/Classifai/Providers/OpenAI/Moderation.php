@@ -69,6 +69,7 @@ class Moderation extends Provider {
 
 		if ( 'moderation_flags' === $column_name ) {
 			$flags = get_comment_meta( $comment_id, 'classifai_moderation_flags', true );
+			$flags = $flags ? $flags : [];
 			echo '<div style="text-align: center">' . esc_html( implode( ', ', $flags ) ) . '</div>';
 		}
 	}
@@ -80,8 +81,8 @@ class Moderation extends Provider {
 	 * @return array
 	 */
 	public function add_comment_list_columns( $columns ) {
-		$columns['moderation_flagged'] = __( 'Moderation Flagged' );
-		$columns['moderation_flags']   = __( 'Moderation Flags' );
+		$columns['moderation_flagged'] = __( 'Moderation Flagged', 'classifai' );
+		$columns['moderation_flags']   = __( 'Moderation Flags', 'classifai' );
 
 		return $columns;
 	}
@@ -102,7 +103,7 @@ class Moderation extends Provider {
 			wp_verify_nonce( $nonce, 'moderate_comment' )
 		) {
 			$this->moderate_comment( $comment_id );
-			wp_redirect( '/wp-admin/edit-comments.php' );
+			wp_safe_redirect( '/wp-admin/edit-comments.php' );
 			exit;
 		}
 	}
@@ -119,9 +120,16 @@ class Moderation extends Provider {
 
 		$actions['moderate'] = sprintf(
 			'<a href="%s" aria-label="%s">%s</a>',
-			"edit-comments.php?a=moderate&amp;c={$comment->comment_ID}&amp;nonce={$nonce}",
+			add_query_arg(
+				[
+					'a'     => 'moderate',
+					'c'     => $comment->comment_ID,
+					'nonce' => $nonce,
+				],
+				admin_url( 'edit-comments.php' ),
+			),
 			esc_attr__( 'Moderate this comment' ),
-			__( 'Moderate' )
+			esc_html__( 'Moderate', 'classifai' )
 		);
 
 		return $actions;
@@ -161,7 +169,7 @@ class Moderation extends Provider {
 	}
 
 	/**
-	 * Start the audio transcription process.
+	 * Send comment to remote service for moderation.
 	 *
 	 * @param int $comment_id Attachment ID to process.
 	 * @return void
