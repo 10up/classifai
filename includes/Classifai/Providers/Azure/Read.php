@@ -268,13 +268,10 @@ class Read {
 					break;
 				case 'failed':
 					return $this->log_error( new WP_Error( 'failed_read_request', esc_html__( 'The Read operation has failed.', 'classifai' ) ) );
-					break;
 				case 'succeeded':
 					return $this->update_document_description( $body );
-					break;
 				default:
 					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid Read result status.', 'classifai' ) ) );
-					break;
 			}
 		}
 	}

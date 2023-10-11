@@ -51,7 +51,7 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Vision' );
 		if ( ! is_wp_error( $provider ) ) {
 			wp_add_inline_script(
 				'classifai-media-script',
@@ -236,7 +236,7 @@ class ImageProcessing extends Service {
 		}
 
 		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes ?? [], 'Computer Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Vision' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {
@@ -273,7 +273,7 @@ class ImageProcessing extends Service {
 			return false;
 		}
 
-		$settings = \Classifai\get_plugin_settings( 'image_processing', 'Computer Vision' );
+		$settings = \Classifai\get_plugin_settings( 'image_processing', 'AI Vision' );
 
 		// For the image-tags route, ensure the taxonomy is valid and the user has permission to assign terms.
 		if ( 'image-tags' === $route_to_call ) {

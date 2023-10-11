@@ -421,7 +421,7 @@ class SavePostHandler {
 		$rest_bases = apply_filters( 'classifai_rest_bases', array( 'posts', 'pages' ) );
 
 		foreach ( $rest_bases as $rest_base ) {
-			if ( false !== strpos( sanitize_text_field( $_SERVER['REQUEST_URI'] ), 'wp-json/wp/v2/' . $rest_base ) ) {
+			if ( false !== strpos( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), 'wp-json/wp/v2/' . $rest_base ) ) {
 				return true;
 			}
 		}
@@ -435,7 +435,7 @@ class SavePostHandler {
 	 * @return void
 	 */
 	public function classifai_classify_post() {
-		if ( ! empty( $_GET['classifai_classify_post_nonce'] ) && wp_verify_nonce( sanitize_text_field( $_GET['classifai_classify_post_nonce'] ), 'classifai_classify_post_action' ) ) {
+		if ( ! empty( $_GET['classifai_classify_post_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['classifai_classify_post_nonce'] ) ), 'classifai_classify_post_action' ) ) {
 			$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 			if ( $post_id ) {
 				$result     = $this->classify( $post_id );

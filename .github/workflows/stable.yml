@@ -1,0 +1,38 @@
+name: Release to Stable
+on:
+  push:
+    branches:
+    - trunk
+jobs:
+  release:
+    name: Push (merge) to trunk
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Set Node.js 16.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16.x
+    - name: npm install and build
+      run: |
+        npm install
+        npm run build
+        npm run makepot
+        composer install --no-dev
+        npm run archive
+    - name: Release to Stable
+      uses: s0/git-publish-subdir-action@develop
+      env:
+        REPO: self
+        BRANCH: stable
+        FOLDER: release
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        MESSAGE: 'Release: ({sha}) {msg}'
+    - name: Build docs
+      run: npm run build:docs
+    - name: Deploy docs update
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: './docs'

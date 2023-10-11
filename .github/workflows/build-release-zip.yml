@@ -1,28 +1,29 @@
 name: Build release zip
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 jobs:
   build_zip:
-    name: New release
+    name: Build release zip
     runs-on: ubuntu-latest
     steps:
-
     - name: Checkout code
       uses: actions/checkout@v3
-
-    - name: Create ZIP
-      run: |
-        git archive --prefix=classifai/ HEAD -o classifai.zip
-
-    - name: Upload release asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Set Node.js 16.x
+      uses: actions/setup-node@v3
       with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{github.workspace}}/classifai.zip
-        asset_name: classifai.zip
-        asset_content_type: application/zip
+        node-version-file: .nvmrc
+    - name: npm install and build
+      run: |
+        npm install
+        npm run build
+        npm run makepot
+        composer install --no-dev
+        npm run archive
+    - name: Upload the ZIP file as an artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.event.repository.name }}
+        path: release
+        retention-days: 2

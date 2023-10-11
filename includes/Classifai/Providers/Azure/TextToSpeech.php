@@ -135,7 +135,7 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
-	 * Resets settings for the Personalizer provider.
+	 * Resets settings for the TextToSpeech provider.
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
@@ -729,6 +729,10 @@ class TextToSpeech extends Provider {
 		$_post = get_post();
 
 		if ( ! $_post instanceof \WP_Post ) {
+			return $content;
+		}
+
+		if ( ! is_singular( $_post->post_type ) ) {
 			return $content;
 		}
 
