@@ -93,9 +93,9 @@ class Moderation extends Provider {
 	 * @return void
 	 */
 	public function maybe_moderate_comment() {
-		$action     = sanitize_text_field( wp_unslash( $_GET['a'] ) ?? null );
-		$comment_id = sanitize_text_field( wp_unslash( $_GET['c'] ) ?? null );
-		$nonce      = sanitize_text_field( wp_unslash( $_GET['nonce'] ) ?? null );
+		$action     = sanitize_text_field( wp_unslash( $_GET['a'] ?? null ) );
+		$comment_id = sanitize_text_field( wp_unslash( $_GET['c'] ?? null ) );
+		$nonce      = sanitize_text_field( wp_unslash( $_GET['nonce'] ?? null ) );
 
 		if (
 			'moderate' === $action &&
