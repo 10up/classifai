@@ -436,6 +436,10 @@ We recommend that you are transparent with your users that AI tools are being us
 
 > This site makes use of Artificial Intelligence tools to help with tasks like language processing, image processing, and content recommendations.
 
+### When a post is sent to OpenAI (e.g. to generate a title or excerpt), is the post content fed into OpenAI and used for other customers?
+
+According to OpenAI, they do not train their models on any data that is sent via API requests (see https://openai.com/enterprise-privacy). OpenAI may keep the data for up to 30 days to identify abuse, though you can request zero data retention (ZDR) with a qualifying use-case.
+
 ## Support Level
 
 **Active:** 10up is actively working on this, and we expect to continue work for the foreseeable future including keeping tested up to the most recent version of WordPress.  Bug reports, feature requests, questions, and pull requests are welcome.
