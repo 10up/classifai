@@ -789,9 +789,16 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
-		$language = isset( $settings['language'] ) && 'en' !== $settings['language'] ? ' in ' . sanitize_text_field( $settings['language'] ) . ' language' : '';
-		$args     = wp_parse_args(
+		$translations = \get_site_transient( 'available_translations' );
+		if ( empty( $translations ) ) {
+			require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+			$translations = wp_get_available_translations();
+		}
+
+		$settings              = $this->get_settings();
+		$language_english_name = $translations[ sanitize_text_field( $settings['language'] ) ]['english_name'] ?? '';
+		$language              = isset( $settings['language'] ) && 'en' !== $settings['language'] ? " in $language_english_name  language" : '';
+		$args                  = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num'     => $settings['number_titles'] ?? 1,
