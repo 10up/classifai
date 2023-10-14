@@ -706,7 +706,7 @@ class ChatGPT extends Provider {
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
-		$language       = isset( $settings['language'] ) && 'en' !== $settings['language'] ? ' in ' . sanitize_text_field( $settings['language'] ) . ' language' : '';
+		$language       = $this->get_language_for_prompt( sanitize_text_field( $settings['language'] ) );
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
@@ -790,8 +790,7 @@ class ChatGPT extends Provider {
 		}
 
 		$settings      = $this->get_settings();
-		$language_code = sanitize_text_field( $settings['language'] );
-		$language      = $this->get_language_for_prompt( $language_code );
+		$language      = $this->get_language_for_prompt( sanitize_text_field( $settings['language'] ) );
 
 		$args = wp_parse_args(
 			array_filter( $args ),
