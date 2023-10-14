@@ -795,13 +795,24 @@ class ChatGPT extends Provider {
 			$translations = wp_get_available_translations();
 		}
 
-		$settings              = $this->get_settings();
-		$language_english_name = $translations[ sanitize_text_field( $settings['language'] ) ]['english_name'] ?? '';
-		$language              = isset( $settings['language'] ) && 'en' !== $settings['language'] ? " in $language_english_name  language" : '';
-		$args                  = wp_parse_args(
+		$settings      = $this->get_settings();
+		$language_code = sanitize_text_field( $settings['language'] );
+		$language      = '';
+
+		// Use English name for language if available.
+		if (
+			isset( $settings['language'] )
+			&& 'en' !== $settings['language']
+			&& array_key_exists( $language_code, $translations )
+		) {
+			$language_english_name = $translations[ $language_code ]['english_name'] ?? '';
+			$language              = " in $language_english_name  language";
+		}
+
+		$args = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings['number_titles'] ?? 1,
+				'num' => $settings['number_titles'] ?? 1,
 				'content' => '',
 			]
 		);
