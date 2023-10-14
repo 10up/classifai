@@ -372,11 +372,12 @@ abstract class Provider {
 	/**
 	 * Renders language selection
 	 *
+	 * @since x.x.x
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_language( $args ) {
+	public function render_language( array $args ): void {
 		$setting_index = $this->get_settings();
-		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		$saved         = $setting_index[ $args['label_for'] ] ?? '';
 
 		// Check for a default value
 		$saved = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
