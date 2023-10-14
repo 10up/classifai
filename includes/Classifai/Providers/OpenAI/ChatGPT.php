@@ -611,7 +611,7 @@ class ChatGPT extends Provider {
 			'enable_resize_content' => false,
 			'resize_content_roles'  => array_keys( $editable_roles ),
 			'number_resize_content' => 1,
-			'language'              => '',
+			'language'              => '', // Empty language means English (United States).
 		];
 	}
 
