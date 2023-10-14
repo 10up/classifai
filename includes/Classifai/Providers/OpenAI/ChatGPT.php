@@ -789,25 +789,9 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$translations = \get_site_transient( 'available_translations' );
-		if ( empty( $translations ) ) {
-			require_once ABSPATH . 'wp-admin/includes/translation-install.php';
-			$translations = wp_get_available_translations();
-		}
-
 		$settings      = $this->get_settings();
 		$language_code = sanitize_text_field( $settings['language'] );
-		$language      = '';
-
-		// Use English name for language if available.
-		if (
-			isset( $settings['language'] )
-			&& 'en' !== $settings['language']
-			&& array_key_exists( $language_code, $translations )
-		) {
-			$language_english_name = $translations[ $language_code ]['english_name'] ?? '';
-			$language              = " in $language_english_name  language";
-		}
+		$language      = $this->get_language_for_prompt( $language_code );
 
 		$args = wp_parse_args(
 			array_filter( $args ),
@@ -1065,4 +1049,40 @@ class ChatGPT extends Provider {
 		return apply_filters( 'classifai_chatgpt_content', $content, $post_id );
 	}
 
+	/**
+	 * This function should return language for prompt.
+	 *
+	 * @since x.x.x
+	 * @param string $language_code Language code.
+	 */
+	private function get_language_for_prompt( string $language_code ): string {
+		$language = '';
+
+		if ( 'en' === $language_code ) {
+			return $language;
+		}
+
+		$translations = \get_site_transient( 'available_translations' );
+		if ( empty( $translations ) ) {
+			require_once ABSPATH . 'wp-admin/includes/translation-install.php';
+			$translations = wp_get_available_translations();
+		}
+
+		// Use English name for language if available.
+		if ( array_key_exists( $language_code, $translations ) ) {
+			$language_english_name = $translations[ $language_code ]['english_name'] ?? '';
+			$language              = " in $language_english_name  language";
+		}
+
+		return $language;
+	}
+
+	/**
+	 * This function should return default settings.
+	 *
+	 * @since x.x.x
+	 */
+	public function get_default_setting(): array {
+		return [ 'language' => 'en' ];
+	}
 }
