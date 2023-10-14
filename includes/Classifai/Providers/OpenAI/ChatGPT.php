@@ -611,7 +611,7 @@ class ChatGPT extends Provider {
 			'enable_resize_content' => false,
 			'resize_content_roles'  => array_keys( $editable_roles ),
 			'number_resize_content' => 1,
-			'language'              => sanitize_text_field( str_replace( '-', '_', get_bloginfo( 'language' ) ) ),
+			'language'              => '',
 		];
 	}
 
@@ -1074,14 +1074,5 @@ class ChatGPT extends Provider {
 		}
 
 		return $language;
-	}
-
-	/**
-	 * This function should return default settings.
-	 *
-	 * @since x.x.x
-	 */
-	public function get_default_setting(): array {
-		return [ 'language' => 'en' ];
 	}
 }
