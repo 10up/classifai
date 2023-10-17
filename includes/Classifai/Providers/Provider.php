@@ -230,6 +230,34 @@ abstract class Provider {
 	}
 
 	/**
+	 * Generic textarea field callback
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_textarea( $args ) {
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
+		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		$class         = isset( $args['class'] ) ? $args['class'] : 'large-text';
+		$placeholder   = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+
+		// Check for a default value
+		$value       = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		?>
+		<textarea
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			class="<?php echo esc_attr( $class ); ?>"
+			rows="4"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			placeholder="<?php echo esc_attr( $placeholder ); ?>"
+		><?php echo esc_textarea( $value ); ?></textarea>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
 	 * Renders a select menu
 	 *
 	 * @param array $args The args passed to add_settings_field.
