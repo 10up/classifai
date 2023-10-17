@@ -50,14 +50,14 @@ class ChatGPT extends Provider {
 	protected $generate_title_prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
 
 	/**
-	 * Prompt for Shrink content.
+	 * Prompt for shrinking content
 	 *
 	 * @var string
 	 */
 	protected $shrink_content_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
 
 	/**
-	 * Prompt for Grow content.
+	 * Prompt for growing content
 	 *
 	 * @var string
 	 */
@@ -472,7 +472,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Custom prompt for generate titles
+		// Custom prompt for generating titles.
 		add_settings_field(
 			'generate_title_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
@@ -541,7 +541,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Custom prompt for shrink content.
+		// Custom prompt for shrinking content.
 		add_settings_field(
 			'shrink_content_prompt',
 			esc_html__( 'Shrink content prompt', 'classifai' ),
@@ -556,7 +556,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Custom prompt for grow content.
+		// Custom prompt for growing content.
 		add_settings_field(
 			'grow_content_prompt',
 			esc_html__( 'Grow content prompt', 'classifai' ),
