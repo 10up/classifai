@@ -43,6 +43,27 @@ class ChatGPT extends Provider {
 	protected $generate_excerpt_prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
 
 	/**
+	 * Prompt for generating titles
+	 *
+	 * @var string
+	 */
+	protected $generate_title_prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
+
+	/**
+	 * Prompt for Shrink content.
+	 *
+	 * @var string
+	 */
+	protected $shrink_content_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+
+	/**
+	 * Prompt for Grow content.
+	 *
+	 * @var string
+	 */
+	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
+
+	/**
 	 * OpenAI ChatGPT constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -388,15 +409,15 @@ class ChatGPT extends Provider {
 
 		// Custom prompt for excerpt generation.
 		add_settings_field(
-			'default_excerpt_prompt',
+			'generate_excerpt_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
 			[ $this, 'render_textarea' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_excerpt',
 			[
-				'label_for'     => 'default_excerpt_prompt',
+				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->generate_excerpt_prompt,
-				'default_value' => $default_settings['default_excerpt_prompt'],
+				'default_value' => $default_settings['generate_excerpt_prompt'],
 				'description'   => __( "Enter your custom prompt. If no custom prompt is entered, the default shown above will be used. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} - replaced with the excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
 		);
@@ -448,6 +469,21 @@ class ChatGPT extends Provider {
 				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
 				'default_value' => $default_settings['number_titles'],
 				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
+			]
+		);
+
+		// Custom prompt for generate titles
+		add_settings_field(
+			'generate_title_prompt',
+			esc_html__( 'Prompt', 'classifai' ),
+			[ $this, 'render_textarea' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_title',
+			[
+				'label_for'     => 'generate_title_prompt',
+				'placeholder'   => $this->generate_title_prompt,
+				'default_value' => $default_settings['generate_title_prompt'],
+				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
 			]
 		);
 
@@ -504,6 +540,36 @@ class ChatGPT extends Provider {
 				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
 			]
 		);
+
+		// Custom prompt for shrink content.
+		add_settings_field(
+			'shrink_content_prompt',
+			esc_html__( 'Shrink content prompt', 'classifai' ),
+			[ $this, 'render_textarea' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'shrink_content_prompt',
+				'placeholder'   => $this->shrink_content_prompt,
+				'default_value' => $default_settings['shrink_content_prompt'],
+				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
+			]
+		);
+
+		// Custom prompt for grow content.
+		add_settings_field(
+			'grow_content_prompt',
+			esc_html__( 'Grow content prompt', 'classifai' ),
+			[ $this, 'render_textarea' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'grow_content_prompt',
+				'placeholder'   => $this->grow_content_prompt,
+				'default_value' => $default_settings['grow_content_prompt'],
+				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
@@ -538,10 +604,10 @@ class ChatGPT extends Provider {
 			$new_settings['length'] = 55;
 		}
 
-		if ( isset( $settings['default_excerpt_prompt'] ) && ! empty( $settings['default_excerpt_prompt'] ) ) {
-			$new_settings['default_excerpt_prompt'] = sanitize_textarea_field( $settings['default_excerpt_prompt'] );
+		if ( isset( $settings['generate_excerpt_prompt'] ) && ! empty( $settings['generate_excerpt_prompt'] ) ) {
+			$new_settings['generate_excerpt_prompt'] = sanitize_textarea_field( $settings['generate_excerpt_prompt'] );
 		} else {
-			$new_settings['default_excerpt_prompt'] = '';
+			$new_settings['generate_excerpt_prompt'] = '';
 		}
 
 		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
@@ -562,6 +628,12 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
+		if ( isset( $settings['generate_title_prompt'] ) && ! empty( $settings['generate_title_prompt'] ) ) {
+			$new_settings['generate_title_prompt'] = sanitize_textarea_field( $settings['generate_title_prompt'] );
+		} else {
+			$new_settings['generate_title_prompt'] = '';
+		}
+
 		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
 			$new_settings['enable_resize_content'] = 'no';
 		} else {
@@ -578,6 +650,18 @@ class ChatGPT extends Provider {
 			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
 		} else {
 			$new_settings['number_resize_content'] = 1;
+		}
+
+		if ( isset( $settings['shrink_content_prompt'] ) && ! empty( $settings['shrink_content_prompt'] ) ) {
+			$new_settings['shrink_content_prompt'] = sanitize_textarea_field( $settings['shrink_content_prompt'] );
+		} else {
+			$new_settings['shrink_content_prompt'] = '';
+		}
+
+		if ( isset( $settings['grow_content_prompt'] ) && ! empty( $settings['grow_content_prompt'] ) ) {
+			$new_settings['grow_content_prompt'] = sanitize_textarea_field( $settings['grow_content_prompt'] );
+		} else {
+			$new_settings['grow_content_prompt'] = '';
 		}
 
 		return $new_settings;
@@ -602,18 +686,21 @@ class ChatGPT extends Provider {
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [
-			'authenticated'          => false,
-			'api_key'                => '',
-			'enable_excerpt'         => false,
-			'roles'                  => array_keys( $editable_roles ),
-			'length'                 => (int) apply_filters( 'excerpt_length', 55 ),
-			'default_excerpt_prompt' => '',
-			'enable_titles'          => false,
-			'title_roles'            => array_keys( $editable_roles ),
-			'number_titles'          => 1,
-			'enable_resize_content'  => false,
-			'resize_content_roles'   => array_keys( $editable_roles ),
-			'number_resize_content'  => 1,
+			'authenticated'           => false,
+			'api_key'                 => '',
+			'enable_excerpt'          => false,
+			'roles'                   => array_keys( $editable_roles ),
+			'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
+			'generate_excerpt_prompt' => '',
+			'enable_titles'           => false,
+			'title_roles'             => array_keys( $editable_roles ),
+			'number_titles'           => 1,
+			'generate_title_prompt'   => '',
+			'enable_resize_content'   => false,
+			'resize_content_roles'    => array_keys( $editable_roles ),
+			'number_resize_content'   => 1,
+			'shrink_content_prompt'   => '',
+			'grow_content_prompt'     => '',
 		];
 	}
 
@@ -711,7 +798,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
-		$excerpt_prompt = ! empty( $settings['default_excerpt_prompt'] ) ? $settings['default_excerpt_prompt'] : $this->generate_excerpt_prompt;
+		$excerpt_prompt = ! empty( $settings['generate_excerpt_prompt'] ) ? esc_textarea( $settings['generate_excerpt_prompt'] ) : $this->generate_excerpt_prompt;
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -814,6 +901,8 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
+		$prompt = ! empty( $settings['generate_title_prompt'] ) ? esc_textarea( $settings['generate_title_prompt'] ) : $this->generate_title_prompt;
+
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
@@ -826,7 +915,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', $prompt, $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -912,9 +1001,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+			$prompt = ! empty( $settings['shrink_content_prompt'] ) ? esc_textarea( $settings['shrink_content_prompt'] ) : $this->shrink_content_prompt;
 		} else {
-			$prompt = 'Increase the content length no more than 2 to 4 sentences.';
+			$prompt = ! empty( $settings['grow_content_prompt'] ) ? esc_textarea( $settings['grow_content_prompt'] ) : $this->grow_content_prompt;
 		}
 
 		/**

@@ -239,6 +239,16 @@ input.classifai-button {
 		.form-table td fieldset p {
 			margin-bottom: 12px;
 		}
+
+		textarea {
+			max-width: 600px;
+		}
+
+		.classifai-input-description {
+			display: block;
+			margin-top: 8px;
+			max-width: 600px;
+		}
 	}
 
 	input[type="text"],
