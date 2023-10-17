@@ -1070,7 +1070,7 @@ class ChatGPT extends Provider {
 		// Use English name for language if available.
 		if ( array_key_exists( $language_code, $translations ) ) {
 			$language_english_name = $translations[ $language_code ]['english_name'] ?? '';
-			$language              = " in $language_english_name  language";
+			$language              = " in $language_english_name language";
 		}
 
 		return $language;
