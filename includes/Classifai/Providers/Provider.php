@@ -242,7 +242,7 @@ abstract class Provider {
 		$placeholder   = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
 
 		// Check for a default value
-		$value       = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 		?>
 		<textarea
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
