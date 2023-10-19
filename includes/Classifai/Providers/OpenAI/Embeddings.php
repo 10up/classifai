@@ -95,7 +95,7 @@ class Embeddings extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
+			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
