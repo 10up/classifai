@@ -272,7 +272,7 @@ abstract class Provider {
 		// Check for a default value
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 		?>
-		<fieldset class="classifai-field-type-prompt-setting template">
+		<fieldset class="classifai-field-type-prompt-setting">
 			<label>
 				<?php esc_html_e( 'Title', 'classifai' ); ?>
 				<span class="dashicons dashicons-editor-help"

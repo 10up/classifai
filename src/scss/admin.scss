@@ -258,10 +258,6 @@ input.classifai-button {
 			display: flex;
 			flex-direction:column;
 
-			&.template{
-				display: none;
-			}
-
 			&:nth-child(2n + 1){
 				background-color: #f0f0f1;
 
