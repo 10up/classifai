@@ -80,29 +80,80 @@ document.addEventListener( 'DOMContentLoaded', function () {
 } )();
 
 ( () => {
+	// Attach event to add new prompt button.
 	const $addNewPromptFieldsetButton = document.querySelectorAll( 'button.js-classifai-add-prompt-fieldset' );
+	if ( $addNewPromptFieldsetButton.length ) {
+		$addNewPromptFieldsetButton.forEach( ( button ) => {
+			button.addEventListener( 'click', ( e ) => {
+				e.preventDefault();
 
-	if ( !$addNewPromptFieldsetButton.length ) {
-		return;
+				addNewFieldSet(e.target.previousElementSibling);
+			} );
+		} );
 	}
 
-	$addNewPromptFieldsetButton.forEach( ( button ) => {
-		button.addEventListener( 'click', ( e ) => {
-			e.preventDefault();
+	// Attach event to existing prompt fieldsets.
+	const $promptFieldsets = document.querySelectorAll( '.classifai-field-type-prompt-setting' );
+	if( $promptFieldsets.length ) {
+		$promptFieldsets.forEach( ( $promptFieldset ) => {
+			attachEventPromptFieldset( $promptFieldset );
+		} );
+	}
 
-			const $promptFieldsetTemplate = document.querySelector( '.classifai-field-type-prompt-setting.template' );
-			const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
+	// ------------------
+	// Helper function
+	// ------------------
 
-			$newPromptFieldset.classList.remove( 'template' );
+	/**
+	 * Reset all input fields in a fieldset.
+	 *
+	 * @since x.x.x
+	 * @param {Element} $fieldset
+	 */
+	function resetInputFields( $fieldset ) {
+		const fields = $fieldset.querySelectorAll( 'input, textarea' );
 
-			e.target.previousElementSibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
+		for ( let i = 0; i < fields.length; i++ ) {
+			const field = fields[i];
 
-			const $removePromptFieldsetButton = $newPromptFieldset.querySelector( '.action__remove_prompt' );
+			field.value = '';
+		}
+	}
+
+	/**
+	 * Attach event to fieldset.
+	 *
+	 * @since x.x.x
+	 * @param {Element} $newPromptFieldset
+	 */
+	function attachEventPromptFieldset( $newPromptFieldset ) {
+		// Add event to remove button.
+		const $removePromptFieldsetButton = $newPromptFieldset.querySelector( '.action__remove_prompt' );
+		if( $removePromptFieldsetButton ){
 			$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
 				e.preventDefault();
 				e.target.closest( 'fieldset' ).remove();
 			} );
+		}
+	}
 
-		} );
-	} );
+	/**
+	 * Add a new fieldset.
+	 *
+	 * @since x.x.x
+	 * @param {Element} $sibling
+	 *
+	 * @returns {Element} $newPromptFieldset
+	 */
+	function addNewFieldSet( $sibling ) {
+		const $promptFieldsetTemplate = document.querySelector( '.classifai-field-type-prompt-setting' );
+		const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
+
+		resetInputFields( $newPromptFieldset );
+		attachEventPromptFieldset( $newPromptFieldset );
+
+		$sibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
+
+		return $newPromptFieldset;
+	}
 })();
