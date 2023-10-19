@@ -313,6 +313,10 @@ input.classifai-button {
 							color: white;
 						}
 					}
+
+					span.dashicons{
+						pointer-events: none;
+					}
 				}
 
 				button:first-child{
