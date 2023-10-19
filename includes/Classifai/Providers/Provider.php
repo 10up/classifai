@@ -263,36 +263,57 @@ abstract class Provider {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_prompt_repeater_field( $args ) {
-		$option_index = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
-		$value = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-		$class = isset( $args['class'] ) ? $args['class'] : 'large-text';
-		$placeholder = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		$class         = isset( $args['class'] ) ? $args['class'] : 'large-text';
+		$placeholder   = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+
+		if ( empty( $value ) ) {
+			$value = array(
+				array(
+					'title'  => '',
+					'prompt' => '',
+				),
+			);
+		}
 
 		// Check for a default value
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 		?>
-		<fieldset class="classifai-field-type-prompt-setting">
-			<label>
-				<?php esc_html_e( 'Title', 'classifai' ); ?>
-				<span class="dashicons dashicons-editor-help"
-					title="<?php esc_attr_e( 'Short description of prompt to identify', 'classifai' ); ?>"></span>
-				<input type="text">
-			</label>
+		<?php foreach ( $value as $prompt ) : ?>
+			<fieldset class="classifai-field-type-prompt-setting">
+				<label>
+					<?php esc_html_e( 'Title', 'classifai' ); ?>
+					<span class="dashicons dashicons-editor-help"
+						title="<?php esc_attr_e( 'Short description of prompt to identify', 'classifai' ); ?>"></span>
+					<input type="text"
+						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
+						value="<?php echo esc_attr( $prompt['title'] ); ?>">
+				</label>
 
-			<label>
-				<?php esc_html_e( 'Prompt', 'classifai' ); ?>
-				<textarea name="" id="" class="large-text" rows="4"></textarea>
-			</label>
+				<label>
+					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
+					<textarea
+						id="<?php echo esc_attr( $args['label_for'] ); ?>"
+						class="<?php echo esc_attr( $class ); ?>"
+						rows="4"
+						name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+					><?php echo esc_textarea( $prompt['prompt'] ); ?></textarea>
+				</label>
 
-			<div class="actions-rows">
-				<button class="action__set_default"
-					title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>"><span
-						class="dashicons dashicons-saved"></span></button>
-				<button class="action__remove_prompt" title="<?php esc_attr_e( 'Remove prompt', 'classifai' ); ?>"><span
-						class="dashicons dashicons-trash"></span></button>
-			</div>
-		</fieldset>
+				<div class="actions-rows">
+					<button class="action__set_default"
+						title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>">
+						<span class="dashicons dashicons-saved"></span>
+					</button>
+					<button class="action__remove_prompt" title="<?php esc_attr_e( 'Remove prompt', 'classifai' ); ?>">
+						<span class="dashicons dashicons-trash"></span>
+					</button>
+				</div>
+			</fieldset>
+		<?php endforeach; ?>
 		<button
 			class="button-secondary js-classifai-add-prompt-fieldset">
 			<?php esc_html_e( 'Add new prompt', 'classifai' ); ?>
