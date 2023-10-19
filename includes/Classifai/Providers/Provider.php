@@ -274,6 +274,7 @@ abstract class Provider {
 				array(
 					'title'  => '',
 					'prompt' => '',
+					'default' => 'true',
 				),
 			);
 		}
@@ -283,6 +284,7 @@ abstract class Provider {
 		?>
 		<?php foreach ( $value as $prompt ) : ?>
 			<fieldset class="classifai-field-type-prompt-setting">
+				<input type="hidden" name="default" value="<?php echo esc_attr( $prompt['default'] ); ?>">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>
 					<span class="dashicons dashicons-editor-help"
@@ -304,7 +306,7 @@ abstract class Provider {
 				</label>
 
 				<div class="actions-rows">
-					<button class="action__set_default"
+					<button class="action__set_default <?php echo 'true' === $prompt['default'] ? 'selected' : ''; ?>"
 						title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>">
 						<span class="dashicons dashicons-saved"></span>
 					</button>

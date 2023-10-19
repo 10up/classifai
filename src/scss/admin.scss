@@ -306,7 +306,8 @@ input.classifai-button {
 						}
 					}
 
-					&.action__set_default:hover{
+					&.action__set_default:hover,
+					&.action__set_default.selected{
 						span{
 							background-color:green;
 							color: white;

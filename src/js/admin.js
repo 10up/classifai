@@ -112,12 +112,17 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 */
 	function resetInputFields( $fieldset ) {
 		const fields = $fieldset.querySelectorAll( 'input, textarea' );
+		const actionButtons = $fieldset.querySelectorAll( '.actions-rows .action__set_default' );
 
-		for ( let i = 0; i < fields.length; i++ ) {
-			const field = fields[i];
-
+		// Reset form fields.
+		fields.forEach( ( field ) => {
 			field.value = '';
-		}
+		});
+
+		// Reset action buttons.
+		actionButtons.forEach( ( button ) => {
+			button.classList.remove( 'selected' );
+		});
 	}
 
 	/**
