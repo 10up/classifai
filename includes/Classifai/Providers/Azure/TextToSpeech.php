@@ -102,7 +102,7 @@ class TextToSpeech extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
+			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
 			CLASSIFAI_PLUGIN_VERSION,
 			true
 		);
