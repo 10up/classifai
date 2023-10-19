@@ -78,3 +78,31 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
 } )();
+
+( () => {
+	const $addNewPromptFieldsetButton = document.querySelectorAll( 'button.js-classifai-add-prompt-fieldset' );
+
+	if ( !$addNewPromptFieldsetButton.length ) {
+		return;
+	}
+
+	$addNewPromptFieldsetButton.forEach( ( button ) => {
+		button.addEventListener( 'click', ( e ) => {
+			e.preventDefault();
+
+			const $promptFieldsetTemplate = document.querySelector( '.classifai-field-type-prompt-setting.template' );
+			const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
+
+			$newPromptFieldset.classList.remove( 'template' );
+
+			e.target.previousElementSibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
+
+			const $removePromptFieldsetButton = $newPromptFieldset.querySelector( '.action__remove_prompt' );
+			$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
+				e.preventDefault();
+				e.target.closest( 'fieldset' ).remove();
+			} );
+
+		} );
+	} );
+})();

@@ -250,6 +250,89 @@ input.classifai-button {
 			max-width: 600px;
 			line-height: 1.4;
 		}
+
+		.classifai-field-type-prompt-setting{
+			padding: 5px 20px;
+			border: 1px solid #f0f0f1;
+			position: relative;
+			display: flex;
+			flex-direction:column;
+
+			&.template{
+				display: none;
+			}
+
+			&:nth-child(2n + 1){
+				background-color: #f0f0f1;
+
+				.actions-rows span{
+					background-color: #f0f0f1;
+				}
+			}
+
+			&:nth-child(2n){
+				.actions-rows span{
+					background-color: white;
+				}
+			}
+
+			label{
+				display: block;
+			}
+
+			input, textarea{
+				margin-right: 0;
+				display: block;
+			}
+
+			input[type="text"] {
+				width: 90%;
+			}
+
+			.actions-rows{
+				display: flex;
+				position: absolute;
+				right: -20px;
+				top: 32%;
+				flex-direction: column;
+
+				button{
+					border: none;
+					background: transparent;
+					cursor: pointer;
+
+					margin-top: 8px;
+
+					&.action__remove_prompt:hover{
+						span{
+							background-color:red;
+							color: white;
+						}
+					}
+
+					&.action__set_default:hover{
+						span{
+							background-color:green;
+							color: white;
+						}
+					}
+				}
+
+				button:first-child{
+					margin-top: 0;
+				}
+
+				span.dashicons{
+					border: 1px solid #919191;
+					border-radius: 50%;
+					padding: 3px;
+				}
+			}
+
+			+ button{
+				margin-top: 10px;
+			}
+		}
 	}
 
 	input[type="text"],
