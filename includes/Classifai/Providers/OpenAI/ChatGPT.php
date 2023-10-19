@@ -411,7 +411,7 @@ class ChatGPT extends Provider {
 		add_settings_field(
 			'generate_excerpt_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_textarea' ],
+			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_excerpt',
 			[

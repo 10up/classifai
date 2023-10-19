@@ -248,7 +248,6 @@ abstract class Provider {
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
 			rows="4"
-			style="display:none"
 			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			placeholder="<?php echo esc_attr( $placeholder ); ?>"
 		><?php echo esc_textarea( $value ); ?></textarea>
@@ -259,11 +258,11 @@ abstract class Provider {
 	}
 
 	/**
-	 * Generic textarea field callback
+	 * Generic prompt repeater field callback
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_prompt_reapter_field( $args ) {
+	public function render_prompt_repeater_field( $args ) {
 		$option_index = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
 		$value = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
