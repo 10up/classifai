@@ -150,19 +150,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * @param {Element} $newPromptFieldset
 	 */
 	function attachEventPromptFieldset( $newPromptFieldset ) {
-		// Add event to remove button.
-		const $removePromptFieldsetButton = $newPromptFieldset.querySelector(
-			'.action__remove_prompt'
-		);
-		$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
-			e.preventDefault();
-			e.target.closest( 'fieldset' ).remove();
-		} );
-
 		// Add event to set as default button.
 		const $setAsDefaultButton = $newPromptFieldset.querySelector(
 			'.action__set_default'
 		);
+
 		$setAsDefaultButton.addEventListener( 'click', ( e ) => {
 			e.preventDefault();
 

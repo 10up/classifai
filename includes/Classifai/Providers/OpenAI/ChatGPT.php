@@ -141,6 +141,85 @@ class ChatGPT extends Provider {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_script' ] );
+	}
+
+	/**
+	 * This functon should enqueue the script for the admin page.
+	 *
+	 * @param string $hook WordPress admin page
+	 *
+	 * @return void
+	 */
+	public function admin_enqueue_script( string $hook ): void {
+		// Checking if we're on the correct page
+		if (
+			'tools_page_classifai' !== $hook
+			|| 'language_processing' !== $_GET['tab'] // phpcs:ignore
+			|| 'openai_chatgpt' !== $_GET['provider'] // phpcs:ignore
+		) {
+			return;
+		}
+
+		wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_enqueue_style( 'wp-jquery-ui-dialog' );
+
+		add_action(
+			'admin_footer',
+			static function () {
+				printf(
+					'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
+					esc_html__( 'Are you sure you want to delete prompt?', 'classifai' ),
+				);
+			}
+		);
+
+		$modal_title                   = esc_html__( 'Remove Prompt', 'classifai' );
+		$modal_button_title_deactivate = esc_html__( 'Remove', 'classifai' );
+		$modal_button_title_cancel     = esc_html__( 'Cancel', 'classifai' );
+		$script                        = <<<EOD
+			jQuery(document).ready(function($) {
+				const removePromptFieldsetButtons = document
+					.querySelectorAll('.classifai-field-type-prompt-setting button.action__remove_prompt');
+
+				removePromptFieldsetButtons.forEach( button => {
+					button.addEventListener( 'click', function(e) {
+						e.preventDefault();
+						displayModal(e.target);
+						return false;
+					})
+				});
+
+				function displayModal(button){
+					$("#js-classifai--delete-prompt-modal").dialog({
+							modal: true,
+							title: "$modal_title",
+							width: 550,
+							buttons: [
+								{
+									text: "$modal_button_title_cancel",
+									class: "button-secondary",
+									click: function() {
+										$(this).dialog("close");
+									}
+								},
+								{
+									text:"$modal_button_title_deactivate",
+									class: 'button-primary',
+									click: function() {
+										$(this).dialog("close");
+										button.closest( 'fieldset' ).remove();
+									},
+									style: 'margin-left: 10px;'
+								}
+							]
+						});
+				}
+			});
+EOD;
+
+		wp_add_inline_script( 'jquery-ui-dialog', $script );
 	}
 
 	/**
