@@ -5,7 +5,6 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 
-
 document.addEventListener( 'DOMContentLoaded', function () {
 	const template = document.getElementById( 'help-menu-template' );
 	if ( ! template ) {
@@ -154,14 +153,14 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 */
 	function attachEventPromptFieldset( $newPromptFieldset ) {
 		// Add event to remove prompt button
-		const $removePromptFieldsetButton = $newPromptFieldset
-			.querySelector('button.action__remove_prompt');
+		const $removePromptFieldsetButton = $newPromptFieldset.querySelector(
+			'button.action__remove_prompt'
+		);
 
 		$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
 			e.preventDefault();
-			displayPromptRemovalModal(e.target);
-		});
-
+			displayPromptRemovalModal( e.target );
+		} );
 
 		// Add event to set as default button.
 		const $setAsDefaultButton = $newPromptFieldset.querySelector(
@@ -192,7 +191,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			e.target.classList.add( 'selected' );
 
 			// Set default value.
-			$newPromptFieldset.querySelector( '.js-setting-field__default' ).value = '1';
+			$newPromptFieldset.querySelector(
+				'.js-setting-field__default'
+			).value = '1';
 		} );
 	}
 
@@ -200,48 +201,62 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * Handle prompt removal modal.
 	 *
 	 * @since x.x.x
-	 * @param {Element} button
+	 * @param {Element} removePromptButton
 	 */
-	function displayPromptRemovalModal(button){
-		jQuery("#js-classifai--delete-prompt-modal").dialog({
+	function displayPromptRemovalModal( removePromptButton ) {
+		jQuery( '#js-classifai--delete-prompt-modal' ).dialog( {
 			modal: true,
 			title: __( 'Remove Prompt', 'classifai' ),
 			width: 550,
 			buttons: [
 				{
 					text: __( 'Cancel', 'classifai' ),
-					class: "button-secondary",
-					click: function() {
-						jQuery(this).dialog("close");
-					}
+					class: 'button-secondary',
+					click() {
+						jQuery( this ).dialog( 'close' );
+					},
 				},
 				{
-					text:__( 'Remove', 'classifai' ),
+					text: __( 'Remove', 'classifai' ),
 					class: 'button-primary',
-					click: function() {
-						const fieldset = button.closest( 'fieldset' );
+					click() {
+						const fieldset =
+							removePromptButton.closest( 'fieldset' );
 						const fieldsetContainer = fieldset.parentElement;
-						const canResetPrompt = fieldset.querySelector( '.js-setting-field__default' ).value === '1';
+						const canResetPrompt =
+							fieldset.querySelector(
+								'.js-setting-field__default'
+							).value === '1';
+						const hasOnlySinglePrompt =
+							2 ===
+							fieldsetContainer.querySelectorAll( 'fieldset' )
+								.length;
 
 						fieldset.remove();
 
 						// Set first prompt in list as default.
-						if( canResetPrompt ){
-							const button = fieldsetContainer.querySelector('fieldset .action__set_default');
-							button && button.click();
+						if ( canResetPrompt ) {
+							const setAsDefaultButton =
+								fieldsetContainer.querySelector(
+									'fieldset .action__set_default'
+								);
+
+							setAsDefaultButton.click();
 						}
 
 						// Hide remove button if only single fieldset is left.
-						if( 1 === fieldsetContainer.querySelectorAll('fieldset').length ) {
-							fieldsetContainer.querySelector('.action__remove_prompt').style.display = 'none';
+						if ( hasOnlySinglePrompt ) {
+							fieldsetContainer.querySelector(
+								'.action__remove_prompt'
+							).style.display = 'none';
 						}
 
-						jQuery(this).dialog("close");
+						jQuery( this ).dialog( 'close' );
 					},
-					style: 'margin-left: 10px;'
-				}
-			]
-		});
+					style: 'margin-left: 10px;',
+				},
+			],
+		} );
 	}
 
 	/**
@@ -258,8 +273,12 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		);
 
 		// Show remove button if fieldset is single.
-		if( 1 === $sibling.parentElement.querySelectorAll('fieldset').length ) {
-			$sibling.parentElement.querySelector('.action__remove_prompt' ).style.display = 'block';
+		if (
+			1 === $sibling.parentElement.querySelectorAll( 'fieldset' ).length
+		) {
+			$sibling.parentElement.querySelector(
+				'.action__remove_prompt'
+			).style.display = 'block';
 		}
 
 		const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
