@@ -180,15 +180,16 @@ class ChatGPT extends Provider {
 		$modal_button_title_cancel     = esc_html__( 'Cancel', 'classifai' );
 		$script                        = <<<EOD
 			jQuery(document).ready(function($) {
-				const removePromptFieldsetButtons = document
-					.querySelectorAll('.classifai-field-type-prompt-setting button.action__remove_prompt');
+				const removePromptFieldsetButton = document
+					.querySelector('.classifai-field-type-prompt-setting button.action__remove_prompt');
+				const container = removePromptFieldsetButton.closest('tbody');
 
-				removePromptFieldsetButtons.forEach( button => {
-					button.addEventListener( 'click', function(e) {
+				container.addEventListener('click', function(e) {
+					if(e.target && e.target.matches('.classifai-field-type-prompt-setting button.action__remove_prompt')) {
 						e.preventDefault();
 						displayModal(e.target);
 						return false;
-					})
+					}
 				});
 
 				function displayModal(button){
@@ -208,8 +209,19 @@ class ChatGPT extends Provider {
 									text:"$modal_button_title_deactivate",
 									class: 'button-primary',
 									click: function() {
+										const fieldset = button.closest( 'fieldset' );
+										const fieldsetContainer = fieldset.parentElement;
+										const canResetPrompt = fieldset.querySelector( '.js-setting-field__default' ).value === '1';
+
+										fieldset.remove();
+
+										// Set first prompt in list as default.
+										if( canResetPrompt ){
+											const button = fieldsetContainer.querySelector('fieldset .action__set_default');
+											button && button.click();
+										}
+
 										$(this).dialog("close");
-										button.closest( 'fieldset' ).remove();
 									},
 									style: 'margin-left: 10px;'
 								}
