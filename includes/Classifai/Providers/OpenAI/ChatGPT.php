@@ -1222,9 +1222,9 @@ class ChatGPT extends Provider {
 	 *
 	 * @param array $prompts Prompt data.
 	 *
-	 * @return string Default prompt.
+	 * @return string|null Default prompt.
 	 */
-	public function get_default_prompt( array $prompts ): string {
+	public function get_default_prompt( array $prompts ) {
 		$excerpt_prompt = null;
 
 		if ( ! empty( $prompts ) ) {
