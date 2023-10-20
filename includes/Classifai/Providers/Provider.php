@@ -293,7 +293,8 @@ abstract class Provider {
 			<fieldset class="classifai-field-type-prompt-setting">
 				<input type="hidden"
 					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
-					value="<?php echo esc_attr( $prompt['default'] ); ?>">
+					value="<?php echo esc_attr( $prompt['default'] ); ?>"
+					class="js-setting-field__default">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>
 					<span class="dashicons dashicons-editor-help"

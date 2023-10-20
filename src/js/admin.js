@@ -180,15 +180,14 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				button.classList.remove( 'selected' );
 				button
 					.closest( 'fieldset' )
-					.querySelector( 'input[name="default"]' ).value = '';
+					.querySelector( '.js-setting-field__default' ).value = '';
 			} );
 
 			// Set selected class.
 			e.target.classList.add( 'selected' );
 
 			// Set default value.
-			$newPromptFieldset.querySelector( 'input[name="default"]' ).value =
-				'true';
+			$newPromptFieldset.querySelector( '.js-setting-field__default' ).value = 'true';
 		} );
 	}
 
