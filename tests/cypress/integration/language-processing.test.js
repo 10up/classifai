@@ -182,7 +182,14 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#openai_chatgpt_roles_administrator' ).check();
 		cy.get( '#length' ).clear().type( 35 );
-		cy.get( '#generate_excerpt_prompt' )
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Default prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][prompt]"]'
+		)
 			.clear()
 			.type(
 				'Summarize the following message using a maximum of 55 words. Ensure this summary pairs well with the following text: {{TITLE}}.',
@@ -522,7 +529,14 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#enable_titles' ).check();
 		cy.get( '#openai_chatgpt_title_roles_administrator' ).check();
 		cy.get( '#number_titles' ).select( 1 );
-		cy.get( '#generate_title_prompt' )
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Default prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][prompt]"]'
+		)
 			.clear()
 			.type(
 				'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.'
@@ -820,12 +834,26 @@ describe( 'Language processing Tests', () => {
 
 		cy.get( '#enable_resize_content' ).check();
 		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).check();
-		cy.get( '#shrink_content_prompt' )
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Default prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][prompt]"]'
+		)
 			.clear()
 			.type(
 				'Decrease the content length no more than 2 to 4 sentences.'
 			);
-		cy.get( '#grow_content_prompt' )
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Default prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][prompt]"]'
+		)
 			.clear()
 			.type(
 				'Increase the content length no more than 2 to 4 sentences.'
