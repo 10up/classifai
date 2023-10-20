@@ -320,6 +320,128 @@ describe( 'Language processing Tests', () => {
 		} );
 	} );
 
+	it( 'Can set multiple custom excerpt generation prompts, select one as the default and delete one.', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		// Add three custom prompts.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.click()
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][default]"]'
+		)
+			.parents( 'td' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 3 );
+
+		// Set the data for each prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'First custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is our first custom excerpt prompt' );
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][1][title]"]'
+		)
+			.clear()
+			.type( 'Second custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][1][prompt]"]'
+		)
+			.clear()
+			.type( 'This prompt should be deleted' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][2][title]"]'
+		)
+			.clear()
+			.type( 'Third custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][2][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom excerpt prompt' );
+
+		// Set the third prompt as our default.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][2][default]"]'
+		)
+			.parent()
+			.find( 'button.action__set_default' )
+			.click();
+
+		// Delete the second prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][1][default]"]'
+		)
+			.parent()
+			.find( 'button.action__remove_prompt' )
+			.click();
+		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.find( '.button-primary' )
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 2 );
+
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData( 'excerpt' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT post',
+			content: 'Test GPT content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the excerpt panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button exists.
+			cy.wrap( $panel )
+				.find( '.editor-post-excerpt button' )
+				.should( 'exist' );
+
+			// Click on button and verify data loads in.
+			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).click();
+			cy.wrap( $panel ).find( 'textarea' ).should( 'have.value', data );
+		} );
+	} );
+
 	it( 'Can disable excerpt generation feature', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -749,6 +871,148 @@ describe( 'Language processing Tests', () => {
 			} );
 	} );
 
+	it( 'Can set multiple custom title generation prompts, select one as the default and delete one.', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		// Add three custom prompts.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.click()
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 3 );
+
+		// Set the data for each prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'First custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is our first custom title prompt' );
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][1][title]"]'
+		)
+			.clear()
+			.type( 'Second custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][1][prompt]"]'
+		)
+			.clear()
+			.type( 'This prompt should be deleted' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][2][title]"]'
+		)
+			.clear()
+			.type( 'Third custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][2][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom title prompt' );
+
+		// Set the third prompt as our default.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][2][default]"]'
+		)
+			.parent()
+			.find( 'button.action__set_default' )
+			.click();
+
+		// Delete the second prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][1][default]"]'
+		)
+			.parent()
+			.find( 'button.action__remove_prompt' )
+			.click();
+		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.find( '.button-primary' )
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 2 );
+
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData( 'title' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT generate titles',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the summary panel.
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button exists.
+			cy.wrap( $panel )
+				.find( '.classifai-post-status button.title' )
+				.should( 'exist' );
+
+			// Click on button and verify modal shows.
+			cy.wrap( $panel )
+				.find( '.classifai-post-status button.title' )
+				.click();
+		} );
+
+		cy.get( '.title-modal' ).should( 'exist' );
+
+		// Click on button and verify data loads in.
+		cy.get( '.title-modal .classifai-title' )
+			.first()
+			.find( 'textarea' )
+			.should( 'have.value', data );
+		cy.get( '.title-modal .classifai-title' )
+			.first()
+			.find( 'button' )
+			.click();
+
+		cy.get( '.title-modal' ).should( 'not.exist' );
+		cy.getBlockEditor()
+			.find( '.editor-post-title__input' )
+			.should( ( $el ) => {
+				expect( $el.first() ).to.contain( data );
+			} );
+	} );
+
 	it( 'Can disable title generation feature', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -1022,6 +1286,201 @@ describe( 'Language processing Tests', () => {
 		)
 			.clear()
 			.type( 'This is a custom grow prompt' );
+		cy.get( '#submit' ).click();
+
+		cy.createPost( {
+			title: 'Resize content',
+			content: 'Hello, world.',
+		} );
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Expand this text' ).click();
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
+		).should( 'contain.text', '+6 words' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
+		).should( 'contain.text', '+31 characters' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first button'
+		).click();
+		cy.getBlockEditor()
+			.find( '[data-type="core/paragraph"]' )
+			.should(
+				'contain.text',
+				'Start with the basic block of one narrative.'
+			);
+
+		cy.createPost( {
+			title: 'Resize content',
+			content:
+				'Start with the basic building block of one narrative to begin with the editorial process.',
+		} );
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Condense this text' ).click();
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
+		).should( 'contain.text', '-7 words' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
+		).should( 'contain.text', '-45 characters' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first button'
+		).click();
+		cy.getBlockEditor()
+			.find( '[data-type="core/paragraph"]' )
+			.should(
+				'contain.text',
+				'Start with the basic block of one narrative.'
+			);
+	} );
+
+	it( 'Can set multiple custom resize generation prompts, select one as the default and delete one.', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		// Add three custom shrink prompts.
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.click()
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 3 );
+
+		// Add three custom grow prompts.
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.click()
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 3 );
+
+		// Set the data for each prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'First custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is our first custom shrink prompt' );
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][1][title]"]'
+		)
+			.clear()
+			.type( 'Second custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][1][prompt]"]'
+		)
+			.clear()
+			.type( 'This prompt should be deleted' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][title]"]'
+		)
+			.clear()
+			.type( 'Third custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom shrink prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'First custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is our first custom grow prompt' );
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][1][title]"]'
+		)
+			.clear()
+			.type( 'Second custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][1][prompt]"]'
+		)
+			.clear()
+			.type( 'This prompt should be deleted' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][2][title]"]'
+		)
+			.clear()
+			.type( 'Third custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][2][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom grow prompt' );
+
+		// Set the third prompt as our default.
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][default]"]'
+		)
+			.parent()
+			.find( 'button.action__set_default' )
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][2][default]"]'
+		)
+			.parent()
+			.find( 'button.action__set_default' )
+			.click();
+
+		// Delete the second prompt.
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][1][default]"]'
+		)
+			.parent()
+			.find( 'button.action__remove_prompt' )
+			.click();
+		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.find( '.button-primary' )
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 2 );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][1][default]"]'
+		)
+			.parent()
+			.find( 'button.action__remove_prompt' )
+			.click();
+		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.find( '.button-primary' )
+			.click();
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+		)
+			.parents( 'td:first' )
+			.find( '.classifai-field-type-prompt-setting' )
+			.should( 'have.length', 2 );
+
 		cy.get( '#submit' ).click();
 
 		cy.createPost( {
