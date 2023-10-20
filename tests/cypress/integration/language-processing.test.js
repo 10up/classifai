@@ -182,19 +182,6 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#openai_chatgpt_roles_administrator' ).check();
 		cy.get( '#length' ).clear().type( 35 );
-		cy.get(
-			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][title]"]'
-		)
-			.clear()
-			.type( 'Default prompt' );
-		cy.get(
-			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][prompt]"]'
-		)
-			.clear()
-			.type(
-				'Summarize the following message using a maximum of 55 words. Ensure this summary pairs well with the following text: {{TITLE}}.',
-				{ parseSpecialCharSequences: false }
-			);
 		cy.get( '#submit' ).click();
 	} );
 
@@ -272,6 +259,65 @@ describe( 'Language processing Tests', () => {
 
 		cy.visit( '/wp-admin/plugins.php' );
 		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
+	it( 'Can set a custom excerpt generation prompt', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom excerpt prompt' );
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData( 'excerpt' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT post',
+			content: 'Test GPT content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the excerpt panel.
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button exists.
+			cy.wrap( $panel )
+				.find( '.editor-post-excerpt button' )
+				.should( 'exist' );
+
+			// Click on button and verify data loads in.
+			cy.wrap( $panel ).find( '.editor-post-excerpt button' ).click();
+			cy.wrap( $panel ).find( 'textarea' ).should( 'have.value', data );
+		} );
 	} );
 
 	it( 'Can disable excerpt generation feature', () => {
@@ -529,18 +575,6 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#enable_titles' ).check();
 		cy.get( '#openai_chatgpt_title_roles_administrator' ).check();
 		cy.get( '#number_titles' ).select( 1 );
-		cy.get(
-			'[name="classifai_openai_chatgpt[generate_title_prompt][0][title]"]'
-		)
-			.clear()
-			.type( 'Default prompt' );
-		cy.get(
-			'[name="classifai_openai_chatgpt[generate_title_prompt][0][prompt]"]'
-		)
-			.clear()
-			.type(
-				'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.'
-			);
 		cy.get( '#submit' ).click();
 	} );
 
@@ -634,6 +668,85 @@ describe( 'Language processing Tests', () => {
 
 		cy.visit( '/wp-admin/plugins.php' );
 		cy.get( '#deactivate-classic-editor' ).click();
+	} );
+
+	it( 'Can set a custom title generation prompt', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[generate_title_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom title prompt' );
+		cy.get( '#submit' ).click();
+
+		const data = getChatGPTData( 'title' );
+
+		// Create test post.
+		cy.createPost( {
+			title: 'Test ChatGPT generate titles',
+			content: 'Test content',
+		} );
+
+		// Close post publish panel.
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar.
+		cy.openDocumentSettingsSidebar();
+
+		// Find and open the summary panel.
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button exists.
+			cy.wrap( $panel )
+				.find( '.classifai-post-status button.title' )
+				.should( 'exist' );
+
+			// Click on button and verify modal shows.
+			cy.wrap( $panel )
+				.find( '.classifai-post-status button.title' )
+				.click();
+		} );
+
+		cy.get( '.title-modal' ).should( 'exist' );
+
+		// Click on button and verify data loads in.
+		cy.get( '.title-modal .classifai-title' )
+			.first()
+			.find( 'textarea' )
+			.should( 'have.value', data );
+		cy.get( '.title-modal .classifai-title' )
+			.first()
+			.find( 'button' )
+			.click();
+
+		cy.get( '.title-modal' ).should( 'not.exist' );
+		cy.getBlockEditor()
+			.find( '.editor-post-title__input' )
+			.should( ( $el ) => {
+				expect( $el.first() ).to.contain( data );
+			} );
 	} );
 
 	it( 'Can disable title generation feature', () => {
@@ -834,30 +947,6 @@ describe( 'Language processing Tests', () => {
 
 		cy.get( '#enable_resize_content' ).check();
 		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).check();
-		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][title]"]'
-		)
-			.clear()
-			.type( 'Default prompt' );
-		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][prompt]"]'
-		)
-			.clear()
-			.type(
-				'Decrease the content length no more than 2 to 4 sentences.'
-			);
-		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][0][title]"]'
-		)
-			.clear()
-			.type( 'Default prompt' );
-		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][0][prompt]"]'
-		)
-			.clear()
-			.type(
-				'Increase the content length no more than 2 to 4 sentences.'
-			);
 		cy.get( '#submit' ).click();
 
 		cy.createPost( {
@@ -905,6 +994,81 @@ describe( 'Language processing Tests', () => {
 			.should(
 				'contain.text',
 				'Start with the basic building block of one narrative.'
+			);
+	} );
+
+	it( 'Can set a custom grow and shrink prompt', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom shrink prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][title]"]'
+		)
+			.clear()
+			.type( 'Custom prompt' );
+		cy.get(
+			'[name="classifai_openai_chatgpt[grow_content_prompt][0][prompt]"]'
+		)
+			.clear()
+			.type( 'This is a custom grow prompt' );
+		cy.get( '#submit' ).click();
+
+		cy.createPost( {
+			title: 'Resize content',
+			content: 'Hello, world.',
+		} );
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Expand this text' ).click();
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
+		).should( 'contain.text', '+6 words' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
+		).should( 'contain.text', '+31 characters' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first button'
+		).click();
+		cy.getBlockEditor()
+			.find( '[data-type="core/paragraph"]' )
+			.should(
+				'contain.text',
+				'Start with the basic block of one narrative.'
+			);
+
+		cy.createPost( {
+			title: 'Resize content',
+			content:
+				'Start with the basic building block of one narrative to begin with the editorial process.',
+		} );
+
+		cy.get( '.classifai-resize-content-btn' ).click();
+		cy.get( '.components-button' ).contains( 'Condense this text' ).click();
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
+		).should( 'contain.text', '-7 words' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
+		).should( 'contain.text', '-45 characters' );
+		cy.get(
+			'.classifai-content-resize__result-table tbody tr:first button'
+		).click();
+		cy.getBlockEditor()
+			.find( '[data-type="core/paragraph"]' )
+			.should(
+				'contain.text',
+				'Start with the basic block of one narrative.'
 			);
 	} );
 
