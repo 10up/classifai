@@ -828,7 +828,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
-		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'] ) ?: $this->generate_excerpt_prompt );
+		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -931,7 +931,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
-		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'] ) ?: $this->generate_title_prompt );
+		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'] ) ?? $this->generate_title_prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -1031,9 +1031,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'] ) ?: $this->shrink_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
 		} else {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'] ) ?: $this->grow_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'] ) ?? $this->grow_content_prompt );
 		}
 
 		/**
@@ -1223,7 +1223,7 @@ class ChatGPT extends Provider {
 	 * @return string Default prompt.
 	 */
 	public function get_default_prompt( array $prompts ): string {
-		$excerpt_prompt = '';
+		$excerpt_prompt = null;
 
 		if ( ! empty( $prompts ) ) {
 			$prompt_data = array_filter(
