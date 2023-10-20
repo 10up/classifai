@@ -263,17 +263,23 @@ abstract class Provider {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_prompt_repeater_field( $args ) {
-		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
-		$setting_index = $this->get_settings( $option_index );
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-		$class         = isset( $args['class'] ) ? $args['class'] : 'large-text';
-		$placeholder   = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$option_index      = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index     = $this->get_settings( $option_index );
+		$value             = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+		$class             = isset( $args['class'] ) ? $args['class'] : 'large-text';
+		$placeholder       = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$field_name_prefix = sprintf(
+			'classifai_%1$s%2$s[%3$s]',
+			$this->option_name,
+			$option_index ? "[$option_index]" : '',
+			$args['label_for']
+		);
 
 		if ( empty( $value ) ) {
 			$value = array(
 				array(
-					'title'  => '',
-					'prompt' => '',
+					'title'   => '',
+					'prompt'  => '',
 					'default' => 'true',
 				),
 			);
@@ -284,12 +290,15 @@ abstract class Provider {
 		?>
 		<?php foreach ( $value as $prompt ) : ?>
 			<fieldset class="classifai-field-type-prompt-setting">
-				<input type="hidden" name="default" value="<?php echo esc_attr( $prompt['default'] ); ?>">
+				<input type="hidden"
+					name="<?php echo esc_attr( $field_name_prefix . '[][default]' ); ?>"
+					value="<?php echo esc_attr( $prompt['default'] ); ?>">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>
 					<span class="dashicons dashicons-editor-help"
 						title="<?php esc_attr_e( 'Short description of prompt to identify', 'classifai' ); ?>"></span>
 					<input type="text"
+						name="<?php echo esc_attr( $field_name_prefix . '[][title]' ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
 						value="<?php echo esc_attr( $prompt['title'] ); ?>">
 				</label>
@@ -300,7 +309,7 @@ abstract class Provider {
 						id="<?php echo esc_attr( $args['label_for'] ); ?>"
 						class="<?php echo esc_attr( $class ); ?>"
 						rows="4"
-						name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+						name="<?php echo esc_attr( $field_name_prefix . '[][prompt]' ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
 					><?php echo esc_textarea( $prompt['prompt'] ); ?></textarea>
 				</label>

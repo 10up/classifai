@@ -176,18 +176,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		 *
 		 * @returns {Element} $newPromptFieldset
 		 */
-		let $newPromptFieldset = null;
-
 		function addNewFieldSet( $sibling ) {
-			if ( !$newPromptFieldset ) {
-				const $promptFieldsetTemplate = document.querySelector( '.classifai-field-type-prompt-setting' );
-				$newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
+			const $promptFieldsetTemplate = $sibling.parentElement.querySelector( '.classifai-field-type-prompt-setting' );
+			const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
 
-				resetInputFields( $newPromptFieldset );
-			} else {
-				$newPromptFieldset = $newPromptFieldset.cloneNode( true );
-			}
-
+			resetInputFields( $newPromptFieldset );
 			attachEventPromptFieldset( $newPromptFieldset );
 			$sibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
 
