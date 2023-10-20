@@ -257,6 +257,7 @@ input.classifai-button {
 			position: relative;
 			display: flex;
 			flex-direction:column;
+			max-width: 600px;
 
 			&:nth-child(2n + 1){
 				background-color: #f0f0f1;
