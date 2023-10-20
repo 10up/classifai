@@ -476,7 +476,7 @@ class ChatGPT extends Provider {
 		add_settings_field(
 			'generate_title_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_textarea' ],
+			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_title',
 			[
@@ -545,7 +545,7 @@ class ChatGPT extends Provider {
 		add_settings_field(
 			'shrink_content_prompt',
 			esc_html__( 'Shrink content prompt', 'classifai' ),
-			[ $this, 'render_textarea' ],
+			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
 			[
@@ -560,7 +560,7 @@ class ChatGPT extends Provider {
 		add_settings_field(
 			'grow_content_prompt',
 			esc_html__( 'Grow content prompt', 'classifai' ),
-			[ $this, 'render_textarea' ],
+			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
 			[
