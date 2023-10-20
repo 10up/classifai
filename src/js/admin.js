@@ -1,14 +1,17 @@
 /* global ClassifAI */
+import { __ } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
+
 
 document.addEventListener( 'DOMContentLoaded', function () {
 	const template = document.getElementById( 'help-menu-template' );
 	if ( ! template ) {
 		return;
 	}
+
 	const container = document.createElement( 'div' );
 	container.appendChild( document.importNode( template.content, true ) );
 
@@ -150,9 +153,19 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * @param {Element} $newPromptFieldset
 	 */
 	function attachEventPromptFieldset( $newPromptFieldset ) {
+		// Add event to remove prompt button
+		const $removePromptFieldsetButton = $newPromptFieldset
+			.querySelector('button.action__remove_prompt');
+
+		$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
+			e.preventDefault();
+			displayPromptRemovalModal(e.target);
+		});
+
+
 		// Add event to set as default button.
 		const $setAsDefaultButton = $newPromptFieldset.querySelector(
-			'.action__set_default'
+			'button.action__set_default'
 		);
 
 		$setAsDefaultButton.addEventListener( 'click', ( e ) => {
@@ -181,6 +194,54 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			// Set default value.
 			$newPromptFieldset.querySelector( '.js-setting-field__default' ).value = '1';
 		} );
+	}
+
+	/**
+	 * Handle prompt removal modal.
+	 *
+	 * @since x.x.x
+	 * @param {Element} button
+	 */
+	function displayPromptRemovalModal(button){
+		jQuery("#js-classifai--delete-prompt-modal").dialog({
+			modal: true,
+			title: __( 'Remove Prompt', 'classifai' ),
+			width: 550,
+			buttons: [
+				{
+					text: __( 'Cancel', 'classifai' ),
+					class: "button-secondary",
+					click: function() {
+						jQuery(this).dialog("close");
+					}
+				},
+				{
+					text:__( 'Remove', 'classifai' ),
+					class: 'button-primary',
+					click: function() {
+						const fieldset = button.closest( 'fieldset' );
+						const fieldsetContainer = fieldset.parentElement;
+						const canResetPrompt = fieldset.querySelector( '.js-setting-field__default' ).value === '1';
+
+						fieldset.remove();
+
+						// Set first prompt in list as default.
+						if( canResetPrompt ){
+							const button = fieldsetContainer.querySelector('fieldset .action__set_default');
+							button && button.click();
+						}
+
+						// Hide remove button if only single fieldset is left.
+						if( 1 === fieldsetContainer.querySelectorAll('fieldset').length ) {
+							fieldsetContainer.querySelector('.action__remove_prompt').style.display = 'none';
+						}
+
+						jQuery(this).dialog("close");
+					},
+					style: 'margin-left: 10px;'
+				}
+			]
+		});
 	}
 
 	/**
