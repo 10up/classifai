@@ -187,7 +187,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			e.target.classList.add( 'selected' );
 
 			// Set default value.
-			$newPromptFieldset.querySelector( '.js-setting-field__default' ).value = 'true';
+			$newPromptFieldset.querySelector( '.js-setting-field__default' ).value = '1';
 		} );
 	}
 

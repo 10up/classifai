@@ -254,7 +254,7 @@ abstract class Provider {
 				array(
 					'title'   => '',
 					'prompt'  => '',
-					'default' => 'true',
+					'default' => 1,
 				),
 			);
 		}
@@ -290,7 +290,7 @@ abstract class Provider {
 				</label>
 
 				<div class="actions-rows">
-					<button class="action__set_default <?php echo 'true' === $prompt['default'] ? 'selected' : ''; ?>"
+					<button class="action__set_default <?php echo 1 === $prompt['default'] ? 'selected' : ''; ?>"
 						title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>">
 						<span class="dashicons dashicons-saved"></span>
 					</button>

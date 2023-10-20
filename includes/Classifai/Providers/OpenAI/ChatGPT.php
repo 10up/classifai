@@ -1148,9 +1148,10 @@ class ChatGPT extends Provider {
 	 * This is used for the repeater field.
 	 *
 	 * @param array $prompts Prompt data.
+	 *
 	 * @return array Sanitized prompt data.
 	 */
-	public function sanitize_prompts( $prompts ) {
+	public function sanitize_prompts( array $prompts ): array {
 		// Remove any prompts that don't have a title and prompt.
 		$prompts = array_filter(
 			$prompts,
@@ -1161,16 +1162,19 @@ class ChatGPT extends Provider {
 
 		// Sanitize the prompts and make sure only one prompt is marked as default.
 		$has_default = false;
+
 		return array_map(
 			function ( $prompt ) use ( &$has_default ) {
-				$default = ( $prompt['default'] && ! $has_default ) ? (bool) $prompt['default'] : false;
+				$default = $prompt['default'] && ! $has_default;
+
 				if ( $default ) {
 					$has_default = true;
 				}
+
 				return array(
 					'title'   => sanitize_text_field( $prompt['title'] ),
 					'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
-					'default' => $default,
+					'default' => absint( $default ),
 				);
 			},
 			$prompts
