@@ -182,7 +182,7 @@ class ChatGPT extends Provider {
 			jQuery(document).ready(function($) {
 				const removePromptFieldsetButton = document
 					.querySelector('.classifai-field-type-prompt-setting button.action__remove_prompt');
-				const container = removePromptFieldsetButton.closest('tbody');
+				const container = removePromptFieldsetButton.closest('.classifai-nlu-sections');
 
 				container.addEventListener('click', function(e) {
 					if(e.target && e.target.matches('.classifai-field-type-prompt-setting button.action__remove_prompt')) {
@@ -219,6 +219,11 @@ class ChatGPT extends Provider {
 										if( canResetPrompt ){
 											const button = fieldsetContainer.querySelector('fieldset .action__set_default');
 											button && button.click();
+										}
+
+										// Hide remove button if only single fieldset is left.
+										if( 1 === fieldsetContainer.querySelectorAll('fieldset').length ) {
+											fieldsetContainer.querySelector('.action__remove_prompt').style.display = 'none';
 										}
 
 										$(this).dialog("close");

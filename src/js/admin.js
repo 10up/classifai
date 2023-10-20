@@ -195,6 +195,12 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		const $promptFieldsetTemplate = $sibling.parentElement.querySelector(
 			'.classifai-field-type-prompt-setting'
 		);
+
+		// Show remove button if fieldset is single.
+		if( 1 === $sibling.parentElement.querySelectorAll('fieldset').length ) {
+			$sibling.parentElement.querySelector('.action__remove_prompt' ).style.display = 'block';
+		}
+
 		const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
 
 		resetInputFields( $newPromptFieldset, $sibling.closest( 'tr' ) );

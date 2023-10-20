@@ -249,6 +249,9 @@ abstract class Provider {
 			$args['label_for']
 		);
 
+		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+
+		// Data should be in correct format.
 		if ( empty( $value ) ) {
 			$value = array(
 				array(
@@ -259,8 +262,9 @@ abstract class Provider {
 			);
 		}
 
+		$prompt_count = count( $value );
+
 		// Check for a default value
-		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 		$field_index = 0;
 		?>
 		<?php foreach ( $value as $prompt ) : ?>
@@ -294,7 +298,9 @@ abstract class Provider {
 						title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>">
 						<span class="dashicons dashicons-saved"></span>
 					</button>
-					<button class="action__remove_prompt" title="<?php esc_attr_e( 'Remove prompt', 'classifai' ); ?>">
+					<button class="action__remove_prompt"
+						style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>"
+						title="<?php esc_attr_e( 'Remove prompt', 'classifai' ); ?>">
 						<span class="dashicons dashicons-trash"></span>
 					</button>
 				</div>
