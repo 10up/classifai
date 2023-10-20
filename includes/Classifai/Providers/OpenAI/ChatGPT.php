@@ -604,10 +604,10 @@ class ChatGPT extends Provider {
 			$new_settings['length'] = 55;
 		}
 
-		if ( isset( $settings['generate_excerpt_prompt'] ) && ! empty( $settings['generate_excerpt_prompt'] ) ) {
-			$new_settings['generate_excerpt_prompt'] = sanitize_textarea_field( $settings['generate_excerpt_prompt'] );
+		if ( isset( $settings['generate_excerpt_prompt'] ) && is_array( $settings['generate_excerpt_prompt'] ) ) {
+			$new_settings['generate_excerpt_prompt'] = $this->sanitize_prompts( $settings['generate_excerpt_prompt'] );
 		} else {
-			$new_settings['generate_excerpt_prompt'] = '';
+			$new_settings['generate_excerpt_prompt'] = array();
 		}
 
 		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
@@ -628,10 +628,10 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
-		if ( isset( $settings['generate_title_prompt'] ) && ! empty( $settings['generate_title_prompt'] ) ) {
-			$new_settings['generate_title_prompt'] = sanitize_textarea_field( $settings['generate_title_prompt'] );
+		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
+			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
 		} else {
-			$new_settings['generate_title_prompt'] = '';
+			$new_settings['generate_title_prompt'] = array();
 		}
 
 		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
@@ -652,16 +652,16 @@ class ChatGPT extends Provider {
 			$new_settings['number_resize_content'] = 1;
 		}
 
-		if ( isset( $settings['shrink_content_prompt'] ) && ! empty( $settings['shrink_content_prompt'] ) ) {
-			$new_settings['shrink_content_prompt'] = sanitize_textarea_field( $settings['shrink_content_prompt'] );
+		if ( isset( $settings['shrink_content_prompt'] ) && is_array( $settings['shrink_content_prompt'] ) ) {
+			$new_settings['shrink_content_prompt'] = $this->sanitize_prompts( $settings['shrink_content_prompt'] );
 		} else {
-			$new_settings['shrink_content_prompt'] = '';
+			$new_settings['shrink_content_prompt'] = array();
 		}
 
-		if ( isset( $settings['grow_content_prompt'] ) && ! empty( $settings['grow_content_prompt'] ) ) {
-			$new_settings['grow_content_prompt'] = sanitize_textarea_field( $settings['grow_content_prompt'] );
+		if ( isset( $settings['grow_content_prompt'] ) && is_array( $settings['grow_content_prompt'] ) ) {
+			$new_settings['grow_content_prompt'] = $this->sanitize_prompts( $settings['grow_content_prompt'] );
 		} else {
-			$new_settings['grow_content_prompt'] = '';
+			$new_settings['grow_content_prompt'] = array();
 		}
 
 		return $new_settings;
@@ -1143,4 +1143,37 @@ class ChatGPT extends Provider {
 		return apply_filters( 'classifai_chatgpt_content', $content, $post_id );
 	}
 
+	/**
+	 * Sanitize the prompt data.
+	 * This is used for the repeater field.
+	 *
+	 * @param array $prompts Prompt data.
+	 * @return array Sanitized prompt data.
+	 */
+	public function sanitize_prompts( $prompts ) {
+		// Remove any prompts that don't have a title and prompt.
+		$prompts = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
+			}
+		);
+
+		// Sanitize the prompts and make sure only one prompt is marked as default.
+		$has_default = false;
+		return array_map(
+			function ( $prompt ) use ( &$has_default ) {
+				$default = ( $prompt['default'] && ! $has_default ) ? (bool) $prompt['default'] : false;
+				if ( $default ) {
+					$has_default = true;
+				}
+				return array(
+					'title'   => sanitize_text_field( $prompt['title'] ),
+					'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
+					'default' => $default,
+				);
+			},
+			$prompts
+		);
+	}
 }
