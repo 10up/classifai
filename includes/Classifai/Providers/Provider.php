@@ -232,14 +232,16 @@ abstract class Provider {
 	/**
 	 * Generic prompt repeater field callback
 	 *
+	 * @since x.x.x
+	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_prompt_repeater_field( $args ) {
-		$option_index      = isset( $args['option_index'] ) ? $args['option_index'] : false;
+	public function render_prompt_repeater_field( array $args ): void {
+		$option_index      = $args['option_index'] ?? false;
 		$setting_index     = $this->get_settings( $option_index );
-		$value             = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-		$class             = isset( $args['class'] ) ? $args['class'] : 'large-text';
-		$placeholder       = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+		$value             = $setting_index[ $args['label_for'] ] ?? '';
+		$class             = $args['class'] ?? 'large-text';
+		$placeholder       = $args['placeholder'] ?? '';
 		$field_name_prefix = sprintf(
 			'classifai_%1$s%2$s[%3$s]',
 			$this->option_name,
