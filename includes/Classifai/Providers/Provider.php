@@ -287,18 +287,19 @@ abstract class Provider {
 
 		// Check for a default value
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$field_index = 0;
 		?>
 		<?php foreach ( $value as $prompt ) : ?>
 			<fieldset class="classifai-field-type-prompt-setting">
 				<input type="hidden"
-					name="<?php echo esc_attr( $field_name_prefix . '[][default]' ); ?>"
+					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
 					value="<?php echo esc_attr( $prompt['default'] ); ?>">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>
 					<span class="dashicons dashicons-editor-help"
 						title="<?php esc_attr_e( 'Short description of prompt to identify', 'classifai' ); ?>"></span>
 					<input type="text"
-						name="<?php echo esc_attr( $field_name_prefix . '[][title]' ); ?>"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
 						value="<?php echo esc_attr( $prompt['title'] ); ?>">
 				</label>
@@ -306,10 +307,9 @@ abstract class Provider {
 				<label>
 					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
 					<textarea
-						id="<?php echo esc_attr( $args['label_for'] ); ?>"
 						class="<?php echo esc_attr( $class ); ?>"
 						rows="4"
-						name="<?php echo esc_attr( $field_name_prefix . '[][prompt]' ); ?>"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
 					><?php echo esc_textarea( $prompt['prompt'] ); ?></textarea>
 				</label>
@@ -324,6 +324,7 @@ abstract class Provider {
 					</button>
 				</div>
 			</fieldset>
+			<?php ++$field_index; ?>
 		<?php endforeach; ?>
 		<button
 			class="button-secondary js-classifai-add-prompt-fieldset">

@@ -112,14 +112,21 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		 *
 		 * @since x.x.x
 		 * @param {Element} $fieldset
+		 * @param {Element} $parentRow
 		 */
-		function resetInputFields( $fieldset ) {
+		function resetInputFields( $fieldset, $parentRow ) {
+			const $allFieldsets = $parentRow.querySelectorAll('fieldset');
+			const $lastFieldset = Array.from($allFieldsets).pop();
+			const highestFieldIndexOfFieldset = parseInt($lastFieldset.querySelector('input').name.match(/\d+/).pop());
 			const fields = $fieldset.querySelectorAll( 'input, textarea' );
 			const actionButtons = $fieldset.querySelectorAll( '.actions-rows .action__set_default' );
 
 			// Reset form fields.
 			fields.forEach( ( field ) => {
 				field.value = '';
+
+				// Add index to field name.
+				field.name = field.name.replace( /(\d+)/g, () => highestFieldIndexOfFieldset + 1 );
 			} );
 
 			// Reset action buttons.
@@ -180,8 +187,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			const $promptFieldsetTemplate = $sibling.parentElement.querySelector( '.classifai-field-type-prompt-setting' );
 			const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
 
-			resetInputFields( $newPromptFieldset );
+			resetInputFields( $newPromptFieldset, $sibling.closest('tr') );
 			attachEventPromptFieldset( $newPromptFieldset );
+
 			$sibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
 
 			return $newPromptFieldset;
