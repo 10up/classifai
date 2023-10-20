@@ -691,16 +691,16 @@ class ChatGPT extends Provider {
 			'enable_excerpt'          => false,
 			'roles'                   => array_keys( $editable_roles ),
 			'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
-			'generate_excerpt_prompt' => '',
+			'generate_excerpt_prompt' => array(),
 			'enable_titles'           => false,
 			'title_roles'             => array_keys( $editable_roles ),
 			'number_titles'           => 1,
-			'generate_title_prompt'   => '',
+			'generate_title_prompt'   => array(),
 			'enable_resize_content'   => false,
 			'resize_content_roles'    => array_keys( $editable_roles ),
 			'number_resize_content'   => 1,
-			'shrink_content_prompt'   => '',
-			'grow_content_prompt'     => '',
+			'shrink_content_prompt'   => array(),
+			'grow_content_prompt'     => array(),
 		];
 	}
 
@@ -798,7 +798,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
-		$excerpt_prompt = ! empty( $settings['generate_excerpt_prompt'] ) ? esc_textarea( $settings['generate_excerpt_prompt'] ) : $this->generate_excerpt_prompt;
+		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'], $this->generate_excerpt_prompt ) );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -901,7 +901,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
-		$prompt = ! empty( $settings['generate_title_prompt'] ) ? esc_textarea( $settings['generate_title_prompt'] ) : $this->generate_title_prompt;
+		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'], $this->generate_title_prompt ) );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -1001,9 +1001,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '' );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = ! empty( $settings['shrink_content_prompt'] ) ? esc_textarea( $settings['shrink_content_prompt'] ) : $this->shrink_content_prompt;
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'], $this->shrink_content_prompt ) );
 		} else {
-			$prompt = ! empty( $settings['grow_content_prompt'] ) ? esc_textarea( $settings['grow_content_prompt'] ) : $this->grow_content_prompt;
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'], $this->grow_content_prompt ) );
 		}
 
 		/**
@@ -1175,5 +1175,31 @@ class ChatGPT extends Provider {
 			},
 			$prompts
 		);
+	}
+
+	/**
+	 * Get the default prompt for use.
+	 *
+	 * @param array  $prompts Prompt data.
+	 * @param string $default Default prompt.
+	 * @return string Default prompt.
+	 */
+	public function get_default_prompt( $prompts, $default = '' ) {
+		$excerpt_prompt = $default;
+		if ( ! empty( $prompts ) ) {
+			$prompt_data = array_filter(
+				$prompts,
+				function ( $prompt ) {
+					return ! empty( $prompt['prompt'] ) && $prompt['default'];
+				}
+			);
+			if ( ! empty( $prompt_data ) ) {
+				$excerpt_prompt = current( $prompt_data )['prompt'];
+			} elseif ( ! empty( $prompts[0]['prompt'] ) ) {
+				// If there is no default, use the first prompt.
+				$excerpt_prompt = $prompts[0]['prompt'];
+			}
+		}
+		return $excerpt_prompt;
 	}
 }
