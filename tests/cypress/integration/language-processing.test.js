@@ -379,7 +379,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__set_default' )
-			.click();
+			.click( { force: true } );
 
 		// Delete the second prompt.
 		cy.get(
@@ -387,7 +387,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__remove_prompt' )
-			.click();
+			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
 			.find( '.button-primary' )
 			.click();
@@ -930,7 +930,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__set_default' )
-			.click();
+			.click( { force: true } );
 
 		// Delete the second prompt.
 		cy.get(
@@ -938,7 +938,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__remove_prompt' )
-			.click();
+			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
 			.find( '.button-primary' )
 			.click();
@@ -1441,13 +1441,13 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__set_default' )
-			.click();
+			.click( { force: true } );
 		cy.get(
 			'[name="classifai_openai_chatgpt[grow_content_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'button.action__set_default' )
-			.click();
+			.click( { force: true } );
 
 		// Delete the second prompt.
 		cy.get(
@@ -1455,7 +1455,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__remove_prompt' )
-			.click();
+			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
 			.find( '.button-primary' )
 			.click();
@@ -1470,7 +1470,7 @@ describe( 'Language processing Tests', () => {
 		)
 			.parent()
 			.find( 'button.action__remove_prompt' )
-			.click();
+			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
 			.find( '.button-primary' )
 			.click();
