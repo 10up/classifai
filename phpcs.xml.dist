@@ -8,6 +8,7 @@
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
 		<!-- Class properties don't need this -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+		<exclude name="WordPress.PHP.DisallowShortTernary.Found" />
 	</rule>
 
 	<exclude-pattern>*/tests/*</exclude-pattern>
