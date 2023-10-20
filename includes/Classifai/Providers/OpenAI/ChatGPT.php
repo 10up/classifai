@@ -628,12 +628,6 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
-		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
-			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
-		} else {
-			$new_settings['generate_title_prompt'] = array();
-		}
-
 		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
 			$new_settings['enable_resize_content'] = 'no';
 		} else {
