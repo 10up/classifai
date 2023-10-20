@@ -172,8 +172,8 @@ class Plugin {
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'admin', 'dependencies' ),
+			get_asset_info( 'admin', 'version' ),
 			true
 		);
 
