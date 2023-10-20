@@ -185,7 +185,8 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#generate_excerpt_prompt' )
 			.clear()
 			.type(
-				'Summarize the following message using a maximum of 55 words. Ensure this summary pairs well with the following text: {{TITLE}}.'
+				'Summarize the following message using a maximum of 55 words. Ensure this summary pairs well with the following text: {{TITLE}}.',
+				{ parseSpecialCharSequences: false }
 			);
 		cy.get( '#submit' ).click();
 	} );
