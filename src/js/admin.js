@@ -153,9 +153,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				}
 
 				// Remove selected class from all buttons.
-				const $setAsDefaultButtons = document.querySelectorAll( '.classifai-field-type-prompt-setting .action__set_default' );
+				const $settingRow = e.target.closest( 'tr' );
+				const $setAsDefaultButtons = $settingRow.querySelectorAll( '.action__set_default' );
 				$setAsDefaultButtons.forEach( ( button ) => {
 					button.classList.remove( 'selected' );
+					button.closest('fieldset').querySelector('input[name="default"]').value = '';
 				});
 
 				// Set selected class.
