@@ -629,7 +629,7 @@ class ChatGPT extends Provider {
 		}
 
 		if ( isset( $settings['generate_title_prompt'] ) && ! empty( $settings['generate_title_prompt'] ) ) {
-			$new_settings['generate_title_prompt'] = sanitize_textarea_field( $settings['generate_title_prompt'] );
+			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
 		} else {
 			$new_settings['generate_title_prompt'] = '';
 		}
