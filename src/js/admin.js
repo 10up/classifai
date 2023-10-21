@@ -200,7 +200,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	/**
 	 * Handle prompt removal modal.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 * @param {Element} removePromptButton
 	 */
 	function displayPromptRemovalModal( removePromptButton ) {
