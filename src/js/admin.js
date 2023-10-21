@@ -113,7 +113,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	/**
 	 * Reset all input fields in a fieldset.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 * @param {Element} $fieldset
 	 * @param {Element} $parentRow
 	 */
