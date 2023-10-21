@@ -276,7 +276,7 @@ abstract class Provider {
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>
 					<span class="dashicons dashicons-editor-help"
-						title="<?php esc_attr_e( 'Short description of prompt to identify', 'classifai' ); ?>"></span>
+						title="<?php esc_attr_e( 'Short description of prompt to use for identification', 'classifai' ); ?>"></span>
 					<input type="text"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
