@@ -1197,7 +1197,7 @@ class ChatGPT extends Provider {
 		// Sanitize the prompts and make sure only one prompt is marked as default.
 		$has_default = false;
 
-		return array_map(
+		$prompts = array_map(
 			function ( $prompt ) use ( &$has_default ) {
 				$default = $prompt['default'] && ! $has_default;
 
@@ -1213,6 +1213,13 @@ class ChatGPT extends Provider {
 			},
 			$prompts
 		);
+
+		// If there is no default, use the first prompt.
+		if ( false === $has_default && ! empty( $prompts ) ) {
+			$prompts[0]['default'] = 1;
+		}
+
+		return $prompts;
 	}
 
 	/**
