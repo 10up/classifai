@@ -157,6 +157,7 @@ class ChatGPT extends Provider {
 	public function admin_enqueue_script( string $hook ): void {
 		if (
 			'tools_page_classifai' === $hook
+			&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
 			&& 'language_processing' === $_GET['tab'] // phpcs:ignore
 			&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
 		) {
