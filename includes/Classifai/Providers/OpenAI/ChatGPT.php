@@ -168,7 +168,7 @@ class ChatGPT extends Provider {
 				static function () {
 					printf(
 						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
-						esc_html__( 'Are you sure you want to delete prompt?', 'classifai' ),
+						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
 					);
 				}
 			);
