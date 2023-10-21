@@ -1218,7 +1218,7 @@ class ChatGPT extends Provider {
 	/**
 	 * Get the default prompt for use.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 *
 	 * @param array $prompts Prompt data.
 	 *
