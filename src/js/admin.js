@@ -148,7 +148,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	/**
 	 * Attach event to fieldset.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 * @param {Element} $newPromptFieldset
 	 */
 	function attachEventPromptFieldset( $newPromptFieldset ) {
