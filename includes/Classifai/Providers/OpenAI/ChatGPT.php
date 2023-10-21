@@ -148,7 +148,7 @@ class ChatGPT extends Provider {
 	/**
 	 * This function should enqueue the script for the admin page.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 *
 	 * @param string $hook WordPress admin page
 	 *
