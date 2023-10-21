@@ -1179,7 +1179,7 @@ class ChatGPT extends Provider {
 	 * Sanitize the prompt data.
 	 * This is used for the repeater field.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 *
 	 * @param array $prompts Prompt data.
 	 *
