@@ -1224,8 +1224,8 @@ class ChatGPT extends Provider {
 	 *
 	 * @return string|null Default prompt.
 	 */
-	public function get_default_prompt( array $prompts ) {
-		$excerpt_prompt = null;
+	public function get_default_prompt( array $prompts ): ?string {
+		$default_prompt = null;
 
 		if ( ! empty( $prompts ) ) {
 			$prompt_data = array_filter(
@@ -1236,13 +1236,13 @@ class ChatGPT extends Provider {
 			);
 
 			if ( ! empty( $prompt_data ) ) {
-				$excerpt_prompt = current( $prompt_data )['prompt'];
+				$default_prompt = current( $prompt_data )['prompt'];
 			} elseif ( ! empty( $prompts[0]['prompt'] ) ) {
 				// If there is no default, use the first prompt.
-				$excerpt_prompt = $prompts[0]['prompt'];
+				$default_prompt = $prompts[0]['prompt'];
 			}
 		}
 
-		return $excerpt_prompt;
+		return $default_prompt;
 	}
 }
