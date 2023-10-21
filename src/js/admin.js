@@ -262,7 +262,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	/**
 	 * Add a new fieldset.
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 * @param {Element} $sibling
 	 *
 	 * @return {Element} $newPromptFieldset
