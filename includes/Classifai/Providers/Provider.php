@@ -232,7 +232,7 @@ abstract class Provider {
 	/**
 	 * Generic prompt repeater field callback
 	 *
-	 * @since x.x.x
+	 * @since 2.4.0
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
