@@ -142,7 +142,7 @@ class APIRequest {
 	/**
 	 * Add the headers.
 	 *
-	 * @param array $options The header optins, passed by reference.
+	 * @param array $options The header options, passed by reference.
 	 */
 	public function add_headers( &$options ) {
 		if ( empty( $options['headers'] ) ) {

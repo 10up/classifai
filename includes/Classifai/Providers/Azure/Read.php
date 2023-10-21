@@ -277,7 +277,7 @@ class Read {
 	}
 
 	/**
-	 * Update document desctiption using text received from Read API.
+	 * Update document description using text received from Read API.
 	 *
 	 * @param array $data          Read result.
 	 *
