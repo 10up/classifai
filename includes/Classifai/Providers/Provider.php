@@ -465,4 +465,105 @@ abstract class Provider {
 
 		return $is_configured;
 	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @param string $feature_name Feature name.
+	 * @return void
+	 */
+	public function add_access_settings( $feature_name = '' ) {
+		if ( empty( $feature_name ) ) {
+			$feature_name = $this->get_provider_name();
+		}
+		$editable_roles   = get_editable_roles() ?? [];
+		$default_settings = $this->get_default_settings();
+		$settings         = $this->get_settings();
+		$default_settings = array_merge(
+			$default_settings,
+			array(
+				'enable_role_based_access' => 'no',
+				'allowed_roles'            => array_keys( $editable_roles ),
+			)
+		);
+
+		$roles = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ClassifAI
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_chatgpt_allowed_roles
+		 *
+		 * @param {array}  $roles            Array of arrays containing role information.
+		 * @param {string} $feature_name     Feature name.
+		 * @param {string} $option_name      Option name.
+		 * @param {array}  $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $feature_name, $this->get_option_name(), $default_settings );
+
+		add_settings_field(
+			'enable_role_based_access',
+			esc_html__( 'Enable role-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_role_based_access',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_role_based_access'],
+				/* translators: %s - Feature name */
+				'description'   => sprintf( __( 'Enable ability to select which role can access %s', 'classifai' ), $feature_name ),
+			]
+		);
+
+		// Add hidden class if role-based access is disabled.
+		$class = 'allowed_roles_row';
+		if ( ! isset( $settings['enable_role_based_access'] ) || '1' !== $settings['enable_role_based_access'] ) {
+			$class .= ' hidden';
+		}
+
+		add_settings_field(
+			'allowed_roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'      => 'allowed_roles',
+				'options'        => $roles,
+				'default_values' => $default_settings['allowed_roles'],
+				/* translators: %s - Feature name */
+				'description'    => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
+				'class'          => $class,
+			]
+		);
+	}
+
+	/**
+	 * Sanitization for the roles/users access options being saved.
+	 *
+	 * @param array $settings Array of settings about to be saved.
+	 *
+	 * @return array The sanitized settings to be saved.
+	 */
+	public function sanitize_access_settings( $settings ) {
+		$new_settings = [];
+
+		if ( empty( $settings['enable_role_based_access'] ) || 1 !== (int) $settings['enable_role_based_access'] ) {
+			$new_settings['enable_role_based_access'] = 'no';
+		} else {
+			$new_settings['enable_role_based_access'] = '1';
+		}
+
+		// Allowed roles.
+		if ( isset( $settings['allowed_roles'] ) && is_array( $settings['allowed_roles'] ) ) {
+			$new_settings['allowed_roles'] = array_map( 'sanitize_text_field', $settings['allowed_roles'] );
+		} else {
+			$new_settings['allowed_roles'] = array_keys( get_editable_roles() ?? [] );
+		}
+		return $new_settings;
+	}
 }

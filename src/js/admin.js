@@ -78,3 +78,37 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
 } )();
+
+document.addEventListener( 'DOMContentLoaded', function () {
+	function toogleAllowedRolesRow() {
+		const enabledRoles = document.querySelectorAll(
+			'tr.allowed_roles_row'
+		);
+		if ( this.checked ) {
+			enabledRoles.forEach( function ( e ) {
+				e.classList.remove( 'hidden' );
+			} );
+		} else {
+			enabledRoles.forEach( function ( e ) {
+				e.classList.add( 'hidden' );
+			} );
+		}
+	}
+
+	const roleBasedAccess = document.getElementById(
+		'enable_role_based_access'
+	);
+	const nluRoleBasedAccess = document.getElementById(
+		'classifai-settings-enable_role_based_access'
+	);
+
+	if ( roleBasedAccess ) {
+		roleBasedAccess.addEventListener( 'change', toogleAllowedRolesRow );
+		roleBasedAccess.dispatchEvent( new Event( 'change' ) );
+	}
+
+	if ( nluRoleBasedAccess ) {
+		nluRoleBasedAccess.addEventListener( 'change', toogleAllowedRolesRow );
+		nluRoleBasedAccess.dispatchEvent( new Event( 'change' ) );
+	}
+} );
