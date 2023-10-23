@@ -11,7 +11,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 	} );
 
 	/**
-	 * This function is solely responsibe for rendering, generating
+	 * This function is solely responsible for rendering, generating
 	 * and applying the generated excerpt in the classic editor.
 	 */
 	function generateExcerptInit() {
