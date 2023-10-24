@@ -35,6 +35,18 @@ class Tokenizer {
 	 */
 	public function __construct( $max_tokens ) {
 		$this->max_tokens = $max_tokens;
+
+		/**
+		 * How many characters in one token (roughly)
+		 *
+		 * @since 0.1.0
+		 * @hook classifai_openai_characters_in_token
+		 *
+		 * @param int $characters_in_token How many characters in one token (roughly)
+		 *
+		 * @return int
+		 */
+		$this->characters_in_token = apply_filters( 'classifai_openai_characters_in_token', $this->characters_in_token );
 	}
 
 	/**
