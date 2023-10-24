@@ -152,7 +152,7 @@ abstract class Service {
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 
-					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
+					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) && $provider->is_feature_enabled( 'classify_content' ) ) :
 						?>
 					<div id="classifai-post-preview-app">
 						<?php

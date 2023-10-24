@@ -350,7 +350,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Add User/role-based access settings for excerpt.
+		// Add user/role-based access settings for excerpt.
 		$this->add_access_settings( 'excerpt', $this->get_option_name() . '_excerpt' );
 
 		add_settings_field(
@@ -406,7 +406,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Add User/role-based access settings for titles.
+		// Add user/role-based access settings for titles.
 		$this->add_access_settings( 'titles', $this->get_option_name() . '_title' );
 
 		add_settings_field(
@@ -460,7 +460,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Add User/role-based access settings for resizing content.
+		// Add user/role-based access settings for resizing content.
 		$this->add_access_settings( 'resize_content', $this->get_option_name() . '_resize_content_settings' );
 
 		add_settings_field(

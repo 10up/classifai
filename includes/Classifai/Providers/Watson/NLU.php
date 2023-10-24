@@ -126,25 +126,27 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		if ( $this->has_access( 'classify_content' ) ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
-		// Add classifai meta box to classic editor.
-		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
+			// Add classifai meta box to classic editor.
+			add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
+			add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
 
-		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 
-		$this->taxonomy_factory = new TaxonomyFactory();
-		$this->taxonomy_factory->build_all();
+			$this->taxonomy_factory = new TaxonomyFactory();
+			$this->taxonomy_factory->build_all();
 
-		$this->save_post_handler = new SavePostHandler();
+			$this->save_post_handler = new SavePostHandler();
 
-		if ( $this->save_post_handler->can_register() ) {
-			$this->save_post_handler->register();
+			if ( $this->save_post_handler->can_register() ) {
+				$this->save_post_handler->register();
+			}
+
+			new PreviewClassifierData();
 		}
-
-		new PreviewClassifierData();
 	}
 
 	/**
@@ -217,7 +219,7 @@ class NLU extends Provider {
 			'classifai-gutenberg-plugin',
 			'classifaiPostData',
 			[
-				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
+				'NLUEnabled'           => $this->is_feature_enabled( 'classify_content' ),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
@@ -382,6 +384,8 @@ class NLU extends Provider {
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
+		// Add user/role-based access settings for classify content.
+		$this->add_access_settings( 'classify_content' );
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
@@ -426,7 +430,8 @@ class NLU extends Provider {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_input( $args ) {
-		$setting_index = $this->get_settings( $args['option_index'] );
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
 		$type          = $args['input_type'] ?? 'text';
 		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 
@@ -454,7 +459,7 @@ class NLU extends Provider {
 			type="<?php echo esc_attr( $type ); ?>"
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['option_index'] ); ?>][<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
@@ -649,6 +654,7 @@ class NLU extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings  = $this->get_settings();
+		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings ) );
 		$authenticated = $this->nlu_authentication_check( $settings );
 
 		if ( is_wp_error( $authenticated ) ) {
@@ -933,6 +939,38 @@ class NLU extends Provider {
 		}
 
 		return $is_configured;
+	}
+
+	/**
+	 * Determine if the current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature = 'classify_content' ) {
+		$access   = false;
+		$settings = $this->get_settings();
+
+		// Check if user has access to the feature and the feature is turned on.
+		if (
+			$this->has_access( $feature ) &&
+			\Classifai\language_processing_features_enabled()
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to a IBM Watson classify content feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_chatgpt_enable_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_watson_nlu_enable_{$feature}", $access, $settings );
 	}
 
 }

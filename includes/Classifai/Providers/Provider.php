@@ -505,7 +505,7 @@ abstract class Provider {
 		}
 
 		if ( empty( $section ) ) {
-			$prefix = $this->get_option_name();
+			$section = $this->get_option_name();
 		}
 
 		$role_based_access_key = $prefix . 'role_based_access';
@@ -513,11 +513,11 @@ abstract class Provider {
 		$roles                 = $this->get_allowed_roles();
 
 		$default_settings = array_merge(
-			$default_settings,
 			array(
 				$role_based_access_key => '1',
 				$roles_key             => array_keys( $editable_roles ),
-			)
+			),
+			$default_settings,
 		);
 
 		add_settings_field(

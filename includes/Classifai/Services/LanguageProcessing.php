@@ -260,7 +260,8 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_tags_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -294,7 +295,7 @@ class LanguageProcessing extends Service {
 		$post_statuses = \Classifai\get_supported_post_statuses();
 
 		// Check if processing allowed.
-		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
+		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! $provider->is_feature_enabled( 'classify_content' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
 		}
 
@@ -372,7 +373,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_excerpt' ) ) {
+		if ( ! $provider->is_feature_enabled( 'excerpt' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -573,7 +574,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_titles' ) ) {
+		if ( ! $provider->is_feature_enabled( 'titles' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -621,7 +622,8 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function resize_content_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -643,17 +645,9 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if resize content feature is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_resize_content'] ) && 'no' === $settings['enable_resize_content'] ) ) {
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'resize_content' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['resize_content_roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
 		}
 
 		return true;
