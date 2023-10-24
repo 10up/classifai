@@ -470,6 +470,7 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_audio_transcript_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
+		$provider      = find_provider_class( $this->provider_classes ?? [], 'Whisper' );
 		$post_type     = get_post_type_object( 'attachment' );
 
 		// Ensure attachments are allowed in REST endpoints.
@@ -489,17 +490,9 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if transcription is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_transcripts'] ) && 'no' === $settings['enable_transcripts'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcription is not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'transcripts' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;

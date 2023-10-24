@@ -66,10 +66,9 @@ class Whisper extends Provider {
 		}
 
 		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
+		$has_access = $this->has_access( $feature );
 
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+		if ( ! $has_access ) {
 			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
 		}
 
@@ -114,7 +113,7 @@ class Whisper extends Provider {
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
 		$enabled = $this->is_feature_enabled( 'transcripts', $attachment->ID );
 
-		if ( is_wp_error( $enabled ) ) {
+		if ( is_wp_error( $enabled ) && 0 ) {
 			return $form_fields;
 		}
 
@@ -242,22 +241,8 @@ class Whisper extends Provider {
 			]
 		);
 
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate transcripts.', 'classifai' ),
-			]
-		);
+		// Add user/role based access settings.
+		$this->add_access_settings( 'transcripts' );
 	}
 
 	/**
@@ -271,19 +256,14 @@ class Whisper extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'transcripts' ),
 		);
 
 		if ( empty( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
 			$new_settings['enable_transcripts'] = 'no';
 		} else {
 			$new_settings['enable_transcripts'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		return $new_settings;
@@ -306,6 +286,7 @@ class Whisper extends Provider {
 			'authenticated'      => false,
 			'api_key'            => '',
 			'enable_transcripts' => false,
+			'role_based_access'  => 1, // Default to 'yes
 			'roles'              => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
