@@ -646,7 +646,7 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
-		if ( isset( $settings['generate_title_prompt'] ) && ! empty( $settings['generate_title_prompt'] ) ) {
+		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
 			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
 		} else {
 			$new_settings['generate_title_prompt'] = array();
