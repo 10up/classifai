@@ -416,11 +416,17 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function speech_synthesis_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Text to Speech' );
 
 		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
 			$post_type = get_post_type( $post_id );
 			$supported = \Classifai\get_tts_supported_post_types();
+
+			// Ensure the feature is enabled. Also runs a user check.
+			if ( ! $provider->is_feature_enabled( 'text_to_speech' ) ) {
+				return new WP_Error( 'not_enabled', esc_html__( 'Azure Speech synthesis is not enabled.', 'classifai' ) );
+			}
 
 			// Check if processing allowed.
 			if ( ! in_array( $post_type, $supported, true ) ) {

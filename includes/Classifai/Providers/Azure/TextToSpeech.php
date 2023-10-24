@@ -121,14 +121,15 @@ class TextToSpeech extends Provider {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
-		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+		if ( $this->is_feature_enabled( 'text_to_speech' ) ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+			add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-		$supported_post_type = get_tts_supported_post_types();
-		foreach ( get_tts_supported_post_types() as $post_type ) {
-			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			foreach ( get_tts_supported_post_types() as $post_type ) {
+				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			}
 		}
 
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
@@ -178,6 +179,9 @@ class TextToSpeech extends Provider {
 			]
 		);
 
+		// Add user/role based access settings.
+		$this->add_access_settings( 'text_to_speech' );
+
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types', 'classifai' ),
@@ -216,6 +220,7 @@ class TextToSpeech extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$current_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$current_settings       = array_merge( $current_settings, $this->sanitize_access_settings( $settings, 'text_to_speech' ) );
 		$is_credentials_changed = false;
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
@@ -878,4 +883,37 @@ class TextToSpeech extends Provider {
 		return $options;
 	}
 
+
+	/**
+	 * Determine if the current user can access the feature
+	 * TODO: remove this method once enable/disable feature is implemented.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature = '' ) {
+		$access   = false;
+		$settings = $this->get_settings();
+
+		// Check if provider is configured and user has access to the feature.
+		if (
+			$this->is_configured() &&
+			$this->has_access( $feature )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $access, $settings );
+	}
 }

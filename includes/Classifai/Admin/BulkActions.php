@@ -69,8 +69,9 @@ class BulkActions {
 	 * Register bulk actions for language processing.
 	 */
 	public function register_language_processing_hooks() {
-		$this->chat_gpt   = new ChatGPT( false );
-		$this->embeddings = new Embeddings( false );
+		$this->chat_gpt       = new ChatGPT( false );
+		$this->embeddings     = new Embeddings( false );
+		$this->text_to_speech = new TextToSpeech( false );
 
 		$embeddings_post_types     = [];
 		$nlu_post_types            = get_supported_post_types();
@@ -97,6 +98,11 @@ class BulkActions {
 			$embeddings_post_types = $this->embeddings->supported_post_types();
 		} else {
 			$this->embeddings = null;
+		}
+
+		// Clear our TextToSpeech handler if no post types are set up.
+		if ( empty( $text_to_speech_post_types ) ) {
+			$this->text_to_speech = null;
 		}
 
 		// Merge our post types together and make them unique.
@@ -156,7 +162,8 @@ class BulkActions {
 
 		if (
 			is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) &&
-			in_array( get_current_screen()->post_type, $this->text_to_speech->get_supported_post_types(), true )
+			in_array( get_current_screen()->post_type, get_tts_supported_post_types(), true ) &&
+			$this->text_to_speech->is_feature_enabled( 'text_to_speech' )
 		) {
 			$bulk_actions['text_to_speech'] = __( 'Text to speech', 'classifai' );
 		}
@@ -410,8 +417,8 @@ class BulkActions {
 			}
 		}
 
-		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) ) {
-			if ( in_array( $post->post_type, $this->text_to_speech->get_supported_post_types(), true ) ) {
+		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) && $this->text_to_speech->is_feature_enabled( 'text_to_speech' ) ) {
+			if ( in_array( $post->post_type, get_tts_supported_post_types(), true ) ) {
 				$actions['text_to_speech'] = sprintf(
 					'<a href="%s">%s</a>',
 					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
