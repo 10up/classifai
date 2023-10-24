@@ -719,7 +719,7 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
-	 * Adds audio controls to the post that has speech sythesis enabled.
+	 * Adds audio controls to the post that has speech synthesis enabled.
 	 *
 	 * @param string $content Post content.
 	 * @return string
