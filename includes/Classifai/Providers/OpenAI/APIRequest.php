@@ -171,7 +171,25 @@ class APIRequest {
 
 		$this->add_headers( $options );
 
-		return $this->get_result( wp_remote_post( $url, $options ) );
+		/**
+		 * Filter the response from OpenAI for a post form request.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_api_request_post_form
+		 *
+		 * @param {string} $url Request URL.
+		 * @param {array} $options Request body options.
+		 * @param {string} $this->feature Feature name.
+		 *
+		 * @return {array} API response.
+		 */
+		return apply_filters(
+			'classifai_openai_api_request_post_form',
+			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$url,
+			$options,
+			$this->feature
+		);
 	}
 
 	/**
