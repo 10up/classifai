@@ -796,7 +796,7 @@ class ChatGPT extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
 		$excerpt_prompt = ! empty( $settings['generate_excerpt_prompt'] ) ? esc_textarea( $settings['generate_excerpt_prompt'] ) : $this->generate_excerpt_prompt;
 
@@ -899,7 +899,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
 		$prompt = ! empty( $settings['generate_title_prompt'] ) ? esc_textarea( $settings['generate_title_prompt'] ) : $this->generate_title_prompt;
 
@@ -998,7 +998,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = ! empty( $settings['shrink_content_prompt'] ) ? esc_textarea( $settings['shrink_content_prompt'] ) : $this->shrink_content_prompt;
