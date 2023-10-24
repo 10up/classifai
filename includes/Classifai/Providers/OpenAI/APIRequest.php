@@ -54,10 +54,10 @@ class APIRequest {
 		$this->add_headers( $options );
 
 		/**
-		 * Filter the response from OpenAI for a post request.
+		 * Filter the response from OpenAI for a get request.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_api_request_post
+		 * @hook classifai_openai_api_request_get
 		 *
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
@@ -89,7 +89,26 @@ class APIRequest {
 			]
 		);
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+
+		/**
+		 * Filter the response from OpenAI for a post request.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_api_request_post
+		 *
+		 * @param {string} $url Request URL.
+		 * @param {array} $options Request body options.
+		 * @param {string} $this->feature Feature name.
+		 *
+		 * @return {array} API response.
+		 */
+		return apply_filters(
+			'classifai_openai_api_request_post',
+			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$url,
+			$options,
+			$this->feature
+		);
 	}
 
 	/**
