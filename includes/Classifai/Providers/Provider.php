@@ -34,6 +34,26 @@ abstract class Provider {
 	 */
 	public $onboarding_options;
 
+	/**
+	 * This variable holds an array that maps feature to their corresponding prefixes for saving role/user based access settings in feature options.
+	 *
+	 * @var array $access_prefix An associative array where the keys are feature and the values are their corresponding prefixes.
+	 */
+	protected $access_prefix = array(
+		'classify_content'    => '',
+		'titles'              => 'title_',
+		'excerpt'             => '',
+		'resize_content'      => 'resize_content_',
+		'classification'      => '',
+		'transcripts'         => '',
+		'image_captions'      => 'image_caption_',
+		'image_tagging'       => 'image_tagging_',
+		'smart_cropping'      => 'smart_cropping_',
+		'ocr'                 => 'ocr_',
+		'read_pdf'            => 'read_pdf_',
+		'image_gen'           => '',
+		'recommended_content' => '',
+	);
 
 	/**
 	 * Provider constructor.
@@ -469,21 +489,33 @@ abstract class Provider {
 	/**
 	 * Add settings fields for Role/User based access.
 	 *
-	 * @param string $feature_name Feature name.
+	 * @param string $feature Feature.
+	 * @param string $section Settings section.
 	 * @return void
 	 */
-	public function add_access_settings( $feature_name = '' ) {
-		if ( empty( $feature_name ) ) {
-			$feature_name = $this->get_provider_name();
-		}
+	public function add_access_settings( $feature = '', $section = '' ) {
+		$feature_name     = $this->get_provider_name();
 		$editable_roles   = get_editable_roles() ?? [];
 		$default_settings = $this->get_default_settings();
 		$settings         = $this->get_settings();
+
+		$prefix = '';
+		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
+			$prefix = $this->access_prefix[ $feature ];
+		}
+
+		if ( empty( $section ) ) {
+			$prefix = $this->get_option_name();
+		}
+
+		$role_based_access_key = $prefix . 'role_based_access';
+		$roles_key             = $prefix . 'roles';
+
 		$default_settings = array_merge(
 			$default_settings,
 			array(
-				'enable_role_based_access' => 'no',
-				'allowed_roles'            => array_keys( $editable_roles ),
+				$role_based_access_key => '1',
+				$roles_key             => array_keys( $editable_roles ),
 			)
 		);
 
@@ -502,39 +534,40 @@ abstract class Provider {
 		 *
 		 * @return {array} Roles array.
 		 */
-		$roles = apply_filters( 'classifai_allowed_roles', $roles, $feature_name, $this->get_option_name(), $default_settings );
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $feature, $this->get_option_name(), $default_settings );
 
 		add_settings_field(
-			'enable_role_based_access',
+			$role_based_access_key,
 			esc_html__( 'Enable role-based access', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$section,
 			[
-				'label_for'     => 'enable_role_based_access',
+				'label_for'     => $role_based_access_key,
 				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_role_based_access'],
+				'default_value' => $default_settings[ $role_based_access_key ],
 				/* translators: %s - Feature name */
 				'description'   => sprintf( __( 'Enable ability to select which role can access %s', 'classifai' ), $feature_name ),
+				'class'         => 'classifai-role-based-access',
 			]
 		);
 
 		// Add hidden class if role-based access is disabled.
 		$class = 'allowed_roles_row';
-		if ( ! isset( $settings['enable_role_based_access'] ) || '1' !== $settings['enable_role_based_access'] ) {
+		if ( ! isset( $settings[ $role_based_access_key ] ) || '1' !== $settings[ $role_based_access_key ] ) {
 			$class .= ' hidden';
 		}
 
 		add_settings_field(
-			'allowed_roles',
+			$roles_key,
 			esc_html__( 'Allowed roles', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$section,
 			[
-				'label_for'      => 'allowed_roles',
+				'label_for'      => $roles_key,
 				'options'        => $roles,
-				'default_values' => $default_settings['allowed_roles'],
+				'default_values' => $default_settings[ $roles_key ],
 				/* translators: %s - Feature name */
 				'description'    => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
 				'class'          => $class,
@@ -545,25 +578,79 @@ abstract class Provider {
 	/**
 	 * Sanitization for the roles/users access options being saved.
 	 *
-	 * @param array $settings Array of settings about to be saved.
+	 * @param array  $settings Array of settings about to be saved.
+	 * @param string $feature  Feature key.
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_access_settings( $settings ) {
+	public function sanitize_access_settings( $settings, $feature = '' ) {
+		$prefix = '';
+		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
+			$prefix = $this->access_prefix[ $feature ];
+		}
+
+		$role_based_access_key = $prefix . 'role_based_access';
+		$roles_key             = $prefix . 'roles';
+
 		$new_settings = [];
 
-		if ( empty( $settings['enable_role_based_access'] ) || 1 !== (int) $settings['enable_role_based_access'] ) {
-			$new_settings['enable_role_based_access'] = 'no';
+		if ( empty( $settings[ $role_based_access_key ] ) || 1 !== (int) $settings[ $role_based_access_key ] ) {
+			$new_settings[ $role_based_access_key ] = 'no';
 		} else {
-			$new_settings['enable_role_based_access'] = '1';
+			$new_settings[ $role_based_access_key ] = '1';
 		}
 
 		// Allowed roles.
-		if ( isset( $settings['allowed_roles'] ) && is_array( $settings['allowed_roles'] ) ) {
-			$new_settings['allowed_roles'] = array_map( 'sanitize_text_field', $settings['allowed_roles'] );
+		if ( isset( $settings[ $roles_key ] ) && is_array( $settings[ $roles_key ] ) ) {
+			$new_settings[ $roles_key ] = array_map( 'sanitize_text_field', $settings[ $roles_key ] );
 		} else {
-			$new_settings['allowed_roles'] = array_keys( get_editable_roles() ?? [] );
+			$new_settings[ $roles_key ] = array_keys( get_editable_roles() ?? [] );
 		}
 		return $new_settings;
+	}
+
+	/**
+	 * Determine if the current user has access of the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	protected function has_access( string $feature = '' ) {
+		$access     = false;
+		$settings   = $this->get_settings();
+		$user_roles = wp_get_current_user()->roles ?? [];
+		$prefix     = '';
+		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
+			$prefix = $this->access_prefix[ $feature ];
+		}
+
+		$role_based_access_key = $prefix . 'role_based_access';
+		$roles_key             = $prefix . 'roles';
+		$feature_roles         = $settings[ $roles_key ] ?? [];
+
+		/*
+		 * Checks:
+		 * - User is logged in.
+		 * - Role-based access is enabled and user role has access to the feature.
+		 */
+		if (
+			is_user_logged_in() &&
+			( 1 !== (int) $settings[ $role_based_access_key ] || ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) ) )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override user access to a ClassifAI feature.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_has_access_{$this->option_name}_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_has_access_{$this->option_name}_{$feature}", $access, $settings );
 	}
 }

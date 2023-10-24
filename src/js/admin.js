@@ -80,35 +80,29 @@ document.addEventListener( 'DOMContentLoaded', function () {
 } )();
 
 document.addEventListener( 'DOMContentLoaded', function () {
-	function toogleAllowedRolesRow() {
-		const enabledRoles = document.querySelectorAll(
-			'tr.allowed_roles_row'
-		);
-		if ( this.checked ) {
-			enabledRoles.forEach( function ( e ) {
-				e.classList.remove( 'hidden' );
-			} );
+	function toogleAllowedRolesRow( e ) {
+		const checkbox = e.target;
+		const parentTr = checkbox.closest( 'tr.classifai-role-based-access' );
+		const allowedRoles = parentTr.nextElementSibling.classList.contains(
+			'allowed_roles_row'
+		)
+			? parentTr.nextElementSibling
+			: null;
+		if ( checkbox.checked ) {
+			allowedRoles.classList.remove( 'hidden' );
 		} else {
-			enabledRoles.forEach( function ( e ) {
-				e.classList.add( 'hidden' );
-			} );
+			allowedRoles.classList.add( 'hidden' );
 		}
 	}
 
-	const roleBasedAccess = document.getElementById(
-		'enable_role_based_access'
-	);
-	const nluRoleBasedAccess = document.getElementById(
-		'classifai-settings-enable_role_based_access'
+	const roleBasedAccessCheckBoxes = document.querySelectorAll(
+		'tr.classifai-role-based-access input[type="checkbox"]'
 	);
 
-	if ( roleBasedAccess ) {
-		roleBasedAccess.addEventListener( 'change', toogleAllowedRolesRow );
-		roleBasedAccess.dispatchEvent( new Event( 'change' ) );
-	}
-
-	if ( nluRoleBasedAccess ) {
-		nluRoleBasedAccess.addEventListener( 'change', toogleAllowedRolesRow );
-		nluRoleBasedAccess.dispatchEvent( new Event( 'change' ) );
+	if ( roleBasedAccessCheckBoxes ) {
+		roleBasedAccessCheckBoxes.forEach( function ( e ) {
+			e.addEventListener( 'change', toogleAllowedRolesRow );
+			e.dispatchEvent( new Event( 'change' ) );
+		} );
 	}
 } );
