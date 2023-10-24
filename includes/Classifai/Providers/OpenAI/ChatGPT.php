@@ -1010,6 +1010,7 @@ class ChatGPT extends Provider {
 		 * Filter the resize prompt we will send to ChatGPT.
 		 *
 		 * @since 2.3.0
+		 * @hook classifai_chatgpt_' . $args['resize_type'] . '_content_prompt
 		 *
 		 * @param {string} $prompt Resize prompt we are sending to ChatGPT. Gets added as a system prompt.
 		 * @param {int} $post_id ID of post.

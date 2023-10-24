@@ -57,7 +57,7 @@ class APIRequest {
 		 * Filter the response from OpenAI for a get request.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_api_request_get
+		 * @hook classifai_openai_api_response_get
 		 *
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
@@ -66,7 +66,7 @@ class APIRequest {
 		 * @return {array} API response.
 		 */
 		return apply_filters(
-			'classifai_openai_api_request_get',
+			'classifai_openai_api_response_get',
 			$this->get_result( wp_remote_get( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 			$url,
 			$options,
@@ -94,7 +94,7 @@ class APIRequest {
 		 * Filter the response from OpenAI for a post request.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_api_request_post
+		 * @hook classifai_openai_api_response_post
 		 *
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
@@ -103,7 +103,7 @@ class APIRequest {
 		 * @return {array} API response.
 		 */
 		return apply_filters(
-			'classifai_openai_api_request_post',
+			'classifai_openai_api_response_post',
 			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 			$url,
 			$options,
@@ -175,7 +175,7 @@ class APIRequest {
 		 * Filter the response from OpenAI for a post form request.
 		 *
 		 * @since x.x.x
-		 * @hook classifai_openai_api_request_post_form
+		 * @hook classifai_openai_api_response_post_form
 		 *
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
@@ -184,7 +184,7 @@ class APIRequest {
 		 * @return {array} API response.
 		 */
 		return apply_filters(
-			'classifai_openai_api_request_post_form',
+			'classifai_openai_api_response_post_form',
 			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 			$url,
 			$options,
