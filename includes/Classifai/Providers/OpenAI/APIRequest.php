@@ -142,13 +142,32 @@ class APIRequest {
 
 		$payload .= '--' . $boundary . '--';
 
-		$options = [
-			'body'    => $payload,
-			'headers' => [
-				'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+		/**
+		 * Filter the options for the post form request.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_api_request_post_form_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $body The body of the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		$options = apply_filters(
+			'classifai_openai_api_request_post_form_options',
+			[
+				'body' => $payload,
+				'headers' => [
+					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+				],
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			],
-			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-		];
+			$url,
+			$body,
+			$this->feature
+		);
 
 		$this->add_headers( $options );
 
