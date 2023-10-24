@@ -493,7 +493,7 @@ abstract class Provider {
 	 * @param string $section Settings section.
 	 * @return void
 	 */
-	public function add_access_settings( $feature = '', $section = '' ) {
+	protected function add_access_settings( $feature = '', $section = '' ) {
 		$feature_name     = $this->get_provider_name();
 		$editable_roles   = get_editable_roles() ?? [];
 		$default_settings = $this->get_default_settings();
@@ -510,6 +510,7 @@ abstract class Provider {
 
 		$role_based_access_key = $prefix . 'role_based_access';
 		$roles_key             = $prefix . 'roles';
+		$roles                 = $this->get_allowed_roles();
 
 		$default_settings = array_merge(
 			$default_settings,
@@ -518,23 +519,6 @@ abstract class Provider {
 				$roles_key             => array_keys( $editable_roles ),
 			)
 		);
-
-		$roles = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for ClassifAI
-		 *
-		 * @since 2.5.0
-		 * @hook classifai_chatgpt_allowed_roles
-		 *
-		 * @param {array}  $roles            Array of arrays containing role information.
-		 * @param {string} $feature_name     Feature name.
-		 * @param {string} $option_name      Option name.
-		 * @param {array}  $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_allowed_roles', $roles, $feature, $this->get_option_name(), $default_settings );
 
 		add_settings_field(
 			$role_based_access_key,
@@ -583,7 +567,7 @@ abstract class Provider {
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_access_settings( $settings, $feature = '' ) {
+	protected function sanitize_access_settings( $settings, $feature = '' ) {
 		$prefix = '';
 		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
 			$prefix = $this->access_prefix[ $feature ];
@@ -652,5 +636,34 @@ abstract class Provider {
 		 * @return {bool} Should the user have access?
 		 */
 		return apply_filters( "classifai_has_access_{$this->option_name}_{$feature}", $access, $settings );
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for ClassifAI.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	protected function get_allowed_roles() {
+		$default_settings = $this->get_default_settings();
+		$editable_roles   = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ClassifAI
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_allowed_roles
+		 *
+		 * @param {array}  $roles            Array of arrays containing role information.
+		 * @param {string} $option_name      Option name.
+		 * @param {array}  $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $this->get_option_name(), $default_settings );
+
+		return $roles;
 	}
 }
