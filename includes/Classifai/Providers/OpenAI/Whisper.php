@@ -53,10 +53,11 @@ class Whisper extends Provider {
 	/**
 	 * Check to see if the feature is enabled and a user has access.
 	 *
-	 * @param int $attachment_id Attachment ID to process.
+	 * @param string $feature       Feature to check.
+	 * @param int    $attachment_id Attachment ID to process.
 	 * @return bool|WP_Error
 	 */
-	public function is_feature_enabled( int $attachment_id = 0 ) {
+	public function is_feature_enabled( string $feature = 'transcripts', int $attachment_id = 0 ) {
 		$settings = $this->get_settings();
 
 		// Check if valid authentication is in place.
@@ -92,7 +93,7 @@ class Whisper extends Provider {
 	 */
 	public function transcribe_audio( $attachment_id = 0 ) {
 		$settings = $this->get_settings();
-		$enabled  = $this->is_feature_enabled( $attachment_id );
+		$enabled  = $this->is_feature_enabled( 'transcripts', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $enabled;
@@ -111,7 +112,7 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
-		$enabled = $this->is_feature_enabled( $attachment->ID );
+		$enabled = $this->is_feature_enabled( 'transcripts', $attachment->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $form_fields;
@@ -144,7 +145,7 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$enabled = $this->is_feature_enabled( $post->ID );
+		$enabled = $this->is_feature_enabled( 'transcripts', $post->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -198,7 +199,7 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_transcribe_audio( $attachment_id ) {
-		$enabled = $this->is_feature_enabled( $attachment_id );
+		$enabled = $this->is_feature_enabled( 'transcripts', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;

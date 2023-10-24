@@ -537,11 +537,13 @@ class DallE extends Provider {
 	/**
 	 * Checks whether we can generate images.
 	 *
+	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled() {
-		$access   = false;
-		$settings = $this->get_settings();
+	public function is_feature_enabled( string $feature = 'image_gen' ) {
+		$access     = false;
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
 
 		// Check if the current user has permission to generate images.
 		$roles      = $settings['roles'] ?? [];
@@ -550,7 +552,7 @@ class DallE extends Provider {
 		if (
 			current_user_can( 'upload_files' )
 			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+			&& ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
 		) {
 			$access = true;
 		}
@@ -566,7 +568,7 @@ class DallE extends Provider {
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
+		return apply_filters( "classifai_openai_dalle_enable_{$feature}", $access, $settings );
 	}
 
 }

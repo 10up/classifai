@@ -72,13 +72,10 @@ class BulkActions {
 		$this->chat_gpt   = new ChatGPT( false );
 		$this->embeddings = new Embeddings( false );
 
-		$user_roles                = wp_get_current_user()->roles ?? [];
-		$embedding_settings        = $this->embeddings->get_settings();
 		$embeddings_post_types     = [];
 		$nlu_post_types            = get_supported_post_types();
 		$text_to_speech_post_types = get_tts_supported_post_types();
 		$chat_gpt_post_types       = [];
-		$chat_gpt_settings         = $this->chat_gpt->get_settings();
 
 		// Set up the save post handler if we have any post types.
 		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
@@ -87,10 +84,8 @@ class BulkActions {
 
 		// Set up the ChatGPT post types if the feature is enabled. Otherwise clear our handler.
 		if (
-			isset( $chat_gpt_settings['enable_excerpt'] ) &&
-			1 === (int) $chat_gpt_settings['enable_excerpt'] &&
-			! empty( $chat_gpt_settings['roles'] ) &&
-			empty( array_diff( $user_roles, $chat_gpt_settings['roles'] ) )
+			$this->chat_gpt &&
+			$this->chat_gpt->is_feature_enabled( 'excerpt' )
 		) {
 			$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
 		} else {
@@ -98,7 +93,7 @@ class BulkActions {
 		}
 
 		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
-		if ( isset( $embedding_settings['enable_classification'] ) && 1 === (int) $embedding_settings['enable_classification'] ) {
+		if ( $this->embeddings && $this->embeddings->is_feature_enabled( 'classification' ) ) {
 			$embeddings_post_types = $this->embeddings->supported_post_types();
 		} else {
 			$this->embeddings = null;

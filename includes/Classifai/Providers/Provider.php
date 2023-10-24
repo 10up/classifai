@@ -666,4 +666,38 @@ abstract class Provider {
 
 		return $roles;
 	}
+
+	/**
+	 * Determine if the current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature = '' ) {
+		$access     = false;
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Check if provider is configured and user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access( $feature ) &&
+			( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
+		) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $access, $settings );
+	}
 }

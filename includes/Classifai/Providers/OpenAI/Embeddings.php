@@ -71,7 +71,7 @@ class Embeddings extends Provider {
 	public function register() {
 		$settings = $this->get_settings();
 
-		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
+		if ( $this->is_feature_enabled( 'classification' ) ) {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
@@ -138,6 +138,9 @@ class Embeddings extends Provider {
 				'description'   => __( 'Automatically classify content within your existing taxonomy structure.', 'classifai' ),
 			]
 		);
+
+		// Add user/role based access settings.
+		$this->add_access_settings( 'classification' );
 
 		add_settings_field(
 			'post-types',
@@ -210,7 +213,8 @@ class Embeddings extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'classification' ),
 		);
 
 		if ( empty( $settings['enable_classification'] ) || 1 !== (int) $settings['enable_classification'] ) {
@@ -291,6 +295,8 @@ class Embeddings extends Provider {
 			'post_statuses'         => [ 'publish' ],
 			'taxonomies'            => [ 'category' ],
 			'number'                => 1,
+			'role_based_access'     => 1,
+			'roles'                 => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 
