@@ -416,14 +416,12 @@ class BulkActions {
 			}
 		}
 
-		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) && $this->text_to_speech->is_feature_enabled( 'text_to_speech' ) ) {
-			if ( in_array( $post->post_type, get_tts_supported_post_types(), true ) ) {
-				$actions['text_to_speech'] = sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-					esc_html__( 'Text to speech', 'classifai' )
-				);
-			}
+		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) && $this->text_to_speech->is_feature_enabled( 'text_to_speech' ) && in_array( $post->post_type, get_tts_supported_post_types(), true ) ) {
+			$actions['text_to_speech'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+				esc_html__( 'Text to speech', 'classifai' )
+			);
 		}
 
 		return $actions;

@@ -113,7 +113,7 @@ class Whisper extends Provider {
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
 		$enabled = $this->is_feature_enabled( 'transcripts', $attachment->ID );
 
-		if ( is_wp_error( $enabled ) && 0 ) {
+		if ( is_wp_error( $enabled ) ) {
 			return $form_fields;
 		}
 
