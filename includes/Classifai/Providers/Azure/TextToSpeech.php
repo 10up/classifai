@@ -85,6 +85,8 @@ class TextToSpeech extends Provider {
 
 	/**
 	 * Enqueue the editor scripts.
+	 *
+	 * @since x.x.x Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_editor_assets() {
 		$post = get_post();

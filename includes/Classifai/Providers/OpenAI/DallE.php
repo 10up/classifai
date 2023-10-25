@@ -84,6 +84,8 @@ class DallE extends Provider {
 	/**
 	 * Enqueue the admin scripts.
 	 *
+	 * @since x.x.x Use get_asset_info to get the asset version and dependencies.
+	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {

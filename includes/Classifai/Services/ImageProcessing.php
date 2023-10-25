@@ -41,6 +41,8 @@ class ImageProcessing extends Service {
 
 	/**
 	 * Enqueue the script for the media modal.
+	 *
+	 * @since x.x.x Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(
