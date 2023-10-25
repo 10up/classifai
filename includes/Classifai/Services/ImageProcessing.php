@@ -274,6 +274,18 @@ class ImageProcessing extends Service {
 		}
 
 		$settings = \Classifai\get_plugin_settings( 'image_processing', 'AI Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Vision' );
+
+		// Permission check for user access.
+		if ( 'ocr' === $route_to_call && ! $provider->is_feature_enabled( 'ocr' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Scan image for text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		} elseif ( 'alt-tags' === $route_to_call && ! $provider->is_feature_enabled( 'image_captions' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image captions is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		} elseif ( 'image-tags' === $route_to_call && ! $provider->is_feature_enabled( 'image_tagging' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image tagging is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		} elseif ( 'smart-crop' === $route_to_call && ! $provider->is_feature_enabled( 'smart_cropping' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Smart cropping is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
 
 		// For the image-tags route, ensure the taxonomy is valid and the user has permission to assign terms.
 		if ( 'image-tags' === $route_to_call ) {
