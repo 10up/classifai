@@ -46,6 +46,7 @@ abstract class Provider {
 		'resize_content'      => 'resize_content_',
 		'classification'      => '',
 		'transcripts'         => '',
+		'text_to_speech'      => '',
 		'image_captions'      => 'image_caption_',
 		'image_tagging'       => 'image_tagging_',
 		'smart_cropping'      => 'smart_cropping_',
@@ -494,10 +495,26 @@ abstract class Provider {
 	 * @return void
 	 */
 	protected function add_access_settings( $feature = '', $section = '' ) {
-		$feature_name     = $this->get_provider_name();
 		$editable_roles   = get_editable_roles() ?? [];
 		$default_settings = $this->get_default_settings();
 		$settings         = $this->get_settings();
+		$feature_names    = array(
+			'classify_content'    => __( 'classify content', 'classifai' ),
+			'titles'              => __( 'generate titles', 'classifai' ),
+			'excerpt'             => __( 'generate excerpts', 'classifai' ),
+			'resize_content'      => __( 'resize content', 'classifai' ),
+			'classification'      => __( 'classify content', 'classifai' ),
+			'transcripts'         => __( 'generate transcripts', 'classifai' ),
+			'text_to_speech'      => __( 'text to speech', 'classifai' ),
+			'image_captions'      => __( 'generate captions', 'classifai' ),
+			'image_tagging'       => __( 'generate tags', 'classifai' ),
+			'smart_cropping'      => __( 'smart cropping', 'classifai' ),
+			'ocr'                 => __( 'scan images for text', 'classifai' ),
+			'read_pdf'            => __( 'scan PDF', 'classifai' ),
+			'image_gen'           => __( 'generate images', 'classifai' ),
+			'recommended_content' => __( 'recommended content block', 'classifai' ),
+		);
+		$feature_name     = $feature_names[ $feature ] ?? $this->get_provider_name();
 
 		$prefix = '';
 		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
