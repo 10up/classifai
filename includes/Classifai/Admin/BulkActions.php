@@ -179,7 +179,7 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
-		$whisper_enabled          = $this->whisper->is_feature_enabled();
+		$whisper_enabled = $this->whisper->is_feature_enabled();
 
 		if (
 			$this->computer_vision->is_feature_enabled( 'image_tagging' ) ||
@@ -436,7 +436,7 @@ class BulkActions {
 	 */
 	public function register_media_row_action( $actions, $post ) {
 		$whisper_settings = $this->whisper->get_settings();
-		$whisper_enabled  = $this->whisper->is_feature_enabled( $post->ID );
+		$whisper_enabled  = $this->whisper->is_feature_enabled( 'transcripts', $post->ID );
 
 		if ( is_wp_error( $whisper_enabled ) ) {
 			return $actions;
