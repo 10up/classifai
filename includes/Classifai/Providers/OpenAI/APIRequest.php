@@ -51,6 +51,34 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function get( string $url, array $options = [] ) {
+		/**
+		 * Filter the URL for the get request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_get_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $options The options for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		apply_filters( 'classifai_openai_api_request_get_url', $url, $options, $this->feature );
+
+		/**
+		 * Filter the options for the get request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_get_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		apply_filters( 'classifai_openai_api_request_get_options', $options, $url, $this->feature );
+
 		$this->add_headers( $options );
 
 		/**
