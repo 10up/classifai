@@ -273,42 +273,8 @@ class DallE extends Provider {
 			]
 		);
 
-		// Get all roles that have the upload_files cap.
-		$roles = get_editable_roles() ?? [];
-		$roles = array_filter(
-			$roles,
-			function( $role ) {
-				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
-			}
-		);
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for DALL·E
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_allowed_image_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate images. Note that the roles above only include those that have permissions to upload media.', 'classifai' ),
-			]
-		);
+		// Add user/role based settings.
+		$this->add_access_settings( 'image_gen' );
 
 		add_settings_field(
 			'number',
@@ -353,19 +319,14 @@ class DallE extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'image_gen' )
 		);
 
 		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
 			$new_settings['enable_image_gen'] = 'no';
 		} else {
 			$new_settings['enable_image_gen'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {
@@ -397,12 +358,13 @@ class DallE extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'authenticated'    => false,
-			'api_key'          => '',
-			'enable_image_gen' => false,
-			'roles'            => array_keys( get_editable_roles() ?? [] ),
-			'number'           => 1,
-			'size'             => '1024x1024',
+			'authenticated'     => false,
+			'api_key'           => '',
+			'enable_image_gen'  => false,
+			'role_based_access' => 1,
+			'roles'             => array_keys( get_editable_roles() ?? [] ),
+			'number'            => 1,
+			'size'              => '1024x1024',
 		];
 	}
 
@@ -571,4 +533,38 @@ class DallE extends Provider {
 		return apply_filters( "classifai_openai_dalle_enable_{$feature}", $access, $settings );
 	}
 
+	/**
+	 * Retrieves the allowed WordPress roles for OpenAI DALL·E
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	protected function get_allowed_roles() {
+		$default_settings = $this->get_default_settings();
+		// Get all roles that have the upload_files cap.
+		$roles = get_editable_roles() ?? [];
+		$roles = array_filter(
+			$roles,
+			function( $role ) {
+				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
+			}
+		);
+		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for DALL·E
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_allowed_image_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
+
+		return $roles;
+	}
 }

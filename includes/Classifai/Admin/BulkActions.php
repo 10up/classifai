@@ -179,17 +179,16 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
-		$computer_vision_settings = $this->computer_vision->get_settings();
 		$whisper_enabled          = $this->whisper->is_feature_enabled();
 
 		if (
-			'no' !== $computer_vision_settings['enable_image_tagging'] ||
-			! empty( $this->computer_vision->get_alt_text_settings() )
+			$this->computer_vision->is_feature_enabled( 'image_tagging' ) ||
+			$this->computer_vision->is_feature_enabled( 'image_captions' )
 		) {
 			$bulk_actions['scan_image'] = __( 'Scan image', 'classifai' );
 		}
 
-		if ( isset( $computer_vision_settings['enable_smart_cropping'] ) && '1' === $computer_vision_settings['enable_smart_cropping'] ) {
+		if ( $this->computer_vision && $this->computer_vision->is_feature_enabled( 'smart_cropping' ) ) {
 			$bulk_actions['smart_crop'] = __( 'Smart crop', 'classifai' );
 		}
 
