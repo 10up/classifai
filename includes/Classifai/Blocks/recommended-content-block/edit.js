@@ -95,6 +95,21 @@ const RecommendedContentBlockEdit = ( props ) => {
 			isActive: displayLayout === 'grid',
 		},
 	];
+	const { hasRecommendedContentAccess } = window;
+	if ( ! hasRecommendedContentAccess ) {
+		return (
+			<Placeholder
+				label={ __( 'ClassifAI Recommended Content', 'classifai' ) }
+			>
+				<p>
+					{ __(
+						"You don't have access to the Recommended Content block. Please contact the administrator to request access.",
+						'classifai'
+					) }
+				</p>
+			</Placeholder>
+		);
+	}
 
 	return (
 		<div { ...blockProps }>

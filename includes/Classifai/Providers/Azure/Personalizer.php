@@ -122,6 +122,8 @@ class Personalizer extends Provider {
 				'description'   => __( 'Azure AI Personalizer Key.', 'classifai' ),
 			]
 		);
+
+		$this->add_access_settings( 'recommended_content' );
 	}
 
 	/**
@@ -132,7 +134,7 @@ class Personalizer extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = [];
+		$new_settings = $this->sanitize_access_settings( $settings, 'recommended_content' );
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {

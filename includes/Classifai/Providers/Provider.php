@@ -616,7 +616,7 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	protected function has_access( string $feature = '' ) {
+	public function has_access( string $feature = '' ) {
 		$access     = false;
 		$settings   = $this->get_settings();
 		$user_roles = wp_get_current_user()->roles ?? [];
