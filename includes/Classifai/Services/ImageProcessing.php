@@ -46,7 +46,7 @@ class ImageProcessing extends Service {
 		wp_enqueue_script(
 			'classifai-media-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
-			array( 'jquery', 'media-editor', 'lodash', 'wp-i18n' ),
+			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
 			get_asset_info( 'media', 'version' ),
 			true
 		);

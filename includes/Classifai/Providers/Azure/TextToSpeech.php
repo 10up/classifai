@@ -103,7 +103,7 @@ class TextToSpeech extends Provider {
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
 			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
 

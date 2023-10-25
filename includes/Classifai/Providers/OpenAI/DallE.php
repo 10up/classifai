@@ -107,7 +107,7 @@ class DallE extends Provider {
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
+			array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
 			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
@@ -158,7 +158,7 @@ class DallE extends Provider {
 				wp_enqueue_script(
 					'classifai-generate-images-media-upload',
 					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-					[ 'jquery' ],
+					array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
 					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
 					true
 				);
