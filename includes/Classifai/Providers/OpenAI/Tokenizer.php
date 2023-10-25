@@ -39,26 +39,26 @@ class Tokenizer {
 		/**
 		 * How many characters in one token (roughly)
 		 *
-		 * @since 0.1.0
+		 * @since 2.4..0
 		 * @hook classifai_openai_characters_in_token
 		 *
-		 * @param int $characters_in_token How many characters in one token (roughly)
-		 * @param int $max_tokens Maximum tokens the model supports.
+		 * @param {int} $characters_in_token How many characters in one token (roughly)
+		 * @param {int} $max_tokens Maximum tokens the model supports.
 		 *
-		 * @return int
+		 * @return {int}
 		 */
 		$this->characters_in_token = apply_filters( 'classifai_openai_characters_in_token', $this->characters_in_token, $max_tokens );
 
 		/**
 		 * How many tokens a word will take (roughly)
 		 *
-		 * @since 0.1.0
+		 * @since 2.4.0
 		 * @hook classifai_openai_tokens_per_word
 		 *
-		 * @param int $tokens_per_word How many tokens a word will take (roughly)
-		 * @param int $max_tokens Maximum tokens the model supports.
+		 * @param {int} $tokens_per_word How many tokens a word will take (roughly)
+		 * @param {int} $max_tokens Maximum tokens the model supports.
 		 *
-		 * @return int
+		 * @return {int}
 		 */
 		$this->tokens_per_word = apply_filters( 'classifai_openai_tokens_per_word', $this->tokens_per_word, $max_tokens );
 	}

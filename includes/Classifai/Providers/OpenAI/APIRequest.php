@@ -56,7 +56,7 @@ class APIRequest {
 		/**
 		 * Filter the response from OpenAI for a get request.
 		 *
-		 * @since x.x.x
+		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_get
 		 *
 		 * @param {string} $url Request URL.
@@ -93,7 +93,7 @@ class APIRequest {
 		/**
 		 * Filter the response from OpenAI for a post request.
 		 *
-		 * @since x.x.x
+		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post
 		 *
 		 * @param {string} $url Request URL.
@@ -145,7 +145,7 @@ class APIRequest {
 		/**
 		 * Filter the options for the post form request.
 		 *
-		 * @since x.x.x
+		 * @since 2.4.0
 		 * @hook classifai_openai_api_request_post_form_options
 		 *
 		 * @param {array} $options The options for the request.
@@ -174,7 +174,7 @@ class APIRequest {
 		/**
 		 * Filter the response from OpenAI for a post form request.
 		 *
-		 * @since x.x.x
+		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post_form
 		 *
 		 * @param {string} $url Request URL.
