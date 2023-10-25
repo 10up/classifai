@@ -116,6 +116,35 @@ class APIRequest {
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
+
+		/**
+		 * Filter the URL for the post request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $options The options for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		apply_filters( 'classifai_openai_api_request_post_url', $url, $options, $this->feature );
+
+		/**
+		 * Filter the options for the post request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		apply_filters( 'classifai_openai_api_request_post_options', $options, $url, $this->feature );
+
 		$this->add_headers( $options );
 
 		/**
