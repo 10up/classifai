@@ -63,7 +63,7 @@ class APIRequest {
 		 *
 		 * @return {string} The URL for the request.
 		 */
-		apply_filters( 'classifai_openai_api_request_get_url', $url, $options, $this->feature );
+		$url = apply_filters( 'classifai_openai_api_request_get_url', $url, $options, $this->feature );
 
 		/**
 		 * Filter the options for the get request.
@@ -77,7 +77,7 @@ class APIRequest {
 		 *
 		 * @return {array} The options for the request.
 		 */
-		apply_filters( 'classifai_openai_api_request_get_options', $options, $url, $this->feature );
+		$options = apply_filters( 'classifai_openai_api_request_get_options', $options, $url, $this->feature );
 
 		$this->add_headers( $options );
 
@@ -129,7 +129,7 @@ class APIRequest {
 		 *
 		 * @return {string} The URL for the request.
 		 */
-		apply_filters( 'classifai_openai_api_request_post_url', $url, $options, $this->feature );
+		$url = apply_filters( 'classifai_openai_api_request_post_url', $url, $options, $this->feature );
 
 		/**
 		 * Filter the options for the post request.
@@ -143,7 +143,7 @@ class APIRequest {
 		 *
 		 * @return {array} The options for the request.
 		 */
-		apply_filters( 'classifai_openai_api_request_post_options', $options, $url, $this->feature );
+		$options = apply_filters( 'classifai_openai_api_request_post_options', $options, $url, $this->feature );
 
 		$this->add_headers( $options );
 
@@ -176,6 +176,19 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post_form( string $url = '', array $body = [] ) {
+		/**
+		 * Filter the URL for the post form request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_form_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		$url = apply_filters( 'classifai_openai_api_request_post_form_url', $url, $this->feature );
+
 		$boundary = wp_generate_password( 24, false );
 		$payload  = '';
 
