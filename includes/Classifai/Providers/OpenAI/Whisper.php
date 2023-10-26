@@ -57,7 +57,7 @@ class Whisper extends Provider {
 	 * @param int    $attachment_id Attachment ID to process.
 	 * @return bool|WP_Error
 	 */
-	public function is_feature_enabled( string $feature = 'transcripts', int $attachment_id = 0 ) {
+	public function is_feature_enabled( string $feature = 'speech_to_text', int $attachment_id = 0 ) {
 		$settings = $this->get_settings();
 
 		// Check if valid authentication is in place.
@@ -92,7 +92,7 @@ class Whisper extends Provider {
 	 */
 	public function transcribe_audio( $attachment_id = 0 ) {
 		$settings = $this->get_settings();
-		$enabled  = $this->is_feature_enabled( 'transcripts', $attachment_id );
+		$enabled  = $this->is_feature_enabled( 'speech_to_text', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $enabled;
@@ -111,7 +111,7 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
-		$enabled = $this->is_feature_enabled( 'transcripts', $attachment->ID );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $attachment->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $form_fields;
@@ -144,7 +144,7 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$enabled = $this->is_feature_enabled( 'transcripts', $post->ID );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $post->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -198,7 +198,7 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_transcribe_audio( $attachment_id ) {
-		$enabled = $this->is_feature_enabled( 'transcripts', $attachment_id );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -242,7 +242,7 @@ class Whisper extends Provider {
 		);
 
 		// Add user/role based access settings.
-		$this->add_access_settings( 'transcripts' );
+		$this->add_access_settings( 'speech_to_text' );
 	}
 
 	/**
@@ -257,7 +257,7 @@ class Whisper extends Provider {
 		$new_settings = array_merge(
 			$new_settings,
 			$this->sanitize_api_key_settings( $new_settings, $settings ),
-			$this->sanitize_access_settings( $settings, 'transcripts' ),
+			$this->sanitize_access_settings( $settings, 'speech_to_text' ),
 		);
 
 		if ( empty( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
@@ -283,11 +283,11 @@ class Whisper extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'authenticated'      => false,
-			'api_key'            => '',
-			'enable_transcripts' => false,
-			'role_based_access'  => 1, // Default to 'yes
-			'roles'              => array_keys( get_editable_roles() ?? [] ),
+			'authenticated'                    => false,
+			'api_key'                          => '',
+			'enable_transcripts'               => false,
+			'speech_to_text_role_based_access' => 1, // Default to 'yes
+			'speech_to_text_roles'             => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 

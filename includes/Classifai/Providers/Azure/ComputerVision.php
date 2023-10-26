@@ -1434,7 +1434,7 @@ class ComputerVision extends Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature = '' ) {
+	public function is_feature_enabled( string $feature ) {
 		if ( 'image_captions' !== $feature ) {
 			return parent::is_feature_enabled( $feature );
 		}

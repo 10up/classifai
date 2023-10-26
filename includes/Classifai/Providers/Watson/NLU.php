@@ -126,7 +126,7 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		if ( $this->has_access( 'classify_content' ) ) {
+		if ( $this->has_access( 'content_classification' ) ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
@@ -159,7 +159,10 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function get_settings( $index = false ) {
-		$defaults = [];
+		$defaults = [
+			'content_classification_role_based_access' => 'no',
+			'content_classification_roles'             => [],
+		];
 		$settings = get_option( $this->get_option_name(), [] );
 
 		// If no settings have been saved, check for older storage to polyfill
@@ -219,7 +222,7 @@ class NLU extends Provider {
 			'classifai-gutenberg-plugin',
 			'classifaiPostData',
 			[
-				'NLUEnabled'           => $this->is_feature_enabled( 'classify_content' ),
+				'NLUEnabled'           => $this->is_feature_enabled( 'content_classification' ),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
@@ -385,7 +388,7 @@ class NLU extends Provider {
 	 */
 	protected function do_nlu_features_sections() {
 		// Add user/role-based access settings for classify content.
-		$this->add_access_settings( 'classify_content' );
+		$this->add_access_settings( 'content_classification' );
 		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
@@ -654,7 +657,7 @@ class NLU extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings  = $this->get_settings();
-		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings ) );
+		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings, 'content_classification' ) );
 		$authenticated = $this->nlu_authentication_check( $settings );
 
 		if ( is_wp_error( $authenticated ) ) {
@@ -947,7 +950,7 @@ class NLU extends Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature = 'classify_content' ) {
+	public function is_feature_enabled( string $feature = 'content_classification' ) {
 		$access   = false;
 		$settings = $this->get_settings();
 

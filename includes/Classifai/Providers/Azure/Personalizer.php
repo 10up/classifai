@@ -64,9 +64,11 @@ class Personalizer extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'authenticated' => false,
-			'url'           => '',
-			'api_key'       => '',
+			'authenticated'                         => false,
+			'url'                                   => '',
+			'api_key'                               => '',
+			'recommended_content_role_based_access' => 1,
+			'recommended_content_roles'             => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 

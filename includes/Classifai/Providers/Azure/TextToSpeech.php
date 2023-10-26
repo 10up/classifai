@@ -433,14 +433,16 @@ class TextToSpeech extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'credentials'   => array(
+			'credentials'                      => array(
 				'url'     => '',
 				'api_key' => '',
 			),
-			'voices'        => array(),
-			'voice'         => '',
-			'authenticated' => false,
-			'post_types'    => array(),
+			'voices'                           => array(),
+			'voice'                            => '',
+			'authenticated'                    => false,
+			'post_types'                       => array(),
+			'text_to_speech_role_based_access' => 1,
+			'text_to_speech_roles'             => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 

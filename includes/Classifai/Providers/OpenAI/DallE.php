@@ -274,7 +274,7 @@ class DallE extends Provider {
 		);
 
 		// Add user/role based settings.
-		$this->add_access_settings( 'image_gen' );
+		$this->add_access_settings( 'image_generation' );
 
 		add_settings_field(
 			'number',
@@ -320,7 +320,7 @@ class DallE extends Provider {
 		$new_settings = array_merge(
 			$new_settings,
 			$this->sanitize_api_key_settings( $new_settings, $settings ),
-			$this->sanitize_access_settings( $settings, 'image_gen' )
+			$this->sanitize_access_settings( $settings, 'image_generation' )
 		);
 
 		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
@@ -358,13 +358,13 @@ class DallE extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'authenticated'     => false,
-			'api_key'           => '',
-			'enable_image_gen'  => false,
-			'role_based_access' => 1,
-			'roles'             => array_keys( get_editable_roles() ?? [] ),
-			'number'            => 1,
-			'size'              => '1024x1024',
+			'authenticated'                      => false,
+			'api_key'                            => '',
+			'enable_image_gen'                   => false,
+			'image_generation_role_based_access' => 1,
+			'image_generation_roles'             => array_keys( get_editable_roles() ?? [] ),
+			'number'                             => 1,
+			'size'                               => '1024x1024',
 		];
 	}
 
@@ -502,19 +502,15 @@ class DallE extends Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature = 'image_gen' ) {
+	public function is_feature_enabled( string $feature = 'image_generation' ) {
 		$access     = false;
 		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
+		$enable_key = 'enable_image_gen';
 
 		if (
-			current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
+			current_user_can( 'upload_files' ) &&
+			$this->has_access( $feature ) &&
+			( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
 		) {
 			$access = true;
 		}
@@ -530,7 +526,7 @@ class DallE extends Provider {
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_openai_dalle_enable_{$feature}", $access, $settings );
+		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
 	}
 
 	/**

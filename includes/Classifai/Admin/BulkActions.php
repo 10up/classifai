@@ -86,7 +86,7 @@ class BulkActions {
 		// Set up the ChatGPT post types if the feature is enabled. Otherwise clear our handler.
 		if (
 			$this->chat_gpt &&
-			$this->chat_gpt->is_feature_enabled( 'excerpt' )
+			$this->chat_gpt->is_feature_enabled( 'excerpt_generation' )
 		) {
 			$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
 		} else {
@@ -179,7 +179,7 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
-		$whisper_enabled = $this->whisper->is_feature_enabled();
+		$whisper_enabled = $this->whisper->is_feature_enabled( 'speech_to_text' );
 
 		if (
 			$this->computer_vision->is_feature_enabled( 'image_tagging' ) ||
@@ -436,7 +436,7 @@ class BulkActions {
 	 */
 	public function register_media_row_action( $actions, $post ) {
 		$whisper_settings = $this->whisper->get_settings();
-		$whisper_enabled  = $this->whisper->is_feature_enabled( 'transcripts', $post->ID );
+		$whisper_enabled  = $this->whisper->is_feature_enabled( 'speech_to_text', $post->ID );
 
 		if ( is_wp_error( $whisper_enabled ) ) {
 			return $actions;

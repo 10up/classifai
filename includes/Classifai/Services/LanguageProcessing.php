@@ -295,7 +295,7 @@ class LanguageProcessing extends Service {
 		$post_statuses = \Classifai\get_supported_post_statuses();
 
 		// Check if processing allowed.
-		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! $provider->is_feature_enabled( 'classify_content' ) ) {
+		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! $provider->is_feature_enabled( 'content_classification' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
 		}
 
@@ -373,7 +373,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'excerpt' ) ) {
+		if ( ! $provider->is_feature_enabled( 'excerpt_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -497,7 +497,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'transcripts' ) ) {
+		if ( ! $provider->is_feature_enabled( 'speech_to_text' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -573,7 +573,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'titles' ) ) {
+		if ( ! $provider->is_feature_enabled( 'title_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 

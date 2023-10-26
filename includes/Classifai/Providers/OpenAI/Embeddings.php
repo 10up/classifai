@@ -288,15 +288,15 @@ class Embeddings extends Provider {
 	 */
 	public function get_default_settings() {
 		return [
-			'authenticated'         => false,
-			'api_key'               => '',
-			'enable_classification' => false,
-			'post_types'            => [ 'post' ],
-			'post_statuses'         => [ 'publish' ],
-			'taxonomies'            => [ 'category' ],
-			'number'                => 1,
-			'role_based_access'     => 1,
-			'roles'                 => array_keys( get_editable_roles() ?? [] ),
+			'authenticated'                    => false,
+			'api_key'                          => '',
+			'enable_classification'            => false,
+			'post_types'                       => [ 'post' ],
+			'post_statuses'                    => [ 'publish' ],
+			'taxonomies'                       => [ 'category' ],
+			'number'                           => 1,
+			'classification_role_based_access' => 1,
+			'classification_roles'             => array_keys( get_editable_roles() ?? [] ),
 		];
 	}
 

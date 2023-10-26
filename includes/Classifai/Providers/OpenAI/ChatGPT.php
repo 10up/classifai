@@ -95,9 +95,15 @@ class ChatGPT extends Provider {
 	 * @return bool
 	 */
 	public function is_feature_enabled( string $feature = '' ) {
-		$access     = false;
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
+		$access   = false;
+		$settings = $this->get_settings();
+		$features = array(
+			'title_generation'   => 'enable_titles',
+			'excerpt_generation' => 'enable_excerpt',
+			'resize_content'     => 'enable_resize_content',
+		);
+
+		$enable_key = $features[ $feature ] ?? 'enable_' . $feature;
 
 		// Check if user has access to the feature and the feature is turned on.
 		if (
@@ -118,7 +124,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_openai_chatgpt_enable_{$feature}", $access, $settings );
+		return apply_filters( "classifai_openai_chatgpt_{$enable_key}", $access, $settings );
 	}
 
 	/**
@@ -162,7 +168,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->is_feature_enabled( 'excerpt' ) ) {
+		if ( $this->is_feature_enabled( 'excerpt_generation' ) ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -173,7 +179,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->is_feature_enabled( 'titles' ) ) {
+		if ( $this->is_feature_enabled( 'title_generation' ) ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -228,7 +234,7 @@ class ChatGPT extends Provider {
 		if ( $screen && ! $screen->is_block_editor() ) {
 			if (
 				post_type_supports( $screen->post_type, 'title' ) &&
-				$this->is_feature_enabled( 'titles' )
+				$this->is_feature_enabled( 'title_generation' )
 			) {
 				wp_enqueue_style(
 					'classifai-generate-title-classic-css',
@@ -258,7 +264,7 @@ class ChatGPT extends Provider {
 
 			if (
 				post_type_supports( $screen->post_type, 'excerpt' ) &&
-				$this->is_feature_enabled( 'excerpt' )
+				$this->is_feature_enabled( 'excerpt_generation' )
 			) {
 				wp_enqueue_style(
 					'classifai-generate-title-classic-css',
@@ -351,7 +357,7 @@ class ChatGPT extends Provider {
 		);
 
 		// Add user/role-based access settings for excerpt.
-		$this->add_access_settings( 'excerpt', $this->get_option_name() . '_excerpt' );
+		$this->add_access_settings( 'excerpt_generation', $this->get_option_name() . '_excerpt' );
 
 		add_settings_field(
 			'length',
@@ -407,7 +413,7 @@ class ChatGPT extends Provider {
 		);
 
 		// Add user/role-based access settings for titles.
-		$this->add_access_settings( 'titles', $this->get_option_name() . '_title' );
+		$this->add_access_settings( 'title_generation', $this->get_option_name() . '_title' );
 
 		add_settings_field(
 			'number-titles',
@@ -520,8 +526,8 @@ class ChatGPT extends Provider {
 		$new_settings = array_merge(
 			$new_settings,
 			$this->sanitize_api_key_settings( $new_settings, $settings ),
-			$this->sanitize_access_settings( $settings, 'excerpt' ),
-			$this->sanitize_access_settings( $settings, 'titles' ),
+			$this->sanitize_access_settings( $settings, 'excerpt_generation' ),
+			$this->sanitize_access_settings( $settings, 'title_generation' ),
 			$this->sanitize_access_settings( $settings, 'resize_content' ),
 		);
 
@@ -607,21 +613,24 @@ class ChatGPT extends Provider {
 		$editable_roles = get_editable_roles() ?? [];
 
 		return [
-			'authenticated'           => false,
-			'api_key'                 => '',
-			'enable_excerpt'          => false,
-			'roles'                   => array_keys( $editable_roles ),
-			'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
-			'generate_excerpt_prompt' => '',
-			'enable_titles'           => false,
-			'title_roles'             => array_keys( $editable_roles ),
-			'number_titles'           => 1,
-			'generate_title_prompt'   => '',
-			'enable_resize_content'   => false,
-			'resize_content_roles'    => array_keys( $editable_roles ),
-			'number_resize_content'   => 1,
-			'shrink_content_prompt'   => '',
-			'grow_content_prompt'     => '',
+			'authenticated'                        => false,
+			'api_key'                              => '',
+			'enable_excerpt'                       => false,
+			'excerpt_generation_role_based_access' => 1,
+			'excerpt_generation_roles'             => array_keys( $editable_roles ),
+			'title_generation_role_based_access'   => 1,
+			'title_generation_roles'               => array_keys( $editable_roles ),
+			'length'                               => (int) apply_filters( 'excerpt_length', 55 ),
+			'generate_excerpt_prompt'              => '',
+			'enable_titles'                        => false,
+			'number_titles'                        => 1,
+			'generate_title_prompt'                => '',
+			'enable_resize_content'                => false,
+			'resize_content_role_based_access'     => 1,
+			'resize_content_roles'                 => array_keys( $editable_roles ),
+			'number_resize_content'                => 1,
+			'shrink_content_prompt'                => '',
+			'grow_content_prompt'                  => '',
 		];
 	}
 
@@ -711,7 +720,7 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'excerpt' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'excerpt_generation' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -816,7 +825,7 @@ class ChatGPT extends Provider {
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'titles' ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'title_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 

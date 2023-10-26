@@ -359,7 +359,7 @@ class ImageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled() ) {
+		if ( ! $provider->is_feature_enabled( 'image_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
 		}
 

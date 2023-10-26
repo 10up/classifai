@@ -35,28 +35,6 @@ abstract class Provider {
 	public $onboarding_options;
 
 	/**
-	 * This variable holds an array that maps feature to their corresponding prefixes for saving role/user based access settings in feature options.
-	 *
-	 * @var array $access_prefix An associative array where the keys are feature and the values are their corresponding prefixes.
-	 */
-	protected $access_prefix = array(
-		'classify_content'    => '',
-		'titles'              => 'title_',
-		'excerpt'             => '',
-		'resize_content'      => 'resize_content_',
-		'classification'      => '',
-		'transcripts'         => '',
-		'text_to_speech'      => '',
-		'image_captions'      => 'image_caption_',
-		'image_tagging'       => 'image_tagging_',
-		'smart_cropping'      => 'smart_cropping_',
-		'ocr'                 => 'ocr_',
-		'read_pdf'            => 'read_pdf_',
-		'image_gen'           => '',
-		'recommended_content' => '',
-	);
-
-	/**
 	 * Provider constructor.
 	 *
 	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
@@ -327,6 +305,11 @@ abstract class Provider {
 				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
 			}
 
+			// Check for backward compatibility.
+			if ( empty( $value ) && '0' !== $value && ! empty( $args['backward_compatible_key'] ) && isset( $setting_index[ $args['backward_compatible_key'] ] ) ) {
+				$value = $setting_index[ $args['backward_compatible_key'] ][ $option_value ] ?? '';
+			}
+
 			// If no saved value, check if we have a default value.
 			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
 				$value = $args['default_values'][ $default_key ];
@@ -494,40 +477,52 @@ abstract class Provider {
 	 * @param string $section Settings section.
 	 * @return void
 	 */
-	protected function add_access_settings( $feature = '', $section = '' ) {
+	protected function add_access_settings( $feature, $section = '' ) {
 		$editable_roles   = get_editable_roles() ?? [];
 		$default_settings = $this->get_default_settings();
 		$settings         = $this->get_settings();
 		$feature_names    = array(
-			'classify_content'    => __( 'classify content', 'classifai' ),
-			'titles'              => __( 'generate titles', 'classifai' ),
-			'excerpt'             => __( 'generate excerpts', 'classifai' ),
-			'resize_content'      => __( 'resize content', 'classifai' ),
-			'classification'      => __( 'classify content', 'classifai' ),
-			'transcripts'         => __( 'generate transcripts', 'classifai' ),
-			'text_to_speech'      => __( 'text to speech', 'classifai' ),
-			'image_captions'      => __( 'generate captions', 'classifai' ),
-			'image_tagging'       => __( 'generate tags', 'classifai' ),
-			'smart_cropping'      => __( 'smart cropping', 'classifai' ),
-			'ocr'                 => __( 'scan images for text', 'classifai' ),
-			'read_pdf'            => __( 'scan PDF', 'classifai' ),
-			'image_gen'           => __( 'generate images', 'classifai' ),
-			'recommended_content' => __( 'recommended content block', 'classifai' ),
+			'content_classification' => __( 'classify content', 'classifai' ),
+			'title_generation'       => __( 'generate titles', 'classifai' ),
+			'excerpt_generation'     => __( 'generate excerpts', 'classifai' ),
+			'resize_content'         => __( 'resize content', 'classifai' ),
+			'classification'         => __( 'classify content', 'classifai' ),
+			'speech_to_text'         => __( 'generate transcripts', 'classifai' ),
+			'text_to_speech'         => __( 'text to speech', 'classifai' ),
+			'image_captions'         => __( 'generate captions', 'classifai' ),
+			'image_tagging'          => __( 'generate tags', 'classifai' ),
+			'smart_cropping'         => __( 'smart cropping', 'classifai' ),
+			'ocr'                    => __( 'scan images for text', 'classifai' ),
+			'read_pdf'               => __( 'scan PDF', 'classifai' ),
+			'image_generation'       => __( 'generate images', 'classifai' ),
+			'recommended_content'    => __( 'recommended content block', 'classifai' ),
 		);
 		$feature_name     = $feature_names[ $feature ] ?? $this->get_provider_name();
-
-		$prefix = '';
-		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
-			$prefix = $this->access_prefix[ $feature ];
-		}
 
 		if ( empty( $section ) ) {
 			$section = $this->get_option_name();
 		}
 
-		$role_based_access_key = $prefix . 'role_based_access';
-		$roles_key             = $prefix . 'roles';
+		$role_based_access_key = $feature . '_role_based_access';
+		$roles_key             = $feature . '_roles';
 		$roles                 = $this->get_allowed_roles();
+
+		// Backward compatibility for old roles keys.
+		$backward_compatible_roles_key = '';
+		switch ( $feature ) {
+			case 'title_generation':
+				$backward_compatible_roles_key = 'title_roles';
+				break;
+
+			case 'excerpt_generation':
+			case 'speech_to_text':
+			case 'image_generation':
+				$backward_compatible_roles_key = 'roles';
+				break;
+
+			default:
+				break;
+		}
 
 		$default_settings = array_merge(
 			array(
@@ -566,12 +561,13 @@ abstract class Provider {
 			$this->get_option_name(),
 			$section,
 			[
-				'label_for'      => $roles_key,
-				'options'        => $roles,
-				'default_values' => $default_settings[ $roles_key ],
+				'label_for'               => $roles_key,
+				'options'                 => $roles,
+				'default_values'          => $default_settings[ $roles_key ],
 				/* translators: %s - Feature name */
-				'description'    => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
-				'class'          => $class,
+				'description'             => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
+				'class'                   => $class,
+				'backward_compatible_key' => $backward_compatible_roles_key,
 			]
 		);
 	}
@@ -584,14 +580,9 @@ abstract class Provider {
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	protected function sanitize_access_settings( $settings, $feature = '' ) {
-		$prefix = '';
-		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
-			$prefix = $this->access_prefix[ $feature ];
-		}
-
-		$role_based_access_key = $prefix . 'role_based_access';
-		$roles_key             = $prefix . 'roles';
+	protected function sanitize_access_settings( $settings, $feature ) {
+		$role_based_access_key = $feature . '_role_based_access';
+		$roles_key             = $feature . '_roles';
 
 		$new_settings = [];
 
@@ -616,18 +607,34 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function has_access( string $feature = '' ) {
+	public function has_access( string $feature ) {
 		$access     = false;
 		$settings   = $this->get_settings();
 		$user_roles = wp_get_current_user()->roles ?? [];
-		$prefix     = '';
-		if ( ! empty( $feature ) && isset( $this->access_prefix[ $feature ] ) ) {
-			$prefix = $this->access_prefix[ $feature ];
-		}
 
-		$role_based_access_key = $prefix . 'role_based_access';
-		$roles_key             = $prefix . 'roles';
+		$role_based_access_key = $feature . '_role_based_access';
+		$roles_key             = $feature . '_roles';
 		$feature_roles         = $settings[ $roles_key ] ?? [];
+
+		// Backward compatibility for old roles keys.
+		switch ( $feature ) {
+			case 'title_generation':
+				if ( ! isset( $settings[ $roles_key ] ) && isset( $settings['title_roles'] ) ) {
+					$feature_roles = $settings['title_roles'] ?? [];
+				}
+				break;
+
+			case 'excerpt_generation':
+			case 'speech_to_text':
+			case 'image_generation':
+				if ( ! isset( $settings[ $roles_key ] ) && isset( $settings['roles'] ) ) {
+					$feature_roles = $settings['roles'] ?? [];
+				}
+				break;
+
+			default:
+				break;
+		}
 
 		/*
 		 * Checks:
@@ -645,14 +652,14 @@ abstract class Provider {
 		 * Filter to override user access to a ClassifAI feature.
 		 *
 		 * @since 2.5.0
-		 * @hook classifai_has_access_{$this->option_name}_{$feature}
+		 * @hook classifai_has_access
 		 *
 		 * @param {bool}  $access Current access value.
 		 * @param {array} $settings Current feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_has_access_{$this->option_name}_{$feature}", $access, $settings );
+		return apply_filters( 'classifai_has_access', $access, $feature, $settings );
 	}
 
 	/**
@@ -690,10 +697,32 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature = '' ) {
+	public function is_feature_enabled( string $feature ) {
 		$access     = false;
 		$settings   = $this->get_settings();
 		$enable_key = 'enable_' . $feature;
+
+		// Handle different enable keys.
+		switch ( $feature ) {
+			case 'title_generation':
+				$enable_key = 'enable_titles';
+				break;
+
+			case 'excerpt_generation':
+				$enable_key = 'enable_excerpt';
+				break;
+
+			case 'speech_to_text':
+				$enable_key = 'enable_transcripts';
+				break;
+
+			case 'image_generation':
+				$enable_key = 'enable_image_gen';
+				break;
+
+			default:
+				break;
+		}
 
 		// Check if provider is configured and user has access to the feature and the feature is turned on.
 		if (
