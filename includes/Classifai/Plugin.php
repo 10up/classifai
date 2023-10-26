@@ -167,7 +167,7 @@ class Plugin {
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
 			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
 

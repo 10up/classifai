@@ -102,7 +102,7 @@ class DallE extends Provider {
 			'classifai-image-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
 			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'media-modal', 'version' ),
 			'all'
 		);
 
