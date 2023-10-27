@@ -129,7 +129,7 @@ describe('Image processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_image_gen' ).check();
-		cy.get( '#openai_dalle_roles_administrator' ).check();
+		cy.get( '#openai_dalle_image_generation_roles_administrator' ).check();
 		cy.get( '#number' ).select( '2' );
 		cy.get( '#size' ).select( '512x512' );
 		cy.get( '#submit' ).click();
@@ -242,7 +242,7 @@ describe('Image processing Tests', () => {
 		);
 
 		cy.get( '#enable_image_gen' ).check();
-		cy.get( '#openai_dalle_roles_administrator' ).uncheck();
+		cy.get( '#openai_dalle_image_generation_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		cy.get(
@@ -294,7 +294,7 @@ describe('Image processing Tests', () => {
 		);
 
 		cy.get( '#enable_image_gen' ).check();
-		cy.get( '#openai_dalle_roles_administrator' ).check();
+		cy.get( '#openai_dalle_image_generation_roles_administrator' ).check();
 		cy.get( '#submit' ).click();
 
 		cy.visit( '/wp-admin/upload.php' );

@@ -180,7 +180,7 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_excerpt' ).check();
-		cy.get( '#openai_chatgpt_roles_administrator' ).check();
+		cy.get( '#openai_chatgpt_excerpt_generation_roles_administrator' ).check();
 		cy.get( '#length' ).clear().type( 35 );
 		cy.get( '#generate_excerpt_prompt' )
 			.clear()
@@ -319,7 +319,7 @@ describe( 'Language processing Tests', () => {
 
 		// Disable admin role.
 		cy.get( '#enable_excerpt' ).check();
-		cy.get( '#openai_chatgpt_roles_administrator' ).uncheck();
+		cy.get( '#openai_chatgpt_excerpt_generation_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Create test post.
@@ -520,7 +520,7 @@ describe( 'Language processing Tests', () => {
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 		cy.get( '#enable_titles' ).check();
-		cy.get( '#openai_chatgpt_title_roles_administrator' ).check();
+		cy.get( '#openai_chatgpt_title_generation_roles_administrator' ).check();
 		cy.get( '#number_titles' ).select( 1 );
 		cy.get( '#generate_title_prompt' )
 			.clear()
@@ -674,7 +674,7 @@ describe( 'Language processing Tests', () => {
 
 		// Disable admin role.
 		cy.get( '#enable_titles' ).uncheck();
-		cy.get( '#openai_chatgpt_title_roles_administrator' ).uncheck();
+		cy.get( '#openai_chatgpt_title_generation_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Create test post.
@@ -721,7 +721,7 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#enable_transcripts' ).check();
-		cy.get( '#openai_whisper_roles_administrator' ).check();
+		cy.get( '#openai_whisper_speech_to_text_roles_administrator' ).check();
 		cy.get( '#submit' ).click();
 	} );
 
@@ -798,7 +798,7 @@ describe( 'Language processing Tests', () => {
 
 		// Disable admin role
 		cy.get( '#enable_transcripts' ).check();
-		cy.get( '#openai_whisper_roles_administrator' ).uncheck();
+		cy.get( '#openai_whisper_speech_to_text_roles_administrator' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify features are not present in attachment metabox.
