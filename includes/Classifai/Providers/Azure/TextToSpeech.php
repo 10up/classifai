@@ -73,6 +73,11 @@ class TextToSpeech extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'text_to_speech' => __( 'Text to speech', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure Text to Speech', 'classifai' ),

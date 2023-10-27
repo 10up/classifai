@@ -45,6 +45,11 @@ class NLU extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'content_classification' => __( 'Classify Content', 'classifai' ),
+		);
+
 		$this->nlu_features = [
 			'category' => [
 				'feature'           => __( 'Category', 'classifai' ),
@@ -88,7 +93,6 @@ class NLU extends Provider {
 			// translators: %s is the post type label.
 			$this->onboarding_options['features'][ 'post_types__' . $post_type->name ] = sprintf( __( 'Automatically tag %s', 'classifai' ), $post_type->label );
 		}
-
 	}
 
 	/**

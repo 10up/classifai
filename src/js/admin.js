@@ -1,8 +1,11 @@
 /* global ClassifAI */
+import { __ } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
+import 'select2';
+import 'select2/dist/css/select2.min.css';
 
 document.addEventListener( 'DOMContentLoaded', function () {
 	const template = document.getElementById( 'help-menu-template' );
@@ -95,8 +98,26 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 	}
 
+	function toogleAllowedUsersRow( e ) {
+		const checkbox = e.target;
+		const parentTr = checkbox.closest( 'tr.classifai-user-based-access' );
+		const allowedUsers = parentTr.nextElementSibling.classList.contains(
+			'allowed_users_row'
+		)
+			? parentTr.nextElementSibling
+			: null;
+		if ( checkbox.checked ) {
+			allowedUsers.classList.remove( 'hidden' );
+		} else {
+			allowedUsers.classList.add( 'hidden' );
+		}
+	}
+
 	const roleBasedAccessCheckBoxes = document.querySelectorAll(
 		'tr.classifai-role-based-access input[type="checkbox"]'
+	);
+	const userBasedAccessCheckBoxes = document.querySelectorAll(
+		'tr.classifai-user-based-access input[type="checkbox"]'
 	);
 
 	if ( roleBasedAccessCheckBoxes ) {
@@ -105,4 +126,38 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			e.dispatchEvent( new Event( 'change' ) );
 		} );
 	}
+
+	if ( userBasedAccessCheckBoxes ) {
+		userBasedAccessCheckBoxes.forEach( function ( e ) {
+			e.addEventListener( 'change', toogleAllowedUsersRow );
+			e.dispatchEvent( new Event( 'change' ) );
+		} );
+	}
 } );
+
+// Search for users.
+( () => {
+	jQuery( '.classifai-search-users' ).select2( {
+		width: '100%',
+		placeholder: __( 'Search for users', 'classifai' ),
+		minimumInputLength: 1,
+		ajax: {
+			cache: false,
+			delay: 250, // wait 250 milliseconds before triggering the request
+			url: ClassifAI.ajax_url,
+			dataType: 'json',
+			data( params ) {
+				return {
+					search: params.term,
+					action: 'classifai_search_users',
+					security: ClassifAI.user_search_nonce,
+				};
+			},
+			processResults( data ) {
+				return {
+					results: data.data,
+				};
+			},
+		},
+	} );
+} )();

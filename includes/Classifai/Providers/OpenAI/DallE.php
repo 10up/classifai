@@ -41,6 +41,11 @@ class DallE extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'image_generation' => __( 'Generate images', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI DALL·E', 'classifai' ),
@@ -536,7 +541,7 @@ class DallE extends Provider {
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	protected function get_allowed_roles() {
+	public function get_allowed_roles() {
 		$default_settings = $this->get_default_settings();
 		// Get all roles that have the upload_files cap.
 		$roles = get_editable_roles() ?? [];

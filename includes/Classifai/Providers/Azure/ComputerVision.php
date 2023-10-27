@@ -36,6 +36,15 @@ class ComputerVision extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'image_captions' => __( 'Generate captions', 'classifai' ),
+			'image_tagging'  => __( 'Generate tags', 'classifai' ),
+			'smart_cropping' => __( 'Smart cropping', 'classifai' ),
+			'ocr'            => __( 'Scan images for text', 'classifai' ),
+			'read_pdf'       => __( 'Scan PDF', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),

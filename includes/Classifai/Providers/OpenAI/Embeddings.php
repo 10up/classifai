@@ -53,6 +53,11 @@ class Embeddings extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'classification' => __( 'Classify Content (OpenAI)', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI Embeddings', 'classifai' ),

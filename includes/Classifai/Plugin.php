@@ -73,6 +73,10 @@ class Plugin {
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
+		// Initialize the classifAI User Access.
+		$user_access = new UserAccess();
+		$user_access->init();
+
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
@@ -158,22 +162,29 @@ class Plugin {
 
 	/**
 	 * Enqueue the admin scripts.
+	 *
+	 * @param string $hook_suffix The current admin page.
 	 */
-	public function enqueue_admin_assets() {
+	public function enqueue_admin_assets( $hook_suffix ) {
 
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
 			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
+
+		// Only enqueue the scripts on the ClassifAI admin pages.
+		if ( ! in_array( $hook_suffix, array( 'tools_page_classifai', 'admin_page_classifai_setup' ), true ) ) {
+			return;
+		}
 
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'admin', 'dependencies' ),
+			get_asset_info( 'admin', 'version' ),
 			true
 		);
 
@@ -181,11 +192,13 @@ class Plugin {
 			'classifai-admin-script',
 			'ClassifAI',
 			[
-				'api_password' => __( 'API Password', 'classifai' ),
-				'api_key'      => __( 'API Key', 'classifai' ),
-				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
-				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
+				'api_password'      => __( 'API Password', 'classifai' ),
+				'api_key'           => __( 'API Key', 'classifai' ),
+				'use_key'           => __( 'Use an API Key instead?', 'classifai' ),
+				'use_password'      => __( 'Use a username/password instead?', 'classifai' ),
+				'ajax_nonce'        => wp_create_nonce( 'classifai' ),
+				'user_search_nonce' => wp_create_nonce( 'classifai-user-search' ),
+				'ajax_url'          => admin_url( 'admin-ajax.php' ),
 			]
 		);
 

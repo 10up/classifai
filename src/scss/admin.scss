@@ -250,6 +250,10 @@ input.classifai-button {
 			max-width: 600px;
 			line-height: 1.4;
 		}
+
+		tr.allowed_users_row .select2 {
+			max-width: 600px;
+		}
 	}
 
 	input[type="text"],
@@ -722,4 +726,15 @@ input.classifai-button {
 	position: absolute;
 	right: 12px;
 	top: 70px;
+}
+
+// Profile page
+#classifai-profile-features-section tr.classifai-features-row {
+	th {
+		padding: 10px 10px 10px 0;
+	}
+
+	td {
+		padding: 10px 10px;
+	}
 }

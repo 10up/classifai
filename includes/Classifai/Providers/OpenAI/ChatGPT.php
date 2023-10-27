@@ -76,6 +76,13 @@ class ChatGPT extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'title_generation'   => __( 'Generate titles', 'classifai' ),
+			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
+			'resize_content'     => __( 'Resize content', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
@@ -1086,7 +1093,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	protected function get_allowed_roles() {
+	public function get_allowed_roles() {
 		$default_settings = $this->get_default_settings();
 		$roles            = get_editable_roles() ?? [];
 		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );

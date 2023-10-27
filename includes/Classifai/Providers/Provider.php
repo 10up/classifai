@@ -35,6 +35,11 @@ abstract class Provider {
 	public $onboarding_options;
 
 	/**
+	 * @var array $features Array of features provided by this provider.
+	 */
+	protected $features = array();
+
+	/**
 	 * Provider constructor.
 	 *
 	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
@@ -74,6 +79,15 @@ abstract class Provider {
 	 */
 	public function get_option_name() {
 		return 'classifai_' . $this->option_name;
+	}
+
+	/**
+	 * Get provider features.
+	 *
+	 * @return array
+	 */
+	public function get_features() {
+		return $this->features;
 	}
 
 	/**
@@ -402,6 +416,44 @@ abstract class Provider {
 	}
 
 	/**
+	 * Render allowed users table.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : array();
+		$users         = array();
+		if ( ! empty( $value ) ) {
+			$users = get_users(
+				array(
+					'include' => array_map( 'absint', $value ),
+					'fields'  => array( 'ID', 'display_name', 'user_login' ),
+				)
+			);
+		}
+		?>
+
+		<select
+			id="<?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>][]"
+			class="classifai-search-users"
+			multiple="multiple"
+			>
+			<?php foreach ( $users as $user ) : ?>
+				<option value="<?php echo absint( $user->ID ); ?>" selected="selected">
+					<?php echo esc_attr( $user->display_name . " ($user->user_login)" ); ?>
+				</option>
+			<?php endforeach; ?>
+		</select>
+
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
 	 * Set up the fields for each section.
 	 */
 	abstract public function setup_fields_sections();
@@ -503,9 +555,12 @@ abstract class Provider {
 			$section = $this->get_option_name();
 		}
 
-		$role_based_access_key = $feature . '_role_based_access';
-		$roles_key             = $feature . '_roles';
-		$roles                 = $this->get_allowed_roles();
+		$role_based_access_key  = $feature . '_role_based_access';
+		$roles_key              = $feature . '_roles';
+		$user_based_access_key  = $feature . '_user_based_access';
+		$user_based_opt_out_key = $feature . '_user_based_opt_out';
+		$users_key              = $feature . '_allowed_users';
+		$roles                  = $this->get_allowed_roles();
 
 		// Backward compatibility for old roles keys.
 		$backward_compatible_roles_key = '';
@@ -526,8 +581,11 @@ abstract class Provider {
 
 		$default_settings = array_merge(
 			array(
-				$role_based_access_key => '1',
-				$roles_key             => array_keys( $editable_roles ),
+				$role_based_access_key  => '1',
+				$roles_key              => array_keys( $editable_roles ),
+				$user_based_access_key  => 'no',
+				$users_key              => array(),
+				$user_based_opt_out_key => 'no',
 			),
 			$default_settings,
 		);
@@ -543,7 +601,7 @@ abstract class Provider {
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings[ $role_based_access_key ],
 				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Enable ability to select which role can access %s', 'classifai' ), $feature_name ),
+				'description'   => sprintf( __( 'Enables ability to select which role can access %s', 'classifai' ), $feature_name ),
 				'class'         => 'classifai-role-based-access',
 			]
 		);
@@ -570,6 +628,58 @@ abstract class Provider {
 				'backward_compatible_key' => $backward_compatible_roles_key,
 			]
 		);
+
+		add_settings_field(
+			$user_based_access_key,
+			esc_html__( 'Enable user-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$section,
+			[
+				'label_for'     => $user_based_access_key,
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings[ $user_based_access_key ],
+				/* translators: %s - Feature name */
+				'description'   => sprintf( __( 'Enables ability to select which users can access %s', 'classifai' ), $feature_name ),
+				'class'         => 'classifai-user-based-access',
+			]
+		);
+
+		// Add hidden class if user-based access is disabled.
+		$users_class = 'allowed_users_row';
+		if ( ! isset( $settings[ $user_based_access_key ] ) || '1' !== $settings[ $user_based_access_key ] ) {
+			$users_class .= ' hidden';
+		}
+
+		add_settings_field(
+			$users_key,
+			esc_html__( 'Allowed users', 'classifai' ),
+			[ $this, 'render_allowed_users' ],
+			$this->get_option_name(),
+			$section,
+			[
+				'label_for'     => $users_key,
+				'default_value' => $default_settings[ $users_key ],
+				/* translators: %s - Feature name */
+				'description'   => sprintf( __( 'Users who have access to %s.', 'classifai' ), $feature_name ),
+				'class'         => $users_class,
+			]
+		);
+
+		add_settings_field(
+			$user_based_opt_out_key,
+			esc_html__( 'Enable user-based opt-out', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$section,
+			[
+				'label_for'     => $user_based_opt_out_key,
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings[ $user_based_opt_out_key ],
+				'description'   => __( 'Enables ability for users to opt-out from their User profile page.', 'classifai' ),
+				'class'         => 'classifai-user-based-opt-out',
+			]
+		);
 	}
 
 	/**
@@ -581,8 +691,11 @@ abstract class Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	protected function sanitize_access_settings( $settings, $feature ) {
-		$role_based_access_key = $feature . '_role_based_access';
-		$roles_key             = $feature . '_roles';
+		$role_based_access_key  = $feature . '_role_based_access';
+		$roles_key              = $feature . '_roles';
+		$user_based_access_key  = $feature . '_user_based_access';
+		$user_based_opt_out_key = $feature . '_user_based_opt_out';
+		$users_key              = $feature . '_allowed_users';
 
 		$new_settings = [];
 
@@ -598,6 +711,26 @@ abstract class Provider {
 		} else {
 			$new_settings[ $roles_key ] = array_keys( get_editable_roles() ?? [] );
 		}
+
+		if ( empty( $settings[ $user_based_access_key ] ) || 1 !== (int) $settings[ $user_based_access_key ] ) {
+			$new_settings[ $user_based_access_key ] = 'no';
+		} else {
+			$new_settings[ $user_based_access_key ] = '1';
+		}
+
+		// Allowed users.
+		if ( isset( $settings[ $users_key ] ) && is_array( $settings[ $users_key ] ) ) {
+			$new_settings[ $users_key ] = array_map( 'absint', $settings[ $users_key ] );
+		} else {
+			$new_settings[ $users_key ] = array();
+		}
+
+		// User-based opt-out.
+		if ( empty( $settings[ $user_based_opt_out_key ] ) || 1 !== (int) $settings[ $user_based_opt_out_key ] ) {
+			$new_settings[ $user_based_opt_out_key ] = 'no';
+		} else {
+			$new_settings[ $user_based_opt_out_key ] = '1';
+		}
 		return $new_settings;
 	}
 
@@ -610,11 +743,16 @@ abstract class Provider {
 	public function has_access( string $feature ) {
 		$access     = false;
 		$settings   = $this->get_settings();
+		$user_id    = get_current_user_id();
 		$user_roles = wp_get_current_user()->roles ?? [];
 
-		$role_based_access_key = $feature . '_role_based_access';
-		$roles_key             = $feature . '_roles';
-		$feature_roles         = $settings[ $roles_key ] ?? [];
+		$role_based_access_key  = $feature . '_role_based_access';
+		$roles_key              = $feature . '_roles';
+		$user_based_access_key  = $feature . '_user_based_access';
+		$user_based_opt_out_key = $feature . '_user_based_opt_out';
+		$users_key              = $feature . '_allowed_users';
+		$feature_roles          = $settings[ $roles_key ] ?? [];
+		$feature_users          = $settings[ $users_key ] ?? [];
 
 		// Backward compatibility for old roles keys.
 		switch ( $feature ) {
@@ -637,15 +775,33 @@ abstract class Provider {
 		}
 
 		/*
-		 * Checks:
-		 * - User is logged in.
-		 * - Role-based access is enabled and user role has access to the feature.
+		 * Checks if Role-based access is enabled and user role has access to the feature.
 		 */
 		if (
 			is_user_logged_in() &&
 			( 1 !== (int) $settings[ $role_based_access_key ] || ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) ) )
 		) {
 			$access = true;
+		}
+
+		/*
+		 * Checks if User-based access is enabled and user has access to the feature.
+		 */
+		if (
+			! $access &&
+			( 1 !== (int) $settings[ $user_based_access_key ] || ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) ) )
+		) {
+			$access = true;
+		}
+
+		/*
+		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
+		 */
+		if ( ( 1 === (int) $settings[ $user_based_opt_out_key ] ) ) {
+			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
+			if ( ! empty( $opted_out_features ) && in_array( $feature, $opted_out_features, true ) ) {
+				$access = false;
+			}
 		}
 
 		/**
@@ -669,7 +825,7 @@ abstract class Provider {
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	protected function get_allowed_roles() {
+	public function get_allowed_roles() {
 		$default_settings = $this->get_default_settings();
 		$editable_roles   = get_editable_roles() ?? [];
 		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
