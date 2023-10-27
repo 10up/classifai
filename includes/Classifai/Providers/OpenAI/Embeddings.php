@@ -55,7 +55,7 @@ class Embeddings extends Provider {
 
 		// Features provided by this provider.
 		$this->features = array(
-			'classification' => __( 'Classify Content (OpenAI)', 'classifai' ),
+			'classification' => __( 'Content classification', 'classifai' ),
 		);
 
 		// Set the onboarding options.
@@ -292,17 +292,20 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'                    => false,
-			'api_key'                          => '',
-			'enable_classification'            => false,
-			'post_types'                       => [ 'post' ],
-			'post_statuses'                    => [ 'publish' ],
-			'taxonomies'                       => [ 'category' ],
-			'number'                           => 1,
-			'classification_role_based_access' => 1,
-			'classification_roles'             => array_keys( get_editable_roles() ?? [] ),
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'         => false,
+				'api_key'               => '',
+				'enable_classification' => false,
+				'post_types'            => [ 'post' ],
+				'post_statuses'         => [ 'publish' ],
+				'taxonomies'            => [ 'category' ],
+				'number'                => 1,
+			]
+		);
 	}
 
 	/**

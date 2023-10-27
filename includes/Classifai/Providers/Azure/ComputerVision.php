@@ -72,35 +72,28 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		$editable_roles = array_keys( get_editable_roles() ?? [] );
+		$default_settings = parent::get_default_settings() ?? [];
 
-		return [
-			'valid'                            => false,
-			'url'                              => '',
-			'api_key'                          => '',
-			'enable_image_captions'            => array(
-				'alt'         => 0,
-				'caption'     => 0,
-				'description' => 0,
-			),
-			'enable_image_tagging'             => true,
-			'enable_smart_cropping'            => false,
-			'enable_ocr'                       => false,
-			'enable_read_pdf'                  => false,
-			'caption_threshold'                => 75,
-			'tag_threshold'                    => 70,
-			'image_tag_taxonomy'               => 'classifai-image-tags',
-			'image_caption_role_based_access'  => 1,
-			'image_caption_roles'              => $editable_roles,
-			'image_tagging_role_based_access'  => 1,
-			'image_tagging_roles'              => $editable_roles,
-			'smart_cropping_role_based_access' => 1,
-			'smart_cropping_roles'             => $editable_roles,
-			'ocr_role_based_access'            => 1,
-			'ocr_roles'                        => $editable_roles,
-			'read_pdf_role_based_access'       => 1,
-			'read_pdf_roles'                   => $editable_roles,
-		];
+		return array_merge(
+			$default_settings,
+			[
+				'valid'                 => false,
+				'url'                   => '',
+				'api_key'               => '',
+				'enable_image_captions' => array(
+					'alt'         => 0,
+					'caption'     => 0,
+					'description' => 0,
+				),
+				'enable_image_tagging'  => true,
+				'enable_smart_cropping' => false,
+				'enable_ocr'            => false,
+				'enable_read_pdf'       => false,
+				'caption_threshold'     => 75,
+				'tag_threshold'         => 70,
+				'image_tag_taxonomy'    => 'classifai-image-tags',
+			]
+		);
 	}
 
 	/**

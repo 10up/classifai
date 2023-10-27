@@ -437,18 +437,21 @@ class TextToSpeech extends Provider {
 	 * Returns the default settings.
 	 */
 	public function get_default_settings() {
-		return [
-			'credentials'                      => array(
-				'url'     => '',
-				'api_key' => '',
-			),
-			'voices'                           => array(),
-			'voice'                            => '',
-			'authenticated'                    => false,
-			'post_types'                       => array(),
-			'text_to_speech_role_based_access' => 1,
-			'text_to_speech_roles'             => array_keys( get_editable_roles() ?? [] ),
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'credentials'   => array(
+					'url'     => '',
+					'api_key' => '',
+				),
+				'voices'        => array(),
+				'voice'         => '',
+				'authenticated' => false,
+				'post_types'    => array(),
+			]
+		);
 	}
 
 	/**

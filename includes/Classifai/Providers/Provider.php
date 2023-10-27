@@ -183,7 +183,31 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [];
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
+		$editable_roles = get_editable_roles() ?? [];
+
+		$defaults = [];
+		$features = $this->get_features();
+		if ( empty( $features ) ) {
+			return $defaults;
+		}
+
+		foreach ( $features as $feature => $title ) {
+			$defaults = array_merge(
+				$defaults,
+				array(
+					$feature . '_role_based_access'  => 1,
+					$feature . '_roles'              => array_keys( $editable_roles ),
+					$feature . '_user_based_access'  => 'no',
+					$feature . '_user_based_opt_out' => 1,
+					$feature . '_users'              => array(),
+				)
+			);
+		}
+
+		return $defaults;
 	}
 
 	/**
@@ -530,156 +554,8 @@ abstract class Provider {
 	 * @return void
 	 */
 	protected function add_access_settings( $feature, $section = '' ) {
-		$editable_roles   = get_editable_roles() ?? [];
-		$default_settings = $this->get_default_settings();
-		$settings         = $this->get_settings();
-		$feature_names    = array(
-			'content_classification' => __( 'classify content', 'classifai' ),
-			'title_generation'       => __( 'generate titles', 'classifai' ),
-			'excerpt_generation'     => __( 'generate excerpts', 'classifai' ),
-			'resize_content'         => __( 'resize content', 'classifai' ),
-			'classification'         => __( 'classify content', 'classifai' ),
-			'speech_to_text'         => __( 'generate transcripts', 'classifai' ),
-			'text_to_speech'         => __( 'text to speech', 'classifai' ),
-			'image_captions'         => __( 'generate captions', 'classifai' ),
-			'image_tagging'          => __( 'generate tags', 'classifai' ),
-			'smart_cropping'         => __( 'smart cropping', 'classifai' ),
-			'ocr'                    => __( 'scan images for text', 'classifai' ),
-			'read_pdf'               => __( 'scan PDF', 'classifai' ),
-			'image_generation'       => __( 'generate images', 'classifai' ),
-			'recommended_content'    => __( 'recommended content block', 'classifai' ),
-		);
-		$feature_name     = $feature_names[ $feature ] ?? $this->get_provider_name();
-
-		if ( empty( $section ) ) {
-			$section = $this->get_option_name();
-		}
-
-		$role_based_access_key  = $feature . '_role_based_access';
-		$roles_key              = $feature . '_roles';
-		$user_based_access_key  = $feature . '_user_based_access';
-		$user_based_opt_out_key = $feature . '_user_based_opt_out';
-		$users_key              = $feature . '_allowed_users';
-		$roles                  = $this->get_allowed_roles();
-
-		// Backward compatibility for old roles keys.
-		$backward_compatible_roles_key = '';
-		switch ( $feature ) {
-			case 'title_generation':
-				$backward_compatible_roles_key = 'title_roles';
-				break;
-
-			case 'excerpt_generation':
-			case 'speech_to_text':
-			case 'image_generation':
-				$backward_compatible_roles_key = 'roles';
-				break;
-
-			default:
-				break;
-		}
-
-		$default_settings = array_merge(
-			array(
-				$role_based_access_key  => '1',
-				$roles_key              => array_keys( $editable_roles ),
-				$user_based_access_key  => 'no',
-				$users_key              => array(),
-				$user_based_opt_out_key => 'no',
-			),
-			$default_settings,
-		);
-
-		add_settings_field(
-			$role_based_access_key,
-			esc_html__( 'Enable role-based access', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$section,
-			[
-				'label_for'     => $role_based_access_key,
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings[ $role_based_access_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Enables ability to select which role can access %s', 'classifai' ), $feature_name ),
-				'class'         => 'classifai-role-based-access',
-			]
-		);
-
-		// Add hidden class if role-based access is disabled.
-		$class = 'allowed_roles_row';
-		if ( ! isset( $settings[ $role_based_access_key ] ) || '1' !== $settings[ $role_based_access_key ] ) {
-			$class .= ' hidden';
-		}
-
-		add_settings_field(
-			$roles_key,
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$section,
-			[
-				'label_for'               => $roles_key,
-				'options'                 => $roles,
-				'default_values'          => $default_settings[ $roles_key ],
-				/* translators: %s - Feature name */
-				'description'             => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
-				'class'                   => $class,
-				'backward_compatible_key' => $backward_compatible_roles_key,
-			]
-		);
-
-		add_settings_field(
-			$user_based_access_key,
-			esc_html__( 'Enable user-based access', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$section,
-			[
-				'label_for'     => $user_based_access_key,
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings[ $user_based_access_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Enables ability to select which users can access %s', 'classifai' ), $feature_name ),
-				'class'         => 'classifai-user-based-access',
-			]
-		);
-
-		// Add hidden class if user-based access is disabled.
-		$users_class = 'allowed_users_row';
-		if ( ! isset( $settings[ $user_based_access_key ] ) || '1' !== $settings[ $user_based_access_key ] ) {
-			$users_class .= ' hidden';
-		}
-
-		add_settings_field(
-			$users_key,
-			esc_html__( 'Allowed users', 'classifai' ),
-			[ $this, 'render_allowed_users' ],
-			$this->get_option_name(),
-			$section,
-			[
-				'label_for'     => $users_key,
-				'default_value' => $default_settings[ $users_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Users who have access to %s.', 'classifai' ), $feature_name ),
-				'class'         => $users_class,
-			]
-		);
-
-		add_settings_field(
-			$user_based_opt_out_key,
-			esc_html__( 'Enable user-based opt-out', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$section,
-			[
-				'label_for'     => $user_based_opt_out_key,
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings[ $user_based_opt_out_key ],
-				'description'   => __( 'Enables ability for users to opt-out from their User profile page.', 'classifai' ),
-				'class'         => 'classifai-user-based-opt-out',
-			]
-		);
+		$access_control = new AccessControl( $this, $feature );
+		$access_control->add_settings( $section );
 	}
 
 	/**
@@ -691,47 +567,8 @@ abstract class Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	protected function sanitize_access_settings( $settings, $feature ) {
-		$role_based_access_key  = $feature . '_role_based_access';
-		$roles_key              = $feature . '_roles';
-		$user_based_access_key  = $feature . '_user_based_access';
-		$user_based_opt_out_key = $feature . '_user_based_opt_out';
-		$users_key              = $feature . '_allowed_users';
-
-		$new_settings = [];
-
-		if ( empty( $settings[ $role_based_access_key ] ) || 1 !== (int) $settings[ $role_based_access_key ] ) {
-			$new_settings[ $role_based_access_key ] = 'no';
-		} else {
-			$new_settings[ $role_based_access_key ] = '1';
-		}
-
-		// Allowed roles.
-		if ( isset( $settings[ $roles_key ] ) && is_array( $settings[ $roles_key ] ) ) {
-			$new_settings[ $roles_key ] = array_map( 'sanitize_text_field', $settings[ $roles_key ] );
-		} else {
-			$new_settings[ $roles_key ] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( empty( $settings[ $user_based_access_key ] ) || 1 !== (int) $settings[ $user_based_access_key ] ) {
-			$new_settings[ $user_based_access_key ] = 'no';
-		} else {
-			$new_settings[ $user_based_access_key ] = '1';
-		}
-
-		// Allowed users.
-		if ( isset( $settings[ $users_key ] ) && is_array( $settings[ $users_key ] ) ) {
-			$new_settings[ $users_key ] = array_map( 'absint', $settings[ $users_key ] );
-		} else {
-			$new_settings[ $users_key ] = array();
-		}
-
-		// User-based opt-out.
-		if ( empty( $settings[ $user_based_opt_out_key ] ) || 1 !== (int) $settings[ $user_based_opt_out_key ] ) {
-			$new_settings[ $user_based_opt_out_key ] = 'no';
-		} else {
-			$new_settings[ $user_based_opt_out_key ] = '1';
-		}
-		return $new_settings;
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->sanitize_settings( $settings );
 	}
 
 	/**
@@ -741,81 +578,8 @@ abstract class Provider {
 	 * @return bool
 	 */
 	public function has_access( string $feature ) {
-		$access     = false;
-		$settings   = $this->get_settings();
-		$user_id    = get_current_user_id();
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		$role_based_access_key  = $feature . '_role_based_access';
-		$roles_key              = $feature . '_roles';
-		$user_based_access_key  = $feature . '_user_based_access';
-		$user_based_opt_out_key = $feature . '_user_based_opt_out';
-		$users_key              = $feature . '_allowed_users';
-		$feature_roles          = $settings[ $roles_key ] ?? [];
-		$feature_users          = $settings[ $users_key ] ?? [];
-
-		// Backward compatibility for old roles keys.
-		switch ( $feature ) {
-			case 'title_generation':
-				if ( ! isset( $settings[ $roles_key ] ) && isset( $settings['title_roles'] ) ) {
-					$feature_roles = $settings['title_roles'] ?? [];
-				}
-				break;
-
-			case 'excerpt_generation':
-			case 'speech_to_text':
-			case 'image_generation':
-				if ( ! isset( $settings[ $roles_key ] ) && isset( $settings['roles'] ) ) {
-					$feature_roles = $settings['roles'] ?? [];
-				}
-				break;
-
-			default:
-				break;
-		}
-
-		/*
-		 * Checks if Role-based access is enabled and user role has access to the feature.
-		 */
-		if (
-			is_user_logged_in() &&
-			( 1 !== (int) $settings[ $role_based_access_key ] || ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) ) )
-		) {
-			$access = true;
-		}
-
-		/*
-		 * Checks if User-based access is enabled and user has access to the feature.
-		 */
-		if (
-			! $access &&
-			( 1 !== (int) $settings[ $user_based_access_key ] || ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) ) )
-		) {
-			$access = true;
-		}
-
-		/*
-		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
-		 */
-		if ( ( 1 === (int) $settings[ $user_based_opt_out_key ] ) ) {
-			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
-			if ( ! empty( $opted_out_features ) && in_array( $feature, $opted_out_features, true ) ) {
-				$access = false;
-			}
-		}
-
-		/**
-		 * Filter to override user access to a ClassifAI feature.
-		 *
-		 * @since 2.5.0
-		 * @hook classifai_has_access
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_has_access', $access, $feature, $settings );
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->has_access();
 	}
 
 	/**
@@ -848,7 +612,7 @@ abstract class Provider {
 	}
 
 	/**
-	 * Determine if the current user can access the feature
+	 * Determine if the feature is enabled and current user can access the feature
 	 *
 	 * @param string $feature Feature to check.
 	 * @return bool

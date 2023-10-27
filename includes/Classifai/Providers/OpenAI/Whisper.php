@@ -287,13 +287,16 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'                    => false,
-			'api_key'                          => '',
-			'enable_transcripts'               => false,
-			'speech_to_text_role_based_access' => 1, // Default to 'yes
-			'speech_to_text_roles'             => array_keys( get_editable_roles() ?? [] ),
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'      => false,
+				'api_key'            => '',
+				'enable_transcripts' => false,
+			]
+		);
 	}
 
 	/**

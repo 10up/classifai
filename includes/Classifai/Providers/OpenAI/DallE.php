@@ -362,15 +362,18 @@ class DallE extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'                      => false,
-			'api_key'                            => '',
-			'enable_image_gen'                   => false,
-			'image_generation_role_based_access' => 1,
-			'image_generation_roles'             => array_keys( get_editable_roles() ?? [] ),
-			'number'                             => 1,
-			'size'                               => '1024x1024',
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'    => false,
+				'api_key'          => '',
+				'enable_image_gen' => false,
+				'number'           => 1,
+				'size'             => '1024x1024',
+			]
+		);
 	}
 
 	/**

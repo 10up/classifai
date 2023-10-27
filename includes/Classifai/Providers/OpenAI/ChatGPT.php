@@ -617,28 +617,25 @@ class ChatGPT extends Provider {
 		if ( ! function_exists( 'get_editable_roles' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 		}
-		$editable_roles = get_editable_roles() ?? [];
+		$default_settings = parent::get_default_settings() ?? [];
 
-		return [
-			'authenticated'                        => false,
-			'api_key'                              => '',
-			'enable_excerpt'                       => false,
-			'excerpt_generation_role_based_access' => 1,
-			'excerpt_generation_roles'             => array_keys( $editable_roles ),
-			'title_generation_role_based_access'   => 1,
-			'title_generation_roles'               => array_keys( $editable_roles ),
-			'length'                               => (int) apply_filters( 'excerpt_length', 55 ),
-			'generate_excerpt_prompt'              => '',
-			'enable_titles'                        => false,
-			'number_titles'                        => 1,
-			'generate_title_prompt'                => '',
-			'enable_resize_content'                => false,
-			'resize_content_role_based_access'     => 1,
-			'resize_content_roles'                 => array_keys( $editable_roles ),
-			'number_resize_content'                => 1,
-			'shrink_content_prompt'                => '',
-			'grow_content_prompt'                  => '',
-		];
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'           => false,
+				'api_key'                 => '',
+				'enable_excerpt'          => false,
+				'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
+				'generate_excerpt_prompt' => '',
+				'enable_titles'           => false,
+				'number_titles'           => 1,
+				'generate_title_prompt'   => '',
+				'enable_resize_content'   => false,
+				'number_resize_content'   => 1,
+				'shrink_content_prompt'   => '',
+				'grow_content_prompt'     => '',
+			]
+		);
 	}
 
 	/**

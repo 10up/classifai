@@ -163,10 +163,7 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function get_settings( $index = false ) {
-		$defaults = [
-			'content_classification_role_based_access' => 'no',
-			'content_classification_roles'             => [],
-		];
+		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
 
 		// If no settings have been saved, check for older storage to polyfill

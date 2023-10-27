@@ -2,6 +2,7 @@
 
 namespace Classifai;
 
+use Classifai\Providers\AccessControl;
 use Classifai\Providers\Provider;
 use Classifai\Services\Service;
 
@@ -183,32 +184,28 @@ class UserAccess {
 				if ( empty( $provider_features ) ) {
 					continue;
 				}
-				$settings = $provider_class->get_settings();
 				foreach ( $provider_features as $feature => $feature_name ) {
-					$user_based_access_key  = $feature . '_user_based_access';
-					$user_based_opt_out_key = $feature . '_user_based_opt_out';
-					$users_key              = $feature . '_allowed_users';
-					$role_based_access_key  = $feature . '_role_based_access';
-					$roles_key              = $feature . '_roles';
+					$access_control = new AccessControl( $provider_class, $feature );
 
 					// Check if feature has user based opt-out enabled.
-					if ( isset( $settings[ $user_based_opt_out_key ] ) && 1 === (int) $settings[ $user_based_opt_out_key ] ) {
-						$feature_roles = $settings[ $roles_key ] ?? [];
+					if ( $access_control->is_user_based_opt_out_enabled() ) {
+						// Check if user has access to the feature by role.
+						$allowed_roles = $access_control->get_allowed_roles();
 						if (
-							isset( $settings[ $role_based_access_key ] ) &&
-							1 === (int) $settings[ $role_based_access_key ] &&
-							! empty( $feature_roles ) &&
-							! empty( array_intersect( $user_roles, $feature_roles ) )
+							$access_control->is_role_based_access_enabled() &&
+							! empty( $allowed_roles ) &&
+							! empty( array_intersect( $user_roles, $allowed_roles ) )
 						) {
 							$allowed_features[ $feature ] = $feature_name;
 							continue;
 						}
 
+						// Check if user has access to the feature.
+						$allowed_users = $access_control->get_allowed_users();
 						if (
-							isset( $settings[ $user_based_access_key ] ) &&
-							1 === (int) $settings[ $user_based_access_key ] &&
-							! empty( $users_key ) &&
-							in_array( $user_id, $settings[ $users_key ], true )
+							$access_control->is_user_based_access_enabled() &&
+							! empty( $allowed_users ) &&
+							in_array( $user_id, $allowed_users, true )
 						) {
 							$allowed_features[ $feature ] = $feature_name;
 						}
