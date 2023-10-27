@@ -201,7 +201,7 @@ abstract class Provider {
 					$feature . '_role_based_access'  => 1,
 					$feature . '_roles'              => array_keys( $editable_roles ),
 					$feature . '_user_based_access'  => 'no',
-					$feature . '_user_based_opt_out' => 1,
+					$feature . '_user_based_opt_out' => 'no',
 					$feature . '_users'              => array(),
 				)
 			);
@@ -585,11 +585,11 @@ abstract class Provider {
 	/**
 	 * Retrieves the allowed WordPress roles for ClassifAI.
 	 *
-	 * @since 2.5.0
+	 * @since 2.4.0
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	public function get_allowed_roles() {
+	public function get_roles() {
 		$default_settings = $this->get_default_settings();
 		$editable_roles   = get_editable_roles() ?? [];
 		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
@@ -597,7 +597,7 @@ abstract class Provider {
 		/**
 		 * Filter the allowed WordPress roles for ClassifAI
 		 *
-		 * @since 2.5.0
+		 * @since 2.4.0
 		 * @hook classifai_allowed_roles
 		 *
 		 * @param {array}  $roles            Array of arrays containing role information.
@@ -656,7 +656,7 @@ abstract class Provider {
 		/**
 		 * Filter to override permission to a specific classifai feature.
 		 *
-		 * @since 2.5.0
+		 * @since 2.4.0
 		 * @hook classifai_{$this->option_name}_enable_{$feature}
 		 *
 		 * @param {bool}  $access Current access value.

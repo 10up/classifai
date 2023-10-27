@@ -1086,11 +1086,11 @@ class ChatGPT extends Provider {
 	/**
 	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
 	 *
-	 * @since 2.5.0
+	 * @since 2.4.0
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	public function get_allowed_roles() {
+	public function get_roles() {
 		$default_settings = $this->get_default_settings();
 		$roles            = get_editable_roles() ?? [];
 		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );

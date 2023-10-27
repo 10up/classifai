@@ -916,7 +916,7 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filter to override permission to a specific classifai feature.
 		 *
-		 * @since 2.5.0
+		 * @since 2.4.0
 		 * @hook classifai_{$this->option_name}_enable_{$feature}
 		 *
 		 * @param {bool}  $access Current access value.

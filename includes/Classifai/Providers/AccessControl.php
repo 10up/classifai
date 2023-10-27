@@ -3,7 +3,7 @@
  *  Class for handling the access control for ClassifAI features.
  *
  * @package Classifai
- * @since 2.5.0
+ * @since 2.4.0
  */
 
 namespace Classifai\Providers;
@@ -80,7 +80,7 @@ class AccessControl {
 		$this->roles_key              = $feature . '_roles';
 		$this->user_based_access_key  = $feature . '_user_based_access';
 		$this->user_based_opt_out_key = $feature . '_user_based_opt_out';
-		$this->users_key              = $feature . '_allowed_users';
+		$this->users_key              = $feature . '_users';
 	}
 
 
@@ -203,7 +203,7 @@ class AccessControl {
 		}
 
 		$default_settings = array_merge(
-			$this->get_default_settings(),
+			$this->provider->get_default_settings(),
 			$default_settings,
 		);
 
@@ -237,7 +237,7 @@ class AccessControl {
 			$section,
 			[
 				'label_for'               => $this->roles_key,
-				'options'                 => $this->provider->get_allowed_roles(),
+				'options'                 => $this->provider->get_roles(),
 				'default_values'          => $default_settings[ $this->roles_key ],
 				/* translators: %s - Feature name */
 				'description'             => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
@@ -388,7 +388,7 @@ class AccessControl {
 		/**
 		 * Filter to override user access to a ClassifAI feature.
 		 *
-		 * @since 2.5.0
+		 * @since 2.4.0
 		 * @hook classifai_has_access
 		 *
 		 * @param {bool}   $access   Current access value.
@@ -399,27 +399,5 @@ class AccessControl {
 		 * @return {bool} Should the user have access?
 		 */
 		return apply_filters( 'classifai_has_access', $access, $this->feature, $user_id, $settings );
-	}
-
-	/**
-	 * Get default settings for the feature.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-		}
-		$editable_roles = get_editable_roles() ?? [];
-
-		$default_settings = array(
-			$this->role_based_access_key  => 1,
-			$this->roles_key              => array_keys( $editable_roles ),
-			$this->user_based_access_key  => 'no',
-			$this->users_key              => array(),
-			$this->user_based_opt_out_key => 1,
-		);
-
-		return $default_settings;
 	}
 }

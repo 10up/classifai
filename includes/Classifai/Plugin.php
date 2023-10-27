@@ -39,6 +39,7 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
+		add_action( 'wp_ajax_classifai_search_users', array( $this, 'classifai_search_users' ) );
 	}
 
 	/**
@@ -73,9 +74,9 @@ class Plugin {
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
-		// Initialize the classifAI User Access.
-		$user_access = new UserAccess();
-		$user_access->init();
+		// Initialize the classifAI User Profile.
+		$user_profile = new Admin\UserProfile();
+		$user_profile->init();
 
 		/**
 		 * Fires after ClassifAI services are loaded.
@@ -241,5 +242,43 @@ class Plugin {
 			),
 			$links
 		);
+	}
+
+	/**
+	 * Ajax callback for searching users.
+	 *
+	 * @since 2.4.0
+	 * @return void
+	 */
+	public function classifai_search_users() {
+		check_ajax_referer( 'classifai-user-search', 'security' );
+
+		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
+		$users  = get_users(
+			array(
+				'search'         => '*' . $search . '*',
+				'number'         => 10,
+				'search_columns' => array( 'user_login', 'user_nicename', 'user_email', 'ID', 'display_name' ),
+				'fields'         => array( 'ID', 'display_name', 'user_login' ),
+			)
+		);
+
+		// bail if we don't have any results
+		if ( empty( $users ) ) {
+			wp_send_json_success( array() );
+		}
+
+		// build our results
+		$results = array_map(
+			function( $user ) {
+				return array(
+					'id'   => absint( $user->ID ),
+					'text' => esc_attr( $user->display_name . ' (' . $user->user_login . ')' ),
+				);
+			},
+			$users
+		);
+
+		wp_send_json_success( $results );
 	}
 }

@@ -251,9 +251,19 @@ input.classifai-button {
 			line-height: 1.4;
 		}
 
-		tr.allowed_users_row .select2 {
-			max-width: 600px;
+		tr.allowed_users_row {
+			.select2 {
+				max-width: 600px;
+			}
+
+			.select2-container--default.select2-container--focus .select2-selection--multiple {
+				border-color: #2271b1;
+				box-shadow: 0 0 0 1px #2271b1;
+				outline: 2px solid transparent;
+			}
 		}
+
+
 	}
 
 	input[type="text"],

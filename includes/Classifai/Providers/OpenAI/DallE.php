@@ -540,11 +540,11 @@ class DallE extends Provider {
 	/**
 	 * Retrieves the allowed WordPress roles for OpenAI DALL·E
 	 *
-	 * @since 2.5.0
+	 * @since 2.4.0
 	 *
 	 * @return array An associative array where the keys are role keys and the values are role names.
 	 */
-	public function get_allowed_roles() {
+	public function get_roles() {
 		$default_settings = $this->get_default_settings();
 		// Get all roles that have the upload_files cap.
 		$roles = get_editable_roles() ?? [];

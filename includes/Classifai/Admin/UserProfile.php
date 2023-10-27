@@ -1,17 +1,19 @@
 <?php
 
-namespace Classifai;
+namespace Classifai\Admin;
 
 use Classifai\Providers\AccessControl;
 use Classifai\Providers\Provider;
 use Classifai\Services\Service;
 
+use function Classifai\get_plugin;
+
 /**
- * The UserAccess class provides role and user based access control for ClassifAI feature.
+ * The UserProfile class provides opt-out settings for ClassifAI feature on user profile page.
  *
- * This class contains methods for managing access settings, such as adding and removing roles and users, and checking whether a given role or user has access to ClassifAI.
+ * @since 2.4.0
  */
-class UserAccess {
+class UserProfile {
 
 	/**
 	 * The user meta key for storing the list of opted out features.
@@ -24,49 +26,11 @@ class UserAccess {
 	 * Initialize the class.
 	 */
 	public function init() {
-		add_action( 'wp_ajax_classifai_search_users', array( $this, 'classifai_search_users' ) );
 		add_action( 'show_user_profile', array( $this, 'user_settings' ) );
 		add_action( 'edit_user_profile', array( $this, 'user_settings' ) );
 
 		add_action( 'personal_options_update', array( $this, 'save_user_settings' ) );
 		add_action( 'edit_user_profile_update', array( $this, 'save_user_settings' ) );
-	}
-
-	/**
-	 * Ajax callback for searching users.
-	 *
-	 * @return void
-	 */
-	public function classifai_search_users() {
-		check_ajax_referer( 'classifai-user-search', 'security' );
-
-		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
-		$users  = get_users(
-			array(
-				'search'         => '*' . $search . '*',
-				'number'         => 10,
-				'search_columns' => array( 'user_login', 'user_nicename', 'user_email', 'ID', 'display_name' ),
-				'fields'         => array( 'ID', 'display_name' ),
-			)
-		);
-
-		// bail if we don't have any results
-		if ( empty( $users ) ) {
-			wp_send_json_success( array() );
-		}
-
-		// build our results
-		$results = array_map(
-			function( $user ) {
-				return array(
-					'id'   => $user->ID,
-					'text' => $user->display_name,
-				);
-			},
-			$users
-		);
-
-		wp_send_json_success( $results );
 	}
 
 	/**
