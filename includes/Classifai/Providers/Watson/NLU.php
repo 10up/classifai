@@ -99,31 +99,48 @@ class NLU extends Provider {
 	 * Resets the settings for the NLU provider.
 	 */
 	public function reset_settings() {
-		$settings = [
-			'post_types' => [
-				'post',
-				'page',
-			],
-			'features'   => [
-				'category'           => true,
-				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
-
-				'keyword'            => true,
-				'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-				'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-				'concept'            => false,
-				'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-				'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-				'entity'             => false,
-				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-			],
-		];
-
+		$settings = $this->get_default_settings() ?? [];
 		update_option( $this->get_option_name(), $settings );
+	}
+
+	/**
+	 * Default settings for ChatGPT
+	 *
+	 * @return array
+	 */
+	public function get_default_settings() {
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'post_types' => [
+					'post' => 1,
+					'page' => null,
+				],
+				'post_statuses' => [
+					'publish' => 1,
+					'draft'   => null,
+				],
+				'features'   => [
+					'category'           => true,
+					'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+					'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
+
+					'keyword'            => true,
+					'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+					'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+
+					'concept'            => false,
+					'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+					'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+
+					'entity'             => false,
+					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
+				],
+			]
+		);
 	}
 
 	/**

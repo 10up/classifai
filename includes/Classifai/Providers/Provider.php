@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use function Classifai\get_feature_default_settings;
+
 abstract class Provider {
 
 	/**
@@ -183,11 +185,6 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-		}
-		$editable_roles = get_editable_roles() ?? [];
-
 		$defaults = [];
 		$features = $this->get_features();
 		if ( empty( $features ) ) {
@@ -197,13 +194,7 @@ abstract class Provider {
 		foreach ( $features as $feature => $title ) {
 			$defaults = array_merge(
 				$defaults,
-				array(
-					$feature . '_role_based_access'  => 1,
-					$feature . '_roles'              => array_keys( $editable_roles ),
-					$feature . '_user_based_access'  => 'no',
-					$feature . '_user_based_opt_out' => 'no',
-					$feature . '_users'              => array(),
-				)
+				get_feature_default_settings( $feature )
 			);
 		}
 

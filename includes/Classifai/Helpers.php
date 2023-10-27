@@ -772,3 +772,26 @@ function get_all_post_statuses() {
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
+
+/**
+ * Get the default settings for a feature.
+ *
+ * @since 2.4.0
+ *
+ * @param string $feature Feature key.
+ * @return array
+ */
+function get_feature_default_settings( $feature ) {
+	if ( ! function_exists( 'get_editable_roles' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+	}
+	$editable_roles = get_editable_roles() ?? [];
+
+	return array(
+		$feature . '_role_based_access'  => 1,
+		$feature . '_roles'              => array_keys( $editable_roles ),
+		$feature . '_user_based_access'  => 'no',
+		$feature . '_user_based_opt_out' => 'no',
+		$feature . '_users'              => array(),
+	);
+}
