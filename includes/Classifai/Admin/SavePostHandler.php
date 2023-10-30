@@ -107,11 +107,12 @@ class SavePostHandler {
 	 * Classifies the post specified with the PostClassifier object.
 	 * Existing terms relationships are removed before classification.
 	 *
-	 * @param int $post_id the post to classify & link
+	 * @param int  $post_id the post to classify & link.
+	 * @param bool $link_terms Whether to link the terms to the post.
 	 *
 	 * @return array
 	 */
-	public function classify( $post_id ) {
+	public function classify( $post_id, $link_terms = true ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -133,23 +134,25 @@ class SavePostHandler {
 
 		$classifier = $this->get_classifier();
 
-		if ( \Classifai\get_feature_enabled( 'category' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+		if ( $link_terms ) {
+			if ( \Classifai\get_feature_enabled( 'category' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'concept' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'entity' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			}
 		}
 
-		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
-		}
-
-		$output = $classifier->classify_and_link( $post_id );
+		$output = $classifier->classify_and_link( $post_id, [], $link_terms );
 
 		if ( is_wp_error( $output ) ) {
 			update_post_meta(
