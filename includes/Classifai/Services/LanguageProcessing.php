@@ -57,6 +57,11 @@ class LanguageProcessing extends Service {
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
 					),
+					'linkTerms' => array(
+						'type'              => 'boolean',
+						'description'       => esc_html__( 'Whether to link terms or not.', 'classifai' ),
+						'default'           => true,
+					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
 			]
@@ -220,7 +225,8 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
 		try {
-			$post_id = $request->get_param( 'id' );
+			$post_id    = $request->get_param( 'id' );
+			$link_terms = $request->get_param( 'linkTerms' );
 
 			if ( empty( $post_id ) ) {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
