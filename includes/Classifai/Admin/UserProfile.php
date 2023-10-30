@@ -97,7 +97,6 @@ class UserProfile {
 	public function save_user_settings( $user_id ) {
 		if (
 			! isset( $_POST['classifai_out_out_features_nonce'] ) ||
-			! isset( $_POST[ $this->opt_out_key ] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_out_out_features_nonce'] ) ), 'classifai_out_out_features' )
 		) {
 			return;
