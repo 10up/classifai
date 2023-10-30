@@ -77,9 +77,13 @@ const buttonClickCallBack = async ( resp ) => {
 
 	if ( resp && resp.terms ) {
 		let updateNeeded = false;
-		const taxonomies = Object.keys( resp.terms );
+		let termsReady = false;
+		// const taxonomies = Object.keys( resp.terms );
+		const taxonomies = resp.terms;
+		// const taxonomies = Object.assign({}, resp.terms);
+		
 		const taxTerms = {};
-		taxonomies.forEach( ( taxonomy ) => {
+		Object.keys( taxonomies ).forEach( ( taxonomy ) => {
 			let tax = taxonomy;
 			if ( 'post_tag' === taxonomy ) {
 				tax = 'tags';
@@ -88,18 +92,10 @@ const buttonClickCallBack = async ( resp ) => {
 				tax = 'categories';
 			}
 
-			const currentTerms =
-				select( 'core/editor' ).getEditedPostAttribute( taxonomy ) ||
-				[];
-			const newTerms = [
-				...currentTerms,
-				...resp.terms[ taxonomy ].map( ( term ) =>
-					Number.parseInt( term )
-				),
-			].filter( ( ele, i, a ) => a.indexOf( ele ) === i );
-
-			if ( newTerms && newTerms.length ) {
-				updateNeeded = true;
+			const newTerms = resp.terms[taxonomy];
+			if ( newTerms && Object.keys( newTerms) .length ) {
+			// 	updateNeeded = true;
+				termsReady = true;
 				taxTerms[ tax ] = newTerms;
 			}
 		} );
