@@ -8,6 +8,7 @@ import {
 	Icon,
 	ToggleControl,
 	BaseControl,
+	Modal
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
@@ -143,6 +144,11 @@ const ClassifAIGenerateTagsButton = () => {
 			'classifai_process_content'
 		)
 	);
+
+	const [ isOpen, setOpen ] = useState( false );
+	const openModal = () => setOpen( true );
+	const closeModal = () => setOpen( false );
+
 	// Display classify post button only when process content on update is disabled.
 	const enabled = 'no' === processContent ? 'no' : 'yes';
 	if ( 'yes' === enabled ) {
@@ -161,17 +167,28 @@ const ClassifAIGenerateTagsButton = () => {
 
 	return (
 		<>
+			{ isOpen && (
+				<Modal
+					title={ __( 'Confirm Post Classification', 'classifai' ) }
+					onRequestClose={ closeModal }
+					isFullScreen={ false }
+					className="classify-modal"
+				>
+				</Modal>
+			) }
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
-				onClick={ ( e ) =>
+				onClick={ ( e ) => {
+					openModal();
 					handleClick( {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
 						buttonText,
+						linkTerms: false
 					} )
-				}
+				} }
 			>
 				{ buttonText }
 			</Button>
