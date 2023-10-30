@@ -280,7 +280,7 @@ class ImageProcessing extends Service {
 		if ( 'ocr' === $route_to_call && ! $provider->is_feature_enabled( 'ocr' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Scan image for text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		} elseif ( 'alt-tags' === $route_to_call && ! $provider->is_feature_enabled( 'image_captions' ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Image captions is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Image descriptive text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		} elseif ( 'image-tags' === $route_to_call && ! $provider->is_feature_enabled( 'image_tagging' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image tagging is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		} elseif ( 'smart-crop' === $route_to_call && ! $provider->is_feature_enabled( 'smart_cropping' ) ) {

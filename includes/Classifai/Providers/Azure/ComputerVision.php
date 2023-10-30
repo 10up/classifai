@@ -38,7 +38,7 @@ class ComputerVision extends Provider {
 
 		// Features provided by this provider.
 		$this->features = array(
-			'image_captions' => __( 'Generate captions', 'classifai' ),
+			'image_captions' => __( 'Generate descriptive text', 'classifai' ),
 			'image_tagging'  => __( 'Generate tags', 'classifai' ),
 			'smart_cropping' => __( 'Smart cropping', 'classifai' ),
 			'ocr'            => __( 'Scan images for text', 'classifai' ),
@@ -776,7 +776,7 @@ class ComputerVision extends Provider {
 
 		// Don't save tags if feature is disabled or user don't have access to use it.
 		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
-			return new WP_Error( 'invalid_settings', esc_html__( 'Image captions feature is disabled.', 'classifai' ) );
+			return new WP_Error( 'invalid_settings', esc_html__( 'Image descriptive text feature is disabled.', 'classifai' ) );
 		}
 
 		/**
@@ -983,10 +983,10 @@ class ComputerVision extends Provider {
 			]
 		);
 
-		// Add Image captions fields.
+		// Add Image descriptive text fields.
 		add_settings_section(
 			$this->get_option_name() . '_image_captions',
-			esc_html__( 'Image captions settings', 'classifai' ),
+			esc_html__( 'Image descriptive text settings', 'classifai' ),
 			'',
 			$this->get_option_name()
 		);
