@@ -23,6 +23,7 @@ export const DisableFeatureButton = ( { feature } ) => {
 			variant="link"
 			className="classifai-disable-feature-link"
 			target="_blank"
+			rel="noopener noreferrer"
 			label={ __(
 				'Opt out of using this ClassifAI feature',
 				'classifai'

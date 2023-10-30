@@ -118,6 +118,7 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 						),
 						href: ClassifAI?.profile_url,
 						target: '_blank',
+						rel: 'noopener noreferrer',
 						class: 'classifai-disable-feature-link',
 					} )
 						.wrap(
