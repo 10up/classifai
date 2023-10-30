@@ -22,6 +22,7 @@ import {
 } from '@wordpress/wordcount';
 import { __ } from '@wordpress/i18n';
 
+import { DisableFeatureButton } from '../components';
 import '../../scss/content-resizing-plugin.scss';
 
 const aiIconSvg = (
@@ -316,6 +317,7 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
+			<DisableFeatureButton feature="resize_content" />
 		</Modal>
 	);
 

@@ -167,6 +167,8 @@ class Plugin {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_assets( $hook_suffix ) {
+		$user_profile     = new Admin\UserProfile();
+		$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 
 		wp_enqueue_style(
 			'classifai-admin-style',
@@ -176,11 +178,6 @@ class Plugin {
 			'all'
 		);
 
-		// Only enqueue the scripts on the ClassifAI admin pages.
-		if ( ! in_array( $hook_suffix, array( 'tools_page_classifai', 'admin_page_classifai_setup' ), true ) ) {
-			return;
-		}
-
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
@@ -189,18 +186,26 @@ class Plugin {
 			true
 		);
 
+		$localize_data = [
+			'api_password'             => __( 'API Password', 'classifai' ),
+			'api_key'                  => __( 'API Key', 'classifai' ),
+			'use_key'                  => __( 'Use an API Key instead?', 'classifai' ),
+			'use_password'             => __( 'Use a username/password instead?', 'classifai' ),
+			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
+			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
+			'opt_out_enabled_features' => array_keys( $allowed_features ),
+			'profile_url'              => get_edit_profile_url( get_current_user_id() ),
+		];
+
+		// Only add user search nonce if scripts on the ClassifAI admin pages.
+		if ( in_array( $hook_suffix, array( 'tools_page_classifai', 'admin_page_classifai_setup' ), true ) ) {
+			$localize_data['user_search_nonce'] = wp_create_nonce( 'classifai-user-search' );
+		}
+
 		wp_localize_script(
 			'classifai-admin-script',
 			'ClassifAI',
-			[
-				'api_password'      => __( 'API Password', 'classifai' ),
-				'api_key'           => __( 'API Key', 'classifai' ),
-				'use_key'           => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password'      => __( 'Use a username/password instead?', 'classifai' ),
-				'ajax_nonce'        => wp_create_nonce( 'classifai' ),
-				'user_search_nonce' => wp_create_nonce( 'classifai-user-search' ),
-				'ajax_url'          => admin_url( 'admin-ajax.php' ),
-			]
+			$localize_data
 		);
 
 		if ( wp_script_is( 'wp-commands', 'registered' ) ) {
