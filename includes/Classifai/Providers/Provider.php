@@ -253,7 +253,7 @@ abstract class Provider {
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -281,7 +281,7 @@ abstract class Provider {
 		><?php echo esc_textarea( $value ); ?></textarea>
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -364,7 +364,7 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
 		}
@@ -424,7 +424,7 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
 		}
