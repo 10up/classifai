@@ -16,6 +16,7 @@ export const handleClick = ( {
 	endpoint,
 	callback = false,
 	buttonText = __( 'Rescan', 'classifai' ),
+	linkTerms = true
 } ) => {
 	const postID = button.getAttribute( 'data-id' );
 	const [ spinner ] = button.parentNode.getElementsByClassName( 'spinner' );
@@ -28,7 +29,15 @@ export const handleClick = ( {
 	spinner.classList.add( 'is-active' );
 	errorContainer.style.display = 'none';
 
-	wp.apiRequest( { path } ).then(
+	// Include the linkTerms attribute in the data object
+	const request = {
+		path,
+		data: {
+		  linkTerms
+		}
+	};
+
+	wp.apiRequest( request ).then(
 		( response ) => {
 			button.removeAttribute( 'disabled' );
 			spinner.style.display = 'none';
