@@ -47,7 +47,7 @@ class NLU extends Provider {
 
 		// Features provided by this provider.
 		$this->features = array(
-			'content_classification' => __( 'Classify Content', 'classifai' ),
+			'content_classification' => __( 'Classify content', 'classifai' ),
 		);
 
 		$this->nlu_features = [
@@ -104,7 +104,7 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Default settings for ChatGPT
+	 * Default settings for Watson NLU.
 	 *
 	 * @return array
 	 */

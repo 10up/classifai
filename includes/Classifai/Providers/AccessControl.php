@@ -83,8 +83,6 @@ class AccessControl {
 		$this->users_key              = $feature . '_users';
 	}
 
-
-
 	/**
 	 * Get settings for the current feature.
 	 *
@@ -178,7 +176,6 @@ class AccessControl {
 	public function add_settings( string $section = '' ) {
 		$default_settings = $this->provider->get_default_settings();
 		$settings         = $this->get_settings();
-		$feature_name     = $this->provider->get_features()[ $this->feature ] ?? $this->provider->get_provider_name();
 
 		$option_name = $this->provider->get_option_name();
 		if ( empty( $section ) ) {
@@ -217,8 +214,7 @@ class AccessControl {
 				'label_for'     => $this->role_based_access_key,
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings[ $this->role_based_access_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Enables ability to select which role can access %s', 'classifai' ), $feature_name ),
+				'description'   => __( 'Enables ability to select which roles can access this feature.', 'classifai' ),
 				'class'         => 'classifai-role-based-access',
 			]
 		);
@@ -239,8 +235,7 @@ class AccessControl {
 				'label_for'               => $this->roles_key,
 				'options'                 => $this->provider->get_roles(),
 				'default_values'          => $default_settings[ $this->roles_key ],
-				/* translators: %s - Feature name */
-				'description'             => sprintf( __( 'Choose which roles are allowed to %s', 'classifai' ), $feature_name ),
+				'description'             => __( 'Choose which roles are allowed to access this feature.', 'classifai' ),
 				'class'                   => $class,
 				'backward_compatible_key' => $backward_compatible_roles_key,
 			]
@@ -256,8 +251,7 @@ class AccessControl {
 				'label_for'     => $this->user_based_access_key,
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings[ $this->user_based_access_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Enables ability to select which users can access %s', 'classifai' ), $feature_name ),
+				'description'   => __( 'Enables ability to select which users can access this feature.', 'classifai' ),
 				'class'         => 'classifai-user-based-access',
 			]
 		);
@@ -277,8 +271,7 @@ class AccessControl {
 			[
 				'label_for'     => $this->users_key,
 				'default_value' => $default_settings[ $this->users_key ],
-				/* translators: %s - Feature name */
-				'description'   => sprintf( __( 'Users who have access to %s.', 'classifai' ), $feature_name ),
+				'description'   => __( 'Users who have access to this feature.', 'classifai' ),
 				'class'         => $users_class,
 			]
 		);

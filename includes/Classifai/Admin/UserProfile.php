@@ -74,7 +74,7 @@ class UserProfile {
 									/>
 								<?php
 								/* translators: %s: Feature name. */
-								echo esc_html( sprintf( __( 'Opt out of using the %s feature', 'classifai' ), $feature_name ) );
+								echo esc_html( sprintf( __( 'Opt out of using the %s feature.', 'classifai' ), strtolower( $feature_name ) ) );
 								?>
 							</label>
 						</td>
