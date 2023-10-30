@@ -104,23 +104,93 @@ const buttonClickCallBack = async ( resp ) => {
 			}
 		} );
 
+
+		if ( termsReady ) {
+			// openModal();
+			
+			const modal = document.querySelector( '.classify-modal .components-modal__content' );
+			// list the term name too from taxTerms
+			Object.keys( taxTerms ).forEach( ( taxonomy ) => {
+				const coverDiv = document.createElement( 'div' );
+				coverDiv.setAttribute( 'class', 'modal-tax-cover' );
+
+				const title = document.createElement( 'h2' );
+				title.textContent = taxonomy;
+				coverDiv.appendChild( title );
+
+				const ul = document.createElement( 'ul' );
+				ul.setAttribute( 'class', 'classify-modal__list' );
+
+				Object.keys( taxTerms[taxonomy] ).forEach( ( termName ) => {
+					const termID = taxTerms[taxonomy][termName];
+					const li = document.createElement( 'li' );
+					li.setAttribute( 'class', 'classify-modal__list-item' );
+					li.setAttribute( 'data-id', termID );
+
+					const liCB = document.createElement( 'input' );
+					liCB.setAttribute( 'type', 'checkbox' );
+					liCB.setAttribute( 'id', `tax-${termID}` );
+					li.appendChild( liCB );
+					
+					const liLB = document.createElement( 'label' );
+					liLB.setAttribute( 'for', `tax-${termID}` );
+					liLB.innerHTML = `${ termName }`;
+					li.appendChild( liLB );
+
+					ul.appendChild( li );
+				});
+
+				coverDiv.appendChild( ul );
+				modal.appendChild( coverDiv );
+			} );
+			
+			
+			// add new button
+			const newButton = document.createElement( 'button' );
+			newButton.setAttribute( 'class', 'classify-modal__button' );
+			newButton.innerHTML = 'Save';
+			newButton.addEventListener( 'click', ( e ) => {
+				handleClick( {
+					button: e.target,
+					endpoint: '/classifai/v1/generate-tags/',
+					callback: buttonClickCallBack,
+					buttonText,
+				} )
+			} );
+			modal.appendChild( newButton );
+		}
+
 		if ( updateNeeded ) {
 			// Check for edited values in post.
 			const isDirty = await select( 'core/editor' ).isEditedPostDirty();
-			await dispatch( 'core' ).editEntityRecord(
-				'postType',
-				postType,
-				postId,
-				taxTerms
-			);
+			// await dispatch( 'core' ).editEntityRecord(
+			// 	'postType',
+			// 	postType,
+			// 	postId,
+			// 	taxTerms
+			// );
+
+			// console.dir(['postType',
+			// postType,
+			// postId,
+			// taxTerms]);
+		
+			
+			// await dispatch( 'core' ).editEntityRecord(
+			// 	'postType',
+			// 	'watson-category',
+			// 	9309,
+			// 	[169]
+			// );
+
 			// If no edited values in post trigger save.
-			if ( ! isDirty ) {
-				await dispatch( 'core' ).saveEditedEntityRecord(
-					'postType',
-					postType,
-					postId
-				);
-			}
+			// if ( ! isDirty ) {
+			// 	await dispatch( 'core' ).saveEditedEntityRecord(
+			// 		'postType',
+			// 		postType,
+			// 		postId
+			// 	);
+			// }
 
 			// Display success notice.
 			dispatch( 'core/notices' ).createSuccessNotice(
