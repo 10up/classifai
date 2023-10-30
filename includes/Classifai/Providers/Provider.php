@@ -437,7 +437,7 @@ abstract class Provider {
 	 */
 	public function render_allowed_users( array $args = array() ) {
 		$setting_index = $this->get_settings();
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : array();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
 		$users         = array();
 		if ( ! empty( $value ) ) {
 			$users = get_users(
@@ -544,7 +544,7 @@ abstract class Provider {
 	 * @param string $section Settings section.
 	 * @return void
 	 */
-	protected function add_access_settings( $feature, $section = '' ) {
+	protected function add_access_settings( string $feature, string $section = '' ) {
 		$access_control = new AccessControl( $this, $feature );
 		$access_control->add_settings( $section );
 	}
@@ -557,7 +557,7 @@ abstract class Provider {
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	protected function sanitize_access_settings( $settings, $feature ) {
+	protected function sanitize_access_settings( array $settings, string $feature ) {
 		$access_control = new AccessControl( $this, $feature );
 		return $access_control->sanitize_settings( $settings );
 	}

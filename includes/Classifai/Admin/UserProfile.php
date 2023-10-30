@@ -36,10 +36,10 @@ class UserProfile {
 	/**
 	 * Add ClassifAI features opt-out checkboxes to user profile and edit user.
 	 *
-	 * @param WP_User $user User object.
+	 * @param \WP_User $user User object.
 	 * @return void
 	 */
-	public function user_settings( $user ) {
+	public function user_settings( \WP_User $user ) {
 		$user_id = $user->ID;
 
 		// Bail if user is not current user or current user cannot edit the user.

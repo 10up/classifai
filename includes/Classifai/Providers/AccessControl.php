@@ -1,6 +1,6 @@
 <?php
 /**
- *  Class for handling the access control for ClassifAI features.
+ * Class for handling the access control for ClassifAI features.
  *
  * @package Classifai
  * @since 2.4.0
@@ -72,7 +72,7 @@ class AccessControl {
 	 * @param Provider $provider The provider class instance.
 	 * @param string   $feature  The feature name.
 	 */
-	public function __construct( $provider, $feature ) {
+	public function __construct( Provider $provider, string $feature ) {
 		$this->provider = $provider;
 		$this->feature  = $feature;
 
@@ -175,7 +175,7 @@ class AccessControl {
 	 * @param string $section Settings section.
 	 * @return void
 	 */
-	public function add_settings( $section = '' ) {
+	public function add_settings( string $section = '' ) {
 		$default_settings = $this->provider->get_default_settings();
 		$settings         = $this->get_settings();
 		$feature_name     = $this->provider->get_features()[ $this->feature ] ?? $this->provider->get_provider_name();
@@ -306,7 +306,7 @@ class AccessControl {
 	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $settings ) {
+	public function sanitize_settings( array $settings ) {
 		$new_settings = [];
 
 		if ( empty( $settings[ $this->role_based_access_key ] ) || 1 !== (int) $settings[ $this->role_based_access_key ] ) {

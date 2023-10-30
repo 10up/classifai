@@ -983,7 +983,7 @@ class NLU extends Provider {
 		/**
 		 * Filter to override permission to a IBM Watson classify content feature.
 		 *
-		 * @since 2.3.0
+		 * @since 2.4.0
 		 * @hook classifai_openai_chatgpt_enable_{$feature}
 		 *
 		 * @param {bool}  $access Current access value.

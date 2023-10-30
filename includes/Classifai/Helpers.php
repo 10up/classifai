@@ -781,7 +781,7 @@ function get_all_post_statuses() {
  * @param string $feature Feature key.
  * @return array
  */
-function get_feature_default_settings( $feature ) {
+function get_feature_default_settings( string $feature ) {
 	if ( ! function_exists( 'get_editable_roles' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/user.php';
 	}
