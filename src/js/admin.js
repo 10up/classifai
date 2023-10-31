@@ -1,11 +1,11 @@
 /* global ClassifAI */
-import { __ } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
-import 'select2';
-import 'select2/dist/css/select2.min.css';
+
+import { createRoot } from '@wordpress/element';
+import { UserSelector } from './components';
 
 document.addEventListener( 'DOMContentLoaded', function () {
 	const template = document.getElementById( 'help-menu-template' );
@@ -135,29 +135,24 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	}
 } );
 
-// Search for users.
+// User Selector.
 ( () => {
-	jQuery( '.classifai-search-users' ).select2( {
-		width: '100%',
-		placeholder: __( 'Search for users', 'classifai' ),
-		minimumInputLength: 1,
-		ajax: {
-			cache: false,
-			delay: 250, // wait 250 milliseconds before triggering the request
-			url: ClassifAI.ajax_url,
-			dataType: 'json',
-			data( params ) {
-				return {
-					search: params.term,
-					action: 'classifai_search_users',
-					security: ClassifAI.user_search_nonce,
-				};
-			},
-			processResults( data ) {
-				return {
-					results: data.data,
-				};
-			},
-		},
+	const userSearches = document.querySelectorAll(
+		'.classifai-user-selector'
+	);
+	if ( ! userSearches ) {
+		return;
+	}
+
+	userSearches.forEach( ( userSearch ) => {
+		const id = userSearch.getAttribute( 'data-id' );
+		const userElement = document.getElementById( id );
+		const values = userElement.value.split( ',' );
+		const onChange = ( newValues ) => {
+			userElement.value = newValues.join( ',' );
+		};
+
+		const root = createRoot( userSearch );
+		root.render( <UserSelector value={ values } onChange={ onChange } /> );
 	} );
 } )();

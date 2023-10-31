@@ -322,8 +322,8 @@ class AccessControl {
 		}
 
 		// Allowed users.
-		if ( isset( $settings[ $this->users_key ] ) && is_array( $settings[ $this->users_key ] ) ) {
-			$new_settings[ $this->users_key ] = array_map( 'absint', $settings[ $this->users_key ] );
+		if ( isset( $settings[ $this->users_key ] ) && ! empty( $settings[ $this->users_key ] ) ) {
+			$new_settings[ $this->users_key ] = array_map( 'absint', explode( ',', $settings[ $this->users_key ] ) );
 		} else {
 			$new_settings[ $this->users_key ] = array();
 		}
