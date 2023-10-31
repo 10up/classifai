@@ -14,6 +14,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
+import TaxonomyControls from '../../includes/Classifai/Blocks/recommended-content-block/inspector-controls/taxonomy-controls';
 
 const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
 	window;
@@ -64,144 +65,6 @@ const ClassifAIToggle = () => {
 };
 
 /**
- * Callback function to handle API response.
- *
- * @param {Object} resp
- */
-const buttonClickCallBack = async ( resp ) => {
-	const { select, dispatch } = wp.data;
-	const postId = select( 'core/editor' ).getCurrentPostId();
-	const postType = select( 'core/editor' ).getCurrentPostType();
-	const postTypeLabel =
-		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
-
-	if ( resp && resp.terms ) {
-		let updateNeeded = false;
-		let termsReady = false;
-		// const taxonomies = Object.keys( resp.terms );
-		const taxonomies = resp.terms;
-		// const taxonomies = Object.assign({}, resp.terms);
-		
-		const taxTerms = {};
-		Object.keys( taxonomies ).forEach( ( taxonomy ) => {
-			let tax = taxonomy;
-			if ( 'post_tag' === taxonomy ) {
-				tax = 'tags';
-			}
-			if ( 'category' === taxonomy ) {
-				tax = 'categories';
-			}
-
-			const newTerms = resp.terms[taxonomy];
-			if ( newTerms && Object.keys( newTerms) .length ) {
-			// 	updateNeeded = true;
-				termsReady = true;
-				taxTerms[ tax ] = newTerms;
-			}
-		} );
-
-
-		if ( termsReady ) {
-			// openModal();
-			
-			const modal = document.querySelector( '.classify-modal .components-modal__content' );
-			// list the term name too from taxTerms
-			Object.keys( taxTerms ).forEach( ( taxonomy ) => {
-				const coverDiv = document.createElement( 'div' );
-				coverDiv.setAttribute( 'class', 'modal-tax-cover' );
-
-				const title = document.createElement( 'h2' );
-				title.textContent = taxonomy;
-				coverDiv.appendChild( title );
-
-				const ul = document.createElement( 'ul' );
-				ul.setAttribute( 'class', 'classify-modal__list' );
-
-				Object.keys( taxTerms[taxonomy] ).forEach( ( termName ) => {
-					const termID = taxTerms[taxonomy][termName];
-					const li = document.createElement( 'li' );
-					li.setAttribute( 'class', 'classify-modal__list-item' );
-					li.setAttribute( 'data-id', termID );
-
-					const liCB = document.createElement( 'input' );
-					liCB.setAttribute( 'type', 'checkbox' );
-					liCB.setAttribute( 'id', `tax-${termID}` );
-					li.appendChild( liCB );
-					
-					const liLB = document.createElement( 'label' );
-					liLB.setAttribute( 'for', `tax-${termID}` );
-					liLB.innerHTML = `${ termName }`;
-					li.appendChild( liLB );
-
-					ul.appendChild( li );
-				});
-
-				coverDiv.appendChild( ul );
-				modal.appendChild( coverDiv );
-			} );
-			
-			
-			// add new button
-			const newButton = document.createElement( 'button' );
-			newButton.setAttribute( 'class', 'classify-modal__button' );
-			newButton.innerHTML = 'Save';
-			newButton.addEventListener( 'click', ( e ) => {
-				handleClick( {
-					button: e.target,
-					endpoint: '/classifai/v1/generate-tags/',
-					callback: buttonClickCallBack,
-					buttonText,
-				} )
-			} );
-			modal.appendChild( newButton );
-		}
-
-		if ( updateNeeded ) {
-			// Check for edited values in post.
-			const isDirty = await select( 'core/editor' ).isEditedPostDirty();
-			// await dispatch( 'core' ).editEntityRecord(
-			// 	'postType',
-			// 	postType,
-			// 	postId,
-			// 	taxTerms
-			// );
-
-			// console.dir(['postType',
-			// postType,
-			// postId,
-			// taxTerms]);
-		
-			
-			// await dispatch( 'core' ).editEntityRecord(
-			// 	'postType',
-			// 	'watson-category',
-			// 	9309,
-			// 	[169]
-			// );
-
-			// If no edited values in post trigger save.
-			// if ( ! isDirty ) {
-			// 	await dispatch( 'core' ).saveEditedEntityRecord(
-			// 		'postType',
-			// 		postType,
-			// 		postId
-			// 	);
-			// }
-
-			// Display success notice.
-			dispatch( 'core/notices' ).createSuccessNotice(
-				sprintf(
-					/** translators: %s is post type label. */
-					__( '%s classified successfully.', 'classifai' ),
-					postTypeLabel
-				),
-				{ type: 'snackbar' }
-			);
-		}
-	}
-};
-
-/**
  *  Classify Post Button
  */
 const ClassifAIGenerateTagsButton = () => {
@@ -214,6 +77,102 @@ const ClassifAIGenerateTagsButton = () => {
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
+
+	const [ taxQuery, setTaxQuery ] = useState( [] );
+
+	/**
+	 * Callback function to handle API response.
+	 *
+	 * @param {Object} resp
+	 */
+	const buttonClickCallBack = async ( resp ) => {
+		if ( resp && resp.terms ) {
+			let termsReady = false;
+			const taxonomies = resp.terms;
+			let taxTerms = {};
+
+			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
+				let tax = taxonomy;
+				if ( 'post_tag' === taxonomy ) {
+					tax = 'tags';
+				}
+				if ( 'category' === taxonomy ) {
+					tax = 'categories';
+				}
+
+				const newTerms = resp.terms[taxonomy];
+				if ( newTerms && Object.keys( newTerms) .length ) {
+					termsReady = true;
+					taxTerms[ tax ] = newTerms;
+				}
+			} );
+
+			setTaxQuery ( taxTerms );
+			openModal();
+		}
+	};
+
+	/**
+	 * Save the terms (Modal).
+	 */
+	const saveTerms = async ( taxTerms ) => {
+		// Remove index values from the nested object
+		// Convert the object into an array of key-value pairs
+		const taxTermsArray = Object.entries(taxTerms);
+
+		// Remove index values from the nested objects and convert back to an object
+		const newtaxTerms = Object.fromEntries(
+			taxTermsArray.map(([key, value]) => {
+				if (typeof value === 'object') {
+				return [key, Object.values(value)];
+				}
+				return [key, value];
+			})
+		);
+		
+		const { select, dispatch } = wp.data;
+		const postId = select( 'core/editor' ).getCurrentPostId();
+		const postType = select( 'core/editor' ).getCurrentPostType();
+		const postTypeLabel =
+			select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
+
+		console.dir(['postType',
+		postType,
+		postId,
+		newtaxTerms]);
+
+		await dispatch( 'core' ).editEntityRecord(
+			'postType',
+			postType,
+			postId,
+			newtaxTerms
+		);
+
+		// If no edited values in post trigger save.
+		const isDirty = await select( 'core/editor' ).isEditedPostDirty();
+		if ( ! isDirty ) {
+			await dispatch( 'core' ).saveEditedEntityRecord(
+				'postType',
+				postType,
+				postId
+			);
+		}
+
+		// Display success notice.
+		dispatch( 'core/notices' ).createSuccessNotice(
+			sprintf(
+				/** translators: %s is post type label. */
+				__( '%s classified successfully.', 'classifai' ),
+				postTypeLabel
+			),
+			{ type: 'snackbar' }
+		);
+
+		// save the post
+		wp.data.dispatch( 'core/editor' ).savePost();
+
+		closeModal();
+};
 
 	// Display classify post button only when process content on update is disabled.
 	const enabled = 'no' === processContent ? 'no' : 'yes';
@@ -231,6 +190,19 @@ const ClassifAIGenerateTagsButton = () => {
 		postTypeLabel
 	);
 
+	let updatedTaxQuery = Object.entries( taxQuery || {} ).reduce(
+		( accumulator, [ taxonomySlug, terms ] ) => {
+			accumulator[ taxonomySlug ] = terms;
+
+			return accumulator;
+		},
+		{}
+	);
+
+	if ( updatedTaxQuery.taxQuery ) {
+		updatedTaxQuery = updatedTaxQuery.taxQuery;
+	}
+
 	return (
 		<>
 			{ isOpen && (
@@ -240,13 +212,28 @@ const ClassifAIGenerateTagsButton = () => {
 					isFullScreen={ false }
 					className="classify-modal"
 				>
+					<TaxonomyControls
+						// add onChange function for onChange( { taxQuery: newTaxQuery } );
+						onChange={ ( newTaxQuery ) => {
+							setTaxQuery( newTaxQuery );
+						} }
+						query={ {
+							contentPostType: 'page',
+							taxQuery: updatedTaxQuery
+						} }
+					/>
+					<Button
+						variant={ 'secondary' }
+						onClick={ () => saveTerms( updatedTaxQuery ) }
+					>
+						{ __( 'Save', 'classifai' ) }
+					</Button>
 				</Modal>
 			) }
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
 				onClick={ ( e ) => {
-					openModal();
 					handleClick( {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
