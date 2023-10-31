@@ -55,7 +55,6 @@
   "dependencies": {
     "@wordpress/icons": "^9.26.0",
     "choices.js": "^10.2.0",
-    "select2": "^4.1.0-rc.0",
     "tippy.js": "^6.3.7"
   }
 }

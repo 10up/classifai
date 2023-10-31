@@ -39,7 +39,6 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
-		add_action( 'wp_ajax_classifai_search_users', array( $this, 'classifai_search_users' ) );
 	}
 
 	/**
@@ -173,7 +172,7 @@ class Plugin {
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array(),
+			array( 'wp-components' ),
 			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
@@ -192,15 +191,9 @@ class Plugin {
 			'use_key'                  => __( 'Use an API Key instead?', 'classifai' ),
 			'use_password'             => __( 'Use a username/password instead?', 'classifai' ),
 			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
-			'ajax_url'                 => admin_url( 'admin-ajax.php' ),
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
-			'profile_url'              => get_edit_profile_url( get_current_user_id() ),
+			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
 		];
-
-		// Only add user search nonce if scripts on the ClassifAI admin pages.
-		if ( in_array( $hook_suffix, array( 'tools_page_classifai', 'admin_page_classifai_setup' ), true ) ) {
-			$localize_data['user_search_nonce'] = wp_create_nonce( 'classifai-user-search' );
-		}
 
 		wp_localize_script(
 			'classifai-admin-script',
@@ -247,43 +240,5 @@ class Plugin {
 			),
 			$links
 		);
-	}
-
-	/**
-	 * Ajax callback for searching users.
-	 *
-	 * @since 2.4.0
-	 * @return void
-	 */
-	public function classifai_search_users() {
-		check_ajax_referer( 'classifai-user-search', 'security' );
-
-		$search = isset( $_GET['search'] ) ? sanitize_text_field( wp_unslash( $_GET['search'] ) ) : '';
-		$users  = get_users(
-			array(
-				'search'         => '*' . $search . '*',
-				'number'         => 10,
-				'search_columns' => array( 'user_login', 'user_nicename', 'user_email', 'ID', 'display_name' ),
-				'fields'         => array( 'ID', 'display_name', 'user_login' ),
-			)
-		);
-
-		// bail if we don't have any results
-		if ( empty( $users ) ) {
-			wp_send_json_success( array() );
-		}
-
-		// build our results
-		$results = array_map(
-			function( $user ) {
-				return array(
-					'id'   => absint( $user->ID ),
-					'text' => esc_attr( $user->display_name . ' (' . $user->user_login . ')' ),
-				);
-			},
-			$users
-		);
-
-		wp_send_json_success( $results );
 	}
 }

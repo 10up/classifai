@@ -438,33 +438,20 @@ abstract class Provider {
 	public function render_allowed_users( array $args = array() ) {
 		$setting_index = $this->get_settings();
 		$value         = $setting_index[ $args['label_for'] ] ?? array();
-		$users         = array();
-		if ( ! empty( $value ) ) {
-			$users = get_users(
-				array(
-					'include' => array_map( 'absint', $value ),
-					'fields'  => array( 'ID', 'display_name', 'user_login' ),
-				)
-			);
-		}
 		?>
-
-		<select
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>][]"
-			class="classifai-search-users"
-			multiple="multiple"
-			>
-			<?php foreach ( $users as $user ) : ?>
-				<option value="<?php echo absint( $user->ID ); ?>" selected="selected">
-					<?php echo esc_attr( $user->display_name . " ($user->user_login)" ); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
-
+		<div class="classifai-search-users-container">
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>"></div>
+			<input
+				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="<?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		</div>
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
