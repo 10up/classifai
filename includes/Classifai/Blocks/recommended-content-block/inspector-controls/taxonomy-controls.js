@@ -98,7 +98,10 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			return [];
 		}
 
-		return ( query.taxQuery?.[ taxonomySlug ] || [] ).reduce(
+		let termIds = query.taxQuery[taxonomySlug] || [];
+		termIds = Object.values( termIds );
+
+		return termIds.reduce(
 			( accumulator, termId ) => {
 				const term = taxonomyInfo.terms.mapById[ termId ];
 				if ( term ) {
