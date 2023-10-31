@@ -272,6 +272,9 @@ input.classifai-button {
 			outline: 2px solid transparent;
 		}
 
+		.components-form-token-field__suggestion.is-selected {
+			background: var(--classifai-highlight-color);
+		}
 	}
 
 	input[type="text"],
