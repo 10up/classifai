@@ -42,17 +42,35 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 
 const TaxonomyControls = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
+	const taxTermsAI = query.taxTermsAI || [];
+
 	let taxonomiesInfo = useSelect(
 		( select ) => {
 			const { getEntityRecords } = select( coreStore );
 			const termsQuery = { per_page: termsPerPage };
 			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
 				const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
-				return {
+				const terms	= getEntitiesInfo( _terms );
+
+				// Append "[AI]" prefix
+				if ( undefined !== terms && undefined !== terms.mapById && taxTermsAI[slug]) {
+					Object.keys(terms.mapById).forEach((term) => {						
+						if (taxTermsAI[slug].includes(terms.mapById[term].id)) {
+							// do not add prefix if already added
+							if ( terms.mapById[term].name.indexOf('[AI]') === -1 ) {
+								terms.mapById[term].name = '[AI] ' + terms.mapById[term].name;
+							}
+						}
+					});
+				}
+
+				const termData = {
 					slug,
 					name,
-					terms: getEntitiesInfo( _terms ),
+					terms,
 				};
+
+				return termData;
 			} );
 			return _taxonomiesInfo;
 		},
@@ -81,8 +99,8 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 				if ( termId ) {
 					return {
-						[termValue]: termId
-					}; // Create an object with the term name as the key and the ID as the value
+						[termValue.value]: termId
+					};
 				} else {	
 					const term = {
 						name: termValue,

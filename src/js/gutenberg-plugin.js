@@ -79,6 +79,7 @@ const ClassifAIGenerateTagsButton = () => {
 	const closeModal = () => setOpen( false );
 
 	const [ taxQuery, setTaxQuery ] = useState( [] );
+	const [ taxTermsAI, setTaxTermsAI ] = useState( [] );
 
 	/**
 	 * Callback function to handle API response.
@@ -90,6 +91,24 @@ const ClassifAIGenerateTagsButton = () => {
 			let termsReady = false;
 			const taxonomies = resp.terms;
 			let taxTerms = {};
+			let taxTermsAI = {};
+			let taxTermsExisting = {};
+
+			// get current terms of the post
+			const { select } = wp.data;
+			const postId = select( 'core/editor' ).getCurrentPostId();
+			const postType = select( 'core/editor' ).getCurrentPostType();
+			const currentTerms = select( 'core' ).getEntityRecord( 'postType', postType, postId );
+
+			// get the current terms of the post
+			if ( currentTerms ) {
+				taxnomyList.forEach( ( taxonomy ) => {
+					const currentTermsOfTaxonomy = currentTerms[taxonomy];
+					if ( currentTermsOfTaxonomy ) {
+						taxTermsExisting[taxonomy] = currentTermsOfTaxonomy;
+					}
+				} );
+			}
 
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
 				let tax = taxonomy;
@@ -101,13 +120,28 @@ const ClassifAIGenerateTagsButton = () => {
 				}
 
 				const newTerms = resp.terms[taxonomy];
-				if ( newTerms && Object.keys( newTerms) .length ) {
+				if ( newTerms && Object.keys( newTerms).length ) {
 					termsReady = true;
+
+					// Loop through each term and add in taxTermsAI if it does not exist in the post.
+					Object.keys( newTerms ).forEach( ( termName ) => {
+						const termId = newTerms[termName];
+						if ( taxTermsExisting[tax] ) {
+							const matchedTerm = taxTermsExisting[tax].find( ( termID ) => termID === termId );
+							if ( ! matchedTerm ) {
+								taxTermsAI[tax] = taxTermsAI[tax] || [];
+								taxTermsAI[tax].push(termId);
+							}
+						}
+					} );
+
+					// update the taxTerms
 					taxTerms[ tax ] = newTerms;
 				}
 			} );
 
-			setTaxQuery ( taxTerms );
+			setTaxQuery( taxTerms );
+			setTaxTermsAI( taxTermsAI );
 			openModal();
 		}
 	};
@@ -135,11 +169,6 @@ const ClassifAIGenerateTagsButton = () => {
 		const postType = select( 'core/editor' ).getCurrentPostType();
 		const postTypeLabel =
 			select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
-
-		console.dir(['postType',
-		postType,
-		postId,
-		newtaxTerms]);
 
 		await dispatch( 'core' ).editEntityRecord(
 			'postType',
@@ -172,7 +201,7 @@ const ClassifAIGenerateTagsButton = () => {
 		wp.data.dispatch( 'core/editor' ).savePost();
 
 		closeModal();
-};
+	};
 
 	// Display classify post button only when process content on update is disabled.
 	const enabled = 'no' === processContent ? 'no' : 'yes';
@@ -219,7 +248,8 @@ const ClassifAIGenerateTagsButton = () => {
 						} }
 						query={ {
 							contentPostType: 'page',
-							taxQuery: updatedTaxQuery
+							taxQuery: updatedTaxQuery,
+							taxTermsAI: taxTermsAI || {}
 						} }
 					/>
 					<Button
