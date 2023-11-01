@@ -275,7 +275,7 @@ abstract class Provider {
 					value="<?php echo esc_attr( $prompt['default'] ); ?>"
 					class="js-setting-field__default">
 				<label>
-					<?php esc_html_e( 'Title', 'classifai' ); ?>
+					<?php esc_html_e( 'Title', 'classifai' ); ?>&nbsp;*
 					<span class="dashicons dashicons-editor-help"
 						title="<?php esc_attr_e( 'Short description of prompt to use for identification', 'classifai' ); ?>"></span>
 					<input type="text"
@@ -286,7 +286,7 @@ abstract class Provider {
 				</label>
 
 				<label>
-					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
+					<?php esc_html_e( 'Prompt', 'classifai' ); ?>&nbsp;*
 					<textarea
 						class="<?php echo esc_attr( $class ); ?>"
 						rows="4"
