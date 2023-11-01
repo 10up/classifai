@@ -8,6 +8,7 @@ import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
+import { useState } from '@wordpress/element';
 
 const termsPerPage = 100;
 
@@ -41,7 +42,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 
 const TaxonomyControls = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
-	const taxonomiesInfo = useSelect(
+	let taxonomiesInfo = useSelect(
 		( select ) => {
 			const { getEntityRecords } = select( coreStore );
 			const termsQuery = { per_page: termsPerPage };
@@ -57,35 +58,110 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		},
 		[ taxonomies ]
 	);
-	const onTermsChange = ( taxonomySlug ) => ( newTermValues ) => {
-		const taxonomyInfo = taxonomiesInfo.find(
-			( { slug } ) => slug === taxonomySlug
-		);
+	const [newTermsInfo, setNewTermsInfo] = useState({});
+
+	// Update the object with newly created terms.
+	if ( Object.keys( newTermsInfo ).length > 0 ) {
+		taxonomiesInfo = newTermsInfo;
+	}
+
+	const onTermsChange = (taxonomySlug) => async (newTermValues) => {
+		let newTermsCreated = 0; // Track the number of new terms created
+		let taxonomyInfo = taxonomiesInfo.find(({ slug }) => slug === taxonomySlug);
 
 		if ( ! taxonomyInfo ) {
 			return;
 		}
-
-		const termIds = Array.from(
-			newTermValues.reduce( ( accumulator, termValue ) => {
+		const termData = await Promise.all(
+			newTermValues.map( async ( termValue ) => {
 				const termId = getTermIdByTermValue(
 					taxonomyInfo.terms.mapByName,
 					termValue
 				);
 
 				if ( termId ) {
-					accumulator.add( termId );
+					return {
+						[termValue]: termId
+					}; // Create an object with the term name as the key and the ID as the value
+				} else {	
+					const term = {
+						name: termValue,
+						taxonomy: taxonomySlug,
+					};
+	
+					const request = {
+						path: `/wp/v2/${taxonomySlug}`,
+						data: term,
+						method: 'POST',
+					};
+	
+					const response = await wp.apiRequest(request).catch((error) => {
+						console.log('Error', error);
+						return null;
+					});
+	
+					if ( response && response.id ) {
+						newTermsCreated++; // Increment the count of new terms created
+						return {
+							[termValue]: response.id
+						}; // Create an object with the term name as the key and the ID as the value
+					} else {
+						return null; // Handle creation failure
+					}
 				}
-
-				return accumulator;
-			}, new Set() )
+			})
 		);
+
+		const termDataObject = termData.reduce((accumulator, item) => {
+			if ( item ) {
+				return {
+					...accumulator,
+					...item
+				}; // Merge objects to create a single object with term names as keys and IDs as values
+			}
+			return accumulator;
+		}, {});
+
+		if ( newTermsCreated > 0 ) {
+			// Fetch rest API
+			const request = {
+				path: `/wp/v2/${taxonomySlug}`,
+				data: {
+					per_page: termsPerPage,
+				},
+			};
+			const response = await wp.apiRequest(request).catch((error) => {
+				console.log('Error', error);
+				return null;
+			});
+
+			if (response) {
+				console.log('response', response);
+				// Update taxonomiesInfo
+				const updatedTaxonomiesInfo = taxonomiesInfo.map((taxonomyInfo) => {
+					if (taxonomyInfo.slug === taxonomySlug) {
+						return {
+							...taxonomyInfo,
+							terms: getEntitiesInfo(response),
+						};
+					}
+					return taxonomyInfo;
+				});
+
+				setNewTermsInfo(updatedTaxonomiesInfo);
+			}
+		}
+
 		const newTaxQuery = {
 			...query.taxQuery,
-			[ taxonomySlug ]: termIds,
+			[taxonomySlug]: termDataObject,
 		};
-		onChange( { taxQuery: newTaxQuery } );
+
+		onChange({
+			taxQuery: newTaxQuery
+		});
 	};
+
 	// Returns only the existing term ids in proper format to be
 	// used in `FormTokenField`. This prevents the component from
 	// crashing in the editor, when non existing term ids were provided.
