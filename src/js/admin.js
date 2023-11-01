@@ -182,8 +182,11 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			);
 			$setAsDefaultLinks.forEach( ( link ) => {
 				// Update text.
-				if( link.classList.contains( 'selected' ) ) {
-					link.textContent = __( 'Set as default prompt', 'classifai' );
+				if ( link.classList.contains( 'selected' ) ) {
+					link.textContent = __(
+						'Set as default prompt',
+						'classifai'
+					);
 				}
 
 				link.classList.remove( 'selected' );
@@ -209,9 +212,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * Handle prompt removal modal.
 	 *
 	 * @since 2.4.0
-	 * @param {Element} removePromptButton
+	 * @param {Element} removePromptLink
 	 */
-	function displayPromptRemovalModal( removePromptButton ) {
+	function displayPromptRemovalModal( removePromptLink ) {
 		jQuery( '#js-classifai--delete-prompt-modal' ).dialog( {
 			modal: true,
 			title: __( 'Remove Prompt', 'classifai' ),
@@ -228,8 +231,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 					text: __( 'Remove', 'classifai' ),
 					class: 'button-primary',
 					click() {
-						const fieldset =
-							removePromptButton.closest( 'fieldset' );
+						const fieldset = removePromptLink.closest( 'fieldset' );
 						const fieldsetContainer = fieldset.parentElement;
 						const canResetPrompt =
 							fieldset.querySelector(
