@@ -281,7 +281,8 @@ abstract class Provider {
 					<input type="text"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
-						value="<?php echo esc_attr( $prompt['title'] ); ?>">
+						value="<?php echo esc_attr( $prompt['title'] ); ?>"
+						required>
 				</label>
 
 				<label>
@@ -291,6 +292,7 @@ abstract class Provider {
 						rows="4"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						required
 					><?php echo esc_textarea( $prompt['prompt'] ); ?></textarea>
 				</label>
 

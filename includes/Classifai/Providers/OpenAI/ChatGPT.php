@@ -434,7 +434,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_excerpt',
 			[
 				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => str_replace( array( '{{WORDS}}' ), array( absint( $this->get_settings( 'length' ) ?? 55 ) ), $this->generate_excerpt_prompt ),
+				'placeholder'   => $default_settings['generate_excerpt_prompt']['prompt'],
 				'default_value' => $default_settings['generate_excerpt_prompt'],
 				'description'   => __( "Enter your custom prompt. If no custom prompt is entered, the default shown above will be used. Note the following variables that can be used in the prompt and will be replaced with content: {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
@@ -703,13 +703,21 @@ class ChatGPT extends Provider {
 		}
 		$editable_roles = get_editable_roles() ?? [];
 
+		$excerpt_length = absint( apply_filters( 'excerpt_length', 55 ) );
+
 		return [
 			'authenticated'           => false,
 			'api_key'                 => '',
 			'enable_excerpt'          => false,
 			'roles'                   => array_keys( $editable_roles ),
-			'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
-			'generate_excerpt_prompt' => array(),
+			'length'                  => $excerpt_length,
+			'generate_excerpt_prompt' => array(
+				array(
+					'title'   => esc_html__( 'Default', 'classifai' ),
+					'prompt'  => str_replace( '{{WORDS}}', $excerpt_length, $this->generate_excerpt_prompt ),
+					'default' => 1,
+				),
+			),
 			'enable_titles'           => false,
 			'title_roles'             => array_keys( $editable_roles ),
 			'number_titles'           => 1,
