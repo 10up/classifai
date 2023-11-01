@@ -268,6 +268,7 @@ abstract class Provider {
 		$field_index = 0;
 		?>
 		<?php foreach ( $value as $prompt ) : ?>
+			<?php $is_default_prompt = 1 === $prompt['default']; ?>
 			<fieldset class="classifai-field-type-prompt-setting">
 				<input type="hidden"
 					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
@@ -294,15 +295,16 @@ abstract class Provider {
 				</label>
 
 				<div class="actions-rows">
-					<button class="action__set_default <?php echo 1 === $prompt['default'] ? 'selected' : ''; ?>"
-						title="<?php esc_attr_e( 'Set prompt as default', 'classifai' ); ?>">
-						<span class="dashicons dashicons-saved"></span>
-					</button>
-					<button class="action__remove_prompt"
-						style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>"
-						title="<?php esc_attr_e( 'Remove prompt', 'classifai' ); ?>">
-						<span class="dashicons dashicons-trash"></span>
-					</button>
+						<a href="#" class="action__set_default <?php echo $is_default_prompt ? 'selected' : ''; ?>">
+							<?php if ( $is_default_prompt ) : ?>
+										<?php esc_html_e( 'Default Prompt', 'classifai' ); ?>
+							<?php else : ?>
+								<?php esc_html_e( 'Set prompt as default', 'classifai' ); ?>
+							<?php endif; ?>
+						</a>
+					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>">
+						<?php esc_html_e( 'Trash', 'classifai' ); ?>
+					</a>
 				</div>
 			</fieldset>
 			<?php ++$field_index; ?>

@@ -261,16 +261,6 @@ input.classifai-button {
 
 			&:nth-child(2n + 1){
 				background-color: #f0f0f1;
-
-				.actions-rows span{
-					background-color: #f0f0f1;
-				}
-			}
-
-			&:nth-child(2n){
-				.actions-rows span{
-					background-color: white;
-				}
 			}
 
 			label{
@@ -286,49 +276,42 @@ input.classifai-button {
 				width: 90%;
 			}
 
+			/* Style for prompt action items container */
 			.actions-rows{
 				display: flex;
-				position: absolute;
-				right: -20px;
-				top: 32%;
-				flex-direction: column;
+				margin: 0.35em 0 .5em!important;
 
-				button{
-					border: none;
-					background: transparent;
+				/* Style for prompt actions */
+				a{
 					cursor: pointer;
+					text-decoration: none;
+					margin-left: 8px;
 
-					margin-top: 8px;
-
-					&.action__remove_prompt:hover{
-						span{
-							background-color:red;
-							color: white;
-						}
+					&.action__remove_prompt{
+						color: #b32d2e;
 					}
+				}
 
-					&.action__set_default:hover,
-					&.action__set_default.selected{
-						span{
-							background-color:green;
-							color: white;
-						}
-					}
+				/* action items separator */
+				a:before{
+					content: '|';
+					color: #a7aaad;
+				}
 
-					span.dashicons{
+				/* Styling for default prompt first action */
+				a:first-child{
+					margin-left: 0;
+
+					&.selected{
+						color: #a7aaad;
 						pointer-events: none;
 					}
+
+					&:before{
+						content: '';
+					}
 				}
 
-				button:first-child{
-					margin-top: 0;
-				}
-
-				span.dashicons{
-					border: 1px solid #919191;
-					border-radius: 50%;
-					padding: 3px;
-				}
 			}
 
 			+ button{
