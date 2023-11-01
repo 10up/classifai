@@ -562,7 +562,7 @@ class ChatGPT extends Provider {
 		// Custom prompt for shrinking content.
 		add_settings_field(
 			'shrink_content_prompt',
-			esc_html__( 'Shrink content prompt', 'classifai' ),
+			esc_html__( 'Condense this text', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
@@ -577,7 +577,7 @@ class ChatGPT extends Provider {
 		// Custom prompt for growing content.
 		add_settings_field(
 			'grow_content_prompt',
-			esc_html__( 'Grow content prompt', 'classifai' ),
+			esc_html__( 'Expand this text', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
