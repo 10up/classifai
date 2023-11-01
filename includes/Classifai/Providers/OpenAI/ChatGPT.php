@@ -721,12 +721,30 @@ class ChatGPT extends Provider {
 			'enable_titles'           => false,
 			'title_roles'             => array_keys( $editable_roles ),
 			'number_titles'           => 1,
-			'generate_title_prompt'   => array(),
+			'generate_title_prompt'   => array(
+				array(
+					'title'   => esc_html__( 'Default', 'classifai' ),
+					'prompt'  => $this->generate_title_prompt,
+					'default' => 1,
+				),
+			),
 			'enable_resize_content'   => false,
 			'resize_content_roles'    => array_keys( $editable_roles ),
 			'number_resize_content'   => 1,
-			'shrink_content_prompt'   => array(),
-			'grow_content_prompt'     => array(),
+			'shrink_content_prompt'   => array(
+				array(
+					'title'   => esc_html__( 'Default', 'classifai' ),
+					'prompt'  => $this->shrink_content_prompt,
+					'default' => 1,
+				),
+			),
+			'grow_content_prompt'     => array(
+				array(
+					'title'   => esc_html__( 'Default', 'classifai' ),
+					'prompt'  => $this->grow_content_prompt,
+					'default' => 1,
+				),
+			),
 		];
 	}
 
