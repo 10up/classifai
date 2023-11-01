@@ -299,7 +299,7 @@ abstract class Provider {
 						<?php if ( $is_default_prompt ) : ?>
 							<?php esc_html_e( 'Default Prompt', 'classifai' ); ?>
 						<?php else : ?>
-							<?php esc_html_e( 'Set prompt as default', 'classifai' ); ?>
+							<?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>
 						<?php endif; ?>
 					</a>
 					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>">

@@ -152,22 +152,22 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	 * @param {Element} $newPromptFieldset
 	 */
 	function attachEventPromptFieldset( $newPromptFieldset ) {
-		// Add event to remove prompt button
-		const $removePromptFieldsetButton = $newPromptFieldset.querySelector(
-			'button.action__remove_prompt'
+		// Add event to remove prompt link
+		const $removePromptFieldsetLink = $newPromptFieldset.querySelector(
+			'a.action__remove_prompt'
 		);
 
-		$removePromptFieldsetButton.addEventListener( 'click', ( e ) => {
+		$removePromptFieldsetLink.addEventListener( 'click', ( e ) => {
 			e.preventDefault();
 			displayPromptRemovalModal( e.target );
 		} );
 
-		// Add event to set as default button.
-		const $setAsDefaultButton = $newPromptFieldset.querySelector(
-			'button.action__set_default'
+		// Add event to set as default link.
+		const $setAsDefaultLink = $newPromptFieldset.querySelector(
+			'a.action__set_default'
 		);
 
-		$setAsDefaultButton.addEventListener( 'click', ( e ) => {
+		$setAsDefaultLink.addEventListener( 'click', ( e ) => {
 			e.preventDefault();
 
 			// If already selected, do nothing.
@@ -177,18 +177,26 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 			// Remove selected class from all buttons.
 			const $settingRow = e.target.closest( 'tr' );
-			const $setAsDefaultButtons = $settingRow.querySelectorAll(
+			const $setAsDefaultLinks = $settingRow.querySelectorAll(
 				'.action__set_default'
 			);
-			$setAsDefaultButtons.forEach( ( button ) => {
-				button.classList.remove( 'selected' );
-				button
+			$setAsDefaultLinks.forEach( ( link ) => {
+				// Update text.
+				if( link.classList.contains( 'selected' ) ) {
+					link.textContent = __( 'Set as default prompt', 'classifai' );
+				}
+
+				link.classList.remove( 'selected' );
+
+				link
 					.closest( 'fieldset' )
 					.querySelector( '.js-setting-field__default' ).value = '';
 			} );
 
 			// Set selected class.
 			e.target.classList.add( 'selected' );
+
+			e.target.textContent = __( 'Default Prompt', 'classifai' );
 
 			// Set default value.
 			$newPromptFieldset.querySelector(
