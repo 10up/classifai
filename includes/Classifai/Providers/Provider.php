@@ -251,17 +251,6 @@ abstract class Provider {
 
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 
-		// Data should be in correct format.
-		if ( empty( $value ) ) {
-			$value = array(
-				array(
-					'title'   => '',
-					'prompt'  => '',
-					'default' => 1,
-				),
-			);
-		}
-
 		$prompt_count = count( $value );
 
 		// Check for a default value

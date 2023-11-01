@@ -434,7 +434,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_excerpt',
 			[
 				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => $default_settings['generate_excerpt_prompt']['prompt'],
+				'placeholder'   => $default_settings['generate_excerpt_prompt'][0]['prompt'],
 				'default_value' => $default_settings['generate_excerpt_prompt'],
 				'description'   => __( "Enter your custom prompt. If no custom prompt is entered, the default shown above will be used. Note the following variables that can be used in the prompt and will be replaced with content: {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
@@ -499,7 +499,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_title',
 			[
 				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => $this->generate_title_prompt,
+				'placeholder'   => $default_settings['generate_title_prompt'][0]['prompt'],
 				'default_value' => $default_settings['generate_title_prompt'],
 				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
 			]
@@ -568,7 +568,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_resize_content_settings',
 			[
 				'label_for'     => 'shrink_content_prompt',
-				'placeholder'   => $this->shrink_content_prompt,
+				'placeholder'   => $default_settings['shrink_content_prompt'][0]['prompt'],
 				'default_value' => $default_settings['shrink_content_prompt'],
 				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
 			]
@@ -583,7 +583,7 @@ class ChatGPT extends Provider {
 			$this->get_option_name() . '_resize_content_settings',
 			[
 				'label_for'     => 'grow_content_prompt',
-				'placeholder'   => $this->grow_content_prompt,
+				'placeholder'   => $default_settings['grow_content_prompt'][0]['prompt'],
 				'default_value' => $default_settings['grow_content_prompt'],
 				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
 			]
