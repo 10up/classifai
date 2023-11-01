@@ -22,6 +22,19 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
+		$body_json = isset( $parsed_args['body'] ) ? wp_unslash( $parsed_args['body'] ) : false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
+			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
+
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+				$response = file_get_contents( __DIR__ . '/resize-content.json' );
+				return classifai_test_prepare_response( $response );
+			}
+		}
+
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
@@ -95,14 +108,3 @@ function classifai_test_prepare_response( $response ) {
 if ( ! defined( 'FS_METHOD' ) ) {
 	define( 'FS_METHOD', 'direct' );
 }
-
-// Load our recommended content block to force the non-iframe editor.
-// Cypress fails to run correctly when the editor is iframed.
-add_action(
-	'admin_init',
-	function() {
-		if ( function_exists( 'Classifai\Blocks\setup' ) ) {
-			Classifai\Blocks\setup();
-		}
-	}
-);

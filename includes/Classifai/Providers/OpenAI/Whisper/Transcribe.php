@@ -63,7 +63,7 @@ class Transcribe {
 			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $this->settings['api_key'] ?? '' );
+		$request = new APIRequest( $this->settings['api_key'] ?? '', 'whisper' );
 
 		/**
 		 * Filter the request body before sending to Whisper.

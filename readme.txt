@@ -1,10 +1,10 @@
 === ClassifAI ===
 Contributors:      10up, jeffpaul, dkotter
-Tags:              AI, Artifical Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, OpenAI, ChatGPT, DALL·E, Content Tagging, Classification, Smart Cropping, Alt Text
-Requires at least: 5.7
+Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, OpenAI, ChatGPT, DALL·E, Content Tagging, Classification, Smart Cropping, Alt Text
+Requires at least: 5.8
 Tested up to:      6.3
 Requires PHP:      7.4
-Stable tag:        2.2.3
+Stable tag:        2.3.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 * Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
@@ -36,6 +37,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+**Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
 
 = 2.1.0 =
 **Note that this release moves the ClassifAI settings to be nested under Tools instead of it's own menu.**

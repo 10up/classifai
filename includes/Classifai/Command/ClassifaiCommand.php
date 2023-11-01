@@ -750,7 +750,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<attachment_ids>]
-	 * : Comma delimeted Attachment IDs to classify
+	 * : Comma delimited Attachment IDs to classify
 	 *
 	 * [--limit=<limit>]
 	 * : Limit classification to N attachments. Default 100.
@@ -1219,7 +1219,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Prints the output from the NLU API.
 	 *
-	 * @param mixed $output  The variable to oputput.
+	 * @param mixed $output  The variable to output.
 	 * @param int   $post_id The post id.
 	 */
 	private function print( $output, $post_id ) {
