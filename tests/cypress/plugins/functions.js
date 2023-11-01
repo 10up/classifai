@@ -12,7 +12,7 @@ import * as pdfData from '../../test-plugin/pdf.json';
  * Get Taxonomy data from test NLU json file.
  *
  * @param {string} taxonomy  Taxonomy.
- * @param {number} threshold Thresold to select terms.
+ * @param {number} threshold Threshold to select terms.
  * @return {string[]} NLU Data.
  */
 export const getNLUData = ( taxonomy = 'categories', threshold = 0.7 ) => {

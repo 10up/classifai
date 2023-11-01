@@ -482,7 +482,7 @@ class DallE extends Provider {
 			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
 
 		/**
 		 * Filter the request body before sending to DALL·E.

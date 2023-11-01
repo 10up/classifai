@@ -1,6 +1,6 @@
 <?php
 /**
- *  Abtract class that defines the providers for a service.
+ *  Abstract class that defines the providers for a service.
  */
 
 namespace Classifai\Providers;
