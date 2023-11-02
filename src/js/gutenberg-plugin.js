@@ -15,6 +15,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
 import TaxonomyControls from '../../includes/Classifai/Blocks/recommended-content-block/inspector-controls/taxonomy-controls';
+import PrePubClassifyPost  from './gutenberg-plugins/pre-publish-classify-post';
 
 const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
 	window;
@@ -150,7 +151,6 @@ const ClassifAIGenerateTagsButton = () => {
 
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
-			openModal();
 		}
 	};
 
@@ -204,10 +204,6 @@ const ClassifAIGenerateTagsButton = () => {
 			),
 			{ type: 'snackbar' }
 		);
-
-		// save the post
-		wp.data.dispatch( 'core/editor' ).savePost();
-
 		closeModal();
 	};
 
@@ -240,6 +236,30 @@ const ClassifAIGenerateTagsButton = () => {
 		updatedTaxQuery = updatedTaxQuery.taxQuery;
 	}
 
+	const modalData = <>
+		<TaxonomyControls
+			onChange={ ( newTaxQuery ) => {
+				setTaxQuery( newTaxQuery );
+			} }
+			query={ {
+				contentPostType: 'page',
+				taxQuery: updatedTaxQuery,
+				taxTermsAI: taxTermsAI || {}
+			} }
+		/>
+		<Button
+			variant={ 'secondary' }
+			onClick={ () => saveTerms( updatedTaxQuery ) }
+		>
+			{ __( 'Save', 'classifai' ) }
+		</Button>
+	</>;
+
+	const triggerCallRef = useRef();
+	const triggerCallClick = () => {
+		triggerCallRef.current.click();
+	};
+
 	return (
 		<>
 			{ isOpen && (
@@ -249,23 +269,7 @@ const ClassifAIGenerateTagsButton = () => {
 					isFullScreen={ false }
 					className="classify-modal"
 				>
-					<TaxonomyControls
-						// add onChange function for onChange( { taxQuery: newTaxQuery } );
-						onChange={ ( newTaxQuery ) => {
-							setTaxQuery( newTaxQuery );
-						} }
-						query={ {
-							contentPostType: 'page',
-							taxQuery: updatedTaxQuery,
-							taxTermsAI: taxTermsAI || {}
-						} }
-					/>
-					<Button
-						variant={ 'secondary' }
-						onClick={ () => saveTerms( updatedTaxQuery ) }
-					>
-						{ __( 'Save', 'classifai' ) }
-					</Button>
+					{modalData}
 				</Modal>
 			) }
 			<Button
@@ -279,6 +283,7 @@ const ClassifAIGenerateTagsButton = () => {
 						buttonText,
 						linkTerms: false
 					} )
+					openModal()
 				} }
 			>
 				{ buttonText }
@@ -295,6 +300,40 @@ const ClassifAIGenerateTagsButton = () => {
 					padding: '5px',
 				} }
 			></span>
+			<Button
+				variant={ 'secondary' }
+				data-id={ postId }
+				ref={triggerCallRef}
+				style={{display: 'none'}}
+				onClick={ ( e ) => {
+					handleClick( {
+						button: e.target,
+						endpoint: '/classifai/v1/generate-tags/',
+						callback: buttonClickCallBack,
+						buttonText,
+						linkTerms: false
+					} )
+				} }
+			>
+				{ buttonText }
+			</Button>
+			<PrePubClassifyPost
+				callback={ triggerCallClick }
+			>
+				<span
+					className="spinner"
+					style={ { display: 'none', float: 'none' } }
+				></span>
+				<span
+					className="error"
+					style={ {
+						display: 'none',
+						color: '#bc0b0b',
+						padding: '5px',
+					} }
+				></span>
+				{modalData}
+			</PrePubClassifyPost>
 		</>
 	);
 };
