@@ -43,6 +43,20 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 const TaxonomyControls = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
 	const taxTermsAI = query.taxTermsAI || [];
+	const [newTermsInfo, setNewTermsInfo] = useState({});
+
+	const appendAIPrefix = (terms, slug) => {
+		if ( undefined !== terms && undefined !== terms.mapById && taxTermsAI[slug]) {
+			Object.keys(terms.mapById).forEach((term) => {
+				if (taxTermsAI[slug].includes(terms.mapById[term].id)) {
+					// do not add prefix if already added
+					if ( terms.mapById[term].name.indexOf('[AI]') === -1 ) {
+						terms.mapById[term].name = '[AI] ' + terms.mapById[term].name;
+					}
+				}
+			});
+		}
+	};
 
 	let taxonomiesInfo = useSelect(
 		( select ) => {
@@ -53,16 +67,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 				const terms	= getEntitiesInfo( _terms );
 
 				// Append "[AI]" prefix
-				if ( undefined !== terms && undefined !== terms.mapById && taxTermsAI[slug]) {
-					Object.keys(terms.mapById).forEach((term) => {						
-						if (taxTermsAI[slug].includes(terms.mapById[term].id)) {
-							// do not add prefix if already added
-							if ( terms.mapById[term].name.indexOf('[AI]') === -1 ) {
-								terms.mapById[term].name = '[AI] ' + terms.mapById[term].name;
-							}
-						}
-					});
-				}
+				appendAIPrefix( terms, slug );
 
 				const termData = {
 					slug,
@@ -76,7 +81,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		},
 		[ taxonomies ]
 	);
-	const [newTermsInfo, setNewTermsInfo] = useState({});
 
 	// Update the object with newly created terms.
 	if ( Object.keys( newTermsInfo ).length > 0 ) {
@@ -153,14 +157,18 @@ const TaxonomyControls = ( { onChange, query } ) => {
 				return null;
 			});
 
-			if (response) {
-				console.log('response', response);
+			if ( response ) {
 				// Update taxonomiesInfo
 				const updatedTaxonomiesInfo = taxonomiesInfo.map((taxonomyInfo) => {
 					if (taxonomyInfo.slug === taxonomySlug) {
+						const terms = getEntitiesInfo(response);
+
+						// Append "[AI]" prefix
+						appendAIPrefix(terms, taxonomySlug);
+
 						return {
 							...taxonomyInfo,
-							terms: getEntitiesInfo(response),
+							terms
 						};
 					}
 					return taxonomyInfo;
@@ -194,7 +202,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 		let termIds = query.taxQuery[taxonomySlug] || [];
 		termIds = Object.values( termIds );
-
 		return termIds.reduce(
 			( accumulator, termId ) => {
 				const term = taxonomyInfo.terms.mapById[ termId ];
@@ -217,6 +224,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					if ( ! terms?.names?.length ) {
 						return null;
 					}
+
 					return (
 						<FormTokenField
 							key={ slug }
