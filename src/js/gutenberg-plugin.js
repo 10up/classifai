@@ -75,7 +75,9 @@ const ClassifAIGenerateTagsButton = () => {
 		)
 	);
 
+	const [ isLoading, setLoading ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
+	const [ popupOpened, setPopupOpened ] = useState( false );
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
 
@@ -152,6 +154,7 @@ const ClassifAIGenerateTagsButton = () => {
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
 		}
+		setLoading( false );
 	};
 
 	/**
@@ -257,7 +260,8 @@ const ClassifAIGenerateTagsButton = () => {
 
 	const triggerCallRef = useRef();
 	const triggerCallClick = () => {
-		triggerCallRef.current.click();
+		triggerCallRef?.current?.click();
+		setLoading( true );
 	};
 
 	return (
@@ -283,6 +287,7 @@ const ClassifAIGenerateTagsButton = () => {
 						buttonText,
 						linkTerms: false
 					} )
+					setPopupOpened( true )
 					openModal()
 				} }
 			>
@@ -319,19 +324,14 @@ const ClassifAIGenerateTagsButton = () => {
 			</Button>
 			<PrePubClassifyPost
 				callback={ triggerCallClick }
+				popupOpened={popupOpened}
 			>
-				<span
-					className="spinner"
-					style={ { display: 'none', float: 'none' } }
-				></span>
-				<span
-					className="error"
-					style={ {
-						display: 'none',
-						color: '#bc0b0b',
-						padding: '5px',
-					} }
-				></span>
+				{ isLoading && (
+					<span
+						className="spinner classify is-active"
+						style={ { float: 'none' } }
+					></span>
+				) }
 				{modalData}
 			</PrePubClassifyPost>
 		</>
