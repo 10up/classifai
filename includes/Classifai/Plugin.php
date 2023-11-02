@@ -158,6 +158,8 @@ class Plugin {
 
 	/**
 	 * Enqueue the admin scripts.
+	 *
+	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_admin_assets() {
 
@@ -165,7 +167,7 @@ class Plugin {
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
 			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
 

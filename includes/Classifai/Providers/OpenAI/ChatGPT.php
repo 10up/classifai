@@ -216,7 +216,7 @@ class ChatGPT extends Provider {
 				'classifai-content-resizing-plugin-css',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
 				[],
-				CLASSIFAI_PLUGIN_VERSION,
+				get_asset_info( 'content-resizing-plugin', 'version' ),
 				'all'
 			);
 		}
@@ -251,7 +251,7 @@ class ChatGPT extends Provider {
 
 		// Load asset in new post and edit post screens.
 		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			$screen   = get_current_screen();
+			$screen = get_current_screen();
 
 			// Load the assets for the classic editor.
 			if ( $screen && ! $screen->is_block_editor() ) {
@@ -263,7 +263,7 @@ class ChatGPT extends Provider {
 						'classifai-generate-title-classic-css',
 						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
 						[],
-						CLASSIFAI_PLUGIN_VERSION,
+						get_asset_info( 'generate-title-classic', 'version' ),
 						'all'
 					);
 
@@ -293,7 +293,7 @@ class ChatGPT extends Provider {
 						'classifai-generate-title-classic-css',
 						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
 						[],
-						CLASSIFAI_PLUGIN_VERSION,
+						get_asset_info( 'generate-title-classic', 'version' ),
 						'all'
 					);
 
@@ -326,7 +326,7 @@ class ChatGPT extends Provider {
 				'classifai-language-processing-style',
 				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
 				[],
-				CLASSIFAI_PLUGIN_VERSION
+				get_asset_info( 'language-processing', 'version' ),
 			);
 		}
 	}
