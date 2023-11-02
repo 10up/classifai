@@ -237,7 +237,7 @@ class LanguageProcessing extends Service {
 			$save_post_handler = new SavePostHandler();
 
 			// Process post content.
-			$result = $save_post_handler->classify( $post_id );
+			$result = $save_post_handler->classify( $post_id, $link_terms );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
