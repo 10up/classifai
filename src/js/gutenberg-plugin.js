@@ -250,12 +250,19 @@ const ClassifAIGenerateTagsButton = () => {
 				taxTermsAI: taxTermsAI || {}
 			} }
 		/>
-		<Button
-			variant={ 'secondary' }
-			onClick={ () => saveTerms( updatedTaxQuery ) }
-		>
-			{ __( 'Save', 'classifai' ) }
-		</Button>
+		<div className="classifai-modal__footer">
+			<div className="classifai-modal__notes">
+				{ __( 'Note that the lists above include any pre-existing terms from this post.', 'classifai' ) }
+				<br />
+				{ __( 'Al recommendations saved to this post will not include the "[AI]" text.', 'classifai' ) }
+			</div>
+			<Button
+				variant={ 'secondary' }
+				onClick={ () => saveTerms( updatedTaxQuery ) }
+			>
+				{ __( 'Save', 'classifai' ) }
+			</Button>
+		</div>
 	</>;
 
 	const triggerCallRef = useRef();
