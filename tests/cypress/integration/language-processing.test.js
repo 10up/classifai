@@ -330,7 +330,7 @@ describe( 'Language processing Tests', () => {
 			'[name="classifai_openai_chatgpt[generate_excerpt_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset' )
 			.click()
 			.click();
 		cy.get(
@@ -881,7 +881,7 @@ describe( 'Language processing Tests', () => {
 			'[name="classifai_openai_chatgpt[generate_title_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset' )
 			.click()
 			.click();
 		cy.get(
@@ -1346,7 +1346,7 @@ describe( 'Language processing Tests', () => {
 			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset:first' )
+			.find( 'button.js-classifai-add-prompt-fieldset' )
 			.click()
 			.click();
 		cy.get(
