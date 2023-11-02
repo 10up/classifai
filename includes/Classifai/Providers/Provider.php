@@ -252,16 +252,16 @@ abstract class Provider {
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
 
 		$prompt_count = count( $value );
-
-		// Check for a default value
-		$field_index = 0;
+		$field_index  = 0;
 		?>
+
 		<?php foreach ( $value as $prompt ) : ?>
 			<?php $is_default_prompt = 1 === $prompt['default']; ?>
+
 			<fieldset class="classifai-field-type-prompt-setting">
 				<input type="hidden"
 					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
-					value="<?php echo esc_attr( $prompt['default'] ); ?>"
+					value="<?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
 					class="js-setting-field__default">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>&nbsp;*
@@ -270,19 +270,18 @@ abstract class Provider {
 					<input type="text"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
-						value="<?php echo esc_attr( $prompt['title'] ); ?>"
+						value="<?php echo esc_attr( $prompt['title'] ?? '' ); ?>"
 						required>
 				</label>
 
 				<label>
-					<?php esc_html_e( 'Prompt', 'classifai' ); ?>&nbsp;*
+					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
 					<textarea
 						class="<?php echo esc_attr( $class ); ?>"
 						rows="4"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-						required
-					><?php echo esc_textarea( $prompt['prompt'] ); ?></textarea>
+					><?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?></textarea>
 				</label>
 
 				<div class="actions-rows">
@@ -300,10 +299,12 @@ abstract class Provider {
 			</fieldset>
 			<?php ++$field_index; ?>
 		<?php endforeach; ?>
+
 		<button
 			class="button-secondary js-classifai-add-prompt-fieldset">
 			<?php esc_html_e( 'Add new prompt', 'classifai' ); ?>
 		</button>
+
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
