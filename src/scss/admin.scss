@@ -723,3 +723,35 @@ input.classifai-button {
 	right: 12px;
 	top: 70px;
 }
+
+// Start: Classify Post Modal
+.classify-modal {
+    max-width: 500px;
+}
+
+.classifai-modal__notes {
+    max-width: 350px;
+    float: left;
+    font-size: 10px;
+}
+
+.classifai-modal__footer {
+    overflow: hidden;
+
+	button {
+		float: right;
+	}
+}
+
+.editor-post-publish-panel {
+	.spinner.classify.is-active {
+		margin: 0 0 20px;
+	}
+	.classifai-modal__footer {
+		button {
+			float: none;
+			margin-top: 10px;
+		}
+	}
+}
+// End: Classify Post Modal
