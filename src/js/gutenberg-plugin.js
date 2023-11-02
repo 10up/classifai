@@ -100,16 +100,6 @@ const ClassifAIGenerateTagsButton = () => {
 			const postType = select( 'core/editor' ).getCurrentPostType();
 			const currentTerms = select( 'core' ).getEntityRecord( 'postType', postType, postId );
 
-			// get the current terms of the post
-			if ( currentTerms ) {
-				taxnomyList.forEach( ( taxonomy ) => {
-					const currentTermsOfTaxonomy = currentTerms[taxonomy];
-					if ( currentTermsOfTaxonomy ) {
-						taxTermsExisting[taxonomy] = currentTermsOfTaxonomy;
-					}
-				} );
-			}
-
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
 				let tax = taxonomy;
 				if ( 'post_tag' === taxonomy ) {
@@ -119,13 +109,17 @@ const ClassifAIGenerateTagsButton = () => {
 					tax = 'categories';
 				}
 
-				const newTerms = resp.terms[taxonomy];
+				const currentTermsOfTaxonomy = currentTerms[taxonomy];
+				if ( currentTermsOfTaxonomy ) {
+					taxTermsExisting[taxonomy] = currentTermsOfTaxonomy;
+				}
+
+				const newTerms = Object.values(resp.terms[taxonomy]);
 				if ( newTerms && Object.keys( newTerms).length ) {
 					termsReady = true;
 
 					// Loop through each term and add in taxTermsAI if it does not exist in the post.
-					Object.keys( newTerms ).forEach( ( termName ) => {
-						const termId = newTerms[termName];
+					Object( newTerms ).forEach( ( termId ) => {
 						if ( taxTermsExisting[tax] ) {
 							const matchedTerm = taxTermsExisting[tax].find( ( termID ) => termID === termId );
 							if ( ! matchedTerm ) {
@@ -139,6 +133,20 @@ const ClassifAIGenerateTagsButton = () => {
 					taxTerms[ tax ] = newTerms;
 				}
 			} );
+
+			// Merge taxterms with taxTermsExisting and remove duplicates
+			Object.keys(taxTermsExisting).forEach((taxonomy) => {
+				if (taxTerms[taxonomy]) {
+					// Merge taxTermsExisting into taxTerms
+					taxTerms[taxonomy] = taxTerms[taxonomy].concat(taxTermsExisting[taxonomy]);
+				} else {
+					// Initialize taxTerms with taxTermsExisting if not already set
+					taxTerms[taxonomy] = taxTermsExisting[taxonomy];
+				}
+
+				// Remove duplicate items from taxTerms
+				taxTerms[taxonomy] = [...new Set(taxTerms[taxonomy])];
+			});
 
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
