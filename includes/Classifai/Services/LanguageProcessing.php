@@ -232,8 +232,6 @@ class LanguageProcessing extends Service {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 			}
 
-			$taxonomy_terms    = [];
-			$features          = [ 'category', 'keyword', 'concept', 'entity' ];
 			$save_post_handler = new SavePostHandler();
 
 			// Process post content.
@@ -242,18 +240,8 @@ class LanguageProcessing extends Service {
 				return $result;
 			}
 
-			foreach ( $features as $feature ) {
-				$taxonomy = \Classifai\get_feature_taxonomy( $feature );
-				$terms    = wp_get_object_terms( $post_id, $taxonomy );
-				if ( ! is_wp_error( $terms ) ) {
-					foreach ( $terms as $term ) {
-						$taxonomy_terms[ $taxonomy ][] = $term->term_id;
-					}
-				}
-			}
-
 			// Return taxonomy terms.
-			return rest_ensure_response( [ 'terms' => $taxonomy_terms ] );
+			return rest_ensure_response( [ 'terms' => $result ] );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
