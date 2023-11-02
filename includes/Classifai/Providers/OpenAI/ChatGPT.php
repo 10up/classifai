@@ -216,7 +216,7 @@ class ChatGPT extends Provider {
 				'classifai-content-resizing-plugin-css',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
 				[],
-				CLASSIFAI_PLUGIN_VERSION,
+				get_asset_info( 'content-resizing-plugin', 'version' ),
 				'all'
 			);
 		}
@@ -245,7 +245,7 @@ class ChatGPT extends Provider {
 					'classifai-generate-title-classic-css',
 					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
 					[],
-					CLASSIFAI_PLUGIN_VERSION,
+					get_asset_info( 'generate-title-classic', 'version' ),
 					'all'
 				);
 
@@ -275,7 +275,7 @@ class ChatGPT extends Provider {
 					'classifai-generate-title-classic-css',
 					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
 					[],
-					CLASSIFAI_PLUGIN_VERSION,
+					get_asset_info( 'generate-title-classic', 'version' ),
 					'all'
 				);
 
@@ -308,7 +308,7 @@ class ChatGPT extends Provider {
 			'classifai-language-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
 			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'language-processing', 'version' ),
 			'all'
 		);
 	}
