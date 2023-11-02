@@ -436,7 +436,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $default_settings['generate_excerpt_prompt'][0]['prompt'],
 				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Enter your custom prompt. If no custom prompt is entered, the default shown above will be used. Note the following variables that can be used in the prompt and will be replaced with content: {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
 		);
 
@@ -501,14 +501,14 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_title_prompt',
 				'placeholder'   => $default_settings['generate_title_prompt'][0]['prompt'],
 				'default_value' => $default_settings['generate_title_prompt'],
-				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
-		// Add resizing content fields.
+		// Add contet resizing fields.
 		add_settings_section(
 			$this->get_option_name() . '_resize_content_settings',
-			esc_html__( 'Resizing content settings', 'classifai' ),
+			esc_html__( 'Content resizing settings', 'classifai' ),
 			'',
 			$this->get_option_name()
 		);
@@ -523,7 +523,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'enable_resize_content',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
+				'description'   => __( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
 			]
 		);
 
@@ -562,7 +562,7 @@ class ChatGPT extends Provider {
 		// Custom prompt for shrinking content.
 		add_settings_field(
 			'shrink_content_prompt',
-			esc_html__( 'Condense this text', 'classifai' ),
+			esc_html__( 'Condense text prompt', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
@@ -570,14 +570,14 @@ class ChatGPT extends Provider {
 				'label_for'     => 'shrink_content_prompt',
 				'placeholder'   => $default_settings['shrink_content_prompt'][0]['prompt'],
 				'default_value' => $default_settings['shrink_content_prompt'],
-				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
 		// Custom prompt for growing content.
 		add_settings_field(
 			'grow_content_prompt',
-			esc_html__( 'Expand this text', 'classifai' ),
+			esc_html__( 'Expand text prompt', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_resize_content_settings',
@@ -585,7 +585,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'grow_content_prompt',
 				'placeholder'   => $default_settings['grow_content_prompt'][0]['prompt'],
 				'default_value' => $default_settings['grow_content_prompt'],
-				'description'   => __( 'Enter your custom prompt. If no custom prompt is entered, the default shown above will be used.', 'classifai' ),
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 	}
@@ -714,7 +714,7 @@ class ChatGPT extends Provider {
 			'generate_excerpt_prompt' => array(
 				array(
 					'title'   => esc_html__( 'Default', 'classifai' ),
-					'prompt'  => str_replace( '{{WORDS}}', $excerpt_length, $this->generate_excerpt_prompt ),
+					'prompt'  => $this->generate_excerpt_prompt,
 					'default' => 1,
 				),
 			),
