@@ -142,6 +142,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		// Reset action buttons.
 		actionButtons.forEach( ( button ) => {
 			button.classList.remove( 'selected' );
+			button.textContent = __( 'Set as default prompt', 'classifai' );
 		} );
 	}
 
