@@ -38,15 +38,19 @@ class PrePubClassifyPost extends Component {
 		// Update our state when the publish panel opens.
 		if (
 			this.props.isPublishPanelOpen &&
+			! this.props.popupOpened &&
 			prevProps.isPublishPanelOpen !== this.props.isPublishPanelOpen
 		) {
-			console.log('panel opned !!')
-			console.log('props.callback', this.props.callback);
 			this.props.callback();
 		}
 	}
 
 	render() {
+		// retun null if popupOpened is true
+		if ( this.props.popupOpened ) {
+			return null;
+		}
+
 		return <PrePubPanel>{ this.props.children }</PrePubPanel>;
 	}
 }
