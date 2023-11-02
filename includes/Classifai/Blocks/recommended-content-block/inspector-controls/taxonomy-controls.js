@@ -56,6 +56,8 @@ const TaxonomyControls = ( { onChange, query } ) => {
 				}
 			});
 		}
+
+		return terms;
 	};
 
 	let taxonomiesInfo = useSelect(
@@ -64,10 +66,10 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			const termsQuery = { per_page: termsPerPage };
 			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
 				const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
-				const terms	= getEntitiesInfo( _terms );
+				let terms	= getEntitiesInfo( _terms );
 
 				// Append "[AI]" prefix
-				appendAIPrefix( terms, slug );
+				terms = appendAIPrefix( terms, slug );
 
 				const termData = {
 					slug,
