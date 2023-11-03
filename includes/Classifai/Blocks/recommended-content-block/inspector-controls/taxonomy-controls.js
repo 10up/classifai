@@ -231,7 +231,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		<>
 			{ !! taxonomiesInfo?.length &&
 				taxonomiesInfo.map( ( { slug, name, terms } ) => {
-					if ( ! terms?.names?.length ) {
+					if ( ! terms?.names?.length || query?.isLoading ) {
 						return null;
 					}
 

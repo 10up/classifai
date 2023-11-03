@@ -16,6 +16,7 @@ export const handleClick = ( {
 	button,
 	endpoint,
 	callback = false,
+	callbackArgs = [],
 	buttonText = __( 'Rescan', 'classifai' ),
 	linkTerms = true,
 } ) => {
@@ -45,7 +46,7 @@ export const handleClick = ( {
 			spinner.classList.remove( 'is-active' );
 			button.textContent = buttonText;
 			// eslint-disable-next-line no-unused-expressions
-			callback && callback( response );
+			callback && callback( response, callbackArgs );
 		},
 		( error ) => {
 			const errorObj = get( error, 'responseJSON', {

@@ -95,7 +95,7 @@ const ClassifAIGenerateTagsButton = () => {
 	 *
 	 * @param {Object} resp
 	 */
-	const buttonClickCallBack = async ( resp ) => {
+	const buttonClickCallBack = async ( resp, callbackArgs ) => {
 		if ( resp && resp.terms ) {
 			let termsReady = false;
 			const taxonomies = resp.terms;
@@ -167,6 +167,10 @@ const ClassifAIGenerateTagsButton = () => {
 
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
+		}
+		if ( callbackArgs?.openPopup ) {
+			openModal();
+			setPopupOpened( true );
 		}
 		setLoading( false );
 	};
@@ -266,6 +270,7 @@ const ClassifAIGenerateTagsButton = () => {
 					contentPostType: 'page',
 					taxQuery: updatedTaxQuery,
 					taxTermsAI: taxTermsAI || {},
+					isLoading,
 				} }
 			/>
 			<div className="classifai-modal__footer">
@@ -310,11 +315,12 @@ const ClassifAIGenerateTagsButton = () => {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
+						callbackArgs: {
+							openPopup: true
+						},
 						buttonText,
 						linkTerms: false,
 					} );
-					setPopupOpened( true );
-					openModal();
 				} }
 			>
 				{ buttonText }
