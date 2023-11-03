@@ -8,14 +8,14 @@ import {
 	Icon,
 	ToggleControl,
 	BaseControl,
-	Modal
+	Modal,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
 import TaxonomyControls from '../../includes/Classifai/Blocks/recommended-content-block/inspector-controls/taxonomy-controls';
-import PrePubClassifyPost  from './gutenberg-plugins/pre-publish-classify-post';
+import PrePubClassifyPost from './gutenberg-plugins/pre-publish-classify-post';
 
 const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
 	window;
@@ -93,15 +93,19 @@ const ClassifAIGenerateTagsButton = () => {
 		if ( resp && resp.terms ) {
 			let termsReady = false;
 			const taxonomies = resp.terms;
-			let taxTerms = {};
-			let taxTermsAI = {};
-			let taxTermsExisting = {};
+			const taxTerms = {};
+			const taxTermsAI = {};
+			const taxTermsExisting = {};
 
 			// get current terms of the post
 			const { select } = wp.data;
 			const postId = select( 'core/editor' ).getCurrentPostId();
 			const postType = select( 'core/editor' ).getCurrentPostType();
-			const currentTerms = select( 'core' ).getEntityRecord( 'postType', postType, postId );
+			const currentTerms = select( 'core' ).getEntityRecord(
+				'postType',
+				postType,
+				postId
+			);
 
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
 				let tax = taxonomy;
@@ -112,22 +116,24 @@ const ClassifAIGenerateTagsButton = () => {
 					tax = 'categories';
 				}
 
-				const currentTermsOfTaxonomy = currentTerms[taxonomy];
+				const currentTermsOfTaxonomy = currentTerms[ taxonomy ];
 				if ( currentTermsOfTaxonomy ) {
-					taxTermsExisting[taxonomy] = currentTermsOfTaxonomy;
+					taxTermsExisting[ taxonomy ] = currentTermsOfTaxonomy;
 				}
 
-				const newTerms = Object.values(resp.terms[taxonomy]);
-				if ( newTerms && Object.keys( newTerms).length ) {
+				const newTerms = Object.values( resp.terms[ taxonomy ] );
+				if ( newTerms && Object.keys( newTerms ).length ) {
 					termsReady = true;
 
 					// Loop through each term and add in taxTermsAI if it does not exist in the post.
 					Object( newTerms ).forEach( ( termId ) => {
-						if ( taxTermsExisting[tax] ) {
-							const matchedTerm = taxTermsExisting[tax].find( ( termID ) => termID === termId );
+						if ( taxTermsExisting[ tax ] ) {
+							const matchedTerm = taxTermsExisting[ tax ].find(
+								( termID ) => termID === termId
+							);
 							if ( ! matchedTerm ) {
-								taxTermsAI[tax] = taxTermsAI[tax] || [];
-								taxTermsAI[tax].push(termId);
+								taxTermsAI[ tax ] = taxTermsAI[ tax ] || [];
+								taxTermsAI[ tax ].push( termId );
 							}
 						}
 					} );
@@ -138,18 +144,20 @@ const ClassifAIGenerateTagsButton = () => {
 			} );
 
 			// Merge taxterms with taxTermsExisting and remove duplicates
-			Object.keys(taxTermsExisting).forEach((taxonomy) => {
-				if (taxTerms[taxonomy]) {
+			Object.keys( taxTermsExisting ).forEach( ( taxonomy ) => {
+				if ( taxTerms[ taxonomy ] ) {
 					// Merge taxTermsExisting into taxTerms
-					taxTerms[taxonomy] = taxTerms[taxonomy].concat(taxTermsExisting[taxonomy]);
+					taxTerms[ taxonomy ] = taxTerms[ taxonomy ].concat(
+						taxTermsExisting[ taxonomy ]
+					);
 				} else {
 					// Initialize taxTerms with taxTermsExisting if not already set
-					taxTerms[taxonomy] = taxTermsExisting[taxonomy];
+					taxTerms[ taxonomy ] = taxTermsExisting[ taxonomy ];
 				}
 
 				// Remove duplicate items from taxTerms
-				taxTerms[taxonomy] = [...new Set(taxTerms[taxonomy])];
-			});
+				taxTerms[ taxonomy ] = [ ...new Set( taxTerms[ taxonomy ] ) ];
+			} );
 
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
@@ -159,27 +167,30 @@ const ClassifAIGenerateTagsButton = () => {
 
 	/**
 	 * Save the terms (Modal).
+	 *
+	 * @param taxTerms
 	 */
 	const saveTerms = async ( taxTerms ) => {
 		// Remove index values from the nested object
 		// Convert the object into an array of key-value pairs
-		const taxTermsArray = Object.entries(taxTerms);
+		const taxTermsArray = Object.entries( taxTerms );
 
 		// Remove index values from the nested objects and convert back to an object
 		const newtaxTerms = Object.fromEntries(
-			taxTermsArray.map(([key, value]) => {
-				if (typeof value === 'object') {
-				return [key, Object.values(value)];
+			taxTermsArray.map( ( [ key, value ] ) => {
+				if ( typeof value === 'object' ) {
+					return [ key, Object.values( value ) ];
 				}
-				return [key, value];
-			})
+				return [ key, value ];
+			} )
 		);
-		
+
 		const { select, dispatch } = wp.data;
 		const postId = select( 'core/editor' ).getCurrentPostId();
 		const postType = select( 'core/editor' ).getCurrentPostType();
 		const postTypeLabel =
-			select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
+			select( 'core/editor' ).getPostTypeLabel() ||
+			__( 'Post', 'classifai' );
 
 		await dispatch( 'core' ).editEntityRecord(
 			'postType',
@@ -239,31 +250,39 @@ const ClassifAIGenerateTagsButton = () => {
 		updatedTaxQuery = updatedTaxQuery.taxQuery;
 	}
 
-	const modalData = <>
-		<TaxonomyControls
-			onChange={ ( newTaxQuery ) => {
-				setTaxQuery( newTaxQuery );
-			} }
-			query={ {
-				contentPostType: 'page',
-				taxQuery: updatedTaxQuery,
-				taxTermsAI: taxTermsAI || {}
-			} }
-		/>
-		<div className="classifai-modal__footer">
-			<div className="classifai-modal__notes">
-				{ __( 'Note that the lists above include any pre-existing terms from this post.', 'classifai' ) }
-				<br />
-				{ __( 'Al recommendations saved to this post will not include the "[AI]" text.', 'classifai' ) }
+	const modalData = (
+		<>
+			<TaxonomyControls
+				onChange={ ( newTaxQuery ) => {
+					setTaxQuery( newTaxQuery );
+				} }
+				query={ {
+					contentPostType: 'page',
+					taxQuery: updatedTaxQuery,
+					taxTermsAI: taxTermsAI || {},
+				} }
+			/>
+			<div className="classifai-modal__footer">
+				<div className="classifai-modal__notes">
+					{ __(
+						'Note that the lists above include any pre-existing terms from this post.',
+						'classifai'
+					) }
+					<br />
+					{ __(
+						'Al recommendations saved to this post will not include the "[AI]" text.',
+						'classifai'
+					) }
+				</div>
+				<Button
+					variant={ 'secondary' }
+					onClick={ () => saveTerms( updatedTaxQuery ) }
+				>
+					{ __( 'Save', 'classifai' ) }
+				</Button>
 			</div>
-			<Button
-				variant={ 'secondary' }
-				onClick={ () => saveTerms( updatedTaxQuery ) }
-			>
-				{ __( 'Save', 'classifai' ) }
-			</Button>
-		</div>
-	</>;
+		</>
+	);
 
 	const triggerCallRef = useRef();
 	const triggerCallClick = () => {
@@ -280,7 +299,7 @@ const ClassifAIGenerateTagsButton = () => {
 					isFullScreen={ false }
 					className="classify-modal"
 				>
-					{modalData}
+					{ modalData }
 				</Modal>
 			) }
 			<Button
@@ -292,10 +311,10 @@ const ClassifAIGenerateTagsButton = () => {
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
 						buttonText,
-						linkTerms: false
-					} )
-					setPopupOpened( true )
-					openModal()
+						linkTerms: false,
+					} );
+					setPopupOpened( true );
+					openModal();
 				} }
 			>
 				{ buttonText }
@@ -315,23 +334,23 @@ const ClassifAIGenerateTagsButton = () => {
 			<Button
 				variant={ 'secondary' }
 				data-id={ postId }
-				ref={triggerCallRef}
-				style={{display: 'none'}}
+				ref={ triggerCallRef }
+				style={ { display: 'none' } }
 				onClick={ ( e ) => {
 					handleClick( {
 						button: e.target,
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
 						buttonText,
-						linkTerms: false
-					} )
+						linkTerms: false,
+					} );
 				} }
 			>
 				{ buttonText }
 			</Button>
 			<PrePubClassifyPost
 				callback={ triggerCallClick }
-				popupOpened={popupOpened}
+				popupOpened={ popupOpened }
 			>
 				{ isLoading && (
 					<span
@@ -339,7 +358,7 @@ const ClassifAIGenerateTagsButton = () => {
 						style={ { float: 'none' } }
 					></span>
 				) }
-				{modalData}
+				{ modalData }
 			</PrePubClassifyPost>
 		</>
 	);
