@@ -201,7 +201,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			// Set selected class.
 			e.target.classList.add( 'selected' );
 
-			e.target.textContent = __( 'Default Prompt', 'classifai' );
+			e.target.textContent = __( 'Default prompt', 'classifai' );
 
 			// Set default value.
 			$newPromptFieldset.querySelector(
