@@ -93,7 +93,8 @@ const ClassifAIGenerateTagsButton = () => {
 	/**
 	 * Callback function to handle API response.
 	 *
-	 * @param {Object} resp
+	 * @param {Object} resp         Response from the API.
+	 * @param {Object} callbackArgs Callback arguments.
 	 */
 	const buttonClickCallBack = async ( resp, callbackArgs ) => {
 		if ( resp && resp.terms ) {
@@ -316,7 +317,7 @@ const ClassifAIGenerateTagsButton = () => {
 						endpoint: '/classifai/v1/generate-tags/',
 						callback: buttonClickCallBack,
 						callbackArgs: {
-							openPopup: true
+							openPopup: true,
 						},
 						buttonText,
 						linkTerms: false,

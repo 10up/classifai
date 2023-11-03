@@ -9,6 +9,7 @@ const { get } = lodash;
  * @param {Element}          root.button     The button being clicked
  * @param {string}           root.endpoint   Which endpoint to query
  * @param {Function|boolean} root.callback   Optional callback to run after the request completes.
+ * @param {array|object}     root.callbackArgs Optional arguments to pass to the callback.
  * @param {string}           root.buttonText Optional text to display on the button while the request is running.
  * @param {boolean}          root.linkTerms  Optional boolean to link terms.
  */
