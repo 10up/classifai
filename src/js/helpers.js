@@ -5,18 +5,19 @@ const { get } = lodash;
 /**
  * Handle Click for given button.
  *
- * @param {Object}           root          Option for handle click.
- * @param {Element}          root.button   The button being clicked
- * @param {string}           root.endpoint Which endpoint to query
- * @param {Function|boolean} root.callback Optional callback to run after the request completes.
+ * @param {Object}           root           Option for handle click.
+ * @param {Element}          root.button    The button being clicked
+ * @param {string}           root.endpoint  Which endpoint to query
+ * @param {Function|boolean} root.callback  Optional callback to run after the request completes.
  *
+ * @param                    root.linkTerms
  */
 export const handleClick = ( {
 	button,
 	endpoint,
 	callback = false,
 	buttonText = __( 'Rescan', 'classifai' ),
-	linkTerms = true
+	linkTerms = true,
 } ) => {
 	const postID = button.getAttribute( 'data-id' );
 	const [ spinner ] = button.parentNode.getElementsByClassName( 'spinner' );
@@ -33,8 +34,8 @@ export const handleClick = ( {
 	const request = {
 		path,
 		data: {
-		  linkTerms
-		}
+			linkTerms,
+		},
 	};
 
 	wp.apiRequest( request ).then(
