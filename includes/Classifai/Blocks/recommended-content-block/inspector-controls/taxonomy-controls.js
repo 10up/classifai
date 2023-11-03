@@ -85,8 +85,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 				return termData;
 			} );
 			return _taxonomiesInfo;
-		},
-		[ taxonomies ]
+		}
 	);
 
 	// Update the object with newly created terms.
@@ -129,6 +128,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 				const response = await wp
 					.apiRequest( request )
 					.catch( ( error ) => {
+						// eslint-disable-next-line no-console
 						console.log( 'Error', error );
 						return null;
 					} );
@@ -164,6 +164,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			const response = await wp
 				.apiRequest( request )
 				.catch( ( error ) => {
+					// eslint-disable-next-line no-console
 					console.log( 'Error', error );
 					return null;
 				} );
@@ -171,19 +172,19 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			if ( response ) {
 				// Update taxonomiesInfo
 				const updatedTaxonomiesInfo = taxonomiesInfo.map(
-					( taxonomyInfo ) => {
-						if ( taxonomyInfo.slug === taxonomySlug ) {
+					( taxoInfo ) => {
+						if ( taxoInfo.slug === taxonomySlug ) {
 							const terms = getEntitiesInfo( response );
 
 							// Append "[AI]" prefix
 							appendAIPrefix( terms, taxonomySlug );
 
 							return {
-								...taxonomyInfo,
+								...taxoInfo,
 								terms,
 							};
 						}
-						return taxonomyInfo;
+						return taxoInfo;
 					}
 				);
 

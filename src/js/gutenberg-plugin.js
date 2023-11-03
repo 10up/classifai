@@ -82,7 +82,13 @@ const ClassifAIGenerateTagsButton = () => {
 	const closeModal = () => setOpen( false );
 
 	const [ taxQuery, setTaxQuery ] = useState( [] );
-	const [ taxTermsAI, setTaxTermsAI ] = useState( [] );
+	let [ taxTermsAI, setTaxTermsAI ] = useState( [] );
+
+	const triggerCallRef = useRef( null );
+	const triggerCallClick = () => {
+		triggerCallRef?.current?.click();
+		setLoading( true );
+	};
 
 	/**
 	 * Callback function to handle API response.
@@ -94,7 +100,6 @@ const ClassifAIGenerateTagsButton = () => {
 			let termsReady = false;
 			const taxonomies = resp.terms;
 			const taxTerms = {};
-			const taxTermsAI = {};
 			const taxTermsExisting = {};
 
 			// get current terms of the post
@@ -126,6 +131,7 @@ const ClassifAIGenerateTagsButton = () => {
 					termsReady = true;
 
 					// Loop through each term and add in taxTermsAI if it does not exist in the post.
+					taxTermsAI = taxTermsAI || {};
 					Object( newTerms ).forEach( ( termId ) => {
 						if ( taxTermsExisting[ tax ] ) {
 							const matchedTerm = taxTermsExisting[ tax ].find(
@@ -168,7 +174,7 @@ const ClassifAIGenerateTagsButton = () => {
 	/**
 	 * Save the terms (Modal).
 	 *
-	 * @param taxTerms
+	 * @param {Object} taxTerms Taxonomy terms.
 	 */
 	const saveTerms = async ( taxTerms ) => {
 		// Remove index values from the nested object
@@ -283,12 +289,6 @@ const ClassifAIGenerateTagsButton = () => {
 			</div>
 		</>
 	);
-
-	const triggerCallRef = useRef();
-	const triggerCallClick = () => {
-		triggerCallRef?.current?.click();
-		setLoading( true );
-	};
 
 	return (
 		<>

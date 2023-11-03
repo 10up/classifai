@@ -30,10 +30,6 @@ const PrePubPanel = ( { children } ) => {
 };
 
 class PrePubClassifyPost extends Component {
-	constructor( props ) {
-		super( props );
-	}
-
 	componentDidUpdate( prevProps ) {
 		// Update our state when the publish panel opens.
 		if (
