@@ -9,6 +9,7 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { getEntitiesInfo, useTaxonomies } from '../utils';
 import { useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 
 const termsPerPage = 100;
 
@@ -65,28 +66,26 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		return terms;
 	};
 
-	let taxonomiesInfo = useSelect(
-		( select ) => {
-			const { getEntityRecords } = select( coreStore );
-			const termsQuery = { per_page: termsPerPage };
-			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
-				const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
-				let terms = getEntitiesInfo( _terms );
+	let taxonomiesInfo = useSelect( ( select ) => {
+		const { getEntityRecords } = select( coreStore );
+		const termsQuery = { per_page: termsPerPage };
+		const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
+			const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
+			let terms = getEntitiesInfo( _terms );
 
-				// Append "[AI]" prefix
-				terms = appendAIPrefix( terms, slug );
+			// Append "[AI]" prefix
+			terms = appendAIPrefix( terms, slug );
 
-				const termData = {
-					slug,
-					name,
-					terms,
-				};
+			const termData = {
+				slug,
+				name,
+				terms,
+			};
 
-				return termData;
-			} );
-			return _taxonomiesInfo;
-		}
-	);
+			return termData;
+		} );
+		return _taxonomiesInfo;
+	} );
 
 	// Update the object with newly created terms.
 	if ( Object.keys( newTermsInfo ).length > 0 ) {
@@ -236,14 +235,48 @@ const TaxonomyControls = ( { onChange, query } ) => {
 						return null;
 					}
 
+					// if none of the terms?.names has "[AI]" prefix, skip the iteration
+					if ( query.taxTermsAI ) {
+						let hasAI = false;
+						Object.keys( terms.mapById ).forEach( ( term ) => {
+							if (
+								terms.mapById[ term ].name.indexOf( '[AI]' ) !==
+								-1
+							) {
+								hasAI = true;
+							}
+						} );
+						if ( ! hasAI ) {
+							// return message in red color
+							return (
+								<>
+									<p style={ { color: 'red' } } key={ slug }>
+										{ sprintf(
+											/* translators: %s: taxonomy name */
+											__(
+												'ClassifAI had no new recommendation found for %s',
+												'classifai'
+											),
+											name
+										) }
+									</p>
+									<hr />
+								</>
+							);
+						}
+					}
+
 					return (
-						<FormTokenField
-							key={ slug }
-							label={ name }
-							value={ getExistingTaxQueryValue( slug ) }
-							suggestions={ terms.names }
-							onChange={ onTermsChange( slug ) }
-						/>
+						<>
+							<FormTokenField
+								key={ slug }
+								label={ name }
+								value={ getExistingTaxQueryValue( slug ) }
+								suggestions={ terms.names }
+								onChange={ onTermsChange( slug ) }
+							/>
+							<hr />
+						</>
 					);
 				} ) }
 		</>
