@@ -772,3 +772,31 @@ function get_all_post_statuses() {
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
+
+/**
+ * Returns the context data for ClassifAI's admin screens.
+ *
+ * @return \stdClass|null
+ */
+function get_admin_context() {
+	$page     = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+	$tab      = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : '';
+	$provider = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : '';
+	$feature  = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : '';
+
+	if ( 'classifai' !== $page ) {
+		return null;
+	}
+
+	if ( ! $tab ) {
+		return null;
+	}
+
+	$context           = new \stdClass();
+	$context->page     = $page;
+	$context->tab      = $tab;
+	$context->provider = $provider;
+	$context->feature  = $feature;
+
+	return $context;
+}

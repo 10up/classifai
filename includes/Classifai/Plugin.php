@@ -107,8 +107,8 @@ class Plugin {
 			'classifai_services',
 			[
 				'language_processing' => 'Classifai\Services\LanguageProcessing',
-				'image_processing'    => 'Classifai\Services\ImageProcessing',
-				'personalizer'        => 'Classifai\Services\Personalizer',
+				// 'image_processing'    => 'Classifai\Services\ImageProcessing',
+				// 'personalizer'        => 'Classifai\Services\Personalizer',
 			]
 		);
 
@@ -164,7 +164,7 @@ class Plugin {
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array(),
+			array( 'wp-components' ),
 			CLASSIFAI_PLUGIN_VERSION,
 			'all'
 		);

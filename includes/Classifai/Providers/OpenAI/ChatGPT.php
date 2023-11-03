@@ -15,6 +15,13 @@ class ChatGPT extends Provider {
 	use \Classifai\Providers\OpenAI\OpenAI;
 
 	/**
+	 * Provider ID
+	 *
+	 * @var string
+	 */
+	const ID = 'openai_chatgpt';
+
+	/**
 	 * OpenAI ChatGPT URL
 	 *
 	 * @var string

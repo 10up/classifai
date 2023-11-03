@@ -10,6 +10,8 @@ use WP_Error;
 
 abstract class Service {
 
+	const SETTINGS_GROUP = 'classifai_settings_group';
+
 	/**
 	 * @var string The settings page slug
 	 */
@@ -31,16 +33,27 @@ abstract class Service {
 	public $provider_classes;
 
 	/**
+	 * @var array Array of features classes for this service
+	 */
+	protected $features = [];
+
+	/**
+	 * @var array Array of class instances.
+	 */
+	public $feature_classes = [];
+
+	/**
 	 * Service constructor.
 	 *
 	 * @param string $display_name Name that appears in menu item and page title.
 	 * @param string $menu_slug    Slug for the settings page.
 	 * @param array  $providers    Array of provider classes for this service
 	 */
-	public function __construct( $display_name, $menu_slug, $providers ) {
+	public function __construct( $display_name, $menu_slug, $providers, $features ) {
 		$this->menu_slug    = $menu_slug;
 		$this->display_name = $display_name;
 		$this->providers    = $providers;
+		$this->features     = $features;
 	}
 
 	/**
@@ -65,7 +78,20 @@ abstract class Service {
 					$this->provider_classes[] = new $provider( $this->menu_slug );
 				}
 			}
+
 			$this->register_providers();
+		}
+
+		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
+
+		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
+			foreach ( $this->features as $provider ) {
+				if ( class_exists( $provider ) ) {
+					$this->feature_classes[ $provider::ID ] = new $provider( $this->menu_slug );
+				}
+			}
+
+			$this->register_features();
 		}
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
@@ -74,13 +100,24 @@ abstract class Service {
 	/**
 	 * Initializes the functionality for this services providers
 	 */
-	public function register_providers() {
+	private function register_providers() {
 		if ( ! empty( $this->provider_classes ) ) {
 			foreach ( $this->provider_classes as $provider ) {
 				$provider->register_admin();
 				if ( $provider->can_register() ) {
 					$provider->register();
 				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the functionality for this services features
+	 */
+	private function register_features() {
+		if ( ! empty( $this->feature_classes ) ) {
+			foreach ( $this->feature_classes as $feature ) {
+				$feature->init();
 			}
 		}
 	}
@@ -133,18 +170,26 @@ abstract class Service {
 				?>
 
 				<h2 class="nav-tab-wrapper">
+					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_title() ); ?></a>
+					<?php endforeach; ?>
+				</h2>
+
+				<!-- <h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
 						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
 					<?php endforeach; ?>
-				</h2>
+				</h2> -->
 
 				<?php settings_errors(); ?>
 
 				<div class="classifai-nlu-sections">
 					<form method="post" action="options.php">
+						<div id="classifai-container-root"></div>
 					<?php
-						settings_fields( 'classifai_' . $active_tab );
-						do_settings_sections( 'classifai_' . $active_tab );
+						settings_fields( self::SETTINGS_GROUP );
+						// settings_fields( 'classifai_' . $active_tab );
+						// do_settings_sections( 'classifai_' . $active_tab );
 						submit_button();
 					?>
 					</form>

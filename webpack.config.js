@@ -42,6 +42,7 @@ module.exports = {
 		'generate-image-media-upload': [
 			'./src/js/media-modal/views/generate-image-media-upload.js',
 		],
+		'react-admin': [ './src/js/react-admin/index.js' ]
 	},
 	module: {
 		rules: [

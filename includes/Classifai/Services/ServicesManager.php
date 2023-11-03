@@ -55,6 +55,36 @@ class ServicesManager {
 		$this->register_services();
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+	}
+
+	/**
+	 * Enqueue the admin scripts for the React-based settings screen.
+	 */
+	public function enqueue_admin_scripts() {
+		$context = \Classifai\get_admin_context();
+
+		if ( ! $context ) {
+			return [];
+		}
+
+		if ( ! $context->feature ) {
+			return [];
+		}
+
+		$feature_instance = $this->service_classes[ $context->tab ]->feature_classes[ $context->feature ];
+		$feature_id = 'classifai_' . $feature_instance::ID;
+
+		$data[ $feature_id ] = $feature_instance->get_settings_data();
+
+		wp_enqueue_script(
+			'classifai-react-admin',
+			CLASSIFAI_PLUGIN_URL . 'dist/react-admin.js',
+			\Classifai\get_asset_info( 'react-admin', 'dependencies' ),
+			\Classifai\get_asset_info( 'react-admin', 'version' ),
+		);
+
+		wp_localize_script( 'classifai-react-admin', 'classifaiReactAdmin', $data );
 	}
 
 	/**
@@ -271,7 +301,8 @@ class ServicesManager {
 			}
 		} else {
 			// Render settings page for the first ( and only ) settings page.
-			$this->service_classes[0]->render_settings_page();
+			$service_key = array_keys( $this->service_classes );
+			$this->service_classes[ $service_key[ 0 ] ]->render_settings_page();
 		}
 	}
 
