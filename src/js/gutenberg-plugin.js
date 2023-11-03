@@ -291,7 +291,7 @@ const ClassifAIGenerateTagsButton = () => {
 	);
 
 	return (
-		<>
+		<div id='classify-post-componenet'>
 			{ isOpen && (
 				<Modal
 					title={ __( 'Confirm Post Classification', 'classifai' ) }
@@ -360,7 +360,7 @@ const ClassifAIGenerateTagsButton = () => {
 				) }
 				{ modalData }
 			</PrePubClassifyPost>
-		</>
+		</div>
 	);
 };
 

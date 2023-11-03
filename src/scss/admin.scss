@@ -725,8 +725,17 @@ input.classifai-button {
 }
 
 // Start: Classify Post Modal
+.classify-post-componenet {
+	hr {
+		margin-bottom: 20px;
+	}
+}
 .classify-modal {
     max-width: 500px;
+
+	hr {
+		margin-bottom: 20px;
+	}
 }
 
 .classifai-modal__notes {
