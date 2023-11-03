@@ -239,7 +239,7 @@ abstract class Provider {
 	public function render_prompt_repeater_field( array $args ): void {
 		$option_index      = $args['option_index'] ?? false;
 		$setting_index     = $this->get_settings( $option_index );
-		$value             = $setting_index[ $args['label_for'] ] ?? '';
+		$prompts           = $setting_index[ $args['label_for'] ] ?? '';
 		$class             = $args['class'] ?? 'large-text';
 		$placeholder       = $args['placeholder'] ?? '';
 		$field_name_prefix = sprintf(
@@ -249,20 +249,26 @@ abstract class Provider {
 			$args['label_for']
 		);
 
-		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$prompts = empty( $prompts ) && isset( $args['default_value'] ) ? $args['default_value'] : $prompts;
 
-		$prompt_count = count( $value );
+		$prompt_count = count( $prompts );
 		$field_index  = 0;
 		?>
 
-		<?php foreach ( $value as $prompt ) : ?>
-			<?php $is_default_prompt = 1 === $prompt['default']; ?>
+		<?php foreach ( $prompts as $prompt ) : ?>
+			<?php
+			$is_default_prompt  = ( isset( $prompt['default'] ) && 1 === $prompt['default'] ) || 1 === $prompt_count;
+			$is_original_prompt = isset( $prompt['original'] ) && 1 === $prompt['original'];
+			?>
 
 			<fieldset class="classifai-field-type-prompt-setting">
 				<input type="hidden"
 					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
 					value="<?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
 					class="js-setting-field__default">
+				<input type="hidden"
+					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][original]" ); ?>"
+					value="<?php echo esc_attr( $prompt['original'] ?? '' ); ?>">
 				<label>
 					<?php esc_html_e( 'Title', 'classifai' ); ?>&nbsp;*
 					<span class="dashicons dashicons-editor-help"
@@ -271,6 +277,7 @@ abstract class Provider {
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
 						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
 						value="<?php echo esc_attr( $prompt['title'] ?? '' ); ?>"
+						<?php echo $is_original_prompt ? 'readonly' : ''; ?>
 						required>
 				</label>
 
@@ -281,18 +288,21 @@ abstract class Provider {
 						rows="4"
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
-					><?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?></textarea>
+						<?php echo $is_original_prompt ? 'readonly' : ''; ?>
+					><?php echo esc_textarea( $is_original_prompt ? $placeholder : $prompt['prompt'] ?? '' ); ?></textarea>
 				</label>
 
 				<div class="actions-rows">
 					<a href="#" class="action__set_default <?php echo $is_default_prompt ? 'selected' : ''; ?>">
-						<?php if ( $is_default_prompt ) : ?>
-							<?php esc_html_e( 'Default Prompt', 'classifai' ); ?>
+						<?php if ( $is_original_prompt && $is_default_prompt ) : ?>
+							<?php esc_html_e( 'ClassifAI default prompt', 'classifai' ); ?>
+						<?php elseif ( $is_default_prompt ) : ?>
+							<?php esc_html_e( 'Default prompt', 'classifai' ); ?>
 						<?php else : ?>
 							<?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>
 						<?php endif; ?>
 					</a>
-					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>">
+					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count || $is_original_prompt ? 'display:none;' : ''; ?>">
 						<?php esc_html_e( 'Trash', 'classifai' ); ?>
 					</a>
 				</div>

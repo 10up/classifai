@@ -131,6 +131,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		// Reset form fields.
 		fields.forEach( ( field ) => {
 			field.value = '';
+			field.removeAttribute( 'readonly' );
 
 			// Add index to field name.
 			field.name = field.name.replace(
@@ -283,19 +284,14 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			'.classifai-field-type-prompt-setting'
 		);
 
-		// Show remove button if fieldset is single.
-		if (
-			1 === $sibling.parentElement.querySelectorAll( 'fieldset' ).length
-		) {
-			$sibling.parentElement.querySelector(
-				'.action__remove_prompt'
-			).style.display = 'block';
-		}
-
 		const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
 
 		resetInputFields( $newPromptFieldset, $sibling.closest( 'tr' ) );
 		attachEventPromptFieldset( $newPromptFieldset );
+
+		$newPromptFieldset.querySelector(
+			'.action__remove_prompt'
+		).style.display = 'block';
 
 		$sibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
 
