@@ -262,6 +262,20 @@ abstract class Provider {
 			?>
 
 			<fieldset class="classifai-field-type-prompt-setting">
+				<?php if ( $is_original_prompt ) : ?>
+					<p class="classifai-original-prompt">
+						<?php
+						printf(
+							/* translators: %1$s is replaced with <strong>; %2$s with </strong>; %3$s with prompt. */
+							esc_html__( '%1$sClassifAI default prompt%2$s: %3$s', 'classifai' ),
+							'<strong>',
+							'</strong>',
+							esc_html( $placeholder )
+						);
+						?>
+					</p>
+				<?php endif; ?>
+
 				<input type="hidden"
 					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
 					value="<?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
@@ -289,14 +303,12 @@ abstract class Provider {
 						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
 						placeholder="<?php echo esc_attr( $placeholder ); ?>"
 						<?php echo $is_original_prompt ? 'readonly' : ''; ?>
-					><?php echo esc_textarea( $is_original_prompt ? $placeholder : $prompt['prompt'] ?? '' ); ?></textarea>
+					><?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?></textarea>
 				</label>
 
 				<div class="actions-rows">
 					<a href="#" class="action__set_default <?php echo $is_default_prompt ? 'selected' : ''; ?>">
-						<?php if ( $is_original_prompt && $is_default_prompt ) : ?>
-							<?php esc_html_e( 'ClassifAI default prompt', 'classifai' ); ?>
-						<?php elseif ( $is_default_prompt ) : ?>
+						<?php if ( $is_default_prompt ) : ?>
 							<?php esc_html_e( 'Default prompt', 'classifai' ); ?>
 						<?php else : ?>
 							<?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>

@@ -436,7 +436,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->generate_excerpt_prompt,
 				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => __( "Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
 		);
 
@@ -501,7 +501,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_title_prompt',
 				'placeholder'   => $this->generate_title_prompt,
 				'default_value' => $default_settings['generate_title_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
@@ -570,7 +569,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'shrink_content_prompt',
 				'placeholder'   => $this->shrink_content_prompt,
 				'default_value' => $default_settings['shrink_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
@@ -585,7 +583,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'grow_content_prompt',
 				'placeholder'   => $this->grow_content_prompt,
 				'default_value' => $default_settings['grow_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 	}

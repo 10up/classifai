@@ -289,6 +289,10 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		resetInputFields( $newPromptFieldset, $sibling.closest( 'tr' ) );
 		attachEventPromptFieldset( $newPromptFieldset );
 
+		$newPromptFieldset
+			.querySelector( '.classifai-original-prompt' )
+			.remove();
+
 		$newPromptFieldset.querySelector(
 			'.action__remove_prompt'
 		).style.display = 'block';
