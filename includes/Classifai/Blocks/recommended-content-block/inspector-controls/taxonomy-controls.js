@@ -43,18 +43,23 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 const TaxonomyControls = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
 	const taxTermsAI = query.taxTermsAI || [];
-	const [newTermsInfo, setNewTermsInfo] = useState({});
+	const [ newTermsInfo, setNewTermsInfo ] = useState( {} );
 
-	const appendAIPrefix = (terms, slug) => {
-		if ( undefined !== terms && undefined !== terms.mapById && taxTermsAI[slug]) {
-			Object.keys(terms.mapById).forEach((term) => {
-				if (taxTermsAI[slug].includes(terms.mapById[term].id)) {
+	const appendAIPrefix = ( terms, slug ) => {
+		if (
+			undefined !== terms &&
+			undefined !== terms.mapById &&
+			taxTermsAI[ slug ]
+		) {
+			Object.keys( terms.mapById ).forEach( ( term ) => {
+				if ( taxTermsAI[ slug ].includes( terms.mapById[ term ].id ) ) {
 					// do not add prefix if already added
-					if ( terms.mapById[term].name.indexOf('[AI]') === -1 ) {
-						terms.mapById[term].name = '[AI] ' + terms.mapById[term].name;
+					if ( terms.mapById[ term ].name.indexOf( '[AI]' ) === -1 ) {
+						terms.mapById[ term ].name =
+							'[AI] ' + terms.mapById[ term ].name;
 					}
 				}
-			});
+			} );
 		}
 
 		return terms;
@@ -66,7 +71,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			const termsQuery = { per_page: termsPerPage };
 			const _taxonomiesInfo = taxonomies?.map( ( { slug, name } ) => {
 				const _terms = getEntityRecords( 'taxonomy', slug, termsQuery );
-				let terms	= getEntitiesInfo( _terms );
+				let terms = getEntitiesInfo( _terms );
 
 				// Append "[AI]" prefix
 				terms = appendAIPrefix( terms, slug );
@@ -89,9 +94,11 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		taxonomiesInfo = newTermsInfo;
 	}
 
-	const onTermsChange = (taxonomySlug) => async (newTermValues) => {
+	const onTermsChange = ( taxonomySlug ) => async ( newTermValues ) => {
 		let newTermsCreated = 0; // Track the number of new terms created
-		let taxonomyInfo = taxonomiesInfo.find(({ slug }) => slug === taxonomySlug);
+		const taxonomyInfo = taxonomiesInfo.find(
+			( { slug } ) => slug === taxonomySlug
+		);
 
 		if ( ! taxonomyInfo ) {
 			return;
@@ -105,89 +112,93 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 				if ( termId ) {
 					return {
-						[termValue.value]: termId
+						[ termValue.value ]: termId,
 					};
-				} else {	
-					const term = {
-						name: termValue,
-						taxonomy: taxonomySlug,
-					};
-	
-					const request = {
-						path: `/wp/v2/${taxonomySlug}`,
-						data: term,
-						method: 'POST',
-					};
-	
-					const response = await wp.apiRequest(request).catch((error) => {
-						console.log('Error', error);
-						return null;
-					});
-	
-					if ( response && response.id ) {
-						newTermsCreated++; // Increment the count of new terms created
-						return {
-							[termValue]: response.id
-						}; // Create an object with the term name as the key and the ID as the value
-					} else {
-						return null; // Handle creation failure
-					}
 				}
-			})
+				const term = {
+					name: termValue,
+					taxonomy: taxonomySlug,
+				};
+
+				const request = {
+					path: `/wp/v2/${ taxonomySlug }`,
+					data: term,
+					method: 'POST',
+				};
+
+				const response = await wp
+					.apiRequest( request )
+					.catch( ( error ) => {
+						console.log( 'Error', error );
+						return null;
+					} );
+
+				if ( response && response.id ) {
+					newTermsCreated++; // Increment the count of new terms created
+					return {
+						[ termValue ]: response.id,
+					}; // Create an object with the term name as the key and the ID as the value
+				}
+				return null; // Handle creation failure
+			} )
 		);
 
-		const termDataObject = termData.reduce((accumulator, item) => {
+		const termDataObject = termData.reduce( ( accumulator, item ) => {
 			if ( item ) {
 				return {
 					...accumulator,
-					...item
+					...item,
 				}; // Merge objects to create a single object with term names as keys and IDs as values
 			}
 			return accumulator;
-		}, {});
+		}, {} );
 
 		if ( newTermsCreated > 0 ) {
 			// Fetch rest API
 			const request = {
-				path: `/wp/v2/${taxonomySlug}`,
+				path: `/wp/v2/${ taxonomySlug }`,
 				data: {
 					per_page: termsPerPage,
 				},
 			};
-			const response = await wp.apiRequest(request).catch((error) => {
-				console.log('Error', error);
-				return null;
-			});
+			const response = await wp
+				.apiRequest( request )
+				.catch( ( error ) => {
+					console.log( 'Error', error );
+					return null;
+				} );
 
 			if ( response ) {
 				// Update taxonomiesInfo
-				const updatedTaxonomiesInfo = taxonomiesInfo.map((taxonomyInfo) => {
-					if (taxonomyInfo.slug === taxonomySlug) {
-						const terms = getEntitiesInfo(response);
+				const updatedTaxonomiesInfo = taxonomiesInfo.map(
+					( taxonomyInfo ) => {
+						if ( taxonomyInfo.slug === taxonomySlug ) {
+							const terms = getEntitiesInfo( response );
 
-						// Append "[AI]" prefix
-						appendAIPrefix(terms, taxonomySlug);
+							// Append "[AI]" prefix
+							appendAIPrefix( terms, taxonomySlug );
 
-						return {
-							...taxonomyInfo,
-							terms
-						};
+							return {
+								...taxonomyInfo,
+								terms,
+							};
+						}
+						return taxonomyInfo;
 					}
-					return taxonomyInfo;
-				});
+				);
 
-				setNewTermsInfo(updatedTaxonomiesInfo);
+				setNewTermsInfo( updatedTaxonomiesInfo );
 			}
 		}
 
 		const newTaxQuery = {
 			...query.taxQuery,
-			[taxonomySlug]: termDataObject,
+			[ taxonomySlug ]: termDataObject,
 		};
 
-		onChange({
-			taxQuery: newTaxQuery
-		});
+		onChange( {
+			taxQuery: newTaxQuery,
+		} );
 	};
 
 	// Returns only the existing term ids in proper format to be
@@ -202,21 +213,18 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			return [];
 		}
 
-		let termIds = query.taxQuery[taxonomySlug] || [];
+		let termIds = query.taxQuery[ taxonomySlug ] || [];
 		termIds = Object.values( termIds );
-		return termIds.reduce(
-			( accumulator, termId ) => {
-				const term = taxonomyInfo.terms.mapById[ termId ];
-				if ( term ) {
-					accumulator.push( {
-						id: termId,
-						value: term.name,
-					} );
-				}
-				return accumulator;
-			},
-			[]
-		);
+		return termIds.reduce( ( accumulator, termId ) => {
+			const term = taxonomyInfo.terms.mapById[ termId ];
+			if ( term ) {
+				accumulator.push( {
+					id: termId,
+					value: term.name,
+				} );
+			}
+			return accumulator;
+		}, [] );
 	};
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
