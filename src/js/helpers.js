@@ -5,13 +5,13 @@ const { get } = lodash;
 /**
  * Handle Click for given button.
  *
- * @param {Object}           root            Option for handle click.
- * @param {Element}          root.button     The button being clicked
- * @param {string}           root.endpoint   Which endpoint to query
- * @param {Function|boolean} root.callback   Optional callback to run after the request completes.
- * @param {array|object}     root.callbackArgs Optional arguments to pass to the callback.
- * @param {string}           root.buttonText Optional text to display on the button while the request is running.
- * @param {boolean}          root.linkTerms  Optional boolean to link terms.
+ * @param {Object}           root              Option for handle click.
+ * @param {Element}          root.button       The button being clicked
+ * @param {string}           root.endpoint     Which endpoint to query
+ * @param {Function|boolean} root.callback     Optional callback to run after the request completes.
+ * @param {Array|object}     root.callbackArgs Optional arguments to pass to the callback.
+ * @param {string}           root.buttonText   Optional text to display on the button while the request is running.
+ * @param {boolean}          root.linkTerms    Optional boolean to link terms.
  */
 export const handleClick = ( {
 	button,
