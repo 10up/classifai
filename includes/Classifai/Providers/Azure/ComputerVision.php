@@ -1274,7 +1274,7 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Authenitcates our credentials.
+	 * Authenticates our credentials.
 	 *
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.

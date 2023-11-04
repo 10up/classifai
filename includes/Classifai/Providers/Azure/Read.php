@@ -147,7 +147,7 @@ class Read {
 		 * Filters the request arguments sent to Read endpoint.
 		 *
 		 * @since 1.7.0
-		 * @hook classifai_azure_read_should_process
+		 * @hook classifai_azure_read_request_args
 		 *
 		 * @param {array} $args       Whether to run OCR processing or not.
 		 * @param {int}   $attachment_id The attachment ID.
@@ -277,7 +277,7 @@ class Read {
 	}
 
 	/**
-	 * Update document desctiption using text received from Read API.
+	 * Update document description using text received from Read API.
 	 *
 	 * @param array $data          Read result.
 	 *

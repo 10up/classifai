@@ -204,7 +204,7 @@ class LanguageProcessing extends Service {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The type of resize operation. "grow" or "shrink".', 'classifai' ),
+						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
 					],
 				],
 			]

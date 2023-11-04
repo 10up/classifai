@@ -90,6 +90,8 @@ class TextToSpeech extends Provider {
 
 	/**
 	 * Enqueue the editor scripts.
+	 *
+	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_editor_assets() {
 		$post = get_post();
@@ -108,7 +110,7 @@ class TextToSpeech extends Provider {
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
 			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
 
@@ -734,7 +736,7 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
-	 * Adds audio controls to the post that has speech sythesis enabled.
+	 * Adds audio controls to the post that has speech synthesis enabled.
 	 *
 	 * @param string $content Post content.
 	 * @return string

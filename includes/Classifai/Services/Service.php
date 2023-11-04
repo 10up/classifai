@@ -234,7 +234,7 @@ abstract class Service {
 	/**
 	 * Provides debug information for the service.
 	 *
-	 * @return array Array of associative arrays respresenting lines of debug information.
+	 * @return array Array of associative arrays representing lines of debug information.
 	 * @since 1.4.0
 	 */
 	public function get_service_debug_information() {

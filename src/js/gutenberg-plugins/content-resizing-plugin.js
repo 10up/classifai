@@ -42,7 +42,7 @@ const aiIconSvg = (
 );
 
 /**
- * Custom store to access common data in a block and a higer order
+ * Custom store to access common data in a block and a higher order
  * component created through filters.
  */
 const DEFAULT_STATE = {
@@ -111,7 +111,7 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 register( resizeContentStore );
 
 const ContentResizingPlugin = () => {
-	// Holds the original text of the block being procesed.
+	// Holds the original text of the block being processed.
 	const [ blockContentAsPlainText, setBlockContentAsPlainText ] =
 		useState( '' );
 

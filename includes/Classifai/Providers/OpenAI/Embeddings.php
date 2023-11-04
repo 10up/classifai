@@ -594,7 +594,7 @@ class Embeddings extends Provider {
 			return false;
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.

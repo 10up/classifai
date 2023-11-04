@@ -89,6 +89,8 @@ class DallE extends Provider {
 	/**
 	 * Enqueue the admin scripts.
 	 *
+	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
+	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_scripts( $hook_suffix = '' ) {
@@ -105,14 +107,14 @@ class DallE extends Provider {
 			'classifai-image-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
 			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'media-modal', 'version' ),
 			'all'
 		);
 
 		wp_enqueue_script(
 			'classifai-generate-images',
 			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			[ 'jquery', 'wp-api', 'wp-media-utils', 'wp-url' ],
+			array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
 			get_asset_info( 'media-modal', 'version' ),
 			true
 		);
@@ -163,7 +165,7 @@ class DallE extends Provider {
 				wp_enqueue_script(
 					'classifai-generate-images-media-upload',
 					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-					[ 'jquery' ],
+					array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
 					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
 					true
 				);
@@ -452,7 +454,7 @@ class DallE extends Provider {
 			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
 
 		/**
 		 * Filter the request body before sending to DALL·E.

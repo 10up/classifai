@@ -17,14 +17,14 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 	} );
 
 	/**
-	 * This function is solely responsibe for rendering, generating
+	 * This function is solely responsible for rendering, generating
 	 * and applying the generated title for the classic editor.
 	 */
 	function generateTitleInit() {
 		// Boolean indicating whether title generation is in progress.
 		let isProcessing = false;
 
-		// Creates and appens the "Generate titles" button.
+		// Creates and appends the "Generate titles" button.
 		$( '<span />', {
 			text: scriptData?.title?.buttonText ?? '',
 			class: 'classifai-openai__title-generate-btn--text',
