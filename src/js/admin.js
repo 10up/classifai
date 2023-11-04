@@ -147,7 +147,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	userSearches.forEach( ( userSearch ) => {
 		const id = userSearch.getAttribute( 'data-id' );
 		const userElement = document.getElementById( id );
-		const values = userElement.value.split( ',' );
+		const values = userElement.value?.split( ',' ) || [];
 		const onChange = ( newValues ) => {
 			userElement.value = newValues.join( ',' );
 		};

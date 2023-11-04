@@ -7,6 +7,8 @@ import { store as coreStore } from '@wordpress/core-data';
 import { FormTokenField } from '@wordpress/components';
 import { useDebounce } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * User selector component.
@@ -27,33 +29,34 @@ export const UserSelector = ( { value, onChange } ) => {
 		return name.replace( / /g, '' ).toLowerCase();
 	};
 
-	// Load existing selected users.
-	const { users, hasResolvedUsers } = useSelect(
-		( select ) => {
-			const { getUsers, hasFinishedResolution } = select( coreStore );
+	// Load existing user and set as selected users.
+	useEffect( () => {
+		const userIds = value.filter( ( id ) => id );
+		if ( userIds.length ) {
 			const query = {
 				context: 'view',
-				include: value,
+				include: userIds,
 				per_page: -1,
 				__fields: 'id,name,slug',
 			};
-			return {
-				users: getUsers( query ),
-				hasResolvedUsers: hasFinishedResolution( 'getUsers', [
-					query,
-				] ),
-			};
-		},
-		[ value ]
-	);
-
-	// Set selected user values.
-	useEffect( () => {
-		if ( hasResolvedUsers ) {
-			const newValues = ( users ?? [] ).map( getNameString );
-			setValues( newValues );
+			apiFetch( {
+				path: addQueryArgs( '/wp/v2/users1', query ),
+			} )
+				.then( ( data ) => {
+					const users = data ?? [];
+					const newValues = users.map( getNameString );
+					setValues( newValues );
+					const usersMap = {};
+					users.forEach( ( user ) => {
+						usersMap[ getNameKey( getNameString( user ) ) ] =
+							user.id;
+					} );
+					setUsersByName( usersMap );
+				} )
+				// eslint-disable-next-line no-console
+				.catch( console.error );
 		}
-	}, [ users, hasResolvedUsers ] );
+	}, [ value ] );
 
 	// Load search results.
 	const searchResults = useSelect(
@@ -74,16 +77,6 @@ export const UserSelector = ( { value, onChange } ) => {
 		() => ( searchResults ?? [] ).map( getNameString ),
 		[ searchResults ]
 	);
-
-	// Set users by name object to map user names to ids.
-	useEffect( () => {
-		if ( hasResolvedUsers && users ) {
-			( users ?? [] ).forEach( ( user ) => {
-				usersByName[ getNameKey( getNameString( user ) ) ] = user.id;
-			} );
-			setUsersByName( usersByName );
-		}
-	}, [ users, hasResolvedUsers, usersByName ] );
 
 	useEffect( () => {
 		( searchResults ?? [] ).forEach( ( user ) => {

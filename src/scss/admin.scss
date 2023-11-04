@@ -261,8 +261,12 @@ input.classifai-button {
 		}
 
 		tr.allowed_users_row {
-			.select2 {
+			.classifai-search-users-container {
 				max-width: 600px;
+
+				label.components-form-token-field__label{
+					display: none;
+				}
 			}
 		}
 

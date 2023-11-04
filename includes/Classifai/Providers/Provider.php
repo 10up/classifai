@@ -440,7 +440,7 @@ abstract class Provider {
 		$value         = $setting_index[ $args['label_for'] ] ?? array();
 		?>
 		<div class="classifai-search-users-container">
-			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>"></div>
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>-container"></div>
 			<input
 				id="<?php echo esc_attr( $args['label_for'] ); ?>"
 				class="classifai-search-users"
