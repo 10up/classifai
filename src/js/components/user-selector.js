@@ -40,7 +40,7 @@ export const UserSelector = ( { value, onChange } ) => {
 				__fields: 'id,name,slug',
 			};
 			apiFetch( {
-				path: addQueryArgs( '/wp/v2/users1', query ),
+				path: addQueryArgs( '/wp/v2/users', query ),
 			} )
 				.then( ( data ) => {
 					const users = data ?? [];
@@ -65,7 +65,7 @@ export const UserSelector = ( { value, onChange } ) => {
 			return getUsers( {
 				context: 'view',
 				search: encodeURIComponent( search ),
-				per_page: 10,
+				per_page: 100,
 				__fields: 'id,name,slug',
 			} );
 		},
