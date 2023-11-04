@@ -5,7 +5,7 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 
-import { createRoot } from '@wordpress/element';
+import { createRoot, render } from '@wordpress/element';
 import { UserSelector } from './components';
 
 document.addEventListener( 'DOMContentLoaded', function () {
@@ -155,8 +155,18 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			userElement.value = newValues.join( ',' );
 		};
 
-		const root = createRoot( userSearch );
-		root.render( <UserSelector value={ values } onChange={ onChange } /> );
+		if ( createRoot ) {
+			const root = createRoot( userSearch );
+			root.render(
+				<UserSelector value={ values } onChange={ onChange } />
+			);
+		} else {
+			// Support for wp < 6.2
+			render(
+				<UserSelector value={ values } onChange={ onChange } />,
+				userSearch
+			);
+		}
 	} );
 } )();
 
