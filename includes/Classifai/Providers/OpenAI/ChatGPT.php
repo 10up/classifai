@@ -95,6 +95,33 @@ class ChatGPT extends Provider {
 		);
 	}
 
+	public function get_settings_data() {
+		return [
+			\Classifai\Features\TitleGeneration::ID => [
+				'number_title' => [
+					'type'        => 'number',
+					'label'       => __( 'Number of titles', 'classifai' ),
+					'description' => __( 'Number of titles that will be generated in one request.', 'classifai' ),
+					'value'       => (int) $this->feature_settings->get_setting( 'number_title' ) ?: 1,
+					'min' => 1,
+					'max' => 10,
+					'step' => 1,
+				],
+			],
+			\Classifai\Features\ContentResizing::ID => [
+				'number_resize_content' => [
+					'type'        => 'number',
+					'label'       => __( 'Number of suggestions', 'classifai' ),
+					'description' => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+					'value'       => (int) $this->feature_settings->get_setting( 'number_resize_content' ) ?: 1,
+					'min' => 1,
+					'max' => 10,
+					'step' => 1,
+				],
+			],
+		];
+	}
+
 	/**
 	 * Determine if the current user can access the feature
 	 *
@@ -354,20 +381,6 @@ class ChatGPT extends Provider {
 			$this->get_option_name()
 		);
 
-		add_settings_field(
-			'enable-excerpt',
-			esc_html__( 'Generate excerpt', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'enable_excerpt',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_excerpt'],
-				'description'   => __( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' ),
-			]
-		);
-
 		$roles = get_editable_roles() ?? [];
 		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
 
@@ -383,36 +396,6 @@ class ChatGPT extends Provider {
 		 * @return {array} Roles array.
 		 */
 		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'length',
-			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'length',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $default_settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
-			]
-		);
 
 		// Custom prompt for excerpt generation.
 		add_settings_field(
@@ -435,34 +418,6 @@ class ChatGPT extends Provider {
 			esc_html__( 'Title settings', 'classifai' ),
 			'',
 			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-titles',
-			esc_html__( 'Generate titles', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'enable_titles',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_titles'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'title-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'      => 'title_roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['title_roles'],
-				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
-			]
 		);
 
 		add_settings_field(
@@ -502,37 +457,9 @@ class ChatGPT extends Provider {
 			$this->get_option_name()
 		);
 
-		add_settings_field(
-			'enable-resize-content',
-			esc_html__( 'Enable content resizing', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'enable_resize_content',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
-			]
-		);
-
 		$content_resize_roles = $roles;
 
 		unset( $content_resize_roles['contributor'], $content_resize_roles['subscriber'] );
-
-		add_settings_field(
-			'resize-content-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'      => 'resize_content_roles',
-				'options'        => $content_resize_roles,
-				'default_values' => $default_settings['resize_content_roles'],
-				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
-			]
-		);
 
 		add_settings_field(
 			'number-resize-content',
@@ -695,12 +622,7 @@ class ChatGPT extends Provider {
 		return [
 			'authenticated'           => false,
 			'api_key'                 => '',
-			'enable_excerpt'          => false,
-			'roles'                   => array_keys( $editable_roles ),
-			'length'                  => (int) apply_filters( 'excerpt_length', 55 ),
 			'generate_excerpt_prompt' => '',
-			'enable_titles'           => false,
-			'title_roles'             => array_keys( $editable_roles ),
 			'number_titles'           => 1,
 			'generate_title_prompt'   => '',
 			'enable_resize_content'   => false,

@@ -21,15 +21,16 @@ class LanguageProcessing extends Service {
 			__( 'Language Processing', 'classifai' ),
 			'language_processing',
 			[
-				'Classifai\Providers\Watson\NLU',
+				// 'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\OpenAI\ChatGPT',
-				'Classifai\Providers\OpenAI\Embeddings',
-				'Classifai\Providers\OpenAI\Whisper',
-				'Classifai\Providers\Azure\TextToSpeech',
+				// 'Classifai\Providers\OpenAI\Embeddings',
+				// 'Classifai\Providers\OpenAI\Whisper',
+				// 'Classifai\Providers\Azure\TextToSpeech',
 			],
 			[
 				'Classifai\Features\TitleGeneration',
 				'Classifai\Features\ExcerptGeneration',
+				'Classifai\Features\ContentResizing',
 			]
 		);
 	}

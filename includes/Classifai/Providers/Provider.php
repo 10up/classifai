@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use \Classifai\Settings;
+
 abstract class Provider {
 
 	/**
@@ -34,6 +36,8 @@ abstract class Provider {
 	 */
 	public $onboarding_options;
 
+	protected $feature_settings = null;
+
 
 	/**
 	 * Provider constructor.
@@ -49,6 +53,19 @@ abstract class Provider {
 		$this->option_name           = $option_name;
 		$this->service               = $service;
 		$this->onboarding_options    = array();
+	}
+
+	/**
+	 * Sets the feature instance for the provider.
+	 *
+	 * @param \Classifai\Features\Feature $feature The feature instance.
+	 */
+	public function set_feature_instance( $feature = null ) {
+		if ( ! $feature ) {
+			return;
+		}
+
+		$this->feature_settings = new Settings( $feature );
 	}
 
 	/**
@@ -172,6 +189,14 @@ abstract class Provider {
 	public function get_default_settings() {
 		return [];
 	}
+
+	/**
+	 * Returns array of settings data structure.
+	 * Used to render settings fields for the provider.
+	 *
+	 * @return array
+	 */
+	abstract public function get_settings_data();
 
 	/**
 	 * Generic text input field callback

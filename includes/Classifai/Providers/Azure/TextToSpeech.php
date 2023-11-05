@@ -83,6 +83,10 @@ class TextToSpeech extends Provider {
 		);
 	}
 
+	public function get_settings_data() {
+		return [];
+	}
+
 	/**
 	 * Enqueue the editor scripts.
 	 */

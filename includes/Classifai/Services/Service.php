@@ -6,6 +6,8 @@
 namespace Classifai\Services;
 
 use function Classifai\find_provider_class;
+use function Classifai\get_admin_context;
+
 use WP_Error;
 
 abstract class Service {
@@ -85,9 +87,9 @@ abstract class Service {
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
 
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
-			foreach ( $this->features as $provider ) {
-				if ( class_exists( $provider ) ) {
-					$this->feature_classes[ $provider::ID ] = new $provider( $this->menu_slug );
+			foreach ( $this->features as $feature ) {
+				if ( class_exists( $feature ) ) {
+					$this->feature_classes[ $feature::ID ] = new $feature( $this->provider_classes );
 				}
 			}
 
@@ -187,7 +189,8 @@ abstract class Service {
 					<form method="post" action="options.php">
 						<div id="classifai-container-root"></div>
 					<?php
-						settings_fields( self::SETTINGS_GROUP );
+						$context = get_admin_context();
+						settings_fields( self::SETTINGS_GROUP . '_' . $context->feature );
 						// settings_fields( 'classifai_' . $active_tab );
 						// do_settings_sections( 'classifai_' . $active_tab );
 						submit_button();

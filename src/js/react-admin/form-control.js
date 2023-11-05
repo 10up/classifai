@@ -1,7 +1,9 @@
 import {
+	BaseControl,
 	CheckboxControl,
 	FormTokenField,
 	SelectControl,
+	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
 
 export const FormControl = ( props ) => {
@@ -17,57 +19,100 @@ export const FormControl = ( props ) => {
 
 	const name = `${ featureKey }[${ settingKey }]`;
 
+	const fields = [];
+
 	switch ( type ) {
 		case 'checkbox':
-			return <CheckboxControl
+			fields.push( <CheckboxControl
 				name={ name }
 				label={ label }
 				checked={ 'on' === value }
 				onChange={ ( val ) => onChange( settingKey, val ? 'on' : 'off ' ) }
 				value={ value }
-			/>;
+			/> );
+			break;
 
 		case 'multiselect':
 			const options = props?.options ?? [];
 			const suggestions = Object.values( options );
 
-			function getValueKeys( value = [] ) {
-				return value.map( ( val ) => {
-					return Object.keys( options ).find( ( key ) => options[ key ] === val );
-				} );
+			function getValueByLabel( label ) {
+				return Object.keys( options ).find( ( key ) => options[ key ] === label );
 			}
 
-			const selectedKeys = getValueKeys( value );
-			const hiddenFields = selectedKeys.map( key => <input type="hidden" name={ `${ name }[]` } value={ key } /> );
-
-			return (
-				<>
-					<FormTokenField
-						name={ name }
-						label={ label }
-						value={ value }
-						onChange={ ( val ) => onChange( settingKey, val ) }
-						suggestions={ suggestions }
-						description={ description }
-						__experimentalExpandOnFocus={ true }
+			const hiddenFields = value.map( ( val ) => {
+				return (
+					<input
+						type="hidden"
+						name={ `${ name }[]` }
+						value={ val }
 					/>
+				);
+			} );
+
+			fields.push(
+				<>
+					<BaseControl help={ description }>
+						<FormTokenField
+							name={ name }
+							label={ label }
+							value={ value.map( ( val ) => options[ val ] ) }
+							onChange={ ( val ) => onChange( settingKey, val.map( getValueByLabel ) ) }
+							suggestions={ suggestions }
+							description={ description }
+							__experimentalShowHowTo={ false }
+							__experimentalExpandOnFocus={ true }
+						/>
+					</BaseControl>
 					{ hiddenFields }
 				</>
 			);
 
+			break;
+
 		case 'select':
-			return (
+			fields.push(
 				<SelectControl
 					name={ name }
 					label={ label }
 					value={ value }
 					onChange={ ( val ) => onChange( settingKey, val ) }
 					options={ props?.options ?? [] }
-					description={ description }
+					help={ description }
 				/>
-			)
+			);
+			break;
 
+		case 'number':
+			const { min = 0, max = 100, step = 1 } = props;
+
+			fields.push(
+				<NumberControl
+					name={ name }
+					label={ label }
+					value={ value }
+					onChange={ ( val ) => onChange( settingKey, val ) }
+					help={ description }
+					min={ min }
+					max={ max }
+					step={ step }
+				/>
+			);
+			break;
 	}
 
-	return null;
+	if ( 'provider' === settingKey && props?.provider_settings ) {
+		fields.push( ...Object.keys( props.provider_settings[ value ] ).map( ( settingKey ) => {
+			return (
+				<FormControl
+					{ ...props.provider_settings[ value ][ settingKey ] }
+					onChange={ onChange }
+					featureKey={ value }
+					settingKey={ settingKey }
+				/>
+			)
+		} ) );
+	}
+
+	return fields;
 };

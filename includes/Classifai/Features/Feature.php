@@ -2,6 +2,7 @@
 namespace Classifai\Features;
 
 use \Classifai\Services\Service;
+use \Classifai\Settings;
 
 /**
  * Feature abstract class
@@ -16,13 +17,6 @@ abstract class Feature {
 	const ID = '';
 
 	/**
-	 * Default settings for the feature.
-	 *
-	 * @var array
-	 */
-	public $feature_settings = [];
-
-	/**
 	 * Roles that can use this feature.
 	 */
 	public $roles = [];
@@ -35,12 +29,34 @@ abstract class Feature {
 	protected $title = '';
 
 	/**
+	 * Settings instance for the feature.
+	 */
+	protected $feature_settings = null;
+
+	/**
+	 * Settings for the providers.
+	 */
+	protected $provider_settings = [];
+
+	/**
 	 * Constructor
 	 */
-	public function __construct() {
-		$this->feature_settings = $this->get_settings();
+	public function __construct( $provider_classes ) {
 		$this->roles            = get_editable_roles() ?? [];
 		$this->roles            = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
+		$this->feature_settings = new Settings( $this );
+		$context                = \Classifai\get_admin_context();
+
+		// We populate the $provider_settings array with the settings
+		// for each provider for the current feature.
+		foreach ( $provider_classes as $provider_class ) {
+			$provider_class->set_feature_instance( $this );
+			$provider_settings = $provider_class->get_settings_data();
+
+			if ( isset( $provider_settings[ $context->feature ] ) ) {
+				$this->provider_settings[ $provider_class::ID ] = $provider_settings[ $context->feature ];
+			}
+		}
 
 		/**
 		 * Filter the allowed WordPress roles for ChatGTP
@@ -97,50 +113,24 @@ abstract class Feature {
 	 * All feature settings are under the same options group.
 	 */
 	public function register_settings() {
-		register_setting( Service::SETTINGS_GROUP, $this->get_option_name(), [ $this, 'sanitize_settings' ] );
+		// register_setting( Service::SETTINGS_GROUP, $this->feature_settings->get_option_name(), [ $this, 'sanitize_settings' ] );
+		register_setting( Service::SETTINGS_GROUP . '_' . static::ID, $this->feature_settings->get_option_name(), [ $this, 'sanitize_settings' ] );
 	}
 
 	/**
-	 * Returns the option name for the feature setting.
-	 *
-	 * @return string
-	 */
-	public function get_option_name() {
-		return 'classifai_' . static::ID;
-	}
-
-	/**
-	 * Returns all the settings for the feature.
-	 * This method returns the default settings if no settings are found.
+	 * Returns the provider settings for the feature.
 	 *
 	 * @return array
 	 */
-	public function get_settings() {
-		$settings         = get_option( $this->get_option_name(), [] );
-		$default_settings = [];
+	public function get_provider_settings() {
+		$providers = $this->get_providers();
+		$settings = [];
 
-		foreach ( $this->get_settings_data() as $key => $setting ) {
-			$default_settings[ $key ] = $setting['value'] ?? '';
+		foreach ( $providers as $provider ) {
+			$provider_id = $provider['value'];
+			$settings[ $provider_id ] = $this->provider_settings[ $provider_id ];
 		}
 
-		return wp_parse_args( $settings, $default_settings );
-	}
-
-	/**
-	 * Returns a specific setting for a feature by key.
-	 * For example, 'status' or 'roles'.
-	 *
-	 * Returns false if no setting is found.
-	 *
-	 * @return boolean|mixed
-	 */
-	public function get_setting( $key ) {
-		$settings = get_option( $this->get_option_name(), [] );
-
-		if ( isset( $settings[ $key ] ) ) {
-			return $settings[ $key ];
-		}
-
-		return false;
+		return $settings;
 	}
 }

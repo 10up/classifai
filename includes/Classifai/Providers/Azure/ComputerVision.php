@@ -50,6 +50,10 @@ class ComputerVision extends Provider {
 		);
 	}
 
+	public function get_settings_data() {
+		return [];
+	}
+
 	/**
 	 * Resets settings for the ComputerVision provider.
 	 */

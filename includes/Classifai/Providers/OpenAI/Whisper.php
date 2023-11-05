@@ -38,6 +38,10 @@ class Whisper extends Provider {
 		);
 	}
 
+	public function get_settings_data() {
+		return [];
+	}
+
 	/**
 	 * Register what we need for the plugin.
 	 *

@@ -3,21 +3,21 @@
 namespace Classifai\Features;
 
 /**
- * Title Generation feature class
+ * Content Resizing feature class
  */
-class TitleGeneration extends Feature {
+class ContentResizing extends Feature {
 	/**
 	 * ID of the feature.
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_title_generation';
+	const ID = 'feature_content_resizing';
 
 	/**
 	 * Initialize required variables and hooks.
 	 */
 	public function init() {
-		$this->title = __( 'Title Generation', 'classifai' );
+		$this->title = __( 'Content Resizing', 'classifai' );
 	}
 
 	/**
@@ -32,7 +32,7 @@ class TitleGeneration extends Feature {
 				[
 					'label' => __( 'OpenAI ChatGPT' ),
 					'value' => \Classifai\Providers\OpenAI\ChatGPT::ID,
-				],
+				]
 			]
 		);
 	}
@@ -56,7 +56,7 @@ class TitleGeneration extends Feature {
 		return [
 			'status' => [
 				'type'        => 'checkbox',
-				'label'       => __( 'Enable Title Generation', 'classifai' ),
+				'label'       => __( 'Enable Content Resizing Generation', 'classifai' ),
 				'value'       => $this->feature_settings->get_setting( 'status' ) ?: 'off',
 			],
 			'roles'  => [
