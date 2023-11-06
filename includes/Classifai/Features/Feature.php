@@ -160,7 +160,7 @@ abstract class Feature {
 		$class             = $args['class'] ?? 'large-text';
 		$placeholder       = $args['placeholder'] ?? '';
 		$field_name_prefix = sprintf(
-			'classifai_%1$s%2$s[%3$s]',
+			'%1$s%2$s[%3$s]',
 			$this->get_option_name(),
 			$option_index ? "[$option_index]" : '',
 			$args['label_for']
