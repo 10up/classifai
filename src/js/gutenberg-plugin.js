@@ -69,6 +69,13 @@ const ClassifAIToggle = () => {
  *  Classify Post Button
  */
 const ClassifAIGenerateTagsButton = () => {
+	const { select, dispatch } = wp.data;
+		const postId = select( 'core/editor' ).getCurrentPostId();
+		const postType = select( 'core/editor' ).getCurrentPostType();
+		const postTypeLabel =
+			select( 'core/editor' ).getPostTypeLabel() ||
+			__( 'Post', 'classifai' );
+
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
 			'classifai_process_content'
@@ -105,8 +112,6 @@ const ClassifAIGenerateTagsButton = () => {
 
 			// get current terms of the post
 			const { select } = wp.data;
-			const postId = select( 'core/editor' ).getCurrentPostId();
-			const postType = select( 'core/editor' ).getCurrentPostType();
 			const currentTerms = select( 'core' ).getEntityRecord(
 				'postType',
 				postType,
@@ -196,13 +201,6 @@ const ClassifAIGenerateTagsButton = () => {
 			} )
 		);
 
-		const { select, dispatch } = wp.data;
-		const postId = select( 'core/editor' ).getCurrentPostId();
-		const postType = select( 'core/editor' ).getCurrentPostType();
-		const postTypeLabel =
-			select( 'core/editor' ).getPostTypeLabel() ||
-			__( 'Post', 'classifai' );
-
 		await dispatch( 'core' ).editEntityRecord(
 			'postType',
 			postType,
@@ -238,10 +236,6 @@ const ClassifAIGenerateTagsButton = () => {
 		return null;
 	}
 
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
-	const postTypeLabel =
-		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
-		__( 'Post', 'classifai' );
 	const buttonText = sprintf(
 		/** translators: %s Post type label */
 		__( 'Classify %s', 'classifai' ),
@@ -268,7 +262,7 @@ const ClassifAIGenerateTagsButton = () => {
 					setTaxQuery( newTaxQuery );
 				} }
 				query={ {
-					contentPostType: 'page',
+					contentPostType: postType,
 					taxQuery: updatedTaxQuery,
 					taxTermsAI: taxTermsAI || {},
 					isLoading,
@@ -276,13 +270,19 @@ const ClassifAIGenerateTagsButton = () => {
 			/>
 			<div className="classifai-modal__footer">
 				<div className="classifai-modal__notes">
-					{ __(
-						'Note that the lists above include any pre-existing terms from this post.',
-						'classifai'
+					{ sprintf(
+						(
+							/* translators: %s is post type label */
+							__(
+								'Note that the lists above include any pre-existing terms from this %s.',
+							'classifai'
+							)
+						),
+						postTypeLabel
 					) }
 					<br />
 					{ __(
-						'Al recommendations saved to this post will not include the "[AI]" text.',
+						'AI recommendations saved to this post will not include the "[AI]" text.',
 						'classifai'
 					) }
 				</div>
@@ -297,7 +297,7 @@ const ClassifAIGenerateTagsButton = () => {
 	);
 
 	return (
-		<div id="classify-post-componenet">
+		<div id="classify-post-component">
 			{ isOpen && (
 				<Modal
 					title={ __( 'Confirm Post Classification', 'classifai' ) }

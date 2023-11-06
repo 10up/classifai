@@ -226,6 +226,14 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			return accumulator;
 		}, [] );
 	};
+
+	const watsonTaxonomies = [
+		'watson-category',
+		'watson-concept',
+		'watson-entity',
+		'watson-keyword',
+	];
+
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
@@ -238,6 +246,12 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					// if none of the terms?.names has "[AI]" prefix, skip the iteration
 					let hasAI = false;
 					if ( query.taxTermsAI ) {
+
+						// Return if this is not a watson taxonomy
+						if ( ! watsonTaxonomies.includes( slug ) ) {
+							return null;
+						}
+
 						Object.keys( terms.mapById ).forEach( ( term ) => {
 							if (
 								terms.mapById[ term ].name.indexOf( '[AI]' ) !==
