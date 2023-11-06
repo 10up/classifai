@@ -113,8 +113,8 @@ class ExcerptGeneration extends Feature {
 				'generate_excerpt_prompt' => array(
 					array(
 						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'prompt'  => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+						'original' => 1,
 					),
 				)
 			],

@@ -104,7 +104,7 @@ class TitleGeneration extends Feature {
 			$this,
 			[
 				'id'                 => 'generate_title_prompt',
-				'prompt_placeholder' => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+				'prompt_placeholder' => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
 				'description'        => esc_html__( "Enter a custom prompt, if desired.", 'classifai' )
 			]
 		);
@@ -121,9 +121,9 @@ class TitleGeneration extends Feature {
 				'number_of_titles' => 1,
 				'generate_title_prompt' => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'title'   => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'  => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
+						'original' => 1,
 					),
 				)
 			],

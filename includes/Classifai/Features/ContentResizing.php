@@ -114,16 +114,16 @@ class ContentResizing extends Feature {
 				'number_of_suggestions' => 1,
 				'condense_text_prompt' => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
+						'title'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
 						'prompt'  => '',
-						'default' => 1,
+						'original' => 1,
 					),
 				),
 				'expand_text_prompt' => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
+						'title'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
 						'prompt'  => '',
-						'default' => 1,
+						'original' => 1,
 					),
 				),
 			],
