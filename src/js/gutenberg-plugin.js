@@ -70,11 +70,10 @@ const ClassifAIToggle = () => {
  */
 const ClassifAIGenerateTagsButton = () => {
 	const { select, dispatch } = wp.data;
-		const postId = select( 'core/editor' ).getCurrentPostId();
-		const postType = select( 'core/editor' ).getCurrentPostType();
-		const postTypeLabel =
-			select( 'core/editor' ).getPostTypeLabel() ||
-			__( 'Post', 'classifai' );
+	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postType = select( 'core/editor' ).getCurrentPostType();
+	const postTypeLabel =
+		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
 
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
@@ -267,12 +266,10 @@ const ClassifAIGenerateTagsButton = () => {
 			<div className="classifai-modal__footer">
 				<div className="classifai-modal__notes">
 					{ sprintf(
-						(
-							/* translators: %s is post type label */
-							__(
-								'Note that the lists above include any pre-existing terms from this %s.',
+						/* translators: %s is post type label */
+						__(
+							'Note that the lists above include any pre-existing terms from this %s.',
 							'classifai'
-							)
 						),
 						postTypeLabel
 					) }
@@ -334,40 +331,36 @@ const ClassifAIGenerateTagsButton = () => {
 					padding: '5px',
 				} }
 			></span>
-			<PrePubClassifyPost
-				popupOpened={ popupOpened }
-			>
+			<PrePubClassifyPost popupOpened={ popupOpened }>
 				{ ! resultReceived && (
 					<>
 						<Button
-							variant={'secondary'}
-							data-id={postId}
-							onClick={(e) => {
-								handleClick({
+							variant={ 'secondary' }
+							data-id={ postId }
+							onClick={ ( e ) => {
+								handleClick( {
 									button: e.target,
 									endpoint: '/classifai/v1/generate-tags/',
 									callback: buttonClickCallBack,
 									buttonText,
 									linkTerms: false,
-								});
+								} );
 							} }
 						>
-							{buttonText}
+							{ buttonText }
 						</Button>
 						<span
 							className="spinner classify"
-							style={{ float: 'none', display: 'none' }}
-						>
-						</span>
+							style={ { float: 'none', display: 'none' } }
+						></span>
 						<span
 							className="error"
-							style={{
+							style={ {
 								display: 'none',
 								color: '#bc0b0b',
 								padding: '5px',
-							}}
-						>
-						</span>
+							} }
+						></span>
 					</>
 				) }
 				{ resultReceived && modalData }

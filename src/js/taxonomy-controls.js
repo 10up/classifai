@@ -7,7 +7,10 @@
 import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import { getEntitiesInfo, useTaxonomies } from '../../includes/Classifai/Blocks/recommended-content-block/utils';
+import {
+	getEntitiesInfo,
+	useTaxonomies,
+} from '../../includes/Classifai/Blocks/recommended-content-block/utils';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -246,7 +249,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					// if none of the terms?.names has "[AI]" prefix, skip the iteration
 					let hasAI = false;
 					if ( query.taxTermsAI ) {
-
 						// Return if this is not a watson taxonomy
 						if ( ! watsonTaxonomies.includes( slug ) ) {
 							return null;
@@ -264,8 +266,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 					return (
 						<>
-							{
-								! hasAI &&
+							{ ! hasAI && (
 								<>
 									<p style={ { color: 'red' } } key={ slug }>
 										{ sprintf(
@@ -278,7 +279,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 										) }
 									</p>
 								</>
-							}
+							) }
 							<FormTokenField
 								key={ slug }
 								label={ name }
