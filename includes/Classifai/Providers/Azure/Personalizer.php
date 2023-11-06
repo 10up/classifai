@@ -12,6 +12,8 @@ use UAParser\Parser;
 
 class Personalizer extends Provider {
 
+	const ID = 'ms_azure_personalizer';
+
 	/**
 	 * @var string URL fragment to the Rank API endpoint
 	 */

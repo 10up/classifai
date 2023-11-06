@@ -2,6 +2,8 @@
 
 namespace Classifai\Features;
 
+use \Classifai\Providers\OpenAI\ChatGPT;
+
 class ExcerptGeneration extends Feature {
 	const ID = 'feature_excerpt_generation';
 
@@ -16,7 +18,7 @@ class ExcerptGeneration extends Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
-				\Classifai\Providers\OpenAI\ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
+				ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
 			]
 		);
 	}
@@ -27,7 +29,7 @@ class ExcerptGeneration extends Feature {
 		add_settings_section(
 			$this->get_option_name() . '_section',
 			esc_html__( 'Feature settings', 'classifai' ),
-			array( $this, 'render_section' ),
+			'__return_empty_string',
 			$this->get_option_name()
 		);
 
@@ -88,24 +90,40 @@ class ExcerptGeneration extends Feature {
 			]
 		);
 
-		$this->add_provider_settings_fields();
+		$chat_gpt = new ChatGPT( null );
+		$chat_gpt->add_api_key_field( $this );
+		$chat_gpt->add_prompt_field(
+			$this,
+			[
+				'id'                 => 'generate_excerpt_prompt',
+				'prompt_placeholder' => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+				'description'        => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' )
+			]
+		);
 	}
 
 	public function get_default_settings() {
 		return [
 			'status'   => '0',
 			'roles'    => $this->roles,
-			'provider' => \Classifai\Providers\OpenAI\ChatGPT::ID,
 			'length'   => absint( apply_filters( 'excerpt_length', 55 ) ),
+			'provider' => \Classifai\Providers\OpenAI\ChatGPT::ID,
+			ChatGPT::ID => [
+				'api_key' => '',
+				'generate_excerpt_prompt' => array(
+					array(
+						'title'   => esc_html__( 'Default', 'classifai' ),
+						'prompt'  => '',
+						'default' => 1,
+					),
+				)
+			],
 		];
-	}
-
-	public function render_section() {
-		return;
 	}
 
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
+		$chat_gpt     = new ChatGPT( null );
 
 		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
 			$new_settings['status'] = 'no';
@@ -122,13 +140,18 @@ class ExcerptGeneration extends Feature {
 		if ( isset( $settings['provider'] ) ) {
 			$new_settings['provider'] = sanitize_text_field( $settings['provider'] );
 		} else {
-			$new_settings['provider'] = \Classifai\Providers\OpenAI\ChatGPT::ID;
+			$new_settings['provider'] = ChatGPT::ID;
 		}
 
 		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
 			$new_settings['length'] = absint( $settings['length'] );
 		} else {
 			$new_settings['length'] = 55;
+		}
+
+		if ( isset( $settings[ ChatGPT::ID ] ) ) {
+			$new_settings[ ChatGPT::ID ]['api_key'] = $chat_gpt->sanitize_api_key( $settings );
+			$new_settings[ ChatGPT::ID ]['generate_excerpt_prompt'] = $chat_gpt->sanitize_prompts( 'generate_excerpt_prompt', $settings );
 		}
 
 		return $new_settings;

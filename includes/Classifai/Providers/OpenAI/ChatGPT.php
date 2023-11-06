@@ -88,75 +88,37 @@ class ChatGPT extends Provider {
 				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
 		);
-
-		add_action( 'classifai_feature_title_generation_add_provider_settings_fields', [ $this, 'add_feature_title_generation_fields' ] );
-		add_action( 'classifai_feature_excerpt_generation_add_provider_settings_fields', [ $this, 'add_feature_excerpt_generation_fields' ] );
-		add_action( 'classifai_feature_content_resizing_add_provider_settings_fields', [ $this, 'add_feature_content_resizing_fields' ] );
 	}
 
 	/**
-	 * Adds provider fields for the title generation feature.
+	 * Adds a prompt repeater field.
 	 */
-	public function add_feature_title_generation_fields( $feature_instance ) {
-		$default_settings = $this->get_default_settings();
+	public function add_prompt_field( $feature_instance, $args = [] ) {
+		$default_settings = $feature_instance->get_default_settings();
+		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
-			'api_key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $feature_instance, 'render_input' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
-
-		add_settings_field(
-			'number_titles',
-			esc_html__( 'Number of titles', 'classifai' ),
-			[ $feature_instance, 'render_select' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'number_titles',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number_titles'],
-				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
-
-		// Custom prompt for generating titles.
-		add_settings_field(
-			'generate_title_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
+			$args['id'],
+			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
 			[ $feature_instance, 'render_prompt_repeater_field' ],
 			$feature_instance->get_option_name(),
 			$feature_instance->get_option_name() . '_section',
 			[
-				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => $this->generate_title_prompt,
-				'default_value' => $default_settings['generate_title_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
+				'option_index'  => static::ID,
+				'label_for'     => $args['id'],
+				'placeholder'   => $args['prompt_placeholder'],
+				'default_value' => $default_settings[ $args['id'] ],
+				'description'   => $args['description'],
 			]
 		);
 	}
 
 	/**
-	 * Adds provider fields for the excerpt generation feature.
+	 * Adds an api key field.
 	 */
-	public function add_feature_excerpt_generation_fields( $feature_instance ) {
-		$default_settings = $this->get_default_settings();
+	public function add_api_key_field( $feature_instance ) {
+		$default_settings = $feature_instance->get_default_settings();
+		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
 			'api_key',
@@ -165,27 +127,10 @@ class ChatGPT extends Provider {
 			$feature_instance->get_option_name(),
 			$feature_instance->get_option_name() . '_section',
 			[
+				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
-
-		// Custom prompt for excerpt generation.
-		add_settings_field(
-			'generate_excerpt_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
-			[ $feature_instance, 'render_prompt_repeater_field' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => $this->generate_excerpt_prompt,
-				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 				'data_attr'     => [
 					'provider-scope' => [ static::ID ]
 				],
@@ -194,77 +139,50 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Adds provider fields for the content resizing feature.
+	 * Adds number of responses number field.
 	 */
-	public function add_feature_content_resizing_fields( $feature_instance ) {
-		$default_settings = $this->get_default_settings();
+	public function add_number_of_responses_field( $feature_instance, $args = [] ) {
+		$default_settings = $feature_instance->get_default_settings();
+		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
-			'api_key',
-			esc_html__( 'API Key', 'classifai' ),
+			$args['id'],
+			$args['label'],
 			[ $feature_instance, 'render_input' ],
 			$feature_instance->get_option_name(),
 			$feature_instance->get_option_name() . '_section',
 			[
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
-
-		add_settings_field(
-			'suggestion_count',
-			esc_html__( 'Number of suggestions', 'classifai' ),
-			[ $feature_instance, 'render_input' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'suggestion_count',
+				'option_index'  => static::ID,
+				'label_for'     => $args['id'],
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
-				'default_value' => $default_settings['suggestion_count'],
-				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+				'default_value' => $default_settings[ $args['id'] ],
+				'description'   => $args['description'],
 			]
 		);
+	}
 
-		add_settings_field(
-			'shrink_content_prompt',
-			esc_html__( 'Condense text prompt', 'classifai' ),
-			[ $feature_instance, 'render_prompt_repeater_field' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'shrink_content_prompt',
-				'placeholder'   => $this->shrink_content_prompt,
-				'default_value' => $default_settings['shrink_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
+	/**
+	 * Sanitisation callback for api key.
+	 */
+	public function sanitize_api_key( $settings ) {
+		if ( isset( $settings[ ChatGPT::ID ]['api_key'] ) ) {
+			return sanitize_text_field( $settings[ ChatGPT::ID ]['api_key'] );
+		}
 
-		// Custom prompt for growing content.
-		add_settings_field(
-			'grow_content_prompt',
-			esc_html__( 'Expand text prompt', 'classifai' ),
-			[ $feature_instance, 'render_prompt_repeater_field' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
-			[
-				'label_for'     => 'grow_content_prompt',
-				'placeholder'   => $this->grow_content_prompt,
-				'default_value' => $default_settings['grow_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
-				],
-			]
-		);
+		return '';
+	}
+
+	/**
+	 * Sanitisation callback for number of responses.
+	 */
+	public function sanitize_number_of_responses_field( $key, $settings ) {
+		if ( isset( $settings[ ChatGPT::ID ][ $key ] ) ) {
+			return absint( $settings[ ChatGPT::ID ][ $key ] );
+		}
+
+		return 1;
 	}
 
 	/**
@@ -546,93 +464,13 @@ class ChatGPT extends Provider {
 			$this->sanitize_api_key_settings( $new_settings, $settings )
 		);
 
-		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
-			$new_settings['enable_excerpt'] = 'no';
-		} else {
-			$new_settings['enable_excerpt'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
-			$new_settings['length'] = absint( $settings['length'] );
-		} else {
-			$new_settings['length'] = 55;
-		}
-
-		if ( isset( $settings['generate_excerpt_prompt'] ) && is_array( $settings['generate_excerpt_prompt'] ) ) {
-			$new_settings['generate_excerpt_prompt'] = $this->sanitize_prompts( $settings['generate_excerpt_prompt'] );
-		} else {
-			$new_settings['generate_excerpt_prompt'] = array();
-		}
-
-		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
-			$new_settings['enable_titles'] = 'no';
-		} else {
-			$new_settings['enable_titles'] = '1';
-		}
-
-		if ( isset( $settings['title_roles'] ) && is_array( $settings['title_roles'] ) ) {
-			$new_settings['title_roles'] = array_map( 'sanitize_text_field', $settings['title_roles'] );
-		} else {
-			$new_settings['title_roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['number_titles'] ) && is_numeric( $settings['number_titles'] ) && (int) $settings['number_titles'] >= 1 && (int) $settings['number_titles'] <= 10 ) {
-			$new_settings['number_titles'] = absint( $settings['number_titles'] );
-		} else {
-			$new_settings['number_titles'] = 1;
-		}
-
-		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
-			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
-		} else {
-			$new_settings['generate_title_prompt'] = array();
-		}
-
-		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
-			$new_settings['enable_resize_content'] = 'no';
-		} else {
-			$new_settings['enable_resize_content'] = '1';
-		}
-
-		if ( isset( $settings['resize_content_roles'] ) && is_array( $settings['resize_content_roles'] ) ) {
-			$new_settings['resize_content_roles'] = array_map( 'sanitize_text_field', $settings['resize_content_roles'] );
-		} else {
-			$new_settings['resize_content_roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['number_resize_content'] ) && is_numeric( $settings['number_resize_content'] ) && (int) $settings['number_resize_content'] >= 1 && (int) $settings['number_resize_content'] <= 10 ) {
-			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
-		} else {
-			$new_settings['number_resize_content'] = 1;
-		}
-
-		if ( isset( $settings['shrink_content_prompt'] ) && is_array( $settings['shrink_content_prompt'] ) ) {
-			$new_settings['shrink_content_prompt'] = $this->sanitize_prompts( $settings['shrink_content_prompt'] );
-		} else {
-			$new_settings['shrink_content_prompt'] = array();
-		}
-
-		if ( isset( $settings['grow_content_prompt'] ) && is_array( $settings['grow_content_prompt'] ) ) {
-			$new_settings['grow_content_prompt'] = $this->sanitize_prompts( $settings['grow_content_prompt'] );
-		} else {
-			$new_settings['grow_content_prompt'] = array();
-		}
-
 		return $new_settings;
 	}
 
 	/**
 	 * Resets settings for the provider.
 	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
+	public function reset_settings() {}
 
 	/**
 	 * Default settings for ChatGPT
@@ -1140,41 +978,48 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array Sanitized prompt data.
 	 */
-	public function sanitize_prompts( array $prompts ): array {
-		// Remove any prompts that don't have a title and prompt.
-		$prompts = array_filter(
-			$prompts,
-			function ( $prompt ) {
-				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
-			}
-		);
+	public function sanitize_prompts( $prompt_key = '', array $settings ): array {
+		if ( isset( $settings[ ChatGPT::ID ][ $prompt_key ] ) && is_array( $settings[ ChatGPT::ID ][ $prompt_key ] ) ) {
 
-		// Sanitize the prompts and make sure only one prompt is marked as default.
-		$has_default = false;
+			$prompts = $settings[ ChatGPT::ID ][ $prompt_key ];
 
-		$prompts = array_map(
-			function ( $prompt ) use ( &$has_default ) {
-				$default = $prompt['default'] && ! $has_default;
-
-				if ( $default ) {
-					$has_default = true;
+			// Remove any prompts that don't have a title and prompt.
+			$prompts = array_filter(
+				$prompts,
+				function ( $prompt ) {
+					return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
 				}
+			);
 
-				return array(
-					'title'   => sanitize_text_field( $prompt['title'] ),
-					'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
-					'default' => absint( $default ),
-				);
-			},
-			$prompts
-		);
+			// Sanitize the prompts and make sure only one prompt is marked as default.
+			$has_default = false;
 
-		// If there is no default, use the first prompt.
-		if ( false === $has_default && ! empty( $prompts ) ) {
-			$prompts[0]['default'] = 1;
+			$prompts = array_map(
+				function ( $prompt ) use ( &$has_default ) {
+					$default = $prompt['default'] && ! $has_default;
+
+					if ( $default ) {
+						$has_default = true;
+					}
+
+					return array(
+						'title'   => sanitize_text_field( $prompt['title'] ),
+						'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
+						'default' => absint( $default ),
+					);
+				},
+				$prompts
+			);
+
+			// If there is no default, use the first prompt.
+			if ( false === $has_default && ! empty( $prompts ) ) {
+				$prompts[0]['default'] = 1;
+			}
+
+			return $prompts;
 		}
 
-		return $prompts;
+		return array();
 	}
 
 	/**

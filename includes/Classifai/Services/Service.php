@@ -74,10 +74,16 @@ abstract class Service {
 
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
 
+		$provider_classes_with_id = [];
+
+		foreach ( $this->provider_classes as $provider_class ) {
+			$provider_classes_with_id[ $provider_class::ID ] = $provider_class;
+		}
+
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
 			foreach ( $this->features as $feature ) {
 				if ( class_exists( $feature ) ) {
-					$this->feature_classes[] = new $feature( $this->provider_classes );
+					$this->feature_classes[] = new $feature( $provider_classes_with_id );
 				}
 			}
 		}

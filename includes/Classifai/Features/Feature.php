@@ -7,13 +7,10 @@ abstract class Feature {
 
 	public $roles = [];
 
-	public $provider_instances;
-
 	public function __construct( $provider_instances = [] ) {
-		$default_settings         = $this->get_default_settings();
-		$this->roles              = get_editable_roles() ?? [];
-		$this->roles              = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
-		$this->provider_instances = $provider_instances;
+		$default_settings = $this->get_default_settings();
+		$this->roles      = get_editable_roles() ?? [];
+		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
 
 		/**
 		 * Filter the allowed WordPress roles for ChatGTP
@@ -53,10 +50,6 @@ abstract class Feature {
 
 	abstract public function sanitize_settings( $settings );
 
-	public function add_provider_settings_fields() {
-		do_action( 'classifai_' . static::ID . '_add_provider_settings_fields', $this );
-	}
-
 	public function get_option_name() {
 		return 'classifai_' . static::ID;
 	}
@@ -86,6 +79,13 @@ abstract class Feature {
 		}
 
 		return $data_attr_str;
+	}
+
+	/**
+	 * Resets settings for the provider.
+	 */
+	public function reset_settings() {
+		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
 
 	/**
