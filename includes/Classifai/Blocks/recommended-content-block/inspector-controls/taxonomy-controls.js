@@ -236,8 +236,8 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					}
 
 					// if none of the terms?.names has "[AI]" prefix, skip the iteration
+					let hasAI = false;
 					if ( query.taxTermsAI ) {
-						let hasAI = false;
 						Object.keys( terms.mapById ).forEach( ( term ) => {
 							if (
 								terms.mapById[ term ].name.indexOf( '[AI]' ) !==
@@ -246,24 +246,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								hasAI = true;
 							}
 						} );
-						if ( ! hasAI ) {
-							// return message in red color
-							return (
-								<>
-									<p style={ { color: 'red' } } key={ slug }>
-										{ sprintf(
-											/* translators: %s: taxonomy name */
-											__(
-												'ClassifAI had no new recommendation found for %s',
-												'classifai'
-											),
-											name
-										) }
-									</p>
-									<hr />
-								</>
-							);
-						}
 					}
 
 					return (
@@ -275,6 +257,21 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								suggestions={ terms.names }
 								onChange={ onTermsChange( slug ) }
 							/>
+							{
+								! hasAI &&
+								<>
+									<p style={ { color: 'red' } } key={ slug }>
+										{ sprintf(
+											/* translators: %s: taxonomy name */
+											__(
+												'ClassifAI had no new recommendation found for %s',
+												'classifai'
+											),
+											name
+										) }
+									</p>
+								</>
+							}
 							<hr />
 						</>
 					);
