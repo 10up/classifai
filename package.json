@@ -53,9 +53,11 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
+    "@10up/block-components": "^1.17.3",
     "@wordpress/components": "^25.11.0",
     "@wordpress/icons": "^9.26.0",
     "choices.js": "^10.2.0",
+    "lodash": "^4.17.21",
     "tippy.js": "^6.3.7"
   }
 }

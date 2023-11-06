@@ -59,6 +59,14 @@ class ExcerptGeneration extends Feature {
 				'label'       => __( 'Enable Excerpt Generation', 'classifai' ),
 				'value'       => $this->feature_settings->get_setting( 'status' ) ?: 'off',
 			],
+			'provider' => [
+				'type' => 'select',
+				'label' => __( 'Provider', 'classifai' ),
+				'options' => $this->get_providers(),
+				'description' => __( 'Select a provider for this feature.', 'classifai' ),
+				'value' => \Classifai\Providers\OpenAI\ChatGPT::ID,
+				'provider_settings' => $this->get_provider_settings(),
+			],
 			'roles'  => [
 				'type'        => 'multiselect',
 				'label'       => __( 'Roles', 'classifai' ),
@@ -72,13 +80,6 @@ class ExcerptGeneration extends Feature {
 				'options'     => $this->roles,
 				'description' => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
 				'value'       => (int) $this->feature_settings->get_setting( 'length' ) ?: (int) apply_filters( 'excerpt_length', 55 ),
-			],
-			'provider' => [
-				'type' => 'select',
-				'label' => __( 'Provider', 'classifai' ),
-				'options' => $this->get_providers(),
-				'description' => __( 'Select a provider for this feature.', 'classifai' ),
-				'value' => \Classifai\Providers\OpenAI\ChatGPT::ID,
 			]
 		];
 	}

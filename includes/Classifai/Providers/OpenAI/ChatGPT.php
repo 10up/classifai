@@ -98,6 +98,10 @@ class ChatGPT extends Provider {
 	public function get_settings_data() {
 		return [
 			\Classifai\Features\TitleGeneration::ID => [
+				'api_key' => [
+					'type'	=> 'text',
+					'label'  => __( 'API key', 'classifai' ),
+				],
 				'number_title' => [
 					'type'        => 'number',
 					'label'       => __( 'Number of titles', 'classifai' ),
@@ -108,7 +112,38 @@ class ChatGPT extends Provider {
 					'step' => 1,
 				],
 			],
+			\Classifai\Features\ExcerptGeneration::ID => [
+				'api_key' => [
+					'type'	=> 'text',
+					'label'  => __( 'API key', 'classifai' ),
+				],
+				'generate_excerpt_prompt' => [
+					'type' => 'repeater',
+					'label' => __( "Enter your custom prompt. If no custom prompt is entered, the default shown above will be used. Note the following variables that can be used in the prompt and will be replaced with content: {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+					'add_new_label' => __( 'Add new prompt', 'classifai' ),
+					'value' => $this->feature_settings->get_setting( 'generate_excerpt_prompt' ) ?: [],
+					'repeater_unit' => [
+						'title' => [
+							'type' => 'text',
+							'value' => '',
+							'label' => __( 'Prompt title', 'classifai'),
+							'description' => __( 'Short description of prompt to use for identification', 'classifai' ),
+						],
+						'prompt' => [
+							'type' => 'textarea',
+							'value' => '',
+							'label' => __( 'Prompt', 'classifai'),
+							'description' => __( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
+							'placeholder' => __( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+						],
+					],
+				]
+			],
 			\Classifai\Features\ContentResizing::ID => [
+				'api_key' => [
+					'type'	=> 'text',
+					'label'  => __( 'API key', 'classifai' ),
+				],
 				'number_resize_content' => [
 					'type'        => 'number',
 					'label'       => __( 'Number of suggestions', 'classifai' ),

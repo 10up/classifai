@@ -155,6 +155,7 @@ abstract class Service {
 			),
 			admin_url( 'tools.php' )
 		);
+		$context = get_admin_context();
 		?>
 		<div class="classifai-content">
 			<?php
@@ -173,15 +174,9 @@ abstract class Service {
 
 				<h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_title() ); ?></a>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $context->feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_title() ); ?></a>
 					<?php endforeach; ?>
 				</h2>
-
-				<!-- <h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
-					<?php endforeach; ?>
-				</h2> -->
 
 				<?php settings_errors(); ?>
 
@@ -189,8 +184,10 @@ abstract class Service {
 					<form method="post" action="options.php">
 						<div id="classifai-container-root"></div>
 					<?php
-						$context = get_admin_context();
-						settings_fields( self::SETTINGS_GROUP . '_' . $context->feature );
+
+						if ( $context->feature ) {
+							settings_fields( self::SETTINGS_GROUP . '_' . $context->feature );
+						}
 						// settings_fields( 'classifai_' . $active_tab );
 						// do_settings_sections( 'classifai_' . $active_tab );
 						submit_button();

@@ -49,12 +49,14 @@ abstract class Feature {
 
 		// We populate the $provider_settings array with the settings
 		// for each provider for the current feature.
-		foreach ( $provider_classes as $provider_class ) {
-			$provider_class->set_feature_instance( $this );
-			$provider_settings = $provider_class->get_settings_data();
-
-			if ( isset( $provider_settings[ $context->feature ] ) ) {
-				$this->provider_settings[ $provider_class::ID ] = $provider_settings[ $context->feature ];
+		if ( $context->feature ) {
+			foreach ( $provider_classes as $provider_class ) {
+				$provider_class->set_feature_instance( $this );
+				$provider_settings = $provider_class->get_settings_data();
+	
+				if ( isset( $provider_settings[ $context->feature ] ) ) {
+					$this->provider_settings[ $provider_class::ID ] = $provider_settings[ $context->feature ];
+				}
 			}
 		}
 
@@ -127,7 +129,7 @@ abstract class Feature {
 		$settings = [];
 
 		foreach ( $providers as $provider ) {
-			$provider_id = $provider['value'];
+			$provider_id = $provider['value']::ID;
 			$settings[ $provider_id ] = $this->provider_settings[ $provider_id ];
 		}
 

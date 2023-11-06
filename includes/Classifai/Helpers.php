@@ -784,14 +784,6 @@ function get_admin_context() {
 	$provider = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : '';
 	$feature  = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : '';
 
-	if ( 'classifai' !== $page ) {
-		return null;
-	}
-
-	if ( ! $tab ) {
-		return null;
-	}
-
 	$context           = new \stdClass();
 	$context->page     = $page;
 	$context->tab      = $tab;

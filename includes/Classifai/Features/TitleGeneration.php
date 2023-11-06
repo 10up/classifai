@@ -31,7 +31,7 @@ class TitleGeneration extends Feature {
 			[
 				[
 					'label' => __( 'OpenAI ChatGPT' ),
-					'value' => \Classifai\Providers\OpenAI\ChatGPT::ID,
+					'value' => \Classifai\Providers\OpenAI\ChatGPT::class,
 				],
 			]
 		);
@@ -59,13 +59,6 @@ class TitleGeneration extends Feature {
 				'label'       => __( 'Enable Title Generation', 'classifai' ),
 				'value'       => $this->feature_settings->get_setting( 'status' ) ?: 'off',
 			],
-			'roles'  => [
-				'type'        => 'multiselect',
-				'label'       => __( 'Roles', 'classifai' ),
-				'options'     => $this->roles,
-				'description' => __( 'Select the roles that can use this feature.', 'classifai' ),
-				'value'       => $this->feature_settings->get_setting( 'roles' ) ?: [],
-			],
 			'provider' => [
 				'type' => 'select',
 				'label' => __( 'Provider', 'classifai' ),
@@ -73,7 +66,14 @@ class TitleGeneration extends Feature {
 				'description' => __( 'Select a provider for this feature.', 'classifai' ),
 				'value' => \Classifai\Providers\OpenAI\ChatGPT::ID,
 				'provider_settings' => $this->get_provider_settings(),
-			]
+			],
+			'roles'  => [
+				'type'        => 'multiselect',
+				'label'       => __( 'Roles', 'classifai' ),
+				'options'     => $this->roles,
+				'description' => __( 'Select the roles that can use this feature.', 'classifai' ),
+				'value'       => $this->feature_settings->get_setting( 'roles' ) ?: [],
+			],
 		];
 	}
 }
