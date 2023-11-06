@@ -14,7 +14,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
-import TaxonomyControls from '../../includes/Classifai/Blocks/recommended-content-block/inspector-controls/taxonomy-controls';
+import TaxonomyControls from './taxonomy-controls';
 import PrePubClassifyPost from './gutenberg-plugins/pre-publish-classify-post';
 
 const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
