@@ -14,6 +14,8 @@ class DallE extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
+	const ID = 'openai_dalle';
+
 	/**
 	 * OpenAI DALL·E URL
 	 *

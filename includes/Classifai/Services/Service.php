@@ -30,6 +30,10 @@ abstract class Service {
 	 */
 	public $provider_classes;
 
+	public $features = [];
+
+	public $feature_classes = [];
+
 	/**
 	 * Service constructor.
 	 *
@@ -66,6 +70,16 @@ abstract class Service {
 				}
 			}
 			$this->register_providers();
+		}
+
+		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
+
+		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
+			foreach ( $this->features as $feature ) {
+				if ( class_exists( $feature ) ) {
+					$this->feature_classes[] = new $feature( $this->provider_classes );
+				}
+			}
 		}
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
@@ -116,6 +130,8 @@ abstract class Service {
 			),
 			admin_url( 'tools.php' )
 		);
+		$active_feature = $this->feature_classes ? $this->feature_classes[0]::ID : '';
+		$active_feature = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : $active_feature;
 		?>
 		<div class="classifai-content">
 			<?php
@@ -133,8 +149,8 @@ abstract class Service {
 				?>
 
 				<h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
+					<?php foreach ( $this->feature_classes as $feature_classes ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_classes::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_classes::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_classes->get_label() ); ?></a>
 					<?php endforeach; ?>
 				</h2>
 
@@ -143,8 +159,11 @@ abstract class Service {
 				<div class="classifai-nlu-sections">
 					<form method="post" action="options.php">
 					<?php
-						settings_fields( 'classifai_' . $active_tab );
-						do_settings_sections( 'classifai_' . $active_tab );
+						// settings_fields( 'classifai_' . $active_tab );
+						// do_settings_sections( 'classifai_' . $active_tab );
+
+						settings_fields( 'classifai_' . $active_feature );
+						do_settings_sections( 'classifai_' . $active_feature );
 						submit_button();
 					?>
 					</form>

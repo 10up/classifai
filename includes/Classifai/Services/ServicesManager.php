@@ -42,6 +42,8 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
+		add_filter( 'language_processing_features', [ $this, 'language_processing_features' ] );
+
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
 				$this->service_classes[ $key ] = new $service();
@@ -55,6 +57,14 @@ class ServicesManager {
 		$this->register_services();
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
+	}
+
+	public function language_processing_features() {
+		return [
+			'\Classifai\Features\TitleGeneration',
+			'\Classifai\Features\ExcerptGeneration',
+			'\Classifai\Features\ContentResizing',
+		];
 	}
 
 	/**

@@ -16,6 +16,8 @@ use function Classifai\get_asset_info;
 
 class TextToSpeech extends Provider {
 
+	const ID = 'ms_azure_text_to_speech';
+
 	/**
 	 * Name of the feature that is displayed to the end user.
 	 *

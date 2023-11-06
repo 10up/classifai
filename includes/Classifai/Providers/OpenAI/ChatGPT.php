@@ -14,6 +14,8 @@ class ChatGPT extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
+	const ID = 'openai_chatgpt';
+
 	/**
 	 * OpenAI ChatGPT URL
 	 *
@@ -85,6 +87,183 @@ class ChatGPT extends Provider {
 				'enable_titles'         => __( 'Title generation', 'classifai' ),
 				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
+		);
+
+		add_action( 'classifai_feature_title_generation_add_provider_settings_fields', [ $this, 'add_feature_title_generation_fields' ] );
+		add_action( 'classifai_feature_excerpt_generation_add_provider_settings_fields', [ $this, 'add_feature_excerpt_generation_fields' ] );
+		add_action( 'classifai_feature_content_resizing_add_provider_settings_fields', [ $this, 'add_feature_content_resizing_fields' ] );
+	}
+
+	/**
+	 * Adds provider fields for the title generation feature.
+	 */
+	public function add_feature_title_generation_fields( $feature_instance ) {
+		$default_settings = $this->get_default_settings();
+
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $feature_instance, 'render_input' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $default_settings['api_key'],
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+
+		add_settings_field(
+			'number_titles',
+			esc_html__( 'Number of titles', 'classifai' ),
+			[ $feature_instance, 'render_select' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'number_titles',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $default_settings['number_titles'],
+				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+
+		// Custom prompt for generating titles.
+		add_settings_field(
+			'generate_title_prompt',
+			esc_html__( 'Prompt', 'classifai' ),
+			[ $feature_instance, 'render_prompt_repeater_field' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'generate_title_prompt',
+				'placeholder'   => $this->generate_title_prompt,
+				'default_value' => $default_settings['generate_title_prompt'],
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+	}
+
+	/**
+	 * Adds provider fields for the excerpt generation feature.
+	 */
+	public function add_feature_excerpt_generation_fields( $feature_instance ) {
+		$default_settings = $this->get_default_settings();
+
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $feature_instance, 'render_input' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $default_settings['api_key'],
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+
+		// Custom prompt for excerpt generation.
+		add_settings_field(
+			'generate_excerpt_prompt',
+			esc_html__( 'Prompt', 'classifai' ),
+			[ $feature_instance, 'render_prompt_repeater_field' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'generate_excerpt_prompt',
+				'placeholder'   => $this->generate_excerpt_prompt,
+				'default_value' => $default_settings['generate_excerpt_prompt'],
+				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+	}
+
+	/**
+	 * Adds provider fields for the content resizing feature.
+	 */
+	public function add_feature_content_resizing_fields( $feature_instance ) {
+		$default_settings = $this->get_default_settings();
+
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $feature_instance, 'render_input' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $default_settings['api_key'],
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+
+		add_settings_field(
+			'suggestion_count',
+			esc_html__( 'Number of suggestions', 'classifai' ),
+			[ $feature_instance, 'render_input' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'suggestion_count',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $default_settings['suggestion_count'],
+				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'shrink_content_prompt',
+			esc_html__( 'Condense text prompt', 'classifai' ),
+			[ $feature_instance, 'render_prompt_repeater_field' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'shrink_content_prompt',
+				'placeholder'   => $this->shrink_content_prompt,
+				'default_value' => $default_settings['shrink_content_prompt'],
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
+		);
+
+		// Custom prompt for growing content.
+		add_settings_field(
+			'grow_content_prompt',
+			esc_html__( 'Expand text prompt', 'classifai' ),
+			[ $feature_instance, 'render_prompt_repeater_field' ],
+			$feature_instance->get_option_name(),
+			$feature_instance->get_option_name() . '_section',
+			[
+				'label_for'     => 'grow_content_prompt',
+				'placeholder'   => $this->grow_content_prompt,
+				'default_value' => $default_settings['grow_content_prompt'],
+				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ]
+				],
+			]
 		);
 	}
 
@@ -351,244 +530,7 @@ class ChatGPT extends Provider {
 	/**
 	 * Setup fields
 	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		// Add API fields.
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		// Add excerpt fields.
-		add_settings_section(
-			$this->get_option_name() . '_excerpt',
-			esc_html__( 'Excerpt settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-excerpt',
-			esc_html__( 'Generate excerpt', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'enable_excerpt',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_excerpt'],
-				'description'   => __( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' ),
-			]
-		);
-
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for ChatGTP
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'length',
-			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'length',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $default_settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for excerpt generation.
-		add_settings_field(
-			'generate_excerpt_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => $this->generate_excerpt_prompt,
-				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
-			]
-		);
-
-		// Add title fields.
-		add_settings_section(
-			$this->get_option_name() . '_title',
-			esc_html__( 'Title settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-titles',
-			esc_html__( 'Generate titles', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'enable_titles',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_titles'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'title-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'      => 'title_roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['title_roles'],
-				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'number-titles',
-			esc_html__( 'Number of titles', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'number_titles',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number_titles'],
-				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for generating titles.
-		add_settings_field(
-			'generate_title_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => $this->generate_title_prompt,
-				'default_value' => $default_settings['generate_title_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-			]
-		);
-
-		// Add content resizing fields.
-		add_settings_section(
-			$this->get_option_name() . '_resize_content_settings',
-			esc_html__( 'Content resizing settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-resize-content',
-			esc_html__( 'Enable content resizing', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'enable_resize_content',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
-			]
-		);
-
-		$content_resize_roles = $roles;
-
-		unset( $content_resize_roles['contributor'], $content_resize_roles['subscriber'] );
-
-		add_settings_field(
-			'resize-content-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'      => 'resize_content_roles',
-				'options'        => $content_resize_roles,
-				'default_values' => $default_settings['resize_content_roles'],
-				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'number-resize-content',
-			esc_html__( 'Number of suggestions', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'number_resize_content',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number_resize_content'],
-				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for shrinking content.
-		add_settings_field(
-			'shrink_content_prompt',
-			esc_html__( 'Condense text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'shrink_content_prompt',
-				'placeholder'   => $this->shrink_content_prompt,
-				'default_value' => $default_settings['shrink_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for growing content.
-		add_settings_field(
-			'grow_content_prompt',
-			esc_html__( 'Expand text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'grow_content_prompt',
-				'placeholder'   => $this->grow_content_prompt,
-				'default_value' => $default_settings['grow_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
-			]
-		);
-	}
+	public function setup_fields_sections() {}
 
 	/**
 	 * Sanitization for the options being saved.
@@ -730,7 +672,7 @@ class ChatGPT extends Provider {
 			),
 			'enable_resize_content'   => false,
 			'resize_content_roles'    => array_keys( $editable_roles ),
-			'number_resize_content'   => 1,
+			'suggestion_count'        => 1,
 			'shrink_content_prompt'   => array(
 				array(
 					'title'   => esc_html__( 'Default', 'classifai' ),

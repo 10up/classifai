@@ -18,6 +18,8 @@ use function Classifai\clean_input;
 
 class ComputerVision extends Provider {
 
+	const ID = 'ms_computer_vision';
+
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
