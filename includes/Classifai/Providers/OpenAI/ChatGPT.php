@@ -436,7 +436,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->generate_excerpt_prompt,
 				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => __( 'Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item\'s title.', 'classifai' ),
 			]
 		);
 
