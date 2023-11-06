@@ -26,11 +26,6 @@ class LanguageProcessing extends Service {
 				// 'Classifai\Providers\OpenAI\Embeddings',
 				// 'Classifai\Providers\OpenAI\Whisper',
 				// 'Classifai\Providers\Azure\TextToSpeech',
-			],
-			[
-				'Classifai\Features\TitleGeneration',
-				'Classifai\Features\ExcerptGeneration',
-				'Classifai\Features\ContentResizing',
 			]
 		);
 	}

@@ -101,6 +101,7 @@ class ChatGPT extends Provider {
 				'api_key' => [
 					'type'	=> 'text',
 					'label'  => __( 'API key', 'classifai' ),
+					'value'  => (int) $this->feature_settings->get_setting( 'api_key' ) ?: '',
 				],
 				'number_title' => [
 					'type'        => 'number',
@@ -116,6 +117,7 @@ class ChatGPT extends Provider {
 				'api_key' => [
 					'type'	=> 'text',
 					'label'  => __( 'API key', 'classifai' ),
+					'value'  => (int) $this->feature_settings->get_setting( 'api_key' ) ?: ''
 				],
 				'generate_excerpt_prompt' => [
 					'type' => 'repeater',
@@ -143,6 +145,7 @@ class ChatGPT extends Provider {
 				'api_key' => [
 					'type'	=> 'text',
 					'label'  => __( 'API key', 'classifai' ),
+					'value'  => (int) $this->feature_settings->get_setting( 'api_key' ) ?: ''
 				],
 				'number_resize_content' => [
 					'type'        => 'number',

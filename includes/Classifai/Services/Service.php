@@ -51,11 +51,10 @@ abstract class Service {
 	 * @param string $menu_slug    Slug for the settings page.
 	 * @param array  $providers    Array of provider classes for this service
 	 */
-	public function __construct( $display_name, $menu_slug, $providers, $features ) {
+	public function __construct( $display_name, $menu_slug, $providers ) {
 		$this->menu_slug    = $menu_slug;
 		$this->display_name = $display_name;
 		$this->providers    = $providers;
-		$this->features     = $features;
 	}
 
 	/**

@@ -42,6 +42,8 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
+		add_filter( 'language_processing_features', [ $this, 'add_language_processing_features' ] );
+
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
 				$this->service_classes[ $key ] = new $service();
@@ -85,6 +87,19 @@ class ServicesManager {
 		);
 
 		wp_localize_script( 'classifai-react-admin', 'classifaiReactAdmin', $data );
+	}
+
+	/**
+	 * Adds features under the language processing service.
+	 *
+	 * @param array $features List of feature classes.
+	 */
+	public function add_language_processing_features( $features ) {
+		return [
+			'Classifai\Features\TitleGeneration',
+			'Classifai\Features\ExcerptGeneration',
+			'Classifai\Features\ContentResizing',
+		];
 	}
 
 	/**
