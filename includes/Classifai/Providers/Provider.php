@@ -255,27 +255,81 @@ abstract class Provider {
 	}
 
 	/**
-	 * Generic textarea field callback
+	 * Generic prompt repeater field callback
+	 *
+	 * @since 2.4.0
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_textarea( $args ) {
-		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
-		$setting_index = $this->get_settings( $option_index );
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-		$class         = isset( $args['class'] ) ? $args['class'] : 'large-text';
-		$placeholder   = isset( $args['placeholder'] ) ? $args['placeholder'] : '';
+	public function render_prompt_repeater_field( array $args ): void {
+		$option_index      = $args['option_index'] ?? false;
+		$setting_index     = $this->get_settings( $option_index );
+		$value             = $setting_index[ $args['label_for'] ] ?? '';
+		$class             = $args['class'] ?? 'large-text';
+		$placeholder       = $args['placeholder'] ?? '';
+		$field_name_prefix = sprintf(
+			'classifai_%1$s%2$s[%3$s]',
+			$this->option_name,
+			$option_index ? "[$option_index]" : '',
+			$args['label_for']
+		);
 
-		// Check for a default value
 		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+
+		$prompt_count = count( $value );
+		$field_index  = 0;
 		?>
-		<textarea
-			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			class="<?php echo esc_attr( $class ); ?>"
-			rows="4"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
-			placeholder="<?php echo esc_attr( $placeholder ); ?>"
-		><?php echo esc_textarea( $value ); ?></textarea>
+
+		<?php foreach ( $value as $prompt ) : ?>
+			<?php $is_default_prompt = 1 === $prompt['default']; ?>
+
+			<fieldset class="classifai-field-type-prompt-setting">
+				<input type="hidden"
+					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
+					value="<?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
+					class="js-setting-field__default">
+				<label>
+					<?php esc_html_e( 'Title', 'classifai' ); ?>&nbsp;*
+					<span class="dashicons dashicons-editor-help"
+						title="<?php esc_attr_e( 'Short description of prompt to use for identification', 'classifai' ); ?>"></span>
+					<input type="text"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
+						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
+						value="<?php echo esc_attr( $prompt['title'] ?? '' ); ?>"
+						required>
+				</label>
+
+				<label>
+					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
+					<textarea
+						class="<?php echo esc_attr( $class ); ?>"
+						rows="4"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
+						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+					><?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?></textarea>
+				</label>
+
+				<div class="actions-rows">
+					<a href="#" class="action__set_default <?php echo $is_default_prompt ? 'selected' : ''; ?>">
+						<?php if ( $is_default_prompt ) : ?>
+							<?php esc_html_e( 'Default Prompt', 'classifai' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>
+						<?php endif; ?>
+					</a>
+					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count ? 'display:none;' : ''; ?>">
+						<?php esc_html_e( 'Trash', 'classifai' ); ?>
+					</a>
+				</div>
+			</fieldset>
+			<?php ++$field_index; ?>
+		<?php endforeach; ?>
+
+		<button
+			class="button-secondary js-classifai-add-prompt-fieldset">
+			<?php esc_html_e( 'Add new prompt', 'classifai' ); ?>
+		</button>
+
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
