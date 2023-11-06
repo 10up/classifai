@@ -250,13 +250,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 					return (
 						<>
-							<FormTokenField
-								key={ slug }
-								label={ name }
-								value={ getExistingTaxQueryValue( slug ) }
-								suggestions={ terms.names }
-								onChange={ onTermsChange( slug ) }
-							/>
 							{
 								! hasAI &&
 								<>
@@ -272,6 +265,13 @@ const TaxonomyControls = ( { onChange, query } ) => {
 									</p>
 								</>
 							}
+							<FormTokenField
+								key={ slug }
+								label={ name }
+								value={ getExistingTaxQueryValue( slug ) }
+								suggestions={ terms.names }
+								onChange={ onTermsChange( slug ) }
+							/>
 							<hr />
 						</>
 					);
