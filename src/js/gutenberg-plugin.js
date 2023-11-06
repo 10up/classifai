@@ -105,7 +105,6 @@ const ClassifAIGenerateTagsButton = () => {
 			const taxTermsExisting = {};
 
 			// get current terms of the post
-			const { select } = wp.data;
 			const currentTerms = select( 'core' ).getEntityRecord(
 				'postType',
 				postType,
