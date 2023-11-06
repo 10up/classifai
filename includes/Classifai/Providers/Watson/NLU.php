@@ -241,7 +241,7 @@ class NLU extends Provider {
 			'classifai-language-processing-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
 			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			get_asset_info( 'language-processing', 'version' ),
 			'all'
 		);
 	}
