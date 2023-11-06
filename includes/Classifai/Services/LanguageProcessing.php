@@ -6,6 +6,8 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Features\TitleGeneration;
+
 use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -515,11 +517,10 @@ class LanguageProcessing extends Service {
 		$provider = '';
 
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$title_generation = new TitleGeneration();
+		$feature_settings = $title_generation->get_settings();
+		$provider_id      = $feature_settings['provider'];
+		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( ! $provider ) {
@@ -550,9 +551,11 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
-		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+		$post_id          = $request->get_param( 'id' );
+		$title_generation = new TitleGeneration();
+		$settings         = $title_generation->get_settings();
+		$provider_id      = $settings['provider'];
+		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -568,7 +571,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ $provider_id ]['authenticated'] ) && false === $settings[ $provider_id ]['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 

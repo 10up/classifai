@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
 use WP_Error;
@@ -708,24 +709,25 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
+		$feature  = new TitleGeneration();
+		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings['number_titles'] ?? 1,
+				'num'     => $settings[ static::ID ]['number_titles'] ?? 1,
 				'content' => '',
 			]
 		);
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
 
-		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'] ) ?? $this->generate_title_prompt );
+		$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_title_prompt'] ) ?? $this->generate_title_prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.

@@ -7,7 +7,7 @@ abstract class Feature {
 
 	public $roles = [];
 
-	public function __construct( $provider_instances = [] ) {
+	public function __construct() {
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
@@ -49,6 +49,10 @@ abstract class Feature {
 	abstract public function get_providers();
 
 	abstract public function sanitize_settings( $settings );
+
+	public function is_feature_enabled() {
+		
+	}
 
 	public function get_option_name() {
 		return 'classifai_' . static::ID;

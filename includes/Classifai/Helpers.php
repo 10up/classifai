@@ -701,11 +701,11 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
  * @param string $service_name Service name to look for.
  * @return Provider|WP_Error
  */
-function find_provider_class( array $provider_classes = [], string $service_name = '' ) {
+function find_provider_class( array $provider_classes = [], string $provider_id = '' ) {
 	$provider = '';
 
 	foreach ( $provider_classes as $provider_class ) {
-		if ( $service_name === $provider_class->provider_service_name ) {
+		if ( $provider_id === $provider_class::ID ) {
 			$provider = $provider_class;
 		}
 	}
