@@ -83,6 +83,7 @@ const ClassifAIGenerateTagsButton = () => {
 	);
 
 	const [ isLoading, setLoading ] = useState( false );
+	const [ resultReceived, setResultReceived ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
 	const [ popupOpened, setPopupOpened ] = useState( false );
 	const openModal = () => setOpen( true );
@@ -90,12 +91,6 @@ const ClassifAIGenerateTagsButton = () => {
 
 	const [ taxQuery, setTaxQuery ] = useState( [] );
 	let [ taxTermsAI, setTaxTermsAI ] = useState( [] );
-
-	const triggerCallRef = useRef( null );
-	const triggerCallClick = () => {
-		triggerCallRef?.current?.click();
-		setLoading( true );
-	};
 
 	/**
 	 * Callback function to handle API response.
@@ -179,6 +174,7 @@ const ClassifAIGenerateTagsButton = () => {
 			setPopupOpened( true );
 		}
 		setLoading( false );
+		setResultReceived( true );
 	};
 
 	/**
@@ -338,34 +334,43 @@ const ClassifAIGenerateTagsButton = () => {
 					padding: '5px',
 				} }
 			></span>
-			<Button
-				variant={ 'secondary' }
-				data-id={ postId }
-				ref={ triggerCallRef }
-				style={ { display: 'none' } }
-				onClick={ ( e ) => {
-					handleClick( {
-						button: e.target,
-						endpoint: '/classifai/v1/generate-tags/',
-						callback: buttonClickCallBack,
-						buttonText,
-						linkTerms: false,
-					} );
-				} }
-			>
-				{ buttonText }
-			</Button>
 			<PrePubClassifyPost
-				callback={ triggerCallClick }
 				popupOpened={ popupOpened }
 			>
-				{ isLoading && (
-					<span
-						className="spinner classify is-active"
-						style={ { float: 'none' } }
-					></span>
+				{ ! resultReceived && (
+					<>
+						<Button
+							variant={'secondary'}
+							data-id={postId}
+							onClick={(e) => {
+								handleClick({
+									button: e.target,
+									endpoint: '/classifai/v1/generate-tags/',
+									callback: buttonClickCallBack,
+									buttonText,
+									linkTerms: false,
+								});
+							} }
+						>
+							{buttonText}
+						</Button>
+						<span
+							className="spinner classify"
+							style={{ float: 'none', display: 'none' }}
+						>
+						</span>
+						<span
+							className="error"
+							style={{
+								display: 'none',
+								color: '#bc0b0b',
+								padding: '5px',
+							}}
+						>
+						</span>
+					</>
 				) }
-				{ modalData }
+				{ resultReceived && modalData }
 			</PrePubClassifyPost>
 		</div>
 	);

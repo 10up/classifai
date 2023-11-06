@@ -30,17 +30,11 @@ const PrePubPanel = ( { children } ) => {
 };
 
 class PrePubClassifyPost extends Component {
-	componentDidUpdate( prevProps ) {
-		// Update our state when the publish panel opens.
-		if (
-			this.props.isPublishPanelOpen &&
-			! this.props.popupOpened &&
-			prevProps.isPublishPanelOpen !== this.props.isPublishPanelOpen
-		) {
-			this.props.callback();
-		}
-	}
-
+	/**
+	 * Render the component.
+	 *
+	 * @return {WPElement} Element to render.
+	 */
 	render() {
 		// retun null if popupOpened is true
 		if ( this.props.popupOpened ) {
