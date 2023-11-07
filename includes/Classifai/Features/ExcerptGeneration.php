@@ -90,10 +90,9 @@ class ExcerptGeneration extends Feature {
 			]
 		);
 
-		$chat_gpt = new ChatGPT( null );
-		$chat_gpt->add_api_key_field( $this );
+		$chat_gpt = new ChatGPT( $this );
+		$chat_gpt->add_api_key_field();
 		$chat_gpt->add_prompt_field(
-			$this,
 			[
 				'id'                 => 'generate_excerpt_prompt',
 				'prompt_placeholder' => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
@@ -148,7 +147,7 @@ class ExcerptGeneration extends Feature {
 
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-		$chat_gpt     = new ChatGPT( null );
+		$chat_gpt     = new ChatGPT( $this );
 
 		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
 			$new_settings['status'] = 'no';

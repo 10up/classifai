@@ -74,10 +74,9 @@ class ContentResizing extends Feature {
 			]
 		);
 
-		$chat_gpt = new ChatGPT( null );
-		$chat_gpt->add_api_key_field( $this );
+		$chat_gpt = new ChatGPT( $this );
+		$chat_gpt->add_api_key_field();
 		$chat_gpt->add_number_of_responses_field(
-			$this,
 			[
 				'id'          => 'number_of_suggestions',
 				'label'       => esc_html__( 'Number of suggestions', 'classifai' ),
@@ -85,7 +84,6 @@ class ContentResizing extends Feature {
 			]
 		);
 		$chat_gpt->add_prompt_field(
-			$this,
 			[
 				'id'                 => 'condense_text_prompt',
 				'label'              => esc_html__( 'Condense text prompt', 'classifai' ),
@@ -94,7 +92,6 @@ class ContentResizing extends Feature {
 			]
 		);
 		$chat_gpt->add_prompt_field(
-			$this,
 			[
 				'id'                 => 'expand_text_prompt',
 				'label'              => esc_html__( 'Expand text prompt'),
@@ -161,7 +158,7 @@ class ContentResizing extends Feature {
 
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-		$chat_gpt     = new ChatGPT( null );
+		$chat_gpt     = new ChatGPT( $this );
 
 		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
 			$new_settings['status'] = 'no';

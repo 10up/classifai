@@ -41,13 +41,11 @@ abstract class Provider {
 	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
 	 * @param string $provider_service_name The name of the Service.
 	 * @param string $option_name           Name of the option where the provider settings are stored.
-	 * @param string $service               What service does this provider belong to.
 	 */
-	public function __construct( $provider_name, $provider_service_name, $option_name, $service ) {
+	public function __construct( $provider_name, $provider_service_name, $option_name ) {
 		$this->provider_name         = $provider_name;
 		$this->provider_service_name = $provider_service_name;
 		$this->option_name           = $option_name;
-		$this->service               = $service;
 		$this->onboarding_options    = array();
 	}
 

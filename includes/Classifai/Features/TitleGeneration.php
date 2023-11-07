@@ -90,10 +90,9 @@ class TitleGeneration extends Feature {
 			]
 		);
 
-		$chat_gpt = new ChatGPT( null );
-		$chat_gpt->add_api_key_field( $this );
+		$chat_gpt = new ChatGPT( $this );
+		$chat_gpt->add_api_key_field();
 		$chat_gpt->add_number_of_responses_field(
-			$this,
 			[
 				'id'          => 'number_of_titles',
 				'label'       => esc_html__( 'Number of titles', 'classifai' ),
@@ -101,7 +100,6 @@ class TitleGeneration extends Feature {
 			]
 		);
 		$chat_gpt->add_prompt_field(
-			$this,
 			[
 				'id'                 => 'generate_title_prompt',
 				'prompt_placeholder' => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
@@ -157,7 +155,7 @@ class TitleGeneration extends Feature {
 
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-		$chat_gpt     = new ChatGPT( null );
+		$chat_gpt     = new ChatGPT( $this );
 
 		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
 			$new_settings['status'] = 'no';

@@ -69,16 +69,22 @@ class ChatGPT extends Provider {
 	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
+	 * Feature instance.
+	 *
+	 * @var \Classifai\Features\Feature
+	 */
+	protected $feature_instance = null;
+
+	/**
 	 * OpenAI ChatGPT constructor.
 	 *
 	 * @param string $service The service this class belongs to.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance ) {
 		parent::__construct(
 			'OpenAI ChatGPT',
 			'ChatGPT',
-			'openai_chatgpt',
-			$service
+			'openai_chatgpt'
 		);
 
 		// Set the onboarding options.
@@ -91,21 +97,23 @@ class ChatGPT extends Provider {
 				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
 		);
+
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
 	 * Adds a prompt repeater field.
 	 */
-	public function add_prompt_field( $feature_instance, $args = [] ) {
-		$default_settings = $feature_instance->get_default_settings();
+	public function add_prompt_field( $args = [] ) {
+		$default_settings = $this->feature_instance->get_default_settings();
 		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
 			$args['id'],
 			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
-			[ $feature_instance, 'render_prompt_repeater_field' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
+			[ $this->feature_instance, 'render_prompt_repeater_field' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
 				'label_for'     => $args['id'],
@@ -119,16 +127,16 @@ class ChatGPT extends Provider {
 	/**
 	 * Adds an api key field.
 	 */
-	public function add_api_key_field( $feature_instance ) {
-		$default_settings = $feature_instance->get_default_settings();
+	public function add_api_key_field() {
+		$default_settings = $this->feature_instance->get_default_settings();
 		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
 			'api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $feature_instance, 'render_input' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
@@ -144,16 +152,16 @@ class ChatGPT extends Provider {
 	/**
 	 * Adds number of responses number field.
 	 */
-	public function add_number_of_responses_field( $feature_instance, $args = [] ) {
-		$default_settings = $feature_instance->get_default_settings();
+	public function add_number_of_responses_field( $args = [] ) {
+		$default_settings = $this->feature_instance->get_default_settings();
 		$default_settings = $default_settings[ static::ID ];
 
 		add_settings_field(
 			$args['id'],
 			$args['label'],
-			[ $feature_instance, 'render_input' ],
-			$feature_instance->get_option_name(),
-			$feature_instance->get_option_name() . '_section',
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
 				'label_for'     => $args['id'],
