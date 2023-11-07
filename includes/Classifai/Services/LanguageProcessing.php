@@ -6,6 +6,8 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\ContentResizing;
 use Classifai\Features\TitleGeneration;
 
 use function Classifai\find_provider_class;
@@ -314,8 +316,10 @@ class LanguageProcessing extends Service {
 		$content = $request->get_param( 'content' );
 		$title   = $request->get_param( 'title' );
 
-		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$feature          = new ExcerptGeneration();
+		$feature_settings = $feature->get_settings();
+		$provider_id      = $feature_settings['provider'];
+		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {
@@ -346,9 +350,11 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
-		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+		$post_id     = $request->get_param( 'id' );
+		$feature     = new ExcerptGeneration();
+		$settings    = $feature->get_settings();
+		$provider_id = $settings['provider'];
+		$provider    = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {
@@ -369,12 +375,12 @@ class LanguageProcessing extends Service {
 		}
 
 		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ $provider_id ]['authenticated'] ) && false === $settings[ $provider_id ]['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_excerpt' ) ) {
+		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -517,8 +523,8 @@ class LanguageProcessing extends Service {
 		$provider = '';
 
 		// Find the right provider class.
-		$title_generation = new TitleGeneration();
-		$feature_settings = $title_generation->get_settings();
+		$feature          = new TitleGeneration();
+		$feature_settings = $feature->get_settings();
 		$provider_id      = $feature_settings['provider'];
 		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
@@ -551,11 +557,10 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
-		$post_id          = $request->get_param( 'id' );
-		$title_generation = new TitleGeneration();
-		$settings         = $title_generation->get_settings();
-		$provider_id      = $settings['provider'];
-		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
+		$post_id     = $request->get_param( 'id' );
+		$feature     = new TitleGeneration();
+		$settings    = $feature->get_settings();
+		$provider_id = $settings['provider'];
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -576,8 +581,8 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_titles' ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
@@ -594,11 +599,10 @@ class LanguageProcessing extends Service {
 		$provider = '';
 
 		// Find the right provider class.
-		foreach ( $this->provider_classes as $provider_class ) {
-			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
-				$provider = $provider_class;
-			}
-		}
+		$feature          = new ContentResizing();
+		$feature_settings = $feature->get_settings();
+		$provider_id      = $feature_settings['provider'];
+		$provider         = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( ! $provider ) {
@@ -624,7 +628,10 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function resize_content_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id     = $request->get_param( 'id' );
+		$feature     = new ContentResizing();
+		$settings    = $feature->get_settings();
+		$provider_id = $settings['provider'];
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -639,20 +646,18 @@ class LanguageProcessing extends Service {
 			return false;
 		}
 
-		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
-
 		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ $provider_id ]['authenticated'] ) && false === $settings[ $provider_id ]['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
 		// Check if resize content feature is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_resize_content'] ) && 'no' === $settings['enable_resize_content'] ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ $provider_id ]['status'] ) && 'no' === $settings[ $provider_id ]['status'] ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
 		}
 
 		// Check if the current user's role is allowed.
-		$roles      = $settings['resize_content_roles'] ?? [];
+		$roles      = $settings[ $provider_id ]['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {

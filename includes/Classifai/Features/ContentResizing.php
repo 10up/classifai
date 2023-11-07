@@ -104,6 +104,31 @@ class ContentResizing extends Feature {
 		);
 	}
 
+	public function is_feature_enabled() {
+		$access        = false;
+		$settings      = $this->get_settings();
+		$user_roles    = wp_get_current_user()->roles ?? [];
+		$feature_roles = $settings['roles' ] ?? [];
+
+		// Check if user has access to the feature and the feature is turned on.
+		if ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) ) {
+			$access = true;
+		}
+
+		/**
+		 * Filter to override permission to the generate title feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_chatgpt_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
+	}
+
 	public function get_default_settings() {
 		return [
 			'status'   => '0',

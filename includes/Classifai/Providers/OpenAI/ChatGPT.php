@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Features\ContentResizing;
+use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
@@ -184,50 +186,6 @@ class ChatGPT extends Provider {
 		}
 
 		return 1;
-	}
-
-	/**
-	 * Determine if the current user can access the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature = '' ) {
-		$access        = false;
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$feature_roles = [];
-
-		$role_keys = [
-			'enable_excerpt'        => 'roles',
-			'enable_titles'         => 'title_roles',
-			'enable_resize_content' => 'resize_content_roles',
-		];
-
-		if ( isset( $role_keys[ $feature ] ) ) {
-			$feature_roles = $settings[ $role_keys[ $feature ] ] ?? [];
-		}
-
-		// Check if user has access to the feature and the feature is turned on.
-		if (
-			( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) )
-			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a ChatGPT generate feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_openai_chatgpt_{$feature}", $access, $settings );
 	}
 
 	/**
@@ -604,6 +562,9 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
+		$feature  = new ExcerptGeneration();
+		$settings = $feature->get_settings();
+
 		$settings = $this->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
@@ -615,15 +576,15 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'enable_excerpt' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
+		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -721,7 +682,7 @@ class ChatGPT extends Provider {
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -816,20 +777,22 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num' => $settings['number_resize_content'] ?? 1,
+				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 			]
 		);
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
 		} else {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'] ) ?? $this->grow_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['grow_content_prompt'] ) ?? $this->grow_content_prompt );
 		}
 
 		/**

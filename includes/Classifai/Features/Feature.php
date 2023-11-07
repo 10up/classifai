@@ -50,9 +50,7 @@ abstract class Feature {
 
 	abstract public function sanitize_settings( $settings );
 
-	public function is_feature_enabled() {
-		
-	}
+	abstract public function is_feature_enabled();
 
 	public function get_option_name() {
 		return 'classifai_' . static::ID;
