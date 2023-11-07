@@ -71,7 +71,7 @@ class ChatGPT extends Provider {
 	/**
 	 * OpenAI ChatGPT constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance ) {
 		parent::__construct(
@@ -96,6 +96,11 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Adds a prompt repeater field.
+	 * The prompt fields allow users to add their own prompts for ChatGPT.
+	 *
+	 * This is an optional field and depends on the feature.
+	 *
+	 * @param array $args Arguments passed in.
 	 */
 	public function add_prompt_field( $args = [] ) {
 		$default_settings = $this->feature_instance->get_default_settings();
@@ -119,6 +124,9 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Adds an api key field.
+	 *
+	 * ChatGPT requires an API key to be set.
+	 * Any feature that supports ChatGPT will require this key to be set.
 	 */
 	public function add_api_key_field() {
 		$default_settings = $this->feature_instance->get_default_settings();
@@ -136,7 +144,7 @@ class ChatGPT extends Provider {
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
 				'data_attr'     => [
-					'provider-scope' => [ static::ID ]
+					'provider-scope' => [ static::ID ],
 				],
 			]
 		);
@@ -144,6 +152,13 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Adds number of responses number field.
+	 * ChatGPT is capable of returning variable number of responses.
+	 *
+	 * This field is helpful to set the number of responses to be returned.
+	 *
+	 * This is an optional field and depends on the feature.
+	 *
+	 * @param array $args Arguments passed in.
 	 */
 	public function add_number_of_responses_field( $args = [] ) {
 		$default_settings = $this->feature_instance->get_default_settings();
@@ -169,10 +184,14 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Sanitisation callback for api key.
+	 *
+	 * @param array $settings The settings array.
+	 *
+	 * @return string
 	 */
 	public function sanitize_api_key( $settings ) {
-		if ( isset( $settings[ ChatGPT::ID ]['api_key'] ) ) {
-			return sanitize_text_field( $settings[ ChatGPT::ID ]['api_key'] );
+		if ( isset( $settings[ self::ID ]['api_key'] ) ) {
+			return sanitize_text_field( $settings[ self::ID ]['api_key'] );
 		}
 
 		return '';
@@ -180,10 +199,15 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Sanitisation callback for number of responses.
+	 *
+	 * @param string $key The key of the value we are sanitizing.
+	 * @param array  $settings The settings array.
+	 *
+	 * @return integer
 	 */
 	public function sanitize_number_of_responses_field( $key, $settings ) {
-		if ( isset( $settings[ ChatGPT::ID ][ $key ] ) ) {
-			return absint( $settings[ ChatGPT::ID ][ $key ] );
+		if ( isset( $settings[ self::ID ][ $key ] ) ) {
+			return absint( $settings[ self::ID ][ $key ] );
 		}
 
 		return 1;
@@ -471,14 +495,14 @@ class ChatGPT extends Provider {
 			'enable_resize_content'   => false,
 			'resize_content_roles'    => array_keys( $editable_roles ),
 			'suggestion_count'        => 1,
-			'condense_text_prompt'   => array(
+			'condense_text_prompt'    => array(
 				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->condense_text_prompt,
 					'original' => 1,
 				),
 			),
-			'expand_text_prompt'     => array(
+			'expand_text_prompt'      => array(
 				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->expand_text_prompt,
@@ -779,7 +803,7 @@ class ChatGPT extends Provider {
 		$feature  = new ContentResizing();
 		$settings = $feature->get_settings();
 
-		$args     = wp_parse_args(
+		$args = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
@@ -938,14 +962,15 @@ class ChatGPT extends Provider {
 	 *
 	 * @since 2.4.0
 	 *
-	 * @param array $prompts Prompt data.
+	 * @param array $prompt_key Prompt key.
+	 * @param array $settings   Settings data.
 	 *
 	 * @return array Sanitized prompt data.
 	 */
 	public function sanitize_prompts( $prompt_key = '', array $settings ): array {
-		if ( isset( $settings[ ChatGPT::ID ][ $prompt_key ] ) && is_array( $settings[ ChatGPT::ID ][ $prompt_key ] ) ) {
+		if ( isset( $settings[ self::ID ][ $prompt_key ] ) && is_array( $settings[ self::ID ][ $prompt_key ] ) ) {
 
-			$prompts = $settings[ ChatGPT::ID ][ $prompt_key ];
+			$prompts = $settings[ self::ID ][ $prompt_key ];
 
 			// Remove any prompts that don't have a title and prompt.
 			$prompts = array_filter(
@@ -967,9 +992,9 @@ class ChatGPT extends Provider {
 					}
 
 					return array(
-						'title'   => sanitize_text_field( $prompt['title'] ),
-						'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
-						'default' => absint( $default ),
+						'title'    => sanitize_text_field( $prompt['title'] ),
+						'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+						'default'  => absint( $default ),
 						'original' => absint( $prompt['original'] ),
 					);
 				},

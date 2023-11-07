@@ -698,7 +698,7 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
  * Find the provider class that a service belongs to.
  *
  * @param array  $provider_classes Provider classes to look in.
- * @param string $service_name Service name to look for.
+ * @param string $provider_id      ID of the provider.
  * @return Provider|WP_Error
  */
 function find_provider_class( array $provider_classes = [], string $provider_id = '' ) {

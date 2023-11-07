@@ -5,19 +5,44 @@ namespace Classifai\Features;
 use function Classifai\find_provider_class;
 
 abstract class Feature {
+	/**
+	 * ID of the current feature.
+	 *
+	 * To be set in the subclass.
+	 *
+	 * @var string
+	 */
 	const ID = '';
 
+	/**
+	 * User role array.
+	 *
+	 * @var array
+	 */
 	public $roles = [];
 
-	public $provider_classes = [];
+	/**
+	 * Array of provider classes.
+	 *
+	 * @var \Classifai\Providers\Provider[]
+	 */
+	public $provider_instances = [];
 
-	public function __construct( $provider_classes = [] ) {
-		$this->provider_classes = $provider_classes;
+	/**
+	 * Feature constructor.
+	 *
+	 * @param \Classifai\Providers\Provider[] $provider_instances Array of provider instances.
+	 */
+	public function __construct( $provider_instances = [] ) {
+		$this->provider_instances = $provider_instances;
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
 	}
 
+	/**
+	 * Assigns user roles to the $roles array.
+	 */
 	public function setup_roles() {
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
@@ -42,14 +67,40 @@ abstract class Feature {
 	 */
 	abstract public function setup_fields_sections();
 
-	abstract public function get_default_settings() ;
+	/**
+	 * Returns the default settings for the feature.
+	 *
+	 * @return array
+	 */
+	abstract public function get_default_settings();
 
+	/**
+	 * Returns the providers supported by the feature.
+	 *
+	 * @return array
+	 */
 	abstract public function get_providers();
 
+	/**
+	 * Sanitizes the settings before saving.
+	 *
+	 * @param array $settings The settings to be sanitized on save.
+	 *
+	 * @return array
+	 */
 	abstract public function sanitize_settings( $settings );
 
+	/**
+	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
+	 *
+	 * @return boolean
+	 */
 	abstract public function is_feature_enabled();
 
+	/**
+	 * Calls the register method for the provider set for the feature.
+	 * The Provider::register() method usually loads the JS assets.
+	 */
 	public function register() {
 		if ( ! $this->can_register() ) {
 			return;
@@ -57,13 +108,16 @@ abstract class Feature {
 
 		$feature_settings  = $this->get_settings();
 		$provider_id       = $feature_settings['provider'];
-		$provider_instance = find_provider_class( $this->provider_classes, $provider_id );
+		$provider_instance = find_provider_class( $this->provider_instances, $provider_id );
 		$provider_class    = get_class( $provider_instance );
 		$provider_instance = new $provider_class( $this );
 
 		$provider_instance->register();
 	}
 
+	/**
+	 * Registers the settings for the feature.
+	 */
 	public function register_setting() {
 		register_setting(
 			$this->get_option_name(),
@@ -74,10 +128,22 @@ abstract class Feature {
 		);
 	}
 
+	/**
+	 * Returns the option name for the feature.
+	 *
+	 * @return string
+	 */
 	public function get_option_name() {
 		return 'classifai_' . static::ID;
 	}
 
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 *
+	 * @return array
+	 */
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
@@ -114,6 +180,12 @@ abstract class Feature {
 		return $this->is_configured();
 	}
 
+	/**
+	 * Returns the data attribute string for an input.
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 * @return string
+	 */
 	protected function get_data_attribute( $args ) {
 		$data_attr     = $args['data_attr'] ?? [];
 		$data_attr_str = '';
