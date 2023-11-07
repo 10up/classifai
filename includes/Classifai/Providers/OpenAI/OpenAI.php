@@ -91,7 +91,6 @@ trait OpenAI {
 	/**
 	 * Sanitize the API key, showing an error message if needed.
 	 *
-	 * @param array $new_settings New settings being saved.
 	 * @param array $old_settings Existing settings, if any.
 	 * @return array
 	 */

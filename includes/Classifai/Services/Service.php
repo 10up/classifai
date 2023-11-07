@@ -26,12 +26,18 @@ abstract class Service {
 	protected $providers;
 
 	/**
-	 * @var array Array of class instances.
+	 * @var array Array of provider instances.
 	 */
 	public $provider_classes;
 
+	/**
+	 * @var string[] array Array of feature classes for this service
+	 */
 	public $features = [];
 
+	/**
+	 * @var \Classifai\Features\Feature[] Array of feature instances.
+	 */
 	public $feature_classes = [];
 
 	/**
@@ -69,7 +75,6 @@ abstract class Service {
 					$this->provider_classes[] = new $provider( $this->menu_slug );
 				}
 			}
-			// $this->register_providers();
 		}
 
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
@@ -100,6 +105,9 @@ abstract class Service {
 		}
 	}
 
+	/**
+	 * Initializes the functionality for this services features.
+	 */
 	public function register_features() {
 		if ( ! empty( $this->feature_classes ) ) {
 			foreach ( $this->feature_classes as $feature ) {
@@ -130,9 +138,9 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$base_url   = add_query_arg(
+		$active_tab     = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
+		$active_tab     = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$base_url       = add_query_arg(
 			array(
 				'page' => 'classifai',
 				'tab'  => $this->get_menu_slug(),
@@ -140,7 +148,7 @@ abstract class Service {
 			admin_url( 'tools.php' )
 		);
 		$active_feature = $this->feature_classes ? $this->feature_classes[0]::ID : '';
-		$active_feature = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : $active_feature;
+		$active_feature = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : $active_feature; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="classifai-content">
 			<?php
@@ -168,9 +176,6 @@ abstract class Service {
 				<div class="classifai-nlu-sections">
 					<form method="post" action="options.php">
 					<?php
-						// settings_fields( 'classifai_' . $active_tab );
-						// do_settings_sections( 'classifai_' . $active_tab );
-
 						settings_fields( 'classifai_' . $active_feature );
 						do_settings_sections( 'classifai_' . $active_feature );
 						submit_button();
