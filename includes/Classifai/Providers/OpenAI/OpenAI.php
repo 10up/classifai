@@ -25,12 +25,12 @@ trait OpenAI {
 	 * @param string $default_api_key Default API key.
 	 */
 	protected function setup_api_fields( string $default_api_key = '' ) {
-		$existing_settings = $this->get_settings();
+		$existing_settings = $this->feature_instance->get_settings();
 		$description       = '';
 
 		// Add the settings section.
 		add_settings_section(
-			$this->get_option_name(),
+			$this->feature_instance->get_option_name(),
 			$this->provider_service_name,
 			function() {
 				printf(
@@ -47,7 +47,7 @@ trait OpenAI {
 					esc_url( 'https://platform.openai.com/signup' )
 				);
 			},
-			$this->get_option_name()
+			$this->feature_instance->get_option_name()
 		);
 
 		// Determine which other OpenAI provider to look for an API key in.
@@ -77,8 +77,8 @@ trait OpenAI {
 			'api-key',
 			esc_html__( 'API Key', 'classifai' ),
 			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name(),
 			[
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
@@ -95,17 +95,18 @@ trait OpenAI {
 	 * @param array $old_settings Existing settings, if any.
 	 * @return array
 	 */
-	protected function sanitize_api_key_settings( array $new_settings = [], array $old_settings = [] ) {
-		$authenticated = $this->authenticate_credentials( $old_settings['api_key'] ?? '' );
+	public function sanitize_api_key_settings( array $old_settings = [] ) {
+		$new_settings  = $this->feature_instance->get_settings();
+		$authenticated = $this->authenticate_credentials( $old_settings[ static::ID ]['api_key'] ?? '' );
 
 		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
-			$error_message                 = $authenticated->get_error_message();
+			$new_settings[ static::ID ]['authenticated'] = false;
+			$error_message                               = $authenticated->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
-				$new_settings['authenticated'] = true;
-				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
+				$new_settings[ static::ID ]['authenticated'] = true;
+				$error_message                               = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
 			} else {
 				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
 			}
@@ -117,10 +118,10 @@ trait OpenAI {
 				'error'
 			);
 		} else {
-			$new_settings['authenticated'] = true;
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		$new_settings['api_key'] = sanitize_text_field( $old_settings['api_key'] ?? '' );
+		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $old_settings[ static::ID ]['api_key'] ?? '' );
 
 		return $new_settings;
 	}

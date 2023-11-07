@@ -62,22 +62,6 @@ class TitleGeneration extends Feature {
 		);
 
 		add_settings_field(
-			'length',
-			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'length',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $default_settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
 			'provider',
 			esc_html__( 'Select a provider', 'classifai' ),
 			[ $this, 'render_select' ],
@@ -142,6 +126,7 @@ class TitleGeneration extends Feature {
 			ChatGPT::ID => [
 				'api_key' => '',
 				'number_of_titles' => 1,
+				'authenticated' => false,
 				'generate_title_prompt' => array(
 					array(
 						'title'   => esc_html__( 'ClassifAI default', 'classifai' ),
@@ -176,7 +161,9 @@ class TitleGeneration extends Feature {
 		}
 
 		if ( isset( $settings[ ChatGPT::ID ] ) ) {
-			$new_settings[ ChatGPT::ID ]['api_key']               = $chat_gpt->sanitize_api_key( $settings );
+			$api_key_settings                                     = $chat_gpt->sanitize_api_key_settings( $settings );
+			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
+			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
 			$new_settings[ ChatGPT::ID ]['number_of_titles']      = $chat_gpt->sanitize_number_of_responses_field( 'number_of_titles', $settings );
 			$new_settings[ ChatGPT::ID ]['generate_title_prompt'] = $chat_gpt->sanitize_prompts( 'generate_title_prompt', $settings );
 		}

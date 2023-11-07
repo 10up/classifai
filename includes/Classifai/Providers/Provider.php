@@ -34,6 +34,12 @@ abstract class Provider {
 	 */
 	public $onboarding_options;
 
+	/**
+	 * Feature instance.
+	 *
+	 * @var \Classifai\Features\Feature
+	 */
+	protected $feature_instance = null;
 
 	/**
 	 * Provider constructor.

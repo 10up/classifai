@@ -69,13 +69,6 @@ class ChatGPT extends Provider {
 	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
-	 * Feature instance.
-	 *
-	 * @var \Classifai\Features\Feature
-	 */
-	protected $feature_instance = null;
-
-	/**
 	 * OpenAI ChatGPT constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -590,7 +583,7 @@ class ChatGPT extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
 
@@ -694,7 +687,7 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_title_prompt'] ) ?? $this->generate_title_prompt );
 
@@ -795,7 +788,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );

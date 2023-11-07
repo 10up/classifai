@@ -134,6 +134,7 @@ class ContentResizing extends Feature {
 			ChatGPT::ID => [
 				'api_key' => '',
 				'number_of_suggestions' => 1,
+				'authenticated' => false,
 				'condense_text_prompt' => array(
 					array(
 						'title'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
@@ -179,7 +180,9 @@ class ContentResizing extends Feature {
 		}
 
 		if ( isset( $settings[ ChatGPT::ID ] ) ) {
-			$new_settings[ ChatGPT::ID ]['api_key']               = $chat_gpt->sanitize_api_key( $settings );
+			$api_key_settings                                     = $chat_gpt->sanitize_api_key_settings( $settings );
+			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
+			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
 			$new_settings[ ChatGPT::ID ]['number_of_suggestions'] = $chat_gpt->sanitize_number_of_responses_field( 'number_of_suggestions', $settings );
 			$new_settings[ ChatGPT::ID ]['condense_text_prompt']  = $chat_gpt->sanitize_prompts( 'condense_text_prompt', $settings );
 			$new_settings[ ChatGPT::ID ]['expand_text_prompt']    = $chat_gpt->sanitize_prompts( 'expand_text_prompt', $settings );

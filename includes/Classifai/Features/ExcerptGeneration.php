@@ -134,6 +134,7 @@ class ExcerptGeneration extends Feature {
 			'provider' => \Classifai\Providers\OpenAI\ChatGPT::ID,
 			ChatGPT::ID => [
 				'api_key' => '',
+				'authenticated' => false,
 				'generate_excerpt_prompt' => array(
 					array(
 						'title'   => esc_html__( 'Default', 'classifai' ),
@@ -174,7 +175,9 @@ class ExcerptGeneration extends Feature {
 		}
 
 		if ( isset( $settings[ ChatGPT::ID ] ) ) {
-			$new_settings[ ChatGPT::ID ]['api_key'] = $chat_gpt->sanitize_api_key( $settings );
+			$api_key_settings                                     = $chat_gpt->sanitize_api_key_settings( $settings );
+			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
+			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
 			$new_settings[ ChatGPT::ID ]['generate_excerpt_prompt'] = $chat_gpt->sanitize_prompts( 'generate_excerpt_prompt', $settings );
 		}
 
