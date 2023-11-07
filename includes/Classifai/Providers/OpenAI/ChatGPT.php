@@ -411,7 +411,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->generate_excerpt_prompt,
 				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => __( 'Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item\'s title.', 'classifai' ),
 			]
 		);
 
@@ -465,7 +465,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'generate_title_prompt',
 				'placeholder'   => $this->generate_title_prompt,
 				'default_value' => $default_settings['generate_title_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
@@ -519,7 +518,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'shrink_content_prompt',
 				'placeholder'   => $this->shrink_content_prompt,
 				'default_value' => $default_settings['shrink_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 
@@ -534,7 +532,6 @@ class ChatGPT extends Provider {
 				'label_for'     => 'grow_content_prompt',
 				'placeholder'   => $this->grow_content_prompt,
 				'default_value' => $default_settings['grow_content_prompt'],
-				'description'   => __( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
 	}
@@ -647,34 +644,34 @@ class ChatGPT extends Provider {
 				'length'                  => $excerpt_length,
 				'generate_excerpt_prompt' => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->generate_excerpt_prompt,
+						'original' => 1,
 					),
 				),
 				'enable_titles'           => false,
 				'number_titles'           => 1,
 				'generate_title_prompt'   => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->generate_title_prompt,
+						'original' => 1,
 					),
 				),
 				'enable_resize_content'   => false,
 				'number_resize_content'   => 1,
 				'shrink_content_prompt'   => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->shrink_content_prompt,
+						'original' => 1,
 					),
 				),
 				'grow_content_prompt'     => array(
 					array(
-						'title'   => esc_html__( 'Default', 'classifai' ),
-						'prompt'  => '',
-						'default' => 1,
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->grow_content_prompt,
+						'original' => 1,
 					),
 				),
 			]
@@ -1186,9 +1183,10 @@ class ChatGPT extends Provider {
 				}
 
 				return array(
-					'title'   => sanitize_text_field( $prompt['title'] ),
-					'prompt'  => sanitize_textarea_field( $prompt['prompt'] ),
-					'default' => absint( $default ),
+					'title'    => sanitize_text_field( $prompt['title'] ),
+					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'default'  => absint( $default ),
+					'original' => absint( $prompt['original'] ),
 				);
 			},
 			$prompts
@@ -1218,14 +1216,14 @@ class ChatGPT extends Provider {
 			$prompt_data = array_filter(
 				$prompts,
 				function ( $prompt ) {
-					return $prompt['default'];
+					return $prompt['default'] && ! $prompt['original'];
 				}
 			);
 
 			if ( ! empty( $prompt_data ) ) {
 				$default_prompt = current( $prompt_data )['prompt'];
-			} elseif ( ! empty( $prompts[0]['prompt'] ) ) {
-				// If there is no default, use the first prompt.
+			} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
+				// If there is no default, use the first prompt, unless it's the original prompt.
 				$default_prompt = $prompts[0]['prompt'];
 			}
 		}

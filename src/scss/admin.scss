@@ -280,7 +280,7 @@ input.classifai-button {
 			background: var(--classifai-highlight-color);
 		}
 
-		.classifai-field-type-prompt-setting{
+		.classifai-field-type-prompt-setting {
 			padding: 5px 20px;
 			border: 1px solid #f0f0f1;
 			position: relative;
@@ -288,15 +288,22 @@ input.classifai-button {
 			flex-direction:column;
 			max-width: 600px;
 
-			&:nth-child(2n + 1){
+			&:first-child {
+				> input,
+				> label {
+					display: none;
+				}
+			}
+
+			&:nth-child(2n + 1) {
 				background-color: #f0f0f1;
 			}
 
-			label{
+			label {
 				display: block;
 			}
 
-			input, textarea{
+			input, textarea {
 				margin-right: 0;
 				display: block;
 			}
@@ -306,44 +313,44 @@ input.classifai-button {
 			}
 
 			/* Style for prompt action items container */
-			.actions-rows{
+			.actions-rows {
 				display: flex;
 				margin: 0.35em 0 .5em!important;
 
 				/* Style for prompt actions */
-				a{
+				a {
 					cursor: pointer;
 					text-decoration: none;
 					margin-left: 8px;
 
-					&.action__remove_prompt{
+					&.action__remove_prompt {
 						color: #b32d2e;
 					}
 				}
 
 				/* action items separator */
-				a:before{
+				a:before {
 					content: '|';
 					color: #a7aaad;
 				}
 
 				/* Styling for default prompt first action */
-				a:first-child{
+				a:first-child {
 					margin-left: 0;
 
-					&.selected{
+					&.selected {
 						color: #a7aaad;
 						pointer-events: none;
 					}
 
-					&:before{
+					&:before {
 						content: '';
 					}
 				}
 
 			}
 
-			+ button{
+			+ button {
 				margin-top: 10px;
 			}
 		}
