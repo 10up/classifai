@@ -354,7 +354,7 @@ class LanguageProcessing extends Service {
 		$feature     = new ExcerptGeneration();
 		$settings    = $feature->get_settings();
 		$provider_id = $settings['provider'];
-		$provider    = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+		$provider    = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( is_wp_error( $provider ) ) {
@@ -657,7 +657,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Check if the current user's role is allowed.
-		$roles      = $settings[ $provider_id ]['roles'] ?? [];
+		$roles      = $settings['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {

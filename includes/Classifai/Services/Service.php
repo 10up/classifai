@@ -69,7 +69,7 @@ abstract class Service {
 					$this->provider_classes[] = new $provider( $this->menu_slug );
 				}
 			}
-			$this->register_providers();
+			// $this->register_providers();
 		}
 
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
@@ -77,9 +77,10 @@ abstract class Service {
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
 			foreach ( $this->features as $feature ) {
 				if ( class_exists( $feature ) ) {
-					$this->feature_classes[] = new $feature();
+					$this->feature_classes[] = new $feature( $this->provider_classes );
 				}
 			}
+			$this->register_features();
 		}
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
@@ -95,6 +96,14 @@ abstract class Service {
 				if ( $provider->can_register() ) {
 					$provider->register();
 				}
+			}
+		}
+	}
+
+	public function register_features() {
+		if ( ! empty( $this->feature_classes ) ) {
+			foreach ( $this->feature_classes as $feature ) {
+				$feature->register();
 			}
 		}
 	}

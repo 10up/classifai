@@ -59,14 +59,14 @@ class ChatGPT extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $shrink_content_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+	protected $condense_text_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
 
 	/**
 	 * Prompt for growing content
 	 *
 	 * @var string
 	 */
-	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
+	protected $expand_text_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
 	 * OpenAI ChatGPT constructor.
@@ -230,7 +230,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->is_feature_enabled( 'enable_excerpt' ) ) {
+		if ( $this->feature_instance->is_feature_enabled() ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -241,7 +241,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->is_feature_enabled( 'enable_titles' ) ) {
+		if ( $this->feature_instance->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -260,7 +260,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->is_feature_enabled( 'enable_resize_content' ) ) {
+		if ( $this->feature_instance->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
@@ -314,7 +314,7 @@ class ChatGPT extends Provider {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if (
 					post_type_supports( $screen->post_type, 'title' ) &&
-					$this->is_feature_enabled( 'enable_titles' )
+					$this->feature_instance->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -344,7 +344,7 @@ class ChatGPT extends Provider {
 
 				if (
 					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					$this->is_feature_enabled( 'enable_excerpt' )
+					$this->feature_instance->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -471,17 +471,17 @@ class ChatGPT extends Provider {
 			'enable_resize_content'   => false,
 			'resize_content_roles'    => array_keys( $editable_roles ),
 			'suggestion_count'        => 1,
-			'shrink_content_prompt'   => array(
+			'condense_text_prompt'   => array(
 				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->shrink_content_prompt,
+					'prompt'   => $this->condense_text_prompt,
 					'original' => 1,
 				),
 			),
-			'grow_content_prompt'     => array(
+			'expand_text_prompt'     => array(
 				array(
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->grow_content_prompt,
+					'prompt'   => $this->expand_text_prompt,
 					'original' => 1,
 				),
 			),
@@ -565,8 +565,6 @@ class ChatGPT extends Provider {
 
 		$feature  = new ExcerptGeneration();
 		$settings = $feature->get_settings();
-
-		$settings = $this->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
@@ -676,7 +674,7 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings[ static::ID ]['number_titles'] ?? 1,
+				'num'     => $settings[ static::ID ]['number_of_titles'] ?? 1,
 				'content' => '',
 			]
 		);
@@ -791,9 +789,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['condense_text_prompt'] ) ?? $this->condense_text_prompt );
 		} else {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['grow_content_prompt'] ) ?? $this->grow_content_prompt );
+			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['expand_text_prompt'] ) ?? $this->expand_text_prompt );
 		}
 
 		/**

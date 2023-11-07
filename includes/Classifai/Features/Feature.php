@@ -2,12 +2,23 @@
 
 namespace Classifai\Features;
 
+use function Classifai\find_provider_class;
+
 abstract class Feature {
 	const ID = '';
 
 	public $roles = [];
 
-	public function __construct() {
+	public $provider_classes = [];
+
+	public function __construct( $provider_classes = [] ) {
+		$this->provider_classes = $provider_classes;
+		add_action( 'admin_init', [ $this, 'setup_roles' ] );
+		add_action( 'admin_init', [ $this, 'register_setting' ] );
+		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+	}
+
+	public function setup_roles() {
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
@@ -24,19 +35,6 @@ abstract class Feature {
 		 * @return {array} Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_chatgpt_allowed_roles', $this->roles, $default_settings );
-
-		add_action( 'admin_init', [ $this, 'register_setting' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
-	}
-
-	public function register_setting() {
-		register_setting(
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'sanitize_callback' => [ $this, 'sanitize_settings' ],
-			]
-		);
 	}
 
 	/**
@@ -52,6 +50,30 @@ abstract class Feature {
 
 	abstract public function is_feature_enabled();
 
+	public function register() {
+		if ( ! $this->can_register() ) {
+			return;
+		}
+
+		$feature_settings  = $this->get_settings();
+		$provider_id       = $feature_settings['provider'];
+		$provider_instance = find_provider_class( $this->provider_classes, $provider_id );
+		$provider_class    = get_class( $provider_instance );
+		$provider_instance = new $provider_class( $this );
+
+		$provider_instance->register();
+	}
+
+	public function register_setting() {
+		register_setting(
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'sanitize_callback' => [ $this, 'sanitize_settings' ],
+			]
+		);
+	}
+
 	public function get_option_name() {
 		return 'classifai_' . static::ID;
 	}
@@ -66,6 +88,30 @@ abstract class Feature {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		$settings      = $this->get_settings();
+		$provider_id   = $settings['provider'];
+		$is_configured = false;
+
+		if ( ! empty( $settings ) && ! empty( $settings[ $provider_id ]['authenticated'] ) ) {
+			$is_configured = true;
+		}
+
+		return $is_configured;
+	}
+
+	/**
+	 * Can the feature be initialized?
+	 */
+	public function can_register() {
+		return $this->is_configured();
 	}
 
 	protected function get_data_attribute( $args ) {
