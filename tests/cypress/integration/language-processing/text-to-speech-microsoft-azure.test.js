@@ -1,4 +1,4 @@
-describe( 'Microsoft Azure - Text to Speech', () => {
+describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(

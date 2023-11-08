@@ -67,3 +67,81 @@ Cypress.Commands.add('verifyPostTaxonomyTerms', (taxonomy, threshold) => {
 		cy.wrap($button).click();
 	});
 });
+
+
+Cypress.Commands.add('optOutFeature', (feature) => {
+	// Go to profile page and opt out.
+	cy.visit('/wp-admin/profile.php');
+	cy.get(`#classifai_opted_out_features_${feature}`).check();
+	cy.get('#submit').click();
+	cy.get('#message.notice').contains('Profile updated.');
+});
+
+Cypress.Commands.add('optInFeature', (feature) => {
+	// Go to profile page and opt in.
+	cy.visit('/wp-admin/profile.php');
+	cy.get(`#classifai_opted_out_features_${feature}`).uncheck();
+	cy.get('#submit').click();
+	cy.get('#message.notice').contains('Profile updated.');
+});
+
+
+Cypress.Commands.add('enableFeatureForRoles', (feature, roles, provider) => {
+	cy.visit(
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
+	);
+	cy.get(`#${feature}_role_based_access`).check();
+	roles.forEach(role => {
+		cy.get( `#${provider}_${feature}_roles_${role}` ).check();
+	});
+	cy.get('#submit').click();
+	cy.get('.notice').contains('Settings saved.');
+});
+
+Cypress.Commands.add('disableFeatureForRoles', (feature, roles, provider) => {
+	cy.visit(
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
+	);
+	cy.get(`#${feature}_role_based_access`).check();
+	roles.forEach(role => {
+		cy.get( `#${provider}_${feature}_roles_${role}` ).uncheck();
+	});
+	cy.get('#submit').click();
+	cy.get('.notice').contains('Settings saved.');
+});
+
+Cypress.Commands.add('enableFeatureForUsers', (feature, users, provider) => {
+	cy.visit(
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
+	);
+	cy.get(`#${feature}_user_based_access`).check();
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '.components-form-token-field__remove-token' ).length > 0 ) {
+			cy.get('.components-form-token-field__remove-token').click({
+				multiple: true,
+			});
+		}
+	} );
+
+	users.forEach(user => {
+		cy.get(`#${feature}_users-container input.components-form-token-field__input`).type(user);
+		cy.wait( 1000 );
+		cy.get('ul.components-form-token-field__suggestions-list li:nth-child(1)').click();
+	});
+	cy.get('#submit').click();
+	cy.get('.notice').contains('Settings saved.');
+});
+
+
+Cypress.Commands.add('enableFeatureOptOut', (feature, provider) => {
+	cy.visit(
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
+	);
+	cy.get( `#${feature}_role_based_access` ).check();
+	cy.get( `#${provider}_${feature}_roles_administrator` ).check();
+	cy.get( `#${feature}_user_based_access` ).uncheck();
+	cy.get( `#${feature}_user_based_opt_out` ).check();
+
+	cy.get('#submit').click();
+	cy.get('.notice').contains('Settings saved.');
+});
