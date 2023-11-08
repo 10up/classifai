@@ -1,7 +1,7 @@
 {
   "name": "classifai",
   "version": "2.4.0",
-  "license": "GPLv2",
+  "license": "GPL-2.0-or-later",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "scripts": {
