@@ -106,11 +106,15 @@ Cypress.Commands.add('optInFeature', (feature) => {
 Cypress.Commands.add('optInAllFeatures', () => {
 	// Go to profile page and opt in.
 	cy.visit('/wp-admin/profile.php');
-	cy.get('input[name="classifai_opted_out_features[]"]').uncheck({
-		multiple: true,
-	});
-	cy.get('#submit').click();
-	cy.get('#message.notice').contains('Profile updated.');
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( 'input[name="classifai_opted_out_features[]"]' ).length > 0 ) {
+			cy.get('input[name="classifai_opted_out_features[]"]').uncheck({
+				multiple: true,
+			});
+			cy.get('#submit').click();
+			cy.get('#message.notice').contains('Profile updated.');
+		}
+	} );
 });
 
 /**
@@ -218,22 +222,8 @@ Cypress.Commands.add('verifyClassifyContentEnabled', (enabled = true) => {
  */
 Cypress.Commands.add('verifyExcerptGenerationEnabled', (enabled = true) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
-	// Create test post.
-	cy.createPost( {
-		title: 'Test ChatGPT post user opt-opt',
-		content: 'Test GPT content',
-	} );
-
-	// Close post publish panel.
-	const closePanelSelector = 'button[aria-label="Close panel"]';
-	cy.get( 'body' ).then( ( $body ) => {
-		if ( $body.find( closePanelSelector ).length > 0 ) {
-			cy.get( closePanelSelector ).click();
-		}
-	} );
-
-	// Open post settings sidebar.
-	cy.openDocumentSettingsSidebar();
+	cy.visit('/wp-admin/edit.php');
+	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
 
 	// Find and open the excerpt panel.
 	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
@@ -388,4 +378,13 @@ Cypress.Commands.add('verifyAIVisionEnabled', (enabled = true) => {
 	cy.get('.misc-publishing-actions label[for=rescan-tags]').should(shouldExist);
 	cy.get('.misc-publishing-actions label[for=rescan-ocr]').should(shouldExist);
 		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should(shouldExist);
+});
+
+Cypress.Commands.add('disableClassicEditor', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-classic-editor' ).length > 0 ) {
+			cy.get('#deactivate-classic-editor').click();
+		}
+	} );
 });

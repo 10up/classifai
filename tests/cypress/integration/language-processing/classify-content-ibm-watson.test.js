@@ -1,4 +1,21 @@
 describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+		);
+		cy.get( '#classifai-settings-post' ).check();
+		cy.get( '#classifai-settings-publish' ).check();
+		cy.get( '#classifai-settings-category' ).check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
 		// Disable content classification by openai.
 		cy.visit(
@@ -216,9 +233,13 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
 		cy.get('#classifai-settings-content_classification_role_based_access').uncheck();
 		cy.get('#classifai-settings-content_classification_user_based_access').check();
-		cy.get('.components-form-token-field__remove-token').click({
-			multiple: true,
-		});
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( '#content_classification_users-container .components-form-token-field__remove-token' ).length > 0 ) {
+				cy.get('#content_classification_users-container .components-form-token-field__remove-token').click({
+					multiple: true,
+				});
+			}
+		} );
 		cy.get('#content_classification_users-container input.components-form-token-field__input').type('admin');
 		cy.wait( 1000 );
 		cy.get('ul.components-form-token-field__suggestions-list li:nth-child(1)').click();

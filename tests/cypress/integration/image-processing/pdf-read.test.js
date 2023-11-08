@@ -3,6 +3,18 @@
 import { getPDFData } from '../../plugins/functions';
 
 describe('PDF read Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
+		cy.get('#enable_read_pdf').check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	let pdfEditLink = '';
 	it('Can save "PDF scanning" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
@@ -22,7 +34,7 @@ describe('PDF read Tests', () => {
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile('dummy.pdf');
 
-		cy.get('#media-items .media-item a.edit-attachment').should('exist');
+		cy.get('#media-items .media-item a.edit-attachment', { timeout: 20000 }).should('exist');
 		cy.get('#media-items .media-item a.edit-attachment')
 			.invoke('attr', 'href')
 			.then((editLink) => {

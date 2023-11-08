@@ -1,6 +1,10 @@
 /* eslint jest/expect-expect: 0 */
 
 describe('Admin can login and make sure plugin is activated', () => {
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it('Can deactivate and activate plugin', () => {
 		cy.deactivatePlugin('classifai');
 		cy.activatePlugin('classifai');

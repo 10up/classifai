@@ -1,6 +1,21 @@
 import { getChatGPTData } from '../../plugins/functions';
 
 describe( '[Language processing] Excerpt Generation Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_excerpt' ).check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Can save OpenAI ChatGPT "Language Processing" settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -17,11 +32,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can see the generate excerpt button in a post', () => {
 		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( '#deactivate-classic-editor' ).length > 0 ) {
-				cy.get('#deactivate-classic-editor').click();
-			}
-		} );
+		cy.disableClassicEditor();
 
 		const data = getChatGPTData('excerpt');
 
@@ -94,11 +105,11 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#classifai-openai__excerpt-generate-btn' ).click();
 		cy.get( '#excerpt' ).should( 'have.value', data );
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.disableClassicEditor();
 	} );
 
 	it( 'Can set multiple custom excerpt generation prompts, select one as the default and delete one.', () => {
+		cy.disableClassicEditor();
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);

@@ -13,12 +13,11 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get( '#voice' ).select( 'en-AU-AnnetteNeural|Female' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( '#deactivate-classic-editor' ).length > 0 ) {
-				cy.get('#deactivate-classic-editor').click();
-			}
-		} );
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
 	} );
 
 	it( 'Generates audio from text', () => {
@@ -106,8 +105,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit( '/text-to-speech-test/' );
 		cy.get( '.class-post-audio-controls' ).should( 'be.visible' );
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.disableClassicEditor();
 	} );
 
 	it( 'Disable support for post type Post', () => {

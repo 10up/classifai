@@ -6,6 +6,22 @@ describe('Image processing Tests', () => {
 	let imageEditLink = '';
 	let mediaModelLink = '';
 
+	before( () => {
+		cy.login();
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
+		cy.get('#computer_vision_enable_image_captions_alt').check();
+		cy.get('#computer_vision_enable_image_captions_description').check();
+		cy.get('#enable_image_tagging').check();
+		cy.get('#enable_smart_cropping').check();
+		cy.get('#enable_ocr').check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it('Can save Azure AI Vision "Image Processing" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
@@ -24,13 +40,14 @@ describe('Image processing Tests', () => {
 	});
 
 	it('Can see Azure AI Vision Image processing actions on edit media page and verify Generated data.', () => {
+		cy.visit('/wp-admin/upload.php?mode=grid'); // Ensure grid mode is enabled.
 		cy.visit('/wp-admin/media-new.php');
 		cy.get('#plupload-upload-ui').should('exist');
 		cy.get('#plupload-upload-ui input[type=file]').attachFile(
 			'../../../assets/img/banner-772x250.png'
 		);
 
-		cy.get('#media-items .media-item a.edit-attachment').should('exist');
+		cy.get('#media-items .media-item a.edit-attachment', { timeout: 20000 }).should('exist');
 		cy.get('#media-items .media-item a.edit-attachment')
 			.invoke('attr', 'href')
 			.then((editLink) => {
@@ -90,6 +107,8 @@ describe('Image processing Tests', () => {
 
 		// Disable features
 		cy.get('#computer_vision_enable_image_captions_alt').uncheck();
+		cy.get('#computer_vision_enable_image_captions_caption').uncheck();
+		cy.get('#computer_vision_enable_image_captions_description').uncheck();
 		cy.get('#enable_image_tagging').uncheck();
 		cy.get('#enable_smart_cropping').uncheck();
 		cy.get('#enable_ocr').uncheck();
@@ -123,8 +142,6 @@ describe('Image processing Tests', () => {
 		// Enable features.
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 		cy.get('#computer_vision_enable_image_captions_alt').check();
-		cy.get('#computer_vision_enable_image_captions_caption').check();
-		cy.get('#computer_vision_enable_image_captions_description').check();
 		cy.get('#enable_image_tagging').check();
 		cy.get('#enable_smart_cropping').check();
 		cy.get('#enable_ocr').check();

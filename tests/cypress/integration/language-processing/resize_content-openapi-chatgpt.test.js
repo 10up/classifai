@@ -1,4 +1,19 @@
 describe( '[Language processing] Speech to Text Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_resize_content' ).check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Resize content feature can grow and shrink content', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'

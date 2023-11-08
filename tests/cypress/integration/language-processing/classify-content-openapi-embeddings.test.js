@@ -1,11 +1,25 @@
 describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+		cy.get( '#enable_classification' ).check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Can save OpenAI Embeddings "Language Processing" settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
 		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
-
 		cy.get( '#enable_classification' ).check();
 		cy.get( '#openai_embeddings_post_types_post' ).check();
 		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
@@ -150,8 +164,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#classifai_language_processing_metabox' ).should( 'exist' );
 		cy.get( '#classifai-process-content' ).check();
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.disableClassicEditor();
 	} );
 
 	it( 'Can enable/disable content classification feature by role', () => {

@@ -1,5 +1,19 @@
 /* eslint jest/expect-expect: 0 */
 describe('Image Generation (OpenAI DALL·E) Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
+		);
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#submit' ).click();
+		cy.optInAllFeatures();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Can save OpenAI "Image Processing" settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'

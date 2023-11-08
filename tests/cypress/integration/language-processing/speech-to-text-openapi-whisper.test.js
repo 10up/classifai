@@ -1,6 +1,21 @@
 import { getWhisperData } from '../../plugins/functions';
 
 describe( '[Language processing] Speech to Text Tests', () => {
+	before( () => {
+		cy.login();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+		cy.get( '#enable_transcripts' ).check();
+		cy.get('#submit').click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
+	} );
+
 	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
