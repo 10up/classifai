@@ -88,8 +88,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	} );
 
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
+		cy.enableClassicEditor();
 
 		cy.classicCreatePost( {
 			title: 'Text to Speech test classic',

@@ -380,11 +380,26 @@ Cypress.Commands.add('verifyAIVisionEnabled', (enabled = true) => {
 		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should(shouldExist);
 });
 
+/**
+ * Deactivate the Classic Editor plugin.
+ */
 Cypress.Commands.add('disableClassicEditor', () => {
 	cy.visit( '/wp-admin/plugins.php' );
 	cy.get( 'body' ).then( ( $body ) => {
 		if ( $body.find( '#deactivate-classic-editor' ).length > 0 ) {
 			cy.get('#deactivate-classic-editor').click();
+		}
+	} );
+});
+
+/**
+ * Activate the Classic Editor plugin.
+ */
+Cypress.Commands.add('enableClassicEditor', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-classic-editor' ).length > 0 ) {
+			cy.get('#activate-classic-editor').click();
 		}
 	} );
 });

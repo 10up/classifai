@@ -31,6 +31,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	let audioEditLink = '';
 	let mediaModalLink = '';
 	it( 'Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
+		cy.visit('/wp-admin/upload.php?mode=grid'); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
 		cy.get( '#plupload-upload-ui input[type=file]' ).attachFile(

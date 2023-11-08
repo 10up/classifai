@@ -87,8 +87,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can see the generate titles button in a post (Classic Editor)', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
+		cy.enableClassicEditor();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
