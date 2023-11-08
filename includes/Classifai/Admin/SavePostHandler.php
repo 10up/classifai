@@ -4,6 +4,7 @@ namespace Classifai\Admin;
 
 use \Classifai\Providers\Azure\TextToSpeech;
 use \Classifai\Watson\Normalizer;
+use function Classifai\get_classification_mode;
 
 /**
  * Classifies Posts based on the current ClassifAI configuration.
@@ -20,6 +21,7 @@ class SavePostHandler {
 	 */
 	public function register() {
 		add_filter( 'removable_query_args', [ $this, 'classifai_removable_query_args' ] );
+		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
@@ -56,6 +58,28 @@ class SavePostHandler {
 	 */
 	public function is_configured() {
 		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
+	}
+
+	/**
+	 * Sets the default value for the _classifai_process_content meta key.
+	 *
+	 * @param mixed  $value     The value get_metadata() should return - a single metadata value,
+	 *                          or an array of values.
+	 * @param int    $object_id Object ID.
+	 * @param string $meta_key  Meta key.
+	 *
+	 * @return mixed
+	 */
+	public function default_post_metadata( $value, $object_id, $meta_key ) {
+		if ( '_classifai_process_content' === $meta_key ) {
+			if ( 'automatic_classification' === get_classification_mode() ) {
+				return 'yes';
+			} else {
+				return 'no';
+			}
+		}
+
+		return $value;
 	}
 
 	/**

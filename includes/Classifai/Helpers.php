@@ -127,7 +127,6 @@ function reset_plugin_settings() {
 	}
 }
 
-
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *

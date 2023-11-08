@@ -41,7 +41,8 @@ const ClassifAIToggle = () => {
 
 	// Use the datastore to tell the post to update the meta.
 	const { editPost } = useDispatch( 'core/editor' );
-	const enabled = 'no' === processContent ? 'no' : 'yes';
+	// const enabled = 'no' === processContent ? 'no' : 'yes';
+	const enabled = 'yes' === processContent ? 'yes' : 'no';
 
 	return (
 		<ToggleControl
