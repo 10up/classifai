@@ -13,6 +13,7 @@ use function Classifai\get_plugin_settings;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
+use function Classifai\get_classification_mode;
 use WP_Error;
 
 class NLU extends Provider {
@@ -466,7 +467,14 @@ class NLU extends Provider {
 				break;
 				break;
 			case 'radio':
-				$attrs = ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false );
+				if ( 'classification_mode' === $args['option_index'] ) {
+					// Detect the existing vs new users and serve default value accordingly.
+					$get_classification_mode = get_classification_mode();
+					if ( $value === $get_classification_mode ) {
+						$attrs = ' value="' . esc_attr( $value ) . '" checked="checked"';
+					}
+				}
+				$attrs = empty( $attrs ) ? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false ) : $attrs;
 				break;
 		}
 		?>
@@ -505,7 +513,7 @@ class NLU extends Provider {
 			$args = [
 				...$args,
 				...$data,
-				'label_for'    => $name,
+				'label_for' => $name,
 			];
 
 			echo '<li>';
