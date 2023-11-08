@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Ensure the default prompts in ClassifAI show as the first prompt in our settings and that they can't be removed or edited (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@ravinderk](https://github.com/ravinderk) via [#610](https://github.com/10up/classifai/pull/610)).
 - Fix multiple typos across the codebase (props [@parikshit-adhikari](https://github.com/parikshit-adhikari), [@shresthasurav](https://github.com/shresthasurav), [@jeffpaul](https://github.com/jeffpaul) via [#603](https://github.com/10up/classifai/pull/603), [#605](https://github.com/10up/classifai/pull/605)).
 - Use `get_asset_info` across the enqueuing of all our dependencies (props [@ravinderk](https://github.com/ravinderk), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#608](https://github.com/10up/classifai/pull/608)).
+- Bump WordPress "tested up to" version to 6.4 (props [@dkotter](https://github.com/dkotter) via [#613](https://github.com/10up/classifai/pull/613)).
 
 ### Fixed
 
