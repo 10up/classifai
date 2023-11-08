@@ -3,7 +3,7 @@
 import { getPDFData } from '../../plugins/functions';
 
 describe('PDF read Tests', () => {
-
+	let pdfEditLink = '';
 	it('Can save "PDF scanning" settings', () => {
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
 
@@ -26,6 +26,7 @@ describe('PDF read Tests', () => {
 		cy.get('#media-items .media-item a.edit-attachment')
 			.invoke('attr', 'href')
 			.then((editLink) => {
+				pdfEditLink = editLink;
 				cy.visit(editLink);
 			});
 
@@ -40,4 +41,62 @@ describe('PDF read Tests', () => {
 		// Verify generated Data.
 		cy.get('#attachment_content').should('have.value', getPDFData());
 	});
+
+	it( 'Can enable/disable PDF scanning feature by role', () => {
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+		);
+		cy.get( '#enable_read_pdf' ).check();
+		cy.get( '#submit' ).click();
+
+		// Disable admin role.
+		cy.disableFeatureForRoles('read_pdf', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is not available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('not.exist');
+
+		// Enable admin role.
+		cy.enableFeatureForRoles('read_pdf', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('exist');
+	} );
+
+	it( 'Can enable/disable PDF scanning feature by user', () => {
+		// Disable admin role.
+		cy.disableFeatureForRoles('read_pdf', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is not available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('not.exist');
+
+		// Enable feature for admin user.
+		cy.enableFeatureForUsers('read_pdf', ['admin'], 'computer_vision');
+
+		// Verify that the feature is available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('exist');
+	} );
+
+	it( 'User can opt-out PDF scanning feature', () => {
+		// Enable user based opt-out.
+		cy.enableFeatureOptOut('read_pdf', 'computer_vision');
+
+		// opt-out
+		cy.optOutFeature('read_pdf');
+
+		// Verify that the feature is not available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('not.exist');
+
+		// opt-in
+		cy.optInFeature('read_pdf');
+
+		// Verify that the feature is available.
+		cy.visit(pdfEditLink);
+		cy.get('.misc-publishing-actions label[for=rescan-pdf]').should('exist');
+	} );
 });

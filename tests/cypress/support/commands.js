@@ -372,3 +372,20 @@ Cypress.Commands.add('verifyImageGenerationEnabled', (enabled = true) => {
 		cy.get( '#menu-item-generate' ).should( shouldExist );
 	} );
 });
+
+/**
+ * Verify that the AI Vision features is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyAIVisionEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.visit('/wp-admin/upload.php?mode=list');
+	cy.get('#the-list tr:nth-child(1) td.title a span.image-icon').click();
+
+	// Verify that the feature is not available.
+	cy.get('.misc-publishing-actions label[for=rescan-captions]').should(shouldExist);
+	cy.get('.misc-publishing-actions label[for=rescan-tags]').should(shouldExist);
+	cy.get('.misc-publishing-actions label[for=rescan-ocr]').should(shouldExist);
+		cy.get('.misc-publishing-actions label[for=rescan-smart-crop]').should(shouldExist);
+});

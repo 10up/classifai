@@ -1,6 +1,6 @@
 /* eslint jest/expect-expect: 0 */
 
-import { getOCRData, getImageData, getDalleData } from '../../plugins/functions';
+import { getOCRData, getImageData } from '../../plugins/functions';
 
 describe('Image processing Tests', () => {
 	let imageEditLink = '';
@@ -72,10 +72,6 @@ describe('Image processing Tests', () => {
 			});
 	});
 
-	it('Can limit AI Vision features by roles', () => {
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
-	});
-
 	it('Can see Azure AI Vision Image processing actions on media model', () => {
 		const imageId = imageEditLink.split('post=')[1]?.split('&')[0];
 		mediaModelLink = `wp-admin/upload.php?item=${imageId}`;
@@ -94,8 +90,6 @@ describe('Image processing Tests', () => {
 
 		// Disable features
 		cy.get('#computer_vision_enable_image_captions_alt').uncheck();
-		cy.get('#computer_vision_enable_image_captions_caption').uncheck();
-		cy.get('#computer_vision_enable_image_captions_description').uncheck();
 		cy.get('#enable_image_tagging').uncheck();
 		cy.get('#enable_smart_cropping').uncheck();
 		cy.get('#enable_ocr').uncheck();
@@ -124,4 +118,79 @@ describe('Image processing Tests', () => {
 		cy.get('#classifai-rescan-smart-crop').should('not.exist');
 		cy.get('#classifai-rescan-ocr').should('not.exist');
 	});
+
+	it('Can enable/disable AI Vision features by roles', () => {
+		// Enable features.
+		cy.visit('/wp-admin/tools.php?page=classifai&tab=image_processing');
+		cy.get('#computer_vision_enable_image_captions_alt').check();
+		cy.get('#computer_vision_enable_image_captions_caption').check();
+		cy.get('#computer_vision_enable_image_captions_description').check();
+		cy.get('#enable_image_tagging').check();
+		cy.get('#enable_smart_cropping').check();
+		cy.get('#enable_ocr').check();
+		cy.get('#submit').click();
+
+		// Disable access to admin role.
+		cy.disableFeatureForRoles('image_captions', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('image_tagging', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('smart_cropping', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('ocr', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is not available.
+		cy.verifyAIVisionEnabled(false);
+
+		// Enable access to admin role.
+		cy.enableFeatureForRoles('image_captions', ['administrator'], 'computer_vision');
+		cy.enableFeatureForRoles('image_tagging', ['administrator'], 'computer_vision');
+		cy.enableFeatureForRoles('smart_cropping', ['administrator'], 'computer_vision');
+		cy.enableFeatureForRoles('ocr', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is available.
+		cy.verifyAIVisionEnabled(true);
+	});
+
+	it('Can enable/disable AI Vision features by user', () => {
+		// Disable access to admin role.
+		cy.disableFeatureForRoles('image_captions', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('image_tagging', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('smart_cropping', ['administrator'], 'computer_vision');
+		cy.disableFeatureForRoles('ocr', ['administrator'], 'computer_vision');
+
+		// Verify that the feature is not available.
+		cy.verifyAIVisionEnabled(false);
+
+		cy.enableFeatureForUsers('image_captions', ['admin'], 'computer_vision');
+		cy.enableFeatureForUsers('image_tagging', ['admin'], 'computer_vision');
+		cy.enableFeatureForUsers('smart_cropping', ['admin'], 'computer_vision');
+		cy.enableFeatureForUsers('ocr', ['admin'], 'computer_vision');
+
+		// Verify that the feature is available.
+		cy.verifyAIVisionEnabled(true);
+	});
+
+	it( 'User can opt-out AI Vision features', () => {
+		// Enable user based opt-out.
+		cy.enableFeatureOptOut('image_captions', 'computer_vision');
+		cy.enableFeatureOptOut('image_tagging', 'computer_vision');
+		cy.enableFeatureOptOut('smart_cropping', 'computer_vision');
+		cy.enableFeatureOptOut('ocr', 'computer_vision');
+
+		// opt-out
+		cy.optOutFeature('image_captions');
+		cy.optOutFeature('image_tagging');
+		cy.optOutFeature('smart_cropping');
+		cy.optOutFeature('ocr');
+
+		// Verify that the feature is not available.
+		cy.verifyAIVisionEnabled(false);
+
+		// opt-in
+		cy.optInFeature('image_captions');
+		cy.optInFeature('image_tagging');
+		cy.optInFeature('smart_cropping');
+		cy.optInFeature('ocr');
+
+		// Verify that the feature is available.
+		cy.verifyAIVisionEnabled(true);
+	} );
 } );
