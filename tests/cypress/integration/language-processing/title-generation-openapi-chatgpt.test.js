@@ -1,6 +1,17 @@
 import { getChatGPTData } from '../../plugins/functions';
 
 describe( '[Language processing] Title Generation Tests', () => {
+	before( () => {
+		cy.login();
+		cy.optInAllFeatures();
+		cy.visit( '/wp-admin/plugins.php' );
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( '#deactivate-classic-editor' ).length > 0 ) {
+				cy.get('#deactivate-classic-editor').click();
+			}
+		} );
+	} );
+
 	it( 'Can save OpenAI ChatGPT "Language Processing" title settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
@@ -14,7 +25,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can see the generate titles button in a post', () => {
-		const data = getChatGPTData();
+		const data = getChatGPTData('title');
 
 		// Create test post.
 		cy.createPost( {
@@ -86,7 +97,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( '#enable_titles' ).check();
 		cy.get( '#submit' ).click();
 
-		const data = getChatGPTData();
+		const data = getChatGPTData('title');
 
 		cy.visit( '/wp-admin/post-new.php' );
 
@@ -293,49 +304,55 @@ describe( '[Language processing] Title Generation Tests', () => {
 		} );
 	} );
 
-	it( 'Can disable title generation feature by role', () => {
+	it( 'Can enable/disable title generation feature by role', () => {
+		// Enable feature.
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
-
-		// Disable admin role.
-		cy.get( '#enable_titles' ).uncheck();
-		cy.get( '#openai_chatgpt_title_generation_roles_administrator' ).uncheck();
+		cy.get( '#enable_titles' ).check();
 		cy.get( '#submit' ).click();
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT generate titles role disabled',
-			content: 'Test content',
-		} );
+		// Disable admin role.
+		cy.disableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
 
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
+		// Verify that the feature is not available.
+		cy.verifyTitleGenerationEnabled(false);
 
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
+		// Enable admin role.
+		cy.enableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
 
-		// Find and open the summary panel.
-		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+		// Verify that the feature is available.
+		cy.verifyTitleGenerationEnabled(true);
+	} );
 
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
+	it( 'Can enable/disable title generation feature by user', () => {
+		// Disable admin role.
+		cy.disableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
 
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
+		// Verify that the feature is not available.
+		cy.verifyTitleGenerationEnabled(false);
 
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.classifai-post-status button.title' )
-				.should( 'not.exist' );
-		} );
+		// Enable feature for admin user.
+		cy.enableFeatureForUsers('title_generation', ['admin'], 'openai_chatgpt');
+
+		// Verify that the feature is available.
+		cy.verifyTitleGenerationEnabled(true);
+	} );
+
+	it( 'User can opt-out title generation feature', () => {
+		// Enable user based opt-out.
+		cy.enableFeatureOptOut('title_generation', 'openai_chatgpt');
+
+		// opt-out
+		cy.optOutFeature('title_generation');
+
+		// Verify that the feature is not available.
+		cy.verifyTitleGenerationEnabled(false);
+
+		// opt-in
+		cy.optInFeature('title_generation');
+
+		// Verify that the feature is available.
+		cy.verifyTitleGenerationEnabled(true);
 	} );
 } );

@@ -1,5 +1,12 @@
 describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () => {
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
+		// Disable content classification by openai.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+		cy.get( '#enable_classification' ).uncheck();
+		cy.get( '#submit' ).click();
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
@@ -179,12 +186,8 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get('#submit').click();
 		cy.get('.notice').contains('Settings saved.');
 
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-
 		// Verify that the feature is not available.
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('not.exist');
-
+		cy.verifyClassifyContentEnabled(false);
 
 		// Enable access to admin role.
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
@@ -194,11 +197,8 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get('#submit').click();
 		cy.get('.notice').contains('Settings saved.');
 
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-
 		// Verify that the feature is available.
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('exist');
+		cy.verifyClassifyContentEnabled(true);
 	});
 
 	it('Can limit Natural Language Understanding features by users', () => {
@@ -206,15 +206,11 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
 		cy.get('#classifai-settings-content_classification_role_based_access').uncheck();
 		cy.get('#classifai-settings-content_classification_user_based_access').uncheck();
-
 		cy.get('#submit').click();
 		cy.get('.notice').contains('Settings saved.');
 
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-
 		// Verify that the feature is not available.
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('not.exist');
+		cy.verifyClassifyContentEnabled(false);
 
 		// Enable access to user.
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
@@ -226,14 +222,11 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get('#content_classification_users-container input.components-form-token-field__input').type('admin');
 		cy.wait( 1000 );
 		cy.get('ul.components-form-token-field__suggestions-list li:nth-child(1)').click();
-
 		cy.get('#submit').click();
 		cy.get('.notice').contains('Settings saved.');
 
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('exist');
+		// Verify that the feature is available.
+		cy.verifyClassifyContentEnabled(true);
 
 		// Enable access to admin role. (default)
 		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
@@ -254,27 +247,17 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get('#submit').click();
 		cy.get('.notice').contains('Settings saved.');
 
-		// Go to profile page and opt out.
-		cy.visit('/wp-admin/profile.php');
-		cy.get('#classifai_opted_out_features_content_classification').check();
-		cy.get('#submit').click();
-		cy.get('#message.notice').contains('Profile updated.');
+		// opt-out
+		cy.optOutFeature('content_classification');
 
 		// Verify that the feature is not available.
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('not.exist');
+		cy.verifyClassifyContentEnabled(false);
 
-		// Enable access to admin role.
-		cy.visit('/wp-admin/profile.php');
-		cy.get('#classifai_opted_out_features_content_classification').uncheck();
-		cy.get('#submit').click();
-		cy.get('#message.notice').contains('Profile updated.');
+		// opt-in
+		cy.optInFeature('content_classification');
 
 		// Verify that the feature is available.
-		cy.visit('/wp-admin/edit.php');
-		cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-		cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should('exist');
+		cy.verifyClassifyContentEnabled(true);
 	});
 
 } );

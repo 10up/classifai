@@ -266,95 +266,38 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		} );
 	} );
 
-	it( 'Can disable excerpt generation feature by role', () => {
+	it( 'Can enable/disable excerpt generation feature by role', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
-
-		// Disable features.
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT post admin disabled',
-			content: 'Test GPT content',
-		} );
+		// Verify that the feature is not available.
+		cy.verifyExcerptGenerationEnabled(false);
 
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
+		// enable admin role.
+		cy.enableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
 
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the excerpt panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( 'not.exist' );
-		} );
+		// Verify that the feature is available.
+		cy.verifyExcerptGenerationEnabled(true);
 	} );
 
-	it( 'Can enable excerpt generation feature by user', () => {
+	it( 'Can enable/disable excerpt generation feature by user', () => {
 		// Disable admin role.
 		cy.disableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
+
+		// Verify that the feature is not available.
+		cy.verifyExcerptGenerationEnabled(false);
 
 		// Enable feature for admin user.
 		cy.enableFeatureForUsers('excerpt_generation', ['admin'], 'openai_chatgpt');
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT post user enabled',
-			content: 'Test GPT content',
-		} );
-
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
-
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the excerpt panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( 'exist' );
-		} );
+		// Verify that the feature is available.
+		cy.verifyExcerptGenerationEnabled(true);
 	} );
 
 	it( 'User can opt-out excerpt generation feature', () => {
@@ -364,44 +307,13 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		// opt-out
 		cy.optOutFeature('excerpt_generation');
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT post user opt-opt',
-			content: 'Test GPT content',
-		} );
-
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
-
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the excerpt panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( 'not.exist' );
-		} );
+		// Verify that the feature is not available.
+		cy.verifyExcerptGenerationEnabled(false);
 
 		// opt-in
 		cy.optInFeature('excerpt_generation');
+
+		// Verify that the feature is available.
+		cy.verifyExcerptGenerationEnabled(true);
 	} );
-
-
 } );

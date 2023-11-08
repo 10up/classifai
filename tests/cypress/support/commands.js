@@ -25,6 +25,12 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
 
+/**
+ * Verify that the post has the expected taxonomy terms.
+ *
+ * @param {string} taxonomy  The taxonomy to verify.
+ * @param {number} threshold The threshold to use.
+ */
 Cypress.Commands.add('verifyPostTaxonomyTerms', (taxonomy, threshold) => {
 	const taxonomyTitle = taxonomy.charAt(0).toUpperCase() + taxonomy.slice(1);
 	const panelTitle =
@@ -68,7 +74,11 @@ Cypress.Commands.add('verifyPostTaxonomyTerms', (taxonomy, threshold) => {
 	});
 });
 
-
+/**
+ * Opt out for a feature.
+ *
+ * @param {string} feature The feature to opt out.
+ */
 Cypress.Commands.add('optOutFeature', (feature) => {
 	// Go to profile page and opt out.
 	cy.visit('/wp-admin/profile.php');
@@ -77,6 +87,11 @@ Cypress.Commands.add('optOutFeature', (feature) => {
 	cy.get('#message.notice').contains('Profile updated.');
 });
 
+/**
+ * Opt in for a feature.
+ *
+ * @param {string} feature The feature to opt in.
+ */
 Cypress.Commands.add('optInFeature', (feature) => {
 	// Go to profile page and opt in.
 	cy.visit('/wp-admin/profile.php');
@@ -85,7 +100,26 @@ Cypress.Commands.add('optInFeature', (feature) => {
 	cy.get('#message.notice').contains('Profile updated.');
 });
 
+/**
+ * Opt in for all features.
+ */
+Cypress.Commands.add('optInAllFeatures', () => {
+	// Go to profile page and opt in.
+	cy.visit('/wp-admin/profile.php');
+	cy.get('input[name="classifai_opted_out_features[]"]').uncheck({
+		multiple: true,
+	});
+	cy.get('#submit').click();
+	cy.get('#message.notice').contains('Profile updated.');
+});
 
+/**
+ * Enable role based access for a feature.
+ *
+ * @param {string} feature  The feature to enable.
+ * @param {string} roles    The roles to enable.
+ * @param {string} provider The provider to enable.
+ */
 Cypress.Commands.add('enableFeatureForRoles', (feature, roles, provider) => {
 	cy.visit(
 		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
@@ -98,6 +132,13 @@ Cypress.Commands.add('enableFeatureForRoles', (feature, roles, provider) => {
 	cy.get('.notice').contains('Settings saved.');
 });
 
+/**
+ * Disable role based access for a feature.
+ *
+ * @param {string} feature  The feature to disable.
+ * @param {string} roles    The roles to disable.
+ * @param {string} provider The provider to disable.
+ */
 Cypress.Commands.add('disableFeatureForRoles', (feature, roles, provider) => {
 	cy.visit(
 		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
@@ -110,14 +151,21 @@ Cypress.Commands.add('disableFeatureForRoles', (feature, roles, provider) => {
 	cy.get('.notice').contains('Settings saved.');
 });
 
+/**
+ * Enable user based access for a feature.
+ *
+ * @param {string} feature  The feature to enable.
+ * @param {string} users    The users to enable.
+ * @param {string} provider The provider to enable.
+ */
 Cypress.Commands.add('enableFeatureForUsers', (feature, users, provider) => {
 	cy.visit(
 		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
 	);
 	cy.get(`#${feature}_user_based_access`).check();
 	cy.get( 'body' ).then( ( $body ) => {
-		if ( $body.find( '.components-form-token-field__remove-token' ).length > 0 ) {
-			cy.get('.components-form-token-field__remove-token').click({
+		if ( $body.find( `#${feature}_users-container .components-form-token-field__remove-token` ).length > 0 ) {
+			cy.get(`#${feature}_users-container .components-form-token-field__remove-token`).click({
 				multiple: true,
 			});
 		}
@@ -132,7 +180,12 @@ Cypress.Commands.add('enableFeatureForUsers', (feature, users, provider) => {
 	cy.get('.notice').contains('Settings saved.');
 });
 
-
+/**
+ * Enable user based opt-out for a feature.
+ *
+ * @param {string} feature  The feature to enable.
+ * @param {string} provider The provider to enable.
+ */
 Cypress.Commands.add('enableFeatureOptOut', (feature, provider) => {
 	cy.visit(
 		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${provider}`
@@ -144,4 +197,135 @@ Cypress.Commands.add('enableFeatureOptOut', (feature, provider) => {
 
 	cy.get('#submit').click();
 	cy.get('.notice').contains('Settings saved.');
+});
+
+/**
+ * Verify that the content classification feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyClassifyContentEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.visit('/wp-admin/edit.php');
+	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
+	cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should(shouldExist);
+});
+
+/**
+ * Verify that the excerpt generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyExcerptGenerationEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	// Create test post.
+	cy.createPost( {
+		title: 'Test ChatGPT post user opt-opt',
+		content: 'Test GPT content',
+	} );
+
+	// Close post publish panel.
+	const closePanelSelector = 'button[aria-label="Close panel"]';
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( closePanelSelector ).length > 0 ) {
+			cy.get( closePanelSelector ).click();
+		}
+	} );
+
+	// Open post settings sidebar.
+	cy.openDocumentSettingsSidebar();
+
+	// Find and open the excerpt panel.
+	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+
+	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+		// Find the panel container.
+		const $panel = $panelButton.parents( '.components-panel__body' );
+
+		// Open panel.
+		if ( ! $panel.hasClass( 'is-opened' ) ) {
+			cy.wrap( $panelButton ).click();
+		}
+
+		// Verify button doesn't exist.
+		cy.wrap( $panel )
+			.find( '.editor-post-excerpt button' )
+			.should( shouldExist );
+	} );
+});
+
+/**
+ * Verify that the resize content feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyResizeContentEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.createPost( {
+		title: 'Expand content',
+		content: 'Are the resizing options hidden?',
+	} );
+
+	cy.get( '.classifai-resize-content-btn' ).should( shouldExist );
+});
+
+/**
+ * Verify that the speech to text feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifySpeechToTextEnabled', (enabled = true, options = {}) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	// Verify features are not present in attachment metabox.
+	cy.visit( options.audioEditLink );
+	cy.get( '.misc-publishing-actions label[for=retranscribe]' ).should(
+		shouldExist
+	);
+
+	// Verify features are not present in media modal.
+	cy.visit( options.mediaModalLink );
+	cy.get( '.media-modal' ).should( 'exist' );
+	cy.get( '#classifai-retranscribe' ).should( shouldExist );
+});
+
+/**
+ * Verify that the text to speech feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyTextToSpeechEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.visit('/wp-admin/edit.php');
+	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
+	cy.get( '.classifai-panel' ).click();
+	cy.get( '#classifai-audio-controls__preview-btn' ).should( shouldExist );
+});
+
+/**
+ * Verify that the title generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyTitleGenerationEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.visit('/wp-admin/edit.php');
+	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
+
+	// Find and open the summary panel.
+	const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+
+	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+		// Find the panel container.
+		const $panel = $panelButton.parents( '.components-panel__body' );
+
+		// Open panel.
+		if ( ! $panel.hasClass( 'is-opened' ) ) {
+			cy.wrap( $panelButton ).click();
+		}
+
+		// Verify button doesn't exist.
+		cy.wrap( $panel )
+			.find( '.classifai-post-status button.title' )
+			.should( shouldExist );
+	} );
 });

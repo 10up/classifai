@@ -253,20 +253,48 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			);
 	} );
 
-	it( 'Disabling Resize content feature by role does not render buttons in the UI', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
-		);
-		cy.get(
-			'#openai_chatgpt_resize_content_roles_administrator'
-		).uncheck();
-		cy.get( '#submit' ).click();
+	it( 'Can enable/disable resize content feature by role', () => {
+		// Disable admin role.
+		cy.disableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
 
-		cy.createPost( {
-			title: 'Expand content',
-			content: 'Are the resizing options hidden?',
-		} );
+		// Verify that the feature is not available.
+		cy.verifyResizeContentEnabled(false);
 
-		cy.get( '.classifai-resize-content-btn' ).should( 'not.exist' );
+		// Enable admin role.
+		cy.enableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
+
+		// Verify that the feature is available.
+		cy.verifyResizeContentEnabled(true);
+	} );
+
+	it( 'Can enable/disable resize content feature by user', () => {
+		// Disable admin role.
+		cy.disableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
+
+		// Verify that the feature is not available.
+		cy.verifyResizeContentEnabled(false);
+
+		// Enable feature for admin user.
+		cy.enableFeatureForUsers('resize_content', ['admin'], 'openai_chatgpt');
+
+		// Verify that the feature is available.
+		cy.verifyResizeContentEnabled(true);
+	} );
+
+	it( 'User can opt-out resize content feature', () => {
+		// Enable user based opt-out.
+		cy.enableFeatureOptOut('resize_content', 'openai_chatgpt');
+
+		// opt-out
+		cy.optOutFeature('resize_content');
+
+		// Verify that the feature is not available.
+		cy.verifyResizeContentEnabled(false);
+
+		// opt-in
+		cy.optInFeature('resize_content');
+
+		// Verify that the feature is available.
+		cy.verifyResizeContentEnabled(true);
 	} );
 } );
