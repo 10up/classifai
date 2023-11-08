@@ -510,11 +510,11 @@ class NLU extends Provider {
 			],
 		];
 		foreach ( $modes as $name => $data ) {
-			$args = [
-				...$args,
-				...$data,
-				'label_for' => $name,
-			];
+			$args = array_merge(
+				$args,
+				$data,
+				[ 'label_for' => $name ]
+			);
 
 			echo '<li>';
 			$this->render_input( $args );
