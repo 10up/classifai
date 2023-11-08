@@ -1,6 +1,6 @@
 /* eslint jest/expect-expect: 0 */
 
-import { getPDFData } from '../plugins/functions';
+import { getPDFData } from '../../plugins/functions';
 
 describe('PDF read Tests', () => {
 

@@ -329,3 +329,46 @@ Cypress.Commands.add('verifyTitleGenerationEnabled', (enabled = true) => {
 			.should( shouldExist );
 	} );
 });
+
+/**
+ * Verify that the image generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add('verifyImageGenerationEnabled', (enabled = true) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+	cy.visit('/wp-admin/upload.php');
+	if (enabled) {
+		cy.get(
+			'.wp-has-current-submenu.wp-menu-open li:last-child a'
+		).should( 'contain.text', 'Generate Images' );
+	} else {
+		cy.get(
+			'.wp-has-current-submenu.wp-menu-open li:last-child a'
+		).should( 'not.contain.text', 'Generate Images' );
+	}
+
+	cy.visit('/wp-admin/edit.php');
+	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
+
+	// Find and open the Featured image panel.
+	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+
+	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
+		// Find the panel container.
+		const $panel = $panelButton.parents( '.components-panel__body' );
+
+		// Open panel.
+		if ( ! $panel.hasClass( 'is-opened' ) ) {
+			cy.wrap( $panelButton ).click();
+		}
+
+		// Click to open media modal.
+		cy.wrap( $panel )
+			.find( '.editor-post-featured-image__toggle' )
+			.click();
+
+		// Verify tab doesn't exist.
+		cy.get( '#menu-item-generate' ).should( shouldExist );
+	} );
+});
