@@ -24,7 +24,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can see the generate titles button in a post', () => {
-		const data = getChatGPTData('title');
+		const data = getChatGPTData();
 
 		// Create test post.
 		cy.createPost( {
@@ -95,7 +95,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( '#enable_titles' ).check();
 		cy.get( '#submit' ).click();
 
-		const data = getChatGPTData('title');
+		const data = getChatGPTData();
 
 		cy.visit( '/wp-admin/post-new.php' );
 

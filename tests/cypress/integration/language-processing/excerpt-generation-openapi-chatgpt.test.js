@@ -34,7 +34,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit( '/wp-admin/plugins.php' );
 		cy.disableClassicEditor();
 
-		const data = getChatGPTData('excerpt');
+		const data = getChatGPTData();
 
 		// Create test post.
 		cy.createPost( {
@@ -85,7 +85,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#submit' ).click();
 
-		const data = getChatGPTData('excerpt');
+		const data = getChatGPTData();
 
 		cy.classicCreatePost( {
 			title: 'Excerpt test classic',
