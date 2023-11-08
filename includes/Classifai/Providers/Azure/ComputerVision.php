@@ -176,7 +176,7 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			get_asset_info( 'editor-ocr', 'dependencies' ),
+			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'editor-ocr', 'version' ),
 			true
 		);
