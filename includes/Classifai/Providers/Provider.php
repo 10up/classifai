@@ -8,6 +8,13 @@ namespace Classifai\Providers;
 abstract class Provider {
 
 	/**
+	 * @var string The ID of the provider.
+	 *
+	 * To be set in the subclass.
+	 */
+	const ID = '';
+
+	/**
 	 * @var string The display name for the provider. ie. Azure
 	 */
 	public $provider_name;
@@ -128,11 +135,6 @@ abstract class Provider {
 	abstract public function register();
 
 	/**
-	 * Resets the settings for this provider.
-	 */
-	abstract public function reset_settings();
-
-	/**
 	 * Initialization routine
 	 */
 	public function register_admin() {
@@ -234,5 +236,33 @@ abstract class Provider {
 		}
 
 		return $is_configured;
+	}
+
+	/**
+	 * Adds an api key field.
+	 *
+	 * @param array $args API key field arguments.
+	 */
+	public function add_api_key_field( $args = [] ) {
+		$default_settings = $this->feature_instance->get_default_settings();
+		$default_settings = $default_settings[ static::ID ];
+		$id = $args['id'] ?? 'api_key';
+
+		add_settings_field(
+			$id,
+			$args['label'] ?? esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => $id,
+				'input_type'    => 'password',
+				'default_value' => $default_settings[ $id ],
+				'data_attr'     => [
+					'provider-scope' => [ static::ID ],
+				],
+			]
+		);
 	}
 }

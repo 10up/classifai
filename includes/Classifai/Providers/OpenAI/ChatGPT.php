@@ -103,8 +103,7 @@ class ChatGPT extends Provider {
 	 * @param array $args Arguments passed in.
 	 */
 	public function add_prompt_field( $args = [] ) {
-		$default_settings = $this->feature_instance->get_default_settings();
-		$default_settings = $default_settings[ static::ID ];
+		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
 			$args['id'],
@@ -116,36 +115,8 @@ class ChatGPT extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => $args['id'],
 				'placeholder'   => $args['prompt_placeholder'],
-				'default_value' => $default_settings[ $args['id'] ],
+				'default_value' => $settings[ $args['id'] ],
 				'description'   => $args['description'],
-			]
-		);
-	}
-
-	/**
-	 * Adds an api key field.
-	 *
-	 * ChatGPT requires an API key to be set.
-	 * Any feature that supports ChatGPT will require this key to be set.
-	 */
-	public function add_api_key_field() {
-		$default_settings = $this->feature_instance->get_default_settings();
-		$default_settings = $default_settings[ static::ID ];
-
-		add_settings_field(
-			'api_key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ],
-				],
 			]
 		);
 	}
@@ -161,8 +132,7 @@ class ChatGPT extends Provider {
 	 * @param array $args Arguments passed in.
 	 */
 	public function add_number_of_responses_field( $args = [] ) {
-		$default_settings = $this->feature_instance->get_default_settings();
-		$default_settings = $default_settings[ static::ID ];
+		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
 			$args['id'],
@@ -176,7 +146,7 @@ class ChatGPT extends Provider {
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
-				'default_value' => $default_settings[ $args['id'] ],
+				'default_value' => $settings[ $args['id'] ],
 				'description'   => $args['description'],
 			]
 		);
@@ -434,6 +404,8 @@ class ChatGPT extends Provider {
 	 */
 	public function setup_fields_sections() {}
 
+	public function reset_settings() {}
+
 	/**
 	 * Sanitization for the options being saved.
 	 *
@@ -452,65 +424,11 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {}
-
-	/**
 	 * Default settings for ChatGPT
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
-		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-		}
-		$editable_roles = get_editable_roles() ?? [];
-
-		$excerpt_length = absint( apply_filters( 'excerpt_length', 55 ) );
-
-		return [
-			'authenticated'           => false,
-			'api_key'                 => '',
-			'enable_excerpt'          => false,
-			'roles'                   => array_keys( $editable_roles ),
-			'length'                  => $excerpt_length,
-			'generate_excerpt_prompt' => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->generate_excerpt_prompt,
-					'original' => 1,
-				),
-			),
-			'enable_titles'           => false,
-			'title_roles'             => array_keys( $editable_roles ),
-			'number_titles'           => 1,
-			'generate_title_prompt'   => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->generate_title_prompt,
-					'original' => 1,
-				),
-			),
-			'enable_resize_content'   => false,
-			'resize_content_roles'    => array_keys( $editable_roles ),
-			'suggestion_count'        => 1,
-			'condense_text_prompt'    => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->condense_text_prompt,
-					'original' => 1,
-				),
-			),
-			'expand_text_prompt'      => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->expand_text_prompt,
-					'original' => 1,
-				),
-			),
-		];
-	}
+	public function get_default_settings() {}
 
 	/**
 	 * Provides debug information related to the provider.

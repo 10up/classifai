@@ -2,7 +2,8 @@
 
 namespace Classifai\Admin;
 
-use \Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Features\TextToSpeech;
+use \Classifai\Providers\Azure\Speech;
 use \Classifai\Watson\Normalizer;
 
 /**
@@ -173,6 +174,10 @@ class SavePostHandler {
 	/**
 	 * Synthesizes speech from the post title and content.
 	 *
+	 * @todo: This method is copied to the Azure\Speech provider.
+	 * Once all the speech-synthesize changed are migrated, we should
+	 * remove this method.
+	 *
 	 * @param int $post_id Post ID.
 	 * @return bool|int|WP_Error
 	 */
@@ -193,11 +198,12 @@ class SavePostHandler {
 		}
 
 		$normalizer          = new Normalizer();
-		$settings            = \Classifai\get_plugin_settings( 'language_processing', TextToSpeech::FEATURE_NAME );
+		$feature             = new TextToSpeech();
+		$settings            = $feature->get_settings();
 		$post                = get_post( $post_id );
 		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
-		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
-		$saved_attachment_id = (int) get_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, true );
+		$content_hash        = get_post_meta( $post_id, Speech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, Speech::AUDIO_ID_KEY, true );
 
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
 		if ( $saved_attachment_id ) {
@@ -248,7 +254,7 @@ class SavePostHandler {
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $settings['credentials']['url'], TextToSpeech::API_PATH );
+		$remote_url = sprintf( '%s%s', $settings['credentials']['url'], Speech::API_PATH );
 		$response   = wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
@@ -272,8 +278,8 @@ class SavePostHandler {
 		// If audio already exists for this post, delete it.
 		if ( $saved_attachment_id ) {
 			wp_delete_attachment( $saved_attachment_id, true );
-			delete_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY );
-			delete_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY );
+			delete_post_meta( $post_id, Speech::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY );
 		}
 
 		// The audio file name.
@@ -315,9 +321,9 @@ class SavePostHandler {
 			);
 		}
 
-		update_post_meta( $post_id, TextToSpeech::AUDIO_ID_KEY, absint( $attachment_id ) );
-		update_post_meta( $post_id, TextToSpeech::AUDIO_TIMESTAMP_KEY, time() );
-		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
+		update_post_meta( $post_id, Speech::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, Speech::AUDIO_HASH_KEY, md5( $post_content ) );
 
 		return $attachment_id;
 	}

@@ -5,8 +5,10 @@
 
 namespace Classifai\Providers\Azure;
 
-use Classifai\Admin\SavePostHandler;
-use Classifai\Providers\Provider;
+use \Classifai\Admin\SavePostHandler;
+use \Classifai\Providers\Provider;
+use \Classifai\Watson\Normalizer;
+use \Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;
 
@@ -14,7 +16,7 @@ use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_tts_supported_post_types;
 use function Classifai\get_asset_info;
 
-class TextToSpeech extends Provider {
+class Speech extends Provider {
 
 	const ID = 'ms_azure_text_to_speech';
 
@@ -65,14 +67,13 @@ class TextToSpeech extends Provider {
 	/**
 	 * Azure Text to Speech constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance ) {
 		parent::__construct(
 			'Microsoft Azure',
 			self::FEATURE_NAME,
-			'azure_text_to_speech',
-			$service
+			'azure_text_to_speech'
 		);
 
 		// Set the onboarding options.
@@ -83,6 +84,8 @@ class TextToSpeech extends Provider {
 				'authenticated' => __( 'Generate speech for post content', 'classifai' ),
 			),
 		);
+
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
@@ -130,7 +133,6 @@ class TextToSpeech extends Provider {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-		$supported_post_type = get_tts_supported_post_types();
 		foreach ( get_tts_supported_post_types() as $post_type ) {
 			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
 		}
@@ -138,79 +140,53 @@ class TextToSpeech extends Provider {
 		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
-	/**
-	 * Resets settings for the TextToSpeech provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
+	public function add_endpoint_url_field( $args = [] ) {
+		$settings = $this->feature_instance->get_settings( static::ID );
+		$id               = $args['id'] ?? 'endpoint_url';
+
+		add_settings_field(
+			$id,
+			esc_html__( 'Endpoint URL', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => $id,
+				'input_type'    => 'text',
+				'default_value' => $settings[ $id ],
+				'description'   => $args[ 'description' ] ?? __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+			]
+		);
 	}
 
-	/**
-	 * Set up the fields for each section.
-	 */
-	public function setup_fields_sections() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-		$default_settings = $this->get_default_settings();
+	public function add_voices_options_field( $args = [] ) {
+		$settings = $this->feature_instance->get_settings( static::ID );
 		$voices_options   = $this->get_voices_select_options();
-
-		add_settings_field(
-			'url',
-			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index'  => 'credentials',
-				'label_for'     => 'url',
-				'input_type'    => 'text',
-				'default_value' => $default_settings['credentials']['url'],
-				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'api-key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index'  => 'credentials',
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_settings['credentials']['api_key'],
-			]
-		);
-
-		add_settings_field(
-			'post-types',
-			esc_html__( 'Post Types', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'post_types',
-				'option_index'   => 'post_types',
-				'options'        => $this->get_post_types_select_options(),
-				'default_values' => $default_settings['post_types'],
-			]
-		);
 
 		if ( ! empty( $voices_options ) ) {
 			add_settings_field(
 				'voice',
 				esc_html__( 'Voice', 'classifai' ),
-				[ $this, 'render_select' ],
-				$this->get_option_name(),
-				$this->get_option_name(),
+				[ $this->feature_instance, 'render_select' ],
+				$this->feature_instance->get_option_name(),
+				$this->feature_instance->get_option_name() . '_section',
 				[
+					'option_index'  => static::ID,
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
-					'default_value' => $default_settings['voice'],
+					'default_value' => $settings['voice'],
 				]
 			);
 		}
 	}
+
+	/**
+	 * Set up the fields for each section.
+	 */
+	public function setup_fields_sections() {}
+
+	public function reset_settings() {}
 
 	/**
 	 * Sanitization callback for settings.
@@ -219,40 +195,43 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ) {
-		$current_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$current_settings = wp_parse_args(
+			$this->feature_instance->get_settings(),
+			$this->feature_instance->get_default_settings()
+		);
 		$is_credentials_changed = false;
 
-		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
-			$new_url = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
-			$new_key = sanitize_text_field( $settings['credentials']['api_key'] );
+		if ( ! empty( $settings[ static::ID ]['endpoint_url'] ) && ! empty( $settings[ static::ID ]['api_key'] ) ) {
+			$new_url = trailingslashit( esc_url_raw( $settings[ static::ID ]['endpoint_url'] ) );
+			$new_key = sanitize_text_field( $settings[ static::ID ]['api_key'] );
 
-			if ( $new_url !== $current_settings['credentials']['url'] || $new_key !== $current_settings['credentials']['api_key'] ) {
+			if ( $new_url !== $current_settings[ static::ID ]['endpoint_url'] || $new_key !== $current_settings[ static::ID ]['api_key'] ) {
 				$is_credentials_changed = true;
 			}
 
 			if ( $is_credentials_changed ) {
-				$current_settings['credentials']['url']     = $new_url;
-				$current_settings['credentials']['api_key'] = $new_key;
-				$current_settings['voices']                 = $this->connect_to_service(
+				$current_settings[ static::ID ]['endpoint_url'] = $new_url;
+				$current_settings[ static::ID ]['api_key']      = $new_key;
+				$current_settings[ static::ID ]['voices']       = $this->connect_to_service(
 					array(
-						'url'     => $new_url,
-						'api_key' => $new_key,
+						'endpoint_url' => $new_url,
+						'api_key'      => $new_key,
 					)
 				);
 
-				if ( ! empty( $current_settings['voices'] ) ) {
-					$current_settings['authenticated'] = true;
+				if ( ! empty( $current_settings[ static::ID ]['voices'] ) ) {
+					$current_settings[ static::ID ]['authenticated'] = true;
 				} else {
-					$current_settings['voices']        = [];
-					$current_settings['authenticated'] = false;
+					$current_settings[ static::ID ]['voices']        = [];
+					$current_settings[ static::ID ]['authenticated'] = false;
 				}
 			}
 		} else {
-			$current_settings['credentials']['url']     = '';
-			$current_settings['credentials']['api_key'] = '';
+			$current_settings[ static::ID ]['endpoint_url'] = '';
+			$current_settings[ static::ID ]['api_key']      = '';
 
 			add_settings_error(
-				$this->get_option_name(),
+				$this->feature_instance->get_option_name(),
 				'classifai-azure-text-to-speech-auth-empty',
 				esc_html__( 'One or more credentials required to connect to the Azure Text to Speech service is empty.', 'classifai' ),
 				'error'
@@ -270,8 +249,8 @@ class TextToSpeech extends Provider {
 			}
 		}
 
-		if ( isset( $settings['voice'] ) && ! empty( $settings['voice'] ) ) {
-			$current_settings['voice'] = sanitize_text_field( $settings['voice'] );
+		if ( isset( $settings[ static::ID ]['voice'] ) && ! empty( $settings[ static::ID ]['voice'] ) ) {
+			$current_settings[ static::ID ]['voice'] = sanitize_text_field( $settings[ static::ID ]['voice'] );
 		}
 
 		return $current_settings;
@@ -284,17 +263,17 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function connect_to_service( array $args = array() ) {
-		$credentials = $this->get_settings( 'credentials' );
+		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
-			'url'     => isset( $credentials['url'] ) ? $credentials['url'] : '',
-			'api_key' => isset( $credentials['api_key'] ) ? $credentials['api_key'] : '',
+			'endpoint_url'    => isset( $settings[ static::ID ]['url'] ) ? $settings[ static::ID ]['url'] : '',
+			'api_key'         => isset( $settings[ static::ID ]['api_key'] ) ? $settings[ static::ID ]['api_key'] : '',
 		);
 
 		$default = wp_parse_args( $args, $default );
 
 		// Return if credentials don't exist.
-		if ( empty( $default['url'] ) || empty( $default['api_key'] ) ) {
+		if ( empty( $default['endpoint_url'] ) || empty( $default['api_key'] ) ) {
 			return array();
 		}
 
@@ -309,7 +288,7 @@ class TextToSpeech extends Provider {
 		// Create request URL.
 		$request_url = sprintf(
 			'%1$scognitiveservices/voices/list',
-			$default['url']
+			$default['endpoint_url']
 		);
 
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
@@ -380,8 +359,9 @@ class TextToSpeech extends Provider {
 	 * @return array
 	 */
 	public function get_voices_select_options() {
-		$voices  = $this->get_settings( 'voices' );
-		$options = array();
+		$settings = $this->feature_instance->get_settings( static::ID );
+		$voices   = $settings['voices'];
+		$options  = array();
 
 		if ( false === $voices ) {
 			return $options;
@@ -563,6 +543,159 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Synthesizes speech from the post title and content.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool|int|WP_Error
+	 */
+	public function synthesize_speech( $post_id ) {
+		if ( empty( $post_id ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_post_id_missing',
+				esc_html__( 'Post ID missing.', 'classifai' )
+			);
+		}
+
+		// We skip the user cap check if running under WP-CLI.
+		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_user_not_authorized',
+				esc_html__( 'Unauthorized user.', 'classifai' )
+			);
+		}
+
+		$normalizer          = new Normalizer();
+		$feature             = new TextToSpeech( false );
+		$settings            = $feature->get_settings();
+		$post                = get_post( $post_id );
+		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		$content_hash        = get_post_meta( $post_id, Speech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, Speech::AUDIO_ID_KEY, true );
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
+		}
+
+		$voice        = $settings[ static::ID ]['voice'] ?? '';
+		$voice_data   = explode( '|', $voice );
+		$voice_name   = '';
+		$voice_gender = '';
+
+		// Extract the voice name and gender from the option value.
+		if ( 2 === count( $voice_data ) ) {
+			$voice_name   = $voice_data[0];
+			$voice_gender = $voice_data[1];
+
+			// Return error if voice is not set in settings.
+		} else {
+			return new \WP_Error(
+				'azure_text_to_speech_voice_information_missing',
+				esc_html__( 'Voice data not set.', 'classifai' )
+			);
+		}
+
+		// Create the request body to synthesize speech from text.
+		$request_body = sprintf(
+			"<speak version='1.0' xml:lang='en-US'><voice xml:lang='en-US' xml:gender='%s' name='%s'>%s</voice></speak>",
+			$voice_gender,
+			$voice_name,
+			$post_content
+		);
+
+		// Request parameters.
+		$request_params = array(
+			'method'  => 'POST',
+			'body'    => $request_body,
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Ocp-Apim-Subscription-Key' => $settings[ static::ID ]['api_key'],
+				'Content-Type'              => 'application/ssml+xml',
+				'X-Microsoft-OutputFormat'  => 'audio-16khz-128kbitrate-mono-mp3',
+			),
+		);
+
+		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], Speech::API_PATH );
+		$response   = wp_remote_post( $remote_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK !== $code ) {
+			return new \WP_Error(
+				'azure_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
+
+		// If audio already exists for this post, delete it.
+		if ( $saved_attachment_id ) {
+			wp_delete_attachment( $saved_attachment_id, true );
+			delete_post_meta( $post_id, Speech::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY );
+		}
+
+		// The audio file name.
+		$audio_file_name = sprintf(
+			'post-as-audio-%1$s.mp3',
+			$post_id
+		);
+
+		// Upload the audio stream as an .mp3 file.
+		$file_data = wp_upload_bits(
+			$audio_file_name,
+			null,
+			$response_body
+		);
+
+		if ( isset( $file_data['error'] ) && ! empty( $file_data['error'] ) ) {
+			return new \WP_Error(
+				'azure_text_to_speech_upload_bits_failure',
+				esc_html( $file_data['error'] )
+			);
+		}
+
+		// Insert the audio file as attachment.
+		$attachment_id = wp_insert_attachment(
+			array(
+				'guid'           => $file_data['file'],
+				'post_title'     => $audio_file_name,
+				'post_mime_type' => $file_data['type'],
+			),
+			$file_data['file'],
+			$post_id
+		);
+
+		// Return error if creation of attachment fails.
+		if ( ! $attachment_id ) {
+			return new \WP_Error(
+				'azure_text_to_speech_resource_creation_failure',
+				esc_html__( 'Audio creation failed.', 'classifai' )
+			);
+		}
+
+		update_post_meta( $post_id, Speech::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, Speech::AUDIO_HASH_KEY, md5( $post_content ) );
+
+		return $attachment_id;
+	}
+
+	/**
 	 * Handles audio generation on rest updates / inserts.
 	 *
 	 * @param WP_Post         $post     Inserted or updated post object.
@@ -586,8 +719,7 @@ class TextToSpeech extends Provider {
 			( $process_content && null === $request->get_param( 'classifai_synthesize_speech' ) ) ||
 			true === $request->get_param( 'classifai_synthesize_speech' )
 		) {
-			$save_post_handler = new SavePostHandler();
-			$save_post_handler->synthesize_speech( $request->get_param( 'id' ) );
+			$this->synthesize_speech( $request->get_param( 'id' ) );
 		}
 	}
 

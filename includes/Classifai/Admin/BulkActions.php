@@ -2,7 +2,7 @@
 namespace Classifai\Admin;
 
 use Classifai\Providers\Azure\ComputerVision;
-use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Providers\Azure\Speech;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Providers\OpenAI\Whisper;
@@ -51,7 +51,7 @@ class BulkActions {
 	private $whisper;
 
 	/**
-	 * @var \Classifai\Providers\Azure\TextToSpeech
+	 * @var \Classifai\Providers\Azure\Speech
 	 */
 	private $text_to_speech;
 
@@ -160,7 +160,7 @@ class BulkActions {
 		}
 
 		if (
-			is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) &&
+			is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) &&
 			in_array( get_current_screen()->post_type, $this->text_to_speech->get_supported_post_types(), true )
 		) {
 			$bulk_actions['text_to_speech'] = __( 'Text to speech', 'classifai' );
@@ -250,7 +250,7 @@ class BulkActions {
 			if ( 'text_to_speech' === $doaction ) {
 				// Handle Azure Text to Speech generation.
 				if (
-					is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) &&
+					is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) &&
 					is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' )
 				) {
 					$action = 'text_to_speech';
@@ -415,7 +415,7 @@ class BulkActions {
 			}
 		}
 
-		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\TextToSpeech' ) ) {
+		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) ) {
 			if ( in_array( $post->post_type, $this->text_to_speech->get_supported_post_types(), true ) ) {
 				$actions['text_to_speech'] = sprintf(
 					'<a href="%s">%s</a>',

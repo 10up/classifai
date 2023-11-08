@@ -3,17 +3,20 @@
 namespace Classifai\Features;
 
 use \Classifai\Providers\OpenAI\ChatGPT;
+use \Classifai\Providers\Azure\Speech;
+
+use function Classifai\find_provider_class;
 
 /**
- * Class ExcerptGeneration
+ * Class TitleGeneration
  */
-class ExcerptGeneration extends Feature {
+class TextToSpeech extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_excerpt_generation';
+	const ID = 'feature_text_to_speech';
 
 	/**
 	 * Returns the label of the feature.
@@ -23,7 +26,7 @@ class ExcerptGeneration extends Feature {
 	public function get_label() {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
-			__( 'Excerpt Generation', 'classifai' )
+			__( 'Text to speech', 'classifai' )
 		);
 	}
 
@@ -36,7 +39,7 @@ class ExcerptGeneration extends Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
-				ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
+				Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
 			]
 		);
 	}
@@ -56,7 +59,7 @@ class ExcerptGeneration extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable excerpt generation', 'classifai' ),
+			esc_html__( 'Enable text to speech', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -78,23 +81,28 @@ class ExcerptGeneration extends Feature {
 				'label_for'      => 'roles',
 				'options'        => $this->roles,
 				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
+				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
 			]
 		);
 
+		$post_types        = \Classifai\get_post_types_for_language_settings();
+		$post_type_options = array();
+
+		foreach ( $post_types as $post_type ) {
+			$post_type_options[ $post_type->name ] = $post_type->label;
+		}
+
 		add_settings_field(
-			'length',
-			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
+			'post_types',
+			esc_html__( 'Allowed post types', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
 			[
-				'label_for'     => 'length',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
+				'label_for'      => 'post_types',
+				'options'        => $post_type_options,
+				'default_values' => $settings['post_types'],
+				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
 			]
 		);
 
@@ -117,15 +125,10 @@ class ExcerptGeneration extends Feature {
 		 *
 		 * If the feature supports multiple providers, then the fields should be added for each provider.
 		 */
-		$chat_gpt = new ChatGPT( $this );
-		$chat_gpt->add_api_key_field();
-		$chat_gpt->add_prompt_field(
-			[
-				'id'                 => 'generate_excerpt_prompt',
-				'prompt_placeholder' => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
-				'description'        => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
-			]
-		);
+		$azure_speech = new Speech( $this );
+		$azure_speech->add_api_key_field();
+		$azure_speech->add_endpoint_url_field();
+		$azure_speech->add_voices_options_field();
 	}
 
 	/**
@@ -158,6 +161,17 @@ class ExcerptGeneration extends Feature {
 		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
 	}
 
+	protected function get_post_types_select_options() {
+		$post_types = \Classifai\get_post_types_for_language_settings();
+		$options    = array();
+
+		foreach ( $post_types as $post_type ) {
+			$options[ $post_type->name ] = $post_type->label;
+		}
+
+		return $options;
+	}
+
 	/**
 	 * Returns the default settings for the feature.
 	 *
@@ -170,20 +184,16 @@ class ExcerptGeneration extends Feature {
 	 */
 	public function get_default_settings() {
 		return [
-			'status'    => '0',
-			'roles'     => $this->roles,
-			'length'    => absint( apply_filters( 'excerpt_length', 55 ) ),
-			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
-			ChatGPT::ID => [
-				'api_key'                 => '',
-				'authenticated'           => false,
-				'generate_excerpt_prompt' => array(
-					array(
-						'title'    => esc_html__( 'Default', 'classifai' ),
-						'prompt'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
-						'original' => 1,
-					),
-				),
+			'status'     => '0',
+			'roles'      => $this->roles,
+			'post_types' => [],
+			'provider'   => Speech::ID,
+			Speech::ID => [
+				'endpoint_url' => '',
+				'api_key'       => '',
+				'authenticated' => false,
+				'voice'         => '',
+				'voices'        => [],
 			],
 		];
 	}
@@ -213,13 +223,17 @@ class ExcerptGeneration extends Feature {
 		if ( isset( $settings['provider'] ) ) {
 			$new_settings['provider'] = sanitize_text_field( $settings['provider'] );
 		} else {
-			$new_settings['provider'] = ChatGPT::ID;
+			$new_settings['provider'] = Speech::ID;
 		}
 
-		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
-			$new_settings['length'] = absint( $settings['length'] );
-		} else {
-			$new_settings['length'] = 55;
+		$post_types = \Classifai\get_post_types_for_language_settings();
+
+		foreach ( $post_types as $post_type ) {
+			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
+			} else {
+				$new_settings['post_types'][ $post_type->name ] = null;
+			}
 		}
 
 		/*
@@ -228,12 +242,14 @@ class ExcerptGeneration extends Feature {
 		 *
 		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
 		 */
-		if ( isset( $settings[ ChatGPT::ID ] ) ) {
-			$provider_instance                                      = new ChatGPT( $this );
-			$api_key_settings                                       = $provider_instance->sanitize_api_key_settings( $settings );
-			$new_settings[ ChatGPT::ID ]['api_key']                 = $api_key_settings[ ChatGPT::ID ]['api_key'];
-			$new_settings[ ChatGPT::ID ]['authenticated']           = $api_key_settings[ ChatGPT::ID ]['authenticated'];
-			$new_settings[ ChatGPT::ID ]['generate_excerpt_prompt'] = $provider_instance->sanitize_prompts( 'generate_excerpt_prompt', $settings );
+		if ( isset( $settings[ Speech::ID ] ) ) {
+			$provider_instance                           = new Speech( $this );
+			$api_key_settings                            = $provider_instance->sanitize_settings( $settings );
+			$new_settings[ Speech::ID ]['api_key']       = $api_key_settings[ Speech::ID ]['api_key'];
+			$new_settings[ Speech::ID ]['endpoint_url']  = $api_key_settings[ Speech::ID ]['endpoint_url'];
+			$new_settings[ Speech::ID ]['authenticated'] = $api_key_settings[ Speech::ID ]['authenticated'];
+			$new_settings[ Speech::ID ]['voices']        = $api_key_settings[ Speech::ID ]['voices'];
+			$new_settings[ Speech::ID ]['voice']         = $api_key_settings[ Speech::ID ]['voice'];
 		}
 
 		return $new_settings;

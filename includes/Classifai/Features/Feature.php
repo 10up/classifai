@@ -106,12 +106,7 @@ abstract class Feature {
 			return;
 		}
 
-		$feature_settings  = $this->get_settings();
-		$provider_id       = $feature_settings['provider'];
-		$provider_instance = find_provider_class( $this->provider_instances, $provider_id );
-		$provider_class    = get_class( $provider_instance );
-		$provider_instance = new $provider_class( $this );
-
+		$provider_instance = $this->get_feature_provider_instance();
 		$provider_instance->register();
 	}
 
@@ -154,6 +149,28 @@ abstract class Feature {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns the instance of the provider set for the feature.
+	 *
+	 * @param string $provider_id The ID of the provider.
+	 *
+	 * @return \Classifai\Providers
+	 */
+	public function get_feature_provider_instance( $provider_id = '' ) {
+		$new_settings      = $this->get_settings();
+		$provider_id       = $provider_id ? $provider_id : $new_settings['provider'];
+		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
+
+		if ( is_wp_error( $provider_instance ) ) {
+			return null;
+		}
+
+		$provider_class    = get_class( $provider_instance );
+		$provider_instance = new $provider_class( $this );
+
+		return $provider_instance;
 	}
 
 	/**
@@ -376,7 +393,8 @@ abstract class Feature {
 	 * @param array $args The args passed to add_settings_field.
 	 */
 	public function render_select( $args ) {
-		$setting_index = $this->get_settings();
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
 		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
 		$data_attr     = isset( $args['data_attr'] ) ?: [];
 
@@ -387,7 +405,7 @@ abstract class Feature {
 
 		<select
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
-			name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="<?php echo esc_attr( $this->get_option_name() ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $this->get_data_attribute( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			>
 			<?php foreach ( $options as $value => $name ) : ?>

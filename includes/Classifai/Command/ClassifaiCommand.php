@@ -9,7 +9,7 @@ use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
-use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Providers\Azure\Speech;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use Classifai\Providers\OpenAI\ChatGPT;
@@ -244,7 +244,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		$opts               = wp_parse_args( $opts, $defaults );
 		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
-		$allowed_post_types = TextToSpeech::get_supported_post_types();
+		$allowed_post_types = Speech::get_supported_post_types();
 
 		$count  = 0;
 		$errors = 0;

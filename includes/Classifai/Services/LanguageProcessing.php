@@ -29,7 +29,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\OpenAI\ChatGPT',
 				// 'Classifai\Providers\OpenAI\Embeddings',
 				// 'Classifai\Providers\OpenAI\Whisper',
-				// 'Classifai\Providers\Azure\TextToSpeech',
+				'Classifai\Providers\Azure\Speech',
 			]
 		);
 	}

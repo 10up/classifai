@@ -50,7 +50,7 @@ class ContentResizing extends Feature {
 	 * Sets up the fields and sections for the feature.
 	 */
 	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
+		$settings = $this->get_settings();
 
 		add_settings_section(
 			$this->get_option_name() . '_section',
@@ -68,8 +68,8 @@ class ContentResizing extends Feature {
 			[
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['status'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
+				'default_value' => $settings['status'],
+				'description'   => __( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
 			]
 		);
 
@@ -82,8 +82,8 @@ class ContentResizing extends Feature {
 			[
 				'label_for'      => 'roles',
 				'options'        => $this->roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
+				'default_values' => $settings['roles'],
+				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
 			]
 		);
 
@@ -96,7 +96,7 @@ class ContentResizing extends Feature {
 			[
 				'label_for'     => 'provider',
 				'options'       => $this->get_providers(),
-				'default_value' => $default_settings['provider'],
+				'default_value' => $settings['provider'],
 			]
 		);
 
@@ -209,7 +209,6 @@ class ContentResizing extends Feature {
 	 */
 	public function sanitize_settings( $settings ) {
 		$new_settings = $this->get_settings();
-		$chat_gpt     = new ChatGPT( $this );
 
 		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
 			$new_settings['status'] = 'no';
@@ -236,12 +235,13 @@ class ContentResizing extends Feature {
 		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
 		 */
 		if ( isset( $settings[ ChatGPT::ID ] ) ) {
-			$api_key_settings                                     = $chat_gpt->sanitize_api_key_settings( $settings );
+			$provider_instance                                    = new ChatGPT( $this );
+			$api_key_settings                                     = $provider_instance->sanitize_api_key_settings( $settings );
 			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
 			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
-			$new_settings[ ChatGPT::ID ]['number_of_suggestions'] = $chat_gpt->sanitize_number_of_responses_field( 'number_of_suggestions', $settings );
-			$new_settings[ ChatGPT::ID ]['condense_text_prompt']  = $chat_gpt->sanitize_prompts( 'condense_text_prompt', $settings );
-			$new_settings[ ChatGPT::ID ]['expand_text_prompt']    = $chat_gpt->sanitize_prompts( 'expand_text_prompt', $settings );
+			$new_settings[ ChatGPT::ID ]['number_of_suggestions'] = $provider_instance->sanitize_number_of_responses_field( 'number_of_suggestions', $settings );
+			$new_settings[ ChatGPT::ID ]['condense_text_prompt']  = $provider_instance->sanitize_prompts( 'condense_text_prompt', $settings );
+			$new_settings[ ChatGPT::ID ]['expand_text_prompt']    = $provider_instance->sanitize_prompts( 'expand_text_prompt', $settings );
 		}
 
 		return $new_settings;

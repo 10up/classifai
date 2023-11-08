@@ -2,6 +2,7 @@
 
 namespace Classifai;
 
+use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Provider;
 use Classifai\Providers\Azure;
 use Classifai\Services\Service;
@@ -282,16 +283,13 @@ function get_supported_post_types() {
  * @return array Supported Post Types.
  */
 function get_tts_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing', Azure\TextToSpeech::FEATURE_NAME );
+	$feature    = new TextToSpeech( null );
+	$selected   = $feature->get_settings( 'post_types' );
+	$post_types = [];
 
-	if ( empty( $classifai_settings ) ) {
-		$post_types = [];
-	} else {
-		$post_types = [];
-		foreach ( $classifai_settings['post_types'] as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
+	foreach ( $selected as $post_type => $enabled ) {
+		if ( ! empty( $enabled ) ) {
+			$post_types[] = $post_type;
 		}
 	}
 
