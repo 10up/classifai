@@ -63,6 +63,13 @@ abstract class Feature {
 	}
 
 	/**
+	 * Returns the label of the feature.
+	 *
+	 * @return string
+	 */
+	abstract public function get_label();
+
+	/**
 	 * Set up the fields for each section.
 	 */
 	abstract public function setup_fields_sections();

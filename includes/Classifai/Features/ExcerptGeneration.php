@@ -236,6 +236,9 @@ class ExcerptGeneration extends Feature {
 			$new_settings[ ChatGPT::ID ]['generate_excerpt_prompt'] = $provider_instance->sanitize_prompts( 'generate_excerpt_prompt', $settings );
 		}
 
-		return $new_settings;
+		return apply_filters(
+			'classifai_' . static::ID . '_sanitize_settings',
+			$new_settings
+		);
 	}
 }

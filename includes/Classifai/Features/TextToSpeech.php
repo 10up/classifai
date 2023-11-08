@@ -252,6 +252,9 @@ class TextToSpeech extends Feature {
 			$new_settings[ Speech::ID ]['voice']         = $api_key_settings[ Speech::ID ]['voice'];
 		}
 
-		return $new_settings;
+		return apply_filters(
+			'classifai_' . static::ID . '_sanitize_settings',
+			$new_settings
+		);
 	}
 }
