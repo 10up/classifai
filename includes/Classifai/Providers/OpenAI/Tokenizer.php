@@ -17,7 +17,7 @@ class Tokenizer {
 	/**
 	 * How many characters in one token (roughly)
 	 *
-	 * @var int
+	 * @var float
 	 */
 	public $characters_in_token = 3.5;
 
