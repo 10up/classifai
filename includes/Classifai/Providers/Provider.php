@@ -175,13 +175,6 @@ abstract class Provider {
 	abstract public function setup_fields_sections();
 
 	/**
-	 * Sanitization
-	 *
-	 * @param array $settings The settings being saved.
-	 */
-	abstract public function sanitize_settings( $settings );
-
-	/**
 	 * Provides debug information related to the provider.
 	 *
 	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
@@ -244,7 +237,7 @@ abstract class Provider {
 	 * @param array $args API key field arguments.
 	 */
 	public function add_api_key_field( $args = [] ) {
-		$default_settings = $this->feature_instance->get_default_settings();
+		$default_settings = $this->feature_instance->get_settings();
 		$default_settings = $default_settings[ static::ID ];
 		$id = $args['id'] ?? 'api_key';
 

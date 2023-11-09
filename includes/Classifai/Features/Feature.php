@@ -100,7 +100,7 @@ abstract class Feature {
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
 	 *
-	 * @return boolean
+	 * @return boolean|\WP_Error
 	 */
 	abstract public function is_feature_enabled();
 
@@ -144,7 +144,7 @@ abstract class Feature {
 	 *
 	 * @param string $index The index of the setting to return.
 	 *
-	 * @return array
+	 * @return array|string
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();

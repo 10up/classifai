@@ -399,29 +399,11 @@ class ChatGPT extends Provider {
 		<?php
 	}
 
-	/**
-	 * Setup fields
-	 */
 	public function setup_fields_sections() {}
 
 	public function reset_settings() {}
 
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
-		);
-
-		return $new_settings;
-	}
+	public function sanitize_settings( $settings ) {}
 
 	/**
 	 * Default settings for ChatGPT

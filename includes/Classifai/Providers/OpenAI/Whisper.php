@@ -16,16 +16,22 @@ class Whisper extends Provider {
 	use \Classifai\Providers\OpenAI\OpenAI;
 
 	/**
+	 * ID of the current provider.
+	 *
+	 * @var string
+	 */
+	const ID = 'openai_whisper';
+
+	/**
 	 * OpenAI Whisper constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance ) {
 		parent::__construct(
 			'OpenAI Whisper',
 			'Whisper',
-			'openai_whisper',
-			$service
+			'openai_whisper'
 		);
 
 		// Set the onboarding options.
@@ -36,6 +42,8 @@ class Whisper extends Provider {
 				'enable_transcripts' => __( 'Generate transcripts from audio files', 'classifai' ),
 			),
 		);
+
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
@@ -50,39 +58,11 @@ class Whisper extends Provider {
 		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
 	}
 
-	/**
-	 * Check to see if the feature is enabled and a user has access.
-	 *
-	 * @param int $attachment_id Attachment ID to process.
-	 * @return bool|WP_Error
-	 */
-	public function is_feature_enabled( int $attachment_id = 0 ) {
-		$settings = $this->get_settings();
+	public function setup_fields_sections() {}
 
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
+	public function reset_settings() {}
 
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
-		}
-
-		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return new WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
-		}
-
-		// Ensure feature is turned on.
-		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
-		}
-
-		return true;
-	}
+	public function sanitize_settings( $settings ) {}
 
 	/**
 	 * Start the audio transcription process.
@@ -91,13 +71,17 @@ class Whisper extends Provider {
 	 * @return WP_Error|bool
 	 */
 	public function transcribe_audio( $attachment_id = 0 ) {
-		$settings = $this->get_settings();
-		$enabled  = $this->is_feature_enabled( $attachment_id );
+		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
+		}
+
+		$enabled = $this->feature_instance->is_feature_enabled();
 
 		if ( is_wp_error( $enabled ) ) {
 			return $enabled;
 		}
 
+		$settings   = $this->feature_instance->get_settings( static::ID );
 		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
 
 		return $transcribe->process();
@@ -111,20 +95,20 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
-		$enabled = $this->is_feature_enabled( $attachment->ID );
+		$enabled = $this->feature_instance->is_feature_enabled( $attachment->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $form_fields;
 		}
 
-		$settings   = $this->get_settings();
-		$transcribe = new Transcribe( $attachment->ID, $settings );
+		$settings   = $this->feature_instance->get_settings();
+		$transcribe = new Transcribe( $attachment->ID, $settings[ static::ID ] );
 
 		if ( ! $transcribe->should_process( $attachment->ID ) ) {
 			return $form_fields;
 		}
 
-		if ( is_array( $settings ) && isset( $settings['enable_transcripts'] ) && '1' === $settings['enable_transcripts'] ) {
+		if ( is_array( $settings ) && isset( $settings['status'] ) && '1' === $settings['status'] ) {
 			$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
 
 			$form_fields['retranscribe'] = [
@@ -144,20 +128,20 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$enabled = $this->is_feature_enabled( $post->ID );
+		$enabled = $this->feature_instance->is_feature_enabled( $post->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
 		}
 
-		$settings   = $this->get_settings();
-		$transcribe = new Transcribe( $post->ID, $settings );
+		$settings   = $this->feature_instance->get_settings();
+		$transcribe = new Transcribe( $post->ID, $settings[ static::ID ] );
 
 		if ( ! $transcribe->should_process( $post->ID ) ) {
 			return;
 		}
 
-		if ( is_array( $settings ) && isset( $settings['enable_transcripts'] ) && '1' === $settings['enable_transcripts'] ) {
+		if ( is_array( $settings ) && isset( $settings[ static::ID ]['status'] ) && '1' === $settings[ static::ID ]['status'] ) {
 			add_meta_box(
 				'attachment_meta_box',
 				__( 'ClassifAI Audio Processing', 'classifai' ),
@@ -198,7 +182,11 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_transcribe_audio( $attachment_id ) {
-		$enabled = $this->is_feature_enabled( $attachment_id );
+		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
+			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
+		}
+
+		$enabled = $this->feature_instance->is_feature_enabled();
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -217,96 +205,6 @@ class Whisper extends Provider {
 			remove_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
 			$this->transcribe_audio( $attachment_id );
 		}
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		add_settings_field(
-			'enable-transcripts',
-			esc_html__( 'Generate transcripts from audio files', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_transcripts',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_transcripts'],
-				'description'   => __( 'Automatically generate transcripts for supported audio files.', 'classifai' ),
-			]
-		);
-
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate transcripts.', 'classifai' ),
-			]
-		);
-	}
-
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
-		);
-
-		if ( empty( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
-			$new_settings['enable_transcripts'] = 'no';
-		} else {
-			$new_settings['enable_transcripts'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		return $new_settings;
-	}
-
-	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for Whisper.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		return [
-			'authenticated'      => false,
-			'api_key'            => '',
-			'enable_transcripts' => false,
-			'roles'              => array_keys( get_editable_roles() ?? [] ),
-		];
 	}
 
 	/**
@@ -331,5 +229,4 @@ class Whisper extends Provider {
 			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) ),
 		];
 	}
-
 }

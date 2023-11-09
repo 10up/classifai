@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\ContentResizing;
 use Classifai\Features\TitleGeneration;
@@ -28,7 +29,7 @@ class LanguageProcessing extends Service {
 				// 'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				// 'Classifai\Providers\OpenAI\Embeddings',
-				// 'Classifai\Providers\OpenAI\Whisper',
+				'Classifai\Providers\OpenAI\Whisper',
 				'Classifai\Providers\Azure\Speech',
 			]
 		);
@@ -456,6 +457,10 @@ class LanguageProcessing extends Service {
 				$provider = $provider_class;
 			}
 		}
+
+		$feature        = new AudioTranscriptsGeneration( false );
+		$provider_id    = $feature->get_settings( 'provider' );
+		$provider       = find_provider_class( $this->provider_classes ?? [], $provider_id );
 
 		// Ensure we have a provider class. Should never happen but :shrug:
 		if ( ! $provider ) {
