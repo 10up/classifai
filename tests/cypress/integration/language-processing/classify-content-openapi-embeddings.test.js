@@ -167,6 +167,16 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 	} );
 
 	it( 'Can enable/disable content classification feature by role', () => {
+		// Remove custom taxonomies so those don't interfere with the test.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get( '#classifai-settings-category' ).uncheck();
+		cy.get( '#classifai-settings-keyword' ).uncheck();
+		cy.get( '#classifai-settings-entity' ).uncheck();
+		cy.get( '#classifai-settings-concept' ).uncheck();
+		cy.get( '#submit' ).click();
+
 		// Disable admin role.
 		cy.disableFeatureForRoles('classification', ['administrator'], 'openai_embeddings');
 

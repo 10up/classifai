@@ -212,7 +212,17 @@ Cypress.Commands.add('verifyClassifyContentEnabled', (enabled = true) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
 	cy.visit('/wp-admin/edit.php');
 	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
-	cy.get('.components-panel__body .components-panel__body-title button:contains("ClassifAI")').should(shouldExist);
+	cy.closeWelcomeGuide();
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '.classifai-panel' ).length > 0 ) {
+			if ( ! $body.find( '.classifai-panel' )[0].classList.contains( 'is-opened' )) {
+				cy.get( '.classifai-panel' ).click();
+			}
+
+		}
+	} );
+
+	cy.contains('.classifai-panel label.components-toggle-control__label', 'Process content on update').should(shouldExist);
 });
 
 /**
@@ -226,6 +236,7 @@ Cypress.Commands.add('verifyExcerptGenerationEnabled', (enabled = true) => {
 	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
 
 	// Find and open the excerpt panel.
+	cy.closeWelcomeGuide();
 	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
@@ -287,6 +298,7 @@ Cypress.Commands.add('verifyTextToSpeechEnabled', (enabled = true) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
 	cy.visit('/wp-admin/edit.php');
 	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
+	cy.closeWelcomeGuide();
 	cy.get( '.classifai-panel' ).click();
 	cy.get( '#classifai-audio-controls__preview-btn' ).should( shouldExist );
 });
@@ -302,6 +314,7 @@ Cypress.Commands.add('verifyTitleGenerationEnabled', (enabled = true) => {
 	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
 
 	// Find and open the summary panel.
+	cy.closeWelcomeGuide();
 	const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
@@ -342,6 +355,7 @@ Cypress.Commands.add('verifyImageGenerationEnabled', (enabled = true) => {
 	cy.get('#the-list tr:nth-child(1) td.title a.row-title').click();
 
 	// Find and open the Featured image panel.
+	cy.closeWelcomeGuide();
 	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
