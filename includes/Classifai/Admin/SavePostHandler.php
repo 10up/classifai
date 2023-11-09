@@ -64,7 +64,7 @@ class SavePostHandler {
 	 *
 	 * Skips classification if running under the Gutenberg Metabox
 	 * compatibility request. The classification is performed during the REST
-	 * lifecyle when using Gutenberg.
+	 * lifecycle when using Gutenberg.
 	 *
 	 * @param int $post_id The post that was saved
 	 */
