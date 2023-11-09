@@ -36,6 +36,34 @@ class ChatGPT extends Provider {
 	protected $max_tokens = 4096;
 
 	/**
+	 * Prompt for generating excerpts
+	 *
+	 * @var string
+	 */
+	protected $generate_excerpt_prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
+
+	/**
+	 * Prompt for generating titles
+	 *
+	 * @var string
+	 */
+	protected $generate_title_prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
+
+	/**
+	 * Prompt for shrinking content
+	 *
+	 * @var string
+	 */
+	protected $shrink_content_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+
+	/**
+	 * Prompt for growing content
+	 *
+	 * @var string
+	 */
+	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
+
+	/**
 	 * OpenAI ChatGPT constructor.
 	 *
 	 * @param string $service The service this class belongs to.
@@ -188,7 +216,7 @@ class ChatGPT extends Provider {
 				'classifai-content-resizing-plugin-css',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
 				[],
-				CLASSIFAI_PLUGIN_VERSION,
+				get_asset_info( 'content-resizing-plugin', 'version' ),
 				'all'
 			);
 		}
@@ -199,90 +227,108 @@ class ChatGPT extends Provider {
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
-	public function enqueue_admin_assets( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix ) {
-			return;
+	public function enqueue_admin_assets( string $hook_suffix ) {
+		// Load asset in OpenAI ChatGPT settings page.
+		if (
+			'tools_page_classifai' === $hook_suffix
+			&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
+			&& 'language_processing' === $_GET['tab'] // phpcs:ignore
+			&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+		) {
+			wp_enqueue_script( 'jquery-ui-dialog' );
+			wp_enqueue_style( 'wp-jquery-ui-dialog' );
+
+			add_action(
+				'admin_footer',
+				static function () {
+					printf(
+						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
+						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
+					);
+				}
+			);
 		}
 
-		$screen   = get_current_screen();
-		$settings = $this->get_settings();
+		// Load asset in new post and edit post screens.
+		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
+			$screen = get_current_screen();
 
-		// Load the assets for the classic editor.
-		if ( $screen && ! $screen->is_block_editor() ) {
-			if (
-				post_type_supports( $screen->post_type, 'title' ) &&
-				$this->is_feature_enabled( 'enable_titles' )
-			) {
-				wp_enqueue_style(
-					'classifai-generate-title-classic-css',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-					[],
-					CLASSIFAI_PLUGIN_VERSION,
-					'all'
-				);
+			// Load the assets for the classic editor.
+			if ( $screen && ! $screen->is_block_editor() ) {
+				if (
+					post_type_supports( $screen->post_type, 'title' ) &&
+					$this->is_feature_enabled( 'enable_titles' )
+				) {
+					wp_enqueue_style(
+						'classifai-generate-title-classic-css',
+						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+						[],
+						get_asset_info( 'generate-title-classic', 'version' ),
+						'all'
+					);
 
-				wp_enqueue_script(
-					'classifai-generate-title-classic-js',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-					array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-					get_asset_info( 'generate-title-classic', 'version' ),
-					true
-				);
+					wp_enqueue_script(
+						'classifai-generate-title-classic-js',
+						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
+						array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
+						get_asset_info( 'generate-title-classic', 'version' ),
+						true
+					);
 
-				wp_add_inline_script(
-					'classifai-generate-title-classic-js',
-					sprintf(
-						'var classifaiChatGPTData = %s;',
-						wp_json_encode( $this->get_localised_vars() )
-					),
-					'before'
-				);
+					wp_add_inline_script(
+						'classifai-generate-title-classic-js',
+						sprintf(
+							'var classifaiChatGPTData = %s;',
+							wp_json_encode( $this->get_localised_vars() )
+						),
+						'before'
+					);
+				}
+
+				if (
+					post_type_supports( $screen->post_type, 'excerpt' ) &&
+					$this->is_feature_enabled( 'enable_excerpt' )
+				) {
+					wp_enqueue_style(
+						'classifai-generate-title-classic-css',
+						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+						[],
+						get_asset_info( 'generate-title-classic', 'version' ),
+						'all'
+					);
+
+					wp_enqueue_script(
+						'classifai-generate-excerpt-classic-js',
+						CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
+						array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
+						get_asset_info( 'generate-excerpt-classic', 'version' ),
+						true
+					);
+
+					wp_add_inline_script(
+						'classifai-generate-excerpt-classic-js',
+						sprintf(
+							'var classifaiGenerateExcerpt = %s;',
+							wp_json_encode(
+								[
+									'path'           => '/classifai/v1/openai/generate-excerpt/',
+									'buttonText'     => __( 'Generate excerpt', 'classifai' ),
+									'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
+								]
+							)
+						),
+						'before'
+					);
+				}
 			}
 
-			if (
-				post_type_supports( $screen->post_type, 'excerpt' ) &&
-				$this->is_feature_enabled( 'enable_excerpt' )
-			) {
-				wp_enqueue_style(
-					'classifai-generate-title-classic-css',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-					[],
-					CLASSIFAI_PLUGIN_VERSION,
-					'all'
-				);
-
-				wp_enqueue_script(
-					'classifai-generate-excerpt-classic-js',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-					array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
-					get_asset_info( 'generate-excerpt-classic', 'version' ),
-					true
-				);
-
-				wp_add_inline_script(
-					'classifai-generate-excerpt-classic-js',
-					sprintf(
-						'var classifaiGenerateExcerpt = %s;',
-						wp_json_encode(
-							[
-								'path'           => '/classifai/v1/openai/generate-excerpt/',
-								'buttonText'     => __( 'Generate excerpt', 'classifai' ),
-								'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
-							]
-						)
-					),
-					'before'
-				);
-			}
+			wp_enqueue_style(
+				'classifai-language-processing-style',
+				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+				[],
+				get_asset_info( 'language-processing', 'version' ),
+			);
 		}
-
-		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
-			'all'
-		);
 	}
 
 	/**
@@ -379,6 +425,21 @@ class ChatGPT extends Provider {
 			]
 		);
 
+		// Custom prompt for excerpt generation.
+		add_settings_field(
+			'generate_excerpt_prompt',
+			esc_html__( 'Prompt', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_excerpt',
+			[
+				'label_for'     => 'generate_excerpt_prompt',
+				'placeholder'   => $this->generate_excerpt_prompt,
+				'default_value' => $default_settings['generate_excerpt_prompt'],
+				'description'   => __( 'Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item\'s title.', 'classifai' ),
+			]
+		);
+
 		// Add title fields.
 		add_settings_section(
 			$this->get_option_name() . '_title',
@@ -429,10 +490,24 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		// Add resizing content fields.
+		// Custom prompt for generating titles.
+		add_settings_field(
+			'generate_title_prompt',
+			esc_html__( 'Prompt', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_title',
+			[
+				'label_for'     => 'generate_title_prompt',
+				'placeholder'   => $this->generate_title_prompt,
+				'default_value' => $default_settings['generate_title_prompt'],
+			]
+		);
+
+		// Add content resizing fields.
 		add_settings_section(
 			$this->get_option_name() . '_resize_content_settings',
-			esc_html__( 'Resizing content settings', 'classifai' ),
+			esc_html__( 'Content resizing settings', 'classifai' ),
 			'',
 			$this->get_option_name()
 		);
@@ -447,7 +522,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'enable_resize_content',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Shrink content" and "Grow content" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
+				'description'   => __( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
 			]
 		);
 
@@ -480,6 +555,34 @@ class ChatGPT extends Provider {
 				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
 				'default_value' => $default_settings['number_resize_content'],
 				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+			]
+		);
+
+		// Custom prompt for shrinking content.
+		add_settings_field(
+			'shrink_content_prompt',
+			esc_html__( 'Condense text prompt', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'shrink_content_prompt',
+				'placeholder'   => $this->shrink_content_prompt,
+				'default_value' => $default_settings['shrink_content_prompt'],
+			]
+		);
+
+		// Custom prompt for growing content.
+		add_settings_field(
+			'grow_content_prompt',
+			esc_html__( 'Expand text prompt', 'classifai' ),
+			[ $this, 'render_prompt_repeater_field' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_resize_content_settings',
+			[
+				'label_for'     => 'grow_content_prompt',
+				'placeholder'   => $this->grow_content_prompt,
+				'default_value' => $default_settings['grow_content_prompt'],
 			]
 		);
 	}
@@ -516,6 +619,12 @@ class ChatGPT extends Provider {
 			$new_settings['length'] = 55;
 		}
 
+		if ( isset( $settings['generate_excerpt_prompt'] ) && is_array( $settings['generate_excerpt_prompt'] ) ) {
+			$new_settings['generate_excerpt_prompt'] = $this->sanitize_prompts( $settings['generate_excerpt_prompt'] );
+		} else {
+			$new_settings['generate_excerpt_prompt'] = array();
+		}
+
 		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
 			$new_settings['enable_titles'] = 'no';
 		} else {
@@ -534,6 +643,12 @@ class ChatGPT extends Provider {
 			$new_settings['number_titles'] = 1;
 		}
 
+		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
+			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
+		} else {
+			$new_settings['generate_title_prompt'] = array();
+		}
+
 		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
 			$new_settings['enable_resize_content'] = 'no';
 		} else {
@@ -550,6 +665,18 @@ class ChatGPT extends Provider {
 			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
 		} else {
 			$new_settings['number_resize_content'] = 1;
+		}
+
+		if ( isset( $settings['shrink_content_prompt'] ) && is_array( $settings['shrink_content_prompt'] ) ) {
+			$new_settings['shrink_content_prompt'] = $this->sanitize_prompts( $settings['shrink_content_prompt'] );
+		} else {
+			$new_settings['shrink_content_prompt'] = array();
+		}
+
+		if ( isset( $settings['grow_content_prompt'] ) && is_array( $settings['grow_content_prompt'] ) ) {
+			$new_settings['grow_content_prompt'] = $this->sanitize_prompts( $settings['grow_content_prompt'] );
+		} else {
+			$new_settings['grow_content_prompt'] = array();
 		}
 
 		return $new_settings;
@@ -573,18 +700,48 @@ class ChatGPT extends Provider {
 		}
 		$editable_roles = get_editable_roles() ?? [];
 
+		$excerpt_length = absint( apply_filters( 'excerpt_length', 55 ) );
+
 		return [
-			'authenticated'         => false,
-			'api_key'               => '',
-			'enable_excerpt'        => false,
-			'roles'                 => array_keys( $editable_roles ),
-			'length'                => (int) apply_filters( 'excerpt_length', 55 ),
-			'enable_titles'         => false,
-			'title_roles'           => array_keys( $editable_roles ),
-			'number_titles'         => 1,
-			'enable_resize_content' => false,
-			'resize_content_roles'  => array_keys( $editable_roles ),
-			'number_resize_content' => 1,
+			'authenticated'           => false,
+			'api_key'                 => '',
+			'enable_excerpt'          => false,
+			'roles'                   => array_keys( $editable_roles ),
+			'length'                  => $excerpt_length,
+			'generate_excerpt_prompt' => array(
+				array(
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->generate_excerpt_prompt,
+					'original' => 1,
+				),
+			),
+			'enable_titles'           => false,
+			'title_roles'             => array_keys( $editable_roles ),
+			'number_titles'           => 1,
+			'generate_title_prompt'   => array(
+				array(
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->generate_title_prompt,
+					'original' => 1,
+				),
+			),
+			'enable_resize_content'   => false,
+			'resize_content_roles'    => array_keys( $editable_roles ),
+			'number_resize_content'   => 1,
+			'shrink_content_prompt'   => array(
+				array(
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->shrink_content_prompt,
+					'original' => 1,
+				),
+			),
+			'grow_content_prompt'     => array(
+				array(
+					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+					'prompt'   => $this->grow_content_prompt,
+					'original' => 1,
+				),
+			),
 		];
 	}
 
@@ -680,7 +837,14 @@ class ChatGPT extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+
+		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
+
+		// Replace our variables in the prompt.
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -694,7 +858,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', sprintf( 'Summarize the following message using a maximum of %d words. Ensure this summary pairs well with the following text: %s.', $excerpt_length, $args['title'] ), $post_id, $excerpt_length );
+		$prompt = apply_filters( 'classifai_chatgpt_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -776,7 +940,9 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+
+		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'] ) ?? $this->generate_title_prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -790,7 +956,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', $post_id, $args );
+		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', $prompt, $post_id, $args );
 
 		/**
 		 * Filter the request body before sending to ChatGPT.
@@ -873,18 +1039,19 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = 'Decrease the content length no more than 2 to 4 sentences.';
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
 		} else {
-			$prompt = 'Increase the content length no more than 2 to 4 sentences.';
+			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'] ) ?? $this->grow_content_prompt );
 		}
 
 		/**
 		 * Filter the resize prompt we will send to ChatGPT.
 		 *
 		 * @since 2.3.0
+		 * @hook classifai_chatgpt_' . $args['resize_type'] . '_content_prompt
 		 *
 		 * @param {string} $prompt Resize prompt we are sending to ChatGPT. Gets added as a system prompt.
 		 * @param {int} $post_id ID of post.
@@ -1018,4 +1185,82 @@ class ChatGPT extends Provider {
 		return apply_filters( 'classifai_chatgpt_content', $content, $post_id );
 	}
 
+	/**
+	 * Sanitize the prompt data.
+	 * This is used for the repeater field.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param array $prompts Prompt data.
+	 *
+	 * @return array Sanitized prompt data.
+	 */
+	public function sanitize_prompts( array $prompts ): array {
+		// Remove any prompts that don't have a title and prompt.
+		$prompts = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
+			}
+		);
+
+		// Sanitize the prompts and make sure only one prompt is marked as default.
+		$has_default = false;
+
+		$prompts = array_map(
+			function ( $prompt ) use ( &$has_default ) {
+				$default = $prompt['default'] && ! $has_default;
+
+				if ( $default ) {
+					$has_default = true;
+				}
+
+				return array(
+					'title'    => sanitize_text_field( $prompt['title'] ),
+					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'default'  => absint( $default ),
+					'original' => absint( $prompt['original'] ),
+				);
+			},
+			$prompts
+		);
+
+		// If there is no default, use the first prompt.
+		if ( false === $has_default && ! empty( $prompts ) ) {
+			$prompts[0]['default'] = 1;
+		}
+
+		return $prompts;
+	}
+
+	/**
+	 * Get the default prompt for use.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param array $prompts Prompt data.
+	 *
+	 * @return string|null Default prompt.
+	 */
+	public function get_default_prompt( array $prompts ): ?string {
+		$default_prompt = null;
+
+		if ( ! empty( $prompts ) ) {
+			$prompt_data = array_filter(
+				$prompts,
+				function ( $prompt ) {
+					return $prompt['default'] && ! $prompt['original'];
+				}
+			);
+
+			if ( ! empty( $prompt_data ) ) {
+				$default_prompt = current( $prompt_data )['prompt'];
+			} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
+				// If there is no default, use the first prompt, unless it's the original prompt.
+				$default_prompt = $prompts[0]['prompt'];
+			}
+		}
+
+		return $default_prompt;
+	}
 }

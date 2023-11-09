@@ -239,6 +239,92 @@ input.classifai-button {
 		.form-table td fieldset p {
 			margin-bottom: 12px;
 		}
+
+		textarea {
+			max-width: 600px;
+		}
+
+		.classifai-input-description {
+			display: block;
+			margin-top: 8px;
+			max-width: 600px;
+			line-height: 1.4;
+		}
+
+		.classifai-field-type-prompt-setting {
+			padding: 5px 20px;
+			border: 1px solid #f0f0f1;
+			position: relative;
+			display: flex;
+			flex-direction:column;
+			max-width: 600px;
+
+			&:first-child {
+				> input,
+				> label {
+					display: none;
+				}
+			}
+
+			&:nth-child(2n + 1) {
+				background-color: #f0f0f1;
+			}
+
+			label {
+				display: block;
+			}
+
+			input, textarea {
+				margin-right: 0;
+				display: block;
+			}
+
+			input[type="text"] {
+				width: 90%;
+			}
+
+			/* Style for prompt action items container */
+			.actions-rows {
+				display: flex;
+				margin: 0.35em 0 .5em!important;
+
+				/* Style for prompt actions */
+				a {
+					cursor: pointer;
+					text-decoration: none;
+					margin-left: 8px;
+
+					&.action__remove_prompt {
+						color: #b32d2e;
+					}
+				}
+
+				/* action items separator */
+				a:before {
+					content: '|';
+					color: #a7aaad;
+				}
+
+				/* Styling for default prompt first action */
+				a:first-child {
+					margin-left: 0;
+
+					&.selected {
+						color: #a7aaad;
+						pointer-events: none;
+					}
+
+					&:before {
+						content: '';
+					}
+				}
+
+			}
+
+			+ button {
+				margin-top: 10px;
+			}
+		}
 	}
 
 	input[type="text"],

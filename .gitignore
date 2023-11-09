@@ -48,4 +48,5 @@ config.local.php
 tests/cypress/downloads
 tests/cypress/screenshots
 tests/cypress/videos
+tests/cypress/reports
 .wp-env.override.json
