@@ -1,5 +1,4 @@
-/* eslint jest/expect-expect: 0 */
-describe('Image Generation (OpenAI DALL·E) Tests', () => {
+describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
@@ -164,46 +163,62 @@ describe('Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('image_generation', ['administrator'], 'openai_dalle');
+		cy.disableFeatureForRoles(
+			'image_generation',
+			[ 'administrator' ],
+			'openai_dalle'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyImageGenerationEnabled(false);
+		cy.verifyImageGenerationEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('image_generation', ['administrator'], 'openai_dalle');
+		cy.enableFeatureForRoles(
+			'image_generation',
+			[ 'administrator' ],
+			'openai_dalle'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyImageGenerationEnabled(true);
+		cy.verifyImageGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable image generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('image_generation', ['administrator'], 'openai_dalle');
+		cy.disableFeatureForRoles(
+			'image_generation',
+			[ 'administrator' ],
+			'openai_dalle'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyImageGenerationEnabled(false);
+		cy.verifyImageGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('image_generation', ['admin'], 'openai_dalle');
+		cy.enableFeatureForUsers(
+			'image_generation',
+			[ 'admin' ],
+			'openai_dalle'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyImageGenerationEnabled(true);
+		cy.verifyImageGenerationEnabled( true );
 	} );
 
 	it( 'User can opt-out image generation feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('image_generation', 'openai_dalle');
+		cy.enableFeatureOptOut( 'image_generation', 'openai_dalle' );
 
 		// opt-out
-		cy.optOutFeature('image_generation');
+		cy.optOutFeature( 'image_generation' );
 
 		// Verify that the feature is not available.
-		cy.verifyImageGenerationEnabled(false);
+		cy.verifyImageGenerationEnabled( false );
 
 		// opt-in
-		cy.optInFeature('image_generation');
+		cy.optInFeature( 'image_generation' );
 
 		// Verify that the feature is available.
-		cy.verifyImageGenerationEnabled(true);
+		cy.verifyImageGenerationEnabled( true );
 	} );
 } );

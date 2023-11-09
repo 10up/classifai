@@ -7,7 +7,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
 		cy.get( '#enable_excerpt' ).check();
-		cy.get('#submit').click();
+		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -25,7 +25,9 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		cy.get( '#enable_excerpt' ).check();
 		cy.get( '#excerpt_generation_role_based_access' ).check();
-		cy.get( '#openai_chatgpt_excerpt_generation_roles_administrator' ).check();
+		cy.get(
+			'#openai_chatgpt_excerpt_generation_roles_administrator'
+		).check();
 		cy.get( '#length' ).clear().type( 35 );
 		cy.get( '#submit' ).click();
 	} );
@@ -284,46 +286,62 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'excerpt_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyExcerptGenerationEnabled(false);
+		cy.verifyExcerptGenerationEnabled( false );
 
 		// enable admin role.
-		cy.enableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
+		cy.enableFeatureForRoles(
+			'excerpt_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyExcerptGenerationEnabled(true);
+		cy.verifyExcerptGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable excerpt generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('excerpt_generation', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'excerpt_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyExcerptGenerationEnabled(false);
+		cy.verifyExcerptGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('excerpt_generation', ['admin'], 'openai_chatgpt');
+		cy.enableFeatureForUsers(
+			'excerpt_generation',
+			[ 'admin' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyExcerptGenerationEnabled(true);
+		cy.verifyExcerptGenerationEnabled( true );
 	} );
 
 	it( 'User can opt-out excerpt generation feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('excerpt_generation', 'openai_chatgpt');
+		cy.enableFeatureOptOut( 'excerpt_generation', 'openai_chatgpt' );
 
 		// opt-out
-		cy.optOutFeature('excerpt_generation');
+		cy.optOutFeature( 'excerpt_generation' );
 
 		// Verify that the feature is not available.
-		cy.verifyExcerptGenerationEnabled(false);
+		cy.verifyExcerptGenerationEnabled( false );
 
 		// opt-in
-		cy.optInFeature('excerpt_generation');
+		cy.optInFeature( 'excerpt_generation' );
 
 		// Verify that the feature is available.
-		cy.verifyExcerptGenerationEnabled(true);
+		cy.verifyExcerptGenerationEnabled( true );
 	} );
 } );

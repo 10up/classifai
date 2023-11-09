@@ -18,7 +18,9 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 		cy.get( '#enable_titles' ).check();
-		cy.get( '#openai_chatgpt_title_generation_roles_administrator' ).check();
+		cy.get(
+			'#openai_chatgpt_title_generation_roles_administrator'
+		).check();
 		cy.get( '#number_titles' ).select( 1 );
 		cy.get( '#submit' ).click();
 	} );
@@ -311,46 +313,62 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'title_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyTitleGenerationEnabled(false);
+		cy.verifyTitleGenerationEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
+		cy.enableFeatureForRoles(
+			'title_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyTitleGenerationEnabled(true);
+		cy.verifyTitleGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable title generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('title_generation', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'title_generation',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyTitleGenerationEnabled(false);
+		cy.verifyTitleGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('title_generation', ['admin'], 'openai_chatgpt');
+		cy.enableFeatureForUsers(
+			'title_generation',
+			[ 'admin' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyTitleGenerationEnabled(true);
+		cy.verifyTitleGenerationEnabled( true );
 	} );
 
 	it( 'User can opt-out title generation feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('title_generation', 'openai_chatgpt');
+		cy.enableFeatureOptOut( 'title_generation', 'openai_chatgpt' );
 
 		// opt-out
-		cy.optOutFeature('title_generation');
+		cy.optOutFeature( 'title_generation' );
 
 		// Verify that the feature is not available.
-		cy.verifyTitleGenerationEnabled(false);
+		cy.verifyTitleGenerationEnabled( false );
 
 		// opt-in
-		cy.optInFeature('title_generation');
+		cy.optInFeature( 'title_generation' );
 
 		// Verify that the feature is available.
-		cy.verifyTitleGenerationEnabled(true);
+		cy.verifyTitleGenerationEnabled( true );
 	} );
 } );

@@ -5,7 +5,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
 		);
 		cy.get( '#enable_classification' ).check();
-		cy.get('#submit').click();
+		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -178,46 +178,62 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('classification', ['administrator'], 'openai_embeddings');
+		cy.disableFeatureForRoles(
+			'classification',
+			[ 'administrator' ],
+			'openai_embeddings'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('classification', ['administrator'], 'openai_embeddings');
+		cy.enableFeatureForRoles(
+			'classification',
+			[ 'administrator' ],
+			'openai_embeddings'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
+		cy.verifyClassifyContentEnabled( true );
 	} );
 
 	it( 'Can enable/disable content classification feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('classification', ['administrator'], 'openai_embeddings');
+		cy.disableFeatureForRoles(
+			'classification',
+			[ 'administrator' ],
+			'openai_embeddings'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('classification', ['admin'], 'openai_embeddings');
+		cy.enableFeatureForUsers(
+			'classification',
+			[ 'admin' ],
+			'openai_embeddings'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
+		cy.verifyClassifyContentEnabled( true );
 	} );
 
 	it( 'User can opt-out content classification feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('classification', 'openai_embeddings');
+		cy.enableFeatureOptOut( 'classification', 'openai_embeddings' );
 
 		// opt-out
-		cy.optOutFeature('classification');
+		cy.optOutFeature( 'classification' );
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// opt-in
-		cy.optInFeature('classification');
+		cy.optInFeature( 'classification' );
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
+		cy.verifyClassifyContentEnabled( true );
 	} );
 } );

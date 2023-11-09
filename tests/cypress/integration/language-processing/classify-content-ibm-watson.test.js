@@ -7,7 +7,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get( '#classifai-settings-post' ).check();
 		cy.get( '#classifai-settings-publish' ).check();
 		cy.get( '#classifai-settings-category' ).check();
-		cy.get('#submit').click();
+		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -194,91 +194,138 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.verifyPostTaxonomyTerms( 'tags', threshold / 100 );
 	} );
 
-	it('Can limit Natural Language Understanding features by roles', () => {
+	it( 'Can limit Natural Language Understanding features by roles', () => {
 		// Disable access to admin role.
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').check();
-		cy.get('#watson_nlu_content_classification_roles_administrator').uncheck();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).check();
+		cy.get(
+			'#watson_nlu_content_classification_roles_administrator'
+		).uncheck();
 
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// Enable access to admin role.
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').check();
-		cy.get('#watson_nlu_content_classification_roles_administrator').check();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).check();
+		cy.get(
+			'#watson_nlu_content_classification_roles_administrator'
+		).check();
 
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
-	});
+		cy.verifyClassifyContentEnabled( true );
+	} );
 
-	it('Can limit Natural Language Understanding features by users', () => {
+	it( 'Can limit Natural Language Understanding features by users', () => {
 		// Disable access.
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').uncheck();
-		cy.get('#classifai-settings-content_classification_user_based_access').uncheck();
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).uncheck();
+		cy.get(
+			'#classifai-settings-content_classification_user_based_access'
+		).uncheck();
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// Enable access to user.
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').uncheck();
-		cy.get('#classifai-settings-content_classification_user_based_access').check();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).uncheck();
+		cy.get(
+			'#classifai-settings-content_classification_user_based_access'
+		).check();
 		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( '#content_classification_users-container .components-form-token-field__remove-token' ).length > 0 ) {
-				cy.get('#content_classification_users-container .components-form-token-field__remove-token').click({
+			if (
+				$body.find(
+					'#content_classification_users-container .components-form-token-field__remove-token'
+				).length > 0
+			) {
+				cy.get(
+					'#content_classification_users-container .components-form-token-field__remove-token'
+				).click( {
 					multiple: true,
-				});
+				} );
 			}
 		} );
-		cy.get('#content_classification_users-container input.components-form-token-field__input').type('admin');
+		cy.get(
+			'#content_classification_users-container input.components-form-token-field__input'
+		).type( 'admin' );
 		cy.wait( 1000 );
-		cy.get('ul.components-form-token-field__suggestions-list li:nth-child(1)').click();
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
+		cy.get(
+			'ul.components-form-token-field__suggestions-list li:nth-child(1)'
+		).click();
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
+		cy.verifyClassifyContentEnabled( true );
 
 		// Enable access to admin role. (default)
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').check();
-		cy.get('#classifai-settings-content_classification_user_based_access').uncheck();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).check();
+		cy.get(
+			'#classifai-settings-content_classification_user_based_access'
+		).uncheck();
 
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
-	});
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
+	} );
 
-	it('Can enable user based opt out for Natural Language Understanding', () => {
+	it( 'Can enable user based opt out for Natural Language Understanding', () => {
 		// Opt Out from feature.
-		cy.visit('/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu');
-		cy.get('#classifai-settings-content_classification_role_based_access').check();
-		cy.get('#classifai-settings-content_classification_user_based_access').check();
-		cy.get('#classifai-settings-content_classification_user_based_opt_out').check();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get(
+			'#classifai-settings-content_classification_role_based_access'
+		).check();
+		cy.get(
+			'#classifai-settings-content_classification_user_based_access'
+		).check();
+		cy.get(
+			'#classifai-settings-content_classification_user_based_opt_out'
+		).check();
 
-		cy.get('#submit').click();
-		cy.get('.notice').contains('Settings saved.');
+		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// opt-out
-		cy.optOutFeature('content_classification');
+		cy.optOutFeature( 'content_classification' );
 
 		// Verify that the feature is not available.
-		cy.verifyClassifyContentEnabled(false);
+		cy.verifyClassifyContentEnabled( false );
 
 		// opt-in
-		cy.optInFeature('content_classification');
+		cy.optInFeature( 'content_classification' );
 
 		// Verify that the feature is available.
-		cy.verifyClassifyContentEnabled(true);
-	});
-
+		cy.verifyClassifyContentEnabled( true );
+	} );
 } );

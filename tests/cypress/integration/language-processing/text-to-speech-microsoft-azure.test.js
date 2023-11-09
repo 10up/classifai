@@ -127,46 +127,62 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('text_to_speech', ['administrator'], 'azure_text_to_speech');
+		cy.disableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyTextToSpeechEnabled(false);
+		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('text_to_speech', ['administrator'], 'azure_text_to_speech');
+		cy.enableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyTextToSpeechEnabled(true);
+		cy.verifyTextToSpeechEnabled( true );
 	} );
 
 	it( 'Can enable/disable text to speech feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('text_to_speech', ['administrator'], 'azure_text_to_speech');
+		cy.disableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyTextToSpeechEnabled(false);
+		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('text_to_speech', ['admin'], 'azure_text_to_speech');
+		cy.enableFeatureForUsers(
+			'text_to_speech',
+			[ 'admin' ],
+			'azure_text_to_speech'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyTextToSpeechEnabled(true);
+		cy.verifyTextToSpeechEnabled( true );
 	} );
 
 	it( 'User can opt-out text to speech feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('text_to_speech', 'azure_text_to_speech');
+		cy.enableFeatureOptOut( 'text_to_speech', 'azure_text_to_speech' );
 
 		// opt-out
-		cy.optOutFeature('text_to_speech');
+		cy.optOutFeature( 'text_to_speech' );
 
 		// Verify that the feature is not available.
-		cy.verifyTextToSpeechEnabled(false);
+		cy.verifyTextToSpeechEnabled( false );
 
 		// opt-in
-		cy.optInFeature('text_to_speech');
+		cy.optInFeature( 'text_to_speech' );
 
 		// Verify that the feature is available.
-		cy.verifyTextToSpeechEnabled(true);
+		cy.verifyTextToSpeechEnabled( true );
 	} );
 } );

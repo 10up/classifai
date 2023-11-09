@@ -5,7 +5,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
 		cy.get( '#enable_resize_content' ).check();
-		cy.get('#submit').click();
+		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -270,46 +270,62 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable resize content feature by role', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'resize_content',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyResizeContentEnabled(false);
+		cy.verifyResizeContentEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
+		cy.enableFeatureForRoles(
+			'resize_content',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyResizeContentEnabled(true);
+		cy.verifyResizeContentEnabled( true );
 	} );
 
 	it( 'Can enable/disable resize content feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles('resize_content', ['administrator'], 'openai_chatgpt');
+		cy.disableFeatureForRoles(
+			'resize_content',
+			[ 'administrator' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifyResizeContentEnabled(false);
+		cy.verifyResizeContentEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('resize_content', ['admin'], 'openai_chatgpt');
+		cy.enableFeatureForUsers(
+			'resize_content',
+			[ 'admin' ],
+			'openai_chatgpt'
+		);
 
 		// Verify that the feature is available.
-		cy.verifyResizeContentEnabled(true);
+		cy.verifyResizeContentEnabled( true );
 	} );
 
 	it( 'User can opt-out resize content feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('resize_content', 'openai_chatgpt');
+		cy.enableFeatureOptOut( 'resize_content', 'openai_chatgpt' );
 
 		// opt-out
-		cy.optOutFeature('resize_content');
+		cy.optOutFeature( 'resize_content' );
 
 		// Verify that the feature is not available.
-		cy.verifyResizeContentEnabled(false);
+		cy.verifyResizeContentEnabled( false );
 
 		// opt-in
-		cy.optInFeature('resize_content');
+		cy.optInFeature( 'resize_content' );
 
 		// Verify that the feature is available.
-		cy.verifyResizeContentEnabled(true);
+		cy.verifyResizeContentEnabled( true );
 	} );
 } );

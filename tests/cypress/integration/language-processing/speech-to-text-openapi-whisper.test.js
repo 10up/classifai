@@ -7,7 +7,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
 		);
 		cy.get( '#enable_transcripts' ).check();
-		cy.get('#submit').click();
+		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -31,7 +31,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	let audioEditLink = '';
 	let mediaModalLink = '';
 	it( 'Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
-		cy.visit('/wp-admin/upload.php?mode=grid'); // Ensure grid mode is enabled.
+		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
 		cy.get( '#plupload-upload-ui input[type=file]' ).attachFile(
@@ -105,59 +105,75 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		const options = {
 			audioEditLink,
 			mediaModalLink,
-		}
+		};
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('speech_to_text', ['administrator'], 'openai_whisper');
+		cy.disableFeatureForRoles(
+			'speech_to_text',
+			[ 'administrator' ],
+			'openai_whisper'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifySpeechToTextEnabled(false, options);
+		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles('speech_to_text', ['administrator'], 'openai_whisper');
+		cy.enableFeatureForRoles(
+			'speech_to_text',
+			[ 'administrator' ],
+			'openai_whisper'
+		);
 
 		// Verify that the feature is available.
-		cy.verifySpeechToTextEnabled(true, options);
+		cy.verifySpeechToTextEnabled( true, options );
 	} );
 
 	it( 'Can enable/disable speech to text feature by user', () => {
 		const options = {
 			audioEditLink,
 			mediaModalLink,
-		}
+		};
 
 		// Disable admin role.
-		cy.disableFeatureForRoles('speech_to_text', ['administrator'], 'openai_whisper');
+		cy.disableFeatureForRoles(
+			'speech_to_text',
+			[ 'administrator' ],
+			'openai_whisper'
+		);
 
 		// Verify that the feature is not available.
-		cy.verifySpeechToTextEnabled(false, options);
+		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers('speech_to_text', ['admin'], 'openai_whisper');
+		cy.enableFeatureForUsers(
+			'speech_to_text',
+			[ 'admin' ],
+			'openai_whisper'
+		);
 
 		// Verify that the feature is available.
-		cy.verifySpeechToTextEnabled(true, options);
+		cy.verifySpeechToTextEnabled( true, options );
 	} );
 
 	it( 'User can opt-out speech to text feature', () => {
 		const options = {
 			audioEditLink,
 			mediaModalLink,
-		}
+		};
 
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut('speech_to_text', 'openai_whisper');
+		cy.enableFeatureOptOut( 'speech_to_text', 'openai_whisper' );
 
 		// opt-out
-		cy.optOutFeature('speech_to_text');
+		cy.optOutFeature( 'speech_to_text' );
 
 		// Verify that the feature is not available.
-		cy.verifySpeechToTextEnabled(false, options);
+		cy.verifySpeechToTextEnabled( false, options );
 
 		// opt-in
-		cy.optInFeature('speech_to_text');
+		cy.optInFeature( 'speech_to_text' );
 
 		// Verify that the feature is available.
-		cy.verifySpeechToTextEnabled(true, options);
+		cy.verifySpeechToTextEnabled( true, options );
 	} );
 } );
