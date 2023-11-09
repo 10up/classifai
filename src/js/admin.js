@@ -1,4 +1,5 @@
 /* global ClassifAI */
+import { __ } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -9,6 +10,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	if ( ! template ) {
 		return;
 	}
+
 	const container = document.createElement( 'div' );
 	container.appendChild( document.importNode( template.content, true ) );
 
@@ -77,4 +79,226 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$toggler.innerText = ClassifAI.use_key;
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
+} )();
+
+( () => {
+	// Attach event to add new prompt button.
+	const $addNewPromptFieldsetButton = document.querySelectorAll(
+		'button.js-classifai-add-prompt-fieldset'
+	);
+	if ( $addNewPromptFieldsetButton.length ) {
+		$addNewPromptFieldsetButton.forEach( ( button ) => {
+			button.addEventListener( 'click', ( e ) => {
+				e.preventDefault();
+
+				addNewFieldSet( e.target.previousElementSibling );
+			} );
+		} );
+	}
+
+	// Attach event to existing prompt fieldsets.
+	const $promptFieldsets = document.querySelectorAll(
+		'.classifai-field-type-prompt-setting'
+	);
+	if ( $promptFieldsets.length ) {
+		$promptFieldsets.forEach( ( $promptFieldset ) => {
+			attachEventPromptFieldset( $promptFieldset );
+		} );
+	}
+
+	// ------------------
+	// Helper function
+	// ------------------
+
+	/**
+	 * Reset all input fields in a fieldset.
+	 *
+	 * @since 2.4.0
+	 * @param {Element} $fieldset
+	 * @param {Element} $parentRow
+	 */
+	function resetInputFields( $fieldset, $parentRow ) {
+		const $allFieldsets = $parentRow.querySelectorAll( 'fieldset' );
+		const $lastFieldset = Array.from( $allFieldsets ).pop();
+		const highestFieldIndexOfFieldset = parseInt(
+			$lastFieldset.querySelector( 'input' ).name.match( /\d+/ ).pop()
+		);
+		const fields = $fieldset.querySelectorAll( 'input, textarea' );
+		const actionButtons = $fieldset.querySelectorAll(
+			'.actions-rows .action__set_default'
+		);
+
+		// Reset form fields.
+		fields.forEach( ( field ) => {
+			field.value = '';
+			field.removeAttribute( 'readonly' );
+
+			// Add index to field name.
+			field.name = field.name.replace(
+				/(\d+)/g,
+				() => highestFieldIndexOfFieldset + 1
+			);
+		} );
+
+		// Reset action buttons.
+		actionButtons.forEach( ( button ) => {
+			button.classList.remove( 'selected' );
+			button.textContent = __( 'Set as default prompt', 'classifai' );
+		} );
+	}
+
+	/**
+	 * Attach event to fieldset.
+	 *
+	 * @since 2.4.0
+	 * @param {Element} $newPromptFieldset
+	 */
+	function attachEventPromptFieldset( $newPromptFieldset ) {
+		// Add event to remove prompt link
+		const $removePromptFieldsetLink = $newPromptFieldset.querySelector(
+			'a.action__remove_prompt'
+		);
+
+		$removePromptFieldsetLink.addEventListener( 'click', ( e ) => {
+			e.preventDefault();
+			displayPromptRemovalModal( e.target );
+		} );
+
+		// Add event to set as default link.
+		const $setAsDefaultLink = $newPromptFieldset.querySelector(
+			'a.action__set_default'
+		);
+
+		$setAsDefaultLink.addEventListener( 'click', ( e ) => {
+			e.preventDefault();
+
+			// If already selected, do nothing.
+			if ( e.target.classList.contains( 'selected' ) ) {
+				return;
+			}
+
+			// Remove selected class from all buttons.
+			const $settingRow = e.target.closest( 'tr' );
+			const $setAsDefaultLinks = $settingRow.querySelectorAll(
+				'.action__set_default'
+			);
+			$setAsDefaultLinks.forEach( ( link ) => {
+				// Update text.
+				if ( link.classList.contains( 'selected' ) ) {
+					link.textContent = __(
+						'Set as default prompt',
+						'classifai'
+					);
+				}
+
+				link.classList.remove( 'selected' );
+
+				link
+					.closest( 'fieldset' )
+					.querySelector( '.js-setting-field__default' ).value = '';
+			} );
+
+			// Set selected class.
+			e.target.classList.add( 'selected' );
+
+			e.target.textContent = __( 'Default prompt', 'classifai' );
+
+			// Set default value.
+			$newPromptFieldset.querySelector(
+				'.js-setting-field__default'
+			).value = '1';
+		} );
+	}
+
+	/**
+	 * Handle prompt removal modal.
+	 *
+	 * @since 2.4.0
+	 * @param {Element} removePromptLink
+	 */
+	function displayPromptRemovalModal( removePromptLink ) {
+		jQuery( '#js-classifai--delete-prompt-modal' ).dialog( {
+			modal: true,
+			title: __( 'Remove Prompt', 'classifai' ),
+			width: 550,
+			buttons: [
+				{
+					text: __( 'Cancel', 'classifai' ),
+					class: 'button-secondary',
+					click() {
+						jQuery( this ).dialog( 'close' );
+					},
+				},
+				{
+					text: __( 'Remove', 'classifai' ),
+					class: 'button-primary',
+					click() {
+						const fieldset = removePromptLink.closest( 'fieldset' );
+						const fieldsetContainer = fieldset.parentElement;
+						const canResetPrompt =
+							fieldset.querySelector(
+								'.js-setting-field__default'
+							).value === '1';
+						const hasOnlySinglePrompt =
+							2 ===
+							fieldsetContainer.querySelectorAll( 'fieldset' )
+								.length;
+
+						fieldset.remove();
+
+						// Set first prompt in list as default.
+						if ( canResetPrompt ) {
+							const setAsDefaultButton =
+								fieldsetContainer.querySelector(
+									'fieldset .action__set_default'
+								);
+
+							setAsDefaultButton.click();
+						}
+
+						// Hide remove button if only single fieldset is left.
+						if ( hasOnlySinglePrompt ) {
+							fieldsetContainer.querySelector(
+								'.action__remove_prompt'
+							).style.display = 'none';
+						}
+
+						jQuery( this ).dialog( 'close' );
+					},
+					style: 'margin-left: 10px;',
+				},
+			],
+		} );
+	}
+
+	/**
+	 * Add a new fieldset.
+	 *
+	 * @since 2.4.0
+	 * @param {Element} $sibling
+	 *
+	 * @return {Element} $newPromptFieldset
+	 */
+	function addNewFieldSet( $sibling ) {
+		const $promptFieldsetTemplate = $sibling.parentElement.querySelector(
+			'.classifai-field-type-prompt-setting'
+		);
+
+		const $newPromptFieldset = $promptFieldsetTemplate.cloneNode( true );
+
+		resetInputFields( $newPromptFieldset, $sibling.closest( 'tr' ) );
+		attachEventPromptFieldset( $newPromptFieldset );
+
+		$newPromptFieldset
+			.querySelector( '.classifai-original-prompt' )
+			.remove();
+
+		$newPromptFieldset.querySelector(
+			'.action__remove_prompt'
+		).style.display = 'block';
+
+		$sibling.insertAdjacentElement( 'afterend', $newPromptFieldset );
+
+		return $newPromptFieldset;
+	}
 } )();
