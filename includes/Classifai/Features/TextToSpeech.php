@@ -129,6 +129,8 @@ class TextToSpeech extends Feature {
 		$azure_speech->add_api_key_field();
 		$azure_speech->add_endpoint_url_field();
 		$azure_speech->add_voices_options_field();
+
+		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
 	}
 
 	/**

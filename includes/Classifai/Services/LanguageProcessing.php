@@ -25,13 +25,7 @@ class LanguageProcessing extends Service {
 		parent::__construct(
 			__( 'Language Processing', 'classifai' ),
 			'language_processing',
-			[
-				// 'Classifai\Providers\Watson\NLU',
-				'Classifai\Providers\OpenAI\ChatGPT',
-				// 'Classifai\Providers\OpenAI\Embeddings',
-				'Classifai\Providers\OpenAI\Whisper',
-				'Classifai\Providers\Azure\Speech',
-			]
+			$this->register_service_providers()
 		);
 	}
 
@@ -41,6 +35,19 @@ class LanguageProcessing extends Service {
 	public function init() {
 		parent::init();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	public function register_service_providers() {
+		return apply_filters(
+			'classifai_language_processing_service_providers',
+			[
+				// 'Classifai\Providers\Watson\NLU',
+				'Classifai\Providers\OpenAI\ChatGPT',
+				// 'Classifai\Providers\OpenAI\Embeddings',
+				'Classifai\Providers\OpenAI\Whisper',
+				'Classifai\Providers\Azure\Speech',
+			]
+		);
 	}
 
 	/**

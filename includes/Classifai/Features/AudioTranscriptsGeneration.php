@@ -103,6 +103,8 @@ class AudioTranscriptsGeneration extends Feature {
 		 */
 		$azure_speech = new Whisper( $this );
 		$azure_speech->add_api_key_field();
+
+		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
 	}
 
 	/**

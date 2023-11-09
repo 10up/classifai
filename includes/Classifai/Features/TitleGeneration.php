@@ -117,6 +117,8 @@ class TitleGeneration extends Feature {
 				'description'        => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
+
+		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
 	}
 
 	/**
@@ -160,24 +162,28 @@ class TitleGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'status'    => '0',
-			'roles'     => $this->roles,
-			'length'    => absint( apply_filters( 'excerpt_length', 55 ) ),
-			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
-			ChatGPT::ID => [
-				'api_key'               => '',
-				'number_of_titles'      => 1,
-				'authenticated'         => false,
-				'generate_title_prompt' => array(
-					array(
-						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
-						'original' => 1,
-					),
-				),
-			],
-		];
+		return
+			apply_filters(
+				'classifai_' . static::ID . '_get_default_settings',
+				[
+					'status'    => '0',
+					'roles'     => $this->roles,
+					'length'    => absint( apply_filters( 'excerpt_length', 55 ) ),
+					'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
+					ChatGPT::ID => [
+						'api_key'               => '',
+						'number_of_titles'      => 1,
+						'authenticated'         => false,
+						'generate_title_prompt' => array(
+							array(
+								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+								'prompt'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
+								'original' => 1,
+							),
+						),
+					],
+				]
+			);
 	}
 
 	/**

@@ -126,6 +126,8 @@ class ExcerptGeneration extends Feature {
 				'description'        => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
 		);
+
+		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
 	}
 
 	/**

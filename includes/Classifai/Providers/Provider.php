@@ -170,19 +170,6 @@ abstract class Provider {
 	}
 
 	/**
-	 * Set up the fields for each section.
-	 */
-	abstract public function setup_fields_sections();
-
-	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
-	 * @since 1.4.0
-	 */
-	abstract public function get_provider_debug_information();
-
-	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 * This is called by the Service.
 	 *

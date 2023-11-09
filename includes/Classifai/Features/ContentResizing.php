@@ -131,6 +131,8 @@ class ContentResizing extends Feature {
 				'description'        => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
 			]
 		);
+
+		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
 	}
 
 	/**
