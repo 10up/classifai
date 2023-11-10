@@ -228,7 +228,8 @@ class Embeddings extends Provider {
 			$new_settings['enable_classification'] = '1';
 
 			// If any NLU features are turned, show an admin notice.
-			if ( language_processing_features_enabled() ) {
+			$nlu = new NLU( $this->service );
+			if ( language_processing_features_enabled() && $nlu->is_enabled( 'content_classification' ) ) {
 				add_settings_error(
 					'enable_classification',
 					'conflict',

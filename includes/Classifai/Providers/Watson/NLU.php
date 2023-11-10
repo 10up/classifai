@@ -781,7 +781,7 @@ class NLU extends Provider {
 		}
 
 		// Show a warning if the NLU feature and Embeddings feature are both enabled.
-		if ( $feature_enabled ) {
+		if ( $feature_enabled && '1' === $new_settings['enable_content_classification'] ) {
 			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
 
 			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
