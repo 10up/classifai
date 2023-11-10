@@ -9,7 +9,7 @@ use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use function Classifai\clean_input;
-
+use function Classifai\get_asset_info;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -58,10 +58,13 @@ class Whisper extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
+		if ( $this->feature_instance instanceof \Classifai\Features\AudioTranscriptsGeneration && $this->feature_instance->is_feature_enabled() ) {
+			add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+			add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
+			add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+			add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
+		}
 	}
 
 	public function setup_fields_sections() {}
@@ -69,6 +72,16 @@ class Whisper extends Provider {
 	public function reset_settings() {}
 
 	public function sanitize_settings( $settings ) {}
+
+	public function enqueue_media_scripts() {
+		wp_enqueue_script(
+			'classifai-media-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
+			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
+			get_asset_info( 'media', 'version' ),
+			true
+		);
+	}
 
 	/**
 	 * Start the audio transcription process.
@@ -81,13 +94,14 @@ class Whisper extends Provider {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
 
-		$enabled = $this->feature_instance->is_feature_enabled();
+		$feature = new AudioTranscriptsGeneration();
+		$enabled = $feature->is_feature_enabled();
 
 		if ( is_wp_error( $enabled ) ) {
 			return $enabled;
 		}
 
-		$settings   = $this->feature_instance->get_settings( static::ID );
+		$settings   = $feature->get_settings( static::ID );
 		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
 
 		return $transcribe->process();
@@ -101,29 +115,22 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
-		$enabled = $this->feature_instance->is_feature_enabled( $attachment->ID );
-
-		if ( is_wp_error( $enabled ) ) {
-			return $form_fields;
-		}
-
-		$settings   = $this->feature_instance->get_settings();
+		$feature    = new AudioTranscriptsGeneration();
+		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $attachment->ID, $settings[ static::ID ] );
 
 		if ( ! $transcribe->should_process( $attachment->ID ) ) {
 			return $form_fields;
 		}
 
-		if ( is_array( $settings ) && isset( $settings['status'] ) && '1' === $settings['status'] ) {
-			$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
+		$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
 
-			$form_fields['retranscribe'] = [
-				'label'        => __( 'Transcribe audio', 'classifai' ),
-				'input'        => 'html',
-				'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-				'show_in_edit' => false,
-			];
-		}
+		$form_fields['retranscribe'] = [
+			'label'        => __( 'Transcribe audio', 'classifai' ),
+			'input'        => 'html',
+			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+			'show_in_edit' => false,
+		];
 
 		return $form_fields;
 	}
@@ -134,29 +141,22 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$enabled = $this->feature_instance->is_feature_enabled( $post->ID );
-
-		if ( is_wp_error( $enabled ) ) {
-			return;
-		}
-
-		$settings   = $this->feature_instance->get_settings();
+		$feature    = new AudioTranscriptsGeneration();
+		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $post->ID, $settings[ static::ID ] );
 
 		if ( ! $transcribe->should_process( $post->ID ) ) {
 			return;
 		}
 
-		if ( is_array( $settings ) && isset( $settings[ static::ID ]['status'] ) && '1' === $settings[ static::ID ]['status'] ) {
-			add_meta_box(
-				'attachment_meta_box',
-				__( 'ClassifAI Audio Processing', 'classifai' ),
-				[ $this, 'attachment_meta_box' ],
-				'attachment',
-				'side',
-				'high'
-			);
-		}
+		add_meta_box(
+			'attachment_meta_box',
+			__( 'ClassifAI Audio Processing', 'classifai' ),
+			[ $this, 'attachment_meta_box' ],
+			'attachment',
+			'side',
+			'high'
+		);
 	}
 
 	/**
@@ -192,7 +192,8 @@ class Whisper extends Provider {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
 
-		$enabled = $this->feature_instance->is_feature_enabled();
+		$feature = new AudioTranscriptsGeneration();
+		$enabled = $feature->is_feature_enabled();
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
