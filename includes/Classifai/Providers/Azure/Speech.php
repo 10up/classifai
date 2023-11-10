@@ -106,12 +106,6 @@ class Speech extends Provider {
 			return;
 		}
 
-		$supported_post_types = get_tts_supported_post_types();
-
-		if ( ! in_array( $post->post_type, $supported_post_types, true ) ) {
-			return;
-		}
-
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
@@ -134,7 +128,7 @@ class Speech extends Provider {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		if ( $this->feature_instance instanceof \Classifai\Features\TextToSpeech && ! $this->feature_instance->is_feature_enabled() ) {
+		if ( $this->feature_instance instanceof \Classifai\Features\TextToSpeech && $this->feature_instance->is_feature_enabled() ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );

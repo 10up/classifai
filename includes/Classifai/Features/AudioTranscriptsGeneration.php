@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\Azure\Speech;
 use \Classifai\Providers\OpenAI\Whisper;
 
 /**
@@ -113,27 +114,29 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @return boolean
 	 */
 	public function is_feature_enabled() {
-		$settings = $this->get_settings();
+		$access          = false;
+		$settings        = $this->get_settings();
+		$provider_id     = $settings['provider'] ?? Speech::ID;
+		$user_roles      = wp_get_current_user()->roles ?? [];
+		$feature_roles   = $settings['roles'] ?? [];
 
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
-			return new \WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
+		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
+		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
+		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
+		$access          = $user_access && $provider_access && $feature_status;
 
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return new \WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
-		}
-
-		// Ensure feature is turned on.
-		if ( ! isset( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
-			return new \WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
-		}
-
-		return true;
+		/**
+		 * Filter to override permission to the generate title feature.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_chatgpt_{$feature}
+		 *
+		 * @param {bool}  $access Current access value.
+		 * @param {array} $settings Current feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
 	}
 
 	/**

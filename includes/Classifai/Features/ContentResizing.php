@@ -136,15 +136,16 @@ class ContentResizing extends Feature {
 	 * @return boolean
 	 */
 	public function is_feature_enabled() {
-		$access        = false;
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$feature_roles = $settings['roles'] ?? [];
+		$access          = false;
+		$settings        = $this->get_settings();
+		$provider_id     = $settings['provider'] ?? ChatGPT::ID;
+		$user_roles      = wp_get_current_user()->roles ?? [];
+		$feature_roles   = $settings['roles'] ?? [];
 
-		// Check if user has access to the feature and the feature is turned on.
-		if ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) ) {
-			$access = true;
-		}
+		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
+		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
+		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
+		$access          = $user_access && $provider_access && $feature_status;
 
 		/**
 		 * Filter to override permission to the generate title feature.

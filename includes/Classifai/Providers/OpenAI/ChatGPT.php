@@ -1111,12 +1111,6 @@ class ChatGPT extends Provider {
 		}
 
 		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -1177,12 +1171,6 @@ class ChatGPT extends Provider {
 		}
 
 		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -1238,22 +1226,17 @@ class ChatGPT extends Provider {
 		$feature  = new ContentResizing();
 		$settings = $feature->get_settings();
 
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
-
-		// Check if resize content feature is turned on.
-		if ( empty( $settings ) || ( isset( $settings['status'] ) && 'no' === $settings['status'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
-		}
-
 		// Check if the current user's role is allowed.
 		$roles      = $settings['roles'] ?? [];
 		$user_roles = wp_get_current_user()->roles ?? [];
 
 		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
 			return false;
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing is not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
