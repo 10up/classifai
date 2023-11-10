@@ -96,45 +96,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Determine if the current user can access the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature = '' ) {
-		$access   = false;
-		$settings = $this->get_settings();
-		$features = array(
-			'title_generation'   => 'enable_titles',
-			'excerpt_generation' => 'enable_excerpt',
-			'resize_content'     => 'enable_resize_content',
-		);
-
-		$enable_key = $features[ $feature ] ?? 'enable_' . $feature;
-
-		// Check if user has access to the feature and the feature is turned on.
-		if (
-			$this->has_access( $feature ) &&
-			( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a ChatGPT generate feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_enable_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_openai_chatgpt_{$enable_key}", $access, $settings );
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
@@ -1229,5 +1190,36 @@ class ChatGPT extends Provider {
 		}
 
 		return $default_prompt;
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Handle different enable keys.
+		switch ( $feature ) {
+			case 'title_generation':
+				$enable_key = 'enable_titles';
+				break;
+
+			case 'excerpt_generation':
+				$enable_key = 'enable_excerpt';
+				break;
+
+			default:
+				break;
+		}
+
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

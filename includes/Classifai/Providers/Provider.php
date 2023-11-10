@@ -712,28 +712,6 @@ abstract class Provider {
 		$settings   = $this->get_settings();
 		$enable_key = 'enable_' . $feature;
 
-		// Handle different enable keys.
-		switch ( $feature ) {
-			case 'title_generation':
-				$enable_key = 'enable_titles';
-				break;
-
-			case 'excerpt_generation':
-				$enable_key = 'enable_excerpt';
-				break;
-
-			case 'speech_to_text':
-				$enable_key = 'enable_transcripts';
-				break;
-
-			case 'image_generation':
-				$enable_key = 'enable_image_gen';
-				break;
-
-			default:
-				break;
-		}
-
 		// Check if feature is turned on.
 		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
 

@@ -66,14 +66,11 @@ class Whisper extends Provider {
 		$settings = $this->get_settings();
 
 		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+		if ( ! $this->is_configured() ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if the current user has permission.
-		$has_access = $this->has_access( $feature );
-
-		if ( ! $has_access ) {
+		if ( ! $this->has_access( $feature ) ) {
 			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
 		}
 
@@ -82,11 +79,30 @@ class Whisper extends Provider {
 		}
 
 		// Ensure feature is turned on.
-		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
+		if ( ! $this->is_enabled( 'speech_to_text' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
 		}
 
-		return true;
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", true, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = ( 'speech_to_text' === $feature ) ? 'enable_transcripts' : 'enable_' . $feature;
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 
 	/**

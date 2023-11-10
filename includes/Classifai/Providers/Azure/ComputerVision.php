@@ -1431,39 +1431,24 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Determine if the current user can access the feature
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
 	 *
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature ) {
-		if ( 'image_captions' !== $feature ) {
-			return parent::is_feature_enabled( $feature );
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+		if ( 'image_captions' === $feature ) {
+			$is_enabled = ( ! empty( $this->get_alt_text_settings() ) );
 		}
 
-		$access   = false;
-		$settings = $this->get_settings();
-
-		// Check if provider is configured and user has access to the feature and the feature is turned on.
-		if (
-			$this->is_configured() &&
-			$this->has_access( $feature ) &&
-			! empty( $this->get_alt_text_settings() )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a specific classifai feature.
-		 *
-		 * @since 2.4.0
-		 * @hook classifai_{$this->option_name}_enable_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $access, $settings );
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }
