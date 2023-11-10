@@ -122,6 +122,7 @@ class ChatGPT extends Provider {
 				'placeholder'   => $args['prompt_placeholder'],
 				'default_value' => $settings[ $args['id'] ],
 				'description'   => $args['description'],
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
@@ -153,6 +154,7 @@ class ChatGPT extends Provider {
 				'step'          => 1,
 				'default_value' => $settings[ $args['id'] ],
 				'description'   => $args['description'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}

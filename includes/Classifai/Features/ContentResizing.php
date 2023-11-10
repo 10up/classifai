@@ -244,7 +244,8 @@ class ContentResizing extends Feature {
 
 		return apply_filters(
 			'classifai_' . static::ID . '_sanitize_settings',
-			$new_settings
+			$new_settings,
+			$settings
 		);
 	}
 }

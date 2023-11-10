@@ -239,9 +239,7 @@ abstract class Provider {
 				'label_for'     => $id,
 				'input_type'    => 'password',
 				'default_value' => $default_settings[ $id ],
-				'data_attr'     => [
-					'provider-scope' => [ static::ID ],
-				],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}

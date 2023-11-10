@@ -158,6 +158,7 @@ class Speech extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings[ $id ],
 				'description'   => $args[ 'description' ] ?? __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+				'class'              => 'classifai-provider-field hidden', // Important to add this.
 			]
 		);
 	}
@@ -178,6 +179,7 @@ class Speech extends Provider {
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
+					'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 				]
 			);
 		}
