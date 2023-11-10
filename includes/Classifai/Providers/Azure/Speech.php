@@ -158,7 +158,7 @@ class Speech extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings[ $id ],
 				'description'   => $args[ 'description' ] ?? __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
-				'class'              => 'classifai-provider-field hidden', // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
@@ -195,44 +195,44 @@ class Speech extends Provider {
 	/**
 	 * Sanitization callback for settings.
 	 *
-	 * @param array $settings The settings being saved.
+	 * @param array $new_settings The settings being saved.
 	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$current_settings = wp_parse_args(
-			$this->feature_instance->get_settings(),
-			$this->feature_instance->get_default_settings()
-		);
+	public function sanitize_settings( $new_settings ) {
+		$settings               = $this->feature_instance->get_settings();
 		$is_credentials_changed = false;
 
-		if ( ! empty( $settings[ static::ID ]['endpoint_url'] ) && ! empty( $settings[ static::ID ]['api_key'] ) ) {
-			$new_url = trailingslashit( esc_url_raw( $settings[ static::ID ]['endpoint_url'] ) );
-			$new_key = sanitize_text_field( $settings[ static::ID ]['api_key'] );
+		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
 
-			if ( $new_url !== $current_settings[ static::ID ]['endpoint_url'] || $new_key !== $current_settings[ static::ID ]['api_key'] ) {
+		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
+			$new_url = trailingslashit( esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ) );
+			$new_key = sanitize_text_field( $new_settings[ static::ID ]['api_key'] );
+
+			if ( $new_url !== $settings[ static::ID ]['endpoint_url'] || $new_key !== $settings[ static::ID ]['api_key'] ) {
 				$is_credentials_changed = true;
 			}
 
 			if ( $is_credentials_changed ) {
-				$current_settings[ static::ID ]['endpoint_url'] = $new_url;
-				$current_settings[ static::ID ]['api_key']      = $new_key;
-				$current_settings[ static::ID ]['voices']       = $this->connect_to_service(
+				$new_settings[ static::ID ]['endpoint_url'] = $new_url;
+				$new_settings[ static::ID ]['api_key']      = $new_key;
+				$new_settings[ static::ID ]['voices']       = $this->connect_to_service(
 					array(
 						'endpoint_url' => $new_url,
 						'api_key'      => $new_key,
 					)
 				);
 
-				if ( ! empty( $current_settings[ static::ID ]['voices'] ) ) {
-					$current_settings[ static::ID ]['authenticated'] = true;
+				if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
+					$new_settings[ static::ID ]['authenticated'] = true;
 				} else {
-					$current_settings[ static::ID ]['voices']        = [];
-					$current_settings[ static::ID ]['authenticated'] = false;
+					$new_settings[ static::ID ]['voices']        = [];
+					$new_settings[ static::ID ]['authenticated'] = false;
 				}
 			}
 		} else {
-			$current_settings[ static::ID ]['endpoint_url'] = '';
-			$current_settings[ static::ID ]['api_key']      = '';
+			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
+			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
 
 			add_settings_error(
 				$this->feature_instance->get_option_name(),
@@ -246,18 +246,16 @@ class Speech extends Provider {
 		$post_types = get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
-			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
-				$current_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
+			if ( isset( $new_settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			} else {
-				$current_settings['post_types'][ $post_type->name ] = null;
+				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
 			}
 		}
 
-		if ( isset( $settings[ static::ID ]['voice'] ) && ! empty( $settings[ static::ID ]['voice'] ) ) {
-			$current_settings[ static::ID ]['voice'] = sanitize_text_field( $settings[ static::ID ]['voice'] );
-		}
+		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
 
-		return $current_settings;
+		return $new_settings;
 	}
 
 	/**

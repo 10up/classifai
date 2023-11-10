@@ -91,12 +91,14 @@ trait OpenAI {
 	/**
 	 * Sanitize the API key, showing an error message if needed.
 	 *
-	 * @param array $old_settings Existing settings, if any.
+	 * @param array $new_settings Incoming settings, if any.
+	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $old_settings = [] ) {
-		$new_settings  = $this->feature_instance->get_settings();
-		$authenticated = $this->authenticate_credentials( $old_settings[ static::ID ]['api_key'] ?? '' );
+	public function sanitize_api_key_settings( array $new_settings = [], $settings ) {
+		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
+
+		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
 		if ( is_wp_error( $authenticated ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
@@ -120,7 +122,7 @@ trait OpenAI {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $old_settings[ static::ID ]['api_key'] ?? '' );
+		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
 
 		return $new_settings;
 	}

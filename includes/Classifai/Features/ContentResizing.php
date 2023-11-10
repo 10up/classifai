@@ -201,30 +201,17 @@ class ContentResizing extends Feature {
 	/**
 	 * Sanitizes the settings before saving.
 	 *
-	 * @param array $settings The settings to be sanitized on save.
+	 * @param array $new_settings The settings to be sanitized on save.
 	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
+	public function sanitize_settings( $new_settings ) {
+		$settings = $this->get_settings();
 
-		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
-			$new_settings['status'] = 'no';
-		} else {
-			$new_settings['status'] = '1';
-		}
+		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
+		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
+		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['provider'] ) ) {
-			$new_settings['provider'] = sanitize_text_field( $settings['provider'] );
-		} else {
-			$new_settings['provider'] = ChatGPT::ID;
-		}
 
 		/*
 		 * These are the sanitization methods specific to the OpenAI ChatGPT provider.
@@ -232,14 +219,14 @@ class ContentResizing extends Feature {
 		 *
 		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
 		 */
-		if ( isset( $settings[ ChatGPT::ID ] ) ) {
+		if ( isset( $new_settings[ ChatGPT::ID ] ) ) {
 			$provider_instance                                    = new ChatGPT( $this );
-			$api_key_settings                                     = $provider_instance->sanitize_api_key_settings( $settings );
+			$api_key_settings                                     = $provider_instance->sanitize_api_key_settings( $new_settings, $settings );
 			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
 			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
-			$new_settings[ ChatGPT::ID ]['number_of_suggestions'] = $provider_instance->sanitize_number_of_responses_field( 'number_of_suggestions', $settings );
-			$new_settings[ ChatGPT::ID ]['condense_text_prompt']  = $provider_instance->sanitize_prompts( 'condense_text_prompt', $settings );
-			$new_settings[ ChatGPT::ID ]['expand_text_prompt']    = $provider_instance->sanitize_prompts( 'expand_text_prompt', $settings );
+			$new_settings[ ChatGPT::ID ]['number_of_titles']      = $provider_instance->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
+			$new_settings[ ChatGPT::ID ]['condense_text_prompt'] = $provider_instance->sanitize_prompts( 'condense_text_prompt', $new_settings );
+			$new_settings[ ChatGPT::ID ]['expand_text_prompt'] = $provider_instance->sanitize_prompts( 'expand_text_prompt', $new_settings );
 		}
 
 		return apply_filters(

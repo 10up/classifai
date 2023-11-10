@@ -162,32 +162,26 @@ class ChatGPT extends Provider {
 	/**
 	 * Sanitisation callback for api key.
 	 *
-	 * @param array $settings The settings array.
+	 * @param array $new_settings The settings array.
 	 *
 	 * @return string
 	 */
-	public function sanitize_api_key( $settings ) {
-		if ( isset( $settings[ self::ID ]['api_key'] ) ) {
-			return sanitize_text_field( $settings[ self::ID ]['api_key'] );
-		}
-
-		return '';
+	public function sanitize_api_key( $new_settings ) {
+		$settings = $this->feature_instance->get_settings();
+		return sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] ?? '' );
 	}
 
 	/**
 	 * Sanitisation callback for number of responses.
 	 *
 	 * @param string $key The key of the value we are sanitizing.
-	 * @param array  $settings The settings array.
+	 * @param array  $new_settings The settings array.
+	 * @param array  $settings     Current array.
 	 *
 	 * @return integer
 	 */
-	public function sanitize_number_of_responses_field( $key, $settings ) {
-		if ( isset( $settings[ self::ID ][ $key ] ) ) {
-			return absint( $settings[ self::ID ][ $key ] );
-		}
-
-		return 1;
+	public function sanitize_number_of_responses_field( $key, $new_settings, $settings ) {
+		return absint( $new_settings[ static::ID ][ $key ] ?? $settings[ static::ID ][ $key ] ?? '' );
 	}
 
 	/**
@@ -870,14 +864,14 @@ class ChatGPT extends Provider {
 	 * @since 2.4.0
 	 *
 	 * @param array $prompt_key Prompt key.
-	 * @param array $settings   Settings data.
+	 * @param array $new_settings   Settings data.
 	 *
 	 * @return array Sanitized prompt data.
 	 */
-	public function sanitize_prompts( $prompt_key = '', array $settings ): array {
-		if ( isset( $settings[ self::ID ][ $prompt_key ] ) && is_array( $settings[ self::ID ][ $prompt_key ] ) ) {
+	public function sanitize_prompts( $prompt_key = '', array $new_settings ): array {
+		if ( isset( $new_settings[ self::ID ][ $prompt_key ] ) && is_array( $new_settings[ self::ID ][ $prompt_key ] ) ) {
 
-			$prompts = $settings[ self::ID ][ $prompt_key ];
+			$prompts = $new_settings[ self::ID ][ $prompt_key ];
 
 			// Remove any prompts that don't have a title and prompt.
 			$prompts = array_filter(

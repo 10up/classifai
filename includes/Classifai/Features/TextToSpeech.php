@@ -203,38 +203,24 @@ class TextToSpeech extends Feature {
 	/**
 	 * Sanitizes the settings before saving.
 	 *
-	 * @param array $settings The settings to be sanitized on save.
+	 * @param array $new_settings The settings to be sanitized on save.
 	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
+	public function sanitize_settings( $new_settings ) {
+		$settings = $this->get_settings();
 
-		if ( empty( $settings['status'] ) || 1 !== (int) $settings['status'] ) {
-			$new_settings['status'] = 'no';
-		} else {
-			$new_settings['status'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['provider'] ) ) {
-			$new_settings['provider'] = sanitize_text_field( $settings['provider'] );
-		} else {
-			$new_settings['provider'] = Speech::ID;
-		}
+		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
+		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
+		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
 		$post_types = \Classifai\get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
-			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'][ $post_type->name ];
+			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
 			} else {
-				$new_settings['post_types'][ $post_type->name ] = null;
+				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
 		}
 
@@ -244,9 +230,9 @@ class TextToSpeech extends Feature {
 		 *
 		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
 		 */
-		if ( isset( $settings[ Speech::ID ] ) ) {
+		if ( isset( $new_settings[ Speech::ID ] ) ) {
 			$provider_instance                           = new Speech( $this );
-			$api_key_settings                            = $provider_instance->sanitize_settings( $settings );
+			$api_key_settings                            = $provider_instance->sanitize_settings( $new_settings );
 			$new_settings[ Speech::ID ]['api_key']       = $api_key_settings[ Speech::ID ]['api_key'];
 			$new_settings[ Speech::ID ]['endpoint_url']  = $api_key_settings[ Speech::ID ]['endpoint_url'];
 			$new_settings[ Speech::ID ]['authenticated'] = $api_key_settings[ Speech::ID ]['authenticated'];
