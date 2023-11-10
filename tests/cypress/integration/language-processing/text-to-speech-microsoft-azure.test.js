@@ -8,6 +8,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get( '#url' ).clear();
 		cy.get( '#url' ).type( 'https://service.com' );
 		cy.get( '#api_key' ).type( 'password' );
+		cy.get( '#enable_text_to_speech' ).check();
 		cy.get( '#submit' ).click();
 
 		cy.get( '#voice' ).select( 'en-AU-AnnetteNeural|Female' );
@@ -116,6 +117,29 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 
 		cy.visit( '/text-to-speech-test/' );
 		cy.get( '.class-post-audio-controls' ).should( 'not.exist' );
+	} );
+
+	it( 'Can enable/disable text to speech feature', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech'
+		);
+		cy.get( '#enable_text_to_speech' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.verifyTextToSpeechEnabled( false );
+
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech'
+		);
+		cy.get( '#enable_text_to_speech' ).check();
+		cy.get( '#azure_text_to_speech_post_types_post' ).check( 'post' );
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyTextToSpeechEnabled( true );
 	} );
 
 	it( 'Can enable/disable text to speech feature by role', () => {

@@ -409,26 +409,36 @@ Cypress.Commands.add( 'verifyImageGenerationEnabled', ( enabled = true ) => {
  * Verify that the AI Vision features is enabled or disabled.
  *
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ * @param {Object}  options Options to pass to the command.
  */
-Cypress.Commands.add( 'verifyAIVisionEnabled', ( enabled = true ) => {
-	const shouldExist = enabled ? 'exist' : 'not.exist';
-	cy.visit( '/wp-admin/upload.php?mode=list' );
-	cy.get( '#the-list tr:nth-child(1) td.title a span.image-icon' ).click();
+Cypress.Commands.add(
+	'verifyAIVisionEnabled',
+	( enabled = true, options = {} ) => {
+		const shouldExist = enabled ? 'exist' : 'not.exist';
+		// Verify with Image processing features in attachment metabox.
+		cy.visit( options.imageEditLink );
+		cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).should(
+			shouldExist
+		);
+		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).should(
+			shouldExist
+		);
+		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).should(
+			shouldExist
+		);
+		cy.get(
+			'.misc-publishing-actions label[for=rescan-smart-crop]'
+		).should( shouldExist );
 
-	// Verify that the feature is not available.
-	cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).should(
-		shouldExist
-	);
-	cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).should(
-		shouldExist
-	);
-	cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).should(
-		shouldExist
-	);
-	cy.get( '.misc-publishing-actions label[for=rescan-smart-crop]' ).should(
-		shouldExist
-	);
-} );
+		// Verify with Image processing features in media model.
+		cy.visit( options.mediaModelLink );
+		cy.get( '.media-modal' ).should( 'exist' );
+		cy.get( '#classifai-rescan-alt-tags' ).should( shouldExist );
+		cy.get( '#classifai-rescan-image-tags' ).should( shouldExist );
+		cy.get( '#classifai-rescan-smart-crop' ).should( shouldExist );
+		cy.get( '#classifai-rescan-ocr' ).should( shouldExist );
+	}
+);
 
 /**
  * Deactivate the Classic Editor plugin.

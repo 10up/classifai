@@ -73,25 +73,31 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.get( '#classifai-retranscribe' ).contains( 'Re-transcribe' );
 	} );
 
-	it( 'Can disable OpenAI Whisper language processing features', () => {
+	it( 'Can enable/disable OpenAI Whisper language processing features', () => {
+		const options = {
+			audioEditLink,
+			mediaModalLink,
+		};
+
+		// Disable features
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
 		);
-
-		// Disable features
 		cy.get( '#enable_transcripts' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		// Verify features are not present in attachment metabox.
-		cy.visit( audioEditLink );
-		cy.get( '.misc-publishing-actions label[for=retranscribe]' ).should(
-			'not.exist'
-		);
+		// Verify that the feature is not available.
+		cy.verifySpeechToTextEnabled( false, options );
 
-		// Verify features are not present in media modal.
-		cy.visit( mediaModalLink );
-		cy.get( '.media-modal' ).should( 'exist' );
-		cy.get( '#classifai-retranscribe' ).should( 'not.exist' );
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+		);
+		cy.get( '#enable_transcripts' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifySpeechToTextEnabled( true, options );
 	} );
 
 	it( 'Can enable/disable speech to text feature by role', () => {

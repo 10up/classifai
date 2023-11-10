@@ -268,6 +268,28 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			);
 	} );
 
+	it( 'Can enable/disable resize content feature', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_resize_content' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.verifyResizeContentEnabled( false );
+
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_resize_content' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyResizeContentEnabled( true );
+	} );
+
 	it( 'Can enable/disable resize content feature by role', () => {
 		// Disable admin role.
 		cy.disableFeatureForRoles(
