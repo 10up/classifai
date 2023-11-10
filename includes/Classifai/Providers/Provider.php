@@ -672,9 +672,9 @@ abstract class Provider {
 	 * @return bool
 	 */
 	public function is_feature_enabled( string $feature ) {
-		$access     = false;
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+		$enable_key         = 'enable_' . $feature;
 
 		// Handle different enable keys.
 		switch ( $feature ) {
@@ -698,13 +698,25 @@ abstract class Provider {
 				break;
 		}
 
+		// Check if feature is turned on.
+		$is_enabled = false;
+		switch ( $feature ) {
+			case 'content_classification':
+				$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] && \Classifai\language_processing_features_enabled() );
+				break;
+
+			default:
+				$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+				break;
+		}
+
 		// Check if provider is configured and user has access to the feature and the feature is turned on.
 		if (
 			$this->is_configured() &&
 			$this->has_access( $feature ) &&
-			( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
+			$is_enabled
 		) {
-			$access = true;
+			$is_feature_enabled = true;
 		}
 
 		/**
@@ -713,11 +725,11 @@ abstract class Provider {
 		 * @since 2.4.0
 		 * @hook classifai_{$this->option_name}_enable_{$feature}
 		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
-		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $access, $settings );
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
 	}
 }

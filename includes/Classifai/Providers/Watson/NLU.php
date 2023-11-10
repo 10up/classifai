@@ -114,15 +114,16 @@ class NLU extends Provider {
 		return array_merge(
 			$default_settings,
 			[
-				'post_types' => [
+				'enable_content_classification' => false,
+				'post_types'                    => [
 					'post' => 1,
 					'page' => null,
 				],
-				'post_statuses' => [
+				'post_statuses'                 => [
 					'publish' => 1,
 					'draft'   => null,
 				],
-				'features'   => [
+				'features'                      => [
 					'category'           => true,
 					'category_threshold' => WATSON_CATEGORY_THRESHOLD,
 					'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
@@ -199,6 +200,24 @@ class NLU extends Provider {
 			if ( isset( $old_settings['features'] ) ) {
 				$defaults['features'] = $old_settings['features'];
 			}
+		}
+
+		// Backward compatibility for enable classification setting.
+		if ( ! empty( $settings ) && ! isset( $settings['enable_content_classification'] ) ) {
+			$feature_enabled = 'no';
+			$features        = array(
+				'category',
+				'concept',
+				'entity',
+				'keyword',
+			);
+			foreach ( $features as $feature ) {
+				if ( ! empty( $settings['features'][ $feature ] ) ) {
+					$feature_enabled = '1';
+					break;
+				}
+			}
+			$settings['enable_content_classification'] = $feature_enabled;
 		}
 
 		$settings = wp_parse_args( $settings, $defaults );
@@ -405,6 +424,22 @@ class NLU extends Provider {
 	 * Helper method to create the watson features section
 	 */
 	protected function do_nlu_features_sections() {
+		$default_settings = $this->get_default_settings();
+
+		add_settings_field(
+			'enable_content_classification',
+			esc_html__( 'Classify content', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_content_classification',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_content_classification'],
+				'description'   => __( 'Enables the automatic content classification of posts.', 'classifai' ),
+			]
+		);
+
 		// Add user/role-based access settings for classify content.
 		$this->add_access_settings( 'content_classification' );
 		add_settings_field(
@@ -690,6 +725,12 @@ class NLU extends Provider {
 			$new_settings['authenticated'] = true;
 		}
 
+		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
+			$new_settings['enable_content_classification'] = 'no';
+		} else {
+			$new_settings['enable_content_classification'] = '1';
+		}
+
 		if ( isset( $settings['credentials']['watson_url'] ) ) {
 			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
 		}
@@ -961,37 +1002,4 @@ class NLU extends Provider {
 
 		return $is_configured;
 	}
-
-	/**
-	 * Determine if the current user can access the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature = 'content_classification' ) {
-		$access   = false;
-		$settings = $this->get_settings();
-
-		// Check if user has access to the feature and the feature is turned on.
-		if (
-			$this->has_access( $feature ) &&
-			\Classifai\language_processing_features_enabled()
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a IBM Watson classify content feature.
-		 *
-		 * @since 2.4.0
-		 * @hook classifai_openai_chatgpt_enable_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_watson_nlu_enable_{$feature}", $access, $settings );
-	}
-
 }
