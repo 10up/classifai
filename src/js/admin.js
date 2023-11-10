@@ -302,3 +302,25 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		return $newPromptFieldset;
 	}
 } )();
+
+/** Feature-first refactor settings field: */
+( function ( $ ) {
+	$( function() {
+		const providerSelectEl = $( 'select#provider' );
+
+		providerSelectEl.on( 'change', function() {
+			const providerId = $( this ).val();
+			const providerRows = $( '.classifai-provider-field' );
+			const providerClass = `.provider-scope-${ providerId }`;
+
+			providerRows.addClass( 'hidden' );
+			providerRows.find( ':input' ).prop( 'disabled', true );
+
+			$( providerClass ).removeClass( 'hidden' );
+			$( providerClass ).find( ':input' ).prop( 'disabled', false );
+		} );
+
+		// Trigger 'change' on page load.
+		providerSelectEl.trigger( 'change' );
+	} );
+} ( jQuery ) );
