@@ -85,14 +85,10 @@ class NLU extends Provider {
 		$this->onboarding_options = array(
 			'title'    => __( 'IBM Watson NLU', 'classifai' ),
 			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
-			'features' => array(),
+			'features' => array(
+				'enable_content_classification' => __( 'Classify content', 'classifai' ),
+			),
 		);
-
-		$post_types = get_post_types_for_language_settings();
-		foreach ( $post_types as $post_type ) {
-			// translators: %s is the post type label.
-			$this->onboarding_options['features'][ 'post_types__' . $post_type->name ] = sprintf( __( 'Automatically tag %s', 'classifai' ), $post_type->label );
-		}
 	}
 
 	/**
