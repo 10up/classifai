@@ -11,6 +11,9 @@ use \Classifai\Watson\Normalizer;
 use \Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
 
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_tts_supported_post_types;
@@ -86,6 +89,9 @@ class Speech extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
+
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
@@ -128,16 +134,18 @@ class Speech extends Provider {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
-		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+		if ( $this->feature_instance instanceof \Classifai\Features\TextToSpeech && ! $this->feature_instance->is_feature_enabled() ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+			add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-		foreach ( get_tts_supported_post_types() as $post_type ) {
-			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			foreach ( get_tts_supported_post_types() as $post_type ) {
+				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			}
+
+			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 		}
-
-		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
 	public function add_endpoint_url_field( $args = [] ) {
@@ -702,7 +710,6 @@ class Speech extends Provider {
 	 * @param WP_REST_Request $request  Request object.
 	 */
 	public function rest_handle_audio( $post, $request ) {
-
 		$audio_id = get_post_meta( $request->get_param( 'id' ), self::AUDIO_ID_KEY, true );
 
 		// Since we have dynamic generation option agnostic to meta saves we need a flag to differentiate audio generation accurately
@@ -792,7 +799,7 @@ class Speech extends Provider {
 			</span>
 		</p>
 
-		<p<?php echo $source_url ? '' : ' class="hidden"'; ?>>
+		<p <?php echo $source_url ? '' : 'class="hidden"'; ?>>
 			<label for="classifai_display_generated_audio">
 				<input type="checkbox" value="1" id="classifai_display_generated_audio" name="classifai_display_generated_audio" <?php checked( $display_audio ); ?> />
 				<?php esc_html_e( 'Display audio controls', 'classifai' ); ?>
@@ -849,8 +856,7 @@ class Speech extends Provider {
 		}
 
 		if ( isset( $_POST['classifai_synthesize_speech'] ) ) {
-			$save_post_handler = new SavePostHandler();
-			$save_post_handler->synthesize_speech( $post_id );
+			$this->synthesize_speech( $post_id );
 		}
 	}
 
@@ -1014,4 +1020,75 @@ class Speech extends Provider {
 		return $options;
 	}
 
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'synthesize-speech/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'synthesize_speech_from_text' ),
+				'args'                => array(
+					'id' => array(
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'ID of post to run text to speech conversion on.', 'classifai' ),
+					),
+				),
+				'permission_callback' => [ $this, 'speech_synthesis_permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Generates text to speech for a post using REST.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function synthesize_speech_from_text( WP_REST_Request $request ) {
+		$post_id       = $request->get_param( 'id' );
+		$attachment_id = $this->synthesize_speech( $post_id );
+
+		if ( is_wp_error( $attachment_id ) ) {
+			return rest_ensure_response(
+				array(
+					'success' => false,
+					'code'    => $attachment_id->get_error_code(),
+					'message' => $attachment_id->get_error_message(),
+				)
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'success'  => true,
+				'audio_id' => $attachment_id,
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate audio for the post.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function speech_synthesis_permissions_check( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
+			$post_type = get_post_type( $post_id );
+			$supported = \Classifai\get_tts_supported_post_types();
+
+			// Check if processing allowed.
+			if ( ! in_array( $post_type, $supported, true ) ) {
+				return new WP_Error( 'not_enabled', esc_html__( 'Azure Speech synthesis is not enabled for current post.', 'classifai' ) );
+			}
+
+			return true;
+		}
+
+		return false;
+	}
 }
