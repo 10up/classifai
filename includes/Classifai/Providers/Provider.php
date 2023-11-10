@@ -674,7 +674,43 @@ abstract class Provider {
 	public function is_feature_enabled( string $feature ) {
 		$is_feature_enabled = false;
 		$settings           = $this->get_settings();
-		$enable_key         = 'enable_' . $feature;
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access( $feature ) &&
+			$this->is_enabled( $feature )
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
 
 		// Handle different enable keys.
 		switch ( $feature ) {
@@ -699,37 +735,19 @@ abstract class Provider {
 		}
 
 		// Check if feature is turned on.
-		$is_enabled = false;
-		switch ( $feature ) {
-			case 'content_classification':
-				$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] && \Classifai\language_processing_features_enabled() );
-				break;
-
-			default:
-				$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
-				break;
-		}
-
-		// Check if provider is configured and user has access to the feature and the feature is turned on.
-		if (
-			$this->is_configured() &&
-			$this->has_access( $feature ) &&
-			$is_enabled
-		) {
-			$is_feature_enabled = true;
-		}
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
 
 		/**
-		 * Filter to override permission to a specific classifai feature.
+		 * Filter to override a specific classifai feature enabled.
 		 *
-		 * @since 2.4.0
-		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 * @since 2.5.0
+		 * @hook classifai_is_{$feature}_enabled
 		 *
-		 * @param {bool}  $is_feature_enabled Is the feature enabled?
-		 * @param {array} $settings           Current feature settings.
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
 		 *
-		 * @return {bool} Should the user have access?
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
 		 */
-		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }
