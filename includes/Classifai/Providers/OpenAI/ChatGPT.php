@@ -10,6 +10,8 @@ use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
+use WP_REST_Server;
+use WP_REST_Request;
 use WP_Error;
 use function Classifai\get_asset_info;
 
@@ -92,6 +94,8 @@ class ChatGPT extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
+
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
@@ -941,5 +945,316 @@ class ChatGPT extends Provider {
 		}
 
 		return $default_prompt;
+	}
+
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-title(?:/(?P<id>\d+))?',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
+						],
+						'n'  => [
+							'type'              => 'integer',
+							'minimum'           => 1,
+							'maximum'           => 10,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+				],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_title' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-excerpt(?:/(?P<id>\d+))?',
+			[
+				[
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'id' => [
+							'required'          => true,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+							'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				],
+				[
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => [ $this, 'generate_post_excerpt' ],
+					'args'                => [
+						'content' => [
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Content to summarize into an excerpt.', 'classifai' ),
+						],
+						'title'   => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
+						],
+					],
+					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
+				],
+			]
+		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'resize-content',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'resize_post_content' ],
+				'permission_callback' => [ $this, 'resize_post_content_permissions_check' ],
+				'args'                => [
+					'id'          => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
+					],
+					'content'     => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
+					],
+					'resize_type' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
+					],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Handle request to generate title for given post ID.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_post_title( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+
+		return rest_ensure_response(
+			$this->rest_endpoint_callback(
+				$post_id,
+				'title',
+				[
+					'num'     => $request->get_param( 'n' ),
+					'content' => $request->get_param( 'content' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate a title.
+	 *
+	 * This check ensures we have a proper post ID, the current user
+	 * making the request has access to that post, that we are
+	 * properly authenticated with OpenAI and that title generation
+	 * is turned on.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		$feature  = new TitleGeneration();
+		$settings = $feature->get_settings();
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handle request to generate excerpt for given post ID.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_post_excerpt( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+		$content = $request->get_param( 'content' );
+		$title   = $request->get_param( 'title' );
+
+		return rest_ensure_response(
+			$this->rest_endpoint_callback(
+				$post_id,
+				'excerpt',
+				[
+					'content' => $content,
+					'title'   => $title,
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate an excerpt.
+	 *
+	 * This check ensures we have a proper post ID, the current user
+	 * making the request has access to that post, that we are
+	 * properly authenticated with OpenAI and that excerpt generation
+	 * is turned on.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		$feature  = new ExcerptGeneration();
+		$settings = $feature->get_settings();
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handle request to resize content.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function resize_post_content( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+
+		return rest_ensure_response(
+			$this->rest_endpoint_callback(
+				$post_id,
+				'resize_content',
+				[
+					'content'     => $request->get_param( 'content' ),
+					'resize_type' => $request->get_param( 'resize_type' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to resize content.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function resize_post_content_permissions_check( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Check if resize content feature is turned on.
+		if ( empty( $settings ) || ( isset( $settings['status'] ) && 'no' === $settings['status'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
+		}
+
+		// Check if the current user's role is allowed.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }

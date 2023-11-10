@@ -33,11 +33,6 @@ class ContentResizing extends Feature {
 	 * @return array
 	 */
 	public function get_providers() {
-		/*
-		 * Filter to add or remove providers from the feature.
-		 *
-		 * @param array $providers Array of providers.
-		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -61,7 +56,7 @@ class ContentResizing extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable title generation', 'classifai' ),
+			esc_html__( 'Enable content resizing generation', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -182,19 +177,19 @@ class ContentResizing extends Feature {
 			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
 			ChatGPT::ID => [
 				'api_key'               => '',
-				'number_of_suggestions' => 1,
 				'authenticated'         => false,
+				'number_of_suggestions' => 1,
 				'condense_text_prompt'  => array(
 					array(
-						'title'    => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
-						'prompt'   => '',
+						'title'    => esc_html__( 'Condense text prompt', 'classifai' ),
+						'prompt'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
 						'original' => 1,
 					),
 				),
 				'expand_text_prompt'    => array(
 					array(
-						'title'    => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
-						'prompt'   => '',
+						'title'    => esc_html__( 'Expand text prompt', 'classifai' ),
+						'prompt'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
 						'original' => 1,
 					),
 				),
