@@ -631,7 +631,7 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function has_access( string $feature ) {
+	protected function has_access( string $feature ) {
 		$access_control = new AccessControl( $this, $feature );
 		return $access_control->has_access();
 	}

@@ -31,7 +31,7 @@ function register() {
 		'recommended-content-block-editor-script',
 		sprintf(
 			'var hasRecommendedContentAccess = %d;',
-			$personalizer->has_access( 'recommended_content' )
+			$personalizer->is_feature_enabled( 'recommended_content' )
 		),
 		'before'
 	);
