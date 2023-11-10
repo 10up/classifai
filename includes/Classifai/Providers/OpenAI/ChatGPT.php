@@ -96,6 +96,7 @@ class ChatGPT extends Provider {
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
@@ -228,7 +229,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->feature_instance->is_feature_enabled() ) {
+		if ( $this->feature_instance instanceof ExcerptGeneration && $this->feature_instance->is_feature_enabled() ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -239,7 +240,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->feature_instance->is_feature_enabled() ) {
+		if ( $this->feature_instance instanceof TitleGeneration && $this->feature_instance->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -258,7 +259,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->feature_instance->is_feature_enabled() ) {
+		if ( $this->feature_instance instanceof ContentResizing && $this->feature_instance->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
@@ -312,7 +313,7 @@ class ChatGPT extends Provider {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if (
 					post_type_supports( $screen->post_type, 'title' ) &&
-					$this->feature_instance->is_feature_enabled()
+					$this->feature_instance instanceof TitleGeneration && $this->feature_instance->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -342,7 +343,7 @@ class ChatGPT extends Provider {
 
 				if (
 					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					$this->feature_instance->is_feature_enabled()
+					$this->feature_instance instanceof ExcerptGeneration && $this->feature_instance->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',

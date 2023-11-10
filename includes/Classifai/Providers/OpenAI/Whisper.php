@@ -5,10 +5,13 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use function Classifai\clean_input;
 
+use WP_REST_Server;
+use WP_REST_Request;
 use WP_Error;
 
 class Whisper extends Provider {
@@ -44,6 +47,9 @@ class Whisper extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
+
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
@@ -228,5 +234,85 @@ class Whisper extends Provider {
 			__( 'Allowed roles', 'classifai' )        => implode( ', ', $settings['roles'] ?? [] ),
 			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) ),
 		];
+	}
+
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-transcript/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_audio_transcript' ],
+				'args'                => [
+					'id' => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Attachment ID to generate transcript for.', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'generate_audio_transcript_permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Handle request to generate a transcript for given attachment ID.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_audio_transcript( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+
+		return rest_ensure_response( $this->transcribe_audio( $attachment_id ) );
+	}
+
+	/**
+	 * Check if a given request has access to generate a transcript.
+	 *
+	 * This check ensures we have a valid user with proper capabilities
+	 * making the request, that we are properly authenticated with OpenAI
+	 * and that transcription is turned on.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function generate_audio_transcript_permissions_check( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		$feature  = new AudioTranscriptsGeneration();
+		$settings = $feature->get_settings();
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Check if transcription is turned on.
+		if ( empty( $settings ) || ( isset( $settings['status'] ) && 'no' === $settings['status'] ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcription is not currently enabled.', 'classifai' ) );
+		}
+
+		// Check if the current user's role is allowed.
+		$roles      = $settings['roles'] ?? [];
+		$user_roles = wp_get_current_user()->roles ?? [];
+
+		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+			return false;
+		}
+
+		return true;
 	}
 }
