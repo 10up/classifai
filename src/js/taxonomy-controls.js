@@ -218,12 +218,16 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 		let termIds = query.taxQuery[ taxonomySlug ] || [];
 		termIds = Object.values( termIds );
+
 		return termIds.reduce( ( accumulator, termId ) => {
 			const term = taxonomyInfo.terms.mapById[ termId ];
 			if ( term ) {
+				// Decode HTML entities.
+				const textarea = document.createElement("textarea");
+				textarea.innerHTML = term.name;
 				accumulator.push( {
 					id: termId,
-					value: term.name,
+					value: textarea.value,
 				} );
 			}
 			return accumulator;
