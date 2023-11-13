@@ -465,7 +465,6 @@ class NLU extends Provider {
 			case 'checkbox':
 				$attrs = ' value="1"' . checked( '1', $value, false );
 				break;
-				break;
 			case 'radio':
 				if ( 'classification_mode' === $args['option_index'] ) {
 					// Detect the existing vs new users and serve default value accordingly.
@@ -474,7 +473,10 @@ class NLU extends Provider {
 						$attrs = ' value="' . esc_attr( $value ) . '" checked="checked"';
 					}
 				}
-				$attrs = empty( $attrs ) ? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false ) : $attrs;
+				$setting_index = ! is_array( $setting_index ) ? $setting_index : '';
+				$attrs = empty( $attrs )
+						? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false )
+						: $attrs;
 				break;
 		}
 		?>
