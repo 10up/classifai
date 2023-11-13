@@ -727,7 +727,7 @@ class NLU extends Provider {
 			$new_settings['authenticated'] = true;
 		}
 
-		if ( isset( $new_settings['classification_mode'] ) ) {
+		if ( isset( $settings['classification_mode'] ) ) {
 			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
 		}
 
