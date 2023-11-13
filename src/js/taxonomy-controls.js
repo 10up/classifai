@@ -270,20 +270,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 					return (
 						<>
-							{ ! hasAI && (
-								<>
-									<p style={ { color: 'red' } } key={ slug }>
-										{ sprintf(
-											/* translators: %s: taxonomy name */
-											__(
-												'ClassifAI had no new recommendation found for %s',
-												'classifai'
-											),
-											name
-										) }
-									</p>
-								</>
-							) }
 							<FormTokenField
 								key={ slug }
 								label={ name }
@@ -291,6 +277,20 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								suggestions={ terms.names }
 								onChange={ onTermsChange( slug ) }
 							/>
+							{ ! hasAI && (
+								<>
+									<p style={ { color: '#cc1818' } } key={ slug }>
+										{ sprintf(
+											/* translators: %s: taxonomy name */
+											__(
+												'ClassifAI has no new recommendations for %s',
+												'classifai'
+											),
+											name
+										) }
+									</p>
+								</>
+							) }
 							<hr />
 						</>
 					);
