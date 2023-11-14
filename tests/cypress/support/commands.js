@@ -47,7 +47,7 @@ Cypress.Commands.add('verifyPostTaxonomyTerms', (taxonomy, threshold) => {
 		// Find the panel container
 		const $panel = $button.parents('.components-panel__body');
 
-		// Close Panel.
+		// Open Panel.
 		if (!$panel.hasClass('is-opened')) {
 			cy.wrap($button).click();
 		}

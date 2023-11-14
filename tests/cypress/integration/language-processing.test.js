@@ -13,7 +13,7 @@ describe( 'Language processing Tests', () => {
 			.clear()
 			.type( 'password' );
 
-		cy.get( '#classifai-settings-manual_review' ).check();
+		cy.get( '#classifai-settings-automatic_classification' ).check();
 		cy.get( '#classifai-settings-post' ).check();
 		cy.get( '#classifai-settings-page' ).check();
 		cy.get( '#classifai-settings-draft' ).check();
