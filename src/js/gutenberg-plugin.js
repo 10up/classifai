@@ -78,8 +78,7 @@ const ClassifAIGenerateTagsButton = () => {
 	const { select, dispatch } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
-	const postTypeLabel =
-		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
+	const postTypeLabel = select( 'core' ).getPostType( postType ).name;
 
 	const [ isLoading, setLoading ] = useState( false );
 	const [ resultReceived, setResultReceived ] = useState( false );
