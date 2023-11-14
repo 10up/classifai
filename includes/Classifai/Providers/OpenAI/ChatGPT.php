@@ -33,7 +33,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 4096;
+	protected $max_tokens = 16385;
 
 	/**
 	 * Prompt for generating excerpts
