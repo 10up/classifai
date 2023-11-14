@@ -1,7 +1,6 @@
 describe( 'Language processing Tests', () => {
 	it( 'Check Classification Mode toggle button is on', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.deactivatePlugin( 'classic-editor' );
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
@@ -45,13 +44,11 @@ describe( 'Language processing Tests', () => {
 			'is-checked'
 		);
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
+		cy.activatePlugin( 'classic-editor' );
 	} );
 
 	it( 'Check Classification Mode toggle button is off, display popup, then add/remove terms', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.deactivatePlugin( 'classic-editor' );
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
@@ -139,7 +136,6 @@ describe( 'Language processing Tests', () => {
 
 		cy.get( '.editor-post-publish-button__button' ).click();
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
+		cy.activatePlugin( 'classic-editor' );
 	} );
 } );
