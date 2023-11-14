@@ -223,7 +223,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			const term = taxonomyInfo.terms.mapById[ termId ];
 			if ( term ) {
 				// Decode HTML entities.
-				const textarea = document.createElement("textarea");
+				const textarea = document.createElement( 'textarea' );
 				textarea.innerHTML = term.name;
 				accumulator.push( {
 					id: termId,
@@ -279,7 +279,10 @@ const TaxonomyControls = ( { onChange, query } ) => {
 							/>
 							{ ! hasAI && (
 								<>
-									<p style={ { color: '#cc1818' } } key={ slug }>
+									<p
+										style={ { color: '#cc1818' } }
+										key={ slug }
+									>
 										{ sprintf(
 											/* translators: %s: taxonomy name */
 											__(
