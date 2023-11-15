@@ -124,7 +124,7 @@ describe( 'Language processing Tests', () => {
 				// Now confirm if the term is reduced
 				cy.get( listing ).should( 'have.length', totalTerms - 1 );
 
-				// enter a new term "TEST" as input and press enter key in js
+				// enter a new term as input and press enter key in js
 				cy.get( '.classify-modal > div > div:nth-child(2) > div:first-of-type .components-form-token-field__input' ).type( 'NewTestTerm' );				
 				
 				// press enter key in js
@@ -143,10 +143,10 @@ describe( 'Language processing Tests', () => {
 					if ( ! $panel.hasClass( 'is-opened' ) ) {
 						cy.wrap($button).click();
 					}
-				} );
 
-				// Confirm the new term addition
-				cy.get( '.components-flex-item span' ).contains( 'NewTestTerm' );
+					// Confirm the new term addition
+					cy.get( '.components-flex-item span' ).contains( 'NewTestTerm' );
+				} );
 			}
 		);
 
