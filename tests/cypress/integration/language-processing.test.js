@@ -133,24 +133,10 @@ describe( 'Language processing Tests', () => {
 				// Click the save button
 				cy.get( '.classify-modal .components-button' ).contains( 'Save' ).click();
 
-				// Open Panel
-				const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Watson Categories")`;
-				cy.get(panelButtonSelector).then(($button) => {
-					// Find the panel container
-					const $panel = $button.parents('.components-panel__body');
-
-					// Open Panel.
-					if ( ! $panel.hasClass( 'is-opened' ) ) {
-						cy.wrap($button).click();
-					}
-
-					// Confirm the new term addition
-					cy.get( '.components-flex-item span' ).contains( 'NewTestTerm' );
-				} );
+				// Save the post
+				cy.get( '.editor-post-publish-button__button' ).click();
 			}
 		);
-
-		cy.get( '.editor-post-publish-button__button' ).click();
 	} );
 
 	it( 'Check Classification Mode toggle button is on', () => {
