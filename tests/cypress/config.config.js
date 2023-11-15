@@ -21,7 +21,13 @@ module.exports = defineConfig( {
 		setupNodeEvents( on, config ) {
 			return require( __dirname + '/plugins/index.js' )( on, config );
 		},
-		specPattern: __dirname + '/integration/**/*.test.{js,jsx,ts,tsx}',
+		specPattern: [
+			__dirname + '/integration/admin.test.js',
+			__dirname + '/integration/language-processing.test.js',
+			__dirname + '/integration/image-processing.test.js',
+			__dirname + '/integration/pdf-reading.test.js',
+			__dirname + '/integration/text-to-speach.test.js',
+		],
 		supportFile: __dirname + '/support/index.js',
 	},
 } );

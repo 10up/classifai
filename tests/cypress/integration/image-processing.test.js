@@ -136,6 +136,7 @@ describe('Image processing Tests', () => {
 	} );
 
 	it( 'Can generate images in the media modal', () => {
+		
 		// Create test post.
 		cy.createPost( {
 			title: 'Test DALL-E post',

@@ -28,57 +28,44 @@ describe( 'Language processing Tests', () => {
 		cy.get( '#submit' ).click();
 	} );
 
-	it( 'Check Classification Mode toggle button is on', () => {
-		cy.deactivatePlugin( 'classic-editor' );
-
+	it( 'Can select Watson taxonomies "Language Processing" settings', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
 
-		cy.get( '#classifai-settings-automatic_classification' ).check();
-		cy.get( '#submit' ).click();
-	
-		// Create Test Post
-		cy.createPost( {
-			title: 'Test Classification Mode Post',
-			content: 'Test Classification Mode Post',
-		} );
-
-		// Close post publish panel
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
-
-		// Open post settings sidebar
-		cy.openDocumentSettingsSidebar();
-
-		// Open Panel
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("ClassifAI")`;
-		cy.get(panelButtonSelector).then(($button) => {
-			// Find the panel container
-			const $panel = $button.parents('.components-panel__body');
-
-			// Open Panel
-			if ( !$panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $button ).click();
-			}
-		} );
-		
-		// Check the toggle button is on
-		cy.get( '.classifai-panel .components-form-toggle' ).should(
-			'have.class',
-			'is-checked'
+		cy.get( '#classifai-settings-category_taxonomy' ).select(
+			'watson-category'
 		);
+		cy.get( '#classifai-settings-keyword_taxonomy' ).select(
+			'watson-keyword'
+		);
+		cy.get( '#classifai-settings-entity_taxonomy' ).select(
+			'watson-entity'
+		);
+		cy.get( '#classifai-settings-concept_taxonomy' ).select(
+			'watson-concept'
+		);
+		cy.get( '#submit' ).click();
+	} );
 
-		cy.activatePlugin( 'classic-editor' );
+	it( 'Can see Watson taxonomies under "Posts" Menu.', () => {
+		cy.visit( '/wp-admin/edit.php' );
+
+		cy.get( '#menu-posts ul.wp-submenu li' )
+			.filter( ':contains("Watson Categories")' )
+			.should( 'have.length', 1 );
+		cy.get( '#menu-posts ul.wp-submenu li' )
+			.filter( ':contains("Watson Keywords")' )
+			.should( 'have.length', 1 );
+		cy.get( '#menu-posts ul.wp-submenu li' )
+			.filter( ':contains("Watson Entities")' )
+			.should( 'have.length', 1 );
+		cy.get( '#menu-posts ul.wp-submenu li' )
+			.filter( ':contains("Watson Concepts")' )
+			.should( 'have.length', 1 );
 	} );
 
 	it( 'Check Classification Mode toggle button is off, display popup, then add/remove terms', () => {
-		cy.deactivatePlugin( 'classic-editor' );
-
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
@@ -164,45 +151,52 @@ describe( 'Language processing Tests', () => {
 		);
 
 		cy.get( '.editor-post-publish-button__button' ).click();
-
-		// cy.activatePlugin( 'classic-editor' );
 	} );
 
-	it( 'Can select Watson taxonomies "Language Processing" settings', () => {
+	it( 'Check Classification Mode toggle button is on', () => {
+		cy.deactivatePlugin( 'classic-editor' );
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
 
-		cy.get( '#classifai-settings-category_taxonomy' ).select(
-			'watson-category'
-		);
-		cy.get( '#classifai-settings-keyword_taxonomy' ).select(
-			'watson-keyword'
-		);
-		cy.get( '#classifai-settings-entity_taxonomy' ).select(
-			'watson-entity'
-		);
-		cy.get( '#classifai-settings-concept_taxonomy' ).select(
-			'watson-concept'
-		);
+		cy.get( '#classifai-settings-automatic_classification' ).check();
 		cy.get( '#submit' ).click();
-	} );
+	
+		// Create Test Post
+		cy.createPost( {
+			title: 'Test Classification Mode Post',
+			content: 'Test Classification Mode Post',
+		} );
 
-	it( 'Can see Watson taxonomies under "Posts" Menu.', () => {
-		cy.visit( '/wp-admin/edit.php' );
+		// Close post publish panel
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
 
-		cy.get( '#menu-posts ul.wp-submenu li' )
-			.filter( ':contains("Watson Categories")' )
-			.should( 'have.length', 1 );
-		cy.get( '#menu-posts ul.wp-submenu li' )
-			.filter( ':contains("Watson Keywords")' )
-			.should( 'have.length', 1 );
-		cy.get( '#menu-posts ul.wp-submenu li' )
-			.filter( ':contains("Watson Entities")' )
-			.should( 'have.length', 1 );
-		cy.get( '#menu-posts ul.wp-submenu li' )
-			.filter( ':contains("Watson Concepts")' )
-			.should( 'have.length', 1 );
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Open Panel
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("ClassifAI")`;
+		cy.get(panelButtonSelector).then(($button) => {
+			// Find the panel container
+			const $panel = $button.parents('.components-panel__body');
+
+			// Open Panel
+			if ( !$panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $button ).click();
+			}
+		} );
+		
+		// Check the toggle button is on
+		cy.get( '.classifai-panel .components-form-toggle' ).should(
+			'have.class',
+			'is-checked'
+		);
 	} );
 
 	it( 'Can create post and taxonomy terms get created by ClassifAI (with default threshold)', () => {
