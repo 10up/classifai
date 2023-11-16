@@ -71,12 +71,15 @@ abstract class Feature {
 
 	/**
 	 * Set up the fields for each section.
+	 *
+	 * @internal
 	 */
-	abstract public function setup_fields_sections();
+	abstract protected function setup_fields_sections();
 
 	/**
 	 * Returns the default settings for the feature.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	abstract protected function get_default_settings();
@@ -84,6 +87,7 @@ abstract class Feature {
 	/**
 	 * Returns the providers supported by the feature.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	abstract protected function get_providers();
@@ -93,6 +97,7 @@ abstract class Feature {
 	 *
 	 * @param array $settings The settings to be sanitized on save.
 	 *
+	 * @internal
 	 * @return array
 	 */
 	abstract protected function sanitize_settings( $settings );

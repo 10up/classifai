@@ -32,7 +32,7 @@ class ContentResizing extends Feature {
 	 *
 	 * @return array
 	 */
-	public function get_providers() {
+	protected function get_providers() {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -171,7 +171,7 @@ class ContentResizing extends Feature {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
+	protected function get_default_settings() {
 		return [
 			'status'    => '0',
 			'roles'     => $this->roles,
@@ -205,7 +205,7 @@ class ContentResizing extends Feature {
 	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	protected function sanitize_settings( $new_settings ) {
 		$settings = $this->get_settings();
 
 		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
