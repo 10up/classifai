@@ -134,7 +134,7 @@ class Speech extends Provider {
 			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 			add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-			foreach ( get_tts_supported_post_types() as $post_type ) {
+			foreach ( $this->feature_instance->get_tts_supported_post_types() as $post_type ) {
 				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
 			}
 

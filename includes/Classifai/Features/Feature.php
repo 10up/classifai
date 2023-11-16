@@ -79,14 +79,14 @@ abstract class Feature {
 	 *
 	 * @return array
 	 */
-	abstract public function get_default_settings();
+	abstract protected function get_default_settings();
 
 	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	abstract public function get_providers();
+	abstract protected function get_providers();
 
 	/**
 	 * Sanitizes the settings before saving.
@@ -95,7 +95,7 @@ abstract class Feature {
 	 *
 	 * @return array
 	 */
-	abstract public function sanitize_settings( $settings );
+	abstract protected function sanitize_settings( $settings );
 
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
@@ -149,10 +149,34 @@ abstract class Feature {
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
-		$settings = wp_parse_args( $settings, $defaults );
+		$settings = $this->merge_settings( $settings, $defaults );
 
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Merges the data settings with the default settings recursively,
+	 *
+	 * @internal
+	 *
+	 * @param array $settings Settings data from the database.
+	 * @param array $default  Default feature and providers settings data.
+	 *
+	 * @return array
+	 */
+	protected function merge_settings( $settings = [], $default = [] ) {
+		foreach ( $default as $key => $value ) {
+			if ( ! isset( $settings[ $key ] ) ) {
+				$settings[ $key ] = $default[ $key ];
+			} else {
+				if ( is_array( $value ) ) {
+					$settings[ $key ] = $this->merge_settings( $settings[ $key ], $default[ $key ] );
+				}
+			}
 		}
 
 		return $settings;
@@ -165,9 +189,8 @@ abstract class Feature {
 	 *
 	 * @return \Classifai\Providers
 	 */
-	public function get_feature_provider_instance( $provider_id = '' ) {
-		$new_settings      = $this->get_settings();
-		$provider_id       = $provider_id ? $provider_id : $new_settings['provider'];
+	protected function get_feature_provider_instance( $provider_id = '' ) {
+		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
 		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
 
 		if ( is_wp_error( $provider_instance ) ) {
@@ -434,6 +457,7 @@ abstract class Feature {
 	 * @param array $args The args passed to add_settings_field
 	 */
 	public function render_checkbox_group( array $args = array() ) {
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings();
 
 		// Iterate through all of our options.
@@ -455,12 +479,13 @@ abstract class Feature {
 			printf(
 				'<p>
 					<label for="%1$s_%2$s_%3$s">
-						<input type="hidden" name="%1$s[%2$s][%3$s]" value="0" />
-						<input type="checkbox" id="%1$s_%2$s_%3$s" name="%1$s[%2$s][%3$s]" value="%3$s" %4$s />
-						%5$s
+						<input type="hidden" name="%1$s%2$s[%3$s][%4$s]" value="0" />
+						<input type="checkbox" id="%1$s_%3$s_%4$s" name="%1$s%2$s[%3$s][%4$s]" value="%4$s" %5$s />
+						%6$s
 					</label>
 				</p>',
 				esc_attr( $this->get_option_name() ),
+				$option_index ? '[' . esc_attr( $option_index ) . ']' : '',
 				esc_attr( $args['label_for'] ),
 				esc_attr( $option_value ),
 				checked( $value, $option_value, false ),
