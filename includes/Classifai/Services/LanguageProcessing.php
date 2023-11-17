@@ -51,16 +51,16 @@ class LanguageProcessing extends Service {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
-					'id' => array(
+					'id'        => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
 					),
 					'linkTerms' => array(
-						'type'              => 'boolean',
-						'description'       => esc_html__( 'Whether to link terms or not.', 'classifai' ),
-						'default'           => true,
+						'type'        => 'boolean',
+						'description' => esc_html__( 'Whether to link terms or not.', 'classifai' ),
+						'default'     => true,
 					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
@@ -241,10 +241,47 @@ class LanguageProcessing extends Service {
 			}
 
 			// Return taxonomy terms.
-			return rest_ensure_response( [ 'terms' => $result ] );
+			return rest_ensure_response(
+				array(
+					'terms'              => $result,
+					'feature_taxonomies' => $this->get_all_feature_taxonomies(),
+				)
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Get all feature taxonomies.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_all_feature_taxonomies() {
+		// Get all feature taxonomies.
+		$feature_taxonomies = [];
+		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
+			if ( \Classifai\get_feature_enabled( $feature ) ) {
+				$taxonomy   = \Classifai\get_feature_taxonomy( $feature );
+				$permission = $this->check_term_permissions( $taxonomy );
+
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+
+				if ( 'post_tag' === $taxonomy ) {
+					$taxonomy = 'tags';
+				}
+				if ( 'category' === $taxonomy ) {
+					$taxonomy = 'categories';
+				}
+				$feature_taxonomies[] = $taxonomy;
+			}
+		}
+
+		return $feature_taxonomies;
 	}
 
 	/**
