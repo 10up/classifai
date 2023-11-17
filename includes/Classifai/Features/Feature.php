@@ -33,8 +33,7 @@ abstract class Feature {
 	 *
 	 * @param \Classifai\Providers\Provider[] $provider_instances Array of provider instances.
 	 */
-	public function __construct( $provider_instances = [] ) {
-		$this->provider_instances = $provider_instances;
+	public function __construct() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
@@ -100,7 +99,7 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract protected function sanitize_settings( $settings );
+	abstract public function sanitize_settings( $settings );
 
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
@@ -185,6 +184,24 @@ abstract class Feature {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Returns array of instances of provider classes registered for the service.
+	 *
+	 * @internal
+	 *
+	 * @param array $services Array of provider classes.
+	 * @return array
+	 */
+	protected function get_provider_instances( $services ) {
+		$provider_instances = [];
+
+		foreach ( $services as $provider_class ) {
+			$provider_instances[] = new $provider_class( $this );
+		}
+
+		return $provider_instances;
 	}
 
 	/**

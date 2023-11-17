@@ -82,7 +82,7 @@ abstract class Service {
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
 			foreach ( $this->features as $feature ) {
 				if ( class_exists( $feature ) ) {
-					$this->feature_classes[] = new $feature( $this->provider_classes );
+					$this->feature_classes[] = new $feature();
 				}
 			}
 			$this->register_features();

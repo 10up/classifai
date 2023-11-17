@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use \Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Services\LanguageProcessing;
 use \Classifai\Providers\Azure\Speech;
 
 use function Classifai\find_provider_class;
@@ -17,6 +17,13 @@ class TextToSpeech extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_text_to_speech';
+
+	public function __construct() {
+		parent::__construct();
+
+		$service_providers = LanguageProcessing::get_service_providers();
+		$this->provider_instances = $this->get_provider_instances( $service_providers );
+	}
 
 	/**
 	 * Returns the label of the feature.
@@ -119,18 +126,13 @@ class TextToSpeech extends Feature {
 			]
 		);
 
-		/*
-		 * The following fields are specific to the OpenAI ChatGPT provider.
-		 * These fields will only be displayed if the provider is selected, and will remain hidden otherwise.
-		 *
-		 * If the feature supports multiple providers, then the fields should be added for each provider.
-		 */
-		$azure_speech = new Speech( $this );
-		$azure_speech->add_api_key_field();
-		$azure_speech->add_endpoint_url_field();
-		$azure_speech->add_voices_options_field();
+		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+			$provider = $this->get_feature_provider_instance( $provider_id );
 
-		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
+			if ( method_exists( $provider, 'render_provider_fields' ) ) {
+				$provider->render_provider_fields();
+			}
+		}
 	}
 
 	/**
@@ -185,19 +187,25 @@ class TextToSpeech extends Feature {
 	 * @return array
 	 */
 	protected function get_default_settings() {
-		return [
+		$provider_settings = [];
+		$feature_settings  = [
 			'status'     => '0',
 			'roles'      => $this->roles,
 			'post_types' => [],
 			'provider'   => Speech::ID,
-			Speech::ID => [
-				'endpoint_url' => '',
-				'api_key'       => '',
-				'authenticated' => false,
-				'voice'         => '',
-				'voices'        => [],
-			],
 		];
+
+		$provider_instance                = $this->get_feature_provider_instance( Speech::ID );
+		$provider_settings[ Speech::ID ] = $provider_instance->get_default_provider_settings();
+
+		return
+			apply_filters(
+				'classifai_' . static::ID . '_get_default_settings',
+				array_merge(
+					$feature_settings,
+					$provider_settings
+				)
+			);
 	}
 
 	/**
@@ -225,7 +233,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( $new_settings ) {
 		$settings = $this->get_settings();
 
 		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
@@ -242,21 +250,8 @@ class TextToSpeech extends Feature {
 			}
 		}
 
-		/*
-		 * These are the sanitization methods specific to the OpenAI ChatGPT provider.
-		 * They sanitize the settings for the provider and then merge them into the new settings array.
-		 *
-		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
-		 */
-		if ( isset( $new_settings[ Speech::ID ] ) ) {
-			$provider_instance                           = new Speech( $this );
-			$api_key_settings                            = $provider_instance->sanitize_settings( $new_settings );
-			$new_settings[ Speech::ID ]['api_key']       = $api_key_settings[ Speech::ID ]['api_key'];
-			$new_settings[ Speech::ID ]['endpoint_url']  = $api_key_settings[ Speech::ID ]['endpoint_url'];
-			$new_settings[ Speech::ID ]['authenticated'] = $api_key_settings[ Speech::ID ]['authenticated'];
-			$new_settings[ Speech::ID ]['voices']        = $api_key_settings[ Speech::ID ]['voices'];
-			$new_settings[ Speech::ID ]['voice']         = $api_key_settings[ Speech::ID ]['voice'];
-		}
+		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
+		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
 
 		return apply_filters(
 			'classifai_' . static::ID . '_sanitize_settings',

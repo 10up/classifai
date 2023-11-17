@@ -67,11 +67,53 @@ class Whisper extends Provider {
 		}
 	}
 
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'api_key'       => '',
+			'authenticated' => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case AudioTranscriptsGeneration::ID:
+				return $common_settings;
+		}
+
+		return [];
+	}
+
+	public function sanitize_settings( $new_settings ) {
+		$settings                                    = $this->feature_instance->get_settings();
+		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+
+		return $new_settings;
+	}
+
 	public function setup_fields_sections() {}
 
 	public function reset_settings() {}
-
-	public function sanitize_settings( $settings ) {}
 
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(

@@ -3,6 +3,7 @@
 namespace Classifai\Features;
 
 use \Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Services\LanguageProcessing;
 
 /**
  * Class ContentResizing
@@ -14,6 +15,13 @@ class ContentResizing extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_content_resizing';
+
+	public function __construct() {
+		parent::__construct();
+
+		$service_providers = LanguageProcessing::get_service_providers();
+		$this->provider_instances = $this->get_provider_instances( $service_providers );
+	}
 
 	/**
 	 * Returns the label of the feature.
@@ -95,39 +103,13 @@ class ContentResizing extends Feature {
 			]
 		);
 
-		/*
-		 * The following fields are specific to the OpenAI ChatGPT provider.
-		 * These fields will only be displayed if the provider is selected, and will remain hidden otherwise.
-		 *
-		 * If the feature supports multiple providers, then the fields should be added for each provider.
-		 */
-		$chat_gpt = new ChatGPT( $this );
-		$chat_gpt->add_api_key_field();
-		$chat_gpt->add_number_of_responses_field(
-			[
-				'id'          => 'number_of_suggestions',
-				'label'       => esc_html__( 'Number of suggestions', 'classifai' ),
-				'description' => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-			]
-		);
-		$chat_gpt->add_prompt_field(
-			[
-				'id'                 => 'condense_text_prompt',
-				'label'              => esc_html__( 'Condense text prompt', 'classifai' ),
-				'prompt_placeholder' => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
-				'description'        => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
-			]
-		);
-		$chat_gpt->add_prompt_field(
-			[
-				'id'                 => 'expand_text_prompt',
-				'label'              => esc_html__( 'Expand text prompt' ),
-				'prompt_placeholder' => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
-				'description'        => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
-			]
-		);
+		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+			$provider = $this->get_feature_provider_instance( $provider_id );
 
-		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
+			if ( method_exists( $provider, 'render_provider_fields' ) ) {
+				$provider->render_provider_fields();
+			}
+		}
 	}
 
 	/**
@@ -172,30 +154,24 @@ class ContentResizing extends Feature {
 	 * @return array
 	 */
 	protected function get_default_settings() {
-		return [
+		$provider_settings = [];
+		$feature_settings  = [
 			'status'    => '0',
 			'roles'     => $this->roles,
 			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
-			ChatGPT::ID => [
-				'api_key'               => '',
-				'authenticated'         => false,
-				'number_of_suggestions' => 1,
-				'condense_text_prompt'  => array(
-					array(
-						'title'    => esc_html__( 'Condense text prompt', 'classifai' ),
-						'prompt'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
-						'original' => 1,
-					),
-				),
-				'expand_text_prompt'    => array(
-					array(
-						'title'    => esc_html__( 'Expand text prompt', 'classifai' ),
-						'prompt'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
-						'original' => 1,
-					),
-				),
-			],
 		];
+
+		$provider_instance                = $this->get_feature_provider_instance( ChatGPT::ID );
+		$provider_settings[ ChatGPT::ID ] = $provider_instance->get_default_provider_settings();
+
+		return
+			apply_filters(
+				'classifai_' . static::ID . '_get_default_settings',
+				array_merge(
+					$feature_settings,
+					$provider_settings
+				)
+			);
 	}
 
 	/**
@@ -205,29 +181,15 @@ class ContentResizing extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( $new_settings ) {
 		$settings = $this->get_settings();
 
 		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
 		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
 		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
-
-		/*
-		 * These are the sanitization methods specific to the OpenAI ChatGPT provider.
-		 * They sanitize the settings for the provider and then merge them into the new settings array.
-		 *
-		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
-		 */
-		if ( isset( $new_settings[ ChatGPT::ID ] ) ) {
-			$provider_instance                                    = new ChatGPT( $this );
-			$api_key_settings                                     = $provider_instance->sanitize_api_key_settings( $new_settings, $settings );
-			$new_settings[ ChatGPT::ID ]['api_key']               = $api_key_settings[ ChatGPT::ID ]['api_key'];
-			$new_settings[ ChatGPT::ID ]['authenticated']         = $api_key_settings[ ChatGPT::ID ]['authenticated'];
-			$new_settings[ ChatGPT::ID ]['number_of_titles']      = $provider_instance->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
-			$new_settings[ ChatGPT::ID ]['condense_text_prompt'] = $provider_instance->sanitize_prompts( 'condense_text_prompt', $new_settings );
-			$new_settings[ ChatGPT::ID ]['expand_text_prompt'] = $provider_instance->sanitize_prompts( 'expand_text_prompt', $new_settings );
-		}
+		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
+		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
 
 		return apply_filters(
 			'classifai_' . static::ID . '_sanitize_settings',

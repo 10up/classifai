@@ -25,7 +25,7 @@ class LanguageProcessing extends Service {
 		parent::__construct(
 			__( 'Language Processing', 'classifai' ),
 			'language_processing',
-			$this->register_service_providers()
+			self::get_service_providers()
 		);
 	}
 
@@ -37,7 +37,7 @@ class LanguageProcessing extends Service {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
-	public function register_service_providers() {
+	public static function get_service_providers() {
 		return apply_filters(
 			'classifai_language_processing_service_providers',
 			[

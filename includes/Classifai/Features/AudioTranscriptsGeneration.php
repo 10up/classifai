@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
 use \Classifai\Providers\OpenAI\Whisper;
 
@@ -15,6 +16,13 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @var string
 	 */
 	const ID = 'feature_audio_transcripts_generation';
+
+	public function __construct() {
+		parent::__construct();
+
+		$service_providers = LanguageProcessing::get_service_providers();
+		$this->provider_instances = $this->get_provider_instances( $service_providers );
+	}
 
 	/**
 	 * Returns the label of the feature.
@@ -65,7 +73,7 @@ class AudioTranscriptsGeneration extends Feature {
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['status'],
-				'description'   => __( 'Enabling this will automatically generate transcripts for supported audio files..', 'classifai' ),
+				'description'   => __( 'Enabling this will automatically generate transcripts for supported audio files.', 'classifai' ),
 			]
 		);
 
@@ -96,16 +104,13 @@ class AudioTranscriptsGeneration extends Feature {
 			]
 		);
 
-		/*
-		 * The following fields are specific to the OpenAI ChatGPT provider.
-		 * These fields will only be displayed if the provider is selected, and will remain hidden otherwise.
-		 *
-		 * If the feature supports multiple providers, then the fields should be added for each provider.
-		 */
-		$azure_speech = new Whisper( $this );
-		$azure_speech->add_api_key_field();
+		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+			$provider = $this->get_feature_provider_instance( $provider_id );
 
-		do_action( 'classifai_' . static::ID . 'provider_setup_fields_sections', $this );
+			if ( method_exists( $provider, 'render_provider_fields' ) ) {
+				$provider->render_provider_fields();
+			}
+		}
 	}
 
 	/**
@@ -150,15 +155,24 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'status'     => '0',
-			'roles'      => $this->roles,
-			'provider'   => Whisper::ID,
-			Whisper::ID => [
-				'api_key'       => '',
-				'authenticated' => false,
-			],
+		$provider_settings = [];
+		$feature_settings  = [
+			'status'    => '0',
+			'roles'     => $this->roles,
+			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
 		];
+
+		$provider_instance                = $this->get_feature_provider_instance( Whisper::ID );
+		$provider_settings[ Whisper::ID ] = $provider_instance->get_default_provider_settings();
+
+		return
+			apply_filters(
+				'classifai_' . static::ID . '_get_default_settings',
+				array_merge(
+					$feature_settings,
+					$provider_settings
+				)
+			);
 	}
 
 	/**
@@ -175,18 +189,8 @@ class AudioTranscriptsGeneration extends Feature {
 		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
 		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
-		/*
-		 * These are the sanitization methods specific to the OpenAI ChatGPT provider.
-		 * They sanitize the settings for the provider and then merge them into the new settings array.
-		 *
-		 * When multiple providers are supported, the sanitization methods for each provider should be called here.
-		 */
-		if ( isset( $new_settings[ Whisper::ID ] ) ) {
-			$provider_instance                                    = new Whisper( $this );
-			$api_key_settings                                     = $provider_instance->sanitize_api_key_settings( $new_settings, $settings );
-			$new_settings[ Whisper::ID ]['api_key']               = $api_key_settings[ Whisper::ID ]['api_key'];
-			$new_settings[ Whisper::ID ]['authenticated']         = $api_key_settings[ Whisper::ID ]['authenticated'];
-		}
+		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
+		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
 
 		return apply_filters(
 			'classifai_' . static::ID . '_sanitize_settings',

@@ -99,64 +99,232 @@ class ChatGPT extends Provider {
 		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
-	/**
-	 * Adds a prompt repeater field.
-	 * The prompt fields allow users to add their own prompts for ChatGPT.
-	 *
-	 * This is an optional field and depends on the feature.
-	 *
-	 * @param array $args Arguments passed in.
-	 */
-	public function add_prompt_field( $args = [] ) {
+	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			$args['id'],
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		switch ( $this->feature_instance::ID ) {
+			case TitleGeneration::ID:
+				$this->add_title_generation_fields();
+				break;
+
+			case ExcerptGeneration::ID:
+				$this->add_excerpt_generation_fields();
+				break;
+
+			case ContentResizing::ID:
+				$this->add_content_resizing_fields();
+				break;
+		}
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	private function add_title_generation_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			'number_of_titles',
+			esc_html__( 'Number of titles', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'number_of_titles',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $settings['number_of_titles'],
+				'description'   => esc_html__( 'Number of titles that will be generated in one request.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			'generate_title_prompt',
 			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
 			[ $this->feature_instance, 'render_prompt_repeater_field' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
-				'label_for'     => $args['id'],
-				'placeholder'   => $args['prompt_placeholder'],
-				'default_value' => $settings[ $args['id'] ],
-				'description'   => $args['description'],
+				'label_for'     => 'generate_title_prompt',
+				'placeholder'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
+				'default_value' => $settings['generate_title_prompt'],
+				'description'   => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
-	/**
-	 * Adds number of responses number field.
-	 * ChatGPT is capable of returning variable number of responses.
-	 *
-	 * This field is helpful to set the number of responses to be returned.
-	 *
-	 * This is an optional field and depends on the feature.
-	 *
-	 * @param array $args Arguments passed in.
-	 */
-	public function add_number_of_responses_field( $args = [] ) {
+	private function add_excerpt_generation_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			$args['id'],
-			$args['label'],
+			'generate_excerpt_prompt',
+			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
+			[ $this->feature_instance, 'render_prompt_repeater_field' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'generate_excerpt_prompt',
+				'placeholder'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+				'default_value' => $settings['generate_excerpt_prompt'],
+				'description'   => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+	}
+
+	private function add_content_resizing_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			'number_of_suggestions',
+			esc_html__( 'Number of titles', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
-				'label_for'     => $args['id'],
+				'label_for'     => 'number_of_suggestions',
 				'input_type'    => 'number',
 				'min'           => 1,
 				'step'          => 1,
-				'default_value' => $settings[ $args['id'] ],
-				'description'   => $args['description'],
+				'default_value' => $settings['number_of_suggestions'],
+				'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
+
+		add_settings_field(
+			'condense_text_prompt',
+			$args['label'] ?? esc_html__( 'Condense text prompt', 'classifai' ),
+			[ $this->feature_instance, 'render_prompt_repeater_field' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'condense_text_prompt',
+				'placeholder'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
+				'default_value' => $settings['condense_text_prompt'],
+				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			'expand_text_prompt',
+			$args['label'] ?? esc_html__( 'Expand text prompt', 'classifai' ),
+			[ $this->feature_instance, 'render_prompt_repeater_field' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'expand_text_prompt',
+				'placeholder'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
+				'default_value' => $settings['expand_text_prompt'],
+				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+	}
+
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'api_key'       => '',
+			'authenticated' => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case TitleGeneration::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'number_of_titles'      => 1,
+						'generate_title_prompt' => array(
+							array(
+								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+								'prompt'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
+								'original' => 1,
+							),
+						),
+					]
+				);
+
+			case ExcerptGeneration::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'generate_excerpt_prompt' => array(
+							array(
+								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+								'prompt'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
+								'original' => 1,
+							),
+						),
+					]
+				);
+
+			case ContentResizing::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'number_of_suggestions' => 1,
+						'condense_text_prompt'  => array(
+							array(
+								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+								'prompt'   => esc_html__( 'Descrease the content length no more than 2 to 4 sentences.', 'classifai' ),
+								'original' => 1,
+							),
+						),
+						'expand_text_prompt' => array(
+							array(
+								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+								'prompt'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
+								'original' => 1,
+							),
+						),
+					]
+				);
+		}
+
+		return [];
+	}
+
+	public function sanitize_settings( $new_settings ) {
+		$settings                                            = $this->feature_instance->get_settings();
+		$api_key_settings                                    = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$new_settings[ static::ID ]['api_key']               = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated']         = $api_key_settings[ static::ID ]['authenticated'];
+
+		if ( $this->feature_instance instanceof TitleGeneration ) {
+			$new_settings[ static::ID ]['number_of_titles']      = $this->sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
+			$new_settings[ static::ID ]['generate_title_prompt'] = $this->sanitize_prompts( 'generate_title_prompt', $new_settings );
+		}
+
+		if ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$new_settings[ static::ID ]['length']                  = $this->sanitize_number_of_responses_field( 'length', $new_settings, $settings );
+			$new_settings[ static::ID ]['generate_excerpt_prompt'] = $this->sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
+		}
+
+		return $new_settings;
 	}
 
 	/**
@@ -403,8 +571,6 @@ class ChatGPT extends Provider {
 	public function setup_fields_sections() {}
 
 	public function reset_settings() {}
-
-	public function sanitize_settings( $settings ) {}
 
 	/**
 	 * Default settings for ChatGPT

@@ -142,29 +142,40 @@ class Speech extends Provider {
 		}
 	}
 
-	public function add_endpoint_url_field( $args = [] ) {
+	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
-		$id               = $args['id'] ?? 'endpoint_url';
 
 		add_settings_field(
-			$id,
+			'endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
-				'label_for'     => $id,
+				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
-				'default_value' => $settings[ $id ],
-				'description'   => $args[ 'description' ] ?? __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+				'default_value' => $settings['endpoint_url'],
+				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
-	}
 
-	public function add_voices_options_field( $args = [] ) {
-		$settings = $this->feature_instance->get_settings( static::ID );
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
 		$voices_options   = $this->get_voices_select_options();
 
 		if ( ! empty( $voices_options ) ) {
@@ -183,6 +194,25 @@ class Speech extends Provider {
 				]
 			);
 		}
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'api_key'       => '',
+			'endpoint_url'  => '',
+			'authenticated' => false,
+			'voices'        => [],
+			'voice'         => '',
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case TextToSpeech::ID:
+				return $common_settings;
+		}
+
+		return [];
 	}
 
 	/**
@@ -412,18 +442,7 @@ class Speech extends Provider {
 	/**
 	 * Returns the default settings.
 	 */
-	public function get_default_settings() {
-		return [
-			'credentials'   => array(
-				'url'     => '',
-				'api_key' => '',
-			),
-			'voices'        => array(),
-			'voice'         => '',
-			'authenticated' => false,
-			'post_types'    => array(),
-		];
-	}
+	public function get_default_settings() {}
 
 	/**
 	 * Initial audio generation state.
