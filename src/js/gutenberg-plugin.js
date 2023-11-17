@@ -89,6 +89,7 @@ const ClassifAIGenerateTagsButton = () => {
 	const closeModal = () => setOpen( false );
 
 	const [ taxQuery, setTaxQuery ] = useState( [] );
+	const [ featureTaxonomies, setFeatureTaxonomies ] = useState( [] );
 	let [ taxTermsAI, setTaxTermsAI ] = useState( [] );
 
 	/**
@@ -99,6 +100,7 @@ const ClassifAIGenerateTagsButton = () => {
 	 */
 	const buttonClickCallBack = async ( resp, callbackArgs ) => {
 		if ( resp && resp.terms ) {
+			resp?.feature_taxonomies && setFeatureTaxonomies( resp.feature_taxonomies );
 			let termsReady = false;
 			const taxonomies = resp.terms;
 			const taxTerms = {};
@@ -120,9 +122,9 @@ const ClassifAIGenerateTagsButton = () => {
 					tax = 'categories';
 				}
 
-				const currentTermsOfTaxonomy = currentTerms[ taxonomy ];
+				const currentTermsOfTaxonomy = currentTerms[ tax ];
 				if ( currentTermsOfTaxonomy ) {
-					taxTermsExisting[ taxonomy ] = currentTermsOfTaxonomy;
+					taxTermsExisting[ tax ] = currentTermsOfTaxonomy;
 				}
 
 				const newTerms = Object.values( resp.terms[ taxonomy ] );
@@ -138,7 +140,10 @@ const ClassifAIGenerateTagsButton = () => {
 							);
 							if ( ! matchedTerm ) {
 								taxTermsAI[ tax ] = taxTermsAI[ tax ] || [];
-								taxTermsAI[ tax ].push( termId );
+								// push only if not exist already
+								if ( ! taxTermsAI[ tax ].includes( termId ) ) {
+									taxTermsAI[ tax ].push( termId );
+								}
 							}
 						}
 					} );
@@ -257,6 +262,7 @@ const ClassifAIGenerateTagsButton = () => {
 				} }
 				query={ {
 					contentPostType: postType,
+					featureTaxonomies: featureTaxonomies,
 					taxQuery: updatedTaxQuery,
 					taxTermsAI: taxTermsAI || {},
 					isLoading,
