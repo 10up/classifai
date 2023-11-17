@@ -100,7 +100,11 @@ const ClassifAIGenerateTagsButton = () => {
 	 */
 	const buttonClickCallBack = async ( resp, callbackArgs ) => {
 		if ( resp && resp.terms ) {
-			resp?.feature_taxonomies && setFeatureTaxonomies( resp.feature_taxonomies );
+			// set feature taxonomies
+			if ( resp?.feature_taxonomies ) {
+				setFeatureTaxonomies( resp.feature_taxonomies );
+			}
+
 			let termsReady = false;
 			const taxonomies = resp.terms;
 			const taxTerms = {};
@@ -262,7 +266,7 @@ const ClassifAIGenerateTagsButton = () => {
 				} }
 				query={ {
 					contentPostType: postType,
-					featureTaxonomies: featureTaxonomies,
+					featureTaxonomies,
 					taxQuery: updatedTaxQuery,
 					taxTermsAI: taxTermsAI || {},
 					isLoading,
