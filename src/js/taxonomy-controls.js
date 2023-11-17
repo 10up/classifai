@@ -46,6 +46,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 
 const TaxonomyControls = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
+	const featureTaxonomies = query.featureTaxonomies || [];
 	const taxTermsAI = query.taxTermsAI || [];
 	const [ newTermsInfo, setNewTermsInfo ] = useState( {} );
 
@@ -77,6 +78,12 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			let terms = getEntitiesInfo( _terms );
 
 			// Append "[AI]" prefix
+			if ( 'post_tag' === slug ) {
+				slug = 'tags';
+			}
+			if ( 'category' === slug ) {
+				slug = 'categories';
+			}
 			terms = appendAIPrefix( terms, slug );
 
 			const termData = {
@@ -234,13 +241,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		}, [] );
 	};
 
-	const watsonTaxonomies = [
-		'watson-category',
-		'watson-concept',
-		'watson-entity',
-		'watson-keyword',
-	];
-
 	return (
 		// eslint-disable-next-line react/jsx-no-useless-fragment
 		<>
@@ -253,8 +253,8 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					// if none of the terms?.names has "[AI]" prefix, skip the iteration
 					let hasAI = false;
 					if ( query.taxTermsAI ) {
-						// Return if this is not a watson taxonomy
-						if ( ! watsonTaxonomies.includes( slug ) ) {
+						// Return if this is not a feature taxonomy
+						if ( ! featureTaxonomies.includes( slug ) ) {
 							return null;
 						}
 
