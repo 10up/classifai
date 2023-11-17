@@ -5,10 +5,11 @@
 
 namespace Classifai\Providers\OpenAI;
 
-use Classifai\Admin\UserProfile;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use function Classifai\get_asset_info;
+use function Classifai\render_disable_feature_link;
+
 use WP_Error;
 
 class DallE extends Provider {
@@ -188,9 +189,6 @@ class DallE extends Provider {
 	public function print_media_templates() {
 		$settings         = $this->get_settings();
 		$number_of_images = absint( $settings['number'] );
-		$user_profile     = new UserProfile();
-		$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
-		$profile_url      = get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section';
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
@@ -239,17 +237,9 @@ class DallE extends Provider {
 				</h2>
 				<span class="spinner"></span>
 				<ul></ul>
-				<?php
-				if ( ! empty( $allowed_features ) && isset( $allowed_features['image_generation'] ) ) {
-					?>
-					<p>
-						<a href="<?php echo esc_url( $profile_url ); ?>" target="_blank" rel="noopener noreferrer" class="classifai-disable-feature-link" aria-label="<?php esc_attr_e( 'Opt out of using this ClassifAI feature', 'classifai' ); ?>">
-							<?php esc_html_e( 'Disable this ClassifAI feature', 'classifai' ); ?>
-						</a>
-					</p>
-					<?php
-				}
-				?>
+				<p>
+					<?php echo wp_kses_post( render_disable_feature_link( 'image_generation' ) ); ?>
+				</p>
 			</div>
 		</script>
 

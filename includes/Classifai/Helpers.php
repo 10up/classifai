@@ -2,6 +2,7 @@
 
 namespace Classifai;
 
+use Classifai\Admin\UserProfile;
 use Classifai\Providers\Provider;
 use Classifai\Providers\Azure;
 use Classifai\Services\Service;
@@ -794,4 +795,24 @@ function get_feature_default_settings( string $feature ) {
 		$feature . '_user_based_opt_out' => 'no',
 		$feature . '_users'              => array(),
 	);
+}
+
+/**
+ * Renders a link to disable a specific feature.
+ *
+ * @since 2.5.0
+ *
+ * @param string $feature Feature key.
+ */
+function render_disable_feature_link( string $feature ) {
+	$user_profile     = new UserProfile();
+	$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
+	$profile_url      = get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section';
+	if ( ! empty( $allowed_features ) && isset( $allowed_features[ $feature ] ) ) {
+		?>
+		<a href="<?php echo esc_url( $profile_url ); ?>" target="_blank" rel="noopener noreferrer" class="classifai-disable-feature-link" aria-label="<?php esc_attr_e( 'Opt out of using this ClassifAI feature', 'classifai' ); ?>">
+			<?php esc_html_e( 'Disable this ClassifAI feature', 'classifai' ); ?>
+		</a>
+		<?php
+	}
 }
