@@ -16,9 +16,16 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
 		parent::__construct();
 
+		/**
+		 * Every feature must set the `provider_instances` variable with the list of provider instances
+		 * that are registered to a service.
+		 */
 		$service_providers = ImageProcessing::get_service_providers();
 		$this->provider_instances = $this->get_provider_instances( $service_providers );
 	}
@@ -57,6 +64,9 @@ class ImageTagsGenerator extends Feature {
 	public function setup_fields_sections() {
 		$settings = $this->get_settings();
 
+		/* These are the feature-level fields that are
+		 * independent of the provider.
+		 */
 		add_settings_section(
 			$this->get_option_name() . '_section',
 			esc_html__( 'Feature settings', 'classifai' ),
@@ -105,13 +115,10 @@ class ImageTagsGenerator extends Feature {
 			]
 		);
 
-		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
-			$provider = $this->get_feature_provider_instance( $provider_id );
-
-			if ( method_exists( $provider, 'render_provider_fields' ) ) {
-				$provider->render_provider_fields();
-			}
-		}
+		/* The following renders the fields of all the providers
+		 * that are registered to the feature.
+		 */
+		$this->render_provider_fields();
 	}
 
 	/**
@@ -158,15 +165,12 @@ class ImageTagsGenerator extends Feature {
 	 * @return array
 	 */
 	protected function get_default_settings() {
-		$provider_settings = [];
+		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'status'    => '0',
 			'roles'     => $this->roles,
 			'provider'  => ComputerVision::ID,
 		];
-
-		$provider_instance                       = $this->get_feature_provider_instance( ComputerVision::ID );
-		$provider_settings[ ComputerVision::ID ] = $provider_instance->get_default_provider_settings();
 
 		return
 			apply_filters(
@@ -190,10 +194,12 @@ class ImageTagsGenerator extends Feature {
 	public function sanitize_settings( $new_settings ) {
 		$settings = $this->get_settings();
 
+		// Sanitization of the feature-level settings.
 		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
 		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
 		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
+		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
 		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
 

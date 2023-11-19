@@ -162,6 +162,30 @@ abstract class Feature {
 		return $settings;
 	}
 
+	public function get_provider_default_settings() {
+		$provider_settings = [];
+
+		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+			$provider = $this->get_feature_provider_instance( $provider_id );
+
+			if ( method_exists( $provider, 'get_default_provider_settings' ) ) {
+				$provider_settings[ $provider_id ] = $provider->get_default_provider_settings();
+			}
+		}
+
+		return $provider_settings;
+	}
+
+	public function render_provider_fields() {
+		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+			$provider = $this->get_feature_provider_instance( $provider_id );
+
+			if ( method_exists( $provider, 'render_provider_fields' ) ) {
+				$provider->render_provider_fields();
+			}
+		}
+	}
+
 	/**
 	 * Merges the data settings with the default settings recursively,
 	 *
