@@ -75,7 +75,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $feature_instance ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'OpenAI ChatGPT',
 			'ChatGPT',

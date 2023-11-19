@@ -35,7 +35,7 @@ class DallE extends Provider {
 	 *
 	 * @param string $service The service this class belongs to.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $service = null ) {
 		parent::__construct(
 			'OpenAI',
 			'DALL·E',

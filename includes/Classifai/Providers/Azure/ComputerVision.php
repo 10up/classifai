@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers\Azure;
 
+use Classifai\Features\DescriptiveTextGenerator;
+use Classifai\Features\ImageTagsGenerator;
 use Classifai\Providers\Provider;
 use DOMDocument;
 use WP_Error;
@@ -30,12 +32,11 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string $service The service this class belongs to.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'Microsoft Azure',
 			'AI Vision',
-			'computer_vision',
-			$service
+			'computer_vision'
 		);
 
 		// Set the onboarding options.
@@ -50,6 +51,8 @@ class ComputerVision extends Provider {
 				'enable_read_pdf'       => __( 'Scan PDFs for text', 'classifai' ),
 			),
 		);
+
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
@@ -57,6 +60,316 @@ class ComputerVision extends Provider {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			'endpoint_url',
+			esc_html__( 'Endpoint URL', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'endpoint_url',
+				'input_type'    => 'text',
+				'default_value' => $settings['endpoint_url'],
+				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			'api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		switch ( $this->feature_instance::ID ) {
+			case DescriptiveTextGenerator::ID:
+				$this->add_descriptive_text_generation_fields();
+				break;
+
+			case ImageTagsGenerator::ID:
+				$this->add_image_tags_generation_fields();
+				break;
+		}
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	public function add_descriptive_text_generation_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		$checkbox_options = array(
+			'alt'         => esc_html__( 'Alt text', 'classifai' ),
+			'caption'     => esc_html__( 'Image caption', 'classifai' ),
+			'description' => esc_html__( 'Image description', 'classifai' ),
+		);
+
+		add_settings_field(
+			'descriptive_text_fields',
+			esc_html__( 'Generate descriptive text', 'classifai' ),
+			[ $this->feature_instance, 'render_checkbox_group' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'      => 'descriptive_text_fields',
+				'options'        => $checkbox_options,
+				'default_values' => $settings['descriptive_text_fields'],
+				'description'    => __( 'Choose image fields where the generated captions should be applied.', 'classifai' ),
+				'class'          => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			'descriptive_confidence_threshold',
+			esc_html__( 'Descriptive text confidence threshold', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'descriptive_confidence_threshold',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $settings['descriptive_confidence_threshold'],
+				'description'   => esc_html__( 'Minimum confidence score for automatically added alt text, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+	}
+
+	public function add_image_tags_generation_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$options               = [];
+
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$options[ $name ] = $taxonomy->label;
+		}
+
+		add_settings_field(
+			'tag_taxonomy',
+			esc_html__( 'Tag taxonomy', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'tag_taxonomy',
+				'options'       => $options,
+				'default_value' => $settings['tag_taxonomy'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			'tag_confidence_threshold',
+			esc_html__( 'Tag confidence threshold', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'tag_confidence_threshold',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $settings['tag_confidence_threshold'],
+				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+	}
+
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'endpoint_url'  => '',
+			'api_key'       => '',
+			'authenticated' => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case DescriptiveTextGenerator::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'descriptive_text_fields' => [
+							'alt'         => 0,
+							'caption'     => 0,
+							'description' => 0,
+						],
+						'descriptive_confidence_threshold' => 75
+					]
+				);
+
+			case ImageTagsGenerator::ID:
+				$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+				$options               = [];
+
+				foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+					$options[ $name ] = $taxonomy->label;
+				}
+
+				return array_merge(
+					$common_settings,
+					[
+						'tag_confidence_threshold' => 70,
+						'tag_taxonomy'             => array_key_first( $options ),
+					]
+				);
+		}
+
+		return $common_settings;
+	}
+
+	/**
+	 * Sanitization
+	 *
+	 * @param array $settings The settings being saved.
+	 *
+	 * @return array|mixed
+	 */
+	public function sanitize_settings( $new_settings ) {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
+			$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
+			$new_settings[ static::ID ]['endpoint_url']  = esc_url_raw( $settings['url'] );
+			$new_settings[ static::ID ]['api_key']       = sanitize_text_field( $settings['api_key'] );
+
+			$auth_check = $this->authenticate_credentials(
+				$new_settings[ static::ID ]['endpoint_url'],
+				$new_settings[ static::ID ]['api_key']
+			);
+
+			if ( is_wp_error( $auth_check ) ) {
+				$new_settings[ static::ID ]['authenticated'] = false;
+			} else {
+				$new_settings[ static::ID ]['authenticated'] = true;
+			}
+		} else {
+			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
+			$new_settings[ static::ID ]['api_key']      = $settings[ static::ID ]['api_key'];
+		}
+
+		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
+			$new_settings[ static::ID ][ 'descriptive_confidence_threshold' ] = absint( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
+			$new_settings[ static::ID ][ 'descriptive_text_fields' ]          = array_map( 'sanitize_text_field', $new_settings[ static::ID ]['descriptive_text_fields'] ?? $settings[ static::ID ]['descriptive_text_fields'] );
+		}
+
+		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
+			$new_settings[ static::ID ][ 'tag_confidence_threshold' ] = absint( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
+			$new_settings[ static::ID ][ 'tag_taxonomy' ]             = array_map( 'sanitize_text_field', $new_settings[ static::ID ]['tag_taxonomy'] ?? $settings[ static::ID ]['descriptive_text_fields'] );
+		}
+
+		return $new_settings;
+
+		$new_settings = [];
+		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
+			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
+			if ( is_wp_error( $auth_check ) ) {
+				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
+				$new_settings['authenticated']                               = false;
+			} else {
+				$new_settings['authenticated'] = true;
+			}
+			$new_settings['url']     = esc_url_raw( $settings['url'] );
+			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
+		} else {
+			$new_settings['valid']   = false;
+			$new_settings['url']     = '';
+			$new_settings['api_key'] = '';
+
+			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
+		}
+
+		$checkbox_settings = [
+			'enable_image_tagging',
+			'enable_smart_cropping',
+			'enable_ocr',
+			'enable_read_pdf',
+		];
+
+		foreach ( $checkbox_settings as $checkbox_setting ) {
+
+			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
+				$new_settings[ $checkbox_setting ] = 'no';
+			} else {
+				$new_settings[ $checkbox_setting ] = '1';
+			}
+		}
+
+		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
+			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
+		} else {
+			$new_settings['caption_threshold'] = 75;
+		}
+
+		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
+			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
+		} else {
+			$new_settings['tag_threshold'] = 75;
+		}
+
+		if ( isset( $settings['image_tag_taxonomy'] ) && taxonomy_exists( $settings['image_tag_taxonomy'] ) ) {
+			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
+		} elseif ( taxonomy_exists( 'classifai-image-tags' ) ) {
+			$new_settings['image_tag_taxonomy'] = 'classifai-image-tags';
+		}
+
+		if ( isset( $settings['enable_image_captions'] ) ) {
+			if ( is_array( $settings['enable_image_captions'] ) ) {
+				$new_settings['enable_image_captions'] = $settings['enable_image_captions'];
+			} elseif ( 1 === (int) $settings['enable_image_captions'] ) {
+				// Handle submission from onboarding wizard.
+				$new_settings['enable_image_captions'] = array(
+					'alt'         => 'alt',
+					'caption'     => 0,
+					'description' => 0,
+				);
+			}
+		} else {
+			$new_settings['enable_image_captions'] = array(
+				'alt'         => 0,
+				'caption'     => 0,
+				'description' => 0,
+			);
+		}
+
+		if ( ! empty( $settings_errors ) ) {
+
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+
+			foreach ( $settings_errors as $code => $message ) {
+
+				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
+					add_settings_error(
+						$this->get_option_name(),
+						$code,
+						esc_html( $message ),
+						'error'
+					);
+				}
+			}
+		}
+
+		return $new_settings;
 	}
 
 	/**
@@ -1092,106 +1405,6 @@ class ComputerVision extends Provider {
 				),
 			]
 		);
-	}
-
-	/**
-	 * Sanitization
-	 *
-	 * @param array $settings The settings being saved.
-	 *
-	 * @return array|mixed
-	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = [];
-		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
-			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
-			if ( is_wp_error( $auth_check ) ) {
-				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
-				$new_settings['authenticated']                               = false;
-			} else {
-				$new_settings['authenticated'] = true;
-			}
-			$new_settings['url']     = esc_url_raw( $settings['url'] );
-			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
-		} else {
-			$new_settings['valid']   = false;
-			$new_settings['url']     = '';
-			$new_settings['api_key'] = '';
-
-			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
-		}
-
-		$checkbox_settings = [
-			'enable_image_tagging',
-			'enable_smart_cropping',
-			'enable_ocr',
-			'enable_read_pdf',
-		];
-
-		foreach ( $checkbox_settings as $checkbox_setting ) {
-
-			if ( empty( $settings[ $checkbox_setting ] ) || 1 !== (int) $settings[ $checkbox_setting ] ) {
-				$new_settings[ $checkbox_setting ] = 'no';
-			} else {
-				$new_settings[ $checkbox_setting ] = '1';
-			}
-		}
-
-		if ( isset( $settings['caption_threshold'] ) && is_numeric( $settings['caption_threshold'] ) && (int) $settings['caption_threshold'] >= 0 && (int) $settings['caption_threshold'] <= 100 ) {
-			$new_settings['caption_threshold'] = absint( $settings['caption_threshold'] );
-		} else {
-			$new_settings['caption_threshold'] = 75;
-		}
-
-		if ( isset( $settings['tag_threshold'] ) && is_numeric( $settings['tag_threshold'] ) && (int) $settings['tag_threshold'] >= 0 && (int) $settings['tag_threshold'] <= 100 ) {
-			$new_settings['tag_threshold'] = absint( $settings['tag_threshold'] );
-		} else {
-			$new_settings['tag_threshold'] = 75;
-		}
-
-		if ( isset( $settings['image_tag_taxonomy'] ) && taxonomy_exists( $settings['image_tag_taxonomy'] ) ) {
-			$new_settings['image_tag_taxonomy'] = $settings['image_tag_taxonomy'];
-		} elseif ( taxonomy_exists( 'classifai-image-tags' ) ) {
-			$new_settings['image_tag_taxonomy'] = 'classifai-image-tags';
-		}
-
-		if ( isset( $settings['enable_image_captions'] ) ) {
-			if ( is_array( $settings['enable_image_captions'] ) ) {
-				$new_settings['enable_image_captions'] = $settings['enable_image_captions'];
-			} elseif ( 1 === (int) $settings['enable_image_captions'] ) {
-				// Handle submission from onboarding wizard.
-				$new_settings['enable_image_captions'] = array(
-					'alt'         => 'alt',
-					'caption'     => 0,
-					'description' => 0,
-				);
-			}
-		} else {
-			$new_settings['enable_image_captions'] = array(
-				'alt'         => 0,
-				'caption'     => 0,
-				'description' => 0,
-			);
-		}
-
-		if ( ! empty( $settings_errors ) ) {
-
-			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
-
-			foreach ( $settings_errors as $code => $message ) {
-
-				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
-					add_settings_error(
-						$this->get_option_name(),
-						$code,
-						esc_html( $message ),
-						'error'
-					);
-				}
-			}
-		}
-
-		return $new_settings;
 	}
 
 	/**

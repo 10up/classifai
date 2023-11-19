@@ -42,7 +42,8 @@ class ServicesManager {
 	 * Register the actions required for the settings page.
 	 */
 	public function register() {
-		add_filter( 'language_processing_features', [ $this, 'language_processing_features' ] );
+		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
+		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -59,13 +60,22 @@ class ServicesManager {
 		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
 	}
 
-	public function language_processing_features() {
+	public function register_language_processing_features() {
 		return [
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
 			'\Classifai\Features\ContentResizing',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
+		];
+	}
+
+	public function register_image_processing_features() {
+		return [
+			'\Classifai\Features\DescriptiveTextGenerator',
+			'\Classifai\Features\ImageTagsGenerator',
+			'\Classifai\Features\SmartCropping',
+			'\Classifai\Features\ImageToText',
 		];
 	}
 

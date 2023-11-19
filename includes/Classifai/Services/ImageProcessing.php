@@ -39,6 +39,15 @@ class ImageProcessing extends Service {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
 	}
 
+	public static function get_service_providers() {
+		return apply_filters(
+			'classifai_language_processing_service_providers',
+			[
+				'Classifai\Providers\Azure\ComputerVision',
+			]
+		);
+	}
+
 	/**
 	 * Enqueue the script for the media modal.
 	 *

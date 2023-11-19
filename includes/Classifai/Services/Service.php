@@ -72,7 +72,7 @@ abstract class Service {
 		if ( ! empty( $this->providers ) && is_array( $this->providers ) ) {
 			foreach ( $this->providers as $provider ) {
 				if ( class_exists( $provider ) ) {
-					$this->provider_classes[] = new $provider( $this->menu_slug );
+					$this->provider_classes[] = new $provider();
 				}
 			}
 		}
