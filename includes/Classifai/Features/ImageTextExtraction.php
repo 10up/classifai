@@ -8,7 +8,7 @@ use Classifai\Services\ImageProcessing;
 /**
  * Class TitleGeneration
  */
-class ImageToText extends Feature {
+class ImageTextExtraction extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
@@ -38,7 +38,7 @@ class ImageToText extends Feature {
 	public function get_label() {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
-			__( 'Text extraction from images', 'classifai' )
+			__( 'Image Text Extraction', 'classifai' )
 		);
 	}
 

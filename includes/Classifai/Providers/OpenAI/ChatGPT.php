@@ -96,14 +96,13 @@ class ChatGPT extends Provider {
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			'api_key',
+			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
@@ -138,7 +137,7 @@ class ChatGPT extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			'number_of_titles',
+			static::ID . '_number_of_titles',
 			esc_html__( 'Number of titles', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
@@ -156,7 +155,7 @@ class ChatGPT extends Provider {
 		);
 
 		add_settings_field(
-			'generate_title_prompt',
+			static::ID . '_generate_title_prompt',
 			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
 			[ $this->feature_instance, 'render_prompt_repeater_field' ],
 			$this->feature_instance->get_option_name(),
@@ -176,7 +175,7 @@ class ChatGPT extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			'generate_excerpt_prompt',
+			static::ID . '_generate_excerpt_prompt',
 			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
 			[ $this->feature_instance, 'render_prompt_repeater_field' ],
 			$this->feature_instance->get_option_name(),
@@ -196,7 +195,7 @@ class ChatGPT extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			'number_of_suggestions',
+			static::ID . '_number_of_suggestions',
 			esc_html__( 'Number of titles', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
@@ -214,7 +213,7 @@ class ChatGPT extends Provider {
 		);
 
 		add_settings_field(
-			'condense_text_prompt',
+			static::ID . '_condense_text_prompt',
 			$args['label'] ?? esc_html__( 'Condense text prompt', 'classifai' ),
 			[ $this->feature_instance, 'render_prompt_repeater_field' ],
 			$this->feature_instance->get_option_name(),
@@ -230,7 +229,7 @@ class ChatGPT extends Provider {
 		);
 
 		add_settings_field(
-			'expand_text_prompt',
+			static::ID . '_expand_text_prompt',
 			$args['label'] ?? esc_html__( 'Expand text prompt', 'classifai' ),
 			[ $this->feature_instance, 'render_prompt_repeater_field' ],
 			$this->feature_instance->get_option_name(),
@@ -1272,7 +1271,7 @@ class ChatGPT extends Provider {
 			return false;
 		}
 
-		$feature  = new TitleGeneration();
+		$feature = new TitleGeneration();
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {

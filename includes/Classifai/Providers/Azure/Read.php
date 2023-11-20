@@ -69,7 +69,7 @@ class Read {
 	 * @return string
 	 */
 	public function get_api_url( $path = '' ) {
-		return sprintf( '%s%s%s', trailingslashit( $this->settings['url'] ), static::API_PATH, $path );
+		return sprintf( '%s%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH, $path );
 	}
 
 	/**

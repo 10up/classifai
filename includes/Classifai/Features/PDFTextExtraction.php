@@ -8,13 +8,13 @@ use Classifai\Services\ImageProcessing;
 /**
  * Class TitleGeneration
  */
-class DescriptiveTextGenerator extends Feature {
+class PDFTextExtraction extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_descriptive_text_generator';
+	const ID = 'feature_pdf_to_text_cropping';
 
 	/**
 	 * Constructor.
@@ -38,7 +38,7 @@ class DescriptiveTextGenerator extends Feature {
 	public function get_label() {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
-			__( 'Descriptive Text Generator', 'classifai' )
+			__( 'PDF Text Extraction', 'classifai' )
 		);
 	}
 
@@ -76,7 +76,7 @@ class DescriptiveTextGenerator extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable descriptive text generation', 'classifai' ),
+			esc_html__( 'Enable text extraction from images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -84,7 +84,7 @@ class DescriptiveTextGenerator extends Feature {
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['status'],
-				'description'   => __( 'Enable this to generate descriptive text for images.', 'classifai' ),
+				'description'   => __( 'Extract visible text from multi-pages PDF documents. Store the result as the attachment description.', 'classifai' ),
 			]
 		);
 
@@ -98,7 +98,7 @@ class DescriptiveTextGenerator extends Feature {
 				'label_for'      => 'roles',
 				'options'        => $this->roles,
 				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
+				'description'    => __( 'Choose which roles are allowed to generate image tags.', 'classifai' ),
 			]
 		);
 

@@ -60,6 +60,9 @@ class ServicesManager {
 		add_filter( 'classifai_debug_information', [ $this, 'add_debug_information' ], 1 );
 	}
 
+	/**
+	 * Registers providers under the Language Processing Service.
+	 */
 	public function register_language_processing_features() {
 		return [
 			'\Classifai\Features\TitleGeneration',
@@ -70,12 +73,16 @@ class ServicesManager {
 		];
 	}
 
+	/**
+	 * Registers providers under the Image Processing Service.
+	 */
 	public function register_image_processing_features() {
 		return [
 			'\Classifai\Features\DescriptiveTextGenerator',
 			'\Classifai\Features\ImageTagsGenerator',
 			'\Classifai\Features\SmartCropping',
-			'\Classifai\Features\ImageToText',
+			'\Classifai\Features\ImageTextExtraction',
+			'\Classifai\Features\PDFTextExtraction',
 		];
 	}
 

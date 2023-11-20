@@ -49,7 +49,6 @@ class Whisper extends Provider {
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
@@ -71,7 +70,7 @@ class Whisper extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		add_settings_field(
-			'api_key',
+			static::ID . '_api_key',
 			esc_html__( 'API Key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
