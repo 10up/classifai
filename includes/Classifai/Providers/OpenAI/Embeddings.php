@@ -749,7 +749,7 @@ class Embeddings extends Provider {
 			<p>
 				<label for="classifai-process-content" class="classifai-preview-toggle">
 					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
-					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
+					<strong><?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?></strong>
 				</label>
 			</p>
 		</div>

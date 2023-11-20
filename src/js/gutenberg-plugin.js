@@ -45,18 +45,7 @@ const ClassifAIToggle = () => {
 
 	return (
 		<ToggleControl
-			label={ __( 'Process content on update', 'classifai' ) }
-			help={
-				'yes' === enabled
-					? __(
-							'ClassifAI language processing is enabled',
-							'classifai'
-					  )
-					: __(
-							'ClassifAI language processing is disabled',
-							'classifai'
-					  )
-			}
+			label={ __( 'Automatically tag content on update', 'classifai' ) }
 			checked={ 'yes' === enabled }
 			onChange={ ( value ) => {
 				editPost( { classifai_process_content: value ? 'yes' : 'no' } );
@@ -239,11 +228,7 @@ const ClassifAIGenerateTagsButton = () => {
 		return null;
 	}
 
-	const buttonText = sprintf(
-		/** translators: %s Post type label */
-		__( 'Classify %s', 'classifai' ),
-		postTypeLabel
-	);
+	const buttonText = __( 'Suggest terms & tags', 'classifai' );
 
 	let updatedTaxQuery = Object.entries( taxQuery || {} ).reduce(
 		( accumulator, [ taxonomySlug, terms ] ) => {
