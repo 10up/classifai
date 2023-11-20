@@ -255,7 +255,7 @@ class LanguageProcessing extends Service {
 	/**
 	 * Get all feature taxonomies.
 	 *
-	 * @since x.x.x
+	 * @since 2.5.0
 	 *
 	 * @return array|WP_Error
 	 */

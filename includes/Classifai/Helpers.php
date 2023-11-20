@@ -173,7 +173,7 @@ function get_watson_username() {
 /**
  * Get Classification mode.
  *
- * @since x.x.x
+ * @since 2.5.0
  *
  * @return string
  */
