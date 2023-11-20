@@ -83,7 +83,7 @@ class TextToSpeech extends Provider {
 			'title'    => __( 'Microsoft Azure Text to Speech', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'authenticated' => __( 'Generate speech for post content', 'classifai' ),
+				'enable_text_to_speech' => __( 'Generate speech for post content', 'classifai' ),
 			),
 		);
 	}
@@ -139,7 +139,9 @@ class TextToSpeech extends Provider {
 			}
 		}
 
-		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		if ( $this->is_enabled( 'text_to_speech' ) ) {
+			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		}
 	}
 
 	/**
@@ -186,6 +188,20 @@ class TextToSpeech extends Provider {
 			]
 		);
 
+		add_settings_field(
+			'enable_text_to_speech',
+			esc_html__( 'Generate speech for post content', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_text_to_speech',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_text_to_speech'],
+				'description'   => __( 'Enables speech generation for post content.', 'classifai' ),
+			]
+		);
+
 		// Add user/role based access settings.
 		$this->add_access_settings( 'text_to_speech' );
 
@@ -229,6 +245,12 @@ class TextToSpeech extends Provider {
 		$current_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
 		$current_settings       = array_merge( $current_settings, $this->sanitize_access_settings( $settings, 'text_to_speech' ) );
 		$is_credentials_changed = false;
+
+		if ( empty( $settings['enable_text_to_speech'] ) || 1 !== (int) $settings['enable_text_to_speech'] ) {
+			$current_settings['enable_text_to_speech'] = 'no';
+		} else {
+			$current_settings['enable_text_to_speech'] = '1';
+		}
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
 			$new_url = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
@@ -444,16 +466,44 @@ class TextToSpeech extends Provider {
 		return array_merge(
 			$default_settings,
 			[
-				'credentials'   => array(
+				'enable_text_to_speech' => false,
+				'credentials'           => array(
 					'url'     => '',
 					'api_key' => '',
 				),
-				'voices'        => array(),
-				'voice'         => '',
-				'authenticated' => false,
-				'post_types'    => array(),
+				'voices'                => array(),
+				'voice'                 => '',
+				'authenticated'         => false,
+				'post_types'            => array(
+					'post' => 'post',
+				),
 			]
 		);
+	}
+
+	/**
+	 * Get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// Backward compatibility for enable feature setting.
+		if ( ! empty( $settings ) && ! isset( $settings['enable_text_to_speech'] ) ) {
+			$settings['enable_text_to_speech'] = $settings['authenticated'] ?? $defaults['enable_text_to_speech'];
+		}
+
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -893,39 +943,5 @@ class TextToSpeech extends Provider {
 		}
 
 		return $options;
-	}
-
-
-	/**
-	 * Determine if the current user can access the feature
-	 * TODO: remove this method once enable/disable feature is implemented.
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature = '' ) {
-		$access   = false;
-		$settings = $this->get_settings();
-
-		// Check if provider is configured and user has access to the feature.
-		if (
-			$this->is_configured() &&
-			$this->has_access( $feature )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a specific classifai feature.
-		 *
-		 * @since 2.4.0
-		 * @hook classifai_{$this->option_name}_enable_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $access, $settings );
 	}
 }

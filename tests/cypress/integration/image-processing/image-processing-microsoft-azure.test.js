@@ -103,9 +103,13 @@ describe( 'Image processing Tests', () => {
 	} );
 
 	it( 'Can disable Azure AI Vision Image processing features', () => {
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
+		const options = {
+			imageEditLink,
+			mediaModelLink,
+		};
 
 		// Disable features
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
 		cy.get( '#computer_vision_enable_image_captions_alt' ).uncheck();
 		cy.get( '#computer_vision_enable_image_captions_caption' ).uncheck();
 		cy.get(
@@ -116,31 +120,27 @@ describe( 'Image processing Tests', () => {
 		cy.get( '#enable_ocr' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		// Verify with Image processing features are not present in attachment metabox.
-		cy.visit( imageEditLink );
-		cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).should(
-			'not.exist'
-		);
-		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).should(
-			'not.exist'
-		);
-		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).should(
-			'not.exist'
-		);
-		cy.get(
-			'.misc-publishing-actions label[for=rescan-smart-crop]'
-		).should( 'not.exist' );
+		// Verify that the feature is not available.
+		cy.verifyAIVisionEnabled( false, options );
 
-		// Verify with Image processing features are not present in media model.
-		cy.visit( mediaModelLink );
-		cy.get( '.media-modal' ).should( 'exist' );
-		cy.get( '#classifai-rescan-alt-tags' ).should( 'not.exist' );
-		cy.get( '#classifai-rescan-captions' ).should( 'not.exist' );
-		cy.get( '#classifai-rescan-smart-crop' ).should( 'not.exist' );
-		cy.get( '#classifai-rescan-ocr' ).should( 'not.exist' );
+		// Enable features.
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
+		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
+		cy.get( '#enable_image_tagging' ).check();
+		cy.get( '#enable_smart_cropping' ).check();
+		cy.get( '#enable_ocr' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyAIVisionEnabled( true, options );
 	} );
 
 	it( 'Can enable/disable AI Vision features by roles', () => {
+		const options = {
+			imageEditLink,
+			mediaModelLink,
+		};
+
 		// Enable features.
 		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
 		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
@@ -172,7 +172,7 @@ describe( 'Image processing Tests', () => {
 		);
 
 		// Verify that the feature is not available.
-		cy.verifyAIVisionEnabled( false );
+		cy.verifyAIVisionEnabled( false, options );
 
 		// Enable access to admin role.
 		cy.enableFeatureForRoles(
@@ -197,10 +197,15 @@ describe( 'Image processing Tests', () => {
 		);
 
 		// Verify that the feature is available.
-		cy.verifyAIVisionEnabled( true );
+		cy.verifyAIVisionEnabled( true, options );
 	} );
 
 	it( 'Can enable/disable AI Vision features by user', () => {
+		const options = {
+			imageEditLink,
+			mediaModelLink,
+		};
+
 		// Disable access to admin role.
 		cy.disableFeatureForRoles(
 			'image_captions',
@@ -224,7 +229,7 @@ describe( 'Image processing Tests', () => {
 		);
 
 		// Verify that the feature is not available.
-		cy.verifyAIVisionEnabled( false );
+		cy.verifyAIVisionEnabled( false, options );
 
 		cy.enableFeatureForUsers(
 			'image_captions',
@@ -244,10 +249,15 @@ describe( 'Image processing Tests', () => {
 		cy.enableFeatureForUsers( 'ocr', [ 'admin' ], 'computer_vision' );
 
 		// Verify that the feature is available.
-		cy.verifyAIVisionEnabled( true );
+		cy.verifyAIVisionEnabled( true, options );
 	} );
 
 	it( 'User can opt-out AI Vision features', () => {
+		const options = {
+			imageEditLink,
+			mediaModelLink,
+		};
+
 		// Enable user based opt-out.
 		cy.enableFeatureOptOut( 'image_captions', 'computer_vision' );
 		cy.enableFeatureOptOut( 'image_tagging', 'computer_vision' );
@@ -261,7 +271,7 @@ describe( 'Image processing Tests', () => {
 		cy.optOutFeature( 'ocr' );
 
 		// Verify that the feature is not available.
-		cy.verifyAIVisionEnabled( false );
+		cy.verifyAIVisionEnabled( false, options );
 
 		// opt-in
 		cy.optInFeature( 'image_captions' );
@@ -270,6 +280,6 @@ describe( 'Image processing Tests', () => {
 		cy.optInFeature( 'ocr' );
 
 		// Verify that the feature is available.
-		cy.verifyAIVisionEnabled( true );
+		cy.verifyAIVisionEnabled( true, options );
 	} );
 } );

@@ -518,14 +518,13 @@ class DallE extends Provider {
 	 * @return bool
 	 */
 	public function is_feature_enabled( string $feature = 'image_generation' ) {
-		$access     = false;
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_image_gen';
+		$access   = false;
+		$settings = $this->get_settings();
 
 		if (
 			current_user_can( 'upload_files' ) &&
 			$this->has_access( $feature ) &&
-			( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] )
+			$this->is_enabled( $feature )
 		) {
 			$access = true;
 		}
@@ -542,6 +541,24 @@ class DallE extends Provider {
 		 * @return {bool} Should the user have access?
 		 */
 		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = ( 'image_generation' === $feature ) ? 'enable_image_gen' : 'enable_' . $feature;
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 
 	/**

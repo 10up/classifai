@@ -56,6 +56,34 @@ describe( 'PDF read Tests', () => {
 		cy.get( '#attachment_content' ).should( 'have.value', getPDFData() );
 	} );
 
+	it( 'Can enable/disable PDF scanning feature', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+		);
+		cy.get( '#enable_read_pdf' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.visit( pdfEditLink );
+		cy.get( '.misc-publishing-actions label[for=rescan-pdf]' ).should(
+			'not.exist'
+		);
+
+		// Enable admin role.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+		);
+		cy.get( '#enable_read_pdf' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.visit( pdfEditLink );
+		cy.get( '.misc-publishing-actions label[for=rescan-pdf]' ).should(
+			'exist'
+		);
+	} );
+
 	it( 'Can enable/disable PDF scanning feature by role', () => {
 		// Enable feature.
 		cy.visit(

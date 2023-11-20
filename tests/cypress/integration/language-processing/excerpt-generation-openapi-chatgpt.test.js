@@ -233,49 +233,26 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		} );
 	} );
 
-	it( 'Can disable excerpt generation feature', () => {
+	it( 'Can enable/disable excerpt generation feature', () => {
+		// Disable features.
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
-
-		// Disable features.
 		cy.get( '#enable_excerpt' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT post disabled',
-			content: 'Test GPT content',
-		} );
+		// Verify that the feature is not available.
+		cy.verifyExcerptGenerationEnabled( false );
 
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_excerpt' ).check();
+		cy.get( '#submit' ).click();
 
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the excerpt panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.editor-post-excerpt button' )
-				.should( 'not.exist' );
-		} );
+		// Verify that the feature is available.
+		cy.verifyExcerptGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable excerpt generation feature by role', () => {

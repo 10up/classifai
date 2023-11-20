@@ -166,6 +166,28 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.disableClassicEditor();
 	} );
 
+	it( 'Can enable/disable content classification feature ', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+		cy.get( '#enable_classification' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.verifyClassifyContentEnabled( false );
+
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+		cy.get( '#enable_classification' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyClassifyContentEnabled( true );
+	} );
+
 	it( 'Can enable/disable content classification feature by role', () => {
 		// Remove custom taxonomies so those don't interfere with the test.
 		cy.visit(

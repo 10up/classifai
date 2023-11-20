@@ -77,55 +77,26 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		} );
 	} );
 
-	it( 'Can disable image generation feature', () => {
+	it( 'Can enable/disable image generation feature', () => {
+		// Disable feature.
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
 		);
-
 		cy.get( '#enable_image_gen' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		cy.get(
-			`.wp-has-current-submenu.wp-menu-open li a:contains("Generate Images")`
-		).should( 'not.exist' );
+		// Verify that the feature is not available.
+		cy.verifyImageGenerationEnabled( false );
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test DALL-E post disabled',
-			content: 'Test content',
-		} );
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&provider=openai_dalle'
+		);
+		cy.get( '#enable_image_gen' ).check();
+		cy.get( '#submit' ).click();
 
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
-
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the Featured image panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Click to open media modal.
-			cy.wrap( $panel )
-				.find( '.editor-post-featured-image__toggle' )
-				.click();
-
-			// Verify tab doesn't exist.
-			cy.get( '#menu-item-generate' ).should( 'not.exist' );
-		} );
+		// Verify that the feature is available.
+		cy.verifyImageGenerationEnabled( true );
 	} );
 
 	it( 'Can generate image directly in media library', () => {

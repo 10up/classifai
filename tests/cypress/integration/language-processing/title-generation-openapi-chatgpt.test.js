@@ -259,49 +259,26 @@ describe( '[Language processing] Title Generation Tests', () => {
 			} );
 	} );
 
-	it( 'Can disable title generation feature', () => {
+	it( 'Can enable/disable title generation feature', () => {
+		// Disable features.
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
 		);
-
-		// Disable features.
 		cy.get( '#enable_titles' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		// Create test post.
-		cy.createPost( {
-			title: 'Test ChatGPT generate titles disabled',
-			content: 'Test content',
-		} );
+		// Verify that the feature is not available.
+		cy.verifyTitleGenerationEnabled( false );
 
-		// Close post publish panel.
-		const closePanelSelector = 'button[aria-label="Close panel"]';
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( closePanelSelector ).length > 0 ) {
-				cy.get( closePanelSelector ).click();
-			}
-		} );
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+		);
+		cy.get( '#enable_titles' ).check();
+		cy.get( '#submit' ).click();
 
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the summary panel.
-		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button doesn't exist.
-			cy.wrap( $panel )
-				.find( '.classifai-post-status button.title' )
-				.should( 'not.exist' );
-		} );
+		// Verify that the feature is available.
+		cy.verifyTitleGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable title generation feature by role', () => {

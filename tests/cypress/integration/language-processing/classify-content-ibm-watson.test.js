@@ -7,6 +7,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get( '#classifai-settings-post' ).check();
 		cy.get( '#classifai-settings-publish' ).check();
 		cy.get( '#classifai-settings-category' ).check();
+		cy.get( '#classifai-settings-enable_content_classification' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -192,6 +193,28 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 
 		// Verify Each Created taxonomies.
 		cy.verifyPostTaxonomyTerms( 'tags', threshold / 100 );
+	} );
+
+	it( 'Can enable/disable Natural Language Understanding features.', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get( '#classifai-settings-enable_content_classification' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.verifyClassifyContentEnabled( false );
+
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+		);
+		cy.get( '#classifai-settings-enable_content_classification' ).check();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyClassifyContentEnabled( true );
 	} );
 
 	it( 'Can limit Natural Language Understanding features by roles', () => {
