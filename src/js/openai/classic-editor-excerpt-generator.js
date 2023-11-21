@@ -1,6 +1,8 @@
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import '../../scss/openai/classic-editor-title-generator.scss';
 
+const ClassifAI = window.ClassifAI || {};
 const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 
 ( function ( $ ) {
@@ -37,6 +39,30 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 				} )
 			)
 			.insertAfter( excerptContainer );
+
+		// Append disable feature link.
+		if (
+			ClassifAI?.opt_out_enabled_features?.includes(
+				'excerpt_generation'
+			)
+		) {
+			$( '<a>', {
+				text: __( 'Disable this ClassifAI feature', 'classifai' ),
+				href: ClassifAI?.profile_url,
+				target: '_blank',
+				rel: 'noopener noreferrer',
+				class: 'classifai-disable-feature-link',
+			} )
+				.wrap(
+					`<div class="classifai-openai__excerpt-generate-disable-link" />`
+				)
+				.parent()
+				.insertAfter(
+					document.getElementById(
+						'classifai-openai__excerpt-generate-btn'
+					)
+				);
+		}
 
 		// The current post ID.
 		const postId = $( '#post_ID' ).val();

@@ -8,6 +8,8 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use function Classifai\get_asset_info;
+use function Classifai\render_disable_feature_link;
+
 use WP_Error;
 
 class DallE extends Provider {
@@ -39,6 +41,11 @@ class DallE extends Provider {
 			'DALL·E',
 			'openai_dalle',
 			$service
+		);
+
+		// Features provided by this provider.
+		$this->features = array(
+			'image_generation' => __( 'Generate images', 'classifai' ),
 		);
 
 		// Set the onboarding options.
@@ -230,6 +237,9 @@ class DallE extends Provider {
 				</h2>
 				<span class="spinner"></span>
 				<ul></ul>
+				<p>
+					<?php echo wp_kses_post( render_disable_feature_link( 'image_generation' ) ); ?>
+				</p>
 			</div>
 		</script>
 
@@ -275,42 +285,8 @@ class DallE extends Provider {
 			]
 		);
 
-		// Get all roles that have the upload_files cap.
-		$roles = get_editable_roles() ?? [];
-		$roles = array_filter(
-			$roles,
-			function( $role ) {
-				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
-			}
-		);
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for DALL·E
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_allowed_image_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate images. Note that the roles above only include those that have permissions to upload media.', 'classifai' ),
-			]
-		);
+		// Add user/role based settings.
+		$this->add_access_settings( 'image_generation' );
 
 		add_settings_field(
 			'number',
@@ -355,19 +331,14 @@ class DallE extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'image_generation' )
 		);
 
 		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
 			$new_settings['enable_image_gen'] = 'no';
 		} else {
 			$new_settings['enable_image_gen'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {
@@ -398,14 +369,18 @@ class DallE extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'    => false,
-			'api_key'          => '',
-			'enable_image_gen' => false,
-			'roles'            => array_keys( get_editable_roles() ?? [] ),
-			'number'           => 1,
-			'size'             => '1024x1024',
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'    => false,
+				'api_key'          => '',
+				'enable_image_gen' => false,
+				'number'           => 1,
+				'size'             => '1024x1024',
+			]
+		);
 	}
 
 	/**
@@ -539,20 +514,17 @@ class DallE extends Provider {
 	/**
 	 * Checks whether we can generate images.
 	 *
+	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled() {
+	public function is_feature_enabled( string $feature = 'image_generation' ) {
 		$access   = false;
 		$settings = $this->get_settings();
 
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
 		if (
-			current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
+			current_user_can( 'upload_files' ) &&
+			$this->has_access( $feature ) &&
+			$this->is_enabled( $feature )
 		) {
 			$access = true;
 		}
@@ -571,4 +543,56 @@ class DallE extends Provider {
 		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
 	}
 
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = ( 'image_generation' === $feature ) ? 'enable_image_gen' : 'enable_' . $feature;
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for OpenAI DALL·E
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		// Get all roles that have the upload_files cap.
+		$roles = get_editable_roles() ?? [];
+		$roles = array_filter(
+			$roles,
+			function( $role ) {
+				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
+			}
+		);
+		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for DALL·E
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_openai_dalle_allowed_image_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
+
+		return $roles;
+	}
 }

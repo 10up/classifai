@@ -53,6 +53,6 @@
   "supports": {
     "html": false
   },
-  "editorScript": "file:../../../../dist/recommended-content-block.js",
+  "editorScript": "recommended-content-block-editor-script",
   "style": "recommended-content-block-style"
 }

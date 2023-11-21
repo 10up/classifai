@@ -2,54 +2,63 @@
 	--classifai-admin-theme-color: #007cba;
 	--classifai-admin-theme-color--rgb: 0, 124, 186;
 	--classifai-admin-theme-color-darker-10: #006ba1;
+	--classifai-highlight-color: #007cba;
 }
 
 body.admin-color-light {
 	--classifai-admin-theme-color: #0085ba;
 	--classifai-admin-theme-color--rgb: 0, 133, 186;
 	--classifai-admin-theme-color-darker-10: #0073a1;
+	--classifai-highlight-color: #04a4cc;
 }
 
 body.admin-color-modern {
 	--classifai-admin-theme-color: #3858e9;
 	--classifai-admin-theme-color--rgb: 56, 88, 233;
 	--classifai-admin-theme-color-darker-10: #2145e6;
+	--classifai-highlight-color: #3858e9;
 }
 
 body.admin-color-blue {
 	--classifai-admin-theme-color: #096484;
 	--classifai-admin-theme-color--rgb: 9, 100, 132;
 	--classifai-admin-theme-color-darker-10: #07526c;
+	--classifai-highlight-color: #096484;
 }
 
 body.admin-color-coffee {
 	--classifai-admin-theme-color: #46403c;
 	--classifai-admin-theme-color--rgb: 70, 64, 60;
 	--classifai-admin-theme-color-darker-10: #383330;
+	--classifai-highlight-color: #c7a589;
 }
 
 body.admin-color-ectoplasm {
 	--classifai-admin-theme-color: #523f6d;
 	--classifai-admin-theme-color--rgb: 82, 63, 109;
 	--classifai-admin-theme-color-darker-10: #46365d;
+	--classifai-highlight-color: #a3b745;
 }
 
 body.admin-color-midnight {
 	--classifai-admin-theme-color: #e14d43;
 	--classifai-admin-theme-color--rgb: 225, 77, 67;
 	--classifai-admin-theme-color-darker-10: #dd382d;
+	--classifai-highlight-color: #e14d43;
 }
 
 body.admin-color-ocean {
 	--classifai-admin-theme-color: #627c83;
 	--classifai-admin-theme-color--rgb: 98, 124, 131;
 	--classifai-admin-theme-color-darker-10: #576e74;
+	--classifai-highlight-color: #9ebaa0;
 }
 
 body.admin-color-sunrise {
 	--classifai-admin-theme-color: #dd823b;
 	--classifai-admin-theme-color--rgb: 221, 130, 59;
 	--classifai-admin-theme-color-darker-10: #d97426;
+	--classifai-highlight-color: #dd823b;
 }
 
 #classifai-activation-notice {
@@ -244,11 +253,31 @@ input.classifai-button {
 			max-width: 600px;
 		}
 
-		.classifai-input-description {
+		.description {
 			display: block;
 			margin-top: 8px;
 			max-width: 600px;
 			line-height: 1.4;
+		}
+
+		tr.allowed_users_row {
+			.classifai-search-users-container {
+				max-width: 600px;
+
+				label.components-form-token-field__label{
+					display: none;
+				}
+			}
+		}
+
+		.components-form-token-field__input-container.is-active {
+			border-color: var(--classifai-highlight-color);
+			box-shadow: 0 0 0 1px var(--classifai-highlight-color);
+			outline: 2px solid transparent;
+		}
+
+		.components-form-token-field__suggestion.is-selected {
+			background: var(--classifai-highlight-color);
 		}
 
 		.classifai-field-type-prompt-setting {
@@ -332,6 +361,13 @@ input.classifai-button {
 		height: 38px;
 		font-size: 14px;
 		margin-bottom: 4px;
+	}
+
+	.components-form-token-field__input-container input[type=text].components-form-token-field__input {
+		height: auto;
+		font-size: 14px;
+		margin-bottom: 0px;
+		min-height: 32px;
 	}
 
 	h2.nav-tab-wrapper.classifai-nav-wrapper {
@@ -734,7 +770,7 @@ input.classifai-button {
 			color: red;
 		}
 
-		span.classifai-input-description {
+		span.description {
 			font-size: 12px;
 		}
 	}
@@ -797,4 +833,25 @@ input.classifai-button {
 	position: absolute;
 	right: 12px;
 	top: 70px;
+}
+
+// Profile page
+#classifai-profile-features-section tr.classifai-features-row {
+	th {
+		padding: 10px 10px 10px 0;
+	}
+
+	td {
+		padding: 10px 10px;
+	}
+}
+
+a.components-button.classifai-disable-feature-link {
+    display: block;
+    margin-top: 12px;
+}
+
+div.classifai-openai__result-disable-link {
+    display: block;
+    padding: 0 1em 1.5em 1em;
 }
