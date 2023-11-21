@@ -246,7 +246,7 @@ Cypress.Commands.add( 'verifyClassifyContentEnabled', ( enabled = true ) => {
 
 	cy.contains(
 		'.classifai-panel label.components-toggle-control__label',
-		'Process content on update'
+		'Automatically tag content on update'
 	).should( shouldExist );
 } );
 
