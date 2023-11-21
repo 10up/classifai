@@ -19,7 +19,7 @@ import {
 import { list, grid } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
-import TaxonomyControls from './inspector-controls/taxonomy-controls';
+import TaxonomyControls from '../../../../src/js/taxonomy-controls';
 import { usePostTypes } from './utils';
 
 /**

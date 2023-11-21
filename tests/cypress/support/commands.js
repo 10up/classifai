@@ -56,7 +56,7 @@ Cypress.Commands.add( 'verifyPostTaxonomyTerms', ( taxonomy, threshold ) => {
 		// Find the panel container
 		const $panel = $button.parents( '.components-panel__body' );
 
-		// Close Panel.
+		// Open Panel.
 		if ( ! $panel.hasClass( 'is-opened' ) ) {
 			cy.wrap( $button ).click();
 		}
@@ -246,7 +246,7 @@ Cypress.Commands.add( 'verifyClassifyContentEnabled', ( enabled = true ) => {
 
 	cy.contains(
 		'.classifai-panel label.components-toggle-control__label',
-		'Process content on update'
+		'Automatically tag content on update'
 	).should( shouldExist );
 } );
 

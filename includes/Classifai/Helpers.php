@@ -5,6 +5,7 @@ namespace Classifai;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Provider;
 use Classifai\Providers\Azure;
+use Classifai\Providers\Watson\NLU;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -127,7 +128,6 @@ function reset_plugin_settings() {
 	}
 }
 
-
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
@@ -169,6 +169,33 @@ function get_watson_username() {
 	} else {
 		return '';
 	}
+}
+
+/**
+ * Get Classification mode.
+ *
+ * @since 2.5.0
+ *
+ * @return string
+ */
+function get_classification_mode() {
+	$provider = new NLU( 'Natural Language Understanding' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+	$value    = isset( $settings['classification_mode'] ) ? $settings['classification_mode'] : '';
+
+	if ( $provider->is_configured() ) {
+		if ( empty( $value ) ) {
+			// existing users
+			// default: automatic_classification
+			return 'automatic_classification';
+		}
+	} else {
+		// new users
+		// default: manual_review
+		return 'manual_review';
+	}
+
+	return $value;
 }
 
 /**

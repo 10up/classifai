@@ -835,6 +835,44 @@ input.classifai-button {
 	top: 70px;
 }
 
+// Start: Classify Post Modal
+.classify-post-componenet {
+	hr {
+		margin-bottom: 20px;
+	}
+}
+.classify-modal {
+    width: 500px;
+
+	hr {
+		margin-bottom: 20px;
+	}
+}
+
+.classifai-modal__notes {
+    max-width: 350px;
+    float: left;
+    font-size: 10px;
+}
+
+.classifai-modal__footer {
+    overflow: hidden;
+
+	button {
+		float: right;
+	}
+}
+
+.editor-post-publish-panel {
+	.classifai-modal__footer {
+		button {
+			float: none;
+			margin-top: 10px;
+		}
+	}
+}
+// End: Classify Post Modal
+
 // Profile page
 #classifai-profile-features-section tr.classifai-features-row {
 	th {

@@ -51,11 +51,16 @@ class LanguageProcessing extends Service {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
-					'id' => array(
+					'id'        => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
+					),
+					'linkTerms' => array(
+						'type'        => 'boolean',
+						'description' => esc_html__( 'Whether to link terms or not.', 'classifai' ),
+						'default'     => true,
 					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
@@ -220,37 +225,63 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
 		try {
-			$post_id = $request->get_param( 'id' );
+			$post_id    = $request->get_param( 'id' );
+			$link_terms = $request->get_param( 'linkTerms' );
 
 			if ( empty( $post_id ) ) {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 			}
 
-			$taxonomy_terms    = [];
-			$features          = [ 'category', 'keyword', 'concept', 'entity' ];
 			$save_post_handler = new SavePostHandler();
 
 			// Process post content.
-			$result = $save_post_handler->classify( $post_id );
+			$result = $save_post_handler->classify( $post_id, $link_terms );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 
-			foreach ( $features as $feature ) {
-				$taxonomy = \Classifai\get_feature_taxonomy( $feature );
-				$terms    = wp_get_object_terms( $post_id, $taxonomy );
-				if ( ! is_wp_error( $terms ) ) {
-					foreach ( $terms as $term ) {
-						$taxonomy_terms[ $taxonomy ][] = $term->term_id;
-					}
-				}
-			}
-
 			// Return taxonomy terms.
-			return rest_ensure_response( [ 'terms' => $taxonomy_terms ] );
+			return rest_ensure_response(
+				array(
+					'terms'              => $result,
+					'feature_taxonomies' => $this->get_all_feature_taxonomies(),
+				)
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Get all feature taxonomies.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_all_feature_taxonomies() {
+		// Get all feature taxonomies.
+		$feature_taxonomies = [];
+		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
+			if ( \Classifai\get_feature_enabled( $feature ) ) {
+				$taxonomy   = \Classifai\get_feature_taxonomy( $feature );
+				$permission = $this->check_term_permissions( $taxonomy );
+
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+
+				if ( 'post_tag' === $taxonomy ) {
+					$taxonomy = 'tags';
+				}
+				if ( 'category' === $taxonomy ) {
+					$taxonomy = 'categories';
+				}
+				$feature_taxonomies[] = $taxonomy;
+			}
+		}
+
+		return $feature_taxonomies;
 	}
 
 	/**

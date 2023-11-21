@@ -13,6 +13,7 @@ use function Classifai\get_plugin_settings;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
+use function Classifai\get_classification_mode;
 use WP_Error;
 
 class NLU extends Provider {
@@ -187,6 +188,10 @@ class NLU extends Provider {
 
 			if ( isset( $old_settings['credentials'] ) ) {
 				$defaults['credentials'] = $old_settings['credentials'];
+			}
+
+			if ( isset( $old_settings['classification_mode'] ) ) {
+				$defaults['classification_mode'] = $old_settings['classification_mode'];
 			}
 
 			if ( isset( $old_settings['post_types'] ) ) {
@@ -439,6 +444,18 @@ class NLU extends Provider {
 		// Add user/role-based access settings for classify content.
 		$this->add_access_settings( 'content_classification' );
 		add_settings_field(
+			'classification-mode',
+			esc_html__( 'Classification Mode', 'classifai' ),
+			[ $this, 'render_classification_mode_radios' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'option_index' => 'classification_mode',
+				'input_type'   => 'radio',
+			]
+		);
+
+		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types to Classify', 'classifai' ),
 			[ $this, 'render_post_types_checkboxes' ],
@@ -505,18 +522,66 @@ class NLU extends Provider {
 			case 'checkbox':
 				$attrs = ' value="1"' . checked( '1', $value, false );
 				break;
+			case 'radio':
+				if ( 'classification_mode' === $args['option_index'] ) {
+					// Detect the existing vs new users and serve default value accordingly.
+					$get_classification_mode = get_classification_mode();
+					if ( $value === $get_classification_mode ) {
+						$attrs = ' value="' . esc_attr( $value ) . '" checked="checked"';
+					}
+				}
+				$setting_index = ! is_array( $setting_index ) ? $setting_index : '';
+				$attrs = empty( $attrs )
+						? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false )
+						: $attrs;
+				break;
 		}
 		?>
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
 			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
 			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?><?php echo 'radio' === $type ? '' : '[' . esc_attr( $args['label_for'] . ']' ); ?>"
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
+	}
+
+	/**
+	 * Render the classification modes.
+	 *
+	 * @param array $args Settings for the input
+	 *
+	 * @return void
+	 */
+	public function render_classification_mode_radios( $args ) {
+		echo '<ul>';
+		$modes = [
+			'manual_review' => [
+				'label' => 'Manual review',
+				'default_value' => 'manual_review',
+			],
+			'automatic_classification' => [
+				'label' => 'Automatic classification',
+				'default_value' => 'automatic_classification',
+			],
+		];
+		foreach ( $modes as $name => $data ) {
+			$args = array_merge(
+				$args,
+				$data,
+				[ 'label_for' => $name ]
+			);
+
+			echo '<li>';
+			$this->render_input( $args );
+			echo '<label for="classifai-settings-' . esc_attr( $name ) . '">' . esc_html( $data['label'] ) . '</label>';
+			echo '</li>';
+		}
+
+		echo '</ul>';
 	}
 
 	/**
@@ -544,7 +609,6 @@ class NLU extends Provider {
 
 		echo '</ul>';
 	}
-
 
 	/**
 	 * Render the post statuses checkbox array.
@@ -721,12 +785,6 @@ class NLU extends Provider {
 			$new_settings['authenticated'] = true;
 		}
 
-		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
-			$new_settings['enable_content_classification'] = 'no';
-		} else {
-			$new_settings['enable_content_classification'] = '1';
-		}
-
 		if ( isset( $settings['credentials']['watson_url'] ) ) {
 			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
 		}
@@ -737,6 +795,16 @@ class NLU extends Provider {
 
 		if ( isset( $settings['credentials']['watson_password'] ) ) {
 			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
+		}
+
+		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
+			$new_settings['enable_content_classification'] = 'no';
+		} else {
+			$new_settings['enable_content_classification'] = '1';
+		}
+
+		if ( isset( $settings['classification_mode'] ) ) {
+			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
 		}
 
 		// Sanitize the post type checkboxes
@@ -911,7 +979,7 @@ class NLU extends Provider {
 		<p>
 			<label for="_classifai_process_content">
 				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
-				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
+				<?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?>
 			</label>
 		</p>
 		<div class="classifai-clasify-post-wrapper" style="display: none;">
