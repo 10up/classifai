@@ -16,6 +16,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
 import TaxonomyControls from './taxonomy-controls';
 import PrePubClassifyPost from './gutenberg-plugins/pre-publish-classify-post';
+import { DisableFeatureButton } from './components';
 
 const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
 	window;
@@ -280,6 +281,7 @@ const ClassifAIGenerateTagsButton = () => {
 					{ __( 'Save', 'classifai' ) }
 				</Button>
 			</div>
+			<DisableFeatureButton feature="content_classification" />
 		</>
 	);
 
