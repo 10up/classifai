@@ -29,10 +29,10 @@ classifai_define( 'WATSON_CONCEPT_TAXONOMY', 'watson-concept' );
 classifai_define( 'WATSON_TIMEOUT', 60 ); // seconds
 
 // Default Thresholds
-classifai_define( 'WATSON_CATEGORY_THRESHOLD', 70 );
-classifai_define( 'WATSON_KEYWORD_THRESHOLD', 70 );
-classifai_define( 'WATSON_ENTITY_THRESHOLD', 70 );
-classifai_define( 'WATSON_CONCEPT_THRESHOLD', 70 );
+classifai_define( 'WATSON_CATEGORY_THRESHOLD', 55 );
+classifai_define( 'WATSON_KEYWORD_THRESHOLD', 55 );
+classifai_define( 'WATSON_ENTITY_THRESHOLD', 55 );
+classifai_define( 'WATSON_CONCEPT_THRESHOLD', 55 );
 
 classifai_define( 'WATSON_KEYWORD_LIMIT', 10 );
 
