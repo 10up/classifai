@@ -7,6 +7,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get( '#classifai-settings-post' ).check();
 		cy.get( '#classifai-settings-publish' ).check();
 		cy.get( '#classifai-settings-category' ).check();
+		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
 		cy.get( '#classifai-settings-enable_content_classification' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
@@ -292,13 +293,119 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		);
 	} );
 
-	// Skiping this until issue get fixed.
+	// Test Classification Method.
+	it( 'Check classification method', () => {
+		// Remove all terms.
+		cy.request( {
+			url: '/wp-json/classifai/v1/clean/taxonomy-terms',
+		} );
+
+		const threshold1 = 75;
+		// Update classification method to "Add recommended terms" and threshold value.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+		);
+
+		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
+		cy.get( '#classifai-settings-category_threshold' )
+			.clear()
+			.type( threshold1 );
+		cy.get( '#classifai-settings-keyword_threshold' )
+			.clear()
+			.type( threshold1 );
+		cy.get( '#classifai-settings-entity_threshold' )
+			.clear()
+			.type( threshold1 );
+		cy.get( '#classifai-settings-concept_threshold' )
+			.clear()
+			.type( threshold1 );
+		cy.get( '#submit' ).click();
+
+		// Create Test Post
+		cy.createPost( {
+			title: 'Test classification method',
+			content: 'Test classification method "Add recommended terms"',
+		} );
+
+		// Close post publish panel
+		const closePanelSelector = 'button[aria-label="Close panel"]';
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( closePanelSelector ).length > 0 ) {
+				cy.get( closePanelSelector ).click();
+			}
+		} );
+
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Verify Each Created taxonomies with threshold 75.
+		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
+			( taxonomy ) => {
+				cy.verifyPostTaxonomyTerms( taxonomy, threshold1 / 100 );
+			}
+		);
+
+		// Now create terms with threshold 70 and verify it with threshold 75 to make only existing terms are used in classification and not new terms.
+		const threshold2 = 70;
+		// Update classification method to "Only classify based on existing terms" and threshold value.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+		);
+
+		cy.get( '#watson_nlu_classification_method_existing_terms' ).check();
+		cy.get( '#classifai-settings-category_threshold' )
+			.clear()
+			.type( threshold2 );
+		cy.get( '#classifai-settings-keyword_threshold' )
+			.clear()
+			.type( threshold2 );
+		cy.get( '#classifai-settings-entity_threshold' )
+			.clear()
+			.type( threshold2 );
+		cy.get( '#classifai-settings-concept_threshold' )
+			.clear()
+			.type( threshold2 );
+		cy.get( '#submit' ).click();
+
+		// Create Test Post
+		cy.createPost( {
+			title: 'Test classification method',
+			content:
+				'Test classification method "Only classify based on existing terms"',
+		} );
+
+		// Close post publish panel
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( 'button[aria-label="Close panel"]' ).length > 0 ) {
+				cy.get( 'button[aria-label="Close panel"]' ).click();
+			}
+		} );
+
+		// Open post settings sidebar
+		cy.openDocumentSettingsSidebar();
+
+		// Verify Each Created taxonomies with threshold 75 as we have already created terms with threshold 75. So, those are existing terms.
+		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
+			( taxonomy ) => {
+				cy.verifyPostTaxonomyTerms( taxonomy, threshold1 / 100 );
+			}
+		);
+
+		// Update classification method back to "Add recommended terms".
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+		);
+
+		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
+		cy.get( '#submit' ).click();
+	} );
+
 	it( 'Can create post and tags get created by ClassifAI', () => {
 		const threshold = 75;
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
-
+		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
 		cy.get( '#classifai-settings-category_taxonomy' ).select( 'post_tag' );
 		cy.get( '#classifai-settings-keyword_taxonomy' ).select( 'post_tag' );
 		cy.get( '#classifai-settings-entity_taxonomy' ).select( 'post_tag' );
