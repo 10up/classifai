@@ -23,7 +23,7 @@ class ImageProcessing extends Service {
 			'image_processing',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
-				'Classifai\Providers\OpenAI\DallE',
+				// 'Classifai\Providers\OpenAI\DallE',
 			]
 		);
 	}

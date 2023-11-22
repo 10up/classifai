@@ -342,6 +342,13 @@ abstract class Feature {
 				break;
 			case 'checkbox':
 				$attrs = ' value="1"' . checked( '1', $value, false );
+				?>
+				<input
+					type="hidden"
+					name="<?php echo esc_attr( $this->get_option_name() ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+					value="0"
+				/>
+				<?php
 				break;
 		}
 

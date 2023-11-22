@@ -75,6 +75,7 @@ abstract class Service {
 					$this->provider_classes[] = new $provider();
 				}
 			}
+			$this->register_providers();
 		}
 
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
@@ -85,7 +86,6 @@ abstract class Service {
 					$this->feature_classes[] = new $feature();
 				}
 			}
-			$this->register_features();
 		}
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
@@ -97,21 +97,10 @@ abstract class Service {
 	public function register_providers() {
 		if ( ! empty( $this->provider_classes ) ) {
 			foreach ( $this->provider_classes as $provider ) {
-				$provider->register_admin();
-				if ( $provider->can_register() ) {
-					$provider->register();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Initializes the functionality for this services features.
-	 */
-	public function register_features() {
-		if ( ! empty( $this->feature_classes ) ) {
-			foreach ( $this->feature_classes as $feature ) {
-				$feature->register();
+				// $provider->register_admin();
+				// if ( $provider->can_register() ) {
+				// }
+				$provider->register();
 			}
 		}
 	}
