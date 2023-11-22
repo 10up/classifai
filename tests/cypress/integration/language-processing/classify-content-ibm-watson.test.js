@@ -401,7 +401,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	} );
 
 	it( 'Can create post and tags get created by ClassifAI', () => {
-		const threshold = 75;
+		const threshold = 70;
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
