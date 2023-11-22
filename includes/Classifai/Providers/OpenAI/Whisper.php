@@ -57,7 +57,7 @@ class Whisper extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( $this->feature_instance instanceof \Classifai\Features\AudioTranscriptsGeneration && $this->feature_instance->is_feature_enabled() ) {
+		if ( ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
 			add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
 			add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
 			add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );

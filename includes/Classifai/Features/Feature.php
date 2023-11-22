@@ -109,19 +109,6 @@ abstract class Feature {
 	abstract public function is_feature_enabled();
 
 	/**
-	 * Calls the register method for the provider set for the feature.
-	 * The Provider::register() method usually loads the JS assets.
-	 */
-	public function register() {
-		if ( ! $this->can_register() ) {
-			return;
-		}
-
-		$provider_instance = $this->get_feature_provider_instance();
-		$provider_instance->register();
-	}
-
-	/**
 	 * Registers the settings for the feature.
 	 */
 	public function register_setting() {

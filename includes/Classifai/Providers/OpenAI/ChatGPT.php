@@ -392,7 +392,10 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->feature_instance instanceof ExcerptGeneration && $this->feature_instance->is_feature_enabled() ) {
+		$yolo = new TitleGeneration();
+		$setta = $yolo->get_settings();
+
+		if ( ( new ExcerptGeneration() )->is_feature_enabled() ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -403,7 +406,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->feature_instance instanceof TitleGeneration && $this->feature_instance->is_feature_enabled() ) {
+		if ( ( new TitleGeneration() )->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -422,7 +425,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->feature_instance instanceof ContentResizing && $this->feature_instance->is_feature_enabled() ) {
+		if ( ( new ContentResizing() )->is_feature_enabled() ) {
 			wp_enqueue_script(
 				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
@@ -476,7 +479,7 @@ class ChatGPT extends Provider {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if (
 					post_type_supports( $screen->post_type, 'title' ) &&
-					$this->feature_instance instanceof TitleGeneration && $this->feature_instance->is_feature_enabled()
+					( new TitleGeneration() )->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -506,7 +509,7 @@ class ChatGPT extends Provider {
 
 				if (
 					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					$this->feature_instance instanceof ExcerptGeneration && $this->feature_instance->is_feature_enabled()
+					( new ExcerptGeneration() )->is_feature_enabled()
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',

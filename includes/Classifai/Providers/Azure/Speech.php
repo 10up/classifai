@@ -128,13 +128,14 @@ class Speech extends Provider {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		if ( $this->feature_instance instanceof \Classifai\Features\TextToSpeech && $this->feature_instance->is_feature_enabled() ) {
+		$tts = new TextToSpeech();
+		if ( $tts->is_feature_enabled() ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 			add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-			foreach ( $this->feature_instance->get_tts_supported_post_types() as $post_type ) {
+			foreach ( $tts->get_tts_supported_post_types() as $post_type ) {
 				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
 			}
 
