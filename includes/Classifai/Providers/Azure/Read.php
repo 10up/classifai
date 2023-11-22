@@ -147,7 +147,7 @@ class Read {
 		 * Filters the request arguments sent to Read endpoint.
 		 *
 		 * @since 1.7.0
-		 * @hook classifai_azure_read_should_process
+		 * @hook classifai_azure_read_request_args
 		 *
 		 * @param {array} $args       Whether to run OCR processing or not.
 		 * @param {int}   $attachment_id The attachment ID.
@@ -268,19 +268,16 @@ class Read {
 					break;
 				case 'failed':
 					return $this->log_error( new WP_Error( 'failed_read_request', esc_html__( 'The Read operation has failed.', 'classifai' ) ) );
-					break;
 				case 'succeeded':
 					return $this->update_document_description( $body );
-					break;
 				default:
 					return $this->log_error( new WP_Error( 'invalid_read_result_status', esc_html__( 'Invalid Read result status.', 'classifai' ) ) );
-					break;
 			}
 		}
 	}
 
 	/**
-	 * Update document desctiption using text received from Read API.
+	 * Update document description using text received from Read API.
 	 *
 	 * @param array $data          Read result.
 	 *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Azure Personalizer
+ * Azure AI Personalizer
  */
 
 namespace Classifai\Providers\Azure;
@@ -35,17 +35,22 @@ class Personalizer extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Personalizer',
+			'AI Personalizer',
 			'personalizer',
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'recommended_content' => __( 'Recommended content block', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure Personalizer', 'classifai' ),
+			'title'    => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'authenticated' => __( 'Recommended content block', 'classifai' ),
+				'enable_recommended_content' => __( 'Recommended content block', 'classifai' ),
 			),
 		);
 	}
@@ -63,19 +68,52 @@ class Personalizer extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated' => false,
-			'url'           => '',
-			'api_key'       => '',
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'enable_recommended_content' => false,
+				'authenticated'              => false,
+				'url'                        => '',
+				'api_key'                    => '',
+			]
+		);
+	}
+
+	/**
+	 * Get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// Backward compatibility for enable feature setting.
+		if ( ! empty( $settings ) && ! isset( $settings['enable_recommended_content'] ) ) {
+			$settings['enable_recommended_content'] = $settings['authenticated'] ?? $defaults['enable_recommended_content'];
+		}
+
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
 	}
 
 	/**
 	 * Register the functionality.
 	 */
 	public function register() {
-		// Setup Blocks
-		Blocks\setup();
+		if ( $this->is_enabled( 'recommended_content' ) ) {
+			// Setup Blocks
+			Blocks\setup();
+		}
 	}
 
 	/**
@@ -97,7 +135,7 @@ class Personalizer extends Provider {
 				'description'   => sprintf(
 					wp_kses(
 						// translators: 1 - link to create a Personalizer resource.
-						__( 'Azure Cognitive Service Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
+						__( 'Azure AI Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
 						array(
 							'a' => array(
 								'href'   => array(),
@@ -119,9 +157,25 @@ class Personalizer extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $default_settings['api_key'],
-				'description'   => __( 'Azure Cognitive Service Personalizer Key.', 'classifai' ),
+				'description'   => __( 'Azure AI Personalizer Key.', 'classifai' ),
 			]
 		);
+
+		add_settings_field(
+			'enable_recommended_content',
+			esc_html__( 'Recommend content', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_recommended_content',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_recommended_content'],
+				'description'   => __( 'Enables Recommended content block.', 'classifai' ),
+			]
+		);
+
+		$this->add_access_settings( 'recommended_content' );
 	}
 
 	/**
@@ -132,7 +186,14 @@ class Personalizer extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = [];
+		$new_settings = $this->sanitize_access_settings( $settings, 'recommended_content' );
+
+		if ( empty( $settings['enable_recommended_content'] ) || 1 !== (int) $settings['enable_recommended_content'] ) {
+			$new_settings['enable_recommended_content'] = 'no';
+		} else {
+			$new_settings['enable_recommended_content'] = '1';
+		}
+
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {
@@ -310,7 +371,7 @@ class Personalizer extends Provider {
 
 		if ( is_wp_error( $response ) ) {
 			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log( __( 'Failed to contact Azure Cognitive Service Personalizer: ', 'classifai' ) . $response->get_error_message() );
+			error_log( __( 'Failed to contact Azure AI Personalizer: ', 'classifai' ) . $response->get_error_message() );
 			return array(
 				'response' => (object) array(),
 				'actions'  => $action_ids,
@@ -605,7 +666,7 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Get Ranked action by sending request to Azure Personalizer.
+	 * Get Ranked action by sending request to Azure AI Personalizer.
 	 *
 	 * @param array $rank_request Prepared Request data.
 	 * @return object|string

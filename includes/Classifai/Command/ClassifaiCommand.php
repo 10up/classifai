@@ -164,7 +164,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! empty( $opts['input'] ) ) {
-			$text = file_get_contents( $opts['input'] );
+			$text = file_get_contents( $opts['input'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
@@ -750,7 +750,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<attachment_ids>]
-	 * : Comma delimeted Attachment IDs to classify
+	 * : Comma delimited Attachment IDs to classify
 	 *
 	 * [--limit=<limit>]
 	 * : Limit classification to N attachments. Default 100.
@@ -1156,7 +1156,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_type'      => ! empty( $opts['post_type'] ) ? $opts['post_type'] : 'any',
 			'post_status'    => 'publish',
 			'fields'         => 'ids',
-			'posts_per_page' => -1,
+			'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
 		];
 
 		\WP_CLI::log( 'Fetching posts to classify ...' );
@@ -1219,7 +1219,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Prints the output from the NLU API.
 	 *
-	 * @param mixed $output  The variable to oputput.
+	 * @param mixed $output  The variable to output.
 	 * @param int   $post_id The post id.
 	 */
 	private function print( $output, $post_id ) {

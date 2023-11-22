@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { DisableFeatureButton } from '../components';
 
 const { classifaiChatGPTData } = window;
 
@@ -112,6 +113,9 @@ const PostStatusInfo = () => {
 					{ isLoading && <Spinner /> }
 					{ ! isLoading && data && <RenderData data={ data } /> }
 					{ ! isLoading && error && <RenderError error={ error } /> }
+					{ ! isLoading && (
+						<DisableFeatureButton feature="title_generation" />
+					) }
 				</Modal>
 			) }
 			{ classifaiChatGPTData.enabledFeatures.map( ( feature ) => {

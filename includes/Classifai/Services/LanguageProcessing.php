@@ -51,11 +51,16 @@ class LanguageProcessing extends Service {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
-					'id' => array(
+					'id'        => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
+					),
+					'linkTerms' => array(
+						'type'        => 'boolean',
+						'description' => esc_html__( 'Whether to link terms or not.', 'classifai' ),
+						'default'     => true,
 					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
@@ -179,6 +184,36 @@ class LanguageProcessing extends Service {
 				],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1/openai',
+			'resize-content',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'resize_content' ],
+				'permission_callback' => [ $this, 'resize_content_permissions_check' ],
+				'args'                => [
+					'id'          => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
+					],
+					'content'     => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
+					],
+					'resize_type' => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
+					],
+				],
+			]
+		);
 	}
 
 	/**
@@ -190,37 +225,63 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
 		try {
-			$post_id = $request->get_param( 'id' );
+			$post_id    = $request->get_param( 'id' );
+			$link_terms = $request->get_param( 'linkTerms' );
 
 			if ( empty( $post_id ) ) {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 			}
 
-			$taxonomy_terms    = [];
-			$features          = [ 'category', 'keyword', 'concept', 'entity' ];
 			$save_post_handler = new SavePostHandler();
 
 			// Process post content.
-			$result = $save_post_handler->classify( $post_id );
+			$result = $save_post_handler->classify( $post_id, $link_terms );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 
-			foreach ( $features as $feature ) {
-				$taxonomy = \Classifai\get_feature_taxonomy( $feature );
-				$terms    = wp_get_object_terms( $post_id, $taxonomy );
-				if ( ! is_wp_error( $terms ) ) {
-					foreach ( $terms as $term ) {
-						$taxonomy_terms[ $taxonomy ][] = $term->term_id;
-					}
-				}
-			}
-
 			// Return taxonomy terms.
-			return rest_ensure_response( [ 'terms' => $taxonomy_terms ] );
+			return rest_ensure_response(
+				array(
+					'terms'              => $result,
+					'feature_taxonomies' => $this->get_all_feature_taxonomies(),
+				)
+			);
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Get all feature taxonomies.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_all_feature_taxonomies() {
+		// Get all feature taxonomies.
+		$feature_taxonomies = [];
+		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
+			if ( \Classifai\get_feature_enabled( $feature ) ) {
+				$taxonomy   = \Classifai\get_feature_taxonomy( $feature );
+				$permission = $this->check_term_permissions( $taxonomy );
+
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+
+				if ( 'post_tag' === $taxonomy ) {
+					$taxonomy = 'tags';
+				}
+				if ( 'category' === $taxonomy ) {
+					$taxonomy = 'categories';
+				}
+				$feature_taxonomies[] = $taxonomy;
+			}
+		}
+
+		return $feature_taxonomies;
 	}
 
 	/**
@@ -230,7 +291,8 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_tags_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -264,7 +326,7 @@ class LanguageProcessing extends Service {
 		$post_statuses = \Classifai\get_supported_post_statuses();
 
 		// Check if processing allowed.
-		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! \Classifai\language_processing_features_enabled() ) {
+		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! $provider->is_feature_enabled( 'content_classification' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
 		}
 
@@ -342,7 +404,7 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_excerpt' ) ) {
+		if ( ! $provider->is_feature_enabled( 'excerpt_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
@@ -385,11 +447,17 @@ class LanguageProcessing extends Service {
 	 * @return WP_Error|bool
 	 */
 	public function speech_synthesis_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'Text to Speech' );
 
 		if ( ! empty( $post_id ) && current_user_can( 'edit_post', $post_id ) ) {
 			$post_type = get_post_type( $post_id );
 			$supported = \Classifai\get_tts_supported_post_types();
+
+			// Ensure the feature is enabled. Also runs a user check.
+			if ( ! $provider->is_feature_enabled( 'text_to_speech' ) ) {
+				return new WP_Error( 'not_enabled', esc_html__( 'Azure Speech synthesis is not enabled.', 'classifai' ) );
+			}
 
 			// Check if processing allowed.
 			if ( ! in_array( $post_type, $supported, true ) ) {
@@ -439,6 +507,7 @@ class LanguageProcessing extends Service {
 	 */
 	public function generate_audio_transcript_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
+		$provider      = find_provider_class( $this->provider_classes ?? [], 'Whisper' );
 		$post_type     = get_post_type_object( 'attachment' );
 
 		// Ensure attachments are allowed in REST endpoints.
@@ -458,17 +527,9 @@ class LanguageProcessing extends Service {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if transcription is turned on.
-		if ( empty( $settings ) || ( isset( $settings['enable_transcripts'] ) && 'no' === $settings['enable_transcripts'] ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Transcription is not currently enabled.', 'classifai' ) );
-		}
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'speech_to_text' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
@@ -543,11 +604,82 @@ class LanguageProcessing extends Service {
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled( 'enable_titles' ) ) {
+		if ( ! $provider->is_feature_enabled( 'title_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;
 	}
 
+	/**
+	 * Handle request to resize content.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function resize_content( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+		$provider = '';
+
+		// Find the right provider class.
+		foreach ( $this->provider_classes as $provider_class ) {
+			if ( 'ChatGPT' === $provider_class->provider_service_name ) {
+				$provider = $provider_class;
+			}
+		}
+
+		// Ensure we have a provider class. Should never happen but :shrug:
+		if ( ! $provider ) {
+			return new WP_Error( 'provider_class_required', esc_html__( 'Provider class not found.', 'classifai' ) );
+		}
+
+		return rest_ensure_response(
+			$provider->rest_endpoint_callback(
+				$post_id,
+				'resize_content',
+				[
+					'content'     => $request->get_param( 'content' ),
+					'resize_type' => $request->get_param( 'resize_type' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to resize content.
+	 *
+	 * @param WP_REST_Request $request Full data about the request.
+	 * @return WP_Error|bool
+	 */
+	public function resize_content_permissions_check( WP_REST_Request $request ) {
+		$post_id  = $request->get_param( 'id' );
+		$provider = find_provider_class( $this->provider_classes ?? [], 'ChatGPT' );
+
+		// Ensure we have a logged in user that can edit the item.
+		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+			return false;
+		}
+
+		$post_type     = get_post_type( $post_id );
+		$post_type_obj = get_post_type_object( $post_type );
+
+		// Ensure the post type is allowed in REST endpoints.
+		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
+			return false;
+		}
+
+		$settings = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
+
+		// Check if valid authentication is in place.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		}
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $provider->is_feature_enabled( 'resize_content' ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
 }

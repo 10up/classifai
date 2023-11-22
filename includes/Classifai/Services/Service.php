@@ -108,7 +108,7 @@ abstract class Service {
 	 */
 	public function render_settings_page() {
 		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( $_GET['provider'] ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$base_url   = add_query_arg(
 			array(
 				'page' => 'classifai',
@@ -152,7 +152,7 @@ abstract class Service {
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 
-					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
+					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) && $provider->is_feature_enabled( 'content_classification' ) ) :
 						?>
 					<div id="classifai-post-preview-app">
 						<?php
@@ -234,7 +234,7 @@ abstract class Service {
 	/**
 	 * Provides debug information for the service.
 	 *
-	 * @return array Array of associative arrays respresenting lines of debug information.
+	 * @return array Array of associative arrays representing lines of debug information.
 	 * @since 1.4.0
 	 */
 	public function get_service_debug_information() {

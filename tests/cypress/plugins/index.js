@@ -22,14 +22,14 @@ const getCacheDirectory = require( '@wordpress/env/lib/config/get-cache-director
  * @param {Cypress.PluginConfig} config Cypress Configuration.
  * @return {Cypress.PluginConfig} config.
  */
-module.exports = async (on, config) => {
+module.exports = async ( on, config ) => {
 	const cacheDirectory = await getCacheDirectory();
 	const wpEnvConfig = await loadConfig( cacheDirectory );
 
-	if (wpEnvConfig) {
+	if ( wpEnvConfig ) {
 		const port = wpEnvConfig.env.tests.port || null;
 
-		if (port) {
+		if ( port ) {
 			config.baseUrl = wpEnvConfig.env.tests.config.WP_SITEURL;
 		}
 	}

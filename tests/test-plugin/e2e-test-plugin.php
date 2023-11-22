@@ -22,7 +22,24 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
-		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
+		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
+		$body_json = isset( $parsed_args['body'] ) ? wp_unslash( $parsed_args['body'] ) : false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
+			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
+
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+				$response = file_get_contents( __DIR__ . '/resize-content.json' );
+			} else if ( 'This is a custom excerpt prompt' === $prompt ) {
+				$response = file_get_contents( __DIR__ . '/chatgpt-custom-excerpt-prompt.json' );
+			} else if ( 'This is a custom title prompt' === $prompt ) {
+				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
+			} else if ( 'This is a custom shrink prompt' === $prompt || 'This is a custom grow prompt' === $prompt ) {
+				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
+			}
+		}
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false ) {

@@ -28,6 +28,11 @@ class Whisper extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'speech_to_text' => __( 'Generate transcripts', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI Whisper', 'classifai' ),
@@ -53,22 +58,19 @@ class Whisper extends Provider {
 	/**
 	 * Check to see if the feature is enabled and a user has access.
 	 *
-	 * @param int $attachment_id Attachment ID to process.
+	 * @param string $feature       Feature to check.
+	 * @param int    $attachment_id Attachment ID to process.
 	 * @return bool|WP_Error
 	 */
-	public function is_feature_enabled( int $attachment_id = 0 ) {
+	public function is_feature_enabled( string $feature = 'speech_to_text', int $attachment_id = 0 ) {
 		$settings = $this->get_settings();
 
 		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
+		if ( ! $this->is_configured() ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
 		}
 
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
+		if ( ! $this->has_access( $feature ) ) {
 			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
 		}
 
@@ -77,11 +79,30 @@ class Whisper extends Provider {
 		}
 
 		// Ensure feature is turned on.
-		if ( ! isset( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
+		if ( ! $this->is_enabled( 'speech_to_text' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Transcripts are not enabled.', 'classifai' ) );
 		}
 
-		return true;
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", true, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = ( 'speech_to_text' === $feature ) ? 'enable_transcripts' : 'enable_' . $feature;
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 
 	/**
@@ -92,7 +113,7 @@ class Whisper extends Provider {
 	 */
 	public function transcribe_audio( $attachment_id = 0 ) {
 		$settings = $this->get_settings();
-		$enabled  = $this->is_feature_enabled( $attachment_id );
+		$enabled  = $this->is_feature_enabled( 'speech_to_text', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $enabled;
@@ -111,7 +132,7 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
-		$enabled = $this->is_feature_enabled( $attachment->ID );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $attachment->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return $form_fields;
@@ -144,7 +165,7 @@ class Whisper extends Provider {
 	 * @param \WP_Post $post Post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$enabled = $this->is_feature_enabled( $post->ID );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $post->ID );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -198,7 +219,7 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_transcribe_audio( $attachment_id ) {
-		$enabled = $this->is_feature_enabled( $attachment_id );
+		$enabled = $this->is_feature_enabled( 'speech_to_text', $attachment_id );
 
 		if ( is_wp_error( $enabled ) ) {
 			return;
@@ -241,22 +262,8 @@ class Whisper extends Provider {
 			]
 		);
 
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate transcripts.', 'classifai' ),
-			]
-		);
+		// Add user/role based access settings.
+		$this->add_access_settings( 'speech_to_text' );
 	}
 
 	/**
@@ -270,19 +277,14 @@ class Whisper extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'speech_to_text' ),
 		);
 
 		if ( empty( $settings['enable_transcripts'] ) || 1 !== (int) $settings['enable_transcripts'] ) {
 			$new_settings['enable_transcripts'] = 'no';
 		} else {
 			$new_settings['enable_transcripts'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		return $new_settings;
@@ -301,12 +303,16 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'      => false,
-			'api_key'            => '',
-			'enable_transcripts' => false,
-			'roles'              => array_keys( get_editable_roles() ?? [] ),
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'      => false,
+				'api_key'            => '',
+				'enable_transcripts' => false,
+			]
+		);
 	}
 
 	/**

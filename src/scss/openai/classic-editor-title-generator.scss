@@ -18,6 +18,31 @@
 	}
 }
 
+#postexcerpt {
+	#classifai-openai__excerpt-generate-btn {
+		display: block;
+		width: 160px;
+		max-width: 100%;
+		margin: 1em 0 0 auto;
+		text-align: center;
+		position: relative;
+
+		& > .classifai-openai__excerpt-generate-btn--spinner {
+			display: none;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate( -50%, -50% );
+			line-height: 29px;
+		}
+	}
+
+	.classifai-openai__excerpt-generate-disable-link {
+		text-align: right;
+		margin-top: 6px;
+	}
+}
+
 #classifai-openai {
 	&__overlay {
 		position: fixed;
@@ -108,7 +133,8 @@
 		}
 	}
 
-	&__title-generate-btn--spinner {
+	&__title-generate-btn--spinner,
+	&__excerpt-generate-btn--spinner {
 		&:before {
 			display: block;
 			animation: rotation 2s infinite linear;

@@ -31,14 +31,23 @@ class ComputerVision extends Provider {
 	public function __construct( $service ) {
 		parent::__construct(
 			'Microsoft Azure',
-			'Computer Vision',
+			'AI Vision',
 			'computer_vision',
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'image_captions' => __( 'Generate descriptive text', 'classifai' ),
+			'image_tagging'  => __( 'Generate tags', 'classifai' ),
+			'smart_cropping' => __( 'Smart cropping', 'classifai' ),
+			'ocr'            => __( 'Scan images for text', 'classifai' ),
+			'read_pdf'       => __( 'Scan PDF', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure Computer Vision', 'classifai' ),
+			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
 				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
@@ -63,23 +72,28 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'valid'                 => false,
-			'url'                   => '',
-			'api_key'               => '',
-			'enable_image_captions' => array(
-				'alt'         => 0,
-				'caption'     => 0,
-				'description' => 0,
-			),
-			'enable_image_tagging'  => true,
-			'enable_smart_cropping' => false,
-			'enable_ocr'            => false,
-			'enable_read_pdf'       => false,
-			'caption_threshold'     => 75,
-			'tag_threshold'         => 70,
-			'image_tag_taxonomy'    => 'classifai-image-tags',
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'valid'                 => false,
+				'url'                   => '',
+				'api_key'               => '',
+				'enable_image_captions' => array(
+					'alt'         => 0,
+					'caption'     => 0,
+					'description' => 0,
+				),
+				'enable_image_tagging'  => true,
+				'enable_smart_cropping' => false,
+				'enable_ocr'            => false,
+				'enable_read_pdf'       => false,
+				'caption_threshold'     => 75,
+				'tag_threshold'         => 70,
+				'image_tag_taxonomy'    => 'classifai-image-tags',
+			]
+		);
 	}
 
 	/**
@@ -123,15 +137,13 @@ class ComputerVision extends Provider {
 		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 
-		$settings = $this->get_settings();
-
-		if ( isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) {
+		if ( $this->is_feature_enabled( 'ocr' ) ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
 		}
 
-		if ( isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+		if ( $this->is_feature_enabled( 'read_pdf' ) ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
 			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
@@ -164,7 +176,7 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			get_asset_info( 'editor-ocr', 'dependencies' ),
+			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'editor-ocr', 'version' ),
 			true
 		);
@@ -232,8 +244,6 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		$settings = $this->get_settings();
-
 		if ( wp_attachment_is_image( $post ) ) {
 			add_meta_box(
 				'attachment_meta_box',
@@ -245,7 +255,7 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( attachment_is_pdf( $post ) && is_array( $settings ) && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+		if ( attachment_is_pdf( $post ) && $this->is_feature_enabled( 'read_pdf' ) ) {
 			add_meta_box(
 				'attachment_meta_box',
 				__( 'ClassifAI PDF Processing', 'classifai' ),
@@ -263,7 +273,6 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function attachment_data_meta_box( $post ) {
-		$settings   = $this->get_settings();
 		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No descriptive text? Rescan image', 'classifai' ) : __( 'Generate descriptive text', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
 		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan for text', 'classifai' ) : __( 'Scan image for text', 'classifai' );
@@ -271,7 +280,7 @@ class ComputerVision extends Provider {
 		?>
 
 		<div class="misc-publishing-actions">
-			<?php if ( ! empty( $this->get_alt_text_settings() ) ) : ?>
+			<?php if ( $this->is_feature_enabled( 'image_captions' ) ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-captions">
 						<input type="checkbox" value="yes" id="rescan-captions" name="rescan-captions"/>
@@ -280,7 +289,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( is_array( $settings ) && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) : ?>
+			<?php if ( $this->is_feature_enabled( 'image_tagging' ) ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-tags">
 						<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
@@ -289,7 +298,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( is_array( $settings ) && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) : ?>
+			<?php if ( $this->is_feature_enabled( 'ocr' ) ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-ocr">
 						<input type="checkbox" value="yes" id="rescan-ocr" name="rescan-ocr"/>
@@ -298,7 +307,7 @@ class ComputerVision extends Provider {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( is_array( $settings ) && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) : ?>
+			<?php if ( $this->is_feature_enabled( 'smart_cropping' ) ) : ?>
 				<div class="misc-pub-section">
 					<label for="rescan-smart-crop">
 						<input type="checkbox" value="yes" id="rescan-smart-crop" name="rescan-smart-crop"/>
@@ -341,9 +350,7 @@ class ComputerVision extends Provider {
 	 * @param \WP_post $post        Post object for the attachment being viewed.
 	 */
 	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
-		$settings = $this->get_settings();
-
-		if ( attachment_is_pdf( $post ) && is_array( $settings ) && isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'] ) {
+		if ( attachment_is_pdf( $post ) && $this->is_feature_enabled( 'read_pdf' ) ) {
 			$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$status    = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
 			if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
@@ -366,7 +373,7 @@ class ComputerVision extends Provider {
 			$ocr_text        = empty( get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
 			$smart_crop_text = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 
-			if ( ! empty( $this->get_alt_text_settings() ) ) {
+			if ( $this->is_feature_enabled( 'image_captions' ) ) {
 				$form_fields['rescan_alt_tags'] = [
 					'label'        => __( 'Descriptive text', 'classifai' ),
 					'input'        => 'html',
@@ -375,7 +382,7 @@ class ComputerVision extends Provider {
 				];
 			}
 
-			if ( is_array( $settings ) && isset( $settings['enable_image_tagging'] ) && '1' === $settings['enable_image_tagging'] ) {
+			if ( $this->is_feature_enabled( 'image_tagging' ) ) {
 				$form_fields['rescan_captions'] = [
 					'label'        => __( 'Image tags', 'classifai' ),
 					'input'        => 'html',
@@ -384,7 +391,7 @@ class ComputerVision extends Provider {
 				];
 			}
 
-			if ( is_array( $settings ) && isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'] ) {
+			if ( $this->is_feature_enabled( 'smart_cropping' ) ) {
 				$form_fields['rescan_smart_crop'] = [
 					'label'        => __( 'Smart thumbnail', 'classifai' ),
 					'input'        => 'html',
@@ -393,7 +400,7 @@ class ComputerVision extends Provider {
 				];
 			}
 
-			if ( is_array( $settings ) && isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'] ) {
+			if ( $this->is_feature_enabled( 'ocr' ) ) {
 				$form_fields['rescan_ocr'] = [
 					'label'        => __( 'Scan image for text', 'classifai' ),
 					'input'        => 'html',
@@ -490,11 +497,11 @@ class ComputerVision extends Provider {
 			);
 		}
 
-		if ( clean_input( 'rescan-captions' ) ) {
+		if ( clean_input( 'rescan-captions' ) && $this->is_feature_enabled( 'image_captions' ) ) {
 			$routes[] = 'alt-tags';
-		} elseif ( clean_input( 'rescan-tags' ) ) {
+		} elseif ( clean_input( 'rescan-tags' ) && $this->is_feature_enabled( 'image_tagging' ) ) {
 			$routes[] = 'image-tags';
-		} elseif ( clean_input( 'rescan-smart-crop' ) ) {
+		} elseif ( clean_input( 'rescan-smart-crop' ) && $this->is_feature_enabled( 'smart_cropping' ) ) {
 			$routes[] = 'smart-crop';
 		}
 
@@ -541,7 +548,7 @@ class ComputerVision extends Provider {
 			return $metadata;
 		}
 
-		$should_smart_crop = isset( $settings['enable_smart_cropping'] ) && '1' === $settings['enable_smart_cropping'];
+		$should_smart_crop = $this->is_feature_enabled( 'smart_cropping' );
 
 		/**
 		 * Filters whether to apply smart cropping to the current image.
@@ -585,10 +592,9 @@ class ComputerVision extends Provider {
 	public function generate_image_alt_tags( $metadata, $attachment_id ) {
 
 		$image_scan = false;
-		$settings   = $this->get_settings();
 		if (
-			'no' !== $settings['enable_image_tagging'] ||
-			! empty( $this->get_alt_text_settings() )
+			$this->is_feature_enabled( 'image_tagging' ) ||
+			$this->is_feature_enabled( 'image_captions' )
 		) {
 
 			// Allow scanning image that are not stored in local storage.
@@ -651,7 +657,7 @@ class ComputerVision extends Provider {
 			return $metadata;
 		}
 
-		$should_ocr_scan = isset( $settings['enable_ocr'] ) && '1' === $settings['enable_ocr'];
+		$should_ocr_scan = $this->is_feature_enabled( 'ocr' );
 
 		/**
 		 * Filters whether to run OCR scanning on the current image.
@@ -748,11 +754,11 @@ class ComputerVision extends Provider {
 		$settings     = $this->get_settings();
 		$api_features = [];
 
-		if ( in_array( 'alt-tags', $routes, true ) || ! empty( $this->get_alt_text_settings() ) ) {
+		if ( in_array( 'alt-tags', $routes, true ) || $this->is_feature_enabled( 'image_captions' ) ) {
 			$api_features[] = 'Description';
 		}
 
-		if ( in_array( 'image-tags', $routes, true ) || ( isset( $settings['enable_image_tagging'] ) && 'no' !== $settings['enable_image_tagging'] ) ) {
+		if ( in_array( 'image-tags', $routes, true ) || $this->is_feature_enabled( 'image_tagging' ) ) {
 			$api_features[] = 'Tags';
 		}
 
@@ -767,12 +773,17 @@ class ComputerVision extends Provider {
 	 * @param array $captions      Captions returned from the API
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return string
+	 * @return string|WP_Error
 	 */
 	protected function generate_alt_tags( $captions, $attachment_id ) {
 		$rtn = '';
 
 		$enabled_fields = $this->get_alt_text_settings();
+
+		// Don't save tags if feature is disabled or user don't have access to use it.
+		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Image descriptive text feature is disabled.', 'classifai' ) );
+		}
 
 		/**
 		 * Filter the captions returned from the API.
@@ -847,7 +858,7 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid_settings', 'Can not retrieve the plugin settings.' );
 		}
 
-		$should_read_pdf = isset( $settings['enable_read_pdf'] ) && '1' === $settings['enable_read_pdf'];
+		$should_read_pdf = $this->is_feature_enabled( 'read_pdf' );
 
 		if ( ! $should_read_pdf ) {
 			return false;
@@ -890,11 +901,10 @@ class ComputerVision extends Provider {
 	 * @return string|array|WP_Error
 	 */
 	protected function generate_image_tags( $tags, $attachment_id ) {
-		$rtn      = '';
-		$settings = $this->get_settings();
+		$rtn = '';
 
 		// Don't save tags if the setting is disabled.
-		if ( ! is_array( $settings ) || ! isset( $settings['enable_image_tagging'] ) || '1' !== $settings['enable_image_tagging'] ) {
+		if ( ! $this->is_feature_enabled( 'image_tagging' ) ) {
 			return new WP_Error( 'invalid_settings', esc_html__( 'Image tagging is disabled.', 'classifai' ) );
 		}
 
@@ -978,12 +988,21 @@ class ComputerVision extends Provider {
 				'default_value' => $default_settings['api_key'],
 			]
 		);
+
+		// Add Image descriptive text fields.
+		add_settings_section(
+			$this->get_option_name() . '_image_captions',
+			esc_html__( 'Image descriptive text settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
 		add_settings_field(
 			'enable-image-captions',
 			esc_html__( 'Generate descriptive text', 'classifai' ),
 			[ $this, 'render_auto_caption_fields' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_image_captions',
 			[
 				'label_for'     => 'enable_image_captions',
 				'input_type'    => 'checkbox',
@@ -991,12 +1010,15 @@ class ComputerVision extends Provider {
 				'description'   => __( 'Choose image fields where the generated captions should be applied.', 'classifai' ),
 			]
 		);
+
+		$this->add_access_settings( 'image_captions', $this->get_option_name() . '_image_captions' );
+
 		add_settings_field(
 			'caption-threshold',
 			esc_html__( 'Descriptive text confidence threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_image_captions',
 			[
 				'label_for'     => 'caption_threshold',
 				'input_type'    => 'number',
@@ -1004,12 +1026,21 @@ class ComputerVision extends Provider {
 				'description'   => __( 'Minimum confidence score for automatically added alt text, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
 			]
 		);
+
+		// Add Tag images fields.
+		add_settings_section(
+			$this->get_option_name() . '_image_tagging',
+			esc_html__( 'Image tagging settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
 		add_settings_field(
 			'enable-image-tagging',
 			esc_html__( 'Tag images', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_image_tagging',
 			[
 				'label_for'     => 'enable_image_tagging',
 				'input_type'    => 'checkbox',
@@ -1017,12 +1048,15 @@ class ComputerVision extends Provider {
 				'description'   => __( 'Image tags will be added automatically.', 'classifai' ),
 			]
 		);
+
+		$this->add_access_settings( 'image_tagging', $this->get_option_name() . '_image_tagging' );
+
 		add_settings_field(
 			'image-tag-threshold',
 			esc_html__( 'Tag confidence threshold', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_image_tagging',
 			[
 				'label_for'     => 'tag_threshold',
 				'input_type'    => 'number',
@@ -1041,35 +1075,55 @@ class ComputerVision extends Provider {
 			esc_html__( 'Tag taxonomy', 'classifai' ),
 			[ $this, 'render_select' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_image_tagging',
 			[
 				'label_for'     => 'image_tag_taxonomy',
 				'options'       => $options,
 				'default_value' => $default_settings['image_tag_taxonomy'],
 			]
 		);
+
+		// Add Smart cropping fields.
+		add_settings_section(
+			$this->get_option_name() . '_smart_cropping',
+			esc_html__( 'Smart cropping settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
 		add_settings_field(
 			'enable-smart-cropping',
 			esc_html__( 'Enable smart cropping', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_smart_cropping',
 			[
 				'label_for'     => 'enable_smart_cropping',
 				'input_type'    => 'checkbox',
 				'default_value' => $default_settings['enable_smart_cropping'],
 				'description'   => __(
-					'ComputerVision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
+					'AI Vision detects and saves the most visually interesting part of your image (i.e., faces, animals, notable text).',
 					'classifai'
 				),
 			]
 		);
+
+		$this->add_access_settings( 'smart_cropping', $this->get_option_name() . '_smart_cropping' );
+
+		// Add OCR fields.
+		add_settings_section(
+			$this->get_option_name() . '_ocr',
+			esc_html__( 'Scan images for text settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
 		add_settings_field(
 			'enable-ocr',
 			esc_html__( 'Scan images for text', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_ocr',
 			[
 				'label_for'     => 'enable_ocr',
 				'input_type'    => 'checkbox',
@@ -1080,12 +1134,23 @@ class ComputerVision extends Provider {
 				),
 			]
 		);
+
+		$this->add_access_settings( 'ocr', $this->get_option_name() . '_ocr' );
+
+		// Add PDF fields.
+		add_settings_section(
+			$this->get_option_name() . '_read_pdf',
+			esc_html__( 'Scan PDF documents settings', 'classifai' ),
+			'',
+			$this->get_option_name()
+		);
+
 		add_settings_field(
 			'enable-read-pdf',
 			esc_html__( 'Enable scanning PDF', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
-			$this->get_option_name(),
+			$this->get_option_name() . '_read_pdf',
 			[
 				'label_for'     => 'enable_read_pdf',
 				'input_type'    => 'checkbox',
@@ -1096,6 +1161,8 @@ class ComputerVision extends Provider {
 				),
 			]
 		);
+
+		$this->add_access_settings( 'read_pdf', $this->get_option_name() . '_read_pdf' );
 	}
 
 	/**
@@ -1124,6 +1191,20 @@ class ComputerVision extends Provider {
 
 			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
+
+		$features = [
+			'image_captions',
+			'image_tagging',
+			'smart_cropping',
+			'ocr',
+			'read_pdf',
+		];
+
+		$access_settings = [];
+		foreach ( $features as $feature ) {
+			$access_settings = array_merge( $access_settings, $this->sanitize_access_settings( $settings, $feature ) );
+		}
+		$new_settings = array_merge( $new_settings, $access_settings );
 
 		$checkbox_settings = [
 			'enable_image_tagging',
@@ -1199,7 +1280,7 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Authenitcates our credentials.
+	 * Authenticates our credentials.
 	 *
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
@@ -1353,5 +1434,27 @@ class ComputerVision extends Provider {
 				}
 				break;
 		}
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+		if ( 'image_captions' === $feature ) {
+			$is_enabled = ( ! empty( $this->get_alt_text_settings() ) );
+		}
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

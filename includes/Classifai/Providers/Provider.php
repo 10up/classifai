@@ -1,9 +1,11 @@
 <?php
 /**
- *  Abtract class that defines the providers for a service.
+ *  Abstract class that defines the providers for a service.
  */
 
 namespace Classifai\Providers;
+
+use function Classifai\get_feature_default_settings;
 
 abstract class Provider {
 
@@ -34,6 +36,10 @@ abstract class Provider {
 	 */
 	public $onboarding_options;
 
+	/**
+	 * @var array $features Array of features provided by this provider.
+	 */
+	protected $features = array();
 
 	/**
 	 * Provider constructor.
@@ -75,6 +81,15 @@ abstract class Provider {
 	 */
 	public function get_option_name() {
 		return 'classifai_' . $this->option_name;
+	}
+
+	/**
+	 * Get provider features.
+	 *
+	 * @return array
+	 */
+	public function get_features() {
+		return $this->features;
 	}
 
 	/**
@@ -170,7 +185,20 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [];
+		$defaults = [];
+		$features = $this->get_features();
+		if ( empty( $features ) ) {
+			return $defaults;
+		}
+
+		foreach ( $features as $feature => $title ) {
+			$defaults = array_merge(
+				$defaults,
+				get_feature_default_settings( $feature )
+			);
+		}
+
+		return $defaults;
 	}
 
 	/**
@@ -225,7 +253,111 @@ abstract class Provider {
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
+		}
+	}
+
+	/**
+	 * Generic prompt repeater field callback
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_prompt_repeater_field( array $args ): void {
+		$option_index      = $args['option_index'] ?? false;
+		$setting_index     = $this->get_settings( $option_index );
+		$prompts           = $setting_index[ $args['label_for'] ] ?? '';
+		$class             = $args['class'] ?? 'large-text';
+		$placeholder       = $args['placeholder'] ?? '';
+		$field_name_prefix = sprintf(
+			'classifai_%1$s%2$s[%3$s]',
+			$this->option_name,
+			$option_index ? "[$option_index]" : '',
+			$args['label_for']
+		);
+
+		$prompts = empty( $prompts ) && isset( $args['default_value'] ) ? $args['default_value'] : $prompts;
+
+		$prompt_count = count( $prompts );
+		$field_index  = 0;
+		?>
+
+		<?php foreach ( $prompts as $prompt ) : ?>
+			<?php
+			$is_default_prompt  = ( isset( $prompt['default'] ) && 1 === $prompt['default'] ) || 1 === $prompt_count;
+			$is_original_prompt = isset( $prompt['original'] ) && 1 === $prompt['original'];
+			?>
+
+			<fieldset class="classifai-field-type-prompt-setting">
+				<?php if ( $is_original_prompt ) : ?>
+					<p class="classifai-original-prompt">
+						<?php
+						printf(
+							/* translators: %1$s is replaced with <strong>; %2$s with </strong>; %3$s with prompt. */
+							esc_html__( '%1$sClassifAI default prompt%2$s: %3$s', 'classifai' ),
+							'<strong>',
+							'</strong>',
+							esc_html( $placeholder )
+						);
+						?>
+					</p>
+				<?php endif; ?>
+
+				<input type="hidden"
+					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
+					value="<?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
+					class="js-setting-field__default">
+				<input type="hidden"
+					name="<?php echo esc_attr( $field_name_prefix . "[$field_index][original]" ); ?>"
+					value="<?php echo esc_attr( $prompt['original'] ?? '' ); ?>">
+				<label>
+					<?php esc_html_e( 'Title', 'classifai' ); ?>&nbsp;*
+					<span class="dashicons dashicons-editor-help"
+						title="<?php esc_attr_e( 'Short description of prompt to use for identification', 'classifai' ); ?>"></span>
+					<input type="text"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
+						placeholder="<?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
+						value="<?php echo esc_attr( $prompt['title'] ?? '' ); ?>"
+						<?php echo $is_original_prompt ? 'readonly' : ''; ?>
+						required>
+				</label>
+
+				<label>
+					<?php esc_html_e( 'Prompt', 'classifai' ); ?>
+					<textarea
+						class="<?php echo esc_attr( $class ); ?>"
+						rows="4"
+						name="<?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
+						placeholder="<?php echo esc_attr( $placeholder ); ?>"
+						<?php echo $is_original_prompt ? 'readonly' : ''; ?>
+					><?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?></textarea>
+				</label>
+
+				<div class="actions-rows">
+					<a href="#" class="action__set_default <?php echo $is_default_prompt ? 'selected' : ''; ?>">
+						<?php if ( $is_default_prompt ) : ?>
+							<?php esc_html_e( 'Default prompt', 'classifai' ); ?>
+						<?php else : ?>
+							<?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>
+						<?php endif; ?>
+					</a>
+					<a href="#" class="action__remove_prompt" style="<?php echo 1 === $prompt_count || $is_original_prompt ? 'display:none;' : ''; ?>">
+						<?php esc_html_e( 'Trash', 'classifai' ); ?>
+					</a>
+				</div>
+			</fieldset>
+			<?php ++$field_index; ?>
+		<?php endforeach; ?>
+
+		<button
+			class="button-secondary js-classifai-add-prompt-fieldset">
+			<?php esc_html_e( 'Add new prompt', 'classifai' ); ?>
+		</button>
+
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -278,6 +410,11 @@ abstract class Provider {
 				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
 			}
 
+			// Check for backward compatibility.
+			if ( empty( $value ) && '0' !== $value && ! empty( $args['backward_compatible_key'] ) && isset( $setting_index[ $args['backward_compatible_key'] ] ) ) {
+				$value = $setting_index[ $args['backward_compatible_key'] ][ $option_value ] ?? '';
+			}
+
 			// If no saved value, check if we have a default value.
 			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
 				$value = $args['default_values'][ $default_key ];
@@ -303,7 +440,7 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
 		}
@@ -363,9 +500,34 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
+		}
+	}
+
+	/**
+	 * Render allowed users table.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
+		?>
+		<div class="classifai-search-users-container">
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>-container"></div>
+			<input
+				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="<?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		</div>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -436,5 +598,134 @@ abstract class Provider {
 		}
 
 		return $is_configured;
+	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @param string $feature Feature.
+	 * @param string $section Settings section.
+	 * @return void
+	 */
+	protected function add_access_settings( string $feature, string $section = '' ) {
+		$access_control = new AccessControl( $this, $feature );
+		$access_control->add_settings( $section );
+	}
+
+	/**
+	 * Sanitization for the roles/users access options being saved.
+	 *
+	 * @param array  $settings Array of settings about to be saved.
+	 * @param string $feature  Feature key.
+	 *
+	 * @return array The sanitized settings to be saved.
+	 */
+	protected function sanitize_access_settings( array $settings, string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->sanitize_settings( $settings );
+	}
+
+	/**
+	 * Determine if the current user has access of the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	protected function has_access( string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->has_access();
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for ClassifAI.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$editable_roles   = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ClassifAI
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_allowed_roles
+		 *
+		 * @param {array}  $roles            Array of arrays containing role information.
+		 * @param {string} $option_name      Option name.
+		 * @param {array}  $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $this->get_option_name(), $default_settings );
+
+		return $roles;
+	}
+
+	/**
+	 * Determine if the feature is enabled and current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature ) {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access( $feature ) &&
+			$this->is_enabled( $feature )
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Check if feature is turned on.
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_is_{$feature}_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

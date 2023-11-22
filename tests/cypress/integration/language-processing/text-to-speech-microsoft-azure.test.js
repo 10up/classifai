@@ -1,4 +1,4 @@
-describe( 'Microsoft Azure - Text to Speech', () => {
+describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
@@ -8,10 +8,17 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 		cy.get( '#url' ).clear();
 		cy.get( '#url' ).type( 'https://service.com' );
 		cy.get( '#api_key' ).type( 'password' );
+		cy.get( '#enable_text_to_speech' ).check();
 		cy.get( '#submit' ).click();
 
 		cy.get( '#voice' ).select( 'en-AU-AnnetteNeural|Female' );
 		cy.get( '#submit' ).click();
+		cy.optInAllFeatures();
+		cy.disableClassicEditor();
+	} );
+
+	beforeEach( () => {
+		cy.login();
 	} );
 
 	it( 'Generates audio from text', () => {
@@ -82,8 +89,7 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 	} );
 
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#activate-classic-editor' ).click();
+		cy.enableClassicEditor();
 
 		cy.classicCreatePost( {
 			title: 'Text to Speech test classic',
@@ -99,8 +105,7 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 		cy.visit( '/text-to-speech-test/' );
 		cy.get( '.class-post-audio-controls' ).should( 'be.visible' );
 
-		cy.visit( '/wp-admin/plugins.php' );
-		cy.get( '#deactivate-classic-editor' ).click();
+		cy.disableClassicEditor();
 	} );
 
 	it( 'Disable support for post type Post', () => {
@@ -112,5 +117,96 @@ describe( 'Microsoft Azure - Text to Speech', () => {
 
 		cy.visit( '/text-to-speech-test/' );
 		cy.get( '.class-post-audio-controls' ).should( 'not.exist' );
+	} );
+
+	it( 'Can enable/disable text to speech feature', () => {
+		// Disable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech'
+		);
+		cy.get( '#enable_text_to_speech' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is not available.
+		cy.verifyTextToSpeechEnabled( false );
+
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech'
+		);
+		cy.get( '#enable_text_to_speech' ).check();
+		cy.get( '#azure_text_to_speech_post_types_post' ).check( 'post' );
+		cy.get( '#submit' ).click();
+
+		// Verify that the feature is available.
+		cy.verifyTextToSpeechEnabled( true );
+	} );
+
+	it( 'Can enable/disable text to speech feature by role', () => {
+		// Enable feature.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=azure_text_to_speech'
+		);
+		cy.get( '#azure_text_to_speech_post_types_post' ).check( 'post' );
+		cy.get( '#submit' ).click();
+
+		// Disable admin role.
+		cy.disableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
+
+		// Verify that the feature is not available.
+		cy.verifyTextToSpeechEnabled( false );
+
+		// Enable admin role.
+		cy.enableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
+
+		// Verify that the feature is available.
+		cy.verifyTextToSpeechEnabled( true );
+	} );
+
+	it( 'Can enable/disable text to speech feature by user', () => {
+		// Disable admin role.
+		cy.disableFeatureForRoles(
+			'text_to_speech',
+			[ 'administrator' ],
+			'azure_text_to_speech'
+		);
+
+		// Verify that the feature is not available.
+		cy.verifyTextToSpeechEnabled( false );
+
+		// Enable feature for admin user.
+		cy.enableFeatureForUsers(
+			'text_to_speech',
+			[ 'admin' ],
+			'azure_text_to_speech'
+		);
+
+		// Verify that the feature is available.
+		cy.verifyTextToSpeechEnabled( true );
+	} );
+
+	it( 'User can opt-out text to speech feature', () => {
+		// Enable user based opt-out.
+		cy.enableFeatureOptOut( 'text_to_speech', 'azure_text_to_speech' );
+
+		// opt-out
+		cy.optOutFeature( 'text_to_speech' );
+
+		// Verify that the feature is not available.
+		cy.verifyTextToSpeechEnabled( false );
+
+		// opt-in
+		cy.optInFeature( 'text_to_speech' );
+
+		// Verify that the feature is available.
+		cy.verifyTextToSpeechEnabled( true );
 	} );
 } );

@@ -73,18 +73,25 @@ class TextToSpeech extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'text_to_speech' => __( 'Text to speech', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure Text to Speech', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'authenticated' => __( 'Generate speech for post content', 'classifai' ),
+				'enable_text_to_speech' => __( 'Generate speech for post content', 'classifai' ),
 			),
 		);
 	}
 
 	/**
 	 * Enqueue the editor scripts.
+	 *
+	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_editor_assets() {
 		$post = get_post();
@@ -102,8 +109,8 @@ class TextToSpeech extends Provider {
 		wp_enqueue_script(
 			'classifai-gutenberg-plugin',
 			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array( 'lodash', 'wp-blocks', 'wp-i18n', 'wp-element', 'wp-editor', 'wp-edit-post', 'wp-components', 'wp-data', 'wp-plugins' ),
-			CLASSIFAI_PLUGIN_VERSION,
+			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
+			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
 
@@ -121,21 +128,24 @@ class TextToSpeech extends Provider {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
-		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
+		if ( $this->is_feature_enabled( 'text_to_speech' ) ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'rest_api_init', [ $this, 'add_synthesize_speech_meta_to_rest_api' ] );
+			add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+			add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 
-		$supported_post_type = get_tts_supported_post_types();
-		foreach ( get_tts_supported_post_types() as $post_type ) {
-			add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			foreach ( get_tts_supported_post_types() as $post_type ) {
+				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
+			}
 		}
 
-		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		if ( $this->is_enabled( 'text_to_speech' ) ) {
+			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		}
 	}
 
 	/**
-	 * Resets settings for the Personalizer provider.
+	 * Resets settings for the TextToSpeech provider.
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
@@ -179,6 +189,23 @@ class TextToSpeech extends Provider {
 		);
 
 		add_settings_field(
+			'enable_text_to_speech',
+			esc_html__( 'Generate speech for post content', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_text_to_speech',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_text_to_speech'],
+				'description'   => __( 'Enables speech generation for post content.', 'classifai' ),
+			]
+		);
+
+		// Add user/role based access settings.
+		$this->add_access_settings( 'text_to_speech' );
+
+		add_settings_field(
 			'post-types',
 			esc_html__( 'Post Types', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
@@ -216,7 +243,14 @@ class TextToSpeech extends Provider {
 	 */
 	public function sanitize_settings( $settings ) {
 		$current_settings       = wp_parse_args( $this->get_settings(), $this->get_default_settings() );
+		$current_settings       = array_merge( $current_settings, $this->sanitize_access_settings( $settings, 'text_to_speech' ) );
 		$is_credentials_changed = false;
+
+		if ( empty( $settings['enable_text_to_speech'] ) || 1 !== (int) $settings['enable_text_to_speech'] ) {
+			$current_settings['enable_text_to_speech'] = 'no';
+		} else {
+			$current_settings['enable_text_to_speech'] = '1';
+		}
 
 		if ( ! empty( $settings['credentials']['url'] ) && ! empty( $settings['credentials']['api_key'] ) ) {
 			$new_url = trailingslashit( esc_url_raw( $settings['credentials']['url'] ) );
@@ -427,16 +461,49 @@ class TextToSpeech extends Provider {
 	 * Returns the default settings.
 	 */
 	public function get_default_settings() {
-		return [
-			'credentials'   => array(
-				'url'     => '',
-				'api_key' => '',
-			),
-			'voices'        => array(),
-			'voice'         => '',
-			'authenticated' => false,
-			'post_types'    => array(),
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'enable_text_to_speech' => false,
+				'credentials'           => array(
+					'url'     => '',
+					'api_key' => '',
+				),
+				'voices'                => array(),
+				'voice'                 => '',
+				'authenticated'         => false,
+				'post_types'            => array(
+					'post' => 'post',
+				),
+			]
+		);
+	}
+
+	/**
+	 * Get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// Backward compatibility for enable feature setting.
+		if ( ! empty( $settings ) && ! isset( $settings['enable_text_to_speech'] ) ) {
+			$settings['enable_text_to_speech'] = $settings['authenticated'] ?? $defaults['enable_text_to_speech'];
+		}
+
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -719,7 +786,7 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
-	 * Adds audio controls to the post that has speech sythesis enabled.
+	 * Adds audio controls to the post that has speech synthesis enabled.
 	 *
 	 * @param string $content Post content.
 	 * @return string
@@ -729,6 +796,10 @@ class TextToSpeech extends Provider {
 		$_post = get_post();
 
 		if ( ! $_post instanceof \WP_Post ) {
+			return $content;
+		}
+
+		if ( ! is_singular( $_post->post_type ) ) {
 			return $content;
 		}
 
@@ -873,5 +944,4 @@ class TextToSpeech extends Provider {
 
 		return $options;
 	}
-
 }

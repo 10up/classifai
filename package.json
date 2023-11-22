@@ -1,7 +1,7 @@
 {
   "name": "classifai",
-  "version": "2.2.3",
-  "license": "GPLv2",
+  "version": "2.4.0",
+  "license": "GPL-2.0-or-later",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
   "scripts": {
@@ -19,13 +19,14 @@
     "env": "wp-env",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",
+    "env:destroy": "wp-env destroy",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf ./release && unzip $npm_package_name.zip -d ./release",
     "prepare": "husky install"
   },
   "lint-staged": {
     "*.php": [
-      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.2"
+      "./vendor/bin/phpcs --extensions=php --warning-severity=8 -s --runtime-set testVersion 7.4"
     ]
   },
   "author": {
@@ -35,15 +36,17 @@
     "role": "developer"
   },
   "devDependencies": {
-    "@10up/cypress-wp-utils": "^0.1.0",
+    "@10up/cypress-wp-utils": "^0.2.0",
     "@wordpress/env": "^8.1.0",
     "@wordpress/scripts": "^26.6.0",
-    "cypress": "^12.14.0",
+    "cypress": "^13.1.0",
     "cypress-file-upload": "^5.0.8",
+    "cypress-mochawesome-reporter": "^3.0.1",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^8.0.3",
     "jsdoc": "^3.6.11",
     "lint-staged": "^13.2.2",
+    "mochawesome-json-to-md": "^0.7.2",
     "node-wp-i18n": "^1.2.7",
     "svg-react-loader": "^0.4.6",
     "webpack": "^5.86.0",
