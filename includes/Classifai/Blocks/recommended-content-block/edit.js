@@ -19,7 +19,7 @@ import {
 import { list, grid } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
-import TaxonomyControls from './inspector-controls/taxonomy-controls';
+import TaxonomyControls from '../../../../src/js/taxonomy-controls';
 import { usePostTypes } from './utils';
 
 /**
@@ -95,6 +95,21 @@ const RecommendedContentBlockEdit = ( props ) => {
 			isActive: displayLayout === 'grid',
 		},
 	];
+	const { hasRecommendedContentAccess } = window;
+	if ( ! hasRecommendedContentAccess ) {
+		return (
+			<Placeholder
+				label={ __( 'ClassifAI Recommended Content', 'classifai' ) }
+			>
+				<p>
+					{ __(
+						"You don't have access to the Recommended Content block. Please contact the administrator to request access.",
+						'classifai'
+					) }
+				</p>
+			</Placeholder>
+		);
+	}
 
 	return (
 		<div { ...blockProps }>

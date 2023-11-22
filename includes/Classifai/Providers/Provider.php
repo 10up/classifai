@@ -5,6 +5,8 @@
 
 namespace Classifai\Providers;
 
+use function Classifai\get_feature_default_settings;
+
 abstract class Provider {
 
 	/**
@@ -34,6 +36,10 @@ abstract class Provider {
 	 */
 	public $onboarding_options;
 
+	/**
+	 * @var array $features Array of features provided by this provider.
+	 */
+	protected $features = array();
 
 	/**
 	 * Provider constructor.
@@ -75,6 +81,15 @@ abstract class Provider {
 	 */
 	public function get_option_name() {
 		return 'classifai_' . $this->option_name;
+	}
+
+	/**
+	 * Get provider features.
+	 *
+	 * @return array
+	 */
+	public function get_features() {
+		return $this->features;
 	}
 
 	/**
@@ -170,7 +185,20 @@ abstract class Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [];
+		$defaults = [];
+		$features = $this->get_features();
+		if ( empty( $features ) ) {
+			return $defaults;
+		}
+
+		foreach ( $features as $feature => $title ) {
+			$defaults = array_merge(
+				$defaults,
+				get_feature_default_settings( $feature )
+			);
+		}
+
+		return $defaults;
 	}
 
 	/**
@@ -225,7 +253,7 @@ abstract class Provider {
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -329,7 +357,7 @@ abstract class Provider {
 
 		<?php
 		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';
+			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -382,6 +410,11 @@ abstract class Provider {
 				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
 			}
 
+			// Check for backward compatibility.
+			if ( empty( $value ) && '0' !== $value && ! empty( $args['backward_compatible_key'] ) && isset( $setting_index[ $args['backward_compatible_key'] ] ) ) {
+				$value = $setting_index[ $args['backward_compatible_key'] ][ $option_value ] ?? '';
+			}
+
 			// If no saved value, check if we have a default value.
 			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
 				$value = $args['default_values'][ $default_key ];
@@ -407,7 +440,7 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
 		}
@@ -467,9 +500,34 @@ abstract class Provider {
 		// Render description, if any.
 		if ( ! empty( $args['description'] ) ) {
 			printf(
-				'<span class="description classifai-input-description">%s</span>',
+				'<span class="description">%s</span>',
 				esc_html( $args['description'] )
 			);
+		}
+	}
+
+	/**
+	 * Render allowed users table.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
+		?>
+		<div class="classifai-search-users-container">
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>-container"></div>
+			<input
+				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="classifai_<?php echo esc_attr( $this->option_name ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="<?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		</div>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 
@@ -540,5 +598,134 @@ abstract class Provider {
 		}
 
 		return $is_configured;
+	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @param string $feature Feature.
+	 * @param string $section Settings section.
+	 * @return void
+	 */
+	protected function add_access_settings( string $feature, string $section = '' ) {
+		$access_control = new AccessControl( $this, $feature );
+		$access_control->add_settings( $section );
+	}
+
+	/**
+	 * Sanitization for the roles/users access options being saved.
+	 *
+	 * @param array  $settings Array of settings about to be saved.
+	 * @param string $feature  Feature key.
+	 *
+	 * @return array The sanitized settings to be saved.
+	 */
+	protected function sanitize_access_settings( array $settings, string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->sanitize_settings( $settings );
+	}
+
+	/**
+	 * Determine if the current user has access of the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	protected function has_access( string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->has_access();
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for ClassifAI.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$editable_roles   = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ClassifAI
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_allowed_roles
+		 *
+		 * @param {array}  $roles            Array of arrays containing role information.
+		 * @param {string} $option_name      Option name.
+		 * @param {array}  $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $this->get_option_name(), $default_settings );
+
+		return $roles;
+	}
+
+	/**
+	 * Determine if the feature is enabled and current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature ) {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access( $feature ) &&
+			$this->is_enabled( $feature )
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Check if feature is turned on.
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_is_{$feature}_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

@@ -46,7 +46,7 @@ class HelpersTest extends \WP_UnitTestCase {
 
 	function test_it_has_default_supported_post_types() {
 		$actual = get_supported_post_types();
-		$this->assertEquals( [], $actual );
+		$this->assertEquals( ['post'], $actual );
 	}
 
 	function test_it_can_lookup_supported_post_types_from_option() {

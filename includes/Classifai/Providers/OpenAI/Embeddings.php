@@ -53,6 +53,11 @@ class Embeddings extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'classification' => __( 'Content classification', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI Embeddings', 'classifai' ),
@@ -71,7 +76,7 @@ class Embeddings extends Provider {
 	public function register() {
 		$settings = $this->get_settings();
 
-		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
+		if ( $this->is_feature_enabled( 'classification' ) ) {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
@@ -138,6 +143,9 @@ class Embeddings extends Provider {
 				'description'   => __( 'Automatically classify content within your existing taxonomy structure.', 'classifai' ),
 			]
 		);
+
+		// Add user/role based access settings.
+		$this->add_access_settings( 'classification' );
 
 		add_settings_field(
 			'post-types',
@@ -210,7 +218,8 @@ class Embeddings extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'classification' ),
 		);
 
 		if ( empty( $settings['enable_classification'] ) || 1 !== (int) $settings['enable_classification'] ) {
@@ -219,7 +228,8 @@ class Embeddings extends Provider {
 			$new_settings['enable_classification'] = '1';
 
 			// If any NLU features are turned, show an admin notice.
-			if ( language_processing_features_enabled() ) {
+			$nlu = new NLU( $this->service );
+			if ( language_processing_features_enabled() && $nlu->is_enabled( 'content_classification' ) ) {
 				add_settings_error(
 					'enable_classification',
 					'conflict',
@@ -283,15 +293,20 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated'         => false,
-			'api_key'               => '',
-			'enable_classification' => false,
-			'post_types'            => [ 'post' ],
-			'post_statuses'         => [ 'publish' ],
-			'taxonomies'            => [ 'category' ],
-			'number'                => 1,
-		];
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'         => false,
+				'api_key'               => '',
+				'enable_classification' => false,
+				'post_types'            => [ 'post' ],
+				'post_statuses'         => [ 'publish' ],
+				'taxonomies'            => [ 'category' ],
+				'number'                => 1,
+			]
+		);
 	}
 
 	/**
@@ -749,7 +764,7 @@ class Embeddings extends Provider {
 			<p>
 				<label for="classifai-process-content" class="classifai-preview-toggle">
 					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
-					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
+					<strong><?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?></strong>
 				</label>
 			</p>
 		</div>

@@ -76,6 +76,13 @@ class ChatGPT extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'title_generation'   => __( 'Generate titles', 'classifai' ),
+			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
+			'resize_content'     => __( 'Resize content', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
@@ -86,50 +93,6 @@ class ChatGPT extends Provider {
 				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
 			),
 		);
-	}
-
-	/**
-	 * Determine if the current user can access the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature = '' ) {
-		$access        = false;
-		$settings      = $this->get_settings();
-		$user_roles    = wp_get_current_user()->roles ?? [];
-		$feature_roles = [];
-
-		$role_keys = [
-			'enable_excerpt'        => 'roles',
-			'enable_titles'         => 'title_roles',
-			'enable_resize_content' => 'resize_content_roles',
-		];
-
-		if ( isset( $role_keys[ $feature ] ) ) {
-			$feature_roles = $settings[ $role_keys[ $feature ] ] ?? [];
-		}
-
-		// Check if user has access to the feature and the feature is turned on.
-		if (
-			( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) )
-			&& ( isset( $settings[ $feature ] ) && 1 === (int) $settings[ $feature ] )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to a ChatGPT generate feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( "classifai_openai_chatgpt_{$feature}", $access, $settings );
 	}
 
 	/**
@@ -173,7 +136,7 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		if ( $this->is_feature_enabled( 'enable_excerpt' ) ) {
+		if ( $this->is_feature_enabled( 'excerpt_generation' ) ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
 				'classifai-post-excerpt',
@@ -184,7 +147,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->is_feature_enabled( 'enable_titles' ) ) {
+		if ( $this->is_feature_enabled( 'title_generation' ) ) {
 			wp_enqueue_script(
 				'classifai-post-status-info',
 				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
@@ -203,7 +166,7 @@ class ChatGPT extends Provider {
 			);
 		}
 
-		if ( $this->is_feature_enabled( 'enable_resize_content' ) ) {
+		if ( $this->is_feature_enabled( 'resize_content' ) ) {
 			wp_enqueue_script(
 				'classifai-content-resizing-plugin-js',
 				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
@@ -257,7 +220,7 @@ class ChatGPT extends Provider {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if (
 					post_type_supports( $screen->post_type, 'title' ) &&
-					$this->is_feature_enabled( 'enable_titles' )
+					$this->is_feature_enabled( 'title_generation' )
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -287,7 +250,7 @@ class ChatGPT extends Provider {
 
 				if (
 					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					$this->is_feature_enabled( 'enable_excerpt' )
+					$this->is_feature_enabled( 'excerpt_generation' )
 				) {
 					wp_enqueue_style(
 						'classifai-generate-title-classic-css',
@@ -379,35 +342,8 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for ChatGTP
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate excerpts.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access settings for excerpt.
+		$this->add_access_settings( 'excerpt_generation', $this->get_option_name() . '_excerpt' );
 
 		add_settings_field(
 			'length',
@@ -462,19 +398,8 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		add_settings_field(
-			'title-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'      => 'title_roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['title_roles'],
-				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access settings for titles.
+		$this->add_access_settings( 'title_generation', $this->get_option_name() . '_title' );
 
 		add_settings_field(
 			'number-titles',
@@ -526,23 +451,8 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$content_resize_roles = $roles;
-
-		unset( $content_resize_roles['contributor'], $content_resize_roles['subscriber'] );
-
-		add_settings_field(
-			'resize-content-roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'      => 'resize_content_roles',
-				'options'        => $content_resize_roles,
-				'default_values' => $default_settings['resize_content_roles'],
-				'description'    => __( 'Choose which roles are allowed to resize content.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access settings for resizing content.
+		$this->add_access_settings( 'resize_content', $this->get_option_name() . '_resize_content_settings' );
 
 		add_settings_field(
 			'number-resize-content',
@@ -598,19 +508,16 @@ class ChatGPT extends Provider {
 		$new_settings = $this->get_settings();
 		$new_settings = array_merge(
 			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
+			$this->sanitize_api_key_settings( $new_settings, $settings ),
+			$this->sanitize_access_settings( $settings, 'excerpt_generation' ),
+			$this->sanitize_access_settings( $settings, 'title_generation' ),
+			$this->sanitize_access_settings( $settings, 'resize_content' ),
 		);
 
 		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
 			$new_settings['enable_excerpt'] = 'no';
 		} else {
 			$new_settings['enable_excerpt'] = '1';
-		}
-
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
@@ -631,12 +538,6 @@ class ChatGPT extends Provider {
 			$new_settings['enable_titles'] = '1';
 		}
 
-		if ( isset( $settings['title_roles'] ) && is_array( $settings['title_roles'] ) ) {
-			$new_settings['title_roles'] = array_map( 'sanitize_text_field', $settings['title_roles'] );
-		} else {
-			$new_settings['title_roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
 		if ( isset( $settings['number_titles'] ) && is_numeric( $settings['number_titles'] ) && (int) $settings['number_titles'] >= 1 && (int) $settings['number_titles'] <= 10 ) {
 			$new_settings['number_titles'] = absint( $settings['number_titles'] );
 		} else {
@@ -653,12 +554,6 @@ class ChatGPT extends Provider {
 			$new_settings['enable_resize_content'] = 'no';
 		} else {
 			$new_settings['enable_resize_content'] = '1';
-		}
-
-		if ( isset( $settings['resize_content_roles'] ) && is_array( $settings['resize_content_roles'] ) ) {
-			$new_settings['resize_content_roles'] = array_map( 'sanitize_text_field', $settings['resize_content_roles'] );
-		} else {
-			$new_settings['resize_content_roles'] = array_keys( get_editable_roles() ?? [] );
 		}
 
 		if ( isset( $settings['number_resize_content'] ) && is_numeric( $settings['number_resize_content'] ) && (int) $settings['number_resize_content'] >= 1 && (int) $settings['number_resize_content'] <= 10 ) {
@@ -698,51 +593,50 @@ class ChatGPT extends Provider {
 		if ( ! function_exists( 'get_editable_roles' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/user.php';
 		}
-		$editable_roles = get_editable_roles() ?? [];
+		$default_settings = parent::get_default_settings() ?? [];
+		$excerpt_length   = absint( apply_filters( 'excerpt_length', 55 ) );
 
-		$excerpt_length = absint( apply_filters( 'excerpt_length', 55 ) );
-
-		return [
-			'authenticated'           => false,
-			'api_key'                 => '',
-			'enable_excerpt'          => false,
-			'roles'                   => array_keys( $editable_roles ),
-			'length'                  => $excerpt_length,
-			'generate_excerpt_prompt' => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->generate_excerpt_prompt,
-					'original' => 1,
+		return array_merge(
+			$default_settings,
+			[
+				'authenticated'           => false,
+				'api_key'                 => '',
+				'enable_excerpt'          => false,
+				'length'                  => $excerpt_length,
+				'generate_excerpt_prompt' => array(
+					array(
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->generate_excerpt_prompt,
+						'original' => 1,
+					),
 				),
-			),
-			'enable_titles'           => false,
-			'title_roles'             => array_keys( $editable_roles ),
-			'number_titles'           => 1,
-			'generate_title_prompt'   => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->generate_title_prompt,
-					'original' => 1,
+				'enable_titles'           => false,
+				'number_titles'           => 1,
+				'generate_title_prompt'   => array(
+					array(
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->generate_title_prompt,
+						'original' => 1,
+					),
 				),
-			),
-			'enable_resize_content'   => false,
-			'resize_content_roles'    => array_keys( $editable_roles ),
-			'number_resize_content'   => 1,
-			'shrink_content_prompt'   => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->shrink_content_prompt,
-					'original' => 1,
+				'enable_resize_content'   => false,
+				'number_resize_content'   => 1,
+				'shrink_content_prompt'   => array(
+					array(
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->shrink_content_prompt,
+						'original' => 1,
+					),
 				),
-			),
-			'grow_content_prompt'     => array(
-				array(
-					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->grow_content_prompt,
-					'original' => 1,
+				'grow_content_prompt'     => array(
+					array(
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->grow_content_prompt,
+						'original' => 1,
+					),
 				),
-			),
-		];
+			]
+		);
 	}
 
 	/**
@@ -831,7 +725,7 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'enable_excerpt' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'excerpt_generation' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -936,7 +830,7 @@ class ChatGPT extends Provider {
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'enable_titles' ) ) {
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'title_generation' ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -1038,6 +932,12 @@ class ChatGPT extends Provider {
 				'num' => $settings['number_resize_content'] ?? 1,
 			]
 		);
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'resize_content' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Resizing content is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
 
@@ -1186,6 +1086,34 @@ class ChatGPT extends Provider {
 	}
 
 	/**
+	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$roles            = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ChatGTP
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_chatgpt_allowed_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
+
+		return $roles;
+	}
+
+	/**
 	 * Sanitize the prompt data.
 	 * This is used for the repeater field.
 	 *
@@ -1262,5 +1190,36 @@ class ChatGPT extends Provider {
 		}
 
 		return $default_prompt;
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Handle different enable keys.
+		switch ( $feature ) {
+			case 'title_generation':
+				$enable_key = 'enable_titles';
+				break;
+
+			case 'excerpt_generation':
+				$enable_key = 'enable_excerpt';
+				break;
+
+			default:
+				break;
+		}
+
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }
