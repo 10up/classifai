@@ -137,6 +137,7 @@ class NLU extends Provider {
 					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
 					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
 				],
+				'classification_method'         => 'recommended_terms',
 			]
 		);
 	}
@@ -452,6 +453,22 @@ class NLU extends Provider {
 			[
 				'option_index' => 'classification_mode',
 				'input_type'   => 'radio',
+			]
+		);
+
+		add_settings_field(
+			'classification-method',
+			esc_html__( 'Classification Method', 'classifai' ),
+			[ $this, 'render_radio_group' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'classification_method',
+				'default_value' => $default_settings['classification_method'],
+				'options'       => array(
+					'recommended_terms' => __( 'Add recommended terms', 'classifai' ),
+					'existing_terms'    => __( 'Only classify based on existing terms', 'classifai' ),
+				),
 			]
 		);
 
@@ -805,6 +822,10 @@ class NLU extends Provider {
 
 		if ( isset( $settings['classification_mode'] ) ) {
 			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
+		}
+
+		if ( isset( $settings['classification_method'] ) ) {
+			$new_settings['classification_method'] = sanitize_text_field( $settings['classification_method'] );
 		}
 
 		// Sanitize the post type checkboxes
