@@ -364,6 +364,32 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Get the threshold for the similarity calculation.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return float
+	 */
+	public function get_threshold( $taxonomy = '' ) {
+		$settings  = $this->get_settings();
+		$threshold = 1;
+
+		if ( ! empty( $taxonomy ) ) {
+			$threshold = $settings['taxonomies'][ $taxonomy . '_threshold' ];
+		}
+
+		// Convert $threshold (%) to decimal.
+		$threshold = 1 - ( (float) $threshold / 100 );
+
+		/**
+		 * Filter the threshold for the similarity calculation.
+		 *
+		 * @param float $threshold The threshold to use.
+		 * @param string $taxonomy The taxonomy to get the threshold for.
+		 */
+		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
+	}
+
+	/**
 	 * The list of supported post statuses.
 	 *
 	 * @return array
@@ -477,6 +503,9 @@ class Embeddings extends Provider {
 				continue;
 			}
 
+			// Get threshold setting for this taxonomy.
+			$threshold = $this->get_threshold( $tax );
+
 			// Get embedding similarity for each term.
 			foreach ( $terms as $term_id ) {
 				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
@@ -486,9 +515,9 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					$similarity = $calculations->similarity( $embedding, $term_embedding, $threshold );
 					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
 			}
