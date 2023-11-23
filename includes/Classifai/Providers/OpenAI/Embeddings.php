@@ -272,10 +272,10 @@ class Embeddings extends Provider {
 			// Sanitize the threshold setting.
 			$taxonomy_key = $taxonomy_key . '_threshold';
 			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
-				$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $settings['taxonomies'][ $taxonomy_key ] );
-				$this->trigger_taxonomy_update( $taxonomy_key );
+				$threshold_value = min( absint( $settings['taxonomies'][ $taxonomy_key ] ), 100 );
+				$new_settings['taxonomies'][ $taxonomy_key ] = $threshold_value ? $threshold_value : 75;
 			} else {
-				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
+				$new_settings['taxonomies'][ $taxonomy_key ] = 75;
 			}
 		}
 
@@ -365,6 +365,8 @@ class Embeddings extends Provider {
 
 	/**
 	 * Get the threshold for the similarity calculation.
+	 *
+	 * @since 2.6.0
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return float
