@@ -268,6 +268,15 @@ class Embeddings extends Provider {
 			} else {
 				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
 			}
+
+			// Sanitize the threshold setting.
+			$taxonomy_key = $taxonomy_key . '_threshold';
+			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
+				$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $settings['taxonomies'][ $taxonomy_key ] );
+				$this->trigger_taxonomy_update( $taxonomy_key );
+			} else {
+				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
+			}
 		}
 
 		// Sanitize the number setting.
