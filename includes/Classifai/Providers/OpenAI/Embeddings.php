@@ -376,7 +376,7 @@ class Embeddings extends Provider {
 		$threshold = 1;
 
 		if ( ! empty( $taxonomy ) ) {
-			$threshold = $settings['taxonomies'][ $taxonomy . '_threshold' ];
+			$threshold = isset( $settings['taxonomies'][ $taxonomy . '_threshold' ] ) ? $settings['taxonomies'][ $taxonomy . '_threshold' ] : 75;
 		}
 
 		// Convert $threshold (%) to decimal.
