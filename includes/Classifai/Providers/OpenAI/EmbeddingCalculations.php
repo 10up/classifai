@@ -58,6 +58,13 @@ class EmbeddingCalculations {
 		// Do the math.
 		$distance = 1.0 - ( $combined_average / sqrt( $source_average * $compare_average ) );
 
+		/**
+		 * Filter the threshold for the similarity calculation.
+		 *
+		 * @param float $threshold The threshold to use.
+		 */
+		$threshold = apply_filters( 'classifai_threshold', $threshold );
+
 		// Ensure we are within the range of 0 to 1.0 (i.e. $threshold).
 		return max( 0, min( abs( (float) $distance ), $threshold ) );
 	}
