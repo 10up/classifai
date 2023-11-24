@@ -2,11 +2,12 @@ import Choices from 'choices.js';
 import '../scss/language-processing.scss';
 
 ( () => {
-
 	let featureStatuses = {};
 
 	const previewWatson = () => {
-		const nonceElement = document.getElementById( 'classifai-previewer-watson_nlu-nonce' );
+		const nonceElement = document.getElementById(
+			'classifai-previewer-watson_nlu-nonce'
+		);
 		if ( ! nonceElement ) {
 			return;
 		}
@@ -24,12 +25,15 @@ import '../scss/language-processing.scss';
 			categoriesStatus: document.getElementById(
 				'classifai-settings-category'
 			).checked,
-			keywordsStatus: document.getElementById( 'classifai-settings-keyword' )
-				.checked,
-			entitiesStatus: document.getElementById( 'classifai-settings-entity' )
-				.checked,
-			conceptsStatus: document.getElementById( 'classifai-settings-concept' )
-				.checked,
+			keywordsStatus: document.getElementById(
+				'classifai-settings-keyword'
+			).checked,
+			entitiesStatus: document.getElementById(
+				'classifai-settings-entity'
+			).checked,
+			conceptsStatus: document.getElementById(
+				'classifai-settings-concept'
+			).checked,
 		};
 
 		const plurals = {
@@ -65,11 +69,15 @@ import '../scss/language-processing.scss';
 
 					if ( e.target.checked ) {
 						document
-							.querySelector( `.tax-row--${ plurals[ taxType ] }` )
+							.querySelector(
+								`.tax-row--${ plurals[ taxType ] }`
+							)
 							.classList.remove( 'tax-row--hide' );
 					} else {
 						document
-							.querySelector( `.tax-row--${ plurals[ taxType ] }` )
+							.querySelector(
+								`.tax-row--${ plurals[ taxType ] }`
+							)
 							.classList.add( 'tax-row--hide' );
 					}
 				} );
@@ -83,20 +91,23 @@ import '../scss/language-processing.scss';
 		function showPreviewWatson( e ) {
 			/** Category thresholds. */
 			const categoryThreshold = Number(
-				document.querySelector( '#classifai-settings-category_threshold' )
-					.value
+				document.querySelector(
+					'#classifai-settings-category_threshold'
+				).value
 			);
 			const keywordThreshold = Number(
-				document.querySelector( '#classifai-settings-keyword_threshold' )
-					.value
+				document.querySelector(
+					'#classifai-settings-keyword_threshold'
+				).value
 			);
 			const entityThreshold = Number(
 				document.querySelector( '#classifai-settings-entity_threshold' )
 					.value
 			);
 			const conceptThreshold = Number(
-				document.querySelector( '#classifai-settings-concept_threshold' )
-					.value
+				document.querySelector(
+					'#classifai-settings-concept_threshold'
+				).value
 			);
 
 			const postId = document.getElementById(
@@ -126,51 +137,51 @@ import '../scss/language-processing.scss';
 				method: 'POST',
 				body: formData,
 			} )
-			.then( ( response ) => {
-				return response.json();
-			} )
-			.then( ( data ) => {
-				if ( ! data.success ) {
+				.then( ( response ) => {
+					return response.json();
+				} )
+				.then( ( data ) => {
+					if ( ! data.success ) {
+						previewWrapper.style.display = 'block';
+						previewWrapper.innerHTML = data.data;
+						e.target
+							.closest( '.button' )
+							.classList.remove(
+								'get-classifier-preview-data-btn--loading'
+							);
+						return;
+					}
+
+					const {
+						data: {
+							categories = [],
+							concepts = [],
+							entities = [],
+							keywords = [],
+						},
+					} = data;
+
+					const dataToFilter = {
+						categories,
+						keywords,
+						entities,
+						concepts,
+					};
+
+					const filteredItems = filterByScoreOrRelevance(
+						dataToFilter,
+						thresholds
+					);
+					const htmlData = buildPreviewUI( filteredItems );
 					previewWrapper.style.display = 'block';
-					previewWrapper.innerHTML = data.data;
+					previewWrapper.innerHTML = htmlData;
+
 					e.target
 						.closest( '.button' )
 						.classList.remove(
 							'get-classifier-preview-data-btn--loading'
 						);
-					return;
-				}
-
-				const {
-					data: {
-						categories = [],
-						concepts = [],
-						entities = [],
-						keywords = [],
-					},
-				} = data;
-
-				const dataToFilter = {
-					categories,
-					keywords,
-					entities,
-					concepts,
-				};
-
-				const filteredItems = filterByScoreOrRelevance(
-					dataToFilter,
-					thresholds
-				);
-				const htmlData = buildPreviewUI( filteredItems );
-				previewWrapper.style.display = 'block';
-				previewWrapper.innerHTML = htmlData;
-
-				e.target
-					.closest( '.button' )
-					.classList.remove(
-						'get-classifier-preview-data-btn--loading'
-					);
-			} );
+				} );
 		}
 
 		/**
@@ -202,7 +213,9 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		const nonceElement = document.getElementById( 'classifai-previewer-openai_embeddings-nonce' );
+		const nonceElement = document.getElementById(
+			'classifai-previewer-openai_embeddings-nonce'
+		);
 		if ( ! nonceElement ) {
 			return;
 		}
@@ -214,7 +227,7 @@ import '../scss/language-processing.scss';
 
 		/** Previewer nonce. */
 		const previewerNonce = nonceElement.value;
-		
+
 		/**
 		 * Live preview features.
 		 *
@@ -237,7 +250,10 @@ import '../scss/language-processing.scss';
 				.classList.add( 'get-classifier-preview-data-btn--loading' );
 
 			const formData = new FormData();
-			formData.append( 'action', 'get_post_classifier_embeddings_preview_data' );
+			formData.append(
+				'action',
+				'get_post_classifier_embeddings_preview_data'
+			);
 			formData.append( 'post_id', postId );
 			formData.append( 'nonce', previewerNonce );
 
@@ -245,36 +261,38 @@ import '../scss/language-processing.scss';
 				method: 'POST',
 				body: formData,
 			} )
-			.then( ( response ) => {
-				return response.json();
-			} )
-			.then( ( data ) => {
-				if ( ! data.success ) {
+				.then( ( response ) => {
+					return response.json();
+				} )
+				.then( ( data ) => {
+					if ( ! data.success ) {
+						previewWrapper.style.display = 'block';
+						previewWrapper.innerHTML = data.data;
+						e.target
+							.closest( '.button' )
+							.classList.remove(
+								'get-classifier-preview-data-btn--loading'
+							);
+						return;
+					}
+
+					const htmlData = buildPreviewUI( data.data );
 					previewWrapper.style.display = 'block';
-					previewWrapper.innerHTML = data.data;
+					previewWrapper.innerHTML = htmlData;
+
+					// remove all .tax-row--hide
+					document
+						.querySelectorAll( '.tax-row--hide' )
+						.forEach( ( item ) => {
+							item.classList.remove( 'tax-row--hide' );
+						} );
+
 					e.target
 						.closest( '.button' )
 						.classList.remove(
 							'get-classifier-preview-data-btn--loading'
 						);
-					return;
-				}
-
-				const htmlData = buildPreviewUI( data.data );
-				previewWrapper.style.display = 'block';
-				previewWrapper.innerHTML = htmlData;
-
-				// remove all .tax-row--hide
-				document.querySelectorAll( '.tax-row--hide' ).forEach( ( item ) => {
-					item.classList.remove( 'tax-row--hide' );
 				} );
-				
-				e.target
-					.closest( '.button' )
-					.classList.remove(
-						'get-classifier-preview-data-btn--loading'
-					);
-			} );
 		}
 	};
 	previewEmbeddings();
@@ -292,7 +310,7 @@ import '../scss/language-processing.scss';
 			return '';
 		}
 
-		filteredItems.forEach && filteredItems.forEach( ( obj ) => {
+		filteredItems.forEach( ( obj ) => {
 			Object.keys( obj ).forEach( ( prop ) => {
 				htmlData += `<div class="tax-row tax-row--${ prop } ${
 					featureStatuses[ `${ prop }Status` ] ? '' : 'tax-row--hide'
@@ -348,6 +366,22 @@ import '../scss/language-processing.scss';
 	 * @param {Object} event Choices.js's 'search' event object.
 	 */
 	function searchPosts( event ) {
+		const nonceElementEmbeddings = document.getElementById(
+			'classifai-previewer-openai_embeddings-nonce'
+		);
+		const nonceElementNLU = document.getElementById(
+			'classifai-previewer-watson_nlu-nonce'
+		);
+		const nonceElement = nonceElementEmbeddings
+			? nonceElementEmbeddings
+			: nonceElementNLU;
+		if ( ! nonceElement ) {
+			return;
+		}
+
+		/** Previewer nonce. */
+		const previewerNonce = nonceElement.value;
+
 		/*
 		 * Post types.
 		 */

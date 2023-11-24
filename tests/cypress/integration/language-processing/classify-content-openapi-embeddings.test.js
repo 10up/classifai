@@ -95,7 +95,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		const closePanelSelector = '#get-classifier-preview-data-btn';
 		cy.get( closePanelSelector ).click();
 
-		// Check the term is received is visible.
+		// Check the term is received and visible.
 		cy.get( '.tax-row--Category' ).should( 'be.visible' );
 	} );
 
