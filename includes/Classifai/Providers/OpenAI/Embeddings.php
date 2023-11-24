@@ -524,16 +524,55 @@ class Embeddings extends Provider {
 		}
 
 		// Set terms based on similarity.
+		$index  = 0;
+		$result = [];
+
 		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Get the taxonomy name.
+			$taxonomy = get_taxonomy( $tax );
+			$tax_name = $taxonomy->labels->singular_name;
+
 			// Sort embeddings from lowest to highest.
 			asort( $terms );
+
+			// Return the terms if this is a dry run.
+			if ( $dryrun ) {
+				$result[ $index ] = new \stdClass();
+
+				$result[ $index ]->{$tax_name} = [];
+
+				$term_added = 0;
+				foreach ( $terms as $term_id => $similarity ) {
+					// Convert $similarity to percentage.
+					$similarity = round( ( 1 - $similarity ), 2 );
+
+					// Stop if we have added the number of terms specified in settings.
+					if ( $number_to_add <= $term_added ) {
+						break;
+					}
+
+					$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+						'label' => get_term( $term_id )->name,
+						'score' => $similarity,
+					];
+					$term_added++;
+				}
+			}
 
 			// Only add the number of terms specified in settings.
 			if ( count( $terms ) > $number_to_add ) {
 				$terms = array_slice( $terms, 0, $number_to_add, true );
 			}
 
-			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+			if ( ! $dryrun ) {
+				wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+			}
+			$index++;
+		}
+
+		// Return if its a dry run.
+		if ( $dryrun ) {
+			return $result;
 		}
 	}
 
