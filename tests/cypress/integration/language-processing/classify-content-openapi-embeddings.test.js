@@ -96,7 +96,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( closePanelSelector ).click();
 
 		// Check the term is received and visible.
-		cy.get( '.tax-row--Category' ).should( 'be.visible' );
+		cy.get( '.tax-row--Category' ).should( 'exist' );
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {

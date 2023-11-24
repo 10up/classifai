@@ -4,11 +4,20 @@ import '../scss/language-processing.scss';
 ( () => {
 	let featureStatuses = {};
 
+	const nonceElementNLU = document.getElementById(
+		'classifai-previewer-watson_nlu-nonce'
+	);
+	
+	const nonceElementEmbeddings = document.getElementById(
+		'classifai-previewer-openai_embeddings-nonce'
+	);
+
+	if ( ! nonceElementNLU && ! nonceElementEmbeddings ) {
+		return;
+	}
+
 	const previewWatson = () => {
-		const nonceElement = document.getElementById(
-			'classifai-previewer-watson_nlu-nonce'
-		);
-		if ( ! nonceElement ) {
+		if ( ! nonceElementNLU ) {
 			return;
 		}
 
@@ -18,7 +27,7 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewWatson );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElement.value;
+		const previewerNonce = nonceElementNLU.value;
 
 		/** Feature statuses. */
 		featureStatuses = {
@@ -213,10 +222,10 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		const nonceElement = document.getElementById(
+		const nonceElementEmbeddings = document.getElementById(
 			'classifai-previewer-openai_embeddings-nonce'
 		);
-		if ( ! nonceElement ) {
+		if ( ! nonceElementEmbeddings ) {
 			return;
 		}
 
@@ -226,7 +235,7 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewEmeddings );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElement.value;
+		const previewerNonce = nonceElementEmbeddings.value;
 
 		/**
 		 * Live preview features.
