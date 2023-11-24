@@ -417,9 +417,12 @@ class Embeddings extends Provider {
 	/**
 	 * Trigger embedding generation for content being saved.
 	 *
-	 * @param int $post_id ID of post being saved.
+	 * @param int  $post_id ID of post being saved.
+	 * @param bool $dryrun Whether to run the process or just return the data.
+	 *
+	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( $post_id ) {
+	public function generate_embeddings_for_post( $post_id, $dryrun = false ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
@@ -434,14 +437,17 @@ class Embeddings extends Provider {
 
 		// Only run on supported post types and statuses.
 		if (
-			! in_array( $post->post_type, $this->supported_post_types(), true ) ||
-			! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			! $dryrun
+			&& (
+				! in_array( $post->post_type, $this->supported_post_types(), true ) ||
+				! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			)
 		) {
 			return;
 		}
 
 		// Don't run if turned off for this particular post.
-		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
+		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) && ! $dryrun ) {
 			return;
 		}
 
@@ -449,8 +455,11 @@ class Embeddings extends Provider {
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
-			$this->set_terms( $post_id, $embeddings );
+			if ( ! $dryrun ) {
+				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+			}
+
+			return $this->set_terms( $post_id, $embeddings, $dryrun );
 		}
 	}
 
@@ -459,8 +468,11 @@ class Embeddings extends Provider {
 	 *
 	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
+	 * @param bool  $dryrun Whether to run the process or just return the data.
+	 *
+	 * @return array|WP_Error
 	 */
-	private function set_terms( int $post_id = 0, array $embedding = [] ) {
+	private function set_terms( int $post_id = 0, array $embedding = [], $dryrun = false ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
