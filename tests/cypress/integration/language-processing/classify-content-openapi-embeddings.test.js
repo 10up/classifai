@@ -86,7 +86,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 	} );
 
-	it( 'Can see the privew on settings page', () => {
+	it( 'Can see the preview on the settings page', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
 		);
