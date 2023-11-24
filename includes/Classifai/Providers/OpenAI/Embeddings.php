@@ -84,6 +84,7 @@ class Embeddings extends Provider {
 			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
 			add_action( 'save_post', [ $this, 'save_metabox' ] );
+			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 		}
 	}
 
@@ -390,6 +391,27 @@ class Embeddings extends Provider {
 		 * @return {array} Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies() );
+	}
+
+	/**
+	 * Get the list of post types for settings.
+	 *
+	 * @since 2.6.0
+	 *
+	 * @return array
+	 */
+	public function get_post_classifier_embeddings_preview_data() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' ) ) {
+			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
+		}
+
+		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+
+		$embeddings_terms = $this->generate_embeddings_for_post( $post_id, true );
+
+		return wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
