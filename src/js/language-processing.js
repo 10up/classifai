@@ -7,7 +7,7 @@ import '../scss/language-processing.scss';
 	const nonceElementNLU = document.getElementById(
 		'classifai-previewer-watson_nlu-nonce'
 	);
-	
+
 	const nonceElementEmbeddings = document.getElementById(
 		'classifai-previewer-openai_embeddings-nonce'
 	);
@@ -222,9 +222,6 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		const nonceElementEmbeddings = document.getElementById(
-			'classifai-previewer-openai_embeddings-nonce'
-		);
 		if ( ! nonceElementEmbeddings ) {
 			return;
 		}
@@ -375,12 +372,6 @@ import '../scss/language-processing.scss';
 	 * @param {Object} event Choices.js's 'search' event object.
 	 */
 	function searchPosts( event ) {
-		const nonceElementEmbeddings = document.getElementById(
-			'classifai-previewer-openai_embeddings-nonce'
-		);
-		const nonceElementNLU = document.getElementById(
-			'classifai-previewer-watson_nlu-nonce'
-		);
 		const nonceElement = nonceElementEmbeddings
 			? nonceElementEmbeddings
 			: nonceElementNLU;
