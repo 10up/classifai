@@ -79,55 +79,7 @@ class ImageProcessing extends Service {
 	/**
 	 * Create endpoints for services
 	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-image',
-			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_image' ],
-				'args'                => [
-					'prompt' => [
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
-					],
-					'n'      => [
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'maximum'           => 10,
-						'sanitize_callback' => 'absint',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-					],
-					'size'   => [
-						'type'              => 'string',
-						'enum'              => [
-							'256x256',
-							'512x512',
-							'1024x1024',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-					],
-					'format' => [
-						'type'              => 'string',
-						'enum'              => [
-							'url',
-							'b64_json',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
-			]
-		);
-	}
+	public function register_endpoints() {}
 
 	/**
 	 * Single callback to pass the route callback to the Computer Vision provider.
@@ -207,64 +159,6 @@ class ImageProcessing extends Service {
 		// Check if valid authentication is in place.
 		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Handle request to generate an image for a given prompt.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function generate_image( WP_REST_Request $request ) {
-		// Find the right provider class.
-		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
-
-		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( is_wp_error( $provider ) ) {
-			return $provider;
-		}
-
-		return rest_ensure_response(
-			$provider->generate_image_callback(
-				$request->get_param( 'prompt' ),
-				[
-					'num'    => $request->get_param( 'n' ),
-					'size'   => $request->get_param( 'size' ),
-					'format' => $request->get_param( 'format' ),
-				]
-			)
-		);
-	}
-
-	/**
-	 * Check if a given request has access to generate an image.
-	 *
-	 * This check ensures we have a valid user with proper capabilities
-	 * making the request, that we are properly authenticated with OpenAI
-	 * and that image generation is turned on.
-	 *
-	 * @return WP_Error|bool
-	 */
-	public function generate_image_permissions_check() {
-		$provider = find_provider_class( $this->provider_classes ?? [], 'DALL·E' );
-		$settings = \Classifai\get_plugin_settings( 'image_processing', 'DALL·E' );
-
-		// Ensure we have a provider class. Should never happen but :shrug:
-		if ( is_wp_error( $provider ) ) {
-			return $provider;
-		}
-
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
-		}
-
-		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $provider->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
 		}
 
 		return true;

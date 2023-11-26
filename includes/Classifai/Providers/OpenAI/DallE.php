@@ -5,10 +5,13 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use function Classifai\get_asset_info;
 use WP_Error;
+use WP_REST_Request;
+use WP_REST_Server;
 
 class DallE extends Provider {
 
@@ -33,14 +36,13 @@ class DallE extends Provider {
 	/**
 	 * OpenAI DALL·E constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service = null ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'OpenAI',
 			'DALL·E',
-			'openai_dalle',
-			$service
+			'openai_dalle'
 		);
 
 		// Set the onboarding options.
@@ -51,6 +53,10 @@ class DallE extends Provider {
 				'enable_image_gen' => __( 'Image generation', 'classifai' ),
 			),
 		);
+
+		$this->feature_instance = $feature_instance;
+
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
@@ -59,28 +65,105 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( $this->is_feature_enabled() ) {
-			add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
-			add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
+		add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
+		add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
+	}
+
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			static::ID . '_api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			static::ID . 'number_of_images',
+			esc_html__( 'Number of images', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'number_of_images',
+				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
+				'default_value' => $settings['number_of_images'],
+				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			static::ID . 'image_size',
+			esc_html__( 'Image size', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'image_size',
+				'options'       => [
+					'256x256'   => '256x256',
+					'512x512'   => '512x512',
+					'1024x1024' => '1024x1024',
+				],
+				'default_value' => $settings['image_size'],
+				'description'   => __( 'Size of generated images.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+	}
+
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'api_key'       => '',
+			'authenticated' => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case ImageGeneration::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'number_of_images' => 1,
+						'image_size'       => '256x256',
+					]
+				);
 		}
+
+		return $common_settings;
 	}
 
 	/**
 	 * Registers a Media > Generate Image submenu
 	 */
 	public function register_generate_media_page() {
-		$settings         = $this->get_settings();
-		$number_of_images = absint( $settings['number'] );
+		$image_generation = new ImageGeneration();
 
-		add_submenu_page(
-			'upload.php',
-			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
-			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
-			'upload_files',
-			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
-			''
-		);
+		if ( $image_generation->is_feature_enabled() ) {
+			$settings         = $image_generation->get_settings( static::ID );
+			$number_of_images = absint( $settings['number_of_images'] );
+
+			add_submenu_page(
+				'upload.php',
+				$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+				$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
+				'upload_files',
+				esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+				''
+			);
+		}
 	}
 
 	/**
@@ -95,85 +178,89 @@ class DallE extends Provider {
 			return;
 		}
 
-		$settings         = $this->get_settings();
-		$number_of_images = absint( $settings['number'] );
+		$image_generation = new ImageGeneration();
 
-		wp_enqueue_media();
+		if ( $image_generation->is_feature_enabled() ) {
+			$settings = $image_generation->get_settings( static::ID );
+			$number_of_images = absint( $settings['number_of_images'] );
 
-		wp_enqueue_style(
-			'classifai-image-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
-			[],
-			get_asset_info( 'media-modal', 'version' ),
-			'all'
-		);
+			wp_enqueue_media();
 
-		wp_enqueue_script(
-			'classifai-generate-images',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
-			get_asset_info( 'media-modal', 'version' ),
-			true
-		);
+			wp_enqueue_style(
+				'classifai-image-processing-style',
+				CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
+				[],
+				get_asset_info( 'media-modal', 'version' ),
+				'all'
+			);
 
-		wp_enqueue_script(
-			'classifai-inserter-media-category',
-			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
-			get_asset_info( 'inserter-media-category', 'dependencies' ),
-			get_asset_info( 'inserter-media-category', 'version' ),
-			true
-		);
+			wp_enqueue_script(
+				'classifai-generate-images',
+				CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
+				array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
+				get_asset_info( 'media-modal', 'version' ),
+				true
+			);
 
-		/**
-		 * Filter the default attribution added to generated images.
-		 *
-		 * @since 2.1.0
-		 * @hook classifai_dalle_caption
-		 *
-		 * @param {string} $caption Attribution to be added as a caption to the image.
-		 *
-		 * @return {string} Caption.
-		 */
-		$caption = apply_filters(
-			'classifai_dalle_caption',
-			sprintf(
-				/* translators: %1$s is replaced with the OpenAI DALL·E URL */
-				esc_html__( 'Image generated by <a href="%s">OpenAI\'s DALL·E</a>', 'classifai' ),
-				'https://openai.com/research/dall-e'
-			)
-		);
+			wp_enqueue_script(
+				'classifai-inserter-media-category',
+				CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
+				get_asset_info( 'inserter-media-category', 'dependencies' ),
+				get_asset_info( 'inserter-media-category', 'version' ),
+				true
+			);
 
-		wp_localize_script(
-			'classifai-generate-images',
-			'classifaiDalleData',
-			[
-				'endpoint'   => 'classifai/v1/openai/generate-image',
-				'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
-				'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
-				'buttonText' => esc_html__( 'Select image', 'classifai' ),
-				'caption'    => $caption,
-			]
-		);
+			/**
+			 * Filter the default attribution added to generated images.
+			 *
+			 * @since 2.1.0
+			 * @hook classifai_dalle_caption
+			 *
+			 * @param {string} $caption Attribution to be added as a caption to the image.
+			 *
+			 * @return {string} Caption.
+			 */
+			$caption = apply_filters(
+				'classifai_dalle_caption',
+				sprintf(
+					/* translators: %1$s is replaced with the OpenAI DALL·E URL */
+					esc_html__( 'Image generated by <a href="%s">OpenAI\'s DALL·E</a>', 'classifai' ),
+					'https://openai.com/research/dall-e'
+				)
+			);
 
-		if ( 'upload.php' === $hook_suffix ) {
-			$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			wp_localize_script(
+				'classifai-generate-images',
+				'classifaiDalleData',
+				[
+					'endpoint'   => 'classifai/v1/openai/generate-image',
+					'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
+					'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
+					'buttonText' => esc_html__( 'Select image', 'classifai' ),
+					'caption'    => $caption,
+				]
+			);
 
-			if ( 'classifai-generate-image' === $action ) {
-				wp_enqueue_script(
-					'classifai-generate-images-media-upload',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-					array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
-					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
-					true
-				);
+			if ( 'upload.php' === $hook_suffix ) {
+				$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-				wp_localize_script(
-					'classifai-generate-images-media-upload',
-					'classifaiGenerateImages',
-					[
-						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
-					]
-				);
+				if ( 'classifai-generate-image' === $action ) {
+					wp_enqueue_script(
+						'classifai-generate-images-media-upload',
+						CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
+						array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
+						get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+						true
+					);
+
+					wp_localize_script(
+						'classifai-generate-images-media-upload',
+						'classifaiGenerateImages',
+						[
+							'upload_url' => esc_url( admin_url( 'upload.php' ) ),
+						]
+					);
+				}
 			}
 		}
 	}
@@ -182,8 +269,11 @@ class DallE extends Provider {
 	 * Print the templates we need for our media modal integration.
 	 */
 	public function print_media_templates() {
-		$settings         = $this->get_settings();
-		$number_of_images = absint( $settings['number'] );
+		$image_generation = new ImageGeneration();
+
+		if ( $image_generation->is_feature_enabled() ) :
+			$settings         = $image_generation->get_settings( static::ID );
+			$number_of_images = absint( $settings['number_of_images'] );
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
@@ -252,136 +342,32 @@ class DallE extends Provider {
 		/* phpcs:enable WordPressVIPMinimum.Security.Mustache.OutputNotation */
 		?>
 
-		<?php
+		<?php endif;
 	}
 
 	/**
 	 * Setup fields
 	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		add_settings_field(
-			'enable-image-gen',
-			esc_html__( 'Enable image generation', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_image_gen',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_image_gen'],
-				'description'   => __( 'When enabled, a new Generate images tab will be shown in the media upload flow, allowing you to generate and import images.', 'classifai' ),
-			]
-		);
-
-		// Get all roles that have the upload_files cap.
-		$roles = get_editable_roles() ?? [];
-		$roles = array_filter(
-			$roles,
-			function( $role ) {
-				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
-			}
-		);
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for DALL·E
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_allowed_image_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $default_settings );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate images. Note that the roles above only include those that have permissions to upload media.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'number',
-			esc_html__( 'Number of images', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'number',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number'],
-				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'size',
-			esc_html__( 'Image size', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'size',
-				'options'       => [
-					'256x256'   => '256x256',
-					'512x512'   => '512x512',
-					'1024x1024' => '1024x1024',
-				],
-				'default_value' => $default_settings['size'],
-				'description'   => __( 'Size of generated images.', 'classifai' ),
-			]
-		);
-	}
+	public function setup_fields_sections() {}
 
 	/**
 	 * Sanitization for the options being saved.
 	 *
-	 * @param array $settings Array of settings about to be saved.
+	 * @param array $new_settings Array of settings about to be saved.
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
-		);
+	public function sanitize_settings( $new_settings ) {
+		$settings                                    = $this->feature_instance->get_settings();
+		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		if ( empty( $settings['enable_image_gen'] ) || 1 !== (int) $settings['enable_image_gen'] ) {
-			$new_settings['enable_image_gen'] = 'no';
-		} else {
-			$new_settings['enable_image_gen'] = '1';
-		}
+		if ( $this->feature_instance instanceof ImageGeneration ) {
+			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 1 && (int) $settings['number'] <= 10 ) {
-			$new_settings['number'] = absint( $settings['number'] );
-		} else {
-			$new_settings['number'] = 1;
-		}
-
-		if ( isset( $settings['size'] ) && in_array( $settings['size'], [ '256x256', '512x512', '1024x1024' ], true ) ) {
-			$new_settings['size'] = sanitize_text_field( $settings['size'] );
-		} else {
-			$new_settings['size'] = '1024x1024';
+			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '256x256', '512x512', '1024x1024' ] ) ) {
+				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] ?? $settings[ static::ID ]['image_size'] );
+			}
 		}
 
 		return $new_settings;
@@ -399,16 +385,7 @@ class DallE extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
-		return [
-			'authenticated'    => false,
-			'api_key'          => '',
-			'enable_image_gen' => false,
-			'roles'            => array_keys( get_editable_roles() ?? [] ),
-			'number'           => 1,
-			'size'             => '1024x1024',
-		];
-	}
+	public function get_default_settings() {}
 
 	/**
 	 * Provides debug information related to the provider.
@@ -429,8 +406,8 @@ class DallE extends Provider {
 			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
 			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Number of images', 'classifai' ) => absint( $settings['number'] ?? 1 ),
-			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['size'] ?? '1024x1024' ),
+			__( 'Number of images', 'classifai' ) => absint( $settings['number_of_images'] ?? 1 ),
+			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['image_size'] ?? '1024x1024' ),
 			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) ),
 		];
 	}
@@ -447,25 +424,18 @@ class DallE extends Provider {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
-		$args     = wp_parse_args(
+		$image_generation = new ImageGeneration();
+		$settings         = $image_generation->get_settings( static::ID );
+		$args             = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'    => $settings['number'] ?? 1,
-				'size'   => $settings['size'] ?? '1024x1024',
+				'num'    => $settings['number_of_images'] ?? 1,
+				'size'   => $settings['image_size'] ?? '1024x1024',
 				'format' => 'url',
 			]
 		);
 
-		// These checks already ran in the REST permission_callback,
-		// but we run them again here in case this method is called directly.
-		if ( ! $this->is_feature_enabled() ) {
-			// Note that we purposely leave off the textdomain here as this is the same error
-			// message core uses, so we want translations to load from there.
-			return new WP_Error( 'rest_forbidden', esc_html__( 'Sorry, you are not allowed to do that.' ) );
-		}
-
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_image_gen'] ) && 'no' === $settings['enable_image_gen'] ) ) {
+		if ( ! $image_generation->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -538,39 +508,93 @@ class DallE extends Provider {
 		return $response;
 	}
 
-	/**
-	 * Checks whether we can generate images.
-	 *
-	 * @return bool
-	 */
-	public function is_feature_enabled() {
-		$access   = false;
-		$settings = $this->get_settings();
-
-		// Check if the current user has permission to generate images.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if (
-			current_user_can( 'upload_files' )
-			&& ( ! empty( $roles ) && empty( array_diff( $user_roles, $roles ) ) )
-			&& ( isset( $settings['enable_image_gen'] ) && 1 === (int) $settings['enable_image_gen'] )
-		) {
-			$access = true;
-		}
-
-		/**
-		 * Filter to override permission to use the image gen feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_enable_image_gen
-		 *
-		 * @param {bool} $access  Current access value.
-		 * @param {array} $settings Feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_openai_dalle_enable_image_gen', $access, $settings );
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1/openai',
+			'generate-image',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'generate_image' ],
+				'args'                => [
+					'prompt' => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
+					],
+					'n'      => [
+						'type'              => 'integer',
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+					],
+					'size'   => [
+						'type'              => 'string',
+						'enum'              => [
+							'256x256',
+							'512x512',
+							'1024x1024',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
+					],
+					'format' => [
+						'type'              => 'string',
+						'enum'              => [
+							'url',
+							'b64_json',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
+			]
+		);
 	}
 
+	/**
+	 * Handle request to generate an image for a given prompt.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function generate_image( WP_REST_Request $request ) {
+		return rest_ensure_response(
+			$this->generate_image_callback(
+				$request->get_param( 'prompt' ),
+				[
+					'num'    => $request->get_param( 'n' ),
+					'size'   => $request->get_param( 'size' ),
+					'format' => $request->get_param( 'format' ),
+				]
+			)
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate an image.
+	 *
+	 * This check ensures we have a valid user with proper capabilities
+	 * making the request, that we are properly authenticated with OpenAI
+	 * and that image generation is turned on.
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function generate_image_permissions_check() {
+		$image_generation = new ImageGeneration();
+		$settings         = $image_generation->get_settings( static::ID );
+
+		// Ensure the feature is enabled. Also runs a user check.
+		if ( ! $image_generation->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
 }

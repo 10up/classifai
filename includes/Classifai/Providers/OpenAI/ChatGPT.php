@@ -304,14 +304,14 @@ class ChatGPT extends Provider {
 				);
 		}
 
-		return [];
+		return $common_settings;
 	}
 
 	public function sanitize_settings( $new_settings ) {
-		$settings                                            = $this->feature_instance->get_settings();
-		$api_key_settings                                    = $this->sanitize_api_key_settings( $new_settings, $settings );
-		$new_settings[ static::ID ]['api_key']               = $api_key_settings[ static::ID ]['api_key'];
-		$new_settings[ static::ID ]['authenticated']         = $api_key_settings[ static::ID ]['authenticated'];
+		$settings                                    = $this->feature_instance->get_settings();
+		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$new_settings[ static::ID ]['number_of_titles']      = $this->sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
