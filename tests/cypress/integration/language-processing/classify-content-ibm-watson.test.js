@@ -220,10 +220,30 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 
 	it( 'Can create post and taxonomy terms get created by ClassifAI (with default threshold)', () => {
 		const threshold = 55;
+
+		// Update Threshold to 55.
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+		);
+
+		cy.get( '#classifai-settings-category_threshold' )
+			.clear()
+			.type( threshold );
+		cy.get( '#classifai-settings-keyword_threshold' )
+			.clear()
+			.type( threshold );
+		cy.get( '#classifai-settings-entity_threshold' )
+			.clear()
+			.type( threshold );
+		cy.get( '#classifai-settings-concept_threshold' )
+			.clear()
+			.type( threshold );
+		cy.get( '#submit' ).click();
+
 		// Create Test Post
 		cy.createPost( {
-			title: 'Test NLU post',
-			content: 'Test NLU Content',
+			title: 'Test NLU post with 55 Threshold',
+			content: 'Test NLU Content with 55 Threshold',
 		} );
 
 		// Close post publish panel
@@ -240,7 +260,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		// Verify Each Created taxonomies.
 		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
 			( taxonomy ) => {
-				cy.verifyPostTaxonomyTerms( taxonomy, threshold );
+				cy.verifyPostTaxonomyTerms( taxonomy, threshold / 100 );
 			}
 		);
 	} );
