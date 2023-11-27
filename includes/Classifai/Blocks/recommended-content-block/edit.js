@@ -19,7 +19,7 @@ import {
 import { list, grid } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
-import TaxonomyControls from '../../../../src/js/taxonomy-controls';
+import TermSelector from './term-selector';
 import { usePostTypes } from './utils';
 
 /**
@@ -129,7 +129,7 @@ const RecommendedContentBlockEdit = ( props ) => {
 						/>
 					) }
 					{ postTypesSelectOptions && (
-						<TaxonomyControls
+						<TermSelector
 							onChange={ setAttributes }
 							query={ attributes }
 						/>
