@@ -219,7 +219,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	} );
 
 	it( 'Can create post and taxonomy terms get created by ClassifAI (with default threshold)', () => {
-		const threshold = 0.7;
+		const threshold = 55;
 		// Create Test Post
 		cy.createPost( {
 			title: 'Test NLU post',
