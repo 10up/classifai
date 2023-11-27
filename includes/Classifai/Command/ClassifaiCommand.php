@@ -3,6 +3,10 @@
 namespace Classifai\Command;
 
 use Classifai\Admin\SavePostHandler;
+use Classifai\Features\AudioTranscriptsGeneration;
+use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\ImageCropping;
+use Classifai\Features\TextToSpeech;
 use Classifai\Watson\APIRequest;
 use Classifai\Watson\Classifier;
 use Classifai\Watson\Normalizer;
@@ -14,6 +18,7 @@ use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
+use WP_Error;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -242,14 +247,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'per_page'    => 100,
 		];
 
+		$feature_speech     = new TextToSpeech();
+		$allowed_post_types = $feature_speech->get_tts_supported_post_types();
 		$opts               = wp_parse_args( $opts, $defaults );
 		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
-		$allowed_post_types = Speech::get_supported_post_types();
 
 		$count  = 0;
 		$errors = 0;
-
-		$save_post_handler = new SavePostHandler();
 
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
@@ -297,7 +301,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $save_post_handler->synthesize_speech( $post_id );
+						$result = $feature_speech->run( $post_id );
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
@@ -345,7 +349,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				if ( ! $dry_run ) {
-					$result = $save_post_handler->synthesize_speech( $post_id );
+					$result = $feature_speech->run( $post_id );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
@@ -401,8 +405,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$count  = 0;
 		$errors = 0;
 
-		$whisper  = new Whisper( false );
-		$settings = $whisper->get_settings();
+		$audio_transcription = new AudioTranscriptsGeneration();
+		$feature_settings    = $audio_transcription->get_settings();
 
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
@@ -429,7 +433,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			foreach ( $attachment_ids as $attachment_id ) {
 				$attachment = get_post( $attachment_id );
-				$transcribe = new Transcribe( $attachment_id, $settings );
+				$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
 				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
 					$errors ++;
@@ -481,7 +485,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $attachments as $attachment_id ) {
 					$attachment = get_post( $attachment_id );
-					$transcribe = new Transcribe( $attachment_id, $settings );
+					$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
 					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
 						$errors ++;
@@ -564,8 +568,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$errors  = 0;
 		$skipped = 0;
 
-		$chat_gpt = new ChatGPT( false );
-
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
 			if ( 'false' === $opts['dry-run'] ) {
@@ -617,7 +619,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						continue;
 					}
 
-					$result = $chat_gpt->generate_excerpt( (int) $post->ID );
+					$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
@@ -670,7 +672,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					continue;
 				}
 
-				$result = $chat_gpt->generate_excerpt( (int) $post_id );
+				$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
 
 				if ( is_wp_error( $result ) ) {
 					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
@@ -836,9 +838,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options.
 	 */
 	public function crop( $args = [], $opts = [] ) {
-		$classifier     = new ComputerVision( false );
-		$settings       = $classifier->get_settings();
-		$smart_cropping = new SmartCropping( $settings );
+		$image_cropping = new ImageCropping();
+		$provider       = $image_cropping->get_feature_provider_instance();
+		$provider_class = get_class( $provider );
+		$settings       = $image_cropping->get_settings( $provider_class::ID );
 		$default_opts   = [
 			'limit' => false,
 		];
@@ -875,19 +878,24 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
 
 			foreach ( $current_meta['sizes'] as $size => $size_data ) {
-				if ( ! $smart_cropping->should_crop( $size ) ) {
-					continue;
-				}
+				switch ( $provider_class::ID ) {
+					case ComputerVision::ID:
+						$smart_cropping = new SmartCropping( $settings );
 
-				$data = [
-					'width'  => $size_data['width'],
-					'height' => $size_data['height'],
-				];
+						if ( ! $smart_cropping->should_crop( $size ) ) {
+							continue;
+						}
 
-				$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
+						$data = [
+							'width'  => $size_data['width'],
+							'height' => $size_data['height'],
+						];
 
-				if ( is_wp_error( $smart_thumbnail ) ) {
-					$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
+						$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
+						if ( is_wp_error( $smart_thumbnail ) ) {
+							$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
+						}
+						break;
 				}
 			}
 		}

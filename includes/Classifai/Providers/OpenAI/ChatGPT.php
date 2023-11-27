@@ -323,6 +323,11 @@ class ChatGPT extends Provider {
 			$new_settings[ static::ID ]['generate_excerpt_prompt'] = $this->sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
 		}
 
+		if ( $this->feature_instance instanceof ContentResizing ) {
+			$new_settings[ static::ID ]['condense_text_prompt'] = $this->sanitize_prompts( 'condense_text_prompt', $new_settings );
+			$new_settings[ static::ID ]['expand_text_prompt']   = $this->sanitize_prompts( 'expand_text_prompt', $new_settings );
+		}
+
 		return $new_settings;
 	}
 
@@ -631,13 +636,13 @@ class ChatGPT extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'excerpt':
-				$return = $this->generate_excerpt( $post_id, $args );
+				$return = ( new ExcerptGeneration() )->run( $post_id, $args );
 				break;
 			case 'title':
-				$return = $this->generate_titles( $post_id, $args );
+				$return = ( new TitleGeneration() )->run( $post_id, $args );
 				break;
 			case 'resize_content':
-				$return = $this->resize_content( $post_id, $args );
+				$return = ( new ContentResizing() )->run( $post_id, $args );
 				break;
 		}
 

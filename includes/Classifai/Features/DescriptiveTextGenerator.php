@@ -209,4 +209,27 @@ class DescriptiveTextGenerator extends Feature {
 			$settings
 		);
 	}
+
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'] ?? ComputerVision::ID;
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$result            = '';
+
+		if ( ComputerVision::ID === $provider_instance::ID ) {
+			/** @var ComputerVision $provider_instance */
+			$result = call_user_func_array(
+				[ $provider_instance, 'generate_alt_tags' ],
+				[ ...$args ]
+			);
+		}
+
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$result,
+			$provider_instance,
+			$args,
+			$this
+		);
+	}
 }

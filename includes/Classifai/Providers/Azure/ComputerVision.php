@@ -9,7 +9,7 @@ use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ImageTagsGenerator;
 use Classifai\Features\ImageTextExtraction;
 use Classifai\Features\PDFTextExtraction;
-use Classifai\Features\SmartCropping;
+use Classifai\Features\ImageCropping;
 use Classifai\Providers\Provider;
 use DOMDocument;
 use WP_Error;
@@ -357,7 +357,7 @@ class ComputerVision extends Provider {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 
 
-		if ( ( new SmartCropping() )->is_feature_enabled() ) {
+		if ( ( new ImageCropping() )->is_feature_enabled() ) {
 			add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
 		}
 
@@ -503,7 +503,7 @@ class ComputerVision extends Provider {
 		$alt_generator  = new DescriptiveTextGenerator();
 		$image_tagging  = new ImageTagsGenerator();
 		$image_to_text  = new ImageTextExtraction();
-		$crop_generator = new SmartCropping();
+		$crop_generator = new ImageCropping();
 
 		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No descriptive text? Rescan image', 'classifai' ) : __( 'Generate descriptive text', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
@@ -585,7 +585,7 @@ class ComputerVision extends Provider {
 		$pdf_to_text   = new PDFTextExtraction();
 		$alt_generator = new DescriptiveTextGenerator();
 		$image_to_text = new ImageTextExtraction();
-		$smart_crop    = new SmartCropping();
+		$smart_crop    = new ImageCropping();
 		$image_tagging = new ImageTagsGenerator();
 
 		// PDF to text.
@@ -740,28 +740,33 @@ class ComputerVision extends Provider {
 		}
 
 		if ( clean_input( 'rescan-smart-crop' ) ) {
-			$this->smart_crop_image( $metadata, $attachment_id );
+			$feature = new ImageCropping();
+			$feature->run( $metadata, $attachment_id );
 		}
 
 		if ( clean_input( 'rescan-tags' ) ) {
-			$image_scan = $this->scan_image( $image_url, new ImageTagsGenerator() );
+			$feature    = new ImageTagsGenerator();
+			$image_scan = $this->scan_image( $image_url, $feature );
 
 			if ( isset( $image_scan->tags ) ) {
-				$this->generate_image_tags( $image_scan->tags, $attachment_id );
+				$feature->run( $image_scan->tags, $attachment_id );
 			}
 		}
 
 		if ( clean_input( 'rescan-captions' ) ) {
-			$image_scan = $this->scan_image( $image_url, new DescriptiveTextGenerator() );
+			$feature    = new DescriptiveTextGenerator();
+			$image_scan = $this->scan_image( $image_url, $feature );
 
 			if ( isset( $image_scan->description->captions ) ) {
-				$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+				$feature->run( $image_scan->description->captions, $attachment_id );
 			}
 		}
 
 		// Are we updating the OCR text?
 		if ( clean_input( 'rescan-ocr' ) ) {
+			$feature = new ImageTextExtraction();
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
+			// $feature->run( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 	}
 
@@ -776,7 +781,7 @@ class ComputerVision extends Provider {
 	 * @return array Filtered attachment metadata.
 	 */
 	public function smart_crop_image( $metadata, $attachment_id ) {
-		$feature  = new SmartCropping();
+		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
@@ -854,12 +859,12 @@ class ComputerVision extends Provider {
 					// Check for captions
 					if ( isset( $image_scan->description->captions ) ) {
 						// Process the captions
-						$this->generate_alt_tags( $image_scan->description->captions, $attachment_id );
+						( new DescriptiveTextGenerator() )->run( $image_scan->description->captions, $attachment_id );
 					}
 					// Check for tags
 					if ( isset( $image_scan->tags ) ) {
 						// Process the tags
-						$this->generate_image_tags( $image_scan->tags, $attachment_id );
+						( new ImageTagsGenerator() )->run( $image_scan->tags, $attachment_id );
 					}
 				}
 			}
@@ -1004,7 +1009,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return string
 	 */
-	protected function generate_alt_tags( $captions, $attachment_id ) {
+	public function generate_alt_tags( $captions, $attachment_id, $feature = null ) {
 		$rtn = '';
 
 		$enabled_fields = $this->get_alt_text_settings();
@@ -1023,8 +1028,7 @@ class ComputerVision extends Provider {
 
 		// If $captions isn't an array, don't save them.
 		if ( is_array( $captions ) && ! empty( $captions ) ) {
-			$alt_generator = new DescriptiveTextGenerator();
-			$settings      = $alt_generator->get_settings( static::ID );
+			$settings      = $feature->get_settings( static::ID );
 			$threshold     = $settings['descriptive_confidence_threshold'];
 
 			// Save the first caption as the alt text if it passes the threshold.
@@ -1033,7 +1037,9 @@ class ComputerVision extends Provider {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
 				}
 
-				if ( in_array( 'caption', $enabled_fields, true ) ) {
+				$excerpt = get_the_excerpt( $attachment_id );
+
+				if ( in_array( 'caption', $enabled_fields, true ) && $excerpt !== $captions[0]->text ) {
 					wp_update_post(
 						array(
 							'ID'           => $attachment_id,
@@ -1042,7 +1048,9 @@ class ComputerVision extends Provider {
 					);
 				}
 
-				if ( in_array( 'description', $enabled_fields, true ) ) {
+				$content = get_the_content( null, false, $attachment_id );
+
+				if ( in_array( 'description', $enabled_fields, true ) && $content !== $captions[0]->text ) {
 					wp_update_post(
 						array(
 							'ID'           => $attachment_id,
@@ -1078,9 +1086,9 @@ class ComputerVision extends Provider {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function read_pdf( $attachment_id ) {
-		$pdf_to_text     = new PDFTextExtraction();
-		$settings        = $pdf_to_text->get_settings( static::ID );
-		$should_read_pdf = $pdf_to_text->is_feature_enabled();
+		$feature         = new PDFTextExtraction();
+		$settings        = $feature->get_settings( static::ID );
+		$should_read_pdf = $feature->is_feature_enabled();
 
 		if ( ! $should_read_pdf ) {
 			return false;
@@ -1122,9 +1130,8 @@ class ComputerVision extends Provider {
 	 *
 	 * @return string|array|WP_Error
 	 */
-	protected function generate_image_tags( $tags, $attachment_id ) {
+	public function generate_image_tags( $tags, $attachment_id, $feature = null ) {
 		$rtn      = '';
-		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
 
 		// Don't save tags if the setting is disabled.
@@ -1356,11 +1363,13 @@ class ComputerVision extends Provider {
 		$image_url = get_modified_image_source_url( $post_id );
 
 		if ( 'ocr' === $route_to_call ) {
-			return $this->ocr_processing( $metadata, $post_id, true );
+			$feature = new ImageTextExtraction();
+			return $feature->run( $metadata, $post_id, true );
 		}
 
 		if ( 'read-pdf' === $route_to_call ) {
-			return $this->read_pdf( $post_id );
+			$feature = new PDFTextExtraction();
+			return $feature->run( $post_id );
 		}
 
 		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
@@ -1379,20 +1388,18 @@ class ComputerVision extends Provider {
 		switch ( $route_to_call ) {
 			case 'alt-tags':
 				$feature            = new DescriptiveTextGenerator();
-				$generator_fn       = 'generate_alt_tags';
 				$image_scan_results = $this->scan_image( $image_url, $feature );
 				$fn_arg             = $image_scan_results->description->captions;
 				break;
 
 			case 'image-tags':
 				$feature            = new ImageTagsGenerator();
-				$generator_fn       = 'generate_image_tags';
 				$image_scan_results = $this->scan_image( $image_url, $feature );
-				$fn_arg             = $image_scan_results->description->tags;
+				$fn_arg             = $image_scan_results->tags;
 				break;
 
 			case 'ocr':
-				$feature            = new SmartCropping();
+				$feature            = new ImageCropping();
 				$generator_fn       = 'smart_crop_image';
 				$image_scan_results = $this->scan_image( $image_url, $feature );
 				$fn_arg             = $metadata;
@@ -1403,7 +1410,7 @@ class ComputerVision extends Provider {
 			return $image_scan_results;
 		}
 
-		return $this->$generator_fn( $fn_arg, $post_id );
+		return $feature->run( $fn_arg, $post_id );
 	}
 
 	public function descriptive_text_generator_permissions_check( $request ) {

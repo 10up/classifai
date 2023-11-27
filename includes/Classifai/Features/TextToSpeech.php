@@ -16,7 +16,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_text_to_speech';
+	const ID = 'feature_text_to_speech_generation';
 
 	/**
 	 * Constructor.
@@ -263,6 +263,29 @@ class TextToSpeech extends Feature {
 			'classifai_' . static::ID . '_sanitize_settings',
 			$new_settings,
 			$settings
+		);
+	}
+
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'] ?? Speech::ID;
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$result            = '';
+
+		if ( Speech::ID === $provider_instance::ID ) {
+			/** @var Speech $provider_instance */
+			return call_user_func_array(
+				[ $provider_instance, 'synthesize_speech' ],
+				[ ...$args ]
+			);
+		}
+
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$result,
+			$provider_instance,
+			$args,
+			$this
 		);
 	}
 }

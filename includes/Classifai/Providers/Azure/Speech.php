@@ -587,7 +587,7 @@ class Speech extends Provider {
 		}
 
 		$normalizer          = new Normalizer();
-		$feature             = new TextToSpeech( false );
+		$feature             = new TextToSpeech();
 		$settings            = $feature->get_settings();
 		$post                = get_post( $post_id );
 		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
@@ -740,7 +740,7 @@ class Speech extends Provider {
 			( $process_content && null === $request->get_param( 'classifai_synthesize_speech' ) ) ||
 			true === $request->get_param( 'classifai_synthesize_speech' )
 		) {
-			$this->synthesize_speech( $request->get_param( 'id' ) );
+			( new TextToSpeech() )->run( $request->get_param( 'id' ) );
 		}
 	}
 

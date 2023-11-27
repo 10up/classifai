@@ -8,13 +8,13 @@ use Classifai\Services\ImageProcessing;
 /**
  * Class TitleGeneration
  */
-class SmartCropping extends Feature {
+class ImageCropping extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_smart_cropping';
+	const ID = 'feature_image_cropping';
 
 	/**
 	 * Constructor.
@@ -38,7 +38,7 @@ class SmartCropping extends Feature {
 	public function get_label() {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
-			__( 'Smart Cropping', 'classifai' )
+			__( 'Image Cropping', 'classifai' )
 		);
 	}
 
@@ -207,6 +207,32 @@ class SmartCropping extends Feature {
 			'classifai_' . static::ID . '_sanitize_settings',
 			$new_settings,
 			$settings
+		);
+	}
+
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'] ?? ComputerVision::ID;
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$result            = '';
+
+		if ( ComputerVision::ID === $provider_instance::ID ) {
+			/** @var ComputerVision $provider_instance */
+			$result = call_user_func_array(
+				[ $provider_instance, 'smart_crop_image' ],
+				[
+					...$args,
+					$this
+				]
+			);
+		}
+
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$result,
+			$provider_instance,
+			$args,
+			$this
 		);
 	}
 }

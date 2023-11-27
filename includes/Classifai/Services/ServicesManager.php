@@ -81,7 +81,7 @@ class ServicesManager {
 		return [
 			'\Classifai\Features\DescriptiveTextGenerator',
 			'\Classifai\Features\ImageTagsGenerator',
-			'\Classifai\Features\SmartCropping',
+			'\Classifai\Features\ImageCropping',
 			'\Classifai\Features\ImageTextExtraction',
 			'\Classifai\Features\PDFTextExtraction',
 		];

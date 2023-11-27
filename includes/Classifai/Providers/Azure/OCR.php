@@ -253,6 +253,8 @@ class OCR {
 				 */
 				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $scan );
 
+				$content = get_the_content( null, false, $attachment_id );
+
 				$post_args = [
 					'ID'           => $attachment_id,
 					'post_content' => sanitize_text_field( $text ),
@@ -277,12 +279,14 @@ class OCR {
 				 */
 				$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $text, $scan );
 
-				wp_update_post( $post_args );
+				if ( $content !== $text ) {
+					wp_update_post( $post_args );
 
-				$rtn = $text;
+					$rtn = $text;
 
-				// Save all the results for later
-				update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
+					// Save all the results for later
+					update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
+				}
 			}
 		} else {
 			$rtn = $scan;

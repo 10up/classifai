@@ -222,7 +222,7 @@ abstract class Feature {
 	 *
 	 * @return \Classifai\Providers
 	 */
-	protected function get_feature_provider_instance( $provider_id = '' ) {
+	public function get_feature_provider_instance( $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
 		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
 
