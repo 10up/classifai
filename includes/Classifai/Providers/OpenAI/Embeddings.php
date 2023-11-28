@@ -396,7 +396,7 @@ class Embeddings extends Provider {
 	/**
 	 * Get the data to preview terms.
 	 *
-	 * @since 2.6.0
+	 * @since 2.5.0
 	 *
 	 * @return array
 	 */
@@ -569,7 +569,7 @@ class Embeddings extends Provider {
 	/**
 	 * Get the similarity between an embedding and all terms.
 	 *
-	 * @since 2.6.0
+	 * @since 2.5.0
 	 *
 	 * @param array $embedding Embedding data.
 	 *
