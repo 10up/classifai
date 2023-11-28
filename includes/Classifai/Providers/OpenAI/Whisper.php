@@ -307,7 +307,7 @@ class Whisper extends Provider {
 	public function generate_audio_transcript( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 
-		return rest_ensure_response( $this->transcribe_audio( $attachment_id ) );
+		return rest_ensure_response( ( new AudioTranscriptsGeneration() )->run( $attachment_id ) );
 	}
 
 	/**
@@ -334,9 +334,7 @@ class Whisper extends Provider {
 			return false;
 		}
 
-		$feature = new AudioTranscriptsGeneration();
-
-		if ( ! $feature->is_feature_enabled() ) {
+		if ( ! ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Audio transciption is not currently enabled.', 'classifai' ) );
 		}
 

@@ -419,7 +419,7 @@ class DallE extends Provider {
 	 * @param array  $args Optional arguments passed to endpoint.
 	 * @return string|WP_Error
 	 */
-	public function generate_image_callback( string $prompt = '', array $args = [] ) {
+	public function generate_image( string $prompt = '', array $args = [] ) {
 		if ( ! $prompt ) {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
@@ -514,7 +514,7 @@ class DallE extends Provider {
 			'generate-image',
 			[
 				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_image' ],
+				'callback'            => [ $this, 'generate_image_endpoint_callback' ],
 				'args'                => [
 					'prompt' => [
 						'required'          => true,
@@ -564,9 +564,9 @@ class DallE extends Provider {
 	 * @param WP_REST_Request $request The full request object.
 	 * @return \WP_REST_Response|WP_Error
 	 */
-	public function generate_image( WP_REST_Request $request ) {
+	public function generate_image_endpoint_callback( WP_REST_Request $request ) {
 		return rest_ensure_response(
-			$this->generate_image_callback(
+			( new ImageGeneration() )->run(
 				$request->get_param( 'prompt' ),
 				[
 					'num'    => $request->get_param( 'n' ),
@@ -588,7 +588,6 @@ class DallE extends Provider {
 	 */
 	public function generate_image_permissions_check() {
 		$image_generation = new ImageGeneration();
-		$settings         = $image_generation->get_settings( static::ID );
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $image_generation->is_feature_enabled() ) {

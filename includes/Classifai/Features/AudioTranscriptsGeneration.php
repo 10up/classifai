@@ -128,7 +128,7 @@ class AudioTranscriptsGeneration extends Feature {
 	public function is_feature_enabled() {
 		$access          = false;
 		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? Speech::ID;
+		$provider_id     = $settings['provider'] ?? Whisper::ID;
 		$user_roles      = wp_get_current_user()->roles ?? [];
 		$feature_roles   = $settings['roles'] ?? [];
 
@@ -166,7 +166,7 @@ class AudioTranscriptsGeneration extends Feature {
 		$feature_settings  = [
 			'status'    => '0',
 			'roles'     => $this->roles,
-			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
+			'provider'  => Whisper::ID,
 		];
 
 		return
@@ -202,6 +202,29 @@ class AudioTranscriptsGeneration extends Feature {
 			'classifai_' . static::ID . '_sanitize_settings',
 			$new_settings,
 			$settings
+		);
+	}
+
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'] ?? Whisper::ID;
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$result            = '';
+
+		if ( Whisper::ID === $provider_instance::ID ) {
+			/** @var Whisper $provider_instance */
+			$result = call_user_func_array(
+				[ $provider_instance, 'transcribe_audio' ],
+				[ ...$args ]
+			);
+		}
+
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$result,
+			$provider_instance,
+			$args,
+			$this
 		);
 	}
 }

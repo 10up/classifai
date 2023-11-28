@@ -189,7 +189,7 @@ class ImageGeneration extends Feature {
 		$feature_settings  = [
 			'status'    => '0',
 			'roles'     => $this->roles,
-			'provider'  => \Classifai\Providers\OpenAI\DallE::ID,
+			'provider'  => DallE::ID,
 		];
 
 		return
@@ -225,6 +225,29 @@ class ImageGeneration extends Feature {
 			'classifai_' . static::ID . '_sanitize_settings',
 			$new_settings,
 			$settings
+		);
+	}
+
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'] ?? DallE::ID;
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$result            = '';
+
+		if ( DallE::ID === $provider_instance::ID ) {
+			/** @var DallE $provider_instance */
+			$result = call_user_func_array(
+				[ $provider_instance, 'generate_image' ],
+				[ ...$args ]
+			);
+		}
+
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$result,
+			$provider_instance,
+			$args,
+			$this
 		);
 	}
 }
