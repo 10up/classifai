@@ -33,10 +33,11 @@ class Linker {
 	 * @param int   $post_id The post to link to.
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $options Unused.
+	 * @param bool  $link_terms Whether to link the terms to the post or return the term ids.
 	 *
 	 * @return array The terms that were linked.
 	 */
-	public function link( $post_id, $output, $options = [] ) {
+	public function link( $post_id, $output, $options = [], $link_terms = true ) {
 		$all_terms = [];
 
 		if ( ! empty( $output['categories'] ) ) {
@@ -59,7 +60,7 @@ class Linker {
 			$all_terms = array_merge_recursive( $all_terms, $terms );
 		}
 
-		if ( ! empty( $all_terms ) ) {
+		if ( ! empty( $all_terms ) && $link_terms ) {
 			foreach ( $all_terms as $taxonomy => $terms ) {
 				wp_set_object_terms( $post_id, $terms, $taxonomy, false );
 			}
@@ -110,12 +111,12 @@ class Linker {
 							$term = wp_insert_term( $part, $taxonomy, [ 'parent' => $parent ] );
 
 							if ( ! is_wp_error( $term ) ) {
-								$parent          = (int) $term['term_id'];
-								$terms_to_link[] = (int) $term['term_id'];
+								$parent                 = (int) $term['term_id'];
+								$terms_to_link[ $part ] = (int) $term['term_id'];
 							}
 						} else {
-							$parent          = $term->term_id;
-							$terms_to_link[] = $term->term_id;
+							$parent                 = $term->term_id;
+							$terms_to_link[ $part ] = $term->term_id;
 						}
 					}
 				}
@@ -168,10 +169,10 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = (int) $term['term_id'];
+						$terms_to_link[ $name ] = (int) $term['term_id'];
 					}
 				} else {
-					$terms_to_link[] = $term->term_id;
+					$terms_to_link[ $name ] = $term->term_id;
 				}
 			}
 		}
@@ -221,7 +222,7 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = (int) $term['term_id'];
+						$terms_to_link[ $name ] = (int) $term['term_id'];
 
 						if ( ! empty( $concept['dbpedia_resource'] ) ) {
 							update_term_meta(
@@ -232,7 +233,7 @@ class Linker {
 						}
 					}
 				} else {
-					$terms_to_link[] = $term->term_id;
+					$terms_to_link[ $name ] = $term->term_id;
 				}
 			}
 		}
@@ -287,7 +288,7 @@ class Linker {
 					$term = wp_insert_term( $name, $taxonomy, [] );
 
 					if ( ! is_wp_error( $term ) ) {
-						$terms_to_link[] = (int) $term['term_id'];
+						$terms_to_link[ $name ] = (int) $term['term_id'];
 
 						if ( ! empty( $entity['disambiguation']['dbpedia_resource'] ) ) {
 							update_term_meta(
@@ -304,7 +305,7 @@ class Linker {
 						}
 					}
 				} else {
-					$terms_to_link[] = $term->term_id;
+					$terms_to_link[ $name ] = $term->term_id;
 				}
 			}
 		}

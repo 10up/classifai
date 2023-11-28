@@ -40,7 +40,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 4096;
+	protected $max_tokens = 16385;
 
 	/**
 	 * Prompt for generating excerpts
@@ -80,6 +80,13 @@ class ChatGPT extends Provider {
 			'OpenAI ChatGPT',
 			'ChatGPT',
 			'openai_chatgpt'
+		);
+
+		// Features provided by this provider.
+		$this->features = array(
+			'title_generation'   => __( 'Generate titles', 'classifai' ),
+			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
+			'resize_content'     => __( 'Resize content', 'classifai' ),
 		);
 
 		// Set the onboarding options.
@@ -884,6 +891,12 @@ class ChatGPT extends Provider {
 			]
 		);
 
+		// These checks happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Resizing content is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
@@ -1028,6 +1041,34 @@ class ChatGPT extends Provider {
 		 * @return {string} Content.
 		 */
 		return apply_filters( 'classifai_chatgpt_content', $content, $post_id );
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$roles            = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ChatGTP
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_chatgpt_allowed_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
+
+		return $roles;
 	}
 
 	/**

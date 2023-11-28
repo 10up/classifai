@@ -79,12 +79,17 @@ class Speech extends Provider {
 			'azure_text_to_speech'
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'text_to_speech' => __( 'Text to speech', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure Text to Speech', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'authenticated' => __( 'Generate speech for post content', 'classifai' ),
+				'enable_text_to_speech' => __( 'Generate speech for post content', 'classifai' ),
 			),
 		);
 
@@ -138,9 +143,9 @@ class Speech extends Provider {
 			foreach ( $tts->get_tts_supported_post_types() as $post_type ) {
 				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
 			}
-
-			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 		}
+		// TODO: CONFLICTS add check for is enabled.
+		add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 	}
 
 	public function render_provider_fields() {

@@ -44,6 +44,15 @@ class ComputerVision extends Provider {
 			'computer_vision'
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'image_captions' => __( 'Generate descriptive text', 'classifai' ),
+			'image_tagging'  => __( 'Generate tags', 'classifai' ),
+			'smart_cropping' => __( 'Smart cropping', 'classifai' ),
+			'ocr'            => __( 'Scan images for text', 'classifai' ),
+			'read_pdf'       => __( 'Scan PDF', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),
@@ -403,7 +412,7 @@ class ComputerVision extends Provider {
 		wp_enqueue_script(
 			'editor-ocr',
 			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			get_asset_info( 'editor-ocr', 'dependencies' ),
+			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
 			get_asset_info( 'editor-ocr', 'version' ),
 			true
 		);
@@ -1007,12 +1016,17 @@ class ComputerVision extends Provider {
 	 * @param array $captions      Captions returned from the API
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
-	 * @return string
+	 * @return string|WP_Error
 	 */
 	public function generate_alt_tags( $captions, $attachment_id, $feature = null ) {
 		$rtn = '';
 
 		$enabled_fields = $this->get_alt_text_settings();
+
+		// Don't save tags if feature is disabled or user don't have access to use it.
+		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Image descriptive text feature is disabled.', 'classifai' ) );
+		}
 
 		/**
 		 * Filter the captions returned from the API.

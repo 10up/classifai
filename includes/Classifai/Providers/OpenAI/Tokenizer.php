@@ -17,9 +17,9 @@ class Tokenizer {
 	/**
 	 * How many characters in one token (roughly)
 	 *
-	 * @var int
+	 * @var float
 	 */
-	public $characters_in_token = 4;
+	public $characters_in_token = 3.5;
 
 	/**
 	 * How many tokens a word will take (roughly)
@@ -117,7 +117,7 @@ class Tokenizer {
 		 * can be and trim it up.
 		 */
 		$tokens_to_trim     = $content_tokens - $max_tokens;
-		$characters_to_trim = $tokens_to_trim * $this->characters_in_token;
+		$characters_to_trim = (int) ceil( $tokens_to_trim * $this->characters_in_token );
 		$max_content_length = mb_strlen( $content ) - $characters_to_trim;
 		$trimmed_content    = mb_substr( $content, 0, $max_content_length );
 

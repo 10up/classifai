@@ -1,6 +1,7 @@
 <?php
 namespace Classifai\Admin;
 
+use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\Speech;
 use Classifai\Providers\OpenAI\ChatGPT;
@@ -51,7 +52,7 @@ class BulkActions {
 	private $whisper;
 
 	/**
-	 * @var \Classifai\Providers\Azure\Speech
+	 * @var \Classifai\Features\TextToSpeech
 	 */
 	private $text_to_speech;
 
@@ -69,16 +70,14 @@ class BulkActions {
 	 * Register bulk actions for language processing.
 	 */
 	public function register_language_processing_hooks() {
-		$this->chat_gpt   = new ChatGPT( false );
-		$this->embeddings = new Embeddings( false );
+		$this->chat_gpt       = new ChatGPT( false );
+		$this->embeddings     = new Embeddings( false );
+		$this->text_to_speech = new TextToSpeech( false );
 
-		$user_roles                = wp_get_current_user()->roles ?? [];
-		$embedding_settings        = $this->embeddings->get_settings();
 		$embeddings_post_types     = [];
 		$nlu_post_types            = get_supported_post_types();
 		$text_to_speech_post_types = get_tts_supported_post_types();
 		$chat_gpt_post_types       = [];
-		$chat_gpt_settings         = $this->chat_gpt->get_settings();
 
 		// Set up the save post handler if we have any post types.
 		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
@@ -87,10 +86,8 @@ class BulkActions {
 
 		// Set up the ChatGPT post types if the feature is enabled. Otherwise clear our handler.
 		if (
-			isset( $chat_gpt_settings['enable_excerpt'] ) &&
-			1 === (int) $chat_gpt_settings['enable_excerpt'] &&
-			! empty( $chat_gpt_settings['roles'] ) &&
-			empty( array_diff( $user_roles, $chat_gpt_settings['roles'] ) )
+			$this->chat_gpt &&
+			$this->chat_gpt->is_feature_enabled( 'excerpt_generation' )
 		) {
 			$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
 		} else {
@@ -98,10 +95,15 @@ class BulkActions {
 		}
 
 		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
-		if ( isset( $embedding_settings['enable_classification'] ) && 1 === (int) $embedding_settings['enable_classification'] ) {
+		if ( $this->embeddings && $this->embeddings->is_feature_enabled( 'classification' ) ) {
 			$embeddings_post_types = $this->embeddings->supported_post_types();
 		} else {
 			$this->embeddings = null;
+		}
+
+		// Clear our TextToSpeech handler if no post types are set up.
+		if ( empty( $text_to_speech_post_types ) ) {
+			$this->text_to_speech = null;
 		}
 
 		// Merge our post types together and make them unique.
@@ -160,8 +162,9 @@ class BulkActions {
 		}
 
 		if (
-			is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) &&
-			in_array( get_current_screen()->post_type, $this->text_to_speech->get_supported_post_types(), true )
+			is_a( $this->text_to_speech, '\Classifai\Features\TextToSpeech' ) &&
+			in_array( get_current_screen()->post_type, get_tts_supported_post_types(), true ) &&
+			$this->text_to_speech->is_feature_enabled()
 		) {
 			$bulk_actions['text_to_speech'] = __( 'Text to speech', 'classifai' );
 		}
@@ -177,17 +180,16 @@ class BulkActions {
 	 * @return array
 	 */
 	public function register_media_bulk_actions( $bulk_actions ) {
-		$computer_vision_settings = $this->computer_vision->get_settings();
-		$whisper_enabled          = $this->whisper->is_feature_enabled();
+		$whisper_enabled = $this->whisper->is_feature_enabled( 'speech_to_text' );
 
 		if (
-			'no' !== $computer_vision_settings['enable_image_tagging'] ||
-			! empty( $this->computer_vision->get_alt_text_settings() )
+			$this->computer_vision->is_feature_enabled( 'image_tagging' ) ||
+			$this->computer_vision->is_feature_enabled( 'image_captions' )
 		) {
 			$bulk_actions['scan_image'] = __( 'Scan image', 'classifai' );
 		}
 
-		if ( isset( $computer_vision_settings['enable_smart_cropping'] ) && '1' === $computer_vision_settings['enable_smart_cropping'] ) {
+		if ( $this->computer_vision && $this->computer_vision->is_feature_enabled( 'smart_cropping' ) ) {
 			$bulk_actions['smart_crop'] = __( 'Smart crop', 'classifai' );
 		}
 
@@ -415,14 +417,12 @@ class BulkActions {
 			}
 		}
 
-		if ( is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) ) {
-			if ( in_array( $post->post_type, $this->text_to_speech->get_supported_post_types(), true ) ) {
-				$actions['text_to_speech'] = sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-					esc_html__( 'Text to speech', 'classifai' )
-				);
-			}
+		if ( is_a( $this->text_to_speech, '\Classifai\Features\TextToSpeech' ) && $this->text_to_speech->is_feature_enabled() && in_array( $post->post_type, get_tts_supported_post_types(), true ) ) {
+			$actions['text_to_speech'] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+				esc_html__( 'Text to speech', 'classifai' )
+			);
 		}
 
 		return $actions;
@@ -437,7 +437,7 @@ class BulkActions {
 	 */
 	public function register_media_row_action( $actions, $post ) {
 		$whisper_settings = $this->whisper->get_settings();
-		$whisper_enabled  = $this->whisper->is_feature_enabled( $post->ID );
+		$whisper_enabled  = $this->whisper->is_feature_enabled( 'speech_to_text', $post->ID );
 
 		if ( is_wp_error( $whisper_enabled ) ) {
 			return $actions;

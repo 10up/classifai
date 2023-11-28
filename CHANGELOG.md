@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [2.4.0] - 2023-11-09
+### Added
+- Support for modifying prompts from the admin settings page (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#594](https://github.com/10up/classifai/pull/594)).
+- Support for setting multiple prompts for each feature that supports prompts (props [@ravinderk](https://github.com/ravinderk), [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#602](https://github.com/10up/classifai/pull/602)).
+- New filters added to allow developer control over all requests made to OpenAI (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#604](https://github.com/10up/classifai/pull/604)).
+- Documentation updates in regards to data retention (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#582](https://github.com/10up/classifai/pull/582)).
+- Example snippet to make taxonomies private to the developer docs (props [@theskinnyghost](https://github.com/theskinnyghost), [@dkotter](https://github.com/dkotter) via [#583](https://github.com/10up/classifai/pull/583)).
+- GitHub Action summary for Cypress E2E checks (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#578](https://github.com/10up/classifai/pull/578)).
+
+### Changed
+- Ensure the default prompts in ClassifAI show as the first prompt in our settings and cannot be removed or edited (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@ravinderk](https://github.com/ravinderk) via [#610](https://github.com/10up/classifai/pull/610)).
+- Fix multiple typos across the codebase (props [@parikshit-adhikari](https://github.com/parikshit-adhikari), [@shresthasurav](https://github.com/shresthasurav), [@jeffpaul](https://github.com/jeffpaul) via [#603](https://github.com/10up/classifai/pull/603), [#605](https://github.com/10up/classifai/pull/605)).
+- Use `get_asset_info` across the enqueuing of all our dependencies (props [@ravinderk](https://github.com/ravinderk), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#608](https://github.com/10up/classifai/pull/608)).
+- Bump WordPress "tested up to" version to 6.4 (props [@dkotter](https://github.com/dkotter) via [#613](https://github.com/10up/classifai/pull/613)).
+
+### Fixed
+- Ensure all hooks show in our documentation (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#604](https://github.com/10up/classifai/pull/604)).
+
+### Security
+- Bump `@cypress/request` from 2.88.12 to 3.0.0 and `cypress` from 12.14.0 to 13.1.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#576](https://github.com/10up/classifai/pull/576)).
+- Bump `postcss` from 8.4.24 to 8.4.31 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#584](https://github.com/10up/classifai/pull/584)).
+- Bump `@babel/traverse` from 7.22.4 to 7.23.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#601](https://github.com/10up/classifai/pull/601)).
+
 ## [2.3.0] - 2023-09-05
 **Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
 
@@ -428,6 +451,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[2.4.0]: https://github.com/10up/classifai/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/10up/classifai/compare/2.2.3...2.3.0
 [2.2.3]: https://github.com/10up/classifai/compare/2.2.2...2.2.3
 [2.2.2]: https://github.com/10up/classifai/compare/2.2.1...2.2.2

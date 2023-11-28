@@ -9,6 +9,8 @@ use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use function Classifai\get_asset_info;
+use function Classifai\render_disable_feature_link;
+
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -43,6 +45,11 @@ class DallE extends Provider {
 			'OpenAI',
 			'DALL·E',
 			'openai_dalle'
+		);
+
+		// Features provided by this provider.
+		$this->features = array(
+			'image_generation' => __( 'Generate images', 'classifai' ),
 		);
 
 		// Set the onboarding options.
@@ -322,6 +329,9 @@ class DallE extends Provider {
 				</h2>
 				<span class="spinner"></span>
 				<ul></ul>
+				<p>
+					<?php echo wp_kses_post( render_disable_feature_link( 'image_generation' ) ); ?>
+				</p>
 			</div>
 		</script>
 

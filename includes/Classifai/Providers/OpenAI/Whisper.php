@@ -37,6 +37,11 @@ class Whisper extends Provider {
 			'openai_whisper'
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'speech_to_text' => __( 'Generate transcripts', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI Whisper', 'classifai' ),
@@ -159,6 +164,11 @@ class Whisper extends Provider {
 		$feature    = new AudioTranscriptsGeneration();
 		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $attachment->ID, $settings[ static::ID ] );
+		$enabled    = $feature->is_feature_enabled();
+
+		if ( is_wp_error( $enabled ) ) {
+			return $form_fields;
+		}
 
 		if ( ! $transcribe->should_process( $attachment->ID ) ) {
 			return $form_fields;
@@ -185,6 +195,11 @@ class Whisper extends Provider {
 		$feature    = new AudioTranscriptsGeneration();
 		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $post->ID, $settings[ static::ID ] );
+		$enabled    = $feature->is_feature_enabled();
+
+		if ( is_wp_error( $enabled ) ) {
+			return;
+		}
 
 		if ( ! $transcribe->should_process( $post->ID ) ) {
 			return;
