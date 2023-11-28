@@ -455,11 +455,12 @@ class Embeddings extends Provider {
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			if ( ! $dryrun ) {
+			if ( $dryrun ) {
+				return $this->get_terms( $post_id, $embeddings, true );
+			} else {
 				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+				return $this->set_terms( $post_id, $embeddings );
 			}
-
-			return $this->set_terms( $post_id, $embeddings, $dryrun );
 		}
 	}
 
@@ -468,11 +469,8 @@ class Embeddings extends Provider {
 	 *
 	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
-	 * @param bool  $dryrun Whether to run the process or just return the data.
-	 *
-	 * @return array|WP_Error
 	 */
-	private function set_terms( int $post_id = 0, array $embedding = [], $dryrun = false ) {
+	private function set_terms( int $post_id = 0, array $embedding = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
@@ -523,6 +521,77 @@ class Embeddings extends Provider {
 			return;
 		}
 
+		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Sort embeddings from lowest to highest.
+			asort( $terms );
+
+			// Only add the number of terms specified in settings.
+			if ( count( $terms ) > $number_to_add ) {
+				$terms = array_slice( $terms, 0, $number_to_add, true );
+			}
+
+			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+		}
+	}
+
+	/**
+	 * Get the terms of a post based on embeddings.
+	 *
+	 * @param int   $post_id ID of post to set terms on.
+	 * @param array $embedding Embedding data.
+	 *
+	 * @return array|WP_Error
+	 */
+	private function get_terms( int $post_id = 0, array $embedding = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
+		}
+
+		if ( empty( $embedding ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
+		}
+
+		$settings             = $this->get_settings();
+		$number_to_add        = $settings['number'] ?? 1;
+		$embedding_similarity = [];
+		$taxonomies           = $this->supported_taxonomies();
+		$calculations         = new EmbeddingCalculations();
+
+		foreach ( $taxonomies as $tax ) {
+			$terms = get_terms(
+				[
+					'taxonomy'   => $tax,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				]
+			);
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
+
+			// Get embedding similarity for each term.
+			foreach ( $terms as $term_id ) {
+				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+					continue;
+				}
+
+				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+
+				if ( $term_embedding ) {
+					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity ) {
+						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+					}
+				}
+			}
+		}
+
+		if ( empty( $embedding_similarity ) ) {
+			return;
+		}
+
 		// Set terms based on similarity.
 		$index  = 0;
 		$result = [];
@@ -535,28 +604,26 @@ class Embeddings extends Provider {
 			// Sort embeddings from lowest to highest.
 			asort( $terms );
 
-			// Return the terms if this is a dry run.
-			if ( $dryrun ) {
-				$result[ $index ] = new \stdClass();
+			// Return the terms.
+			$result[ $index ] = new \stdClass();
 
-				$result[ $index ]->{$tax_name} = [];
+			$result[ $index ]->{$tax_name} = [];
 
-				$term_added = 0;
-				foreach ( $terms as $term_id => $similarity ) {
-					// Convert $similarity to percentage.
-					$similarity = round( ( 1 - $similarity ), 2 );
+			$term_added = 0;
+			foreach ( $terms as $term_id => $similarity ) {
+				// Convert $similarity to percentage.
+				$similarity = round( ( 1 - $similarity ), 2 );
 
-					// Stop if we have added the number of terms specified in settings.
-					if ( $number_to_add <= $term_added ) {
-						break;
-					}
-
-					$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-						'label' => get_term( $term_id )->name,
-						'score' => $similarity,
-					];
-					$term_added++;
+				// Stop if we have added the number of terms specified in settings.
+				if ( $number_to_add <= $term_added ) {
+					break;
 				}
+
+				$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+					'label' => get_term( $term_id )->name,
+					'score' => $similarity,
+				];
+				$term_added++;
 			}
 
 			// Only add the number of terms specified in settings.
@@ -564,16 +631,10 @@ class Embeddings extends Provider {
 				$terms = array_slice( $terms, 0, $number_to_add, true );
 			}
 
-			if ( ! $dryrun ) {
-				wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
-			}
 			$index++;
 		}
 
-		// Return if its a dry run.
-		if ( $dryrun ) {
-			return $result;
-		}
+		return $result;
 	}
 
 	/**
