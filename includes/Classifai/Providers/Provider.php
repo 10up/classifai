@@ -432,7 +432,7 @@ abstract class Provider {
 					</label>
 				</p>',
 				esc_attr( $this->option_name ),
-				esc_attr( $args['label_for'] ),
+				esc_attr( $args['label_for'] ?? '' ),
 				esc_attr( $option_value ),
 				checked( $value, $option_value, false ),
 				esc_html( $option_label )
@@ -472,7 +472,7 @@ abstract class Provider {
 				<input type="number" id="%1$s_%2$s_%3$s" class="small-text" name="classifai_%1$s[%2$s][%3$s]" value="%5$s" />				
 			</p>',
 			esc_attr( $this->option_name ),
-			esc_attr( $args['label_for'] ),
+			esc_attr( $args['label_for'] ?? '' ),
 			esc_attr( $option_value ),
 			esc_html__( 'Threshold (%)', 'classifai' ),
 			esc_attr( $value )
@@ -525,7 +525,7 @@ abstract class Provider {
 					</label>
 				</p>',
 				esc_attr( $this->option_name ),
-				esc_attr( $args['label_for'] ),
+				esc_attr( $args['label_for'] ?? '' ),
 				esc_attr( $option_value ),
 				checked( $default_value, $option_value, false ),
 				esc_html( $option_label )
