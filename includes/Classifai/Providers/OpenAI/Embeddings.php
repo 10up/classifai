@@ -394,7 +394,7 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get the list of post types for settings.
+	 * Get the data to preview terms.
 	 *
 	 * @since 2.6.0
 	 *
