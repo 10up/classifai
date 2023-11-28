@@ -61,7 +61,7 @@ class EmbeddingCalculations {
 		/**
 		 * Filter the threshold for the similarity calculation.
 		 *
-		 * @since 2.6.0
+		 * @since 2.5.0
 		 * @hook classifai_threshold
 		 *
 		 * @param {float} $threshold The threshold to use.

@@ -456,7 +456,7 @@ abstract class Provider {
 	/**
 	 * Render a threshold field.
 	 *
-	 * @since 2.6.0
+	 * @since 2.5.0
 	 *
 	 * @param array  $args          The args passed to add_settings_field
 	 * @param string $option_value  The option value.

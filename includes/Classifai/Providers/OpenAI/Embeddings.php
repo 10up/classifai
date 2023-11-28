@@ -366,7 +366,7 @@ class Embeddings extends Provider {
 	/**
 	 * Get the threshold for the similarity calculation.
 	 *
-	 * @since 2.6.0
+	 * @since 2.5.0
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return float
@@ -385,7 +385,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter the threshold for the similarity calculation.
 		 *
-		 * @since 2.6.0
+		 * @since 2.5.0
 		 * @hook classifai_threshold
 		 *
 		 * @param {float} $threshold The threshold to use.
