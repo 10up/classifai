@@ -399,9 +399,13 @@ abstract class Provider {
 	 */
 	public function render_checkbox_group( array $args = array() ) {
 		$setting_index = $this->get_settings();
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
 
 		// Iterate through all of our options.
-		foreach ( $args['options'] as $option_value => $option_label ) {
+		foreach ( $options as $option_value => $option_label ) {
 			$value       = '';
 			$default_key = array_search( $option_value, $args['default_values'], true );
 
@@ -454,9 +458,13 @@ abstract class Provider {
 	public function render_radio_group( array $args = array() ) {
 		$setting_index = $this->get_settings();
 		$value         = $setting_index[ $args['label_for'] ] ?? '';
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
 
 		// Iterate through all of our options.
-		foreach ( $args['options'] as $option_value => $option_label ) {
+		foreach ( $options as $option_value => $option_label ) {
 			// Render radio button.
 			printf(
 				'<p>
