@@ -153,6 +153,11 @@ abstract class Provider {
 	}
 
 	/**
+	 * Returns the default settings.
+	 */
+	public function get_default_settings() {}
+
+	/**
 	 * Helper to get the settings and allow for settings default values.
 	 *
 	 * @param string|bool|mixed $index Optional. Name of the settings option index.
