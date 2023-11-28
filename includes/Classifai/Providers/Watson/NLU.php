@@ -446,7 +446,7 @@ class NLU extends Provider {
 		$this->add_access_settings( 'content_classification' );
 		add_settings_field(
 			'classification-mode',
-			esc_html__( 'Classification Mode', 'classifai' ),
+			esc_html__( 'Classification mode', 'classifai' ),
 			[ $this, 'render_classification_mode_radios' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -458,7 +458,7 @@ class NLU extends Provider {
 
 		add_settings_field(
 			'classification-method',
-			esc_html__( 'Classification Method', 'classifai' ),
+			esc_html__( 'Classification method', 'classifai' ),
 			[ $this, 'render_radio_group' ],
 			$this->get_option_name(),
 			$this->get_option_name(),
@@ -466,8 +466,8 @@ class NLU extends Provider {
 				'label_for'     => 'classification_method',
 				'default_value' => $default_settings['classification_method'],
 				'options'       => array(
-					'recommended_terms' => __( 'Add recommended terms', 'classifai' ),
-					'existing_terms'    => __( 'Only classify based on existing terms', 'classifai' ),
+					'recommended_terms' => __( 'Add all suggested terms', 'classifai' ),
+					'existing_terms'    => __( 'Only add suggested terms that already exist', 'classifai' ),
 				),
 			]
 		);
