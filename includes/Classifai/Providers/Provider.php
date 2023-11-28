@@ -402,13 +402,13 @@ abstract class Provider {
 
 		// Iterate through all of our options.
 		foreach ( $args['options'] as $option_value => $option_label ) {
-			$value       = '';
-			$default_key = array_search( $option_value, $args['default_values'], true );
+			$value                 = '';
+			$default_key           = array_search( $option_value, $args['default_values'], true );
 			$option_value_theshold = $option_value . '_threshold';
 
 			// Get saved value, if any.
 			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
-				$value = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
+				$value           = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
 				$threshold_value = $setting_index[ $args['label_for'] ][ $option_value_theshold ] ?? '';
 			}
 

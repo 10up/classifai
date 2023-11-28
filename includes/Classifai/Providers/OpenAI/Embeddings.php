@@ -272,7 +272,7 @@ class Embeddings extends Provider {
 			// Sanitize the threshold setting.
 			$taxonomy_key = $taxonomy_key . '_threshold';
 			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
-				$threshold_value = min( absint( $settings['taxonomies'][ $taxonomy_key ] ), 100 );
+				$threshold_value                             = min( absint( $settings['taxonomies'][ $taxonomy_key ] ), 100 );
 				$new_settings['taxonomies'][ $taxonomy_key ] = $threshold_value ? $threshold_value : 75;
 			} else {
 				$new_settings['taxonomies'][ $taxonomy_key ] = 75;
