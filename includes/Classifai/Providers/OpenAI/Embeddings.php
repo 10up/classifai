@@ -385,8 +385,13 @@ class Embeddings extends Provider {
 		/**
 		 * Filter the threshold for the similarity calculation.
 		 *
-		 * @param float $threshold The threshold to use.
-		 * @param string $taxonomy The taxonomy to get the threshold for.
+		 * @since 2.6.0
+		 * @hook classifai_threshold
+		 *
+		 * @param {float} $threshold The threshold to use.
+		 * @param {string} $taxonomy The taxonomy to get the threshold for.
+		 *
+		 * @return {float} The threshold to use.
 		 */
 		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
 	}
