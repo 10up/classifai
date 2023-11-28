@@ -238,7 +238,7 @@ class DallE extends Provider {
 				<span class="spinner"></span>
 				<ul></ul>
 				<p>
-					<?php echo wp_kses_post( render_disable_feature_link( 'image_generation' ) ); ?>
+					<?php render_disable_feature_link( 'image_generation' ); ?>
 				</p>
 			</div>
 		</script>
