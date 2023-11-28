@@ -456,7 +456,7 @@ class Embeddings extends Provider {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			if ( $dryrun ) {
-				return $this->get_terms( $post_id, $embeddings, true );
+				return $this->get_terms( $embeddings );
 			} else {
 				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
 				return $this->set_terms( $post_id, $embeddings );
@@ -481,46 +481,13 @@ class Embeddings extends Provider {
 
 		$settings             = $this->get_settings();
 		$number_to_add        = $settings['number'] ?? 1;
-		$embedding_similarity = [];
-		$taxonomies           = $this->supported_taxonomies();
-		$calculations         = new EmbeddingCalculations();
-
-		foreach ( $taxonomies as $tax ) {
-			$terms = get_terms(
-				[
-					'taxonomy'   => $tax,
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					// 'number'  => 500, TODO: see if we need a limit here.
-				]
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				continue;
-			}
-
-			// Get embedding similarity for each term.
-			foreach ( $terms as $term_id ) {
-				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-					continue;
-				}
-
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
-					}
-				}
-			}
-		}
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
 			return;
 		}
 
+		// Set terms based on similarity.
 		foreach ( $embedding_similarity as $tax => $terms ) {
 			// Sort embeddings from lowest to highest.
 			asort( $terms );
@@ -537,56 +504,18 @@ class Embeddings extends Provider {
 	/**
 	 * Get the terms of a post based on embeddings.
 	 *
-	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
 	 *
 	 * @return array|WP_Error
 	 */
-	private function get_terms( int $post_id = 0, array $embedding = [] ) {
-		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
-		}
-
+	private function get_terms( array $embedding = [] ) {
 		if ( empty( $embedding ) ) {
-			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
 		$settings             = $this->get_settings();
 		$number_to_add        = $settings['number'] ?? 1;
-		$embedding_similarity = [];
-		$taxonomies           = $this->supported_taxonomies();
-		$calculations         = new EmbeddingCalculations();
-
-		foreach ( $taxonomies as $tax ) {
-			$terms = get_terms(
-				[
-					'taxonomy'   => $tax,
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				]
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				continue;
-			}
-
-			// Get embedding similarity for each term.
-			foreach ( $terms as $term_id ) {
-				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-					continue;
-				}
-
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
-					}
-				}
-			}
-		}
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
 			return;
@@ -635,6 +564,55 @@ class Embeddings extends Provider {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Get the similarity between an embedding and all terms.
+	 *
+	 * @since 2.6.0
+	 *
+	 * @param array $embedding Embedding data.
+	 *
+	 * @return array
+	 */
+	private function get_embeddings_similarity( $embedding ) {
+		$embedding_similarity = [];
+		$taxonomies           = $this->supported_taxonomies();
+		$calculations         = new EmbeddingCalculations();
+
+		foreach ( $taxonomies as $tax ) {
+			$terms = get_terms(
+				[
+					'taxonomy'   => $tax,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					// 'number'  => 500, TODO: see if we need a limit here.
+				]
+			);
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
+
+			// Get embedding similarity for each term.
+			foreach ( $terms as $term_id ) {
+				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+					continue;
+				}
+
+				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+
+				if ( $term_embedding ) {
+					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity ) {
+						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+					}
+				}
+			}
+		}
+
+		return $embedding_similarity;
 	}
 
 	/**
