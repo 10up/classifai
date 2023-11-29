@@ -155,10 +155,6 @@ abstract class Service {
 						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
 					}
 
-					// echo '<pre>';
-					// print_r( $provider );
-					// die();
-
 					if (
 						! is_wp_error( $provider )
 						&& ! empty(
