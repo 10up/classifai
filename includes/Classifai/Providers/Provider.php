@@ -475,7 +475,7 @@ abstract class Provider {
 			esc_attr( $args['label_for'] ?? '' ),
 			esc_attr( $option_value ),
 			esc_html__( 'Threshold (%)', 'classifai' ),
-			esc_attr( $value )
+			$value ? esc_attr( $value ) : 75
 		);
 	}
 
