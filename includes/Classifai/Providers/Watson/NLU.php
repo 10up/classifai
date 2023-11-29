@@ -145,7 +145,7 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		if ( isset( $_GET['page'] ) && 'classifai' === $_GET['page'] ) {
+		if ( $this->has_access( 'content_classification' ) || isset( $_GET['page'] ) && 'classifai' === $_GET['page'] ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
