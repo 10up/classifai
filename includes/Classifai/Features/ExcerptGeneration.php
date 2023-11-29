@@ -100,6 +100,29 @@ class ExcerptGeneration extends Feature {
 			]
 		);
 
+		$post_types        = \Classifai\get_post_types_for_language_settings();
+		$post_type_options = array();
+
+		foreach ( $post_types as $post_type ) {
+			if ( post_type_supports( $post_type->name, 'excerpt' ) ) {
+				$post_type_options[ $post_type->name ] = $post_type->label;
+			}
+		}
+
+		add_settings_field(
+			'post_types',
+			esc_html__( 'Allowed post types', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'      => 'post_types',
+				'options'        => $post_type_options,
+				'default_values' => $settings['post_types'],
+				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
+			]
+		);
+
 		add_settings_field(
 			'length',
 			esc_html__( 'Excerpt length', 'classifai' ),
@@ -179,10 +202,11 @@ class ExcerptGeneration extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'    => '0',
-			'roles'     => $this->roles,
-			'length'    => absint( apply_filters( 'excerpt_length', 55 ) ),
-			'provider'  => \Classifai\Providers\OpenAI\ChatGPT::ID,
+			'status'     => '0',
+			'roles'      => $this->roles,
+			'post_types' => [],
+			'length'     => absint( apply_filters( 'excerpt_length', 55 ) ),
+			'provider'   => \Classifai\Providers\OpenAI\ChatGPT::ID,
 		];
 
 		return
@@ -207,8 +231,23 @@ class ExcerptGeneration extends Feature {
 
 		// Sanitization of the feature-level settings.
 		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
+		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
 		$new_settings['length']   = absint( $settings['length'] ?? $new_settings['length'] );
 		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
+
+		$post_types = \Classifai\get_post_types_for_language_settings();
+
+		foreach ( $post_types as $post_type ) {
+			if ( ! post_type_supports( $post_type->name, 'excerpt' ) ) {
+				continue;
+			}
+
+			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
+				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
+			} else {
+				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
+			}
+		}
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
