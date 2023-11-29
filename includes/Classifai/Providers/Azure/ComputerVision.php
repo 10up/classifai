@@ -754,28 +754,19 @@ class ComputerVision extends Provider {
 		}
 
 		if ( clean_input( 'rescan-tags' ) ) {
-			$feature    = new ImageTagsGenerator();
-			$image_scan = $this->scan_image( $image_url, $feature );
-
-			if ( isset( $image_scan->tags ) ) {
-				$feature->run( $image_scan->tags, $attachment_id );
-			}
+			$feature = new ImageTagsGenerator();
+			$feature->run( $attachment_id );
 		}
 
 		if ( clean_input( 'rescan-captions' ) ) {
-			$feature    = new DescriptiveTextGenerator();
-			$image_scan = $this->scan_image( $image_url, $feature );
-
-			if ( isset( $image_scan->description->captions ) ) {
-				$feature->run( $image_scan->description->captions, $attachment_id );
-			}
+			$feature = new DescriptiveTextGenerator();
+			$feature->run( $attachment_id );
 		}
 
 		// Are we updating the OCR text?
 		if ( clean_input( 'rescan-ocr' ) ) {
 			$feature = new ImageTextExtraction();
 			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
-			// $feature->run( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 	}
 
@@ -839,10 +830,9 @@ class ComputerVision extends Provider {
 	 * @return mixed
 	 */
 	public function generate_image_alt_tags( $metadata, $attachment_id ) {
-		$image_scan = false;
-		$feature    = new ImageTagsGenerator();
+		$feature = new ImageTagsGenerator();
 
-		if ( $feature->is_feature_enabled() && ! empty( $this->get_alt_text_settings() ) ) {
+		if ( $feature->is_feature_enabled() ) {
 
 			// Allow scanning image that are not stored in local storage.
 			$image_url = get_modified_image_source_url( $attachment_id );
@@ -860,27 +850,14 @@ class ComputerVision extends Provider {
 				}
 			}
 
-			if ( ! empty( $image_url ) ) {
-				$image_scan = $this->scan_image( $image_url, $feature );
-				set_transient( 'classifai_azure_computer_vision_image_scan_latest_response', $image_scan, DAY_IN_SECONDS * 30 );
-
-				if ( ! is_wp_error( $image_scan ) ) {
-					// Check for captions
-					if ( isset( $image_scan->description->captions ) ) {
-						// Process the captions
-						( new DescriptiveTextGenerator() )->run( $image_scan->description->captions, $attachment_id );
-					}
-					// Check for tags
-					if ( isset( $image_scan->tags ) ) {
-						// Process the tags
-						( new ImageTagsGenerator() )->run( $image_scan->tags, $attachment_id );
-					}
-				}
-			}
+			$feature->run( $attachment_id );
 		}
 
-		// OCR processing
-		$this->ocr_processing( $metadata, $attachment_id, false, is_wp_error( $image_scan ) ? false : $image_scan );
+		$feature = new DescriptiveTextGenerator();
+
+		if ( $feature->is_feature_enabled() && ! empty( $this->get_alt_text_settings() ) ) {
+			$feature->run( $attachment_id );
+		}
 
 		return $metadata;
 	}
@@ -895,10 +872,9 @@ class ComputerVision extends Provider {
 	 * @param array       $metadata Attachment metadata.
 	 * @param int         $attachment_id Attachment ID.
 	 * @param boolean     $force Whether to force processing or not. Default false.
-	 * @param bool|object $scan Previously run image scan. Default false.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false, $scan = false ) {
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -923,6 +899,9 @@ class ComputerVision extends Provider {
 		if ( ! $force && ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
 			return $metadata;
 		}
+
+		$image_url = wp_get_attachment_url( $attachment_id );
+		$scan	  = $this->scan_image( $image_url, $feature );
 
 		$ocr      = new OCR( $settings, $scan, $force );
 		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
@@ -1018,10 +997,15 @@ class ComputerVision extends Provider {
 	 *
 	 * @return string|WP_Error
 	 */
-	public function generate_alt_tags( $captions, $attachment_id, $feature = null ) {
+	public function generate_alt_tags( $attachment_id ) {
 		$rtn = '';
 
 		$enabled_fields = $this->get_alt_text_settings();
+		$feature        = new DescriptiveTextGenerator();
+		$image_url      = wp_get_attachment_url( $attachment_id );
+		$details        = $this->scan_image( $image_url, $feature );
+		$captions       = isset( $details->description->captions ) ? $details->description->captions : [];
+
 
 		// Don't save tags if feature is disabled or user don't have access to use it.
 		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
@@ -1042,8 +1026,8 @@ class ComputerVision extends Provider {
 
 		// If $captions isn't an array, don't save them.
 		if ( is_array( $captions ) && ! empty( $captions ) ) {
-			$settings      = $feature->get_settings( static::ID );
-			$threshold     = $settings['descriptive_confidence_threshold'];
+			$settings  = $feature->get_settings( static::ID );
+			$threshold = $settings['descriptive_confidence_threshold'];
 
 			// Save the first caption as the alt text if it passes the threshold.
 			if ( $captions[0]->confidence * 100 > $threshold ) {
@@ -1139,19 +1123,23 @@ class ComputerVision extends Provider {
 	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
-	 * @param array $tags          Array of tags returned from the API.
 	 * @param int   $attachment_id Post ID for the attachment.
 	 *
 	 * @return string|array|WP_Error
 	 */
-	public function generate_image_tags( $tags, $attachment_id, $feature = null ) {
+	public function generate_image_tags( $attachment_id ) {
 		$rtn      = '';
+		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
 
 		// Don't save tags if the setting is disabled.
 		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'invalid_settings', esc_html__( 'Image tagging is disabled.', 'classifai' ) );
 		}
+
+		$image_url = wp_get_attachment_url( $attachment_id );
+		$details   = $this->scan_image( $image_url, $feature );
+		$tags      = isset( $details->tags ) ? $details->tags : [];
 
 		/**
 		 * Filter the tags returned from the API.
@@ -1401,30 +1389,17 @@ class ComputerVision extends Provider {
 
 		switch ( $route_to_call ) {
 			case 'alt-tags':
-				$feature            = new DescriptiveTextGenerator();
-				$image_scan_results = $this->scan_image( $image_url, $feature );
-				$fn_arg             = $image_scan_results->description->captions;
-				break;
+				$feature = new DescriptiveTextGenerator();
+				return $feature->run( $post_id );
 
 			case 'image-tags':
-				$feature            = new ImageTagsGenerator();
-				$image_scan_results = $this->scan_image( $image_url, $feature );
-				$fn_arg             = $image_scan_results->tags;
-				break;
+				$feature = new ImageTagsGenerator();
+				return $feature->run( $post_id );
 
 			case 'ocr':
-				$feature            = new ImageCropping();
-				$generator_fn       = 'smart_crop_image';
-				$image_scan_results = $this->scan_image( $image_url, $feature );
-				$fn_arg             = $metadata;
-				break;
+				$feature = new ImageCropping();
+				return $feature->run( $metadata, $post_id );
 		}
-
-		if ( is_wp_error( $image_scan_results ) ) {
-			return $image_scan_results;
-		}
-
-		return $feature->run( $fn_arg, $post_id );
 	}
 
 	public function descriptive_text_generator_permissions_check( $request ) {

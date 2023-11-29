@@ -1,16 +1,15 @@
 <?php
 namespace Classifai\Admin;
 
+use Classifai\Features\AudioTranscriptsGeneration;
+use Classifai\Features\DescriptiveTextGenerator;
+use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\ImageCropping;
+use Classifai\Features\ImageTagsGenerator;
+use Classifai\Features\ImageTextExtraction;
+use Classifai\Features\PDFTextExtraction;
 use Classifai\Features\TextToSpeech;
-use Classifai\Providers\Azure\ComputerVision;
-use Classifai\Providers\Azure\Speech;
-use Classifai\Providers\OpenAI\ChatGPT;
-use Classifai\Providers\OpenAI\Embeddings;
-use Classifai\Providers\OpenAI\Whisper;
-use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use function Classifai\get_post_types_for_language_settings;
-use function Classifai\get_supported_post_types;
-use function Classifai\get_tts_supported_post_types;
+use function Classifai\attachment_is_pdf;
 
 /**
  * Handle bulk actions.
@@ -27,34 +26,18 @@ class BulkActions {
 	}
 
 	/**
-	 * @var SavePostHandler Triggers a classification with Watson
+	 * Array of language processing features.
+	 *
+	 * @var \Classifai\Features\Feature[]
 	 */
-	private $save_post_handler;
+	private $language_processing_features = [];
 
 	/**
-	 * @var \Classifai\Providers\Azure\ComputerVision
+	 * Array of media processing features.
+	 *
+	 * @var \Classifai\Features\Feature[]
 	 */
-	private $computer_vision;
-
-	/**
-	 * @var \Classifai\Providers\OpenAI\ChatGPT
-	 */
-	private $chat_gpt;
-
-	/**
-	 * @var \Classifai\Providers\OpenAI\Embeddings
-	 */
-	private $embeddings;
-
-	/**
-	 * @var \Classifai\Providers\OpenAI\Whisper
-	 */
-	private $whisper;
-
-	/**
-	 * @var \Classifai\Features\TextToSpeech
-	 */
-	private $text_to_speech;
+	private $media_processing_features = [];
 
 	/**
 	 * Register the actions needed.
@@ -67,134 +50,62 @@ class BulkActions {
 	}
 
 	/**
-	 * Register bulk actions for language processing.
+	 * Register hooks for the features.
 	 */
 	public function register_language_processing_hooks() {
-		$this->chat_gpt       = new ChatGPT( false );
-		$this->embeddings     = new Embeddings( false );
-		$this->text_to_speech = new TextToSpeech( false );
+		$this->language_processing_features = [
+			new ExcerptGeneration(),
+			new TextToSpeech(),
+		];
 
-		$embeddings_post_types     = [];
-		$nlu_post_types            = get_supported_post_types();
-		$text_to_speech_post_types = get_tts_supported_post_types();
-		$chat_gpt_post_types       = [];
+		foreach ( $this->language_processing_features as $feature ) {
+			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
 
-		// Set up the save post handler if we have any post types.
-		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
-			$this->save_post_handler = new SavePostHandler();
-		}
+			$settings = $feature->get_settings();
 
-		// Set up the ChatGPT post types if the feature is enabled. Otherwise clear our handler.
-		if (
-			$this->chat_gpt &&
-			$this->chat_gpt->is_feature_enabled( 'excerpt_generation' )
-		) {
-			$chat_gpt_post_types = array_keys( get_post_types_for_language_settings() );
-		} else {
-			$this->chat_gpt = null;
-		}
+			if ( ! isset( $settings['post_types'] ) ) {
+				continue;
+			}
 
-		// Set up the embeddings post types if the feature is enabled. Otherwise clear our embeddings handler.
-		if ( $this->embeddings && $this->embeddings->is_feature_enabled( 'classification' ) ) {
-			$embeddings_post_types = $this->embeddings->supported_post_types();
-		} else {
-			$this->embeddings = null;
-		}
+			foreach ( $settings['post_types'] as $key => $post_type ) {
+				add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_language_processing_actions' ] );
+				add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'language_processing_actions_handler' ], 10, 3 );
 
-		// Clear our TextToSpeech handler if no post types are set up.
-		if ( empty( $text_to_speech_post_types ) ) {
-			$this->text_to_speech = null;
-		}
-
-		// Merge our post types together and make them unique.
-		$post_types = array_unique( array_merge( $chat_gpt_post_types, $embeddings_post_types, $nlu_post_types, $text_to_speech_post_types ) );
-
-		if ( empty( $post_types ) ) {
-			return;
-		}
-
-		foreach ( $post_types as $post_type ) {
-			add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_bulk_actions' ] );
-			add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'bulk_action_handler' ], 10, 3 );
-
-			if ( is_post_type_hierarchical( $post_type ) ) {
-				add_filter( 'page_row_actions', [ $this, 'register_row_action' ], 10, 2 );
-			} else {
-				add_filter( 'post_row_actions', [ $this, 'register_row_action' ], 10, 2 );
+				if ( is_post_type_hierarchical( $post_type ) ) {
+					add_filter( 'page_row_actions', [ $this, 'register_language_processing_row_action' ], 10, 2 );
+				} else {
+					add_filter( 'post_row_actions', [ $this, 'register_language_processing_row_action' ], 10, 2 );
+				}
 			}
 		}
 	}
 
 	/**
-	 * Register bulk actions for the Computer Vision provider.
-	 */
-	public function register_image_processing_hooks() {
-		$this->computer_vision = new ComputerVision( false );
-		$this->whisper         = new Whisper( false );
-
-		add_filter( 'bulk_actions-upload', [ $this, 'register_media_bulk_actions' ] );
-		add_filter( 'handle_bulk_actions-upload', [ $this, 'media_bulk_action_handler' ], 10, 3 );
-		add_filter( 'media_row_actions', [ $this, 'register_media_row_action' ], 10, 2 );
-	}
-
-	/**
-	 * Register language processing bulk actions.
+	 * Register Classifai bulk actions.
 	 *
 	 * @param array $bulk_actions Current bulk actions.
 	 *
 	 * @return array
 	 */
-	public function register_bulk_actions( $bulk_actions ) {
-		$nlu_post_types = get_supported_post_types();
+	public function register_language_processing_actions( $bulk_actions ) {
+		foreach ( $this->language_processing_features as $feature ) {
+			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
 
-		if (
-			! empty( $nlu_post_types ) ||
-			( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) && ! empty( $this->embeddings->supported_post_types() ) )
-		) {
-			$bulk_actions['classify'] = __( 'Classify', 'classifai' );
-		}
+			$bulk_actions[ $feature::ID ] = $feature->get_label();
 
-		if (
-			is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) &&
-			in_array( get_current_screen()->post_type, array_keys( get_post_types_for_language_settings() ), true )
-		) {
-			$bulk_actions['generate_excerpt'] = __( 'Generate excerpt', 'classifai' );
-		}
+			switch ( $feature::ID ) {
+				case ExcerptGeneration::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Generate Excerpt', 'classifai' );
+					break;
 
-		if (
-			is_a( $this->text_to_speech, '\Classifai\Features\TextToSpeech' ) &&
-			in_array( get_current_screen()->post_type, get_tts_supported_post_types(), true ) &&
-			$this->text_to_speech->is_feature_enabled()
-		) {
-			$bulk_actions['text_to_speech'] = __( 'Text to speech', 'classifai' );
-		}
-
-		return $bulk_actions;
-	}
-
-	/**
-	 * Register Classifai media bulk actions.
-	 *
-	 * @param array $bulk_actions Current bulk actions.
-	 *
-	 * @return array
-	 */
-	public function register_media_bulk_actions( $bulk_actions ) {
-		$whisper_enabled = $this->whisper->is_feature_enabled( 'speech_to_text' );
-
-		if (
-			$this->computer_vision->is_feature_enabled( 'image_tagging' ) ||
-			$this->computer_vision->is_feature_enabled( 'image_captions' )
-		) {
-			$bulk_actions['scan_image'] = __( 'Scan image', 'classifai' );
-		}
-
-		if ( $this->computer_vision && $this->computer_vision->is_feature_enabled( 'smart_cropping' ) ) {
-			$bulk_actions['smart_crop'] = __( 'Smart crop', 'classifai' );
-		}
-
-		if ( ! is_wp_error( $whisper_enabled ) ) {
-			$bulk_actions['transcribe'] = __( 'Transcribe audio', 'classifai' );
+				case TextToSpeech::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Generate audio (text to speech)', 'classifai' );
+					break;
+			}
 		}
 
 		return $bulk_actions;
@@ -209,35 +120,27 @@ class BulkActions {
 	 *
 	 * @return string
 	 */
-	public function bulk_action_handler( $redirect_to, $doaction, $post_ids ) {
+	public function language_processing_actions_handler( $redirect_to, $doaction, $post_ids ) {
+		$feature_ids = array_map(
+			function( $feature ) {
+				return $feature::ID;
+			},
+			$this->language_processing_features
+		);
+
 		if (
 			empty( $post_ids ) ||
-			! in_array( $doaction, [ 'classify', 'generate_excerpt', 'text_to_speech' ], true )
+			! in_array( $doaction, $feature_ids, true )
 		) {
 			return $redirect_to;
 		}
 
-		$action = '';
-
 		foreach ( $post_ids as $post_id ) {
-			if ( 'classify' === $doaction ) {
-				// Handle NLU classification.
-				if ( is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' ) ) {
-					$action = 'classified';
-					$this->save_post_handler->classify( $post_id );
-				}
+			switch ( $doaction ) {
+				case ExcerptGeneration::ID:
+					$excerpt = ( new ExcerptGeneration() )->run( $post_id );
+					$action  = $doaction;
 
-				// Handle OpenAI Embeddings classification.
-				if ( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) ) {
-					$action = 'classified';
-					$this->embeddings->generate_embeddings_for_post( $post_id );
-				}
-			}
-
-			if ( 'generate_excerpt' === $doaction ) {
-				if ( is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) ) {
-					$action  = 'excerpt_generated';
-					$excerpt = $this->chat_gpt->generate_excerpt( $post_id );
 					if ( ! is_wp_error( $excerpt ) ) {
 						wp_update_post(
 							[
@@ -246,25 +149,125 @@ class BulkActions {
 							]
 						);
 					}
-				}
-			}
+					break;
 
-			if ( 'text_to_speech' === $doaction ) {
-				// Handle Azure Text to Speech generation.
-				if (
-					is_a( $this->text_to_speech, '\Classifai\Providers\Azure\Speech' ) &&
-					is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' )
-				) {
-					$action = 'text_to_speech';
-					$this->save_post_handler->synthesize_speech( $post_id );
-				}
+				case TextToSpeech::ID:
+					( new TextToSpeech() )->run( $post_id );
+					$action = $doaction;
+					break;
 			}
 		}
 
-		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_excerpt_generated', 'bulk_text_to_speech', 'bulk_scanned', 'bulk_cropped', 'bulk_transcribed' ], $redirect_to );
+		$args_to_remove = array_map(
+			function ( $feature ) {
+				return "bulk_{$feature}";
+			},
+			$feature_ids
+		);
+
+		$redirect_to = remove_query_arg( $args_to_remove, $redirect_to );
 		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $post_ids ), $redirect_to );
 
 		return esc_url_raw( $redirect_to );
+	}
+
+	/**
+	 * Register Classifai row action.
+	 *
+	 * @param array    $actions Current row actions.
+	 * @param \WP_Post $post    Post object.
+	 *
+	 * @return array
+	 */
+	public function register_language_processing_row_action( $actions, $post ) {
+		foreach ( $this->language_processing_features as $feature ) {
+			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
+
+			switch ( $feature::ID ) {
+				case ExcerptGeneration::ID:
+					$actions[ ExcerptGeneration::ID ] = sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=%s&ids=%d&post_type=%s', ExcerptGeneration::ID, $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+						esc_html__( 'Generate excerpt', 'classifai' )
+					);
+					break;
+
+				case TextToSpeech::ID:
+					$actions[ TextToSpeech::ID ] = sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=%s&ids=%d&post_type=%s', TextToSpeech::ID, $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+						esc_html__( 'Text to speech', 'classifai' )
+					);
+					break;
+			}
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Register bulk actions for the Computer Vision provider.
+	 */
+	public function register_image_processing_hooks() {
+		$this->media_processing_features = [
+			new DescriptiveTextGenerator(),
+			new ImageTagsGenerator(),
+			new ImageCropping(),
+			new ImageTextExtraction(),
+			new PDFTextExtraction(),
+			new AudioTranscriptsGeneration(),
+		];
+
+		add_filter( 'bulk_actions-upload', [ $this, 'register_media_processing_media_bulk_actions' ] );
+		add_filter( 'handle_bulk_actions-upload', [ $this, 'media_processing_bulk_action_handler' ], 10, 3 );
+		add_filter( 'media_row_actions', [ $this, 'register_media_processing_row_action' ], 10, 2 );
+	}
+
+	/**
+	 * Register Classifai media bulk actions.
+	 *
+	 * @param array $bulk_actions Current bulk actions.
+	 *
+	 * @return array
+	 */
+	public function register_media_processing_media_bulk_actions( $bulk_actions ) {
+		foreach ( $this->media_processing_features as $feature ) {
+			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
+
+			$bulk_actions[ $feature::ID ] = $feature->get_label();
+
+			switch ( $feature::ID ) {
+				case DescriptiveTextGenerator::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Generate descriptive text', 'classifai' );
+					break;
+
+				case ImageTagsGenerator::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Generate image tags', 'classifai' );
+					break;
+
+				case ImageCropping::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Crop image', 'classifai' );
+					break;
+
+				case ImageTextExtraction::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Extract text from images', 'classifai' );
+					break;
+
+				case PDFTextExtraction::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Extract text from PDFs', 'classifai' );
+					break;
+
+				case AudioTranscriptsGeneration::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Transcribe audio', 'classifai' );
+					break;
+			}
+		}
+
+		return $bulk_actions;
 	}
 
 	/**
@@ -276,81 +279,203 @@ class BulkActions {
 	 *
 	 * @return string
 	 */
-	public function media_bulk_action_handler( $redirect_to, $doaction, $attachment_ids ) {
+	public function media_processing_bulk_action_handler( $redirect_to, $doaction, $attachment_ids ) {
+		$feature_ids = array_map(
+			function( $feature ) {
+				return $feature::ID;
+			},
+			$this->media_processing_features
+		);
+
 		if (
 			empty( $attachment_ids ) ||
-			! in_array( $doaction, [ 'scan_image', 'smart_crop', 'transcribe' ], true )
+			! in_array( $doaction, $feature_ids, true )
 		) {
 			return $redirect_to;
 		}
 
-		$action = '';
-
 		foreach ( $attachment_ids as $attachment_id ) {
-			if ( 'transcribe' === $doaction ) {
-				$action = 'transcribed';
-				$this->whisper->transcribe_audio( $attachment_id );
-				continue;
-			}
-
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
 
-			if ( 'smart_crop' === $doaction ) {
-				$action = 'cropped';
-				$this->computer_vision->smart_crop_image( $current_meta, $attachment_id );
-			} elseif ( 'scan_image' === $doaction ) {
-				$action = 'scanned';
-				$this->computer_vision->generate_image_alt_tags( $current_meta, $attachment_id );
+			switch ( $doaction ) {
+				case DescriptiveTextGenerator::ID:
+					if ( wp_attachment_is_image( $attachment_id ) ) {
+						( new DescriptiveTextGenerator() )->run( $attachment_id );
+					}
+					break;
+
+				case ImageTagsGenerator::ID:
+					if ( wp_attachment_is_image( $attachment_id ) ) {
+						( new ImageTagsGenerator() )->run( $attachment_id );
+					}
+					break;
+
+				case ImageCropping::ID:
+					if ( wp_attachment_is_image( $attachment_id ) ) {
+						( new ImageCropping() )->run( $current_meta, $attachment_id );
+					}
+					break;
+
+				case ImageTextExtraction::ID:
+					if ( wp_attachment_is_image( $attachment_id ) ) {
+						( new ImageTextExtraction() )->run( $current_meta, $attachment_id, true );
+					}
+					break;
+
+				case PDFTextExtraction::ID:
+					if ( attachment_is_pdf( $attachment_id ) ) {
+						( new PDFTextExtraction() )->run( $attachment_id );
+					}
+					break;
+
+				case AudioTranscriptsGeneration::ID:
+					if ( wp_attachment_is( 'audio', $attachment_id ) ) {
+						( new AudioTranscriptsGeneration() )->run( $attachment_id );
+					}
+					break;
 			}
 		}
 
-		$redirect_to = remove_query_arg( [ 'bulk_classified', 'bulk_text_to_speech', 'bulk_scanned', 'bulk_cropped', 'bulk_transcribed' ], $redirect_to );
-		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $attachment_ids ), $redirect_to );
+		$args_to_remove = array_map(
+			function ( $feature ) {
+				return "bulk_{$feature}";
+			},
+			$feature_ids
+		);
+
+		$redirect_to = remove_query_arg( $args_to_remove, $redirect_to );
+		$redirect_to = add_query_arg( rawurlencode( "bulk_{$doaction}" ), count( $attachment_ids ), $redirect_to );
 
 		return esc_url_raw( $redirect_to );
+	}
+
+	/**
+	 * Register media row actions.
+	 *
+	 * @param array    $actions An array of action links for each attachment.
+	 * @param \WP_Post $post WP_Post object for the current attachment.
+	 * @return array
+	 */
+	public function register_media_processing_row_action( $actions, $post ) {
+		if ( attachment_is_pdf( $post ) && ( new PDFTextExtraction() )->is_feature_enabled() ) {
+			$actions[ PDFTextExtraction::ID ] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', PDFTextExtraction::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+				esc_html__( 'Extract text from PDF', 'classifai' )
+			);
+		}
+
+		if ( wp_attachment_is( 'image' ) ) {
+			if ( ( new DescriptiveTextGenerator() )->is_feature_enabled() ) {
+				$actions[ DescriptiveTextGenerator::ID ] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', DescriptiveTextGenerator::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+					esc_html__( 'Generate descriptive text', 'classifai' )
+				);
+			}
+
+			if ( ( new ImageTagsGenerator() )->is_feature_enabled() ) {
+				$actions[ ImageTagsGenerator::ID ] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', ImageTagsGenerator::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+					esc_html__( 'Generate image tags', 'classifai' )
+				);
+			}
+
+			if ( ( new ImageCropping() )->is_feature_enabled() ) {
+				$actions[ ImageCropping::ID ] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', ImageCropping::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+					esc_html__( 'Crop image', 'classifai' )
+				);
+			}
+
+			if ( ( new ImageTextExtraction() )->is_feature_enabled() ) {
+				$actions[ ImageTextExtraction::ID ] = sprintf(
+					'<a href="%s">%s</a>',
+					esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', ImageTextExtraction::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+					esc_html__( 'Extract text from image', 'classifai' )
+				);
+			}
+		}
+
+		if ( wp_attachment_is( 'audio', $post ) && ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
+			$actions[ AudioTranscriptsGeneration::ID ] = sprintf(
+				'<a href="%s">%s</a>',
+				esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=%s&ids=%d&post_type=%s', AudioTranscriptsGeneration::ID, $post->ID, $post->post_type ) ), 'bulk-media' ) ),
+				esc_html__( 'Transcribe audio', 'classifai' )
+			);
+		}
+
+		return $actions;
 	}
 
 	/**
 	 * Display an admin notice after bulk updates.
 	 */
 	public function bulk_action_admin_notice() {
+		$post_count      = 0;
+		$action          = '';
+		$post_type       = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$all_feature_ids = array_map(
+			function( $feature ) {
+				return $feature::ID;
+			},
+			array_merge( $this->language_processing_features, $this->media_processing_features )
+		);
 
-		$classified     = ! empty( $_GET['bulk_classified'] ) ? intval( wp_unslash( $_GET['bulk_classified'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$excerpts       = ! empty( $_GET['bulk_excerpt_generated'] ) ? intval( wp_unslash( $_GET['bulk_excerpt_generated'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$text_to_speech = ! empty( $_GET['bulk_text_to_speech'] ) ? intval( wp_unslash( $_GET['bulk_text_to_speech'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$post_type      = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$scanned        = ! empty( $_GET['bulk_scanned'] ) ? intval( wp_unslash( $_GET['bulk_scanned'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$cropped        = ! empty( $_GET['bulk_cropped'] ) ? intval( wp_unslash( $_GET['bulk_cropped'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$transcribed    = ! empty( $_GET['bulk_transcribed'] ) ? intval( wp_unslash( $_GET['bulk_transcribed'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		foreach ( $all_feature_ids as $feature_id ) {
+			$post_count = ! empty( $_GET[ "bulk_{$feature_id}" ] ) ? intval( wp_unslash( $_GET[ "bulk_{$feature_id}" ] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( ! $classified && ! $excerpts && ! $text_to_speech && ! $scanned && ! $cropped && ! $transcribed ) {
+			if ( $post_count ) {
+				$action = $feature_id;
+				break;
+			}
+		}
+
+		if ( ! $action ) {
 			return;
 		}
 
-		if ( $classified ) {
-			$classified_posts_count = $classified;
-			$post_type              = $post_type;
-			$action                 = __( 'Classified', 'classifai' );
-		} elseif ( $excerpts ) {
-			$classified_posts_count = $excerpts;
-			$post_type              = $post_type;
-			$action                 = __( 'Excerpts generated for', 'classifai' );
-		} elseif ( $text_to_speech ) {
-			$classified_posts_count = $text_to_speech;
-			$post_type              = $post_type;
-			$action                 = __( 'Text to speech conversion done for', 'classifai' );
-		} elseif ( $scanned ) {
-			$classified_posts_count = $scanned;
-			$post_type              = 'image';
-			$action                 = __( 'Scanned', 'classifai' );
-		} elseif ( $cropped ) {
-			$classified_posts_count = $cropped;
-			$post_type              = 'image';
-			$action                 = __( 'Cropped', 'classifai' );
-		} elseif ( $transcribed ) {
-			$classified_posts_count = $transcribed;
-			$post_type              = 'audio';
-			$action                 = __( 'Transcribed', 'classifai' );
+		switch ( $feature_id ) {
+			case ExcerptGeneration::ID:
+				$action_text = __( 'Excerpts generated for', 'classifai' );
+				break;
+
+			case TextToSpeech::ID:
+				$action_text = __( 'Text to speech conversion done for', 'classifai' );
+				break;
+
+			case PDFTextExtraction::ID:
+				$action_text = __( 'PDF Text extraction done for', 'classifai' );
+				$post_type   = 'file';
+				break;
+
+			case DescriptiveTextGenerator::ID:
+				$action_text = __( 'Alt text generated for', 'classifai' );
+				$post_type   = 'image';
+				break;
+
+			case ImageTagsGenerator::ID:
+				$action_text = __( 'Tags generated for', 'classifai' );
+				$post_type   = 'image';
+				break;
+
+			case ImageCropping::ID:
+				$action_text = __( 'Cropping done for', 'classifai' );
+				$post_type   = 'image';
+				break;
+
+			case ImageTextExtraction::ID:
+				$action_text = __( 'Text extraction done for', 'classifai' );
+				$post_type   = 'image';
+				break;
+
+			case AudioTranscriptsGeneration::ID:
+				$action_text = __( 'Audio transcribed for', 'classifai' );
+				$post_type   = 'file';
+				break;
+
 		}
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';
@@ -359,11 +484,11 @@ class BulkActions {
 			_n(
 				'%1$s %2$s %3$s.',
 				'%1$s %2$s %3$ss.',
-				$classified_posts_count,
+				$post_count,
 				'classifai'
 			),
-			$action,
-			$classified_posts_count,
+			$action_text,
+			$post_count,
 			$post_type
 		);
 		$output .= '</p></div>';
@@ -379,81 +504,4 @@ class BulkActions {
 			]
 		);
 	}
-
-	/**
-	 * Register Classifai row action.
-	 *
-	 * @param array    $actions Current row actions.
-	 * @param \WP_Post $post    Post object.
-	 *
-	 * @return array
-	 */
-	public function register_row_action( $actions, $post ) {
-		$post_types = [];
-
-		if ( is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' ) ) {
-			$post_types = array_merge( $post_types, get_supported_post_types() );
-		}
-
-		if ( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) ) {
-			$post_types = array_merge( $post_types, $this->embeddings->supported_post_types() );
-		}
-
-		if ( in_array( $post->post_type, $post_types, true ) ) {
-			$actions['classify'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=classify&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-				esc_html__( 'Classify', 'classifai' )
-			);
-		}
-
-		if ( is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) ) {
-			if ( in_array( $post->post_type, array_keys( get_post_types_for_language_settings() ), true ) ) {
-				$actions['generate_excerpt'] = sprintf(
-					'<a href="%s">%s</a>',
-					esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=generate_excerpt&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-					esc_html__( 'Generate excerpt', 'classifai' )
-				);
-			}
-		}
-
-		if ( is_a( $this->text_to_speech, '\Classifai\Features\TextToSpeech' ) && $this->text_to_speech->is_feature_enabled() && in_array( $post->post_type, get_tts_supported_post_types(), true ) ) {
-			$actions['text_to_speech'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=text_to_speech&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
-				esc_html__( 'Text to speech', 'classifai' )
-			);
-		}
-
-		return $actions;
-	}
-
-	/**
-	 * Register media row actions.
-	 *
-	 * @param array    $actions An array of action links for each attachment.
-	 * @param \WP_Post $post WP_Post object for the current attachment.
-	 * @return array
-	 */
-	public function register_media_row_action( $actions, $post ) {
-		$whisper_settings = $this->whisper->get_settings();
-		$whisper_enabled  = $this->whisper->is_feature_enabled( 'speech_to_text', $post->ID );
-
-		if ( is_wp_error( $whisper_enabled ) ) {
-			return $actions;
-		}
-
-		$transcribe = new Transcribe( $post->ID, $whisper_settings );
-
-		if ( $transcribe->should_process( $post->ID ) ) {
-			$actions['transcribe'] = sprintf(
-				'<a href="%s">%s</a>',
-				esc_url( wp_nonce_url( admin_url( sprintf( 'upload.php?action=transcribe&ids=%d&post_type=%s', $post->ID, $post->post_type ) ), 'bulk-media' ) ),
-				esc_html__( 'Transcribe', 'classifai' )
-			);
-		}
-
-		return $actions;
-	}
-
 }

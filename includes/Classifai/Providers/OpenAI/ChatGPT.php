@@ -404,9 +404,6 @@ class ChatGPT extends Provider {
 			return;
 		}
 
-		$yolo = new TitleGeneration();
-		$setta = $yolo->get_settings();
-
 		if ( ( new ExcerptGeneration() )->is_feature_enabled() ) {
 			// This script removes the core excerpt panel and replaces it with our own.
 			wp_enqueue_script(
