@@ -151,10 +151,16 @@ abstract class Service {
 					<?php
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
+					if ( 'openai_embeddings' === $active_tab ) {
+						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
+					}
 
 					if (
-						! is_wp_error( $provider ) && ! empty( $provider->can_register() )
-						&& ( 'openai_embeddings' === $active_tab || $provider->is_feature_enabled( 'content_classification' ) )
+						! is_wp_error( $provider )
+						&& ! empty(
+							$provider->can_register()
+							&& $provider->is_feature_enabled( 'content_classification' )
+						)
 					) :
 						?>
 					<div id="classifai-post-preview-app">
