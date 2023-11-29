@@ -155,11 +155,15 @@ abstract class Service {
 						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
 					}
 
+					// echo '<pre>';
+					// print_r( $provider );
+					// die();
+
 					if (
 						! is_wp_error( $provider )
 						&& ! empty(
 							$provider->can_register()
-							&& $provider->is_feature_enabled( 'content_classification' )
+							&& ( $provider->is_feature_enabled( 'content_classification' ) || $provider->is_feature_enabled( 'classification' ) )
 						)
 					) :
 						?>
