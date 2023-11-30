@@ -80,11 +80,33 @@ class Embeddings extends Provider {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
 			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
 			add_action( 'save_post', [ $this, 'save_metabox' ] );
 		}
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-language-processing-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
+			get_asset_info( 'language-processing', 'dependencies' ),
+			get_asset_info( 'language-processing', 'version' ),
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			array(),
+			get_asset_info( 'language-processing', 'version' ),
+			'all'
+		);
 	}
 
 	/**
