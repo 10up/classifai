@@ -2,6 +2,7 @@
 
 namespace Classifai;
 
+use Classifai\Features\Classification;
 use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Provider;
 use Classifai\Providers\Azure;
@@ -429,21 +430,21 @@ function get_feature_threshold( $feature ) {
  * Returns the Taxonomy for the specified NLU feature. Returns defaults
  * in config.php if options have not been configured.
  *
- * @param string $feature NLU feature name
+ * @param string $classify_by NLU feature name
  * @return string Taxonomy mapped to the feature
  */
-function get_feature_taxonomy( $feature ) {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+function get_feature_taxonomy( $classify_by = '' ) {
 	$taxonomy = 0;
 
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature . '_taxonomy' ] ) ) {
-			$taxonomy = $settings['features'][ $feature . '_taxonomy' ];
-		}
+	$featuse  = new Classification();
+	$settings = $featuse->get_settings( $featuse::ID );
+
+	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
+		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
 	}
 
 	if ( empty( $taxonomy ) ) {
-		$constant = 'WATSON_' . strtoupper( $feature ) . '_TAXONOMY';
+		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
 
 		if ( defined( $constant ) ) {
 			$taxonomy = constant( $constant );
@@ -769,4 +770,26 @@ function get_all_post_statuses() {
 	 * @return {array} Array of post statuses.
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
+}
+
+/**
+ * Check if the current user has permission to create and assign terms.
+ *
+ * @param string $tax Taxonomy name.
+ * @return bool|WP_Error
+ */
+function check_term_permissions( string $tax = '' ) {
+	$taxonomy = get_taxonomy( $tax );
+
+	if ( empty( $taxonomy ) || empty( $taxonomy->show_in_rest ) ) {
+		return new WP_Error( 'invalid_taxonomy', esc_html__( 'Taxonomy not found. Double check your settings.', 'classifai' ) );
+	}
+
+	$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
+
+	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
+	}
+
+	return true;
 }

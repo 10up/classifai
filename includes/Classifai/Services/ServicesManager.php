@@ -65,6 +65,7 @@ class ServicesManager {
 	 */
 	public function register_language_processing_features() {
 		return [
+			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
 			'\Classifai\Features\ContentResizing',

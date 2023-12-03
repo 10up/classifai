@@ -68,7 +68,7 @@ class PostClassifier {
 	 *
 	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
-	 * @return array
+	 * @return object|boolean
 	 */
 	public function classify_and_link( $post_id, $opts = [] ) {
 		$output = $this->classify( $post_id, $opts );
