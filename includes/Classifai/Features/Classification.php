@@ -256,7 +256,7 @@ class Classification extends Feature {
 		if ( NLU::ID === $provider_instance::ID ) {
 			/** @var NLU $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'generate_titles' ],
+				[ $provider_instance, 'classify_post' ],
 				[ ...$args ]
 			);
 		}

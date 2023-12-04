@@ -2,6 +2,7 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Features\Classification;
 use Classifai\Features\TextToSpeech;
 use \Classifai\Providers\Azure\Speech;
 use \Classifai\Watson\Normalizer;
@@ -94,7 +95,7 @@ class SavePostHandler {
 		$post_statuses = apply_filters( 'classifai_post_statuses_for_post_type_or_id', $post_statuses, $post_type, $post_id );
 
 		// Process posts in allowed post statuses, supported items and only if features are enabled
-		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) && \Classifai\language_processing_features_enabled() ) {
+		if ( in_array( $post_status, $post_statuses, true ) && in_array( $post_type, $supported, true ) ) {
 			// Check if processing content on save is disabled.
 			$classifai_process_content = get_post_meta( $post_id, '_classifai_process_content', true );
 			if ( 'no' === $classifai_process_content ) {

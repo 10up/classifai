@@ -256,25 +256,24 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		if ( ( new Classification() )->is_feature_enabled() ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
-		// Add classifai meta box to classic editor.
-		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
+			// Add classifai meta box to classic editor.
+			add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
+			add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
 
-		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 
-		$this->taxonomy_factory = new TaxonomyFactory();
-		$this->taxonomy_factory->build_all();
+			$this->taxonomy_factory = new TaxonomyFactory();
+			$this->taxonomy_factory->build_all();
 
-		$this->save_post_handler = new SavePostHandler();
-
-		if ( $this->save_post_handler->can_register() ) {
+			$this->save_post_handler = new SavePostHandler();
 			$this->save_post_handler->register();
-		}
 
-		new PreviewClassifierData();
+			new PreviewClassifierData();
+		}
 	}
 
 	/**
@@ -318,7 +317,7 @@ class NLU extends Provider {
 			'classifai-gutenberg-plugin',
 			'classifaiPostData',
 			[
-				'NLUEnabled'           => \Classifai\language_processing_features_enabled(),
+				'NLUEnabled'           => ( new Classification() )->is_feature_enabled(),
 				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
 				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
 				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
@@ -548,7 +547,7 @@ class NLU extends Provider {
 		$authenticated = $this->nlu_authentication_check( $new_settings );
 
 		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
+			$new_settings[ static::ID ]['authenticated'] = false;
 			add_settings_error(
 				'classifai-credentials',
 				'classifai-auth',
@@ -556,7 +555,7 @@ class NLU extends Provider {
 				'error'
 			);
 		} else {
-			$new_settings['authenticated'] = true;
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
 		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
@@ -905,9 +904,57 @@ class NLU extends Provider {
 	 * @return array|bool|string|WP_Error
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
-		try {
-			$post_id = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
+		if ( empty( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
+		}
+
+		return rest_ensure_response(
+			$this->rest_endpoint_callback(
+				$post_id,
+				'classify'
+			)
+		);
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id The Post Id we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
+		$route_to_call = strtolower( $route_to_call );
+
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+		}
+
+		$return = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'classify':
+				$return = ( new Classification() )->run( $post_id );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Handle request to generate tags for given post ID.
+	 *
+	 * @param int $post_id The Post Id we're processing.
+	 *
+	 * @return mixed
+	 */
+	public function classify_post( $post_id ) {
+		try {
 			if ( empty( $post_id ) ) {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 			}

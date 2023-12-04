@@ -2,6 +2,9 @@
 
 namespace Classifai;
 
+use Classifai\Features\Classification;
+use Classifai\Providers\Watson\NLU;
+
 /**
  * PostClassifier classifies and links WP posts to Taxonomy Terms based
  * on IBM Watson NLU API output.
@@ -149,13 +152,15 @@ class PostClassifier {
 	 * @return array
 	 */
 	public function get_features() {
-		$features = [];
+		$classification = new Classification();
+		$settings       = $classification->get_settings( NLU::ID );
+		$features       = [];
 
-		if ( get_feature_enabled( 'category' ) ) {
+		if ( $settings[ 'category' ] ) {
 			$features['categories'] = (object) [];
 		}
 
-		if ( get_feature_enabled( 'keyword' ) ) {
+		if ( $settings[ 'keyword' ] ) {
 			$features['keywords'] = [
 				'emotion'   => false,
 				'sentiment' => false,
@@ -163,11 +168,11 @@ class PostClassifier {
 			];
 		}
 
-		if ( get_feature_enabled( 'concept' ) ) {
+		if ( $settings[ 'concept' ] ) {
 			$features['concepts'] = (object) [];
 		}
 
-		if ( get_feature_enabled( 'entity' ) ) {
+		if ( $settings[ 'entity' ] ) {
 			$features['entities'] = (object) [];
 		}
 

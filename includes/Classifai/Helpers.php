@@ -5,7 +5,7 @@ namespace Classifai;
 use Classifai\Features\Classification;
 use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Provider;
-use Classifai\Providers\Azure;
+use Classifai\Providers\Watson\NLU;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -138,11 +138,11 @@ function reset_plugin_settings() {
  * @return string
  */
 function get_watson_api_url() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
+	$settings = ( new Classification() )->get_settings();
+	$creds    = ! empty( $settings[ NLU::ID ] ) ? $settings[ NLU::ID ] : [];
 
-	if ( ! empty( $creds['watson_url'] ) ) {
-		return $creds['watson_url'];
+	if ( ! empty( $creds['endpoint_url'] ) ) {
+		return $creds['endpoint_url'];
 	} elseif ( defined( 'WATSON_URL' ) ) {
 		return WATSON_URL;
 	} else {
@@ -160,11 +160,11 @@ function get_watson_api_url() {
  * @return string
  */
 function get_watson_username() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
+	$settings = ( new Classification() )->get_settings( NLU::ID );
+	$username = ! empty( $settings['username'] ) ? $settings['username'] : '';
 
-	if ( ! empty( $creds['watson_username'] ) ) {
-		return $creds['watson_username'];
+	if ( ! empty( $username ) ) {
+		return $username;
 	} elseif ( defined( 'WATSON_USERNAME' ) ) {
 		return WATSON_USERNAME;
 	} else {
@@ -173,7 +173,7 @@ function get_watson_username() {
 }
 
 /**
- * Returns the currently configured Watson username. Lookup order is,
+ * Returns the currently configured Watson password. Lookup order is,
  *
  * - Options
  * - Constant
@@ -181,11 +181,11 @@ function get_watson_username() {
  * @return string
  */
 function get_watson_password() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
+	$settings = ( new Classification() )->get_settings( NLU::ID );
+	$password = ! empty( $settings['password'] ) ? $settings['password'] : '';
 
-	if ( ! empty( $creds['watson_password'] ) ) {
-		return $creds['watson_password'];
+	if ( ! empty( $password ) ) {
+		return $password;
 	} elseif ( defined( 'WATSON_PASSWORD' ) ) {
 		return WATSON_PASSWORD;
 	} else {
@@ -250,16 +250,13 @@ function get_post_statuses_for_language_settings() {
  * return array
  */
 function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+	$feature    = new Classification();
+	$settings   = $feature->get_settings();
+	$post_types = [];
 
-	if ( empty( $classifai_settings ) ) {
-		$post_types = [];
-	} else {
-		$post_types = [];
-		foreach ( $classifai_settings['post_types'] as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
+	foreach ( $settings['post_types'] as $post_type => $enabled ) {
+		if ( ! empty( $enabled ) ) {
+			$post_types[] = $post_type;
 		}
 	}
 
@@ -304,16 +301,13 @@ function get_tts_supported_post_types() {
  * @return array
  */
 function get_supported_post_statuses() {
-	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+	$feature        = new Classification();
+	$settings       = $feature->get_settings();
+	$post_statuses  = [];
 
-	if ( empty( $classifai_settings ) ) {
-		$post_statuses = [ 'publish' ];
-	} else {
-		$post_statuses = [];
-		foreach ( $classifai_settings['post_statuses'] as $post_status => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_statuses[] = $post_status;
-			}
+	foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
+		if ( ! empty( $enabled ) ) {
+			$post_statuses[] = $post_status;
 		}
 	}
 
@@ -335,20 +329,17 @@ function get_supported_post_statuses() {
 /**
  * Returns a bool based on whether the specified feature is enabled
  *
- * @param string $feature category,keyword,entity,concept
+ * @param string $classify_by category,keyword,entity,concept
  * @return bool
  */
-function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+function get_feature_enabled( $classify_by ) {
+	$feature  = new Classification();
+	$settings = $feature->get_settings( NLU::ID );
 
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature ] ) ) {
-			return filter_var(
-				$settings['features'][ $feature ],
-				FILTER_VALIDATE_BOOLEAN
-			);
-		}
-	}
+	return filter_var(
+		$settings[ $classify_by ],
+		FILTER_VALIDATE_BOOLEAN
+	);
 
 	return false;
 }
@@ -458,11 +449,11 @@ function get_feature_taxonomy( $classify_by = '' ) {
 	 * @hook classifai_taxonomy_for_feature
 	 *
 	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $feature  The NLU feature this taxonomy is for.
+	 * @param {string} $classify_by  The NLU feature this taxonomy is for.
 	 *
 	 * @return {string} The filtered taxonomy slug.
 	 */
-	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
+	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $classify_by );
 }
 
 /**
