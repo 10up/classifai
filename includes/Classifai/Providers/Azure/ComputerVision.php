@@ -801,7 +801,9 @@ class ComputerVision extends Provider {
 					update_post_meta( $attachment_id, '_wp_attachment_image_alt', $captions[0]->text );
 				}
 
-				if ( in_array( 'caption', $enabled_fields, true ) ) {
+				$excerpt = get_the_excerpt( $attachment_id );
+
+				if ( in_array( 'caption', $enabled_fields, true ) && $excerpt !== $captions[0]->text ) {
 					wp_update_post(
 						array(
 							'ID'           => $attachment_id,
