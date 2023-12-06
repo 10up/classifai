@@ -40,7 +40,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @var int
 	 */
-	protected $max_tokens = 4096;
+	protected $max_tokens = 16385;
 
 	/**
 	 * Prompt for generating excerpts
@@ -80,6 +80,13 @@ class ChatGPT extends Provider {
 			'OpenAI ChatGPT',
 			'ChatGPT',
 			'openai_chatgpt'
+		);
+
+		// Features provided by this provider.
+		$this->features = array(
+			'title_generation'   => __( 'Generate titles', 'classifai' ),
+			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
+			'resize_content'     => __( 'Resize content', 'classifai' ),
 		);
 
 		// Set the onboarding options.
@@ -1028,6 +1035,34 @@ class ChatGPT extends Provider {
 	}
 
 	/**
+	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$roles            = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ChatGTP
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_chatgpt_allowed_roles
+		 *
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
+
+		return $roles;
+	}
+
+	/**
 	 * Sanitize the prompt data.
 	 * This is used for the repeater field.
 	 *
@@ -1406,5 +1441,36 @@ class ChatGPT extends Provider {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Handle different enable keys.
+		switch ( $feature ) {
+			case 'title_generation':
+				$enable_key = 'enable_titles';
+				break;
+
+			case 'excerpt_generation':
+				$enable_key = 'enable_excerpt';
+				break;
+
+			default:
+				break;
+		}
+
+		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
+
+		/** This filter is documented in includes/Classifai/Providers/Provider.php */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

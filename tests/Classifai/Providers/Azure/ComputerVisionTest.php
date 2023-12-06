@@ -8,6 +8,8 @@ namespace Classifai\Tests\Providers\Azure;
 use \WP_UnitTestCase;
 use Classifai\Providers\Azure\ComputerVision;
 
+use function Classifai\get_feature_default_settings;
+
 /**
  * Class ComputerVisionTest
  * @package Classifai\Tests\Providers\Azure;
@@ -86,25 +88,38 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	public function test_no_computer_vision_option_set() {
 		delete_option( 'classifai_computer_vision' );
 
+		$defaults = [];
+		$features = $this->get_computer_vision()->get_features() ?? [];
+		foreach ( $features as $feature => $title ) {
+			$defaults = array_merge(
+				$defaults,
+				get_feature_default_settings( $feature )
+			);
+		}
+
+		$expected = array_merge(
+			$defaults,
+			[
+				'valid'                 => false,
+				'url'                   => '',
+				'api_key'               => '',
+				'enable_image_captions' => array(
+					'alt'         => 0,
+					'caption'     => 0,
+					'description' => 0,
+				),
+				'enable_image_tagging'  => true,
+				'enable_smart_cropping' => false,
+				'enable_ocr'            => false,
+				'enable_read_pdf'       => false,
+				'caption_threshold'     => 75,
+				'tag_threshold'         => 70,
+				'image_tag_taxonomy'    => 'classifai-image-tags',
+			]
+		);
 		$settings = $this->get_computer_vision()->get_settings();
 
-		$this->assertSame( $settings, [
-			'valid'                 => false,
-			'url'                   => '',
-			'api_key'               => '',
-			'enable_image_captions' => array(
-				'alt'         => 0,
-				'caption'     => 0,
-				'description' => 0,
-			),
-			'enable_image_tagging'  => true,
-			'enable_smart_cropping' => false,
-			'enable_ocr'            => false,
-			'enable_read_pdf'       => false,
-			'caption_threshold'     => 75,
-			'tag_threshold'         => 70,
-			'image_tag_taxonomy'    => 'classifai-image-tags',
-		] );
+		$this->assertSame( $expected, $settings );
 	}
 
 	/**

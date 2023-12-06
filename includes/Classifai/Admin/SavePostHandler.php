@@ -6,6 +6,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\TextToSpeech;
 use \Classifai\Providers\Azure\Speech;
 use \Classifai\Watson\Normalizer;
+use function Classifai\get_classification_mode;
 
 /**
  * Classifies Posts based on the current ClassifAI configuration.
@@ -22,6 +23,7 @@ class SavePostHandler {
 	 */
 	public function register() {
 		add_filter( 'removable_query_args', [ $this, 'classifai_removable_query_args' ] );
+		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
 		add_action( 'save_post', [ $this, 'did_save_post' ] );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
@@ -58,6 +60,28 @@ class SavePostHandler {
 	 */
 	public function is_configured() {
 		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
+	}
+
+	/**
+	 * Sets the default value for the _classifai_process_content meta key.
+	 *
+	 * @param mixed  $value     The value get_metadata() should return - a single metadata value,
+	 *                          or an array of values.
+	 * @param int    $object_id Object ID.
+	 * @param string $meta_key  Meta key.
+	 *
+	 * @return mixed
+	 */
+	public function default_post_metadata( $value, $object_id, $meta_key ) {
+		if ( '_classifai_process_content' === $meta_key ) {
+			if ( 'automatic_classification' === get_classification_mode() ) {
+				return 'yes';
+			} else {
+				return 'no';
+			}
+		}
+
+		return $value;
 	}
 
 	/**
@@ -109,11 +133,12 @@ class SavePostHandler {
 	 * Classifies the post specified with the PostClassifier object.
 	 * Existing terms relationships are removed before classification.
 	 *
-	 * @param int $post_id the post to classify & link
+	 * @param int  $post_id the post to classify & link.
+	 * @param bool $link_terms Whether to link the terms to the post.
 	 *
 	 * @return array
 	 */
-	public function classify( $post_id ) {
+	public function classify( $post_id, $link_terms = true ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -135,23 +160,25 @@ class SavePostHandler {
 
 		$classifier = $this->get_classifier();
 
-		if ( \Classifai\get_feature_enabled( 'category' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+		if ( $link_terms ) {
+			if ( \Classifai\get_feature_enabled( 'category' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'concept' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			}
+
+			if ( \Classifai\get_feature_enabled( 'entity' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			}
 		}
 
-		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
-		}
-
-		$output = $classifier->classify_and_link( $post_id );
+		$output = $classifier->classify_and_link( $post_id, [], $link_terms );
 
 		if ( is_wp_error( $output ) ) {
 			update_post_meta(

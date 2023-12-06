@@ -15,6 +15,7 @@ use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
 use function Classifai\check_term_permissions;
+use function Classifai\get_classification_mode;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -48,6 +49,11 @@ class NLU extends Provider {
 			'IBM Watson',
 			'Natural Language Understanding',
 			'watson_nlu'
+		);
+
+		// Features provided by this provider.
+		$this->features = array(
+			'content_classification' => __( 'Classify content', 'classifai' ),
 		);
 
 		$this->nlu_features = [
@@ -85,7 +91,9 @@ class NLU extends Provider {
 		$this->onboarding_options = array(
 			'title'    => __( 'IBM Watson NLU', 'classifai' ),
 			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
-			'features' => array(),
+			'features' => array(
+				'enable_content_classification' => __( 'Classify content', 'classifai' ),
+			),
 		);
 
 		$post_types = get_post_types_for_language_settings();
@@ -225,31 +233,49 @@ class NLU extends Provider {
 	 * Resets the settings for the NLU provider.
 	 */
 	public function reset_settings() {
-		$settings = [
-			'post_types' => [
-				'post',
-				'page',
-			],
-			'features'   => [
-				'category'           => true,
-				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
-
-				'keyword'            => true,
-				'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-				'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-				'concept'            => false,
-				'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-				'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-				'entity'             => false,
-				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-			],
-		];
-
+		$settings = $this->get_default_settings() ?? [];
 		update_option( $this->get_option_name(), $settings );
+	}
+
+	/**
+	 * Default settings for Watson NLU.
+	 *
+	 * @return array
+	 */
+	public function get_default_settings() {
+		$default_settings = parent::get_default_settings() ?? [];
+
+		return array_merge(
+			$default_settings,
+			[
+				'enable_content_classification' => false,
+				'post_types'                    => [
+					'post' => 1,
+					'page' => null,
+				],
+				'post_statuses'                 => [
+					'publish' => 1,
+					'draft'   => null,
+				],
+				'features'                      => [
+					'category'           => true,
+					'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+					'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
+
+					'keyword'            => true,
+					'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+					'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+
+					'concept'            => false,
+					'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+					'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+
+					'entity'             => false,
+					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
+				],
+			]
+		);
 	}
 
 	/**
@@ -487,7 +513,6 @@ class NLU extends Provider {
 		return $supported;
 	}
 
-
 	/**
 	 * Helper to ensure the authentication works.
 	 *
@@ -590,6 +615,7 @@ class NLU extends Provider {
 	 */
 	public function sanitize_settings_old( $settings ) {
 		$new_settings  = $this->get_settings();
+		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings, 'content_classification' ) );
 		$authenticated = $this->nlu_authentication_check( $settings );
 
 		if ( is_wp_error( $authenticated ) ) {
@@ -614,6 +640,16 @@ class NLU extends Provider {
 
 		if ( isset( $settings['credentials']['watson_password'] ) ) {
 			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
+		}
+
+		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
+			$new_settings['enable_content_classification'] = 'no';
+		} else {
+			$new_settings['enable_content_classification'] = '1';
+		}
+
+		if ( isset( $settings['classification_mode'] ) ) {
+			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
 		}
 
 		// Sanitize the post type checkboxes
@@ -658,7 +694,7 @@ class NLU extends Provider {
 		}
 
 		// Show a warning if the NLU feature and Embeddings feature are both enabled.
-		if ( $feature_enabled ) {
+		if ( $feature_enabled && '1' === $new_settings['enable_content_classification'] ) {
 			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
 
 			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
@@ -788,7 +824,7 @@ class NLU extends Provider {
 		<p>
 			<label for="_classifai_process_content">
 				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
-				<?php esc_html_e( 'Process content on update', 'classifai' ); ?>
+				<?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?>
 			</label>
 		</p>
 		<div class="classifai-clasify-post-wrapper" style="display: none;">

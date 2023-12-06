@@ -73,6 +73,10 @@ class Plugin {
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
+		// Initialize the classifAI User Profile.
+		$user_profile = new Admin\UserProfile();
+		$user_profile->init();
+
 		/**
 		 * Fires after ClassifAI services are loaded.
 		 *
@@ -159,14 +163,20 @@ class Plugin {
 	/**
 	 * Enqueue the admin scripts.
 	 *
+	 * @param string $hook_suffix The current admin page.
 	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
-	public function enqueue_admin_assets() {
+	public function enqueue_admin_assets( $hook_suffix ) {
+		$user_profile     = new Admin\UserProfile();
+
+		// @todo: rework on this part.
+		// $allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
+		$allowed_features = [];
 
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array(),
+			array( 'wp-components' ),
 			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
@@ -179,16 +189,20 @@ class Plugin {
 			true
 		);
 
+		$localize_data = [
+			'api_password'             => __( 'API Password', 'classifai' ),
+			'api_key'                  => __( 'API Key', 'classifai' ),
+			'use_key'                  => __( 'Use an API Key instead?', 'classifai' ),
+			'use_password'             => __( 'Use a username/password instead?', 'classifai' ),
+			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
+			'opt_out_enabled_features' => array_keys( $allowed_features ),
+			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
+		];
+
 		wp_localize_script(
 			'classifai-admin-script',
 			'ClassifAI',
-			[
-				'api_password' => __( 'API Password', 'classifai' ),
-				'api_key'      => __( 'API Key', 'classifai' ),
-				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
-				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
-			]
+			$localize_data
 		);
 
 		if ( wp_script_is( 'wp-commands', 'registered' ) ) {

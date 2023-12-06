@@ -1,6 +1,8 @@
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import '../../scss/openai/classic-editor-title-generator.scss';
 
+const ClassifAI = window.ClassifAI || {};
 const classifaiChatGPTData = window.classifaiChatGPTData || {};
 const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 	( acc, cur ) => ( { [ cur.feature ]: cur } ),
@@ -102,6 +104,29 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 						)
 						.appendTo( '#classifai-openai__results-content' );
 				} );
+
+				// Append disable feature link.
+				if (
+					ClassifAI?.opt_out_enabled_features?.includes(
+						'title_generation'
+					)
+				) {
+					$( '<a>', {
+						text: __(
+							'Disable this ClassifAI feature',
+							'classifai'
+						),
+						href: ClassifAI?.profile_url,
+						target: '_blank',
+						rel: 'noopener noreferrer',
+						class: 'classifai-disable-feature-link',
+					} )
+						.wrap(
+							`<div class="classifai-openai__result-disable-link" />`
+						)
+						.parent()
+						.appendTo( '#classifai-openai__modal' );
+				}
 
 				$( '#classifai-openai__results' )
 					.show()

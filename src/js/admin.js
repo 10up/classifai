@@ -5,6 +5,9 @@ import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/light.css';
 
+import { createRoot, render } from '@wordpress/element';
+import { UserSelector } from './components';
+
 document.addEventListener( 'DOMContentLoaded', function () {
 	const template = document.getElementById( 'help-menu-template' );
 	if ( ! template ) {
@@ -81,6 +84,93 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	} );
 } )();
 
+// Role and user based access.
+document.addEventListener( 'DOMContentLoaded', function () {
+	function toogleAllowedRolesRow( e ) {
+		const checkbox = e.target;
+		const parentTr = checkbox.closest( 'tr.classifai-role-based-access' );
+		const allowedRoles = parentTr.nextElementSibling.classList.contains(
+			'allowed_roles_row'
+		)
+			? parentTr.nextElementSibling
+			: null;
+		if ( checkbox.checked ) {
+			allowedRoles.classList.remove( 'hidden' );
+		} else {
+			allowedRoles.classList.add( 'hidden' );
+		}
+	}
+
+	function toogleAllowedUsersRow( e ) {
+		const checkbox = e.target;
+		const parentTr = checkbox.closest( 'tr.classifai-user-based-access' );
+		const allowedUsers = parentTr.nextElementSibling.classList.contains(
+			'allowed_users_row'
+		)
+			? parentTr.nextElementSibling
+			: null;
+		if ( checkbox.checked ) {
+			allowedUsers.classList.remove( 'hidden' );
+		} else {
+			allowedUsers.classList.add( 'hidden' );
+		}
+	}
+
+	const roleBasedAccessCheckBoxes = document.querySelectorAll(
+		'tr.classifai-role-based-access input[type="checkbox"]'
+	);
+	const userBasedAccessCheckBoxes = document.querySelectorAll(
+		'tr.classifai-user-based-access input[type="checkbox"]'
+	);
+
+	if ( roleBasedAccessCheckBoxes ) {
+		roleBasedAccessCheckBoxes.forEach( function ( e ) {
+			e.addEventListener( 'change', toogleAllowedRolesRow );
+			e.dispatchEvent( new Event( 'change' ) );
+		} );
+	}
+
+	if ( userBasedAccessCheckBoxes ) {
+		userBasedAccessCheckBoxes.forEach( function ( e ) {
+			e.addEventListener( 'change', toogleAllowedUsersRow );
+			e.dispatchEvent( new Event( 'change' ) );
+		} );
+	}
+} );
+
+// User Selector.
+( () => {
+	const userSearches = document.querySelectorAll(
+		'.classifai-user-selector'
+	);
+	if ( ! userSearches ) {
+		return;
+	}
+
+	userSearches.forEach( ( userSearch ) => {
+		const id = userSearch.getAttribute( 'data-id' );
+		const userElement = document.getElementById( id );
+		const values = userElement.value?.split( ',' ) || [];
+		const onChange = ( newValues ) => {
+			userElement.value = newValues.join( ',' );
+		};
+
+		if ( createRoot ) {
+			const root = createRoot( userSearch );
+			root.render(
+				<UserSelector value={ values } onChange={ onChange } />
+			);
+		} else {
+			// Support for wp < 6.2
+			render(
+				<UserSelector value={ values } onChange={ onChange } />,
+				userSearch
+			);
+		}
+	} );
+} )();
+
+// Prompt fieldset.
 ( () => {
 	// Attach event to add new prompt button.
 	const $addNewPromptFieldsetButton = document.querySelectorAll(

@@ -42,12 +42,17 @@ class Personalizer extends Provider {
 			$service
 		);
 
+		// Features provided by this provider.
+		$this->features = array(
+			'recommended_content' => __( 'Recommended content block', 'classifai' ),
+		);
+
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 			'fields'   => array( 'url', 'api-key' ),
 			'features' => array(
-				'authenticated' => __( 'Recommended content block', 'classifai' ),
+				'enable_recommended_content' => __( 'Recommended content block', 'classifai' ),
 			),
 		);
 	}
@@ -65,19 +70,42 @@ class Personalizer extends Provider {
 	 * @return array
 	 */
 	public function get_default_settings() {
-		return [
-			'authenticated' => false,
-			'url'           => '',
-			'api_key'       => '',
-		];
+		return [];
+	}
+
+	/**
+	 * Get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+
+		// Backward compatibility for enable feature setting.
+		if ( ! empty( $settings ) && ! isset( $settings['enable_recommended_content'] ) ) {
+			$settings['enable_recommended_content'] = $settings['authenticated'] ?? $defaults['enable_recommended_content'];
+		}
+
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index && isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
 	}
 
 	/**
 	 * Register the functionality.
 	 */
 	public function register() {
-		// Setup Blocks
-		Blocks\setup();
+		if ( $this->is_enabled( 'recommended_content' ) ) {
+			// Setup Blocks
+			Blocks\setup();
+		}
 	}
 
 	/**
@@ -124,6 +152,22 @@ class Personalizer extends Provider {
 				'description'   => __( 'Azure AI Personalizer Key.', 'classifai' ),
 			]
 		);
+
+		add_settings_field(
+			'enable_recommended_content',
+			esc_html__( 'Recommend content', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name(),
+			[
+				'label_for'     => 'enable_recommended_content',
+				'input_type'    => 'checkbox',
+				'default_value' => $default_settings['enable_recommended_content'],
+				'description'   => __( 'Enables Recommended content block.', 'classifai' ),
+			]
+		);
+
+		$this->add_access_settings( 'recommended_content' );
 	}
 
 	/**
@@ -134,7 +178,14 @@ class Personalizer extends Provider {
 	 * @return array|mixed
 	 */
 	public function sanitize_settings( $settings ) {
-		$new_settings = [];
+		$new_settings = $this->sanitize_access_settings( $settings, 'recommended_content' );
+
+		if ( empty( $settings['enable_recommended_content'] ) || 1 !== (int) $settings['enable_recommended_content'] ) {
+			$new_settings['enable_recommended_content'] = 'no';
+		} else {
+			$new_settings['enable_recommended_content'] = '1';
+		}
+
 		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
 			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
 			if ( is_wp_error( $auth_check ) ) {
