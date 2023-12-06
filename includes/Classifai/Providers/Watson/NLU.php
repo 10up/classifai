@@ -466,8 +466,8 @@ class NLU extends Provider {
 				'label_for'     => 'classification_method',
 				'default_value' => $default_settings['classification_method'],
 				'options'       => array(
-					'recommended_terms' => __( 'Add all suggested terms', 'classifai' ),
-					'existing_terms'    => __( 'Only add suggested terms that already exist', 'classifai' ),
+					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
+					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
 				),
 			]
 		);
