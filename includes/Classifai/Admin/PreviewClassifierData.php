@@ -34,6 +34,7 @@ class PreviewClassifierData {
 		$request                 = $classifier->get_request();
 
 		$classified_data = $request->post( $classifier->get_endpoint(), $request_options );
+		$classified_data = $this->filter_classify_preview_data( $classified_data );
 
 		wp_send_json_success( $classified_data );
 	}
@@ -61,6 +62,84 @@ class PreviewClassifierData {
 		);
 
 		wp_send_json_success( $posts );
+	}
+
+	/**
+	 * Filter classifier preview based on the feature settings.
+	 *
+	 * @param array $classified_data The classified data.
+	 */
+	public function filter_classify_preview_data( $classified_data ) {
+		if ( is_wp_error( $classified_data ) ) {
+			return $classified_data;
+		}
+
+		$classify_existing_terms = 'existing_terms' === \Classifai\get_classification_method();
+		if ( ! $classify_existing_terms ) {
+			return $classified_data;
+		}
+
+		$features = [
+			'category' => 'categories',
+			'concept'  => 'concepts',
+			'entity'   => 'entities',
+			'keyword'  => 'keywords',
+		];
+		foreach ( $features as $key => $feature ) {
+			$taxonomy = \Classifai\get_feature_taxonomy( $key );
+			if ( ! $taxonomy ) {
+				continue;
+			}
+
+			if ( ! isset( $classified_data[ $feature ] ) || empty( $classified_data[ $feature ] ) ) {
+				continue;
+			}
+
+			// Handle categories feature.
+			if ( 'categories' === $feature ) {
+				$classified_data[ $feature ] = array_filter(
+					$classified_data[ $feature ],
+					function( $item ) use ( $taxonomy ) {
+						$keep  = false;
+						$parts = explode( '/', $item['label'] );
+						$parts = array_filter( $parts );
+						if ( ! empty( $parts ) ) {
+							foreach ( $parts as $part ) {
+								$term = get_term_by( 'name', $part, $taxonomy );
+								if ( ! empty( $term ) ) {
+									$keep = true;
+									break;
+								}
+							}
+						}
+						return $keep;
+					}
+				);
+				// Reset array keys.
+				$classified_data[ $feature ] = array_values( $classified_data[ $feature ] );
+				continue;
+			}
+
+			$classified_data[ $feature ] = array_filter(
+				$classified_data[ $feature ],
+				function( $item ) use ( $taxonomy, $key ) {
+					$name = $item['text'];
+					if ( 'keyword' === $key ) {
+						$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
+					} elseif ( 'entity' === $key ) {
+						if ( ! empty( $item['disambiguation'] ) && ! empty( $item['disambiguation']['name'] ) ) {
+							$name = $item['disambiguation']['name'];
+						}
+					}
+					$term = get_term_by( 'name', $name, $taxonomy );
+					return ! empty( $term );
+				}
+			);
+			// Reset array keys.
+			$classified_data[ $feature ] = array_values( $classified_data[ $feature ] );
+		}
+
+		return $classified_data;
 	}
 }
 

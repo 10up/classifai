@@ -399,9 +399,13 @@ abstract class Provider {
 	 */
 	public function render_checkbox_group( array $args = array() ) {
 		$setting_index = $this->get_settings();
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
 
 		// Iterate through all of our options.
-		foreach ( $args['options'] as $option_value => $option_label ) {
+		foreach ( $options as $option_value => $option_label ) {
 			$value                 = '';
 			$default_key           = array_search( $option_value, $args['default_values'], true );
 			$option_value_theshold = $option_value . '_threshold';
@@ -454,6 +458,46 @@ abstract class Provider {
 	}
 
 	/**
+	 * Render a group of radio.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_radio_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? '';
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		// Iterate through all of our options.
+		foreach ( $options as $option_value => $option_label ) {
+			// Render radio button.
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s">
+						<input type="radio" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s]" value="%3$s" %4$s />
+						%5$s
+					</label>
+				</p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description">%s</span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
 	 * Render a threshold field.
 	 *
 	 * @since 2.5.0
@@ -469,7 +513,7 @@ abstract class Provider {
 			'<p class="threshold_wrapper">
 				<label for="%1$s_%2$s_%3$s">%4$s</label>
 				<br>
-				<input type="number" id="%1$s_%2$s_%3$s" class="small-text" name="classifai_%1$s[%2$s][%3$s]" value="%5$s" />				
+				<input type="number" id="%1$s_%2$s_%3$s" class="small-text" name="classifai_%1$s[%2$s][%3$s]" value="%5$s" />
 			</p>',
 			esc_attr( $this->option_name ),
 			esc_attr( $args['label_for'] ?? '' ),
@@ -478,8 +522,6 @@ abstract class Provider {
 			$value ? esc_attr( $value ) : 75
 		);
 	}
-
-
 
 	/**
 	 * Renders the checkbox group for 'Generate descriptive text' setting.
