@@ -24,6 +24,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#openai_embeddings_post_types_post' ).check();
 		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
 		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category_threshold' ).type( 80 ); // "Test" requires 80% confidence. At 81%, it does not apply.
 		cy.get( '#number' ).clear().type( 1 );
 		cy.get( '#submit' ).click();
 	} );
