@@ -32,8 +32,6 @@ const PrePubPanel = ( { children } ) => {
 class PrePubClassifyPost extends Component {
 	/**
 	 * Render the component.
-	 *
-	 * @return {WPElement} Element to render.
 	 */
 	render() {
 		// retun null if popupOpened is true

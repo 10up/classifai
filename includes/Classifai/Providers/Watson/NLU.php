@@ -146,7 +146,7 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		if ( $this->has_access( 'content_classification' ) ) {
+		if ( $this->is_feature_enabled( 'content_classification' ) ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
@@ -548,7 +548,7 @@ class NLU extends Provider {
 					}
 				}
 				$setting_index = ! is_array( $setting_index ) ? $setting_index : '';
-				$attrs = empty( $attrs )
+				$attrs         = empty( $attrs )
 						? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false )
 						: $attrs;
 				break;
@@ -570,21 +570,21 @@ class NLU extends Provider {
 	 * Render the classification modes.
 	 *
 	 * @param array $args Settings for the input
-	 *
-	 * @return void
 	 */
 	public function render_classification_mode_radios( $args ) {
 		echo '<ul>';
+
 		$modes = [
-			'manual_review' => [
-				'label' => 'Manual review',
+			'manual_review'            => [
+				'label'         => 'Manual review',
 				'default_value' => 'manual_review',
 			],
 			'automatic_classification' => [
-				'label' => 'Automatic classification',
+				'label'         => 'Automatic classification',
 				'default_value' => 'automatic_classification',
 			],
 		];
+
 		foreach ( $modes as $name => $data ) {
 			$args = array_merge(
 				$args,
@@ -728,7 +728,6 @@ class NLU extends Provider {
 		return $supported;
 	}
 
-
 	/**
 	 * Helper to ensure the authentication works.
 	 *
@@ -776,7 +775,6 @@ class NLU extends Provider {
 			return $response;
 		}
 	}
-
 
 	/**
 	 * Sanitization for the options being saved.
@@ -1104,4 +1102,5 @@ class NLU extends Provider {
 		/** This filter is documented in includes/Classifai/Providers/Provider.php */
 		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
+
 }
