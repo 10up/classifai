@@ -604,13 +604,13 @@ class Embeddings extends Provider {
 
 			$term_added = 0;
 			foreach ( $terms as $term_id => $similarity ) {
-				// Convert $similarity to percentage.
-				$similarity = round( ( 1 - $similarity ), 2 );
-
 				// Stop if we have added the number of terms specified in settings.
 				if ( $number_to_add <= $term_added ) {
 					break;
 				}
+
+				// Convert $similarity to percentage.
+				$similarity = round( ( 1 - $similarity ), 10 );
 
 				$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 					'label' => get_term( $term_id )->name,
@@ -671,8 +671,8 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding, $threshold );
-					if ( false !== $similarity ) {
+					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity || $similarity <= $threshold ) {
 						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
