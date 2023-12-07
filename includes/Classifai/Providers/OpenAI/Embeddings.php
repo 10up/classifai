@@ -80,12 +80,34 @@ class Embeddings extends Provider {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
 			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
 			add_action( 'save_post', [ $this, 'save_metabox' ] );
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 		}
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-language-processing-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
+			get_asset_info( 'language-processing', 'dependencies' ),
+			get_asset_info( 'language-processing', 'version' ),
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			array(),
+			get_asset_info( 'language-processing', 'version' ),
+			'all'
+		);
 	}
 
 	/**
@@ -269,6 +291,15 @@ class Embeddings extends Provider {
 			} else {
 				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
 			}
+
+			// Sanitize the threshold setting.
+			$taxonomy_key = $taxonomy_key . '_threshold';
+			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
+				$threshold_value                             = min( absint( $settings['taxonomies'][ $taxonomy_key ] ), 100 );
+				$new_settings['taxonomies'][ $taxonomy_key ] = $threshold_value ? $threshold_value : 75;
+			} else {
+				$new_settings['taxonomies'][ $taxonomy_key ] = 75;
+			}
 		}
 
 		// Sanitize the number setting.
@@ -353,6 +384,39 @@ class Embeddings extends Provider {
 		 * @return {array} Array of post types.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types() );
+	}
+
+	/**
+	 * Get the threshold for the similarity calculation.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return float
+	 */
+	public function get_threshold( $taxonomy = '' ) {
+		$settings  = $this->get_settings();
+		$threshold = 1;
+
+		if ( ! empty( $taxonomy ) ) {
+			$threshold = isset( $settings['taxonomies'][ $taxonomy . '_threshold' ] ) ? $settings['taxonomies'][ $taxonomy . '_threshold' ] : 75;
+		}
+
+		// Convert $threshold (%) to decimal.
+		$threshold = 1 - ( (float) $threshold / 100 );
+
+		/**
+		 * Filter the threshold for the similarity calculation.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_threshold
+		 *
+		 * @param {float} $threshold The threshold to use.
+		 * @param {string} $taxonomy The taxonomy to get the threshold for.
+		 *
+		 * @return {float} The threshold to use.
+		 */
+		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
 	}
 
 	/**
@@ -595,6 +659,9 @@ class Embeddings extends Provider {
 				continue;
 			}
 
+			// Get threshold setting for this taxonomy.
+			$threshold = $this->get_threshold( $tax );
+
 			// Get embedding similarity for each term.
 			foreach ( $terms as $term_id ) {
 				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
@@ -604,9 +671,9 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					$similarity = $calculations->similarity( $embedding, $term_embedding, $threshold );
 					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
 			}
