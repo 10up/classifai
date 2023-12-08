@@ -37,11 +37,6 @@ class Whisper extends Provider {
 			'openai_whisper'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'speech_to_text' => __( 'Generate transcripts', 'classifai' ),
-		);
-
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI Whisper', 'classifai' ),

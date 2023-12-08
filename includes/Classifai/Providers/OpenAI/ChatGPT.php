@@ -82,13 +82,6 @@ class ChatGPT extends Provider {
 			'openai_chatgpt'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'title_generation'   => __( 'Generate titles', 'classifai' ),
-			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
-			'resize_content'     => __( 'Resize content', 'classifai' ),
-		);
-
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),

@@ -51,11 +51,6 @@ class NLU extends Provider {
 			'watson_nlu'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'content_classification' => __( 'Classify content', 'classifai' ),
-		);
-
 		$this->nlu_features = [
 			'category' => [
 				'feature'           => __( 'Category', 'classifai' ),
