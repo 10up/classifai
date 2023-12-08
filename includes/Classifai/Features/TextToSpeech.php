@@ -131,36 +131,6 @@ class TextToSpeech extends Feature {
 		$this->render_provider_fields();
 	}
 
-	/**
-	 * Returns true if the feature meets all the criteria to be enabled.
-	 *
-	 * @return boolean
-	 */
-	public function is_feature_enabled() {
-		$access          = false;
-		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? Speech::ID;
-		$feature_roles   = $settings['roles'] ?? [];
-		$user_roles      = wp_get_current_user()->roles ?? [];
-		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
-		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
-		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
-		$access          = $user_access && $provider_access && $feature_status;
-
-		/**
-		 * Filter to override permission to the generate title feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
-	}
-
 	protected function get_post_types_select_options() {
 		$post_types = \Classifai\get_post_types_for_language_settings();
 		$options    = array();

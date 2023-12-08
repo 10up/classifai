@@ -154,11 +154,125 @@ abstract class Feature {
 	}
 
 	/**
+	 * Determine if the current user has access to the feature
+	 *
+	 * @return bool
+	 */
+	public function has_access() {
+		$access        = false;
+		$user_id       = get_current_user_id();
+		$user          = get_user_by( 'id', $user_id );
+		$user_roles    = $user->roles ?? [];
+		$settings      = $this->get_settings();
+		$feature_roles = $settings['roles'] ?? [];
+		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
+
+		$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
+		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
+		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
+
+		/*
+		 * Checks if Role-based access is enabled and user role has access to the feature.
+		 */
+		if ( $role_based_access_enabled ) {
+			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
+		}
+
+		/*
+		 * Checks if User-based access is enabled and user has access to the feature.
+		 */
+		if ( ! $access && $user_based_access_enabled ) {
+			$access = ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) );
+		}
+
+		/*
+		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
+		 */
+		if ( $access && $user_based_opt_out_enabled ) {
+			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
+			$access             = ( ! in_array( static::ID, $opted_out_features, true ) );
+		}
+
+		/**
+		 * Filter to override user access to a ClassifAI feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$feature}_has_access
+		 *
+		 * @param {bool}   $access   Current access value.
+		 * @param {array}  $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_has_access', $access, $settings );
+	}
+
+	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
+	 * Criteria:
+	 *  - Provider is configured.
+	 *  - User has access to the feature.
+	 *  - Feature is turned on.
 	 *
 	 * @return boolean|\WP_Error
 	 */
-	abstract public function is_feature_enabled();
+	public function is_feature_enabled() {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access() &&
+			$this->is_enabled()
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_is_feature_enabled
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		$settings = $this->get_settings();
+
+		// Check if feature is turned on.
+		$feature_status = ( isset( $settings['status'] ) && 1 === (int) $settings['status'] );
+		$is_configured  = $this->is_configured();
+		$is_enabled     = $feature_status && $is_configured;
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_{$feature}_is_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_enabled', $is_enabled, $settings );
+	}
 
 	/**
 	 * Registers the settings for the feature.

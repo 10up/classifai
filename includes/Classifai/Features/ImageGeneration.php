@@ -60,7 +60,7 @@ class ImageGeneration extends Feature {
 	 * Assigns user roles to the $roles array.
 	 */
 	public function setup_roles() {
-		$settings = $this->get_settings();
+		$default_settings = $this->get_default_settings();
 
 		// Get all roles that have the upload_files cap.
 		$roles = get_editable_roles() ?? [];
@@ -78,12 +78,12 @@ class ImageGeneration extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_feature_image_generation_roles
 		 *
-		 * @param {array} $roles     Array of arrays containing role information.
-		 * @param {array} $settings  Default setting values.
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
 		 *
 		 * @return {array} Roles array.
 		 */
-		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $settings );
+		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $default_settings );
 	}
 
 	/**
@@ -146,30 +146,11 @@ class ImageGeneration extends Feature {
 	 * @return boolean
 	 */
 	public function is_feature_enabled() {
-		$access          = false;
-		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? DallE::ID;
-		$user_roles      = wp_get_current_user()->roles ?? [];
-		$feature_roles   = $settings['roles'] ?? [];
+		$settings           = $this->get_settings();
+		$is_feature_enabled = parent::is_feature_enabled() && current_user_can( 'upload_files' );
 
-		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
-		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
-		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
-		$can_user_upload = current_user_can( 'upload_files' );
-		$access          = $user_access && $provider_access && $feature_status && $can_user_upload;
-
-		/**
-		 * Filter to override permission to the generate title feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
+		/** This filter is documented in includes/Classifai/Features/Feature.php */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
 	}
 
 	/**
