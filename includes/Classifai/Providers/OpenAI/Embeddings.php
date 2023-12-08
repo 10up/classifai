@@ -672,7 +672,7 @@ class Embeddings extends Provider {
 
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity || $similarity <= $threshold ) {
+					if ( false !== $similarity && $similarity <= $threshold ) {
 						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
