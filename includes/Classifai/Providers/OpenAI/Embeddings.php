@@ -579,7 +579,7 @@ class Embeddings extends Provider {
 
 		$settings             = $this->get_settings();
 		$number_to_add        = $settings['number'] ?? 1;
-		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
 
 		if ( empty( $embedding_similarity ) ) {
 			return;
@@ -636,10 +636,11 @@ class Embeddings extends Provider {
 	 * @since 2.5.0
 	 *
 	 * @param array $embedding Embedding data.
+	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 *
 	 * @return array
 	 */
-	private function get_embeddings_similarity( $embedding ) {
+	private function get_embeddings_similarity( $embedding, $consider_threshold = true ) {
 		$embedding_similarity = [];
 		$taxonomies           = $this->supported_taxonomies();
 		$calculations         = new EmbeddingCalculations();
@@ -672,7 +673,7 @@ class Embeddings extends Provider {
 
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity && $similarity <= $threshold ) {
+					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
