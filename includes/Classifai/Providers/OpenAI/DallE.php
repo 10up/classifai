@@ -330,7 +330,7 @@ class DallE extends Provider {
 				<span class="spinner"></span>
 				<ul></ul>
 				<p>
-					<?php render_disable_feature_link( 'image_generation' ); ?>
+					<?php render_disable_feature_link( 'feature_image_generation' ); ?>
 				</p>
 			</div>
 		</script>

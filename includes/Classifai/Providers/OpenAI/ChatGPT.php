@@ -1242,7 +1242,7 @@ class ChatGPT extends Provider {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_title( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
 		return rest_ensure_response(
 			$this->rest_endpoint_callback(
@@ -1328,7 +1328,7 @@ class ChatGPT extends Provider {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -1343,7 +1343,7 @@ class ChatGPT extends Provider {
 			return false;
 		}
 
-		$feature  = new ExcerptGeneration();
+		$feature = new ExcerptGeneration();
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -1396,16 +1396,7 @@ class ChatGPT extends Provider {
 			return false;
 		}
 
-		$feature  = new ContentResizing();
-		$settings = $feature->get_settings();
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
-		}
+		$feature = new ContentResizing();
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {

@@ -281,7 +281,7 @@ const ClassifAIGenerateTagsButton = () => {
 					{ __( 'Save', 'classifai' ) }
 				</Button>
 			</div>
-			<DisableFeatureButton feature="content_classification" />
+			<DisableFeatureButton feature="feature_classification" />
 		</>
 	);
 

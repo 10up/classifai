@@ -109,8 +109,8 @@ abstract class Feature {
 	 * @return array
 	 */
 	public function sanitize_settings( $settings ) {
+		$new_settings             = $settings;
 		$current_settings         = $this->get_settings();
-		$new_settings             = [];
 		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
 		$new_settings['provider'] = isset( $settings['provider'] ) ? sanitize_text_field( $settings['provider'] ) : $current_settings['provider'];
 

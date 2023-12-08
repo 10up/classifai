@@ -105,7 +105,7 @@ class ImageGeneration extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable title generation', 'classifai' ),
+			esc_html__( 'Enable image generation', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',

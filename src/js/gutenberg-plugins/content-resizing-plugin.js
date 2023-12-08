@@ -317,7 +317,7 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
-			<DisableFeatureButton feature="resize_content" />
+			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
 
