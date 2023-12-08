@@ -81,7 +81,16 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract protected function get_default_settings();
+	protected function get_default_settings() {
+		return [
+			'status'             => '0',
+			'role_based_access'  => '1',
+			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
+			'user_based_access'  => 'no',
+			'users'              => [],
+			'user_based_opt_out' => 'no',
+		];
+	}
 
 	/**
 	 * Returns the providers supported by the feature.
@@ -99,7 +108,50 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract public function sanitize_settings( $settings );
+	public function sanitize_settings( $settings ) {
+		$current_settings         = $this->get_settings();
+		$new_settings             = [];
+		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
+		$new_settings['provider'] = isset( $settings['provider'] ) ? sanitize_text_field( $settings['provider'] ) : $current_settings['provider'];
+
+		if ( empty( $settings['role_based_access'] ) || 1 !== (int) $settings['role_based_access'] ) {
+			$new_settings['role_based_access'] = 'no';
+		} else {
+			$new_settings['role_based_access'] = '1';
+		}
+
+		// Allowed roles.
+		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
+			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		} else {
+			$new_settings['roles'] = $current_settings['roles'];
+		}
+
+		if ( empty( $settings['user_based_access'] ) || 1 !== (int) $settings['user_based_access'] ) {
+			$new_settings['user_based_access'] = 'no';
+		} else {
+			$new_settings['user_based_access'] = '1';
+		}
+
+		// Allowed users.
+		if ( isset( $settings['users'] ) && ! empty( $settings['users'] ) ) {
+			if ( is_array( $settings['users'] ) ) {
+				$new_settings['users'] = array_map( 'absint', $settings['users'] );
+			} else {
+				$new_settings['users'] = array_map( 'absint', explode( ',', $settings['users'] ) );
+			}
+		} else {
+			$new_settings['users'] = array();
+		}
+
+		// User-based opt-out.
+		if ( empty( $settings['user_based_opt_out'] ) || 1 !== (int) $settings['user_based_opt_out'] ) {
+			$new_settings['user_based_opt_out'] = 'no';
+		} else {
+			$new_settings['user_based_opt_out'] = '1';
+		}
+		return $new_settings;
+	}
 
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
@@ -286,6 +338,101 @@ abstract class Feature {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @return void
+	 */
+	protected function add_access_control_fields() {
+		$settings = $this->get_settings();
+
+		add_settings_field(
+			'role_based_access',
+			esc_html__( 'Enable role-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'role_based_access',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['role_based_access'],
+				'description'   => __( 'Enables ability to select which roles can access this feature.', 'classifai' ),
+				'class'         => 'classifai-role-based-access',
+			]
+		);
+
+		// Add hidden class if role-based access is disabled.
+		$class = 'allowed_roles_row';
+		if ( ! isset( $settings['role_based_access'] ) || '1' !== $settings['role_based_access'] ) {
+			$class .= ' hidden';
+		}
+
+		add_settings_field(
+			'roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'      => 'roles',
+				'options'        => $this->roles,
+				'default_values' => $settings['roles'],
+				'description'    => __( 'Choose which roles are allowed to access this feature.', 'classifai' ),
+				'class'          => $class,
+			]
+		);
+
+		add_settings_field(
+			'user_based_access',
+			esc_html__( 'Enable user-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'user_based_access',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['user_based_access'],
+				'description'   => __( 'Enables ability to select which users can access this feature.', 'classifai' ),
+				'class'         => 'classifai-user-based-access',
+			]
+		);
+
+		// Add hidden class if user-based access is disabled.
+		$users_class = 'allowed_users_row';
+		if ( ! isset( $settings['user_based_access'] ) || '1' !== $settings['user_based_access'] ) {
+			$users_class .= ' hidden';
+		}
+
+		add_settings_field(
+			'users',
+			esc_html__( 'Allowed users', 'classifai' ),
+			[ $this, 'render_allowed_users' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'users',
+				'default_value' => $settings['users'],
+				'description'   => __( 'Users who have access to this feature.', 'classifai' ),
+				'class'         => $users_class,
+			]
+		);
+
+		add_settings_field(
+			'user_based_opt_out',
+			esc_html__( 'Enable user-based opt-out', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'user_based_opt_out',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['user_based_opt_out'],
+				'description'   => __( 'Enables ability for users to opt-out from their user profile page.', 'classifai' ),
+				'class'         => 'classifai-user-based-opt-out',
+			]
+		);
 	}
 
 	/**
@@ -599,6 +746,31 @@ abstract class Feature {
 				'<span class="description classifai-input-description">%s</span>',
 				esc_html( $args['description'] )
 			);
+		}
+	}
+
+	/**
+	 * Render allowed users input field.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
+		?>
+		<div class="classifai-search-users-container">
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>-container"></div>
+			<input
+				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="<?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		</div>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 }
