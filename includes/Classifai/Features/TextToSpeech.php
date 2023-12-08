@@ -88,19 +88,8 @@ class TextToSpeech extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'      => 'roles',
-				'options'        => $this->roles,
-				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
 
 		$post_types        = \Classifai\get_post_types_for_language_settings();
 		$post_type_options = array();
@@ -196,8 +185,6 @@ class TextToSpeech extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'     => '0',
-			'roles'      => $this->roles,
 			'post_types' => [],
 			'provider'   => Speech::ID,
 		];
@@ -206,6 +193,7 @@ class TextToSpeech extends Feature {
 			apply_filters(
 				'classifai_' . static::ID . '_get_default_settings',
 				array_merge(
+					parent::get_default_settings(),
 					$feature_settings,
 					$provider_settings
 				)
@@ -241,11 +229,8 @@ class TextToSpeech extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
-		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
-		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
-
-		$post_types = \Classifai\get_post_types_for_language_settings();
+		$new_settings = parent::sanitize_settings( $new_settings );
+		$post_types   = \Classifai\get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {

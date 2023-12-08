@@ -88,19 +88,8 @@ class Classification extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'      => 'roles',
-				'options'        => $this->roles,
-				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
 
 		$post_statuses = get_post_statuses_for_language_settings();
 
@@ -202,8 +191,6 @@ class Classification extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'        => '0',
-			'roles'         => $this->roles,
 			'post_statuses' => [],
 			'post_types'    => [],
 			'provider'      => NLU::ID,
@@ -213,6 +200,7 @@ class Classification extends Feature {
 			apply_filters(
 				'classifai_' . static::ID . '_get_default_settings',
 				array_merge(
+					parent::get_default_settings(),
 					$feature_settings,
 					$provider_settings
 				)
@@ -230,11 +218,9 @@ class Classification extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings['status']        = $new_settings['status'] ?? $settings['status'];
-		$new_settings['roles']         = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
+		$new_settings                  = parent::sanitize_settings( $new_settings );
 		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
 		$new_settings['post_types']    = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
-		$new_settings['provider']      = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );

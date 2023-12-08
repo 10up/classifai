@@ -51,14 +51,14 @@ abstract class Feature {
 		 * Filter the allowed WordPress roles for ChatGTP
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
+		 * @hook classifai_{feature}_roles
 		 *
 		 * @param {array} $roles            Array of arrays containing role information.
 		 * @param {array} $default_settings Default setting values.
 		 *
 		 * @return {array} Roles array.
 		 */
-		$this->roles = apply_filters( 'classifai_chatgpt_allowed_roles', $this->roles, $default_settings );
+		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $this->roles, $default_settings );
 	}
 
 	/**
@@ -665,7 +665,7 @@ abstract class Feature {
 			// Render checkbox.
 			printf(
 				'<p>
-					<label for="%1$s_%2$s_%3$s">
+					<label for="%1$s_%3$s_%4$s">
 						<input type="hidden" name="%1$s%2$s[%3$s][%4$s]" value="0" />
 						<input type="checkbox" id="%1$s_%3$s_%4$s" name="%1$s%2$s[%3$s][%4$s]" value="%4$s" %5$s />
 						%6$s
