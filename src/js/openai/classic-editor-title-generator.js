@@ -108,7 +108,7 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 				// Append disable feature link.
 				if (
 					ClassifAI?.opt_out_enabled_features?.includes(
-						'title_generation'
+						'feature_title_generation'
 					)
 				) {
 					$( '<a>', {
