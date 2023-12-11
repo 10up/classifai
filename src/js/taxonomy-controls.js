@@ -179,7 +179,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 						const terms = {
 							...taxoInfo.terms,
 							entitites: [
-								...taxoInfo.terms.entitites,
+								...taxoInfo.terms.entities,
 								newTerm,
 							],
 							mapById: {
@@ -196,17 +196,17 @@ const TaxonomyControls = ( { onChange, query } ) => {
 							],
 						};
 
-							return {
-								...taxoInfo,
-								terms,
-							};
-						}
-						return taxoInfo;
+						return {
+							...taxoInfo,
+							terms,
+						};
 					}
-				);
 
-				setNewTermsInfo( updatedTaxonomiesInfo );
-			}
+					return taxoInfo;
+				}
+			);
+
+			setNewTermsInfo( updatedTaxonomiesInfo );
 		}
 
 		const newTaxQuery = {
