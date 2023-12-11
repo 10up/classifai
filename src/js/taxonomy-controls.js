@@ -111,6 +111,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		if ( ! taxonomyInfo ) {
 			return;
 		}
+		let newTerm = {};
 		const termData = await Promise.all(
 			newTermValues.map( async ( termValue ) => {
 				const termId = getTermIdByTermValue(
@@ -144,6 +145,13 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 				if ( response && response.id ) {
 					newTermsCreated++; // Increment the count of new terms created
+					newTerm = {
+						'id' : response.id,
+						'name': termValue,
+						'taxonomy': taxonomySlug,
+						'count': 0,
+						'description': ''
+					};
 					return {
 						[ termValue ]: response.id,
 					}; // Create an object with the term name as the key and the ID as the value
