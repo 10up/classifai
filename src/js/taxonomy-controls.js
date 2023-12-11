@@ -171,30 +171,30 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		}, {} );
 
 		if ( newTermsCreated > 0 ) {
-			// Fetch rest API
-			const request = {
-				path: `/wp/v2/${ taxonomySlug }`,
-				data: {
-					per_page: termsPerPage,
-				},
-			};
-			const response = await wp
-				.apiRequest( request )
-				.catch( ( error ) => {
-					// eslint-disable-next-line no-console
-					console.log( 'Error', error );
-					return null;
-				} );
-
-			if ( response ) {
-				// Update taxonomiesInfo
-				const updatedTaxonomiesInfo = taxonomiesInfo.map(
-					( taxoInfo ) => {
-						if ( taxoInfo.slug === taxonomySlug ) {
-							const terms = getEntitiesInfo( response );
-
-							// Append "[AI]" prefix
-							appendAIPrefix( terms, taxonomySlug );
+			// Update taxonomiesInfo with new term.
+			const updatedTaxonomiesInfo = taxonomiesInfo.map(
+				( taxoInfo ) => {
+					if ( taxoInfo.slug === taxonomySlug ) {
+						// Append newTerm to taxoInfo.terms.
+						const terms = {
+							...taxoInfo.terms,
+							entitites: [
+								...taxoInfo.terms.entitites,
+								newTerm,
+							],
+							mapById: {
+								...taxoInfo.terms.mapById,
+								[newTerm.id]: newTerm,
+							},
+							mapByName: {
+								...taxoInfo.terms.mapByName,
+								[newTerm.name]: newTerm,
+							},
+							names: [
+								...taxoInfo.terms.names,
+								newTerm.name,
+							],
+						};
 
 							return {
 								...taxoInfo,
