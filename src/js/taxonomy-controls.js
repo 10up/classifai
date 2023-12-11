@@ -144,11 +144,11 @@ const TaxonomyControls = ( { onChange, query } ) => {
 
 				if ( response && response.id ) {
 					newTerm = {
-						'id' : response.id,
-						'name': termValue,
-						'taxonomy': taxonomySlug,
-						'count': 0,
-						'description': ''
+						id: response.id,
+						name: termValue,
+						taxonomy: taxonomySlug,
+						count: 0,
+						description: '',
 					};
 
 					// Update taxonomiesInfo with new term.
@@ -164,11 +164,11 @@ const TaxonomyControls = ( { onChange, query } ) => {
 									],
 									mapById: {
 										...taxoInfo.terms.mapById,
-										[newTerm.id]: newTerm,
+										[ newTerm.id ]: newTerm,
 									},
 									mapByName: {
 										...taxoInfo.terms.mapByName,
-										[newTerm.name]: newTerm,
+										[ newTerm.name ]: newTerm,
 									},
 									names: [
 										...taxoInfo.terms.names,
