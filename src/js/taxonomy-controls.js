@@ -14,7 +14,7 @@ import {
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-const termsPerPage = 100;
+const termsPerPage = -1;
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
