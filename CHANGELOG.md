@@ -14,17 +14,17 @@ All notable changes to this project will be documented in this file, per [the Ke
 - New setting option for the IBM Watson classification feature to allow you to classify content within existing terms only (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#620](https://github.com/10up/classifai/pull/620)).
 - Threshold settings added for taxonomies in the OpenAI Embeddings classification feature (props [@faisal-alvi](https://github.com/faisal-alvi), [@timatron](https://github.com/timatron), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#621](https://github.com/10up/classifai/pull/621)).
 - Ability to preview the suggested terms for the OpenAI Embeddings classification feature (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#622](https://github.com/10up/classifai/pull/622)).
-- Post autosave when a generated title is used or when a paragraph of text is resized (props [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#626](https://github.com/10up/classifai/pull/626)).
+- Post autosave when a generated title is used or when a paragraph of text is resized to allow for Revisions-based rollbacks (props [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#626](https://github.com/10up/classifai/pull/626)).
 
 ### Changed
 - Bump WordPress minimum from 5.8 to 6.1 (props [@faisal-alvi](https://github.com/faisal-alvi), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#609](https://github.com/10up/classifai/pull/609)).
 - Increase our max content length for any interactions with ChatGPT (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#617](https://github.com/10up/classifai/pull/617)).
 
 ### Fixed
+- Ensure that when using the manual classification mode, all terms will be considered, not just the first 100 (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#638](https://github.com/10up/classifai/pull/638)).
+- Ensure that the ClassifAI panel only appears when the related feature is enabled (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#628](https://github.com/10up/classifai/pull/628)).
 - More accurate token counts when trimming content (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#616](https://github.com/10up/classifai/pull/616)).
 - Ensure that updating the "Recommended Content Block" settings works correctly (props [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#625](https://github.com/10up/classifai/pull/625)).
-- Ensure that the ClassifAI panel only appears when the related feature is enabled (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#628](https://github.com/10up/classifai/pull/628)).
-- Ensure that when using the manual classification mode, all terms will be considered, not just the first 100 (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#638](https://github.com/10up/classifai/pull/638)).
 
 ### Security
 - Bump `axios` from 0.25.0 to 1.6.2 and `@wordpress/scripts` from 26.6.0 to 26.18.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#629](https://github.com/10up/classifai/pull/629)).
