@@ -38,6 +38,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 == Upgrade Notice ==
 
+= 2.5.0 =
+**Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
+
 = 2.3.0 =
 **Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
 
