@@ -14,7 +14,7 @@ import {
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-const termsPerPage = 100;
+const termsPerPage = -1;
 
 // Helper function to get the term id based on user input in terms `FormTokenField`.
 // eslint-disable-next-line consistent-return
@@ -103,7 +103,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	}
 
 	const onTermsChange = ( taxonomySlug ) => async ( newTermValues ) => {
-		let newTermsCreated = 0; // Track the number of new terms created
 		const taxonomyInfo = taxonomiesInfo.find(
 			( { slug } ) => slug === taxonomySlug
 		);
@@ -111,6 +110,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 		if ( ! taxonomyInfo ) {
 			return;
 		}
+		let newTerm = {};
 		const termData = await Promise.all(
 			newTermValues.map( async ( termValue ) => {
 				const termId = getTermIdByTermValue(
@@ -143,7 +143,51 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					} );
 
 				if ( response && response.id ) {
-					newTermsCreated++; // Increment the count of new terms created
+					newTerm = {
+						id: response.id,
+						name: termValue,
+						taxonomy: taxonomySlug,
+						count: 0,
+						description: '',
+					};
+
+					// Update taxonomiesInfo with new term.
+					const updatedTaxonomiesInfo = taxonomiesInfo.map(
+						( taxoInfo ) => {
+							if ( taxoInfo.slug === taxonomySlug ) {
+								// Append newTerm to taxoInfo.terms.
+								const terms = {
+									...taxoInfo.terms,
+									entitites: [
+										...taxoInfo.terms.entities,
+										newTerm,
+									],
+									mapById: {
+										...taxoInfo.terms.mapById,
+										[ newTerm.id ]: newTerm,
+									},
+									mapByName: {
+										...taxoInfo.terms.mapByName,
+										[ newTerm.name ]: newTerm,
+									},
+									names: [
+										...taxoInfo.terms.names,
+										newTerm.name,
+									],
+								};
+
+								return {
+									...taxoInfo,
+									terms,
+								};
+							}
+
+							return taxoInfo;
+						}
+					);
+
+					setNewTermsInfo( updatedTaxonomiesInfo );
+
 					return {
 						[ termValue ]: response.id,
 					}; // Create an object with the term name as the key and the ID as the value
@@ -161,45 +205,6 @@ const TaxonomyControls = ( { onChange, query } ) => {
 			}
 			return accumulator;
 		}, {} );
-
-		if ( newTermsCreated > 0 ) {
-			// Fetch rest API
-			const request = {
-				path: `/wp/v2/${ taxonomySlug }`,
-				data: {
-					per_page: termsPerPage,
-				},
-			};
-			const response = await wp
-				.apiRequest( request )
-				.catch( ( error ) => {
-					// eslint-disable-next-line no-console
-					console.log( 'Error', error );
-					return null;
-				} );
-
-			if ( response ) {
-				// Update taxonomiesInfo
-				const updatedTaxonomiesInfo = taxonomiesInfo.map(
-					( taxoInfo ) => {
-						if ( taxoInfo.slug === taxonomySlug ) {
-							const terms = getEntitiesInfo( response );
-
-							// Append "[AI]" prefix
-							appendAIPrefix( terms, taxonomySlug );
-
-							return {
-								...taxoInfo,
-								terms,
-							};
-						}
-						return taxoInfo;
-					}
-				);
-
-				setNewTermsInfo( updatedTaxonomiesInfo );
-			}
-		}
 
 		const newTaxQuery = {
 			...query.taxQuery,
