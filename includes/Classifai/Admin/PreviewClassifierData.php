@@ -20,7 +20,7 @@ class PreviewClassifierData {
 	public function get_post_classifier_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
@@ -45,7 +45,13 @@ class PreviewClassifierData {
 	public function get_post_search_results() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
+		if (
+			! $nonce
+			|| (
+				! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' )
+				&& ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-nonce' )
+			)
+		) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 

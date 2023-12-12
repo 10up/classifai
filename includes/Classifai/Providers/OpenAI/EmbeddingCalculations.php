@@ -15,11 +15,10 @@ class EmbeddingCalculations {
 	 *
 	 * @param array $source_embedding Embedding data of the source item.
 	 * @param array $compare_embedding Embedding data of the item to compare.
-	 * @param float $threshold The threshold to use for the similarity calculation.
 	 *
 	 * @return bool|float
 	 */
-	public function similarity( array $source_embedding = [], array $compare_embedding = [], $threshold = 1 ) {
+	public function similarity( array $source_embedding = [], array $compare_embedding = [] ) {
 		if ( empty( $source_embedding ) || empty( $compare_embedding ) ) {
 			return false;
 		}
@@ -58,20 +57,8 @@ class EmbeddingCalculations {
 		// Do the math.
 		$distance = 1.0 - ( $combined_average / sqrt( $source_average * $compare_average ) );
 
-		/**
-		 * Filter the threshold for the similarity calculation.
-		 *
-		 * @since 2.5.0
-		 * @hook classifai_threshold
-		 *
-		 * @param {float} $threshold The threshold to use.
-		 *
-		 * @return {float} The threshold to use.
-		 */
-		$threshold = apply_filters( 'classifai_threshold', $threshold );
-
-		// Ensure we are within the range of 0 to 1.0 (i.e. $threshold).
-		return max( 0, min( abs( (float) $distance ), $threshold ) );
+		// Ensure we are within the range of 0 to 1.0.
+		return max( 0, min( abs( (float) $distance ), 1.0 ) );
 	}
 
 }

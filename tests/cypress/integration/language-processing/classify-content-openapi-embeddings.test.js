@@ -87,6 +87,19 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 	} );
 
+	it( 'Can see the preview on the settings page', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+
+		// Click the Preview button.
+		const closePanelSelector = '#get-classifier-preview-data-btn';
+		cy.get( closePanelSelector ).click();
+
+		// Check the term is received and visible.
+		cy.get( '.tax-row--Category' ).should( 'exist' );
+	} );
+
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
