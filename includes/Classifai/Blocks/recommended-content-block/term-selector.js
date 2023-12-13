@@ -1,5 +1,5 @@
 /**
- * TaxonomyControls Component file.
+ * TermSelector Component file.
  * This file inspired by Gutenberg TaxonomyControls component.
  *
  * @see https://github.com/WordPress/gutenberg/blob/trunk/packages/block-library/src/query/edit/inspector-controls/taxonomy-controls.js
@@ -7,7 +7,7 @@
 import { FormTokenField } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import { getEntitiesInfo, useTaxonomies } from '../utils';
+import { getEntitiesInfo, useTaxonomies } from './utils';
 
 const termsPerPage = 100;
 
@@ -39,7 +39,7 @@ const getTermIdByTermValue = ( termsMappedByName, termValue ) => {
 	}
 };
 
-const TaxonomyControls = ( { onChange, query } ) => {
+const TermSelector = ( { onChange, query } ) => {
 	const taxonomies = useTaxonomies( query.contentPostType );
 	const taxonomiesInfo = useSelect(
 		( select ) => {
@@ -134,4 +134,4 @@ const TaxonomyControls = ( { onChange, query } ) => {
 	);
 };
 
-export default TaxonomyControls;
+export default TermSelector;

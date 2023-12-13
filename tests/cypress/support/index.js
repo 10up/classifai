@@ -18,9 +18,3 @@ import 'cypress-plugin-tab';
 
 // Import commands.js using ES2015 syntax:
 import './commands';
-
-beforeEach( () => {
-	cy.session( 'login', cy.login, {
-		cacheAcrossSpecs: true,
-	} );
-} );
