@@ -151,8 +151,17 @@ abstract class Service {
 					<?php
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
+					if ( 'openai_embeddings' === $active_tab ) {
+						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
+					}
 
-					if ( ! is_wp_error( $provider ) && ! empty( $provider->can_register() ) ) :
+					if (
+						! is_wp_error( $provider )
+						&& ! empty(
+							$provider->can_register()
+							&& ( $provider->is_feature_enabled( 'content_classification' ) || $provider->is_feature_enabled( 'classification' ) )
+						)
+					) :
 						?>
 					<div id="classifai-post-preview-app">
 						<?php
@@ -191,7 +200,7 @@ abstract class Service {
 							);
 							?>
 
-						<?php if ( 'watson_nlu' === $active_tab ) : ?>
+						<?php if ( 'watson_nlu' === $active_tab || 'openai_embeddings' === $active_tab ) : ?>
 						<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
 						<div id="classifai-post-preview-controls">
 							<select id="classifai-preview-post-selector">
@@ -199,18 +208,24 @@ abstract class Service {
 									<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
 								<?php endforeach; ?>
 							</select>
-							<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
+							<?php wp_nonce_field( "classifai-previewer-$active_tab-action", "classifai-previewer-$active_tab-nonce" ); ?>
 							<button type="button" class="button" id="get-classifier-preview-data-btn">
 								<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
 							</button>
 						</div>
 						<div id="classifai-post-preview-wrapper">
-							<?php foreach ( $features as $feature_slug => $feature ) : ?>
-								<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-									<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
-								</div>
-							<?php endforeach; ?>
-						</div>
+							<?php
+							if ( 'watson_nlu' === $active_tab ) :
+								foreach ( $features as $feature_slug => $feature ) :
+									?>
+									<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
+										<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
+									</div>
+									<?php
+								endforeach;
+							endif;
+							?>
+					</div>
 						<?php endif; ?>
 					</div>
 					<?php endif; ?>

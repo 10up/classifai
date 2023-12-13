@@ -2,8 +2,10 @@
 
 namespace Classifai;
 
+use Classifai\Admin\UserProfile;
 use Classifai\Providers\Provider;
 use Classifai\Providers\Azure;
+use Classifai\Providers\Watson\NLU;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -126,7 +128,6 @@ function reset_plugin_settings() {
 	}
 }
 
-
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
@@ -168,6 +169,48 @@ function get_watson_username() {
 	} else {
 		return '';
 	}
+}
+
+/**
+ * Get Classification mode.
+ *
+ * @since 2.5.0
+ *
+ * @return string
+ */
+function get_classification_mode() {
+	$provider = new NLU( 'Natural Language Understanding' );
+	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
+	$value    = isset( $settings['classification_mode'] ) ? $settings['classification_mode'] : '';
+
+	if ( $provider->is_configured() ) {
+		if ( empty( $value ) ) {
+			// existing users
+			// default: automatic_classification
+			return 'automatic_classification';
+		}
+	} else {
+		// new users
+		// default: manual_review
+		return 'manual_review';
+	}
+
+	return $value;
+}
+
+/**
+ * Get IBM Watson Content Classification method.
+ *
+ * @since 2.6.0
+ *
+ * @return string
+ */
+function get_classification_method() {
+	$provider = new NLU( 'language_processing' );
+	$settings = $provider->get_settings();
+	$value    = $settings['classification_method'] ?? '';
+
+	return $value;
 }
 
 /**
@@ -771,4 +814,47 @@ function get_all_post_statuses() {
 	 * @return {array} Array of post statuses.
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
+}
+
+/**
+ * Get the default settings for a feature.
+ *
+ * @since 2.4.0
+ *
+ * @param string $feature Feature key.
+ * @return array
+ */
+function get_feature_default_settings( string $feature ) {
+	if ( ! function_exists( 'get_editable_roles' ) ) {
+		require_once ABSPATH . 'wp-admin/includes/user.php';
+	}
+	$editable_roles = get_editable_roles() ?? [];
+
+	return array(
+		$feature . '_role_based_access'  => 1,
+		$feature . '_roles'              => array_keys( $editable_roles ),
+		$feature . '_user_based_access'  => 'no',
+		$feature . '_user_based_opt_out' => 'no',
+		$feature . '_users'              => array(),
+	);
+}
+
+/**
+ * Renders a link to disable a specific feature.
+ *
+ * @since 2.5.0
+ *
+ * @param string $feature Feature key.
+ */
+function render_disable_feature_link( string $feature ) {
+	$user_profile     = new UserProfile();
+	$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
+	$profile_url      = get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section';
+	if ( ! empty( $allowed_features ) && isset( $allowed_features[ $feature ] ) ) {
+		?>
+		<a href="<?php echo esc_url( $profile_url ); ?>" target="_blank" rel="noopener noreferrer" class="classifai-disable-feature-link" aria-label="<?php esc_attr_e( 'Opt out of using this ClassifAI feature', 'classifai' ); ?>">
+			<?php esc_html_e( 'Disable this ClassifAI feature', 'classifai' ); ?>
+		</a>
+		<?php
+	}
 }

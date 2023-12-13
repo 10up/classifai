@@ -68,9 +68,11 @@ class PostClassifier {
 	 *
 	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
+	 * @param bool  $link_terms Whether to link the terms or not.
+	 *
 	 * @return array
 	 */
-	public function classify_and_link( $post_id, $opts = [] ) {
+	public function classify_and_link( $post_id, $opts = [], $link_terms = true ) {
 		$output = $this->classify( $post_id, $opts );
 
 		if ( is_wp_error( $output ) ) {
@@ -78,8 +80,9 @@ class PostClassifier {
 		} elseif ( empty( $output ) ) {
 			return false;
 		} else {
-			$this->link( $post_id, $output, $opts );
-			return $output;
+			$link_output = $this->link( $post_id, $output, $opts, $link_terms );
+
+			return $link_terms ? $output : $link_output;
 		}
 	}
 
@@ -89,10 +92,14 @@ class PostClassifier {
 	 * @param int   $post_id The post id.
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $opts    Link options.
+	 * @param bool  $link_terms Whether to link the terms or not.
+	 *
+	 * @return array The linked output.
 	 */
-	public function link( $post_id, $output, $opts = [] ) {
+	public function link( $post_id, $output, $opts = [], $link_terms = true ) {
 		$linker = $this->get_linker();
-		$linker->link( $post_id, $output, $opts );
+
+		return $linker->link( $post_id, $output, $opts, $link_terms );
 	}
 
 	/* helpers */
