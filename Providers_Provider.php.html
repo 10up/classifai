@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source: Providers/Provider.php - 10up ClassifAI Hook Docs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+	<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans:300,400|Playfair+Display:900&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles-10up.css">
+</head>
+
+<body>
+
+<div id="main">
+
+	
+    <h1 class="page-title">Source: Providers/Provider.php</h1>
+	
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ *  Abstract class that defines the providers for a service.
+ */
+
+namespace Classifai\Providers;
+
+use function Classifai\get_feature_default_settings;
+
+abstract class Provider {
+
+	/**
+	 * @var string The display name for the provider. ie. Azure
+	 */
+	public $provider_name;
+
+
+	/**
+	 * @var string $provider_service_name The formal name of the service being provided. i.e Computer Vision, NLU, Rekongnition.
+	 */
+	public $provider_service_name;
+
+	/**
+	 * @var string $option_name Name of the option where the provider settings are stored.
+	 */
+	protected $option_name;
+
+
+	/**
+	 * @var string $service The name of the service this provider belongs to.
+	 */
+	protected $service;
+
+	/**
+	 * @var array $onboarding The onboarding options for this provider.
+	 */
+	public $onboarding_options;
+
+	/**
+	 * @var array $features Array of features provided by this provider.
+	 */
+	protected $features = array();
+
+	/**
+	 * Provider constructor.
+	 *
+	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
+	 * @param string $provider_service_name The name of the Service.
+	 * @param string $option_name           Name of the option where the provider settings are stored.
+	 * @param string $service               What service does this provider belong to.
+	 */
+	public function __construct( $provider_name, $provider_service_name, $option_name, $service ) {
+		$this->provider_name         = $provider_name;
+		$this->provider_service_name = $provider_service_name;
+		$this->option_name           = $option_name;
+		$this->service               = $service;
+		$this->onboarding_options    = array();
+	}
+
+	/**
+	 * Provides the provider name.
+	 *
+	 * @return string
+	 */
+	public function get_provider_name() {
+		return $this->provider_name;
+	}
+
+	/** Returns the name of the settings section for this provider
+	 *
+	 * @return string
+	 */
+	public function get_settings_section() {
+		return $this->option_name;
+	}
+
+	/**
+	 * Get the option name.
+	 *
+	 * @return string
+	 */
+	public function get_option_name() {
+		return 'classifai_' . $this->option_name;
+	}
+
+	/**
+	 * Get provider features.
+	 *
+	 * @return array
+	 */
+	public function get_features() {
+		return $this->features;
+	}
+
+	/**
+	 * Get the onboarding options.
+	 *
+	 * @return array
+	 */
+	public function get_onboarding_options() {
+		if ( empty( $this->onboarding_options ) || ! isset( $this->onboarding_options['features'] ) ) {
+			return array();
+		}
+
+		$settings      = $this->get_settings();
+		$is_configured = $this->is_configured();
+
+		foreach ( $this->onboarding_options['features'] as $key => $title ) {
+			$enabled = isset( $settings[ $key ] ) ? 1 === absint( $settings[ $key ] ) : false;
+			if ( count( explode( '__', $key ) ) > 1 ) {
+				$keys    = explode( '__', $key );
+				$enabled = isset( $settings[ $keys[0] ][ $keys[1] ] ) ? 1 === absint( $settings[ $keys[0] ][ $keys[1] ] ) : false;
+			}
+			// Handle enable_image_captions
+			if ( 'enable_image_captions' === $key ) {
+				$enabled = isset( $settings['enable_image_captions']['alt'] ) &amp;&amp; 'alt' === $settings['enable_image_captions']['alt'];
+			}
+			$enabled = $enabled &amp;&amp; $is_configured;
+
+			$this->onboarding_options['features'][ $key ] = array(
+				'title'   => $title,
+				'enabled' => $enabled,
+			);
+		}
+
+		return $this->onboarding_options;
+	}
+
+	/**
+	 * Can the Provider be initialized?
+	 */
+	public function can_register() {
+		return $this->is_configured();
+	}
+
+	/**
+	 * Register the functionality for the Provider.
+	 */
+	abstract public function register();
+
+	/**
+	 * Resets the settings for this provider.
+	 */
+	abstract public function reset_settings();
+
+	/**
+	 * Initialization routine
+	 */
+	public function register_admin() {
+		add_action( 'admin_init', [ $this, 'register_settings' ] );
+		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+	}
+
+	/**
+	 * Register the settings and sanitization callback method.
+	 *
+	 * It's very important that the option group matches the page slug.
+	 */
+	public function register_settings() {
+		register_setting( $this->get_option_name(), $this->get_option_name(), [ $this, 'sanitize_settings' ] );
+	}
+
+	/**
+	 * Helper to get the settings and allow for settings default values.
+	 *
+	 * @param string|bool|mixed $index Optional. Name of the settings option index.
+	 *
+	 * @return string|array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$defaults = $this->get_default_settings();
+		$settings = get_option( $this->get_option_name(), [] );
+		$settings = wp_parse_args( $settings, $defaults );
+
+		if ( $index &amp;&amp; isset( $settings[ $index ] ) ) {
+			return $settings[ $index ];
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Returns the default settings.
+	 *
+	 * @return array
+	 */
+	public function get_default_settings() {
+		$defaults = [];
+		$features = $this->get_features();
+		if ( empty( $features ) ) {
+			return $defaults;
+		}
+
+		foreach ( $features as $feature => $title ) {
+			$defaults = array_merge(
+				$defaults,
+				get_feature_default_settings( $feature )
+			);
+		}
+
+		return $defaults;
+	}
+
+	/**
+	 * Generic text input field callback
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_input( $args ) {
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
+		$type          = $args['input_type'] ?? 'text';
+		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+
+		// Check for a default value
+		$value = ( empty( $value ) &amp;&amp; isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
+		$attrs = '';
+		$class = '';
+
+		switch ( $type ) {
+			case 'text':
+			case 'password':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+				$class = 'regular-text';
+				break;
+			case 'number':
+				$attrs = ' value="' . esc_attr( $value ) . '"';
+
+				if ( isset( $args['max'] ) &amp;&amp; is_numeric( $args['max'] ) ) {
+					$attrs .= ' max="' . esc_attr( (float) $args['max'] ) . '"';
+				}
+
+				if ( isset( $args['min'] ) &amp;&amp; is_numeric( $args['min'] ) ) {
+					$attrs .= ' min="' . esc_attr( (float) $args['min'] ) . '"';
+				}
+
+				if ( isset( $args['step'] ) &amp;&amp; is_numeric( $args['step'] ) ) {
+					$attrs .= ' step="' . esc_attr( (float) $args['step'] ) . '"';
+				}
+
+				$class = 'small-text';
+				break;
+			case 'checkbox':
+				$attrs = ' value="1"' . checked( '1', $value, false );
+				break;
+		}
+		?>
+		&lt;input
+			type="&lt;?php echo esc_attr( $type ); ?>"
+			id="&lt;?php echo esc_attr( $args['label_for'] ); ?>"
+			class="&lt;?php echo esc_attr( $class ); ?>"
+			name="classifai_&lt;?php echo esc_attr( $this->option_name ); ?>&lt;?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[&lt;?php echo esc_attr( $args['label_for'] ); ?>]"
+			&lt;?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+		&lt;?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '&lt;span class="description">' . wp_kses_post( $args['description'] ) . '&lt;/span>';
+		}
+	}
+
+	/**
+	 * Generic prompt repeater field callback
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_prompt_repeater_field( array $args ): void {
+		$option_index      = $args['option_index'] ?? false;
+		$setting_index     = $this->get_settings( $option_index );
+		$prompts           = $setting_index[ $args['label_for'] ] ?? '';
+		$class             = $args['class'] ?? 'large-text';
+		$placeholder       = $args['placeholder'] ?? '';
+		$field_name_prefix = sprintf(
+			'classifai_%1$s%2$s[%3$s]',
+			$this->option_name,
+			$option_index ? "[$option_index]" : '',
+			$args['label_for']
+		);
+
+		$prompts = empty( $prompts ) &amp;&amp; isset( $args['default_value'] ) ? $args['default_value'] : $prompts;
+
+		$prompt_count = count( $prompts );
+		$field_index  = 0;
+		?>
+
+		&lt;?php foreach ( $prompts as $prompt ) : ?>
+			&lt;?php
+			$is_default_prompt  = ( isset( $prompt['default'] ) &amp;&amp; 1 === $prompt['default'] ) || 1 === $prompt_count;
+			$is_original_prompt = isset( $prompt['original'] ) &amp;&amp; 1 === $prompt['original'];
+			?>
+
+			&lt;fieldset class="classifai-field-type-prompt-setting">
+				&lt;?php if ( $is_original_prompt ) : ?>
+					&lt;p class="classifai-original-prompt">
+						&lt;?php
+						printf(
+							/* translators: %1$s is replaced with &lt;strong>; %2$s with &lt;/strong>; %3$s with prompt. */
+							esc_html__( '%1$sClassifAI default prompt%2$s: %3$s', 'classifai' ),
+							'&lt;strong>',
+							'&lt;/strong>',
+							esc_html( $placeholder )
+						);
+						?>
+					&lt;/p>
+				&lt;?php endif; ?>
+
+				&lt;input type="hidden"
+					name="&lt;?php echo esc_attr( $field_name_prefix . "[$field_index][default]" ); ?>"
+					value="&lt;?php echo esc_attr( $prompt['default'] ?? '' ); ?>"
+					class="js-setting-field__default">
+				&lt;input type="hidden"
+					name="&lt;?php echo esc_attr( $field_name_prefix . "[$field_index][original]" ); ?>"
+					value="&lt;?php echo esc_attr( $prompt['original'] ?? '' ); ?>">
+				&lt;label>
+					&lt;?php esc_html_e( 'Title', 'classifai' ); ?>&amp;nbsp;*
+					&lt;span class="dashicons dashicons-editor-help"
+						title="&lt;?php esc_attr_e( 'Short description of prompt to use for identification', 'classifai' ); ?>">&lt;/span>
+					&lt;input type="text"
+						name="&lt;?php echo esc_attr( $field_name_prefix . "[$field_index][title]" ); ?>"
+						placeholder="&lt;?php esc_attr_e( 'Prompt title', 'classifai' ); ?>"
+						value="&lt;?php echo esc_attr( $prompt['title'] ?? '' ); ?>"
+						&lt;?php echo $is_original_prompt ? 'readonly' : ''; ?>
+						required>
+				&lt;/label>
+
+				&lt;label>
+					&lt;?php esc_html_e( 'Prompt', 'classifai' ); ?>
+					&lt;textarea
+						class="&lt;?php echo esc_attr( $class ); ?>"
+						rows="4"
+						name="&lt;?php echo esc_attr( $field_name_prefix . "[$field_index][prompt]" ); ?>"
+						placeholder="&lt;?php echo esc_attr( $placeholder ); ?>"
+						&lt;?php echo $is_original_prompt ? 'readonly' : ''; ?>
+					>&lt;?php echo esc_textarea( $prompt['prompt'] ?? '' ); ?>&lt;/textarea>
+				&lt;/label>
+
+				&lt;div class="actions-rows">
+					&lt;a href="#" class="action__set_default &lt;?php echo $is_default_prompt ? 'selected' : ''; ?>">
+						&lt;?php if ( $is_default_prompt ) : ?>
+							&lt;?php esc_html_e( 'Default prompt', 'classifai' ); ?>
+						&lt;?php else : ?>
+							&lt;?php esc_html_e( 'Set as default prompt', 'classifai' ); ?>
+						&lt;?php endif; ?>
+					&lt;/a>
+					&lt;a href="#" class="action__remove_prompt" style="&lt;?php echo 1 === $prompt_count || $is_original_prompt ? 'display:none;' : ''; ?>">
+						&lt;?php esc_html_e( 'Trash', 'classifai' ); ?>
+					&lt;/a>
+				&lt;/div>
+			&lt;/fieldset>
+			&lt;?php ++$field_index; ?>
+		&lt;?php endforeach; ?>
+
+		&lt;button
+			class="button-secondary js-classifai-add-prompt-fieldset">
+			&lt;?php esc_html_e( 'Add new prompt', 'classifai' ); ?>
+		&lt;/button>
+
+		&lt;?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '&lt;br />&lt;span class="description">' . wp_kses_post( $args['description'] ) . '&lt;/span>';
+		}
+	}
+
+	/**
+	 * Renders a select menu
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_select( $args ) {
+		$setting_index = $this->get_settings();
+		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
+
+		// Check for a default value
+		$saved   = ( empty( $saved ) &amp;&amp; isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;
+		$options = isset( $args['options'] ) ? $args['options'] : [];
+		?>
+
+		&lt;select
+			id="&lt;?php echo esc_attr( $args['label_for'] ); ?>"
+			name="classifai_&lt;?php echo esc_attr( $this->option_name ); ?>[&lt;?php echo esc_attr( $args['label_for'] ); ?>]"
+			>
+			&lt;?php foreach ( $options as $value => $name ) : ?>
+				&lt;option value="&lt;?php echo esc_attr( $value ); ?>" &lt;?php selected( $saved, $value ); ?>>
+					&lt;?php echo esc_attr( $name ); ?>
+				&lt;/option>
+			&lt;?php endforeach; ?>
+		&lt;/select>
+
+		&lt;?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '&lt;br />&lt;span class="description">' . wp_kses_post( $args['description'] ) . '&lt;/span>';
+		}
+	}
+
+	/**
+	 * Render a group of checkboxes.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_checkbox_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		// Iterate through all of our options.
+		foreach ( $options as $option_value => $option_label ) {
+			$value                 = '';
+			$default_key           = array_search( $option_value, $args['default_values'], true );
+			$option_value_theshold = $option_value . '_threshold';
+
+			// Get saved value, if any.
+			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
+				$value           = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
+				$threshold_value = $setting_index[ $args['label_for'] ][ $option_value_theshold ] ?? '';
+			}
+
+			// Check for backward compatibility.
+			if ( empty( $value ) &amp;&amp; '0' !== $value &amp;&amp; ! empty( $args['backward_compatible_key'] ) &amp;&amp; isset( $setting_index[ $args['backward_compatible_key'] ] ) ) {
+				$value = $setting_index[ $args['backward_compatible_key'] ][ $option_value ] ?? '';
+			}
+
+			// If no saved value, check if we have a default value.
+			if ( empty( $value ) &amp;&amp; '0' !== $value &amp;&amp; isset( $args['default_values'][ $default_key ] ) ) {
+				$value = $args['default_values'][ $default_key ];
+			}
+
+			// Render checkbox.
+			printf(
+				'&lt;p>
+					&lt;label for="%1$s_%2$s_%3$s">
+						&lt;input type="hidden" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						&lt;input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
+						%5$s
+					&lt;/label>
+				&lt;/p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ?? '' ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+
+			// Render Threshold field.
+			if ( 'openai_embeddings' === $this->option_name &amp;&amp; 'taxonomies' === $args['label_for'] ) {
+				$this->render_threshold_field( $args, $option_value_theshold, $threshold_value );
+			}
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'&lt;span class="description">%s&lt;/span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
+	 * Render a group of radio.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_radio_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? '';
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		// Iterate through all of our options.
+		foreach ( $options as $option_value => $option_label ) {
+			// Render radio button.
+			printf(
+				'&lt;p>
+					&lt;label for="%1$s_%2$s_%3$s">
+						&lt;input type="radio" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s]" value="%3$s" %4$s />
+						%5$s
+					&lt;/label>
+				&lt;/p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'&lt;span class="description">%s&lt;/span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
+	 * Render a threshold field.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param array  $args          The args passed to add_settings_field
+	 * @param string $option_value  The option value.
+	 * @param string $value         The value.
+	 *
+	 * @return void
+	 */
+	public function render_threshold_field( $args, $option_value, $value ) {
+		printf(
+			'&lt;p class="threshold_wrapper">
+				&lt;label for="%1$s_%2$s_%3$s">%4$s&lt;/label>
+				&lt;br>
+				&lt;input type="number" id="%1$s_%2$s_%3$s" class="small-text" name="classifai_%1$s[%2$s][%3$s]" value="%5$s" />
+			&lt;/p>',
+			esc_attr( $this->option_name ),
+			esc_attr( $args['label_for'] ?? '' ),
+			esc_attr( $option_value ),
+			esc_html__( 'Threshold (%)', 'classifai' ),
+			$value ? esc_attr( $value ) : 75
+		);
+	}
+
+	/**
+	 * Renders the checkbox group for 'Generate descriptive text' setting.
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 */
+	public function render_auto_caption_fields( $args ) {
+		$setting_index = $this->get_settings();
+
+		$default_value = '';
+
+		if ( isset( $setting_index['enable_image_captions'] ) ) {
+			if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
+				if ( '1' === $setting_index['enable_image_captions'] ) {
+					$default_value = 'alt';
+				} elseif ( 'no' === $setting_index['enable_image_captions'] ) {
+					$default_value = '';
+				}
+			}
+		}
+
+		$checkbox_options = array(
+			'alt'         => esc_html__( 'Alt text', 'classifai' ),
+			'caption'     => esc_html__( 'Image caption', 'classifai' ),
+			'description' => esc_html__( 'Image description', 'classifai' ),
+		);
+
+		foreach ( $checkbox_options as $option_value => $option_label ) {
+			if ( isset( $setting_index['enable_image_captions'] ) ) {
+				if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
+					$default_value = '1' === $setting_index['enable_image_captions'] ? 'alt' : '';
+				} else {
+					$default_value = $setting_index['enable_image_captions'][ $option_value ];
+				}
+			}
+
+			printf(
+				'&lt;p>
+					&lt;label for="%1$s_%2$s_%3$s">
+						&lt;input type="hidden" name="classifai_%1$s[%2$s][%3$s]" value="0" />
+						&lt;input type="checkbox" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s][%3$s]" value="%3$s" %4$s />
+						%5$s
+					&lt;/label>
+				&lt;/p>',
+				esc_attr( $this->option_name ),
+				esc_attr( $args['label_for'] ?? '' ),
+				esc_attr( $option_value ),
+				checked( $default_value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'&lt;span class="description">%s&lt;/span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
+	 * Render allowed users table.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
+		?>
+		&lt;div class="classifai-search-users-container">
+			&lt;div class="classifai-user-selector" data-id="&lt;?php echo esc_attr( $args['label_for'] ); ?>" id="&lt;?php echo esc_attr( $args['label_for'] ); ?>-container">&lt;/div>
+			&lt;input
+				id="&lt;?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="classifai_&lt;?php echo esc_attr( $this->option_name ); ?>[&lt;?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="&lt;?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		&lt;/div>
+		&lt;?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '&lt;span class="description">' . wp_kses_post( $args['description'] ) . '&lt;/span>';
+		}
+	}
+
+	/**
+	 * Set up the fields for each section.
+	 */
+	abstract public function setup_fields_sections();
+
+	/**
+	 * Sanitization
+	 *
+	 * @param array $settings The settings being saved.
+	 */
+	abstract public function sanitize_settings( $settings );
+
+	/**
+	 * Provides debug information related to the provider.
+	 *
+	 * @return string|array Debug info to display on the Site Health screen. Accepts a string or key-value pairs.
+	 * @since 1.4.0
+	 */
+	abstract public function get_provider_debug_information();
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 * This is called by the Service.
+	 *
+	 * @param int    $post_id       The Post Id we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 *
+	 * @return mixed
+	 */
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
+		return null;
+	}
+
+	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param array|WP_Error $data Response data to format.
+	 *
+	 * @return string
+	 */
+	protected function get_formatted_latest_response( $data ) {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured() {
+		$settings = $this->get_settings();
+
+		$is_configured = false;
+		if ( ! empty( $settings ) &amp;&amp; ! empty( $settings['authenticated'] ) ) {
+			$is_configured = true;
+		}
+
+		return $is_configured;
+	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @param string $feature Feature.
+	 * @param string $section Settings section.
+	 * @return void
+	 */
+	protected function add_access_settings( string $feature, string $section = '' ) {
+		$access_control = new AccessControl( $this, $feature );
+		$access_control->add_settings( $section );
+	}
+
+	/**
+	 * Sanitization for the roles/users access options being saved.
+	 *
+	 * @param array  $settings Array of settings about to be saved.
+	 * @param string $feature  Feature key.
+	 *
+	 * @return array The sanitized settings to be saved.
+	 */
+	protected function sanitize_access_settings( array $settings, string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->sanitize_settings( $settings );
+	}
+
+	/**
+	 * Determine if the current user has access of the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	protected function has_access( string $feature ) {
+		$access_control = new AccessControl( $this, $feature );
+		return $access_control->has_access();
+	}
+
+	/**
+	 * Retrieves the allowed WordPress roles for ClassifAI.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @return array An associative array where the keys are role keys and the values are role names.
+	 */
+	public function get_roles() {
+		$default_settings = $this->get_default_settings();
+		$editable_roles   = get_editable_roles() ?? [];
+		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
+
+		/**
+		 * Filter the allowed WordPress roles for ClassifAI
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_allowed_roles
+		 *
+		 * @param {array}  $roles            Array of arrays containing role information.
+		 * @param {string} $option_name      Option name.
+		 * @param {array}  $default_settings Default setting values.
+		 *
+		 * @return {array} Roles array.
+		 */
+		$roles = apply_filters( 'classifai_allowed_roles', $roles, $this->get_option_name(), $default_settings );
+
+		return $roles;
+	}
+
+	/**
+	 * Determine if the feature is enabled and current user can access the feature
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_feature_enabled( string $feature ) {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &amp;&amp;
+			$this->has_access( $feature ) &amp;&amp;
+			$this->is_enabled( $feature )
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$this->option_name}_enable_{$feature}
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @param string $feature Feature to check.
+	 * @return bool
+	 */
+	public function is_enabled( string $feature ) {
+		$settings   = $this->get_settings();
+		$enable_key = 'enable_' . $feature;
+
+		// Check if feature is turned on.
+		$is_enabled = ( isset( $settings[ $enable_key ] ) &amp;&amp; 1 === (int) $settings[ $enable_key ] );
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_is_{$feature}_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+    <footer>
+		<a href="https://classifaiplugin.com/">ClassifAI Plugin</a> &bull;
+		<a href="https://github.com/10up/classifai/">ClassifAI on GitHub</a> &bull;
+		<a href="https://10up.com/careers">Careers at 10up</a>
+	</footer>
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_allowed_roles.html">classifai_allowed_roles</a></li><li><a href="classifai_audio_generation_initial_state.html">classifai_audio_generation_initial_state</a></li><li><a href="classifai_audio_generation_subsequent_state.html">classifai_audio_generation_subsequent_state</a></li><li><a href="classifai_azure_read_request_args.html">classifai_azure_read_request_args</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_allowed_roles.html">classifai_chatgpt_allowed_roles</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_resize_content_request_body.html">classifai_chatgpt_resize_content_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_has_access.html">classifai_has_access</a></li><li><a href="classifai_is_%257B$feature%257D_enabled.html">classifai_is_{$feature}_enabled</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_api_request_get_options.html">classifai_openai_api_request_get_options</a></li><li><a href="classifai_openai_api_request_get_url.html">classifai_openai_api_request_get_url</a></li><li><a href="classifai_openai_api_request_post_form_options.html">classifai_openai_api_request_post_form_options</a></li><li><a href="classifai_openai_api_request_post_form_url.html">classifai_openai_api_request_post_form_url</a></li><li><a href="classifai_openai_api_request_post_options.html">classifai_openai_api_request_post_options</a></li><li><a href="classifai_openai_api_request_post_url.html">classifai_openai_api_request_post_url</a></li><li><a href="classifai_openai_api_response_get.html">classifai_openai_api_response_get</a></li><li><a href="classifai_openai_api_response_post.html">classifai_openai_api_response_post</a></li><li><a href="classifai_openai_api_response_post_form.html">classifai_openai_api_response_post_form</a></li><li><a href="classifai_openai_characters_in_token.html">classifai_openai_characters_in_token</a></li><li><a href="classifai_openai_dalle_allowed_image_roles.html">classifai_openai_dalle_allowed_image_roles</a></li><li><a href="classifai_openai_dalle_enable_image_gen.html">classifai_openai_dalle_enable_image_gen</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_post_statuses.html">classifai_openai_embeddings_post_statuses</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_embeddings_taxonomies.html">classifai_openai_embeddings_taxonomies</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_openai_tokens_per_word.html">classifai_openai_tokens_per_word</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="classifai_threshold.html">classifai_threshold</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="classifai_%257B$this-_option_name%257D_enable_%257B$feature%257D.html">classifai_{$this->option_name}_enable_{$feature}</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-useful-snippets.html">Useful snippets</a></li><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

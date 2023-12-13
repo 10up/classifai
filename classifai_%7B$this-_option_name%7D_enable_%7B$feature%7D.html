@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_smart_crop_max_pixel_dimension - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_{$this->option_name}_enable_{$feature} - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_smart_crop_max_pixel_dimension</h1>
+    <h1 class="page-title">Filter: classifai_{$this->option_name}_enable_{$feature}</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_smart_crop_max_pixel_dimension">apply_filters( 'classifai_smart_crop_max_pixel_dimension', <span class="signature">$max )</span><span class="type-signature"> &rarr; {int}</span></h4>
+    <h4 class="name" id="classifai_{$this->option_name}_enable_{$feature}">apply_filters( 'classifai_{$this->option_name}_enable_{$feature}', <span class="signature">$is_feature_enabled, $settings )</span><span class="type-signature"> &rarr; {bool}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filters the maximum allowable width or height of an image to be cropped. Default 1024.</p>
+    <p>Filter to override permission to a specific classifai feature.</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$max</code></td>
+                <td class="name"><code>$is_feature_enabled</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">int</span>
+<span class="param-type">bool</span>
 
 
             
@@ -100,7 +100,30 @@
 
             
 
-            <td class="description last"><p>The max width/height in pixels. Default 1024.</p></td>
+            <td class="description last"><p>Is the feature enabled?</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Current feature settings.</p></td>
         </tr>
 
     
@@ -118,7 +141,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.4.0</li></ul></dd>
     
 
     
@@ -144,7 +167,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line100">line 100</a>
+        <a href="Providers_Provider.php.html">Providers/Provider.php</a>, <a href="Providers_Provider.php.html#line764">line 764</a>
     </li></ul></dd>
     
 
@@ -171,7 +194,7 @@
 
         
 <div class="param-desc">
-    <p>Filtered max dimension in pixels.</p>
+    <p>Returns true if the user has access and the feature is enabled, false otherwise.</p>
 </div>
 
 
@@ -182,7 +205,7 @@
     </dt>
     <dd>
         
-<span class="param-type">int</span>
+<span class="param-type">bool</span>
 
 
     </dd>

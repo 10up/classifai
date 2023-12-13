@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Filter: classifai_smart_crop_max_pixel_dimension - 10up ClassifAI Hook Docs</title>
+    <title>Filter: classifai_allowed_roles - 10up ClassifAI Hook Docs</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="main">
 
 	
-    <h1 class="page-title">Filter: classifai_smart_crop_max_pixel_dimension</h1>
+    <h1 class="page-title">Filter: classifai_allowed_roles</h1>
 	
 
     
@@ -43,14 +43,14 @@
 
     
 
-    <h4 class="name" id="classifai_smart_crop_max_pixel_dimension">apply_filters( 'classifai_smart_crop_max_pixel_dimension', <span class="signature">$max )</span><span class="type-signature"> &rarr; {int}</span></h4>
+    <h4 class="name" id="classifai_allowed_roles">apply_filters( 'classifai_allowed_roles', <span class="signature">$roles, $option_name, $default_settings )</span><span class="type-signature"> &rarr; {array}</span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Filters the maximum allowable width or height of an image to be cropped. Default 1024.</p>
+    <p>Filter the allowed WordPress roles for ClassifAI</p>
 </div>
 
 
@@ -84,13 +84,13 @@
 
         <tr>
             
-                <td class="name"><code>$max</code></td>
+                <td class="name"><code>$roles</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">int</span>
+<span class="param-type">array</span>
 
 
             
@@ -100,7 +100,53 @@
 
             
 
-            <td class="description last"><p>The max width/height in pixels. Default 1024.</p></td>
+            <td class="description last"><p>Array of arrays containing role information.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$option_name</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Option name.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>$default_settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Default setting values.</p></td>
         </tr>
 
     
@@ -118,7 +164,7 @@
 
     
     <dt class="tag-since">Since:</dt>
-    <dd class="tag-since"><ul class="dummy"><li>1.5.0</li></ul></dd>
+    <dd class="tag-since"><ul class="dummy"><li>2.4.0</li></ul></dd>
     
 
     
@@ -144,7 +190,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Providers_Azure_SmartCropping.php.html">Providers/Azure/SmartCropping.php</a>, <a href="Providers_Azure_SmartCropping.php.html#line100">line 100</a>
+        <a href="Providers_Provider.php.html">Providers/Provider.php</a>, <a href="Providers_Provider.php.html#line728">line 728</a>
     </li></ul></dd>
     
 
@@ -171,7 +217,7 @@
 
         
 <div class="param-desc">
-    <p>Filtered max dimension in pixels.</p>
+    <p>Roles array.</p>
 </div>
 
 
@@ -182,7 +228,7 @@
     </dt>
     <dd>
         
-<span class="param-type">int</span>
+<span class="param-type">array</span>
 
 
     </dd>
