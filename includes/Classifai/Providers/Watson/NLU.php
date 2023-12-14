@@ -9,12 +9,12 @@ use Classifai\Admin\SavePostHandler;
 use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+use WP_Error;
 use function Classifai\get_plugin_settings;
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
 use function Classifai\get_classification_mode;
-use WP_Error;
 
 class NLU extends Provider {
 
@@ -298,7 +298,7 @@ class NLU extends Provider {
 		add_settings_section(
 			$this->get_option_name(),
 			$this->provider_service_name,
-			function() {
+			function () {
 				printf(
 					wp_kses(
 						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
@@ -334,7 +334,6 @@ class NLU extends Provider {
 						);
 					echo '</strong></p></div>';
 				}
-
 			},
 			$this->get_option_name()
 		);
@@ -394,7 +393,7 @@ class NLU extends Provider {
 		add_settings_field(
 			'toggle',
 			'',
-			function() {
+			function () {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
 					$this->use_username_password()
@@ -904,7 +903,7 @@ class NLU extends Provider {
 		$settings_post_types = $settings['post_types'] ?? [];
 		$post_types          = array_filter(
 			array_keys( $settings_post_types ),
-			function( $post_type ) use ( $settings_post_types ) {
+			function ( $post_type ) use ( $settings_post_types ) {
 				return 1 === intval( $settings_post_types[ $post_type ] );
 			}
 		);
@@ -1051,13 +1050,13 @@ class NLU extends Provider {
 			$supported_post_types,
 			'classifai_process_content',
 			array(
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+				'get_callback'    => function ( $data ) {
+					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
-				'update_callback' => function ( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
 				'schema'          => [
 					'type'    => 'string',
@@ -1102,5 +1101,4 @@ class NLU extends Provider {
 		/** This filter is documented in includes/Classifai/Providers/Provider.php */
 		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
-
 }

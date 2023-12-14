@@ -58,23 +58,23 @@ class Psr4AutoloaderClass {
 	/**
 	 * Loads the class file for a given class name.
 	 *
-	 * @param string $class The fully-qualified class name.
+	 * @param string $classname The fully-qualified class name.
 	 * @return mixed The mapped file name on success, or boolean false on
 	 * failure.
 	 */
-	public function load_class( $class ) {
+	public function load_class( $classname ) {
 		// the current namespace prefix
-		$prefix = $class;
+		$prefix = $classname;
 
 		// work backwards through the namespace names of the fully-qualified
 		// class name to find a mapped file name
-		while ( false !== $pos = strrpos( $prefix, '\\' ) ) { // phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+		while ( false !== $pos = strrpos( $prefix, '\\' ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 
 			// retain the trailing namespace separator in the prefix
-			$prefix = substr( $class, 0, $pos + 1 );
+			$prefix = substr( $classname, 0, $pos + 1 );
 
 			// the rest is the relative class name
-			$relative_class = substr( $class, $pos + 1 );
+			$relative_class = substr( $classname, $pos + 1 );
 
 			// try to load a mapped file for the prefix and relative class
 			$mapped_file = $this->load_mapped_file( $prefix, $relative_class );

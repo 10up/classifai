@@ -325,5 +325,4 @@ class APIRequest {
 	public function get_api_key() {
 		return $this->api_key;
 	}
-
 }

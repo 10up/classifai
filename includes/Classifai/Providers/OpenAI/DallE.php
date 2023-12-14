@@ -7,10 +7,9 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
+use WP_Error;
 use function Classifai\get_asset_info;
 use function Classifai\render_disable_feature_link;
-
-use WP_Error;
 
 class DallE extends Provider {
 
@@ -574,7 +573,7 @@ class DallE extends Provider {
 		$roles = get_editable_roles() ?? [];
 		$roles = array_filter(
 			$roles,
-			function( $role ) {
+			function ( $role ) {
 				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
 			}
 		);

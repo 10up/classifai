@@ -638,7 +638,7 @@ abstract class Provider {
 	 *
 	 * @return mixed
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) {
+	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return null;
 	}
 
