@@ -24,7 +24,7 @@
     ]
   },
   "require-dev": {
-    "10up/phpcs-composer": "dev-master",
+    "10up/phpcs-composer": "^3",
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
