@@ -5,6 +5,7 @@
 
 namespace Classifai\Services;
 
+use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Taxonomy\ImageTagTaxonomy;
 use function Classifai\get_asset_info;
 use function Classifai\find_provider_class;
@@ -58,7 +59,7 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		$provider = find_provider_class( $this->provider_classes ?? [], 'AI Vision' );
+		$provider = find_provider_class( $this->provider_classes ?? [], ComputerVision::ID );
 		if ( ! is_wp_error( $provider ) ) {
 			wp_add_inline_script(
 				'classifai-media-script',
