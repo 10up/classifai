@@ -7,7 +7,6 @@
 
 $onboarding         = new Classifai\Admin\Onboarding();
 $features           = $onboarding->get_features();
-$has_configured     = $onboarding->has_configured_providers();
 $onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
 $enabled_features   = $onboarding_options['enabled_features'] ?? array();
 
@@ -45,40 +44,24 @@ foreach ( $features as $key => $feature ) {
 		<div class="classifai-features">
 			<ul>
 				<?php
-				foreach ( $feature['features'] as $provider => $provider_features ) {
-					foreach ( $provider_features as $feature_key => $feature_options ) {
-						$checked = false;
-						if ( $has_configured ) {
-							// For existing users, enable features based on their saved configuration.
-							$checked = $feature_options['enabled'] ?? false;
-						} elseif ( ! empty( $enabled_features ) ) {
-							// Enable features based on user selection.
-							$checked = isset( $enabled_features[ $provider ][ $feature_key ] );
-							if ( count( explode( '__', $feature_key ) ) > 1 ) {
-								$keys    = explode( '__', $feature_key );
-								$checked = isset( $enabled_features[ $provider ][ $keys[0] ][ $keys[1] ] );
-							}
-						} else {
-							// Enable all features by default.
-							$checked = true;
-							if ( strpos( $feature_key, 'post_types__' ) !== false ) {
-								if ( ! in_array( str_replace( 'post_types__', '', $feature_key ), array( 'post', 'page' ), true ) ) {
-									$checked = false;
-								}
-							}
-						}
-						?>
-						<li class="classifai-enable-feature">
-							<label class="classifai-toggle">
-								<span class="classifai-feature-text">
-									<?php echo esc_html( $feature_options['title'] ); ?>
-								</span>
-								<input type="checkbox" class="classifai-toggle-checkbox" name="<?php echo esc_attr( 'classifai-features[' . $provider . '][' . str_replace( '__', '][', $feature_key ) . ']' ); ?>" value="1" <?php checked( $checked, '1', true ); ?>>
-								<span class="classifai-toggle-switch"></span>
-							</label>
-						</li>
-						<?php
+				foreach ( $feature['features'] as $feature_key => $feature_class ) {
+					if ( ! $feature_class instanceof Classifai\Features\Feature ) {
+						continue;
 					}
+					$feature_label = $feature_class->get_label();
+					$settings      = $feature_class->get_settings();
+					$checked       = isset( $enabled_features[ $feature_key ] ) ? $enabled_features[ $feature_key ] : $settings['status'];
+					?>
+					<li class="classifai-enable-feature">
+						<label class="classifai-toggle">
+							<span class="classifai-feature-text">
+								<?php echo esc_html( $feature_label ); ?>
+							</span>
+							<input type="checkbox" class="classifai-toggle-checkbox" name="<?php echo esc_attr( 'classifai-features[' . $feature_key . ']' ); ?>" value="1" <?php checked( $checked, '1', true ); ?>>
+							<span class="classifai-toggle-switch"></span>
+						</label>
+					</li>
+					<?php
 				}
 				?>
 			</ul>

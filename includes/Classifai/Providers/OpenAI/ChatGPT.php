@@ -461,10 +461,13 @@ class ChatGPT extends Provider {
 	public function enqueue_admin_assets( string $hook_suffix ) {
 		// Load asset in OpenAI ChatGPT settings page.
 		if (
-			'tools_page_classifai' === $hook_suffix
-			&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
-			&& 'language_processing' === $_GET['tab'] // phpcs:ignore
-			&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+			(
+				'tools_page_classifai' === $hook_suffix
+				&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
+				&& 'language_processing' === $_GET['tab'] // phpcs:ignore
+				&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+			) ||
+			'admin_page_classifai_setup' === $hook_suffix
 		) {
 			wp_enqueue_script( 'jquery-ui-dialog' );
 			wp_enqueue_style( 'wp-jquery-ui-dialog' );
