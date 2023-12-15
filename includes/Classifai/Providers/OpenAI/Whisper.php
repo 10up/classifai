@@ -147,6 +147,8 @@ class Whisper extends Provider {
 
 	public function reset_settings() {}
 
+	public function get_default_settings() { }
+
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(
 			'classifai-media-script',
