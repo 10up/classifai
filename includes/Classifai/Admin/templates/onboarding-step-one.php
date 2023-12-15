@@ -7,7 +7,7 @@
 
 $onboarding         = new Classifai\Admin\Onboarding();
 $features           = $onboarding->get_features();
-$onboarding_options = Classifai\Admin\Onboarding::get_onboarding_options();
+$onboarding_options = $onboarding->get_onboarding_options();
 $enabled_features   = $onboarding_options['enabled_features'] ?? array();
 
 $args = array(
