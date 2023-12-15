@@ -89,17 +89,6 @@ class ChatGPT extends Provider {
 			'resize_content'     => __( 'Resize content', 'classifai' ),
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'         => __( 'Title generation', 'classifai' ),
-				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
-			),
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
