@@ -393,12 +393,15 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	}
 } )();
 
-/** Feature-first refactor settings field: */
+/**
+ * Feature-first refactor settings field:
+ * @param {Object} $ jQuery object
+ */
 ( function ( $ ) {
-	$( function() {
+	$( function () {
 		const providerSelectEl = $( 'select#provider' );
 
-		providerSelectEl.on( 'change', function() {
+		providerSelectEl.on( 'change', function () {
 			const providerId = $( this ).val();
 			const providerRows = $( '.classifai-provider-field' );
 			const providerClass = `.provider-scope-${ providerId }`;
@@ -413,4 +416,4 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		// Trigger 'change' on page load.
 		providerSelectEl.trigger( 'change' );
 	} );
-} ( jQuery ) );
+} )( jQuery );
