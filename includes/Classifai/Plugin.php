@@ -168,10 +168,7 @@ class Plugin {
 	 */
 	public function enqueue_admin_assets( $hook_suffix ) {
 		$user_profile     = new Admin\UserProfile();
-
-		// @todo: rework on this part.
-		// $allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
-		$allowed_features = [];
+		$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 
 		wp_enqueue_style(
 			'classifai-admin-style',

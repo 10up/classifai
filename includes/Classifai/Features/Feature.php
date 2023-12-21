@@ -51,14 +51,14 @@ abstract class Feature {
 		 * Filter the allowed WordPress roles for ChatGTP
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
+		 * @hook classifai_{feature}_roles
 		 *
 		 * @param {array} $roles            Array of arrays containing role information.
 		 * @param {array} $default_settings Default setting values.
 		 *
 		 * @return {array} Roles array.
 		 */
-		$this->roles = apply_filters( 'classifai_chatgpt_allowed_roles', $this->roles, $default_settings );
+		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $this->roles, $default_settings );
 	}
 
 	/**
@@ -81,7 +81,16 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract protected function get_default_settings();
+	protected function get_default_settings() {
+		return [
+			'status'             => '0',
+			'role_based_access'  => '1',
+			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
+			'user_based_access'  => 'no',
+			'users'              => [],
+			'user_based_opt_out' => 'no',
+		];
+	}
 
 	/**
 	 * Returns the providers supported by the feature.
@@ -99,14 +108,171 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract public function sanitize_settings( $settings );
+	public function sanitize_settings( $settings ) {
+		$new_settings             = $settings;
+		$current_settings         = $this->get_settings();
+		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
+		$new_settings['provider'] = isset( $settings['provider'] ) ? sanitize_text_field( $settings['provider'] ) : $current_settings['provider'];
+
+		if ( empty( $settings['role_based_access'] ) || 1 !== (int) $settings['role_based_access'] ) {
+			$new_settings['role_based_access'] = 'no';
+		} else {
+			$new_settings['role_based_access'] = '1';
+		}
+
+		// Allowed roles.
+		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
+			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
+		} else {
+			$new_settings['roles'] = $current_settings['roles'];
+		}
+
+		if ( empty( $settings['user_based_access'] ) || 1 !== (int) $settings['user_based_access'] ) {
+			$new_settings['user_based_access'] = 'no';
+		} else {
+			$new_settings['user_based_access'] = '1';
+		}
+
+		// Allowed users.
+		if ( isset( $settings['users'] ) && ! empty( $settings['users'] ) ) {
+			if ( is_array( $settings['users'] ) ) {
+				$new_settings['users'] = array_map( 'absint', $settings['users'] );
+			} else {
+				$new_settings['users'] = array_map( 'absint', explode( ',', $settings['users'] ) );
+			}
+		} else {
+			$new_settings['users'] = array();
+		}
+
+		// User-based opt-out.
+		if ( empty( $settings['user_based_opt_out'] ) || 1 !== (int) $settings['user_based_opt_out'] ) {
+			$new_settings['user_based_opt_out'] = 'no';
+		} else {
+			$new_settings['user_based_opt_out'] = '1';
+		}
+		return $new_settings;
+	}
+
+	/**
+	 * Determine if the current user has access to the feature
+	 *
+	 * @return bool
+	 */
+	public function has_access() {
+		$access        = false;
+		$user_id       = get_current_user_id();
+		$user          = get_user_by( 'id', $user_id );
+		$user_roles    = $user->roles ?? [];
+		$settings      = $this->get_settings();
+		$feature_roles = $settings['roles'] ?? [];
+		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
+
+		$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
+		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
+		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
+
+		/*
+		 * Checks if Role-based access is enabled and user role has access to the feature.
+		 */
+		if ( $role_based_access_enabled ) {
+			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
+		}
+
+		/*
+		 * Checks if User-based access is enabled and user has access to the feature.
+		 */
+		if ( ! $access && $user_based_access_enabled ) {
+			$access = ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) );
+		}
+
+		/*
+		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
+		 */
+		if ( $access && $user_based_opt_out_enabled ) {
+			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
+			$access             = ( ! in_array( static::ID, $opted_out_features, true ) );
+		}
+
+		/**
+		 * Filter to override user access to a ClassifAI feature.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_{$feature}_has_access
+		 *
+		 * @param {bool}   $access   Current access value.
+		 * @param {array}  $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_has_access', $access, $settings );
+	}
 
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
+	 * Criteria:
+	 *  - Provider is configured.
+	 *  - User has access to the feature.
+	 *  - Feature is turned on.
 	 *
 	 * @return boolean|\WP_Error
 	 */
-	abstract public function is_feature_enabled();
+	public function is_feature_enabled() {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access() &&
+			$this->is_enabled()
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_is_feature_enabled
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @return bool
+	 */
+	public function is_enabled() {
+		$settings = $this->get_settings();
+
+		// Check if feature is turned on.
+		$feature_status = ( isset( $settings['status'] ) && 1 === (int) $settings['status'] );
+		$is_configured  = $this->is_configured();
+		$is_enabled     = $feature_status && $is_configured;
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_{$feature}_is_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_enabled', $is_enabled, $settings );
+	}
 
 	/**
 	 * Registers the settings for the feature.
@@ -286,6 +452,101 @@ abstract class Feature {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Add settings fields for Role/User based access.
+	 *
+	 * @return void
+	 */
+	protected function add_access_control_fields() {
+		$settings = $this->get_settings();
+
+		add_settings_field(
+			'role_based_access',
+			esc_html__( 'Enable role-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'role_based_access',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['role_based_access'],
+				'description'   => __( 'Enables ability to select which roles can access this feature.', 'classifai' ),
+				'class'         => 'classifai-role-based-access',
+			]
+		);
+
+		// Add hidden class if role-based access is disabled.
+		$class = 'allowed_roles_row';
+		if ( ! isset( $settings['role_based_access'] ) || '1' !== $settings['role_based_access'] ) {
+			$class .= ' hidden';
+		}
+
+		add_settings_field(
+			'roles',
+			esc_html__( 'Allowed roles', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'      => 'roles',
+				'options'        => $this->roles,
+				'default_values' => $settings['roles'],
+				'description'    => __( 'Choose which roles are allowed to access this feature.', 'classifai' ),
+				'class'          => $class,
+			]
+		);
+
+		add_settings_field(
+			'user_based_access',
+			esc_html__( 'Enable user-based access', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'user_based_access',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['user_based_access'],
+				'description'   => __( 'Enables ability to select which users can access this feature.', 'classifai' ),
+				'class'         => 'classifai-user-based-access',
+			]
+		);
+
+		// Add hidden class if user-based access is disabled.
+		$users_class = 'allowed_users_row';
+		if ( ! isset( $settings['user_based_access'] ) || '1' !== $settings['user_based_access'] ) {
+			$users_class .= ' hidden';
+		}
+
+		add_settings_field(
+			'users',
+			esc_html__( 'Allowed users', 'classifai' ),
+			[ $this, 'render_allowed_users' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'users',
+				'default_value' => $settings['users'],
+				'description'   => __( 'Users who have access to this feature.', 'classifai' ),
+				'class'         => $users_class,
+			]
+		);
+
+		add_settings_field(
+			'user_based_opt_out',
+			esc_html__( 'Enable user-based opt-out', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'user_based_opt_out',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['user_based_opt_out'],
+				'description'   => __( 'Enables ability for users to opt-out from their user profile page.', 'classifai' ),
+				'class'         => 'classifai-user-based-opt-out',
+			]
+		);
 	}
 
 	/**
@@ -518,7 +779,7 @@ abstract class Feature {
 			// Render checkbox.
 			printf(
 				'<p>
-					<label for="%1$s_%2$s_%3$s">
+					<label for="%1$s_%3$s_%4$s">
 						<input type="hidden" name="%1$s%2$s[%3$s][%4$s]" value="0" />
 						<input type="checkbox" id="%1$s_%3$s_%4$s" name="%1$s%2$s[%3$s][%4$s]" value="%4$s" %5$s />
 						%6$s
@@ -599,6 +860,31 @@ abstract class Feature {
 				'<span class="description classifai-input-description">%s</span>',
 				esc_html( $args['description'] )
 			);
+		}
+	}
+
+	/**
+	 * Render allowed users input field.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_allowed_users( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? array();
+		?>
+		<div class="classifai-search-users-container">
+			<div class="classifai-user-selector" data-id="<?php echo esc_attr( $args['label_for'] ); ?>" id="<?php echo esc_attr( $args['label_for'] ); ?>-container"></div>
+			<input
+				id="<?php echo esc_attr( $args['label_for'] ); ?>"
+				class="classifai-search-users"
+				type="hidden"
+				name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
+				value="<?php echo esc_attr( implode( ',', $value ) ); ?>"
+			/>
+		</div>
+		<?php
+		if ( ! empty( $args['description'] ) ) {
+			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
 	}
 }

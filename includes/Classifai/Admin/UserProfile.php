@@ -2,8 +2,7 @@
 
 namespace Classifai\Admin;
 
-use Classifai\Providers\AccessControl;
-use Classifai\Providers\Provider;
+use Classifai\Features\Feature;
 use Classifai\Services\Service;
 
 use function Classifai\get_plugin;
@@ -135,44 +134,49 @@ class UserProfile {
 
 		$service_classes = $services['service_manager']->service_classes;
 		foreach ( $service_classes as $service_class ) {
-			if ( ! $service_class instanceof Service || empty( $service_class->provider_classes ) ) {
+			if ( ! $service_class instanceof Service || empty( $service_class->feature_classes ) ) {
 				continue;
 			}
 
-			foreach ( $service_class->provider_classes as $provider_class ) {
-				if ( ! $provider_class instanceof Provider ) {
+			foreach ( $service_class->feature_classes as $feature_class ) {
+				if ( ! $feature_class instanceof Feature ) {
 					continue;
 				}
-				$provider_features = $provider_class->get_features();
-				if ( empty( $provider_features ) ) {
+
+				$settings = $feature_class->get_settings();
+				// Bail if feature settings are empty.
+				if ( empty( $settings ) ) {
 					continue;
 				}
-				foreach ( $provider_features as $feature => $feature_name ) {
-					$access_control = new AccessControl( $provider_class, $feature );
 
-					// Check if feature has user based opt-out enabled.
-					if ( $access_control->is_user_based_opt_out_enabled() ) {
-						// Check if user has access to the feature by role.
-						$allowed_roles = $access_control->get_allowed_roles();
-						if (
-							$access_control->is_role_based_access_enabled() &&
-							! empty( $allowed_roles ) &&
-							! empty( array_intersect( $user_roles, $allowed_roles ) )
-						) {
-							$allowed_features[ $feature ] = $feature_name;
-							continue;
-						}
+				$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
+				$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
+				$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
-						// Check if user has access to the feature.
-						$allowed_users = $access_control->get_allowed_users();
-						if (
-							$access_control->is_user_based_access_enabled() &&
-							! empty( $allowed_users ) &&
-							in_array( $user_id, $allowed_users, true )
-						) {
-							$allowed_features[ $feature ] = $feature_name;
-						}
-					}
+				// Bail if user opt-out is not enabled.
+				if ( ! $user_based_opt_out_enabled ) {
+					continue;
+				}
+
+				// Check if user has access to the feature by role.
+				$allowed_roles = $settings['roles'] ?? [];
+				if (
+					$role_based_access_enabled &&
+					! empty( $allowed_roles ) &&
+					! empty( array_intersect( $user_roles, $allowed_roles ) )
+				) {
+					$allowed_features[ $feature_class::ID ] = $feature_class->get_label();
+					continue;
+				}
+
+				// Check if user has access to the feature.
+				$allowed_users = $settings['users'] ?? [];
+				if (
+					$user_based_access_enabled &&
+					! empty( $allowed_users ) &&
+					in_array( $user_id, $allowed_users, true )
+				) {
+					$allowed_features[ $feature_class::ID ] = $feature_class->get_label();
 				}
 			}
 		}

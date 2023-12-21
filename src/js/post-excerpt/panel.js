@@ -106,7 +106,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					{ error }
 				</span>
 			) }
-			<DisableFeatureButton feature="excerpt_generation" />
+			<DisableFeatureButton feature="feature_excerpt_generation" />
 		</div>
 	);
 }

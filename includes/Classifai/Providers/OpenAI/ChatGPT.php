@@ -82,13 +82,6 @@ class ChatGPT extends Provider {
 			'openai_chatgpt'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'title_generation'   => __( 'Generate titles', 'classifai' ),
-			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
-			'resize_content'     => __( 'Resize content', 'classifai' ),
-		);
-
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
@@ -1035,34 +1028,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @return array An associative array where the keys are role keys and the values are role names.
-	 */
-	public function get_roles() {
-		$default_settings = $this->get_default_settings();
-		$roles            = get_editable_roles() ?? [];
-		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for ChatGTP
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
-
-		return $roles;
-	}
-
-	/**
 	 * Sanitize the prompt data.
 	 * This is used for the repeater field.
 	 *
@@ -1270,7 +1235,7 @@ class ChatGPT extends Provider {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function generate_post_title( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
 		return rest_ensure_response(
 			$this->rest_endpoint_callback(
@@ -1356,7 +1321,7 @@ class ChatGPT extends Provider {
 	 * @return WP_Error|bool
 	 */
 	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
 		// Ensure we have a logged in user that can edit the item.
 		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
@@ -1371,7 +1336,7 @@ class ChatGPT extends Provider {
 			return false;
 		}
 
-		$feature  = new ExcerptGeneration();
+		$feature = new ExcerptGeneration();
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -1424,16 +1389,7 @@ class ChatGPT extends Provider {
 			return false;
 		}
 
-		$feature  = new ContentResizing();
-		$settings = $feature->get_settings();
-
-		// Check if the current user's role is allowed.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return false;
-		}
+		$feature = new ContentResizing();
 
 		// Ensure the feature is enabled. Also runs a user check.
 		if ( ! $feature->is_feature_enabled() ) {
@@ -1441,36 +1397,5 @@ class ChatGPT extends Provider {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Determine if the feature is turned on.
-	 * Note: This function does not check if the user has access to the feature.
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_enabled( string $feature ) {
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
-
-		// Handle different enable keys.
-		switch ( $feature ) {
-			case 'title_generation':
-				$enable_key = 'enable_titles';
-				break;
-
-			case 'excerpt_generation':
-				$enable_key = 'enable_excerpt';
-				break;
-
-			default:
-				break;
-		}
-
-		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
-
-		/** This filter is documented in includes/Classifai/Providers/Provider.php */
-		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

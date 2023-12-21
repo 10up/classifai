@@ -5,8 +5,6 @@
 
 namespace Classifai\Providers;
 
-use function Classifai\get_feature_default_settings;
-
 abstract class Provider {
 
 	/**
@@ -51,11 +49,6 @@ abstract class Provider {
 	protected $feature_instance = null;
 
 	/**
-	 * @var array $features Array of features provided by this provider.
-	 */
-	protected $features = array();
-
-	/**
 	 * Provider constructor.
 	 *
 	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
@@ -93,15 +86,6 @@ abstract class Provider {
 	 */
 	public function get_option_name() {
 		return 'classifai_' . $this->option_name;
-	}
-
-	/**
-	 * Get provider features.
-	 *
-	 * @return array
-	 */
-	public function get_features() {
-		return $this->features;
 	}
 
 	/**
@@ -252,31 +236,6 @@ abstract class Provider {
 	}
 
 	/**
-	 * Add settings fields for Role/User based access.
-	 *
-	 * @param string $feature Feature.
-	 * @param string $section Settings section.
-	 * @return void
-	 */
-	protected function add_access_settings( string $feature, string $section = '' ) {
-		$access_control = new AccessControl( $this, $feature );
-		$access_control->add_settings( $section );
-	}
-
-	/**
-	 * Sanitization for the roles/users access options being saved.
-	 *
-	 * @param array  $settings Array of settings about to be saved.
-	 * @param string $feature  Feature key.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	protected function sanitize_access_settings( array $settings, string $feature ) {
-		$access_control = new AccessControl( $this, $feature );
-		return $access_control->sanitize_settings( $settings );
-	}
-
-	/**
 	 * Determine if the current user has access of the feature
 	 *
 	 * @param string $feature Feature to check.
@@ -285,35 +244,6 @@ abstract class Provider {
 	protected function has_access( string $feature ) {
 		$access_control = new AccessControl( $this, $feature );
 		return $access_control->has_access();
-	}
-
-	/**
-	 * Retrieves the allowed WordPress roles for ClassifAI.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @return array An associative array where the keys are role keys and the values are role names.
-	 */
-	public function get_roles() {
-		$default_settings = $this->get_default_settings();
-		$editable_roles   = get_editable_roles() ?? [];
-		$roles            = array_combine( array_keys( $editable_roles ), array_column( $editable_roles, 'name' ) );
-
-		/**
-		 * Filter the allowed WordPress roles for ClassifAI
-		 *
-		 * @since 2.4.0
-		 * @hook classifai_allowed_roles
-		 *
-		 * @param {array}  $roles            Array of arrays containing role information.
-		 * @param {string} $option_name      Option name.
-		 * @param {array}  $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_allowed_roles', $roles, $this->get_option_name(), $default_settings );
-
-		return $roles;
 	}
 
 	/**
