@@ -95,6 +95,8 @@ const ClassifAIGenerateTagsButton = () => {
 				setFeatureTaxonomies( resp.feature_taxonomies );
 			}
 
+			let termsReady = false;
+			resp.terms = resp.terms?.data?.terms;
 			const taxonomies = resp.terms;
 			const taxTerms = {};
 			const taxTermsExisting = {};

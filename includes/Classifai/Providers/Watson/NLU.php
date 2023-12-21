@@ -951,12 +951,49 @@ class NLU extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
 		}
 
+		$result = $this->rest_endpoint_callback(
+			$post_id,
+			'classify'
+		);
+
 		return rest_ensure_response(
-			$this->rest_endpoint_callback(
-				$post_id,
-				'classify'
+			array(
+				'terms'              => $result,
+				'feature_taxonomies' => $this->get_all_feature_taxonomies(),
 			)
 		);
+	}
+
+	/**
+	 * Get all feature taxonomies.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array|WP_Error
+	 */
+	public function get_all_feature_taxonomies() {
+		// Get all feature taxonomies.
+		$feature_taxonomies = [];
+		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
+			if ( \Classifai\get_feature_enabled( $feature ) ) {
+				$taxonomy   = \Classifai\get_feature_taxonomy( $feature );
+				$permission = check_term_permissions( $taxonomy );
+
+				if ( is_wp_error( $permission ) ) {
+					return $permission;
+				}
+
+				if ( 'post_tag' === $taxonomy ) {
+					$taxonomy = 'tags';
+				}
+				if ( 'category' === $taxonomy ) {
+					$taxonomy = 'categories';
+				}
+				$feature_taxonomies[] = $taxonomy;
+			}
+		}
+
+		return $feature_taxonomies;
 	}
 
 	/**
