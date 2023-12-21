@@ -30,8 +30,6 @@ abstract class Feature {
 
 	/**
 	 * Feature constructor.
-	 *
-	 * @param \Classifai\Providers\Provider[] $provider_instances Array of provider instances.
 	 */
 	public function __construct() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
@@ -315,10 +313,15 @@ abstract class Feature {
 		return $settings;
 	}
 
+	/**
+	 * Returns the default settings for the provider selected for the feature.
+	 *
+	 * @return array
+	 */
 	public function get_provider_default_settings() {
 		$provider_settings = [];
 
-		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
 
 			if ( method_exists( $provider, 'get_default_provider_settings' ) ) {
@@ -329,8 +332,13 @@ abstract class Feature {
 		return $provider_settings;
 	}
 
+	/**
+	 * Renders the fields of the provider selected for the feature.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
-		foreach( array_keys( $this->get_providers() ) as $provider_id ) {
+		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
 
 			if ( method_exists( $provider, 'render_provider_fields' ) ) {
@@ -727,7 +735,6 @@ abstract class Feature {
 		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
 		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-		$data_attr     = isset( $args['data_attr'] ) ?: [];
 
 		// Check for a default value
 		$saved   = ( empty( $saved ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $saved;

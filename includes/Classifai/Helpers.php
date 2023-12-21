@@ -343,9 +343,9 @@ function get_tts_supported_post_types() {
  * @return array
  */
 function get_supported_post_statuses() {
-	$feature        = new Classification();
-	$settings       = $feature->get_settings();
-	$post_statuses  = [];
+	$feature       = new Classification();
+	$settings      = $feature->get_settings();
+	$post_statuses = [];
 
 	foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
 		if ( ! empty( $enabled ) ) {
@@ -382,8 +382,6 @@ function get_feature_enabled( $classify_by ) {
 		$settings[ $classify_by ],
 		FILTER_VALIDATE_BOOLEAN
 	);
-
-	return false;
 }
 
 /**

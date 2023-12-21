@@ -26,7 +26,7 @@ class ImageGeneration extends Feature {
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
 		 */
-		$service_providers = LanguageProcessing::get_service_providers();
+		$service_providers        = LanguageProcessing::get_service_providers();
 		$this->provider_instances = $this->get_provider_instances( $service_providers );
 	}
 
@@ -166,7 +166,7 @@ class ImageGeneration extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'provider'  => DallE::ID,
+			'provider' => DallE::ID,
 		];
 
 		return apply_filters(
@@ -203,6 +203,13 @@ class ImageGeneration extends Feature {
 		);
 	}
 
+	/**
+	 * Runs the feature.
+	 *
+	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
+	 *
+	 * @return mixed
+	 */
 	public function run( ...$args ) {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'] ?? DallE::ID;

@@ -69,8 +69,9 @@ class PostClassifier {
 	 * Classifies the specified post using Watson NLU and also links to
 	 * Taxonomy terms if output was valid.
 	 *
-	 * @param int   $post_id The post to classify
-	 * @param array $opts The classification options
+	 * @param int   $post_id    The post to classify
+	 * @param array $opts       The classification options
+	 * @param bool  $link_terms Whether to link the terms or not.
 	 * @return object|boolean
 	 */
 	public function classify_and_link( $post_id, $opts = [], $link_terms = true ) {
@@ -161,11 +162,11 @@ class PostClassifier {
 		$settings       = $classification->get_settings( NLU::ID );
 		$features       = [];
 
-		if ( $settings[ 'category' ] ) {
+		if ( $settings['category'] ) {
 			$features['categories'] = (object) [];
 		}
 
-		if ( $settings[ 'keyword' ] ) {
+		if ( $settings['keyword'] ) {
 			$features['keywords'] = [
 				'emotion'   => false,
 				'sentiment' => false,
@@ -173,11 +174,11 @@ class PostClassifier {
 			];
 		}
 
-		if ( $settings[ 'concept' ] ) {
+		if ( $settings['concept'] ) {
 			$features['concepts'] = (object) [];
 		}
 
-		if ( $settings[ 'entity' ] ) {
+		if ( $settings['entity'] ) {
 			$features['entities'] = (object) [];
 		}
 

@@ -28,7 +28,7 @@ class Classification extends Feature {
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
 		 */
-		$service_providers = LanguageProcessing::get_service_providers();
+		$service_providers        = LanguageProcessing::get_service_providers();
 		$this->provider_instances = $this->get_provider_instances( $service_providers );
 	}
 
@@ -64,7 +64,8 @@ class Classification extends Feature {
 	public function setup_fields_sections() {
 		$settings = $this->get_settings();
 
-		/* These are the feature-level fields that are
+		/*
+		 * These are the feature-level fields that are
 		 * independent of the provider.
 		 */
 		add_settings_section(
@@ -141,7 +142,8 @@ class Classification extends Feature {
 			]
 		);
 
-		/* The following renders the fields of all the providers
+		/*
+		 * The following renders the fields of all the providers
 		 * that are registered to the feature.
 		 */
 		$this->render_provider_fields();
@@ -165,15 +167,14 @@ class Classification extends Feature {
 			'provider'      => NLU::ID,
 		];
 
-		return
-			apply_filters(
-				'classifai_' . static::ID . '_get_default_settings',
-				array_merge(
-					parent::get_default_settings(),
-					$feature_settings,
-					$provider_settings
-				)
-			);
+		return apply_filters(
+			'classifai_' . static::ID . '_get_default_settings',
+			array_merge(
+				parent::get_default_settings(),
+				$feature_settings,
+				$provider_settings
+			)
+		);
 	}
 
 	/**
@@ -202,6 +203,13 @@ class Classification extends Feature {
 		);
 	}
 
+	/**
+	 * Runs the feature.
+	 *
+	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
+	 *
+	 * @return mixed
+	 */
 	public function run( ...$args ) {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'] ?? NLU::ID;

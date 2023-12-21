@@ -15,6 +15,7 @@ use DOMDocument;
 use WP_Error;
 use WP_REST_Server;
 use WP_REST_Request;
+use WP_REST_Response;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
@@ -36,7 +37,7 @@ class ComputerVision extends Provider {
 	/**
 	 * ComputerVision constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
 		parent::__construct(
@@ -82,7 +83,7 @@ class ComputerVision extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
 				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -97,7 +98,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -133,12 +134,12 @@ class ComputerVision extends Provider {
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
-				'option_index'  => static::ID,
+				'option_index'   => static::ID,
 				'label_for'      => 'descriptive_text_fields',
 				'options'        => $checkbox_options,
 				'default_values' => $settings['descriptive_text_fields'],
 				'description'    => __( 'Choose image fields where the generated captions should be applied.', 'classifai' ),
-				'class'          => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'          => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -156,7 +157,7 @@ class ComputerVision extends Provider {
 				'step'          => 1,
 				'default_value' => $settings['descriptive_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added alt text, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
@@ -185,7 +186,7 @@ class ComputerVision extends Provider {
 				'label_for'     => 'tag_taxonomy',
 				'options'       => $options,
 				'default_value' => $settings['tag_taxonomy'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -203,7 +204,7 @@ class ComputerVision extends Provider {
 				'step'          => 1,
 				'default_value' => $settings['tag_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
@@ -226,12 +227,12 @@ class ComputerVision extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'descriptive_text_fields' => [
+						'descriptive_text_fields'          => [
 							'alt'         => 0,
 							'caption'     => 0,
 							'description' => 0,
 						],
-						'descriptive_confidence_threshold' => 75
+						'descriptive_confidence_threshold' => 75,
 					]
 				);
 
@@ -258,7 +259,7 @@ class ComputerVision extends Provider {
 	/**
 	 * Sanitization
 	 *
-	 * @param array $settings The settings being saved.
+	 * @param array $new_settings The settings being saved.
 	 *
 	 * @return array|mixed
 	 */
@@ -292,13 +293,13 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
-			$new_settings[ static::ID ][ 'descriptive_confidence_threshold' ] = absint( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
-			$new_settings[ static::ID ][ 'descriptive_text_fields' ]          = array_map( 'sanitize_text_field', $new_settings[ static::ID ]['descriptive_text_fields'] ?? $settings[ static::ID ]['descriptive_text_fields'] );
+			$new_settings[ static::ID ]['descriptive_confidence_threshold'] = absint( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
+			$new_settings[ static::ID ]['descriptive_text_fields']          = array_map( 'sanitize_text_field', $new_settings[ static::ID ]['descriptive_text_fields'] ?? $settings[ static::ID ]['descriptive_text_fields'] );
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
-			$new_settings[ static::ID ][ 'tag_confidence_threshold' ] = absint( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
-			$new_settings[ static::ID ][ 'tag_taxonomy' ]             = $new_settings[ static::ID ]['tag_taxonomy'] ?? $settings[ static::ID ]['tag_taxonomy'];
+			$new_settings[ static::ID ]['tag_confidence_threshold'] = absint( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
+			$new_settings[ static::ID ]['tag_taxonomy']             = $new_settings[ static::ID ]['tag_taxonomy'] ?? $settings[ static::ID ]['tag_taxonomy'];
 		}
 
 		return $new_settings;
@@ -346,7 +347,6 @@ class ComputerVision extends Provider {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 
-
 		if ( ( new ImageCropping() )->is_feature_enabled() ) {
 			add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
 		}
@@ -355,13 +355,13 @@ class ComputerVision extends Provider {
 			add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_alt_tags' ], 8, 2 );
 		}
 
-		if ( ( new PDFTextExtraction )->is_feature_enabled() ) {
+		if ( ( new PDFTextExtraction() )->is_feature_enabled() ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
 			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
 		}
 
-		if ( ( new ImageTextExtraction )->is_feature_enabled() ) {
+		if ( ( new ImageTextExtraction() )->is_feature_enabled() ) {
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
 		}
@@ -615,7 +615,6 @@ class ComputerVision extends Provider {
 					'show_in_edit' => false,
 				];
 			}
-
 		}
 
 		// Image tagging.
@@ -858,9 +857,9 @@ class ComputerVision extends Provider {
 	 *
 	 * @filter wp_generate_attachment_metadata
 	 *
-	 * @param array       $metadata Attachment metadata.
-	 * @param int         $attachment_id Attachment ID.
-	 * @param boolean     $force Whether to force processing or not. Default false.
+	 * @param array   $metadata Attachment metadata.
+	 * @param int     $attachment_id Attachment ID.
+	 * @param boolean $force Whether to force processing or not. Default false.
 	 * @return array Filtered attachment metadata.
 	 */
 	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
@@ -890,7 +889,7 @@ class ComputerVision extends Provider {
 		}
 
 		$image_url = wp_get_attachment_url( $attachment_id );
-		$scan	  = $this->scan_image( $image_url, $feature );
+		$scan      = $this->scan_image( $image_url, $feature );
 
 		$ocr      = new OCR( $settings, $scan, $force );
 		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
@@ -981,8 +980,7 @@ class ComputerVision extends Provider {
 	/**
 	 * Generate the alt tags for the image being uploaded.
 	 *
-	 * @param array $captions      Captions returned from the API
-	 * @param int   $attachment_id Post ID for the attachment.
+	 * @param int $attachment_id Post ID for the attachment.
 	 *
 	 * @return string|WP_Error
 	 */
@@ -994,7 +992,6 @@ class ComputerVision extends Provider {
 		$image_url      = wp_get_attachment_url( $attachment_id );
 		$details        = $this->scan_image( $image_url, $feature );
 		$captions       = isset( $details->description->captions ) ? $details->description->captions : [];
-
 
 		// Don't save tags if feature is disabled or user don't have access to use it.
 		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
@@ -1112,7 +1109,7 @@ class ComputerVision extends Provider {
 	/**
 	 * Generate the image tags for the image being uploaded.
 	 *
-	 * @param int   $attachment_id Post ID for the attachment.
+	 * @param int $attachment_id Post ID for the attachment.
 	 *
 	 * @return string|array|WP_Error
 	 */
@@ -1217,6 +1214,9 @@ class ComputerVision extends Provider {
 		return $rtn;
 	}
 
+	/**
+	 * Register the REST API endpoints for this provider.
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1',
@@ -1314,6 +1314,12 @@ class ComputerVision extends Provider {
 		);
 	}
 
+	/**
+	 * REST request callback for Computer Vision features.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_Error|WP_REST_Response
+	 */
 	public function computer_vision_endpoint_callback( $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$custom_atts   = $request->get_attributes();
@@ -1391,6 +1397,12 @@ class ComputerVision extends Provider {
 		}
 	}
 
+	/**
+	 * REST request permissions check for DescriptiveTextGenerator feature.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
 	public function descriptive_text_generator_permissions_check( $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
@@ -1412,6 +1424,12 @@ class ComputerVision extends Provider {
 		return true;
 	}
 
+	/**
+	 * REST request permissions check for ImageTagsGenerator feature.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
 	public function image_tags_generator_permissions_check( $request ) {
 		$attachment_id      = $request->get_param( 'id' );
 		$post_type          = get_post_type_object( 'attachment' );
@@ -1445,6 +1463,12 @@ class ComputerVision extends Provider {
 		return true;
 	}
 
+	/**
+	 * REST request permissions check for ImageCropping feature.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
 	public function smart_crop_permissions_check( $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
@@ -1459,13 +1483,19 @@ class ComputerVision extends Provider {
 			return false;
 		}
 
-		if ( ! ( new PDFTextExtraction() )->is_feature_enabled() ) {
+		if ( ! ( new ImageCropping() )->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Smart cropping is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		return true;
 	}
 
+	/**
+	 * REST request permissions check for PDFTextExtraction feature.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
 	public function pdf_read_permissions_check( $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
@@ -1480,13 +1510,19 @@ class ComputerVision extends Provider {
 			return false;
 		}
 
-		if ( ! ( new DescriptiveTextGenerator() )->is_feature_enabled() ) {
+		if ( ! ( new PDFTextExtraction() )->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'PDF Text Extraction is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		return true;
 	}
 
+	/**
+	 * REST request permissions check for ImageTextExtraction feature.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
 	public function image_text_extractor_permissions_check( $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
@@ -1501,7 +1537,7 @@ class ComputerVision extends Provider {
 			return false;
 		}
 
-		if ( ! ( new ImageCropping() )->is_feature_enabled() ) {
+		if ( ! ( new ImageTextExtraction() )->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Scan image for text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
 		}
 

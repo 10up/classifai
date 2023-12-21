@@ -141,6 +141,11 @@ class Speech extends Provider {
 		}
 	}
 
+	/**
+	 * Render the provider fields.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -156,7 +161,7 @@ class Speech extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
 				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -171,11 +176,11 @@ class Speech extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
-		$voices_options   = $this->get_voices_select_options();
+		$voices_options = $this->get_voices_select_options();
 
 		if ( ! empty( $voices_options ) ) {
 			add_settings_field(
@@ -189,7 +194,7 @@ class Speech extends Provider {
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
-					'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+					'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				]
 			);
 		}
@@ -197,6 +202,11 @@ class Speech extends Provider {
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
 			'api_key'       => '',
@@ -213,13 +223,6 @@ class Speech extends Provider {
 
 		return [];
 	}
-
-	/**
-	 * Set up the fields for each section.
-	 */
-	public function setup_fields_sections() {}
-
-	public function reset_settings() {}
 
 	/**
 	 * Sanitization callback for settings.
@@ -297,8 +300,8 @@ class Speech extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
-			'endpoint_url'    => isset( $settings[ static::ID ]['url'] ) ? $settings[ static::ID ]['url'] : '',
-			'api_key'         => isset( $settings[ static::ID ]['api_key'] ) ? $settings[ static::ID ]['api_key'] : '',
+			'endpoint_url' => isset( $settings[ static::ID ]['url'] ) ? $settings[ static::ID ]['url'] : '',
+			'api_key'      => isset( $settings[ static::ID ]['api_key'] ) ? $settings[ static::ID ]['api_key'] : '',
 		);
 
 		$default = wp_parse_args( $args, $default );
@@ -584,8 +587,8 @@ class Speech extends Provider {
 		$settings            = $feature->get_settings();
 		$post                = get_post( $post_id );
 		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
-		$content_hash        = get_post_meta( $post_id, Speech::AUDIO_HASH_KEY, true );
-		$saved_attachment_id = (int) get_post_meta( $post_id, Speech::AUDIO_ID_KEY, true );
+		$content_hash        = get_post_meta( $post_id, self::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, self::AUDIO_ID_KEY, true );
 
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
 		if ( $saved_attachment_id ) {
@@ -636,7 +639,7 @@ class Speech extends Provider {
 			),
 		);
 
-		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], Speech::API_PATH );
+		$remote_url = sprintf( '%s%s', $settings[ static::ID ]['endpoint_url'], self::API_PATH );
 		$response   = wp_remote_post( $remote_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
@@ -660,8 +663,8 @@ class Speech extends Provider {
 		// If audio already exists for this post, delete it.
 		if ( $saved_attachment_id ) {
 			wp_delete_attachment( $saved_attachment_id, true );
-			delete_post_meta( $post_id, Speech::AUDIO_ID_KEY );
-			delete_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY );
+			delete_post_meta( $post_id, self::AUDIO_ID_KEY );
+			delete_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY );
 		}
 
 		// The audio file name.
@@ -703,9 +706,9 @@ class Speech extends Provider {
 			);
 		}
 
-		update_post_meta( $post_id, Speech::AUDIO_ID_KEY, absint( $attachment_id ) );
-		update_post_meta( $post_id, Speech::AUDIO_TIMESTAMP_KEY, time() );
-		update_post_meta( $post_id, Speech::AUDIO_HASH_KEY, md5( $post_content ) );
+		update_post_meta( $post_id, self::AUDIO_ID_KEY, absint( $attachment_id ) );
+		update_post_meta( $post_id, self::AUDIO_TIMESTAMP_KEY, time() );
+		update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
 
 		return $attachment_id;
 	}
@@ -1027,6 +1030,11 @@ class Speech extends Provider {
 		return $options;
 	}
 
+	/**
+	 * Registers REST endpoints for this provider.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1',
