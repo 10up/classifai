@@ -50,7 +50,8 @@ class Notifications {
 
 		$needs_setup = get_transient( 'classifai_activation_notice' );
 		if ( $needs_setup ) {
-			if ( Onboarding::is_onboarding_completed() ) {
+			$onboarding = new Onboarding();
+			if ( $onboarding->is_onboarding_completed() ) {
 				delete_transient( 'classifai_activation_notice' );
 				return;
 			}

@@ -37,13 +37,9 @@ class Whisper extends Provider {
 			'openai_whisper'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI Whisper', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_transcripts' => __( 'Generate transcripts from audio files', 'classifai' ),
-			),
+		// Features provided by this provider.
+		$this->features = array(
+			'speech_to_text' => __( 'Generate transcripts', 'classifai' ),
 		);
 
 		$this->feature_instance = $feature_instance;
@@ -113,6 +109,8 @@ class Whisper extends Provider {
 	public function setup_fields_sections() {}
 
 	public function reset_settings() {}
+
+	public function get_default_settings() { }
 
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(

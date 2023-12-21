@@ -47,13 +47,9 @@ class DallE extends Provider {
 			'openai_dalle'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI DALL·E', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_image_gen' => __( 'Image generation', 'classifai' ),
-			),
+		// Features provided by this provider.
+		$this->features = array(
+			'image_generation' => __( 'Generate images', 'classifai' ),
 		);
 
 		$this->feature_instance = $feature_instance;

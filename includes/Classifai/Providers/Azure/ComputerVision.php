@@ -45,17 +45,13 @@ class ComputerVision extends Provider {
 			'computer_vision'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure AI Vision', 'classifai' ),
-			'fields'   => array( 'url', 'api-key' ),
-			'features' => array(
-				'enable_image_captions' => __( 'Automatically add alt-text to images', 'classifai' ),
-				'enable_image_tagging'  => __( 'Automatically tag images', 'classifai' ),
-				'enable_smart_cropping' => __( 'Smart crop images', 'classifai' ),
-				'enable_ocr'            => __( 'Scan images for text', 'classifai' ),
-				'enable_read_pdf'       => __( 'Scan PDFs for text', 'classifai' ),
-			),
+		// Features provided by this provider.
+		$this->features = array(
+			'image_captions' => __( 'Generate descriptive text', 'classifai' ),
+			'image_tagging'  => __( 'Generate tags', 'classifai' ),
+			'smart_cropping' => __( 'Smart cropping', 'classifai' ),
+			'ocr'            => __( 'Scan images for text', 'classifai' ),
+			'read_pdf'       => __( 'Scan PDF', 'classifai' ),
 		);
 
 		$this->feature_instance = $feature_instance;
