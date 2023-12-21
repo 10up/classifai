@@ -75,11 +75,34 @@ class Embeddings extends Provider {
 			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
 			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
 			add_action( 'save_post', [ $this, 'save_metabox' ] );
+			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 		}
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-language-processing-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
+			get_asset_info( 'language-processing', 'dependencies' ),
+			get_asset_info( 'language-processing', 'version' ),
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			array(),
+			get_asset_info( 'language-processing', 'version' ),
+			'all'
+		);
 	}
 
 	/**
@@ -263,6 +286,15 @@ class Embeddings extends Provider {
 			} else {
 				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
 			}
+
+			// Sanitize the threshold setting.
+			$taxonomy_key = $taxonomy_key . '_threshold';
+			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
+				$threshold_value                             = min( absint( $settings['taxonomies'][ $taxonomy_key ] ), 100 );
+				$new_settings['taxonomies'][ $taxonomy_key ] = $threshold_value ? $threshold_value : 75;
+			} else {
+				$new_settings['taxonomies'][ $taxonomy_key ] = 75;
+			}
 		}
 
 		// Sanitize the number setting.
@@ -350,6 +382,39 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Get the threshold for the similarity calculation.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return float
+	 */
+	public function get_threshold( $taxonomy = '' ) {
+		$settings  = $this->get_settings();
+		$threshold = 1;
+
+		if ( ! empty( $taxonomy ) ) {
+			$threshold = isset( $settings['taxonomies'][ $taxonomy . '_threshold' ] ) ? $settings['taxonomies'][ $taxonomy . '_threshold' ] : 75;
+		}
+
+		// Convert $threshold (%) to decimal.
+		$threshold = 1 - ( (float) $threshold / 100 );
+
+		/**
+		 * Filter the threshold for the similarity calculation.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_threshold
+		 *
+		 * @param {float} $threshold The threshold to use.
+		 * @param {string} $taxonomy The taxonomy to get the threshold for.
+		 *
+		 * @return {float} The threshold to use.
+		 */
+		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
+	}
+
+	/**
 	 * The list of supported post statuses.
 	 *
 	 * @return array
@@ -388,11 +453,35 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Get the data to preview terms.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array
+	 */
+	public function get_post_classifier_embeddings_preview_data() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' ) ) {
+			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
+		}
+
+		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+
+		$embeddings_terms = $this->generate_embeddings_for_post( $post_id, true );
+
+		return wp_send_json_success( $embeddings_terms );
+	}
+
+	/**
 	 * Trigger embedding generation for content being saved.
 	 *
-	 * @param int $post_id ID of post being saved.
+	 * @param int  $post_id ID of post being saved.
+	 * @param bool $dryrun Whether to run the process or just return the data.
+	 *
+	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( $post_id ) {
+	public function generate_embeddings_for_post( $post_id, $dryrun = false ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
@@ -407,14 +496,17 @@ class Embeddings extends Provider {
 
 		// Only run on supported post types and statuses.
 		if (
-			! in_array( $post->post_type, $this->supported_post_types(), true ) ||
-			! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			! $dryrun
+			&& (
+				! in_array( $post->post_type, $this->supported_post_types(), true ) ||
+				! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			)
 		) {
 			return;
 		}
 
 		// Don't run if turned off for this particular post.
-		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
+		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) && ! $dryrun ) {
 			return;
 		}
 
@@ -422,8 +514,12 @@ class Embeddings extends Provider {
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
-			$this->set_terms( $post_id, $embeddings );
+			if ( $dryrun ) {
+				return $this->get_terms( $embeddings );
+			} else {
+				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+				return $this->set_terms( $post_id, $embeddings );
+			}
 		}
 	}
 
@@ -444,6 +540,102 @@ class Embeddings extends Provider {
 
 		$settings             = $this->get_settings();
 		$number_to_add        = $settings['number'] ?? 1;
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
+
+		if ( empty( $embedding_similarity ) ) {
+			return;
+		}
+
+		// Set terms based on similarity.
+		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Sort embeddings from lowest to highest.
+			asort( $terms );
+
+			// Only add the number of terms specified in settings.
+			if ( count( $terms ) > $number_to_add ) {
+				$terms = array_slice( $terms, 0, $number_to_add, true );
+			}
+
+			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+		}
+	}
+
+	/**
+	 * Get the terms of a post based on embeddings.
+	 *
+	 * @param array $embedding Embedding data.
+	 *
+	 * @return array|WP_Error
+	 */
+	private function get_terms( array $embedding = [] ) {
+		if ( empty( $embedding ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
+		}
+
+		$settings             = $this->get_settings();
+		$number_to_add        = $settings['number'] ?? 1;
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
+
+		if ( empty( $embedding_similarity ) ) {
+			return;
+		}
+
+		// Set terms based on similarity.
+		$index  = 0;
+		$result = [];
+
+		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Get the taxonomy name.
+			$taxonomy = get_taxonomy( $tax );
+			$tax_name = $taxonomy->labels->singular_name;
+
+			// Sort embeddings from lowest to highest.
+			asort( $terms );
+
+			// Return the terms.
+			$result[ $index ] = new \stdClass();
+
+			$result[ $index ]->{$tax_name} = [];
+
+			$term_added = 0;
+			foreach ( $terms as $term_id => $similarity ) {
+				// Stop if we have added the number of terms specified in settings.
+				if ( $number_to_add <= $term_added ) {
+					break;
+				}
+
+				// Convert $similarity to percentage.
+				$similarity = round( ( 1 - $similarity ), 10 );
+
+				$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+					'label' => get_term( $term_id )->name,
+					'score' => $similarity,
+				];
+				$term_added++;
+			}
+
+			// Only add the number of terms specified in settings.
+			if ( count( $terms ) > $number_to_add ) {
+				$terms = array_slice( $terms, 0, $number_to_add, true );
+			}
+
+			$index++;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get the similarity between an embedding and all terms.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param array $embedding Embedding data.
+	 * @param bool  $consider_threshold Whether to consider the threshold setting.
+	 *
+	 * @return array
+	 */
+	private function get_embeddings_similarity( $embedding, $consider_threshold = true ) {
 		$embedding_similarity = [];
 		$taxonomies           = $this->supported_taxonomies();
 		$calculations         = new EmbeddingCalculations();
@@ -463,6 +655,9 @@ class Embeddings extends Provider {
 				continue;
 			}
 
+			// Get threshold setting for this taxonomy.
+			$threshold = $this->get_threshold( $tax );
+
 			// Get embedding similarity for each term.
 			foreach ( $terms as $term_id ) {
 				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
@@ -473,29 +668,14 @@ class Embeddings extends Provider {
 
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
 			}
 		}
 
-		if ( empty( $embedding_similarity ) ) {
-			return;
-		}
-
-		// Set terms based on similarity.
-		foreach ( $embedding_similarity as $tax => $terms ) {
-			// Sort embeddings from lowest to highest.
-			asort( $terms );
-
-			// Only add the number of terms specified in settings.
-			if ( count( $terms ) > $number_to_add ) {
-				$terms = array_slice( $terms, 0, $number_to_add, true );
-			}
-
-			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
-		}
+		return $embedding_similarity;
 	}
 
 	/**
