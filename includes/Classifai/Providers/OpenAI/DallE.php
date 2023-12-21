@@ -68,6 +68,11 @@ class DallE extends Provider {
 		add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
 	}
 
+	/**
+	 * Register settings for the provider.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -82,7 +87,7 @@ class DallE extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -98,7 +103,7 @@ class DallE extends Provider {
 				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
 				'default_value' => $settings['number_of_images'],
 				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -118,11 +123,16 @@ class DallE extends Provider {
 				],
 				'default_value' => $settings['image_size'],
 				'description'   => __( 'Size of generated images.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
+	/**
+	 * Returns the default settings for the provider.
+	 *
+	 * @return array
+	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
 			'api_key'       => '',
@@ -179,7 +189,7 @@ class DallE extends Provider {
 		$image_generation = new ImageGeneration();
 
 		if ( $image_generation->is_feature_enabled() ) {
-			$settings = $image_generation->get_settings( static::ID );
+			$settings         = $image_generation->get_settings( static::ID );
 			$number_of_images = absint( $settings['number_of_images'] );
 
 			wp_enqueue_media();
@@ -272,9 +282,9 @@ class DallE extends Provider {
 		if ( $image_generation->is_feature_enabled() ) :
 			$settings         = $image_generation->get_settings( static::ID );
 			$number_of_images = absint( $settings['number_of_images'] );
-		?>
+			?>
 
-		<?php // Template for the Generate images tab content. Includes prompt input. ?>
+			<?php // Template for the Generate images tab content. Includes prompt input. ?>
 		<script type="text/html" id="tmpl-dalle-prompt">
 			<div class="prompt-view">
 				<p>
@@ -326,10 +336,10 @@ class DallE extends Provider {
 			</div>
 		</script>
 
-		<?php
-		// Template for a single generated image.
+			<?php
+			// Template for a single generated image.
 		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation */
-		?>
+			?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
 				<img src="data:image/png;base64,{{{ data.url }}}" />
@@ -339,11 +349,12 @@ class DallE extends Provider {
 				<span class="error"></span>
 			</div>
 		</script>
-		<?php
+			<?php
 		/* phpcs:enable WordPressVIPMinimum.Security.Mustache.OutputNotation */
-		?>
+			?>
 
-		<?php endif;
+			<?php
+		endif;
 	}
 
 	/**
@@ -366,7 +377,7 @@ class DallE extends Provider {
 		if ( $this->feature_instance instanceof ImageGeneration ) {
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
-			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '256x256', '512x512', '1024x1024' ] ) ) {
+			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '256x256', '512x512', '1024x1024' ], true ) ) {
 				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] ?? $settings[ static::ID ]['image_size'] );
 			}
 		}
@@ -380,13 +391,6 @@ class DallE extends Provider {
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
-
-	/**
-	 * Default settings for ChatGPT
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {}
 
 	/**
 	 * Provides debug information related to the provider.
@@ -509,6 +513,11 @@ class DallE extends Provider {
 		return $response;
 	}
 
+	/**
+	 * Registers REST endpoints for this provider.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1/openai',

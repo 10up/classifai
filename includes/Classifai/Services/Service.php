@@ -97,9 +97,6 @@ abstract class Service {
 	public function register_providers() {
 		if ( ! empty( $this->provider_classes ) ) {
 			foreach ( $this->provider_classes as $provider ) {
-				// $provider->register_admin();
-				// if ( $provider->can_register() ) {
-				// }
 				$provider->register();
 			}
 		}

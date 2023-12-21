@@ -439,11 +439,6 @@ class Speech extends Provider {
 	}
 
 	/**
-	 * Returns the default settings.
-	 */
-	public function get_default_settings() {}
-
-	/**
 	 * Initial audio generation state.
 	 *
 	 * Fetch the initial state of audio generation prior to the audio existing for the post.

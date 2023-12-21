@@ -42,7 +42,7 @@ class NLU extends Provider {
 	/**
 	 * Watson NLU constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature Feature instance (Optional, only required in admin).
 	 */
 	public function __construct( $feature = null ) {
 		parent::__construct(
@@ -87,6 +87,11 @@ class NLU extends Provider {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
+	/**
+	 * Renders settings fields for this provider.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -130,10 +135,10 @@ class NLU extends Provider {
 			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
-				'label_for'    => 'password',
+				'label_for'     => 'password',
 				'default_value' => $settings['password'],
-				'input_type'   => 'password',
-				'large'        => true,
+				'input_type'    => 'password',
+				'large'         => true,
 			]
 		);
 
@@ -152,7 +157,7 @@ class NLU extends Provider {
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
-				'class' => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -168,12 +173,17 @@ class NLU extends Provider {
 					'feature'       => $classify_by,
 					'labels'        => $labels,
 					'default_value' => $settings[ $classify_by ],
-					'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+					'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				]
 			);
 		}
 	}
 
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
 			'endpoint_url' => '',
@@ -218,48 +228,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Default settings for Watson NLU.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		$default_settings = parent::get_default_settings() ?? [];
-
-		return array_merge(
-			$default_settings,
-			[
-				'enable_content_classification' => false,
-				'post_types'                    => [
-					'post' => 1,
-					'page' => null,
-				],
-				'post_statuses'                 => [
-					'publish' => 1,
-					'draft'   => null,
-				],
-				'features'                      => [
-					'category'           => true,
-					'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-					'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
-
-					'keyword'            => true,
-					'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-					'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-					'concept'            => false,
-					'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-					'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-					'entity'             => false,
-					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-				],
-				'classification_method'         => 'recommended_terms',
-			]
-		);
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
@@ -282,17 +250,6 @@ class NLU extends Provider {
 			new PreviewClassifierData();
 		}
 	}
-
-	/**
-	 * Helper to get the settings and allow for settings default values.
-	 *
-	 * Overridden from parent to polyfill older settings storage schema.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 *
-	 * @return array
-	 */
-	public function get_settings( $index = false ) {}
 
 	/**
 	 * Enqueue the editor scripts.
@@ -409,13 +366,14 @@ class NLU extends Provider {
 	 * @return bool
 	 */
 	protected function use_username_password() {
-		$settings = $this->get_settings( 'credentials' );
+		$feature  = new Classification();
+		$settings = $feature->get_settings( static::ID );
 
-		if ( empty( $settings['watson_username'] ) ) {
+		if ( empty( $settings['username'] ) ) {
 			return false;
 		}
 
-		return 'apikey' === $settings['watson_username'];
+		return 'apikey' === $settings['username'];
 	}
 
 	/**
@@ -468,7 +426,7 @@ class NLU extends Provider {
 			<label
 				for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
 			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"
-				name="<?php echo esc_attr( $this->feature_instance->get_option_name() ); ?>[<?php echo self::ID; ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+				name="<?php echo esc_attr( $this->feature_instance->get_option_name() ); ?>[<?php echo esc_attr( self::ID ); ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
 				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
 					<option
 						value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
@@ -897,6 +855,11 @@ class NLU extends Provider {
 		return $is_configured;
 	}
 
+	/**
+	 * Register REST endpoints.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1',

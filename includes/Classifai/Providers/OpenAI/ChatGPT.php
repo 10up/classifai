@@ -94,6 +94,11 @@ class ChatGPT extends Provider {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
+	/**
+	 * Render the provider fields.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -108,7 +113,7 @@ class ChatGPT extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -129,6 +134,11 @@ class ChatGPT extends Provider {
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
+	/**
+	 * Renders te fields for Title generation feature.
+	 *
+	 * @return void
+	 */
 	private function add_title_generation_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -146,7 +156,7 @@ class ChatGPT extends Provider {
 				'step'          => 1,
 				'default_value' => $settings['number_of_titles'],
 				'description'   => esc_html__( 'Number of titles that will be generated in one request.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -162,11 +172,16 @@ class ChatGPT extends Provider {
 				'placeholder'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
 				'default_value' => $settings['generate_title_prompt'],
 				'description'   => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
+	/**
+	 * Renders te fields for Excerpt generation feature.
+	 *
+	 * @return void
+	 */
 	private function add_excerpt_generation_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -182,11 +197,16 @@ class ChatGPT extends Provider {
 				'placeholder'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
 				'default_value' => $settings['generate_excerpt_prompt'],
 				'description'   => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
+	/**
+	 * Renders te fields for Content resizing feature.
+	 *
+	 * @return void
+	 */
 	private function add_content_resizing_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -204,7 +224,7 @@ class ChatGPT extends Provider {
 				'step'          => 1,
 				'default_value' => $settings['number_of_suggestions'],
 				'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -220,7 +240,7 @@ class ChatGPT extends Provider {
 				'placeholder'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
 				'default_value' => $settings['condense_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -236,11 +256,16 @@ class ChatGPT extends Provider {
 				'placeholder'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
 				'default_value' => $settings['expand_text_prompt'],
 				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
 			'api_key'       => '',
@@ -289,7 +314,7 @@ class ChatGPT extends Provider {
 								'original' => 1,
 							),
 						),
-						'expand_text_prompt' => array(
+						'expand_text_prompt'    => array(
 							array(
 								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 								'prompt'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
@@ -303,6 +328,12 @@ class ChatGPT extends Provider {
 		return $common_settings;
 	}
 
+	/**
+	 * Sanitize the settings for this provider.
+	 *
+	 * @param array $new_settings The settings array.
+	 * @return array
+	 */
 	public function sanitize_settings( $new_settings ) {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
@@ -570,17 +601,6 @@ class ChatGPT extends Provider {
 		</div>
 		<?php
 	}
-
-	public function setup_fields_sections() {}
-
-	public function reset_settings() {}
-
-	/**
-	 * Default settings for ChatGPT
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {}
 
 	/**
 	 * Provides debug information related to the provider.
@@ -1113,6 +1133,11 @@ class ChatGPT extends Provider {
 		return $default_prompt;
 	}
 
+	/**
+	 * Registers REST endpoints for this provider.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1/openai',
@@ -1352,7 +1377,7 @@ class ChatGPT extends Provider {
 	 * @return \WP_REST_Response|WP_Error
 	 */
 	public function resize_post_content( WP_REST_Request $request ) {
-		$post_id  = $request->get_param( 'id' );
+		$post_id = $request->get_param( 'id' );
 
 		return rest_ensure_response(
 			$this->rest_endpoint_callback(

@@ -37,6 +37,11 @@ class LanguageProcessing extends Service {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
+	/**
+	 * Get service providers for Language Processing.
+	 *
+	 * @return array
+	 */
 	public static function get_service_providers() {
 		return apply_filters(
 			'classifai_language_processing_service_providers',

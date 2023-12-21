@@ -305,13 +305,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Default settings for ComputerVision
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {}
-
-	/**
 	 * Returns an array of fields enabled to be set to store image captions.
 	 *
 	 * @return array

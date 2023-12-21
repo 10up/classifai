@@ -191,7 +191,7 @@ abstract class Provider {
 	public function add_api_key_field( $args = [] ) {
 		$default_settings = $this->feature_instance->get_settings();
 		$default_settings = $default_settings[ static::ID ];
-		$id = $args['id'] ?? 'api_key';
+		$id               = $args['id'] ?? 'api_key';
 
 		add_settings_field(
 			$id,
@@ -204,7 +204,7 @@ abstract class Provider {
 				'label_for'     => $id,
 				'input_type'    => 'password',
 				'default_value' => $default_settings[ $id ],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}

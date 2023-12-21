@@ -62,6 +62,11 @@ class Whisper extends Provider {
 		}
 	}
 
+	/**
+	 * Register settings for this provider.
+	 *
+	 * @return void
+	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
@@ -76,13 +81,18 @@ class Whisper extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
+	/**
+	 * Get the default settings for this provider.
+	 *
+	 * @return array
+	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
 			'api_key'       => '',
@@ -97,6 +107,12 @@ class Whisper extends Provider {
 		return [];
 	}
 
+	/**
+	 * Sanitize the settings for this provider.
+	 *
+	 * @param array $new_settings New settings.
+	 * @return array
+	 */
 	public function sanitize_settings( $new_settings ) {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
@@ -106,12 +122,11 @@ class Whisper extends Provider {
 		return $new_settings;
 	}
 
-	public function setup_fields_sections() {}
-
-	public function reset_settings() {}
-
-	public function get_default_settings() { }
-
+	/**
+	 * Enqueue assets.
+	 *
+	 * @return void
+	 */
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(
 			'classifai-media-script',
@@ -276,6 +291,11 @@ class Whisper extends Provider {
 		];
 	}
 
+	/**
+	 * Register REST endpoints for this provider.
+	 *
+	 * @return void
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1/openai',
