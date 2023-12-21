@@ -20,6 +20,7 @@ use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\attachment_is_pdf;
+use function Classifai\check_term_permissions;
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
 
@@ -467,7 +468,15 @@ class ComputerVision extends Provider {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( $post ) {
-		if ( wp_attachment_is_image( $post ) ) {
+		if (
+			wp_attachment_is_image( $post ) &&
+			(
+				( new DescriptiveTextGenerator() )->is_feature_enabled() ||
+				( new ImageTagsGenerator() )->is_feature_enabled() ||
+				( new ImageTextExtraction() )->is_feature_enabled() ||
+				( new ImageCropping() )->is_feature_enabled()
+			)
+		) {
 			add_meta_box(
 				'attachment_meta_box',
 				__( 'ClassifAI Image Processing', 'classifai' ),
@@ -1383,29 +1392,126 @@ class ComputerVision extends Provider {
 				$feature = new ImageTagsGenerator();
 				return $feature->run( $post_id );
 
-			case 'ocr':
+			case 'smart-crop':
 				$feature = new ImageCropping();
 				return $feature->run( $metadata, $post_id );
 		}
 	}
 
 	public function descriptive_text_generator_permissions_check( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! ( new DescriptiveTextGenerator() )->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image descriptive text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
 		return true;
 	}
 
 	public function image_tags_generator_permissions_check( $request ) {
+		$attachment_id      = $request->get_param( 'id' );
+		$post_type          = get_post_type_object( 'attachment' );
+		$image_tags_feature = new ImageTagsGenerator();
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! $image_tags_feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image tagging is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$settings = $image_tags_feature->get_settings();
+		if ( ! empty( $settings ) && isset( $settings[ static::ID ]['tag_taxonomy'] ) ) {
+			$permission = check_term_permissions( $settings[ static::ID ]['tag_taxonomy'] );
+
+			if ( is_wp_error( $permission ) ) {
+				return $permission;
+			}
+		} else {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Ensure the service settings have been saved.', 'classifai' ) );
+		}
+
 		return true;
 	}
 
 	public function smart_crop_permissions_check( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! ( new PDFTextExtraction() )->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Smart cropping is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
 		return true;
 	}
 
 	public function pdf_read_permissions_check( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! ( new DescriptiveTextGenerator() )->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'PDF Text Extraction is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
 		return true;
 	}
 
 	public function image_text_extractor_permissions_check( $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! ( new ImageCropping() )->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Scan image for text is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
 		return true;
 	}
 

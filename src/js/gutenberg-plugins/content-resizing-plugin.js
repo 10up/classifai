@@ -222,7 +222,11 @@ const ContentResizingPlugin = () => {
 	 *
 	 * @param {string} updateWith The content that will be used to replace the selection.
 	 */
-	function updateContent( updateWith ) {
+	async function updateContent( updateWith ) {
+		const isDirty = await select( 'core/editor' ).isEditedPostDirty();
+		const postId = select( 'core/editor' ).getCurrentPostId();
+		const postType = select( 'core/editor' ).getCurrentPostType();
+
 		dispatch( blockEditorStore ).updateBlockAttributes(
 			selectedBlock.clientId,
 			{
@@ -237,6 +241,15 @@ const ContentResizingPlugin = () => {
 			updateWith.length
 		);
 		resetStates();
+
+		// If no edited values in post trigger save.
+		if ( ! isDirty ) {
+			await dispatch( 'core' ).saveEditedEntityRecord(
+				'postType',
+				postType,
+				postId
+			);
+		}
 	}
 
 	// We don't want to use the reszing feature when multiple blocks are selected.
@@ -317,7 +330,7 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
-			<DisableFeatureButton feature="resize_content" />
+			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
 

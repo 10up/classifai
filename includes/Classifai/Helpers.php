@@ -200,6 +200,21 @@ function get_classification_mode() {
 }
 
 /**
+ * Get IBM Watson Content Classification method.
+ *
+ * @since 2.6.0
+ *
+ * @return string
+ */
+function get_classification_method() {
+	$provider = new NLU( 'language_processing' );
+	$settings = $provider->get_settings();
+	$value    = $settings['classification_method'] ?? '';
+
+	return $value;
+}
+
+/**
  * Returns the currently configured Watson username. Lookup order is,
  *
  * - Options
@@ -810,29 +825,6 @@ function check_term_permissions( string $tax = '' ) {
 	}
 
 	return true;
-}
-
-/**
- * Get the default settings for a feature.
- *
- * @since 2.4.0
- *
- * @param string $feature Feature key.
- * @return array
- */
-function get_feature_default_settings( string $feature ) {
-	if ( ! function_exists( 'get_editable_roles' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/user.php';
-	}
-	$editable_roles = get_editable_roles() ?? [];
-
-	return array(
-		$feature . '_role_based_access'  => 1,
-		$feature . '_roles'              => array_keys( $editable_roles ),
-		$feature . '_user_based_access'  => 'no',
-		$feature . '_user_based_opt_out' => 'no',
-		$feature . '_users'              => array(),
-	);
 }
 
 /**

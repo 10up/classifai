@@ -112,3 +112,35 @@ function classifai_test_prepare_response( $response ) {
 if ( ! defined( 'FS_METHOD' ) ) {
 	define( 'FS_METHOD', 'direct' );
 }
+
+// Add a route to clean taxonomy terms.
+add_action(
+	'rest_api_init',
+	function () {
+		register_rest_route(
+			'classifai/v1',
+			'clean/taxonomy-terms',
+			array(
+				'methods'  => 'GET',
+				'callback' => function() {
+					$taxonomies = ['watson-category', 'watson-concept', 'watson-entity', 'watson-keyword'];
+
+					foreach ( $taxonomies as $taxonomy ) {
+						$terms = get_terms(
+							array(
+								'taxonomy'   => $taxonomy,
+								'hide_empty' => false,
+							)
+						);
+
+						foreach ( $terms as $term ) {
+							wp_delete_term( $term->term_id, $taxonomy );
+						}
+					}
+
+					return true;
+				},
+			)
+		);
+	}
+);

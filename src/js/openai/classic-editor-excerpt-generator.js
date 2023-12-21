@@ -43,7 +43,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 		// Append disable feature link.
 		if (
 			ClassifAI?.opt_out_enabled_features?.includes(
-				'excerpt_generation'
+				'feature_excerpt_generation'
 			)
 		) {
 			$( '<a>', {

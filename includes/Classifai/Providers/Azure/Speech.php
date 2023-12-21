@@ -134,7 +134,9 @@ class Speech extends Provider {
 			foreach ( $tts->get_tts_supported_post_types() as $post_type ) {
 				add_action( 'rest_insert_' . $post_type, [ $this, 'rest_handle_audio' ], 10, 2 );
 			}
+		}
 
+		if ( $tts->is_enabled() ) {
 			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
 		}
 	}
