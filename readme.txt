@@ -4,7 +4,7 @@ Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft 
 Requires at least: 6.1
 Tested up to:      6.4
 Requires PHP:      7.4
-Stable tag:        2.4.0
+Stable tag:        2.5.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -37,6 +37,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 
 == Upgrade Notice ==
+
+= 2.5.0 =
+**Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
 
 = 2.3.0 =
 **Note that this release bumps the WordPress minimum from 5.7 to 5.8.**

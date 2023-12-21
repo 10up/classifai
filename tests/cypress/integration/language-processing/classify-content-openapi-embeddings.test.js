@@ -24,6 +24,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#openai_embeddings_post_types_post' ).check();
 		cy.get( '#openai_embeddings_post_statuses_publish' ).check();
 		cy.get( '#openai_embeddings_taxonomies_category' ).check();
+		cy.get( '#openai_embeddings_taxonomies_category_threshold' ).type( 80 ); // "Test" requires 80% confidence. At 81%, it does not apply.
 		cy.get( '#number' ).clear().type( 1 );
 		cy.get( '#submit' ).click();
 	} );
@@ -84,6 +85,19 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 				)
 				.contains( 'Test' );
 		} );
+	} );
+
+	it( 'Can see the preview on the settings page', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+		);
+
+		// Click the Preview button.
+		const closePanelSelector = '#get-classifier-preview-data-btn';
+		cy.get( closePanelSelector ).click();
+
+		// Check the term is received and visible.
+		cy.get( '.tax-row--Category' ).should( 'exist' );
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {

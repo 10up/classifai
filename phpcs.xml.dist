@@ -8,6 +8,9 @@
 		<exclude name="Squiz.Commenting.FileComment.MissingPackageTag" />
 		<!-- Class properties don't need this -->
 		<exclude name="Generic.Commenting.DocComment.MissingShort" />
+
+		<!-- For CI, also fail on warnings -->
+		<config name="ignore_warnings_on_exit" value="0"/>
 	</rule>
 
 	<exclude-pattern>*/tests/*</exclude-pattern>

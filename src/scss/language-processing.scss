@@ -123,7 +123,6 @@
         align-self: flex-start;
         position: sticky;
         top: 3rem;
-        margin-left: -5rem;
 
         .choices__inner {
             display: block;
@@ -170,4 +169,21 @@
 		font-size: 12px;
 		color: rgb(117, 117, 117);
 	}
+}
+
+.form-table {
+    td {
+        p.threshold_wrapper {
+            margin: 10px 0 40px;
+
+            &:last-of-type {
+                margin-bottom: 20px;
+            }
+
+            label {
+                display: inline-block;
+                margin: 0 0 10px;
+            }
+        }
+    }
 }
