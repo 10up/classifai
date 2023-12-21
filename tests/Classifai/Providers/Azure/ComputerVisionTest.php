@@ -8,8 +8,6 @@ namespace Classifai\Tests\Providers\Azure;
 use \WP_UnitTestCase;
 use Classifai\Providers\Azure\ComputerVision;
 
-use function Classifai\get_feature_default_settings;
-
 /**
  * Class ComputerVisionTest
  * @package Classifai\Tests\Providers\Azure;
@@ -89,13 +87,6 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		delete_option( 'classifai_computer_vision' );
 
 		$defaults = [];
-		$features = $this->get_computer_vision()->get_features() ?? [];
-		foreach ( $features as $feature => $title ) {
-			$defaults = array_merge(
-				$defaults,
-				get_feature_default_settings( $feature )
-			);
-		}
 
 		$expected = array_merge(
 			$defaults,

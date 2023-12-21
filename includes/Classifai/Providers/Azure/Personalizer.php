@@ -42,11 +42,6 @@ class Personalizer extends Provider {
 			$service
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'recommended_content' => __( 'Recommended content block', 'classifai' ),
-		);
-
 		// Set the onboarding options.
 		$this->onboarding_options = array(
 			'title'    => __( 'Microsoft Azure AI Personalizer', 'classifai' ),

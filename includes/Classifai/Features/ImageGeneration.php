@@ -57,10 +57,10 @@ class ImageGeneration extends Feature {
 	}
 
 	/**
-	 * Sets up the fields and sections for the feature.
+	 * Assigns user roles to the $roles array.
 	 */
-	public function setup_fields_sections() {
-		$settings = $this->get_settings();
+	public function setup_roles() {
+		$default_settings = $this->get_default_settings();
 
 		// Get all roles that have the upload_files cap.
 		$roles = get_editable_roles() ?? [];
@@ -76,16 +76,24 @@ class ImageGeneration extends Feature {
 		 * Filter the allowed WordPress roles for DALL·E
 		 *
 		 * @since 2.3.0
-		 * @hook classifai_openai_dalle_allowed_image_roles
+		 * @hook classifai_feature_image_generation_roles
 		 *
-		 * @param {array} $roles     Array of arrays containing role information.
-		 * @param {array} $settings  Default setting values.
+		 * @param {array} $roles            Array of arrays containing role information.
+		 * @param {array} $default_settings Default setting values.
 		 *
 		 * @return {array} Roles array.
 		 */
-		$roles = apply_filters( 'classifai_openai_dalle_allowed_image_roles', $roles, $settings );
+		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $default_settings );
+	}
 
-		/* These are the feature-level fields that are
+	/**
+	 * Sets up the fields and sections for the feature.
+	 */
+	public function setup_fields_sections() {
+		$settings = $this->get_settings();
+
+		/*
+		 * These are the feature-level fields that are
 		 * independent of the provider.
 		 */
 		add_settings_section(
@@ -97,7 +105,7 @@ class ImageGeneration extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable title generation', 'classifai' ),
+			esc_html__( 'Enable image generation', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -109,19 +117,8 @@ class ImageGeneration extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to generate titles.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
 
 		add_settings_field(
 			'provider',
@@ -136,7 +133,8 @@ class ImageGeneration extends Feature {
 			]
 		);
 
-		/* The following renders the fields of all the providers
+		/*
+		 * The following renders the fields of all the providers
 		 * that are registered to the feature.
 		 */
 		$this->render_provider_fields();
@@ -148,30 +146,11 @@ class ImageGeneration extends Feature {
 	 * @return boolean
 	 */
 	public function is_feature_enabled() {
-		$access          = false;
-		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? DallE::ID;
-		$user_roles      = wp_get_current_user()->roles ?? [];
-		$feature_roles   = $settings['roles'] ?? [];
+		$settings           = $this->get_settings();
+		$is_feature_enabled = parent::is_feature_enabled() && current_user_can( 'upload_files' );
 
-		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
-		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
-		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
-		$can_user_upload = current_user_can( 'upload_files' );
-		$access          = $user_access && $provider_access && $feature_status && $can_user_upload;
-
-		/**
-		 * Filter to override permission to the generate title feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
+		/** This filter is documented in includes/Classifai/Features/Feature.php */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
 	}
 
 	/**
@@ -187,19 +166,17 @@ class ImageGeneration extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'    => '0',
-			'roles'     => $this->roles,
 			'provider'  => DallE::ID,
 		];
 
-		return
-			apply_filters(
-				'classifai_' . static::ID . '_get_default_settings',
-				array_merge(
-					$feature_settings,
-					$provider_settings
-				)
-			);
+		return apply_filters(
+			'classifai_' . static::ID . '_get_default_settings',
+			array_merge(
+				parent::get_default_settings(),
+				$feature_settings,
+				$provider_settings
+			)
+		);
 	}
 
 	/**
@@ -213,9 +190,7 @@ class ImageGeneration extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
-		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
-		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
+		$new_settings = parent::sanitize_settings( $new_settings );
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );

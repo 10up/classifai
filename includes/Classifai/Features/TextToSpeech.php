@@ -88,19 +88,8 @@ class TextToSpeech extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'      => 'roles',
-				'options'        => $this->roles,
-				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
 
 		$post_types        = \Classifai\get_post_types_for_language_settings();
 		$post_type_options = array();
@@ -142,36 +131,6 @@ class TextToSpeech extends Feature {
 		$this->render_provider_fields();
 	}
 
-	/**
-	 * Returns true if the feature meets all the criteria to be enabled.
-	 *
-	 * @return boolean
-	 */
-	public function is_feature_enabled() {
-		$access          = false;
-		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? Speech::ID;
-		$feature_roles   = $settings['roles'] ?? [];
-		$user_roles      = wp_get_current_user()->roles ?? [];
-		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
-		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
-		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
-		$access          = $user_access && $provider_access && $feature_status;
-
-		/**
-		 * Filter to override permission to the generate title feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
-	}
-
 	protected function get_post_types_select_options() {
 		$post_types = \Classifai\get_post_types_for_language_settings();
 		$options    = array();
@@ -196,8 +155,6 @@ class TextToSpeech extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'     => '0',
-			'roles'      => $this->roles,
 			'post_types' => [],
 			'provider'   => Speech::ID,
 		];
@@ -206,6 +163,7 @@ class TextToSpeech extends Feature {
 			apply_filters(
 				'classifai_' . static::ID . '_get_default_settings',
 				array_merge(
+					parent::get_default_settings(),
 					$feature_settings,
 					$provider_settings
 				)
@@ -241,11 +199,8 @@ class TextToSpeech extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings['status']   = $new_settings['status'] ?? $settings['status'];
-		$new_settings['roles']    = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
-		$new_settings['provider'] = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
-
-		$post_types = \Classifai\get_post_types_for_language_settings();
+		$new_settings = parent::sanitize_settings( $new_settings );
+		$post_types   = \Classifai\get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {

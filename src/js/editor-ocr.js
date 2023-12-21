@@ -4,7 +4,7 @@
 /* eslint-disable @wordpress/no-unused-vars-before-return */
 import { select, dispatch, subscribe } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { apiFetch } from '@wordpress/api-fetch';
+import apiFetch from '@wordpress/api-fetch';
 import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { BlockControls } from '@wordpress/block-editor';

@@ -88,19 +88,8 @@ class Classification extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'      => 'roles',
-				'options'        => $this->roles,
-				'default_values' => $settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to use this feature.', 'classifai' ),
-			]
-		);
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
 
 		$post_statuses = get_post_statuses_for_language_settings();
 
@@ -159,37 +148,6 @@ class Classification extends Feature {
 	}
 
 	/**
-	 * Returns true if the feature meets all the criteria to be enabled.
-	 *
-	 * @return boolean
-	 */
-	public function is_feature_enabled() {
-		$access          = false;
-		$settings        = $this->get_settings();
-		$provider_id     = $settings['provider'] ?? NLU::ID;
-		$user_roles      = wp_get_current_user()->roles ?? [];
-		$feature_roles   = $settings['roles'] ?? [];
-
-		$user_access     = ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) );
-		$provider_access = $settings[ $provider_id ]['authenticated'] ?? false;
-		$feature_status  = isset( $settings['status'] ) && '1' === $settings['status'];
-		$access          = $user_access && $provider_access && $feature_status;
-
-		/**
-		 * Filter to override permission to the generate title feature.
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_openai_chatgpt_{$feature}
-		 *
-		 * @param {bool}  $access Current access value.
-		 * @param {array} $settings Current feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $access, $settings );
-	}
-
-	/**
 	 * Returns the default settings for the feature.
 	 *
 	 * The root-level keys are the setting keys that are independent of the provider.
@@ -202,8 +160,6 @@ class Classification extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'status'        => '0',
-			'roles'         => $this->roles,
 			'post_statuses' => [],
 			'post_types'    => [],
 			'provider'      => NLU::ID,
@@ -213,6 +169,7 @@ class Classification extends Feature {
 			apply_filters(
 				'classifai_' . static::ID . '_get_default_settings',
 				array_merge(
+					parent::get_default_settings(),
 					$feature_settings,
 					$provider_settings
 				)
@@ -230,11 +187,9 @@ class Classification extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings['status']        = $new_settings['status'] ?? $settings['status'];
-		$new_settings['roles']         = isset( $new_settings['roles'] ) ? array_map( 'sanitize_text_field', $new_settings['roles'] ) : $settings['roles'];
+		$new_settings                  = parent::sanitize_settings( $new_settings );
 		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
 		$new_settings['post_types']    = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
-		$new_settings['provider']      = isset( $new_settings['provider'] ) ? sanitize_text_field( $new_settings['provider'] ) : $settings['provider'];
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );

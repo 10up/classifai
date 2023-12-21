@@ -128,7 +128,7 @@ const PostStatusInfo = () => {
 					{ ! isLoading && data && <RenderData data={ data } /> }
 					{ ! isLoading && error && <RenderError error={ error } /> }
 					{ ! isLoading && (
-						<DisableFeatureButton feature="title_generation" />
+						<DisableFeatureButton feature="feature_title_generation" />
 					) }
 				</Modal>
 			) }
