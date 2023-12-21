@@ -5,11 +5,11 @@
  * @package ClassifAI
  */
 
-$onboarding_options   = get_option( 'classifai_onboarding_options', array() );
-$enabled_features     = $onboarding_options['enabled_features'] ?? array();
-$configured_providers = $onboarding_options['configured_providers'] ?? array();
-$onboarding           = new Classifai\Admin\Onboarding();
-$features             = $onboarding->get_features();
+$onboarding_options  = get_option( 'classifai_onboarding_options', array() );
+$enabled_features    = $onboarding_options['enabled_features'] ?? array();
+$configured_features = $onboarding_options['configured_features'] ?? array();
+$onboarding          = new Classifai\Admin\Onboarding();
+$features            = $onboarding->get_features();
 
 $args = array(
 	'step'       => 4,
@@ -46,28 +46,22 @@ foreach ( $features as $key => $feature ) {
 		<div class="classifai-features">
 			<ul>
 				<?php
-				foreach ( $feature['features'] as $provider => $provider_features ) {
-					foreach ( $provider_features as $feature_key => $feature_options ) {
-						$enabled = isset( $enabled_features[ $provider ][ $feature_key ] );
-						if ( count( explode( '__', $feature_key ) ) > 1 ) {
-							$keys    = explode( '__', $feature_key );
-							$enabled = isset( $enabled_features[ $provider ][ $keys[0] ][ $keys[1] ] );
-						}
-
-						if ( ! $enabled ) {
-							continue;
-						}
-
-						$icon_class = ( $feature_options['enabled'] ) ? 'dashicons-yes-alt' : 'dashicons-dismiss';
-						?>
-						<li class="classifai-enable-feature">
-							<span class="dashicons <?php echo esc_attr( $icon_class ); ?>"></span>
-							<label class="classifai-feature-text">
-								<?php echo esc_html( $feature_options['title'] ); ?>
-							</label>
-						</li>
-						<?php
+				foreach ( $feature['features'] as $feature_key => $feature_class ) {
+					$enabled = isset( $enabled_features[ $feature_key ] );
+					if ( ! $enabled ) {
+						continue;
 					}
+
+					$is_configured = $feature_class->is_feature_enabled();
+					$icon_class    = $is_configured ? 'dashicons-yes-alt' : 'dashicons-dismiss';
+					?>
+					<li class="classifai-enable-feature">
+						<span class="dashicons <?php echo esc_attr( $icon_class ); ?>"></span>
+						<label class="classifai-feature-text">
+							<?php echo esc_html( $feature_class->get_label() ); ?>
+						</label>
+					</li>
+					<?php
 				}
 				?>
 			</ul>

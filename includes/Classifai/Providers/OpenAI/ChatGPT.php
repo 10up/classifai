@@ -82,15 +82,11 @@ class ChatGPT extends Provider {
 			'openai_chatgpt'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'         => __( 'Title generation', 'classifai' ),
-				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
-			),
+		// Features provided by this provider.
+		$this->features = array(
+			'title_generation'   => __( 'Generate titles', 'classifai' ),
+			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
+			'resize_content'     => __( 'Resize content', 'classifai' ),
 		);
 
 		$this->feature_instance = $feature_instance;
@@ -454,10 +450,13 @@ class ChatGPT extends Provider {
 	public function enqueue_admin_assets( string $hook_suffix ) {
 		// Load asset in OpenAI ChatGPT settings page.
 		if (
-			'tools_page_classifai' === $hook_suffix
-			&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
-			&& 'language_processing' === $_GET['tab'] // phpcs:ignore
-			&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+			(
+				'tools_page_classifai' === $hook_suffix
+				&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
+				&& 'language_processing' === $_GET['tab'] // phpcs:ignore
+				&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+			) ||
+			'admin_page_classifai_setup' === $hook_suffix
 		) {
 			wp_enqueue_script( 'jquery-ui-dialog' );
 			wp_enqueue_style( 'wp-jquery-ui-dialog' );
