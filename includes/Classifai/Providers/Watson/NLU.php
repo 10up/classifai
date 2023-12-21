@@ -274,6 +274,7 @@ class NLU extends Provider {
 					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
 					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
 				],
+				'classification_method'         => 'recommended_terms',
 			]
 		);
 	}
@@ -650,6 +651,10 @@ class NLU extends Provider {
 
 		if ( isset( $settings['classification_mode'] ) ) {
 			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
+		}
+
+		if ( isset( $settings['classification_method'] ) ) {
+			$new_settings['classification_method'] = sanitize_text_field( $settings['classification_method'] );
 		}
 
 		// Sanitize the post type checkboxes

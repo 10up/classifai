@@ -2,6 +2,8 @@
 
 namespace Classifai\Watson;
 
+use function Classifai\get_classification_method;
+
 /**
  * Linker connects Watson classification results with Taxonomy Terms.
  *
@@ -93,8 +95,9 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
-		$terms_to_link = [];
-		$taxonomy      = \Classifai\get_feature_taxonomy( 'category' );
+		$terms_to_link           = [];
+		$taxonomy                = \Classifai\get_feature_taxonomy( 'category' );
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $categories as $category ) {
 			if ( $this->can_link_category( $category ) ) {
@@ -106,6 +109,11 @@ class Linker {
 
 					foreach ( $parts as $part ) {
 						$term = get_term_by( 'name', $part, $taxonomy );
+
+						// Skip if the term is not found and we are classifying based on existing terms.
+						if ( $classify_existing_terms && false === $term ) {
+							continue;
+						}
 
 						if ( false === $term ) {
 							$term = wp_insert_term( $part, $taxonomy, [ 'parent' => $parent ] );
@@ -156,14 +164,20 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
-		$terms_to_link = [];
-		$taxonomy      = \Classifai\get_feature_taxonomy( 'keyword' );
+		$terms_to_link           = [];
+		$taxonomy                = \Classifai\get_feature_taxonomy( 'keyword' );
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $keywords as $keyword ) {
 			if ( $this->can_link_keyword( $keyword ) ) {
 				$name = $keyword['text'];
 				$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
 				$term = get_term_by( 'name', $name, $taxonomy );
+
+				// Skip if the term is not found and we are classifying based on existing terms.
+				if ( $classify_existing_terms && false === $term ) {
+					continue;
+				}
 
 				if ( false === $term ) {
 					$term = wp_insert_term( $name, $taxonomy, [] );
@@ -210,13 +224,19 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
-		$terms_to_link = [];
-		$taxonomy      = \Classifai\get_feature_taxonomy( 'concept' );
+		$terms_to_link           = [];
+		$taxonomy                = \Classifai\get_feature_taxonomy( 'concept' );
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $concepts as $concept ) {
 			if ( $this->can_link_concept( $concept ) ) {
 				$name = $concept['text'];
 				$term = get_term_by( 'name', $name, $taxonomy );
+
+				// Skip if the term is not found and we are classifying based on existing terms.
+				if ( $classify_existing_terms && false === $term ) {
+					continue;
+				}
 
 				if ( false === $term ) {
 					$term = wp_insert_term( $name, $taxonomy, [] );
@@ -271,8 +291,9 @@ class Linker {
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
-		$terms_to_link = [];
-		$taxonomy      = \Classifai\get_feature_taxonomy( 'entity' );
+		$terms_to_link           = [];
+		$taxonomy                = \Classifai\get_feature_taxonomy( 'entity' );
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $entities as $entity ) {
 			if ( $this->can_link_entity( $entity ) ) {
@@ -283,6 +304,11 @@ class Linker {
 				}
 
 				$term = get_term_by( 'name', $name, $taxonomy );
+
+				// Skip if the term is not found and we are classifying based on existing terms.
+				if ( $classify_existing_terms && false === $term ) {
+					continue;
+				}
 
 				if ( false === $term ) {
 					$term = wp_insert_term( $name, $taxonomy, [] );

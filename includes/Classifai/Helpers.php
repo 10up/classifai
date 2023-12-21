@@ -200,6 +200,21 @@ function get_classification_mode() {
 }
 
 /**
+ * Get IBM Watson Content Classification method.
+ *
+ * @since 2.6.0
+ *
+ * @return string
+ */
+function get_classification_method() {
+	$provider = new NLU( 'language_processing' );
+	$settings = $provider->get_settings();
+	$value    = $settings['classification_method'] ?? '';
+
+	return $value;
+}
+
+/**
  * Returns the currently configured Watson username. Lookup order is,
  *
  * - Options

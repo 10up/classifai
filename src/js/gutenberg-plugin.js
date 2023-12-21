@@ -124,8 +124,6 @@ const ClassifAIGenerateTagsButton = () => {
 
 				const newTerms = Object.values( resp.terms[ taxonomy ] );
 				if ( newTerms && Object.keys( newTerms ).length ) {
-					termsReady = true;
-
 					// Loop through each term and add in taxTermsAI if it does not exist in the post.
 					taxTermsAI = taxTermsAI || {};
 					Object( newTerms ).forEach( ( termId ) => {
