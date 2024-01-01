@@ -79,11 +79,6 @@ class Speech extends Provider {
 			'azure_text_to_speech'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'text_to_speech' => __( 'Text to speech', 'classifai' ),
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );

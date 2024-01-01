@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
 use \Classifai\Providers\Watson\NLU;
+use \Classifai\Providers\OpenAI\Embeddings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_post_types_for_language_settings;
 
@@ -53,7 +54,8 @@ class Classification extends Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
-				NLU::ID => __( 'IBM Watson NLU', 'classifai' ),
+				NLU::ID        => __( 'IBM Watson NLU', 'classifai' ),
+				Embeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			]
 		);
 	}
@@ -218,6 +220,12 @@ class Classification extends Feature {
 
 		if ( NLU::ID === $provider_instance::ID ) {
 			/** @var NLU $provider_instance */
+			$result = call_user_func_array(
+				[ $provider_instance, 'classify_post' ],
+				[ ...$args ]
+			);
+		} else if ( Embeddings::ID === $provider_instance::ID ) {
+			/** @var Embeddings $provider_instance */
 			$result = call_user_func_array(
 				[ $provider_instance, 'classify_post' ],
 				[ ...$args ]

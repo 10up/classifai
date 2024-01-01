@@ -15,7 +15,6 @@ use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_asset_info;
 use function Classifai\check_term_permissions;
-use function Classifai\get_classification_mode;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -107,6 +106,7 @@ class NLU extends Provider {
 				'default_value' => $settings['endpoint_url'],
 				'input_type'    => 'text',
 				'large'         => true,
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -123,7 +123,7 @@ class NLU extends Provider {
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
 				'large'         => true,
-				'class'         => $this->use_username_password() ? 'hidden' : '',
+				'class'         => 'classifai-provider-field ' . $this->use_username_password() ? 'hidden' : '' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -139,6 +139,7 @@ class NLU extends Provider {
 				'default_value' => $settings['password'],
 				'input_type'    => 'password',
 				'large'         => true,
+				'class'         => 'classifai-provider-field ' . $this->use_username_password() ? 'hidden' : '' . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -231,7 +232,9 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
-		if ( ( new Classification() )->is_feature_enabled() ) {
+		$feature = new Classification();
+
+		if ( $feature->is_feature_enabled() && $feature->get_feature_provider_instance()::ID === static::ID ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
@@ -541,114 +544,6 @@ class NLU extends Provider {
 		$new_settings[ static::ID ]['concept']           = absint( $new_settings[ static::ID ]['concept'] ?? $settings[ static::ID ]['concept'] );
 		$new_settings[ static::ID ]['concept_threshold'] = absint( $new_settings[ static::ID ]['concept_threshold'] ?? $settings[ static::ID ]['concept_threshold'] );
 		$new_settings[ static::ID ]['concept_taxonomy']  = sanitize_text_field( $new_settings[ static::ID ]['concept_taxonomy'] ?? $settings[ static::ID ]['concept_taxonomy'] );
-
-		return $new_settings;
-	}
-
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	public function sanitize_settings_old( $settings ) {
-		$new_settings  = $this->get_settings();
-		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings, 'content_classification' ) );
-		$authenticated = $this->nlu_authentication_check( $settings );
-
-		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
-			add_settings_error(
-				'credentials',
-				'classifai-auth',
-				$authenticated->get_error_message(),
-				'error'
-			);
-		} else {
-			$new_settings['authenticated'] = true;
-		}
-
-		if ( isset( $settings['credentials']['watson_url'] ) ) {
-			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
-		}
-
-		if ( isset( $settings['credentials']['watson_username'] ) ) {
-			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
-		}
-
-		if ( isset( $settings['credentials']['watson_password'] ) ) {
-			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
-		}
-
-		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
-			$new_settings['enable_content_classification'] = 'no';
-		} else {
-			$new_settings['enable_content_classification'] = '1';
-		}
-
-		if ( isset( $settings['classification_mode'] ) ) {
-			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
-		}
-
-		if ( isset( $settings['classification_method'] ) ) {
-			$new_settings['classification_method'] = sanitize_text_field( $settings['classification_method'] );
-		}
-
-		// Sanitize the post type checkboxes
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
-		foreach ( $post_types as $post_type ) {
-			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = absint( $settings['post_types'][ $post_type->name ] );
-			} else {
-				$new_settings['post_types'][ $post_type->name ] = null;
-			}
-		}
-
-		// Sanitize the post statuses checkboxes
-		$post_statuses = get_post_statuses_for_language_settings();
-		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
-			if ( isset( $settings['post_statuses'][ $post_status_key ] ) ) {
-				$new_settings['post_statuses'][ $post_status_key ] = absint( $settings['post_statuses'][ $post_status_key ] );
-			} else {
-				$new_settings['post_statuses'][ $post_status_key ] = null;
-			}
-		}
-
-		$feature_enabled = false;
-
-		foreach ( $this->nlu_features as $feature => $labels ) {
-			// Set the enabled flag.
-			if ( isset( $settings['features'][ $feature ] ) ) {
-				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
-				$feature_enabled                      = true;
-			} else {
-				$new_settings['features'][ $feature ] = null;
-			}
-
-			// Set the threshold
-			if ( isset( $settings['features'][ "{$feature}_threshold" ] ) ) {
-				$new_settings['features'][ "{$feature}_threshold" ] = min( absint( $settings['features'][ "{$feature}_threshold" ] ), 100 );
-			}
-
-			if ( isset( $settings['features'][ "{$feature}_taxonomy" ] ) ) {
-				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
-			}
-		}
-
-		// Show a warning if the NLU feature and Embeddings feature are both enabled.
-		if ( $feature_enabled && '1' === $new_settings['enable_content_classification'] ) {
-			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
-
-			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
-				add_settings_error(
-					'features',
-					'conflict',
-					esc_html__( 'OpenAI Embeddings classification is turned on. This may conflict with the NLU classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
-					'warning'
-				);
-			}
-		}
 
 		return $new_settings;
 	}

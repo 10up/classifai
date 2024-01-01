@@ -47,11 +47,6 @@ class DallE extends Provider {
 			'openai_dalle'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'image_generation' => __( 'Generate images', 'classifai' ),
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
