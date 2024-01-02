@@ -136,7 +136,7 @@ class ComputerVision extends Provider {
 
 		add_settings_field(
 			static::ID . '_descriptive_confidence_threshold',
-			esc_html__( 'Descriptive text confidence threshold', 'classifai' ),
+			esc_html__( 'Confidence threshold', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -183,7 +183,7 @@ class ComputerVision extends Provider {
 
 		add_settings_field(
 			static::ID . '_tag_confidence_threshold',
-			esc_html__( 'Tag confidence threshold', 'classifai' ),
+			esc_html__( 'Confidence threshold', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -1536,30 +1536,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
-	 * @return array Keyed array of debug information.
-	 * @since 1.4.0
-	 */
-	public function get_provider_debug_information( $settings = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )         => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )               => $settings['url'] ?? '',
-			__( 'Caption threshold', 'classifai' )     => $settings['caption_threshold'] ?? null,
-			__( 'Latest response - Image Scan', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_scan_latest_response' ) ),
-			__( 'Latest response - Smart Cropping', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ),
-			__( 'Latest response - OCR', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_ocr_latest_response' ) ),
-		];
-	}
-
-	/**
 	 * Filter the SQL clauses of an attachment query to include tags and alt text.
 	 *
 	 * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
@@ -1586,5 +1562,35 @@ class ComputerVision extends Provider {
 		);
 
 		return $clauses;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
+			$descriptive_text  = array_filter(
+				$provider_settings['descriptive_text_fields'],
+				function( $type ) {
+					return '0' !== $type;
+				}
+			);
+
+			$debug_info[ __( 'Generate descriptive text', 'classifai' ) ] = implode( ', ', $descriptive_text );
+			$debug_info[ __( 'Confidence threshold', 'classifai' ) ]      = $provider_settings['descriptive_confidence_threshold'];
+		}
+
+		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
+			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'];
+			$debug_info[ __( 'Confidence threshold', 'classifai' ) ] = $provider_settings['tag_confidence_threshold'];
+		}
+
+		return $debug_info;
 	}
 }

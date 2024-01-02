@@ -416,27 +416,6 @@ class Speech extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param null|array $settings   Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return array Keyed array of debug information.
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )            => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )                  => $settings['url'] ?? '',
-			__( 'Latest response - Voices', 'classifai' ) => $this->get_formatted_latest_response( $this->get_settings( 'voices' ) ),
-		];
-	}
-
-	/**
 	 * Initial audio generation state.
 	 *
 	 * Fetch the initial state of audio generation prior to the audio existing for the post.
@@ -1100,5 +1079,30 @@ class Speech extends Provider {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof TextToSpeech ) {
+			$post_types        = array_filter(
+				$settings['post_types'],
+				function( $value ) {
+					return '0' !== $value;
+				}
+			);
+
+			$debug_info[ __( 'Allowed post types', 'classifai' ) ] = implode( ', ', $post_types );
+			$debug_info[ __( 'Voice', 'classifai' ) ]              = $provider_settings['voice'];
+		}
+
+		return $debug_info;
 	}
 }

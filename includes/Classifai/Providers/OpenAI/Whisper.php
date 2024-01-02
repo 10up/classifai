@@ -277,29 +277,6 @@ class Whisper extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated     = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_transcript = 1 === intval( $settings['enable_transcripts'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )        => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate transcripts', 'classifai' ) => $enable_transcript ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles', 'classifai' )        => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) ),
-		];
-	}
-
-	/**
 	 * Register REST endpoints for this provider.
 	 *
 	 * @return void
@@ -365,5 +342,16 @@ class Whisper extends Provider {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		return [];
 	}
 }

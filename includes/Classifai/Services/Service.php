@@ -272,14 +272,14 @@ abstract class Service {
 	 * @since 1.4.0
 	 */
 	public function get_service_debug_information() {
-		$make_line = function( $provider ) {
+		$make_line = function( $feature ) {
 			return [
-				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
-				'value' => $provider->get_provider_debug_information(),
+				'label' => sprintf( '%s', $feature->get_label() ),
+				'value' => $feature->get_debug_information(),
 			];
 		};
 
-		return array_map( $make_line, $this->provider_classes );
+		return array_map( $make_line, $this->feature_classes );
 	}
 
 	/**

@@ -82,7 +82,7 @@ abstract class Feature {
 	protected function get_default_settings() {
 		return [
 			'status'             => '0',
-			'role_based_access'  => '1',
+			'role_based_access'  => 'no',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
 			'user_based_access'  => 'no',
 			'users'              => [],
@@ -432,6 +432,66 @@ abstract class Feature {
 	 */
 	public function can_register() {
 		return $this->is_configured();
+	}
+
+	public static function get_debug_value_text( $setting_value, $type = 0 ) {
+		$debug_value = '';
+
+		if ( empty ( $setting_value ) ) {
+			$boolean = false;
+		} else if ( 'no' === $setting_value ) {
+			$boolean = false;
+		} else {
+			$boolean = true;
+		}
+
+		switch ( $type ) {
+			case 0:
+				$debug_value = $boolean ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' );
+				break;
+			case 1:
+				$debug_value = $boolean ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+				break;
+		}
+
+		return $debug_value;
+	}
+
+	/**
+	 * Returns an array of feature-level debug info.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$feature_settings = $this->get_settings();
+		$provider         = $this->get_feature_provider_instance();
+
+		$roles = array_filter(
+			$feature_settings['roles'],
+			function( $role ) {
+				return '0' !== $role;
+			}
+		);
+
+		$common_debug_info = [
+			__( 'Authenticated', 'classifai' )          => self::get_debug_value_text( $this->is_configured() ),
+			__( 'Status', 'classifai' )                 => self::get_debug_value_text( $feature_settings['status'], 1 ),
+			__( 'Role-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['role_based_access'], 1 ),
+			__( 'Allowed roles (titles)', 'classifai' ) => implode( ', ', $roles ?? [] ),
+			__( 'User-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['user_based_access'], 1 ),
+			__( 'Allowed users (titles)', 'classifai' ) => implode( ', ', $feature_settings['users'] ?? [] ),
+			__( 'User based opt-out', 'classifai' )     => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
+			__( 'Provider', 'classifai' )               => $feature_settings['provider'],
+		];
+
+		if ( method_exists( $provider, 'get_debug_information' ) ) {
+			$common_debug_info = array_merge(
+				$common_debug_info,
+				$provider->get_debug_information()
+			);
+		}
+
+		return $common_debug_info;
 	}
 
 	/**

@@ -266,32 +266,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( ( new Classification() )->get_settings() );
-		}
-
-		$authenticated         = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_classification = 1 === intval( $settings['enable_classification'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )          => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Classification enabled', 'classifai' ) => $enable_classification ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Post types', 'classifai' )             => implode( ', ', $settings['post_types'] ?? [] ),
-			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
-			__( 'Taxonomies', 'classifai' )             => implode( ', ', $settings['taxonomies'] ?? [] ),
-			__( 'Number of terms', 'classifai' )        => $settings['number'] ?? 1,
-			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) ),
-		];
-	}
-
-	/**
 	 * The list of supported post types.
 	 *
 	 * return array
@@ -1008,5 +982,26 @@ class Embeddings extends Provider {
 			esc_html__( 'Threshold (%)', 'classifai' ),
 			$value ? esc_attr( $value ) : 75
 		);
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		return [
+			__( 'Number of titles', 'classifai' ) => $settings['number_of_titles'] ?? 1,
+			__( 'Taxonomy (category)', 'classifai' ) => $settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
+			__( 'Taxonomy (category threshold)', 'classifai' ) => $settings['taxonomies']['category_threshold'],
+			__( 'Taxonomy (tag)', 'classifai' ) => $settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
+			__( 'Taxonomy (tag threshold)', 'classifai' ) => $settings['taxonomies']['post_tag_threshold'],
+			__( 'Taxonomy (format)', 'classifai' ) => $settings['taxonomies']['post_format'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
+			__( 'Taxonomy (format threshold)', 'classifai' ) => $settings['taxonomies']['post_format_threshold'],
+			__( 'Taxonomy (image tag)', 'classifai' ) => $settings['taxonomies']['classifai-image-tags'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
+			__( 'Taxonomy (image tag threshold)', 'classifai' ) => $settings['taxonomies']['classifai-image-tags_threshold'],
+		];
 	}
 }

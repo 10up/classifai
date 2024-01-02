@@ -401,31 +401,6 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enabled       = 1 === intval( $settings['enable_image_gen'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )    => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate images', 'classifai' )  => $enabled ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles', 'classifai' )    => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Number of images', 'classifai' ) => absint( $settings['number_of_images'] ?? 1 ),
-			__( 'Image size', 'classifai' )       => sanitize_text_field( $settings['image_size'] ?? '1024x1024' ),
-			__( 'Latest response', 'classifai' )  => $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) ),
-		];
-	}
-
-	/**
 	 * Entry point for the generate-image REST endpoint.
 	 *
 	 * @param string $prompt The prompt used to generate an image.

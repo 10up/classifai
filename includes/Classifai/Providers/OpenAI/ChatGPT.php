@@ -218,7 +218,7 @@ class ChatGPT extends Provider {
 
 		add_settings_field(
 			static::ID . '_number_of_suggestions',
-			esc_html__( 'Number of titles', 'classifai' ),
+			esc_html__( 'Number of suggestions', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -352,13 +352,13 @@ class ChatGPT extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof ExcerptGeneration ) {
-			$new_settings[ static::ID ]['length']                  = $this->sanitize_number_of_responses_field( 'length', $new_settings, $settings );
 			$new_settings[ static::ID ]['generate_excerpt_prompt'] = $this->sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
 		}
-
+		
 		if ( $this->feature_instance instanceof ContentResizing ) {
-			$new_settings[ static::ID ]['condense_text_prompt'] = $this->sanitize_prompts( 'condense_text_prompt', $new_settings );
-			$new_settings[ static::ID ]['expand_text_prompt']   = $this->sanitize_prompts( 'expand_text_prompt', $new_settings );
+			$new_settings[ static::ID ]['number_of_suggestions'] = $this->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
+			$new_settings[ static::ID ]['condense_text_prompt']  = $this->sanitize_prompts( 'condense_text_prompt', $new_settings );
+			$new_settings[ static::ID ]['expand_text_prompt']    = $this->sanitize_prompts( 'expand_text_prompt', $new_settings );
 		}
 
 		return $new_settings;
@@ -606,36 +606,6 @@ class ChatGPT extends Provider {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated  = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_excerpt = 1 === intval( $settings['enable_excerpt'] ?? 0 );
-		$enable_titles  = 1 === intval( $settings['enable_titles'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )           => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate excerpt', 'classifai' )        => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (excerpt)', 'classifai' ) => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Excerpt length', 'classifai' )          => $settings['length'] ?? 55,
-			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
-			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
-			__( 'Allowed roles (resize)', 'classifai' )  => implode( ', ', $settings['resize_content_roles'] ?? [] ),
-			__( 'Number of suggestions', 'classifai' )   => absint( $settings['number_resize_content'] ?? 1 ),
-			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
-		];
 	}
 
 	/**
@@ -1427,5 +1397,30 @@ class ChatGPT extends Provider {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information() {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof TitleGeneration ) {
+			$debug_info[ __( 'No. of titles', 'classifai' ) ] = $provider_settings['number_of_titles'];
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] );
+		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ] = $settings['length'];
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] );
+		} elseif ( $this->feature_instance instanceof ContentResizing ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ] = $provider_settings['number_of_suggestions'];
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['expand_text_prompt'] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['condense_text_prompt'] );
+		}
+
+		return $debug_info;
 	}
 }
