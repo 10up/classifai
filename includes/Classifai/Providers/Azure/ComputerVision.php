@@ -497,7 +497,7 @@ class ComputerVision extends Provider {
 		$captions   = get_post_meta( $post->ID, '_wp_attachment_image_alt', true ) ? __( 'No descriptive text? Rescan image', 'classifai' ) : __( 'Generate descriptive text', 'classifai' );
 		$tags       = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
 		$ocr        = get_post_meta( $post->ID, 'classifai_computer_vision_ocr', true ) ? __( 'Rescan for text', 'classifai' ) : __( 'Scan image for text', 'classifai' );
-		$smart_crop = get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
+		$smart_crop = get_transient( 'classifai_azure_computer_vision_image_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
 
 		<div class="misc-publishing-actions">
@@ -621,7 +621,7 @@ class ComputerVision extends Provider {
 
 		// Smart crop.
 		if ( $smart_crop->is_feature_enabled() && wp_attachment_is_image( $post ) ) {
-			$smart_crop_text                  = empty( get_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
+			$smart_crop_text                  = empty( get_transient( 'classifai_azure_computer_vision_image_cropping_latest_response' ) ) ? __( 'Generate', 'classifai' ) : __( 'Regenerate', 'classifai' );
 			$form_fields['rescan_smart_crop'] = [
 				'label'        => __( 'Smart thumbnail', 'classifai' ),
 				'input'        => 'html',
@@ -885,6 +885,8 @@ class ComputerVision extends Provider {
 		$ocr      = new OCR( $settings, $scan, $force );
 		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
 
+		set_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response', $scan, DAY_IN_SECONDS * 30 );
+
 		if ( $force ) {
 			return $response;
 		}
@@ -983,6 +985,8 @@ class ComputerVision extends Provider {
 		$image_url      = wp_get_attachment_url( $attachment_id );
 		$details        = $this->scan_image( $image_url, $feature );
 		$captions       = isset( $details->description->captions ) ? $details->description->captions : [];
+
+		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
 
 		// Don't save tags if feature is disabled or user don't have access to use it.
 		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
@@ -1117,6 +1121,8 @@ class ComputerVision extends Provider {
 		$image_url = wp_get_attachment_url( $attachment_id );
 		$details   = $this->scan_image( $image_url, $feature );
 		$tags      = isset( $details->tags ) ? $details->tags : [];
+
+		set_transient( 'classifai_azure_computer_vision_image_tags_latest_response', $details, DAY_IN_SECONDS * 30 );
 
 		/**
 		 * Filter the tags returned from the API.
@@ -1584,13 +1590,31 @@ class ComputerVision extends Provider {
 
 			$debug_info[ __( 'Generate descriptive text', 'classifai' ) ] = implode( ', ', $descriptive_text );
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ]      = $provider_settings['descriptive_confidence_threshold'];
+			$debug_info[ __( 'Latest response:', 'classifai' ) ]           = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response' ) );
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
 			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'];
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ] = $provider_settings['tag_confidence_threshold'];
+			$debug_info[ __( 'Latest response:', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_tags_latest_response' ) );
 		}
 
-		return $debug_info;
+		if ( $this->feature_instance instanceof ImageCropping ) {
+			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_cropping_latest_response' ) );
+		}
+
+		if ( $this->feature_instance instanceof ImageTextExtraction ) {
+			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response' ) );
+		}
+
+		if ( $this->feature_instance instanceof PDFTextExtraction ) {
+			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_pdf_text_extraction_check_result_latest_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+		);
 	}
 }

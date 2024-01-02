@@ -485,13 +485,17 @@ abstract class Feature {
 		];
 
 		if ( method_exists( $provider, 'get_debug_information' ) ) {
-			$common_debug_info = array_merge(
+			$all_debug_info = array_merge(
 				$common_debug_info,
 				$provider->get_debug_information()
 			);
 		}
 
-		return $common_debug_info;
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$all_debug_info,
+			$this,
+		);
 	}
 
 	/**

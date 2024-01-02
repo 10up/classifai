@@ -235,7 +235,8 @@ class SmartCropping {
 		];
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
-		set_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
+
+		set_transient( 'classifai_azure_computer_vision_image_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $new_thumb_image ) ) {
 			return $new_thumb_image;

@@ -238,6 +238,8 @@ class Read {
 			);
 		}
 
+		set_transient( 'classifai_azure_computer_vision_pdf_text_extraction_check_result_latest_response', $response, DAY_IN_SECONDS * 30 );
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}

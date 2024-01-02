@@ -1099,10 +1099,16 @@ class Speech extends Provider {
 				}
 			);
 
-			$debug_info[ __( 'Allowed post types', 'classifai' ) ] = implode( ', ', $post_types );
-			$debug_info[ __( 'Voice', 'classifai' ) ]              = $provider_settings['voice'];
+			$debug_info[ __( 'Allowed post types', 'classifai' ) ]       = implode( ', ', $post_types );
+			$debug_info[ __( 'Voice', 'classifai' ) ]                    = $provider_settings['voice'];
+			$debug_info[ __( 'Latest response - Voices', 'classifai' ) ] = $this->get_formatted_latest_response( $provider_settings['voices'] );
 		}
 
-		return $debug_info;
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }

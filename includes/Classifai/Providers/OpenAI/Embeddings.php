@@ -990,18 +990,28 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information() {
-		$settings = $this->feature_instance->get_settings( static::ID );
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
 
-		return [
-			__( 'Number of titles', 'classifai' ) => $settings['number_of_titles'] ?? 1,
-			__( 'Taxonomy (category)', 'classifai' ) => $settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
-			__( 'Taxonomy (category threshold)', 'classifai' ) => $settings['taxonomies']['category_threshold'],
-			__( 'Taxonomy (tag)', 'classifai' ) => $settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
-			__( 'Taxonomy (tag threshold)', 'classifai' ) => $settings['taxonomies']['post_tag_threshold'],
-			__( 'Taxonomy (format)', 'classifai' ) => $settings['taxonomies']['post_format'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
-			__( 'Taxonomy (format threshold)', 'classifai' ) => $settings['taxonomies']['post_format_threshold'],
-			__( 'Taxonomy (image tag)', 'classifai' ) => $settings['taxonomies']['classifai-image-tags'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' ),
-			__( 'Taxonomy (image tag threshold)', 'classifai' ) => $settings['taxonomies']['classifai-image-tags_threshold'],
-		];
+		if ( $this->feature_instance instanceof Classification ) {
+			$debug_info[ __( 'Number of titles', 'classifai' ) ]               = $provider_settings['number_of_titles'] ?? 1;
+			$debug_info[ __( 'Taxonomy (category)', 'classifai' ) ]            = $provider_settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (category threshold)', 'classifai' ) ]  = $provider_settings['taxonomies']['category_threshold'];
+			$debug_info[ __( 'Taxonomy (tag)', 'classifai' ) ]                 = $provider_settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (tag threshold)', 'classifai' ) ]       = $provider_settings['taxonomies']['post_tag_threshold'];
+			$debug_info[ __( 'Taxonomy (format)', 'classifai' ) ]              = $provider_settings['taxonomies']['post_format'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (format threshold)', 'classifai' ) ]    = $provider_settings['taxonomies']['post_format_threshold'];
+			$debug_info[ __( 'Taxonomy (image tag)', 'classifai' ) ]           = $provider_settings['taxonomies']['classifai-image-tags'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (image tag threshold)', 'classifai' ) ] = $provider_settings['taxonomies']['classifai-image-tags_threshold'];
+			$debug_info[ __( 'Latest response', 'classifai' ) ]                = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }

@@ -350,8 +350,19 @@ class Whisper extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information() {
-		$settings = $this->feature_instance->get_settings( static::ID );
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
 
-		return [];
+		if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }
