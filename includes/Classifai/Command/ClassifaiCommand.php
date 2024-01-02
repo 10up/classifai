@@ -2,8 +2,8 @@
 
 namespace Classifai\Command;
 
-use Classifai\Admin\SavePostHandler;
 use Classifai\Features\AudioTranscriptsGeneration;
+use Classifai\Features\Classification;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\ImageCropping;
 use Classifai\Features\TextToSpeech;
@@ -13,10 +13,8 @@ use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
-use Classifai\Providers\Azure\Speech;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
 use WP_Error;
 
@@ -954,6 +952,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'per_page'    => 100,
 		];
 
+		$feature  = new Classification();
+		$provider = $feature->get_feature_provider_instance();
+
+		if ( Embeddings::ID !== $provider::ID ) {
+			\WP_CLI::error( 'This command is only available for the OpenAI Embeddings feature' );
+		}
+
 		$embeddings          = new Embeddings( false );
 		$opts                = wp_parse_args( $opts, $defaults );
 		$opts['per_page']    = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
@@ -1009,7 +1014,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $embeddings->generate_embeddings_for_post( $post_id );
+						$result = $feature->run( $post_id );
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
@@ -1057,7 +1062,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				if ( ! $dry_run ) {
-					$result = $embeddings->generate_embeddings_for_post( $post_id );
+					$result = $feature->run( $post_id );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );

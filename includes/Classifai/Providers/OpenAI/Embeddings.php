@@ -281,7 +281,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post types.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types() );
+		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types( new Classification() ) );
 	}
 
 	/**
@@ -333,7 +333,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post statuses.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses() );
+		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses( new Classification() ) );
 	}
 
 	/**
@@ -352,7 +352,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of taxonomies.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies() );
+		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies( new Classification() ) );
 	}
 
 	/**
@@ -779,7 +779,7 @@ class Embeddings extends Provider {
 	 * Add `classifai_process_content` to the REST API for view/edit.
 	 */
 	public function add_process_content_meta_to_rest_api() {
-		$supported_post_types = $this->supported_post_types();
+		$supported_post_types = $this->supported_post_types( new Classification() );
 
 		register_rest_field(
 			$supported_post_types,
@@ -807,7 +807,7 @@ class Embeddings extends Provider {
 	 * @param string $post_type Post type name.
 	 */
 	public function add_metabox( $post_type ) {
-		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+		if ( ! in_array( $post_type, $this->get_supported_post_types( new Classification() ), true ) ) {
 			return;
 		}
 

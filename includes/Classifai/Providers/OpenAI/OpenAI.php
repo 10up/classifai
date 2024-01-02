@@ -239,10 +239,12 @@ trait OpenAI {
 	/**
 	 * The list of supported post types.
 	 *
-	 * return array
+	 * @param \Classifai\Features\Feature $feature
+	 *
+	 * @return array
 	 */
-	public function get_supported_post_types() {
-		$settings   = $this->get_settings();
+	public function get_supported_post_types( $feature ) {
+		$settings   = $feature->get_settings();
 		$post_types = [];
 
 		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
@@ -259,10 +261,12 @@ trait OpenAI {
 	/**
 	 * The list of supported post statuses.
 	 *
+	 * @param \Classifai\Features\Feature $feature
+	 *
 	 * @return array
 	 */
-	public function get_supported_post_statuses() {
-		$settings      = $this->get_settings();
+	public function get_supported_post_statuses( $feature ) {
+		$settings      = $feature->get_settings();
 		$post_statuses = [];
 
 		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
@@ -279,10 +283,12 @@ trait OpenAI {
 	/**
 	 * The list of supported taxonomies.
 	 *
+	 * @param \Classifai\Features\Feature $feature
+	 *
 	 * @return array
 	 */
-	public function get_supported_taxonomies() {
-		$settings   = $this->get_settings();
+	public function get_supported_taxonomies( $feature ) {
+		$settings   = $feature->get_settings();
 		$taxonomies = [];
 
 		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {

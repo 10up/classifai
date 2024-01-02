@@ -227,7 +227,7 @@ class Classification extends Feature {
 		} else if ( Embeddings::ID === $provider_instance::ID ) {
 			/** @var Embeddings $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'classify_post' ],
+				[ $provider_instance, 'generate_embeddings_for_post' ],
 				[ ...$args ]
 			);
 		}
