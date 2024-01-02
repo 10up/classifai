@@ -123,7 +123,7 @@ class NLU extends Provider {
 				'input_type'    => 'text',
 				'default_value' => 'apikey',
 				'large'         => true,
-				'class'         => 'classifai-provider-field ' . $this->use_username_password() ? 'hidden' : '' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hidden' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 
@@ -139,7 +139,21 @@ class NLU extends Provider {
 				'default_value' => $settings['password'],
 				'input_type'    => 'password',
 				'large'         => true,
-				'class'         => 'classifai-provider-field ' . $this->use_username_password() ? 'hidden' : '' . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
+					wp_kses(
+						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
+						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://cloud.ibm.com/registration' ),
+					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
+				),
 			]
 		);
 

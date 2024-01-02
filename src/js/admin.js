@@ -31,10 +31,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 } );
 
 ( () => {
+	return;
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
-	const $userField = document.getElementById(
-		'classifai-settings-watson_username'
-	);
+	const $userField = document.getElementById( 'username' );
 
 	if ( $toggler === null || $userField === null ) {
 		return;
@@ -50,20 +49,20 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 	if (
 		document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( 'tr' )
 	) {
 		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( 'tr' )
 			.getElementsByTagName( 'label' );
 	} else if (
 		document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( '.classifai-setup-form-field' )
 	) {
 		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( '.classifai-setup-form-field' )
 			.getElementsByTagName( 'label' );
 	}
