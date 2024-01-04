@@ -2,6 +2,7 @@
 namespace Classifai\Admin;
 
 use Classifai\Features\AudioTranscriptsGeneration;
+use Classifai\Features\Classification;
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\ImageCropping;
@@ -54,6 +55,7 @@ class BulkActions {
 	 */
 	public function register_language_processing_hooks() {
 		$this->language_processing_features = [
+			new Classification(),
 			new ExcerptGeneration(),
 			new TextToSpeech(),
 		];
@@ -98,6 +100,10 @@ class BulkActions {
 			$bulk_actions[ $feature::ID ] = $feature->get_label();
 
 			switch ( $feature::ID ) {
+				case Classification::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Classify', 'classifai' );
+					break;
+
 				case ExcerptGeneration::ID:
 					$bulk_actions[ $feature::ID ] = esc_html__( 'Generate Excerpt', 'classifai' );
 					break;
@@ -137,6 +143,11 @@ class BulkActions {
 
 		foreach ( $post_ids as $post_id ) {
 			switch ( $doaction ) {
+				case Classification::ID:
+					( new Classification() )->run( $post_id );
+					$action = $doaction;
+					break;
+
 				case ExcerptGeneration::ID:
 					$excerpt = ( new ExcerptGeneration() )->run( $post_id );
 					$action  = $doaction;
@@ -186,6 +197,14 @@ class BulkActions {
 			}
 
 			switch ( $feature::ID ) {
+				case Classification::ID:
+					$actions[ Classification::ID ] = sprintf(
+						'<a href="%s">%s</a>',
+						esc_url( wp_nonce_url( admin_url( sprintf( 'edit.php?action=%s&ids=%d&post_type=%s', Classification::ID, $post->ID, $post->post_type ) ), 'bulk-posts' ) ),
+						esc_html__( 'Classify', 'classifai' )
+					);
+					break;
+
 				case ExcerptGeneration::ID:
 					$actions[ ExcerptGeneration::ID ] = sprintf(
 						'<a href="%s">%s</a>',
@@ -474,6 +493,10 @@ class BulkActions {
 			case AudioTranscriptsGeneration::ID:
 				$action_text = __( 'Audio transcribed for', 'classifai' );
 				$post_type   = 'file';
+				break;
+
+			case Classification::ID:
+				$action_text = __( 'Classification done for', 'classifai' );
 				break;
 
 		}
