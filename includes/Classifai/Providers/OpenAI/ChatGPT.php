@@ -354,7 +354,7 @@ class ChatGPT extends Provider {
 		if ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$new_settings[ static::ID ]['generate_excerpt_prompt'] = $this->sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
 		}
-		
+
 		if ( $this->feature_instance instanceof ContentResizing ) {
 			$new_settings[ static::ID ]['number_of_suggestions'] = $this->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
 			$new_settings[ static::ID ]['condense_text_prompt']  = $this->sanitize_prompts( 'condense_text_prompt', $new_settings );
@@ -485,13 +485,19 @@ class ChatGPT extends Provider {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_assets( string $hook_suffix ) {
-		// Load asset in OpenAI ChatGPT settings page.
+		$prompt_features = array(
+			'feature_title_generation',
+			'feature_excerpt_generation',
+			'feature_content_resizing',
+		);
+
+		// Load jQuery UI Dialog for prompt deletion.
 		if (
 			(
 				'tools_page_classifai' === $hook_suffix
-				&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
-				&& 'language_processing' === $_GET['tab'] // phpcs:ignore
-				&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
+				&& ( isset( $_GET['tab'], $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& 'language_processing' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				&& in_array( $_GET['feature'], $prompt_features, true ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			) ||
 			'admin_page_classifai_setup' === $hook_suffix
 		) {
