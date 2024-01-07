@@ -39,6 +39,15 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
+		add_action(
+			'admin_footer',
+			static function () {
+				printf(
+					'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
+					esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
+				);
+			}
+		);
 	}
 
 	/**
@@ -177,6 +186,9 @@ class Plugin {
 			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
+
+		wp_enqueue_script( 'jquery-ui-dialog' );
+		wp_enqueue_style( 'wp-jquery-ui-dialog' );
 
 		wp_enqueue_script(
 			'classifai-admin-script',

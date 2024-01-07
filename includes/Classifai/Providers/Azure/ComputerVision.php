@@ -353,6 +353,7 @@ class ComputerVision extends Provider {
 		}
 
 		if ( ( new ImageTextExtraction() )->is_feature_enabled() ) {
+			add_filter( 'wp_generate_attachment_metadata', [ $this, 'perform_ocr_processing' ], 8, 2 );
 			add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 			add_filter( 'rest_api_init', [ $this, 'add_ocr_data_to_api_response' ] );
 		}
@@ -745,7 +746,7 @@ class ComputerVision extends Provider {
 		// Are we updating the OCR text?
 		if ( clean_input( 'rescan-ocr' ) ) {
 			$feature = new ImageTextExtraction();
-			$this->ocr_processing( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
+			$feature->run( wp_get_attachment_metadata( $attachment_id ), $attachment_id, true );
 		}
 	}
 
@@ -760,6 +761,10 @@ class ComputerVision extends Provider {
 	 * @return array Filtered attachment metadata.
 	 */
 	public function smart_crop_image( $metadata, $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return $metadata;
+		}
+
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
@@ -809,6 +814,10 @@ class ComputerVision extends Provider {
 	 * @return mixed
 	 */
 	public function generate_image_alt_tags( $metadata, $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return $metadata;
+		}
+
 		$feature = new ImageTagsGenerator();
 
 		if ( $feature->is_feature_enabled() ) {
@@ -842,6 +851,22 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Performs OCR processing on an image.
+	 *
+	 * @param array $metadata      The metadata for the image.
+	 * @param int   $attachment_id Post ID for the attachment.
+	 *
+	 * @return void
+	 */
+	public function perform_ocr_processing( $metadata, $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return $metadata;
+		}
+
+		return ( new ImageTextExtraction() )->run( $metadata, $attachment_id, true );
+	}
+
+	/**
 	 * Runs text recognition on the attachment.
 	 *
 	 * @since 1.6.0
@@ -854,6 +879,10 @@ class ComputerVision extends Provider {
 	 * @return array Filtered attachment metadata.
 	 */
 	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return $metadata;
+		}
+
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -989,7 +1018,7 @@ class ComputerVision extends Provider {
 		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
 
 		// Don't save tags if feature is disabled or user don't have access to use it.
-		if ( ! $this->is_feature_enabled( 'image_captions' ) ) {
+		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'invalid_settings', esc_html__( 'Image descriptive text feature is disabled.', 'classifai' ) );
 		}
 

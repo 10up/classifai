@@ -4,9 +4,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
 		);
-		cy.get( '#enable_transcripts' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -18,13 +18,13 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
 		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 
-		cy.get( '#enable_transcripts' ).check();
-		cy.get( '#openai_whisper_speech_to_text_roles_administrator' ).check();
+		cy.get( '#status' ).check();
+		cy.get( '#classifai_feature_audio_transcripts_generation_roles_administrator' ).check();
 		cy.get( '#submit' ).click();
 	} );
 
@@ -81,9 +81,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Disable features
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
 		);
-		cy.get( '#enable_transcripts' ).uncheck();
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is not available.
@@ -91,9 +91,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
 		);
-		cy.get( '#enable_transcripts' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -103,9 +103,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	it( 'Can enable/disable speech to text feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_whisper'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
 		);
-		cy.get( '#enable_transcripts' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		const options = {
@@ -115,9 +115,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Disable admin role.
 		cy.disableFeatureForRoles(
-			'speech_to_text',
-			[ 'administrator' ],
-			'openai_whisper'
+			'feature_audio_transcripts_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is not available.
@@ -125,9 +124,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Enable admin role.
 		cy.enableFeatureForRoles(
-			'speech_to_text',
-			[ 'administrator' ],
-			'openai_whisper'
+			'feature_audio_transcripts_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is available.
@@ -142,9 +140,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Disable admin role.
 		cy.disableFeatureForRoles(
-			'speech_to_text',
-			[ 'administrator' ],
-			'openai_whisper'
+			'feature_audio_transcripts_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is not available.
@@ -152,9 +149,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Enable feature for admin user.
 		cy.enableFeatureForUsers(
-			'speech_to_text',
-			[ 'admin' ],
-			'openai_whisper'
+			'feature_audio_transcripts_generation',
+			[ 'admin' ]
 		);
 
 		// Verify that the feature is available.
@@ -168,16 +164,16 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		};
 
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'speech_to_text', 'openai_whisper' );
+		cy.enableFeatureOptOut( 'feature_audio_transcripts_generation' );
 
 		// opt-out
-		cy.optOutFeature( 'speech_to_text' );
+		cy.optOutFeature( 'feature_audio_transcripts_generation' );
 
 		// Verify that the feature is not available.
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// opt-in
-		cy.optInFeature( 'speech_to_text' );
+		cy.optInFeature( 'feature_audio_transcripts_generation' );
 
 		// Verify that the feature is available.
 		cy.verifySpeechToTextEnabled( true, options );

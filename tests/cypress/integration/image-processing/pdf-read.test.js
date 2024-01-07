@@ -3,8 +3,8 @@ import { getPDFData } from '../../plugins/functions';
 describe( 'PDF read Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#enable_read_pdf' ).check();
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation' );
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 	} );
@@ -15,13 +15,13 @@ describe( 'PDF read Tests', () => {
 
 	let pdfEditLink = '';
 	it( 'Can save "PDF scanning" settings', () => {
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
+		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation' );
 
-		cy.get( '#url' )
+		cy.get( '#endpoint_url' )
 			.clear()
 			.type( 'http://e2e-test-image-processing.test' );
 		cy.get( '#api_key' ).clear().type( 'password' );
-		cy.get( '#enable_read_pdf' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -59,9 +59,9 @@ describe( 'PDF read Tests', () => {
 	it( 'Can enable/disable PDF scanning feature', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
 		);
-		cy.get( '#enable_read_pdf' ).uncheck();
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is not available.
@@ -72,9 +72,9 @@ describe( 'PDF read Tests', () => {
 
 		// Enable admin role.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
 		);
-		cy.get( '#enable_read_pdf' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -87,16 +87,15 @@ describe( 'PDF read Tests', () => {
 	it( 'Can enable/disable PDF scanning feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=computer_vision'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
 		);
-		cy.get( '#enable_read_pdf' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles(
-			'read_pdf',
-			[ 'administrator' ],
-			'computer_vision'
+			'feature_pdf_to_text_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is not available.
@@ -107,9 +106,8 @@ describe( 'PDF read Tests', () => {
 
 		// Enable admin role.
 		cy.enableFeatureForRoles(
-			'read_pdf',
-			[ 'administrator' ],
-			'computer_vision'
+			'feature_pdf_to_text_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is available.
@@ -122,9 +120,8 @@ describe( 'PDF read Tests', () => {
 	it( 'Can enable/disable PDF scanning feature by user', () => {
 		// Disable admin role.
 		cy.disableFeatureForRoles(
-			'read_pdf',
-			[ 'administrator' ],
-			'computer_vision'
+			'feature_pdf_to_text_generation',
+			[ 'administrator' ]
 		);
 
 		// Verify that the feature is not available.
@@ -134,7 +131,10 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers( 'read_pdf', [ 'admin' ], 'computer_vision' );
+		cy.enableFeatureForUsers(
+			'feature_pdf_to_text_generation',
+			[ 'admin' ]
+		);
 
 		// Verify that the feature is available.
 		cy.visit( pdfEditLink );
@@ -145,10 +145,10 @@ describe( 'PDF read Tests', () => {
 
 	it( 'User can opt-out PDF scanning feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'read_pdf', 'computer_vision' );
+		cy.enableFeatureOptOut( 'feature_pdf_to_text_generation' );
 
 		// opt-out
-		cy.optOutFeature( 'read_pdf' );
+		cy.optOutFeature( 'feature_pdf_to_text_generation' );
 
 		// Verify that the feature is not available.
 		cy.visit( pdfEditLink );
@@ -157,7 +157,7 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// opt-in
-		cy.optInFeature( 'read_pdf' );
+		cy.optInFeature( 'feature_pdf_to_text_generation' );
 
 		// Verify that the feature is available.
 		cy.visit( pdfEditLink );

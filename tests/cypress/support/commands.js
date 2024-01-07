@@ -128,15 +128,14 @@ Cypress.Commands.add( 'optInAllFeatures', () => {
  *
  * @param {string} feature  The feature to enable.
  * @param {string} roles    The roles to enable.
- * @param {string} provider The provider to enable.
  */
-Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles, provider ) => {
+Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${ provider }`
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
 	);
-	cy.get( `#${ feature }_role_based_access` ).check();
+	cy.get( `#role_based_access` ).check();
 	roles.forEach( ( role ) => {
-		cy.get( `#${ provider }_${ feature }_roles_${ role }` ).check();
+		cy.get( `#classifai_${ feature }_roles_${ role }` ).check();
 	} );
 	cy.get( '#submit' ).click();
 	cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -147,17 +146,17 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles, provider ) => {
  *
  * @param {string} feature  The feature to disable.
  * @param {string} roles    The roles to disable.
- * @param {string} provider The provider to disable.
  */
 Cypress.Commands.add(
 	'disableFeatureForRoles',
-	( feature, roles, provider ) => {
+	( feature, roles ) => {
 		cy.visit(
-			`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${ provider }`
+			`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
 		);
-		cy.get( `#${ feature }_role_based_access` ).check();
+		cy.get( '#status' ).check();
+		cy.get( `#role_based_access` ).check();
 		roles.forEach( ( role ) => {
-			cy.get( `#${ provider }_${ feature }_roles_${ role }` ).uncheck();
+			cy.get( `#classifai_${ feature }_roles_${ role }` ).uncheck();
 		} );
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -169,21 +168,21 @@ Cypress.Commands.add(
  *
  * @param {string} feature  The feature to enable.
  * @param {string} users    The users to enable.
- * @param {string} provider The provider to enable.
  */
-Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users, provider ) => {
+Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${ provider }`
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
 	);
-	cy.get( `#${ feature }_user_based_access` ).check();
-	cy.get( 'body' ).then( ( $body ) => {
+	cy.get( `#user_based_access` ).check();
+	cy.wait(1000)
+	cy.get( '.allowed_users_row' ).then( ( $body ) => {
 		if (
 			$body.find(
-				`#${ feature }_users-container .components-form-token-field__remove-token`
+				`.components-form-token-field__remove-token`
 			).length > 0
 		) {
 			cy.get(
-				`#${ feature }_users-container .components-form-token-field__remove-token`
+				`.components-form-token-field__remove-token`
 			).click( {
 				multiple: true,
 			} );
@@ -192,11 +191,11 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users, provider ) => {
 
 	users.forEach( ( user ) => {
 		cy.get(
-			`#${ feature }_users-container input.components-form-token-field__input`
+			`.allowed_users_row input.components-form-token-field__input`
 		).type( user );
-		cy.wait( 1000 );
+
 		cy.get(
-			'ul.components-form-token-field__suggestions-list li:nth-child(1)'
+			'[aria-label="admin (admin)"]'
 		).click();
 	} );
 	cy.get( '#submit' ).click();
@@ -207,16 +206,15 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users, provider ) => {
  * Enable user based opt-out for a feature.
  *
  * @param {string} feature  The feature to enable.
- * @param {string} provider The provider to enable.
  */
-Cypress.Commands.add( 'enableFeatureOptOut', ( feature, provider ) => {
+Cypress.Commands.add( 'enableFeatureOptOut', ( feature ) => {
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&provider=${ provider }`
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
 	);
-	cy.get( `#${ feature }_role_based_access` ).check();
-	cy.get( `#${ provider }_${ feature }_roles_administrator` ).check();
-	cy.get( `#${ feature }_user_based_access` ).uncheck();
-	cy.get( `#${ feature }_user_based_opt_out` ).check();
+	cy.get( `#role_based_access` ).check();
+	cy.get( `#classifai_${ feature }_roles_administrator` ).check();
+	cy.get( `#user_based_access` ).uncheck();
+	cy.get( `#user_based_opt_out` ).check();
 
 	cy.get( '#submit' ).click();
 	cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -324,10 +322,15 @@ Cypress.Commands.add(
  */
 Cypress.Commands.add( 'verifyTextToSpeechEnabled', ( enabled = true ) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
+	console.log( shouldExist )
 	cy.visit( '/wp-admin/edit.php' );
 	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
 	cy.closeWelcomeGuide();
-	cy.get( '.classifai-panel' ).click();
+	cy.get( 'body' ).then( $body => {
+		if ( $body.find( '.classifai-panel' ).length ) {
+			$body.find( '.classifai-panel' ).click();
+		}
+	} );
 	cy.get( '#classifai-audio-controls__preview-btn' ).should( shouldExist );
 } );
 
