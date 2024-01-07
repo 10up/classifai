@@ -76,7 +76,7 @@ class RecommendedContent extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable title generation', 'classifai' ),
+			esc_html__( 'Enable Recommended content block.', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -84,7 +84,7 @@ class RecommendedContent extends Feature {
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['status'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
+				'description'   => __( 'Enables the ability to generate recommended content data for the block.', 'classifai' ),
 			]
 		);
 
@@ -170,14 +170,14 @@ class RecommendedContent extends Feature {
 	 */
 	public function run( ...$args ) {
 		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? ChatGPT::ID;
+		$provider_id       = $settings['provider'] ?? PersonalizerProvider::ID;
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 		$result            = '';
 
-		if ( ChatGPT::ID === $provider_instance::ID ) {
-			/** @var ChatGPT $provider_instance */
+		if ( PersonalizerProvider::ID === $provider_instance::ID ) {
+			/** @var PersonalizerProvider $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'generate_titles' ],
+				[ $provider_instance, 'personalizer_send_reward' ],
 				[ ...$args ]
 			);
 		}
