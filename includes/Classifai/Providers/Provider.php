@@ -135,6 +135,15 @@ abstract class Provider {
 	}
 
 	/**
+	 * Default settings for Provider.
+	 *
+	 * @return array
+	 */
+	public function get_default_settings() {
+		return [];
+	}
+
+	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 * This is called by the Service.
 	 *
