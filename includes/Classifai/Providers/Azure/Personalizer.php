@@ -7,6 +7,7 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
 use Classifai\Blocks;
+use Classifai\Features\RecommendedContent;
 use WP_Error;
 use UAParser\Parser;
 
@@ -32,89 +33,51 @@ class Personalizer extends Provider {
 	/**
 	 * Personalizer constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service = null ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'Microsoft Azure',
 			'AI Personalizer',
-			'personalizer',
-			$service
+			'personalizer'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'recommended_content' => __( 'Recommended content block', 'classifai' ),
-		);
-	}
+		$this->feature_instance = $feature_instance;
 
-	/**
-	 * Resets settings for the Personalizer provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for Personalizer
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		return [];
-	}
-
-	/**
-	 * Get the settings and allow for settings default values.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 *
-	 * @return string|array|mixed
-	 */
-	public function get_settings( $index = false ) {
-		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
-
-		// Backward compatibility for enable feature setting.
-		if ( ! empty( $settings ) && ! isset( $settings['enable_recommended_content'] ) ) {
-			$settings['enable_recommended_content'] = $settings['authenticated'] ?? $defaults['enable_recommended_content'];
-		}
-
-		$settings = wp_parse_args( $settings, $defaults );
-
-		if ( $index && isset( $settings[ $index ] ) ) {
-			return $settings[ $index ];
-		}
-
-		return $settings;
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
 	 * Register the functionality.
 	 */
 	public function register() {
-		if ( $this->is_enabled( 'recommended_content' ) ) {
+		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
 			// Setup Blocks
 			Blocks\setup();
 		}
 	}
 
 	/**
-	 * Setup fields.
+	 * Render the provider fields.
+	 *
+	 * @return void
 	 */
-	public function setup_fields_sections() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-		$default_settings = $this->get_default_settings();
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
 		add_settings_field(
-			'url',
+			'endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
-				'label_for'     => 'url',
+				'option_index'  => static::ID,
+				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
-				'default_value' => $default_settings['url'],
+				'default_value' => $settings['endpoint_url'],
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				'description'   => sprintf(
 					wp_kses(
 						// translators: 1 - link to create a Personalizer resource.
@@ -130,73 +93,73 @@ class Personalizer extends Provider {
 				),
 			]
 		);
+
 		add_settings_field(
-			'api-key',
+			'api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
+				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-				'description'   => __( 'Azure AI Personalizer Key.', 'classifai' ),
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
-
-		add_settings_field(
-			'enable_recommended_content',
-			esc_html__( 'Recommend content', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_recommended_content',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_recommended_content'],
-				'description'   => __( 'Enables Recommended content block.', 'classifai' ),
-			]
-		);
-
-		$this->add_access_settings( 'recommended_content' );
 	}
 
 	/**
-	 * Sanitize settings.
+	 * Returns the default settings for this provider.
 	 *
-	 * @param array $settings The settings being saved.
-	 *
-	 * @return array|mixed
+	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->sanitize_access_settings( $settings, 'recommended_content' );
+	public function get_default_provider_settings() {
+		$common_settings = [
+			'endpoint_url'  => '',
+			'api_key'       => '',
+			'authenticated' => false,
+		];
 
-		if ( empty( $settings['enable_recommended_content'] ) || 1 !== (int) $settings['enable_recommended_content'] ) {
-			$new_settings['enable_recommended_content'] = 'no';
-		} else {
-			$new_settings['enable_recommended_content'] = '1';
+		switch ( $this->feature_instance::ID ) {
+			case RecommendedContent::ID:
+				return $common_settings;
 		}
 
-		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
-			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
+		return $common_settings;
+	}
+
+	/**
+	 * Sanitize the settings for this provider.
+	 *
+	 * @param array $new_settings The settings array.
+	 * @return array
+	 */
+	public function sanitize_settings( $new_settings ) {
+		$settings = $this->feature_instance->get_settings();
+
+		$new_settings['endpoint_url'] = esc_url_raw( $new_settings['endpoint_url'] ?? $settings['endpoint_url'] );
+		$new_settings['api_key']      = sanitize_text_field( $new_settings['api_key'] ?? $settings['api_key'] );
+
+		if ( ! empty( $new_settings['endpoint_url'] ) && ! empty( $new_settings['api_key'] ) ) {
+			$auth_check = $this->authenticate_credentials( $new_settings['endpoint_url'], $new_settings['api_key'] );
+
 			if ( is_wp_error( $auth_check ) ) {
 				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
 				$new_settings['authenticated']                               = false;
 			} else {
 				$new_settings['authenticated'] = true;
 			}
-			$new_settings['url']     = esc_url_raw( $settings['url'] );
-			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
 		} else {
 			$new_settings['authenticated'] = false;
-			$new_settings['url']           = '';
+			$new_settings['endpoint_url']  = '';
 			$new_settings['api_key']       = '';
 
 			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
 
 		if ( ! empty( $settings_errors ) ) {
-
 			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
 
 			foreach ( $settings_errors as $code => $message ) {
@@ -655,9 +618,10 @@ class Personalizer extends Provider {
 	 * @return object|string
 	 */
 	protected function personalizer_get_ranked_action( $rank_request ) {
-		$settings = $this->get_settings();
+		$feature  = new RecommendedContent();
+		$settings = $feature->get_settings( static::ID );
 		$result   = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $this->rank_endpoint,
+			trailingslashit( $settings['endpoint_url'] ) . $this->rank_endpoint,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -686,10 +650,12 @@ class Personalizer extends Provider {
 	 * @return object|string
 	 */
 	public function personalizer_send_reward( $event_id, $reward ) {
-		$settings        = $this->get_settings();
+		$feature  = new RecommendedContent();
+		$settings = $feature->get_settings( static::ID );
+
 		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
 		$result          = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $reward_endpoint,
+			trailingslashit( $settings['endpoint_url'] ) . $reward_endpoint,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -745,23 +711,25 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
+	 * Returns the debug information for the provider settings.
 	 *
-	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
-	 * @return array Keyed array of debug information.
-	 * @since 1.4.0
+	 * @return array
 	 */
-	public function get_provider_debug_information( $settings = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
+	public function get_debug_information() {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof RecommendedContent ) {
+			$debug_info[ __( 'API URL', 'classifai' ) ] = $provider_settings['endpoint_url'];
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) );
 		}
 
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )  => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )        => $settings['url'] ?? '',
-			__( 'Service Status', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) ),
-		];
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }

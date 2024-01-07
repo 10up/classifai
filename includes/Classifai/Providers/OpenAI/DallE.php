@@ -601,7 +601,7 @@ class DallE extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof ImageGeneration ) {
-			$debug_info[ __( 'Number of images', 'classifai' ) ]         = $provider_settings['number_of_images'];
+			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'];
 			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) );
 		}
 

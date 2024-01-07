@@ -17,11 +17,9 @@ class Personalizer extends Service {
 	 */
 	public function __construct() {
 		parent::__construct(
-			__( 'Recommended Content', 'classifai' ),
+			__( 'Recommendation Service', 'classifai' ),
 			'personalizer',
-			[
-				'Classifai\Providers\Azure\Personalizer',
-			]
+			self::get_service_providers()
 		);
 	}
 
@@ -34,6 +32,20 @@ class Personalizer extends Service {
 		add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 		add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 		add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
+	}
+
+	/**
+	 * Get service providers for Recommendation service.
+	 *
+	 * @return array
+	 */
+	public static function get_service_providers() {
+		return apply_filters(
+			'classifai_recommendation_service_providers',
+			[
+				'Classifai\Providers\Azure\Personalizer',
+			]
+		);
 	}
 
 	/**

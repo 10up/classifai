@@ -31,7 +31,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 } );
 
 ( () => {
-	return;
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
 	const $userField = document.getElementById( 'username' );
 

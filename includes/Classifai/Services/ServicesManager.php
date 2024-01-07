@@ -44,6 +44,7 @@ class ServicesManager {
 	public function register() {
 		add_filter( 'language_processing_features', [ $this, 'register_language_processing_features' ] );
 		add_filter( 'image_processing_features', [ $this, 'register_image_processing_features' ] );
+		add_filter( 'personalizer_features', [ $this, 'register_recommendation_service_features' ] );
 
 		foreach ( $this->services as $key => $service ) {
 			if ( class_exists( $service ) ) {
@@ -85,6 +86,15 @@ class ServicesManager {
 			'\Classifai\Features\ImageCropping',
 			'\Classifai\Features\ImageTextExtraction',
 			'\Classifai\Features\PDFTextExtraction',
+		];
+	}
+
+	/**
+	 * Registers providers under the Image Processing Service.
+	 */
+	public function register_recommendation_service_features() {
+		return [
+			'\Classifai\Features\RecommendedContent',
 		];
 	}
 

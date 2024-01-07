@@ -139,7 +139,7 @@ class UserProfile {
 			}
 
 			foreach ( $service_class->feature_classes as $feature_class ) {
-				if ( ! $feature_class instanceof Feature ) {
+				if ( ! $feature_class instanceof Feature || ! $feature_class->is_enabled() ) {
 					continue;
 				}
 
