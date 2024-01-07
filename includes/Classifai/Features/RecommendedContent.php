@@ -2,19 +2,20 @@
 
 namespace Classifai\Features;
 
-use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\OpenAI\Whisper;
+use Classifai\Services\Personalizer as PersonalizerService;
+use \Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
+use \Classifai\Providers\OpenAI\ChatGPT;
 
 /**
- * Class AudioTranscriptsGeneration
+ * Class RecommendedContent
  */
-class AudioTranscriptsGeneration extends Feature {
+class RecommendedContent extends Feature {
 	/**
 	 * ID of the current feature.
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_audio_transcripts_generation';
+	const ID = 'feature_recommended_content';
 
 	/**
 	 * Constructor.
@@ -26,7 +27,7 @@ class AudioTranscriptsGeneration extends Feature {
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
 		 */
-		$service_providers        = LanguageProcessing::get_service_providers();
+		$service_providers        = PersonalizerService::get_service_providers();
 		$this->provider_instances = $this->get_provider_instances( $service_providers );
 	}
 
@@ -38,7 +39,7 @@ class AudioTranscriptsGeneration extends Feature {
 	public function get_label() {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
-			__( 'Audio Transcripts Generation', 'classifai' )
+			__( 'Recommended Content', 'classifai' )
 		);
 	}
 
@@ -51,7 +52,7 @@ class AudioTranscriptsGeneration extends Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
-				Whisper::ID => __( 'OpenAI Whisper', 'classifai' ),
+				PersonalizerProvider::ID => __( 'Microsoft AI Personalizer', 'classifai' ),
 			]
 		);
 	}
@@ -75,7 +76,7 @@ class AudioTranscriptsGeneration extends Feature {
 
 		add_settings_field(
 			'status',
-			esc_html__( 'Enable audio transcription', 'classifai' ),
+			esc_html__( 'Enable title generation', 'classifai' ),
 			[ $this, 'render_input' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
@@ -83,7 +84,7 @@ class AudioTranscriptsGeneration extends Feature {
 				'label_for'     => 'status',
 				'input_type'    => 'checkbox',
 				'default_value' => $settings['status'],
-				'description'   => __( 'Enabling this will automatically generate transcripts for supported audio files.', 'classifai' ),
+				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
 			]
 		);
 
@@ -120,10 +121,10 @@ class AudioTranscriptsGeneration extends Feature {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
+	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'provider' => Whisper::ID,
+			'provider' => PersonalizerProvider::ID,
 		];
 
 		return apply_filters(
@@ -169,14 +170,14 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function run( ...$args ) {
 		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? Whisper::ID;
+		$provider_id       = $settings['provider'] ?? ChatGPT::ID;
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 		$result            = '';
 
-		if ( Whisper::ID === $provider_instance::ID ) {
-			/** @var Whisper $provider_instance */
+		if ( ChatGPT::ID === $provider_instance::ID ) {
+			/** @var ChatGPT $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'transcribe_audio' ],
+				[ $provider_instance, 'generate_titles' ],
 				[ ...$args ]
 			);
 		}

@@ -82,7 +82,7 @@ abstract class Feature {
 	protected function get_default_settings() {
 		return [
 			'status'             => '0',
-			'role_based_access'  => 'no',
+			'role_based_access'  => '1',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
 			'user_based_access'  => 'no',
 			'users'              => [],
