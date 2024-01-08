@@ -180,11 +180,11 @@ function get_watson_username() {
  * @return string
  */
 function get_classification_mode() {
-	$provider = new NLU( 'Natural Language Understanding' );
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$value    = isset( $settings['classification_mode'] ) ? $settings['classification_mode'] : '';
+	$feature  = new Classification();
+	$settings = $feature->get_settings();
+	$value    = $settings['classification_mode'] ?? '';
 
-	if ( $provider->is_configured() ) {
+	if ( $feature->is_feature_enabled() ) {
 		if ( empty( $value ) ) {
 			// existing users
 			// default: automatic_classification
@@ -207,11 +207,10 @@ function get_classification_mode() {
  * @return string
  */
 function get_classification_method() {
-	$provider = new NLU( 'language_processing' );
-	$settings = $provider->get_settings();
-	$value    = $settings['classification_method'] ?? '';
+	$feature  = new Classification();
+	$settings = $feature->get_settings();
 
-	return $value;
+	return $settings['classification_method'] ?? '';
 }
 
 /**

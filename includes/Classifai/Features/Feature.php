@@ -935,6 +935,46 @@ abstract class Feature {
 	}
 
 	/**
+	 * Render a group of radio.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_radio_group( array $args = array() ) {
+		$setting_index = $this->get_settings();
+		$value         = $setting_index[ $args['label_for'] ] ?? '';
+		$options       = $args['options'] ?? [];
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		// Iterate through all of our options.
+		foreach ( $options as $option_value => $option_label ) {
+			// Render radio button.
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s">
+						<input type="radio" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s]" value="%3$s" %4$s />
+						%5$s
+					</label>
+				</p>',
+				esc_attr( $this->get_option_name() ),
+				esc_attr( $args['label_for'] ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description">%s</span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
 	 * Render allowed users input field.
 	 *
 	 * @param array $args The args passed to add_settings_field
