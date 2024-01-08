@@ -227,8 +227,8 @@ class Classification extends Feature {
 		$new_settings                          = parent::sanitize_settings( $new_settings );
 		$new_settings['post_statuses']         = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
 		$new_settings['post_types']            = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
-		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 		$new_settings['classification_mode']   = sanitize_text_field( $new_settings['classification_mode'] ?? $settings['classification_mode'] );
+		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
@@ -257,7 +257,7 @@ class Classification extends Feature {
 		if ( NLU::ID === $provider_instance::ID ) {
 			/** @var NLU $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'classify_post' ],
+				[ $provider_instance, 'classify' ],
 				[ ...$args ]
 			);
 		} else if ( Embeddings::ID === $provider_instance::ID ) {

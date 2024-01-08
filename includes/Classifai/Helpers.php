@@ -466,8 +466,8 @@ function get_feature_threshold( $feature ) {
 function get_feature_taxonomy( $classify_by = '' ) {
 	$taxonomy = 0;
 
-	$featuse  = new Classification();
-	$settings = $featuse->get_settings( $featuse::ID );
+	$feature  = new Classification();
+	$settings = $feature->get_settings( NLU::ID );
 
 	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
 		$taxonomy = $settings[ $classify_by . '_taxonomy' ];

@@ -953,7 +953,7 @@ abstract class Feature {
 			printf(
 				'<p>
 					<label for="%1$s_%2$s_%3$s">
-						<input type="radio" id="%1$s_%2$s_%3$s" name="classifai_%1$s[%2$s]" value="%3$s" %4$s />
+						<input type="radio" id="%1$s_%2$s_%3$s" name="%1$s[%2$s]" value="%3$s" %4$s />
 						%5$s
 					</label>
 				</p>',
