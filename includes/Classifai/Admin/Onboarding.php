@@ -328,14 +328,14 @@ class Onboarding {
 	 * Sanitize variables using sanitize_text_field and wp_unslash. Arrays are cleaned recursively.
 	 * Non-scalar values are ignored.
 	 *
-	 * @param string|array $var Data to sanitize.
+	 * @param string|array $data Data to sanitize.
 	 * @return string|array
 	 */
-	public function classifai_sanitize( $var ) {
-		if ( is_array( $var ) ) {
-			return array_map( array( $this, 'classifai_sanitize' ), $var );
+	public function classifai_sanitize( $data ) {
+		if ( is_array( $data ) ) {
+			return array_map( array( $this, 'classifai_sanitize' ), $data );
 		} else {
-			return is_scalar( $var ) ? sanitize_text_field( wp_unslash( $var ) ) : $var;
+			return is_scalar( $data ) ? sanitize_text_field( wp_unslash( $data ) ) : $data;
 		}
 	}
 
@@ -663,5 +663,4 @@ class Onboarding {
 
 		return $configured_features;
 	}
-
 }

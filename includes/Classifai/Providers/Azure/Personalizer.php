@@ -330,14 +330,14 @@ class Personalizer extends Provider {
 			$exclude = $attributes['excludeId'];
 			$actions = array_filter(
 				$actions,
-				function( $ele ) use ( $exclude ) {
+				function ( $ele ) use ( $exclude ) {
 					return $ele['id'] && absint( $ele['id'] ) !== absint( $exclude );
 				}
 			);
 		}
 
 		$action_ids = array_map(
-			function( $ele ) {
+			function ( $ele ) {
 				return $ele['id'];
 			},
 			$actions
@@ -423,20 +423,20 @@ class Personalizer extends Provider {
 			// Sort ranking by probability.
 			usort(
 				$ranking,
-				function( $a, $b ) {
+				function ( $a, $b ) {
 					return $a->probability - $b->probability;
 				}
 			);
 
 			$recommended_ids = array_map(
-				function( $ele ) {
+				function ( $ele ) {
 					return absint( $ele->id );
 				},
 				$ranking
 			);
 			$recommended_ids = array_filter(
 				$recommended_ids,
-				function( $ele ) use ( $rewarded_post ) {
+				function ( $ele ) use ( $rewarded_post ) {
 					return $ele && absint( $ele ) !== absint( $rewarded_post );
 				}
 			);
@@ -652,11 +652,11 @@ class Personalizer extends Provider {
 	/**
 	 * Get array of words from string. Words as key of array.
 	 *
-	 * @param string $string String to get words from.
+	 * @param string $text String of text to get words from.
 	 * @return array
 	 */
-	protected function get_string_words( $string ) {
-		$str_array = preg_split( '/\s+/', $string );
+	protected function get_string_words( $text ) {
+		$str_array = preg_split( '/\s+/', $text );
 		$words     = array();
 		foreach ( $str_array as $str ) {
 			$words[ $str ] = 1;

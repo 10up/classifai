@@ -44,5 +44,4 @@ class CategoryTaxonomy extends AbstractTaxonomy {
 		return \Classifai\get_feature_enabled( 'category' ) &&
 			\Classifai\get_feature_taxonomy( 'category' ) === $this->get_name();
 	}
-
 }

@@ -44,5 +44,4 @@ class ConceptTaxonomy extends AbstractTaxonomy {
 		return \Classifai\get_feature_enabled( 'concept' ) &&
 			\Classifai\get_feature_taxonomy( 'concept' ) === $this->get_name();
 	}
-
 }
