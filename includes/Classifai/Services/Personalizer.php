@@ -5,10 +5,10 @@
 
 namespace Classifai\Services;
 
-use function Classifai\find_provider_class;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
+use function Classifai\find_provider_class;
 
 class Personalizer extends Service {
 

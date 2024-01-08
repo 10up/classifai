@@ -44,5 +44,4 @@ class KeywordTaxonomy extends AbstractTaxonomy {
 		return \Classifai\get_feature_enabled( 'keyword' ) &&
 			\Classifai\get_feature_taxonomy( 'keyword' ) === $this->get_name();
 	}
-
 }

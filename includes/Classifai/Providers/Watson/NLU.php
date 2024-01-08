@@ -333,7 +333,7 @@ class NLU extends Provider {
 		add_settings_section(
 			$this->get_option_name(),
 			$this->provider_service_name,
-			function() {
+			function () {
 				printf(
 					wp_kses(
 						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
@@ -369,7 +369,6 @@ class NLU extends Provider {
 						);
 					echo '</strong></p></div>';
 				}
-
 			},
 			$this->get_option_name()
 		);
@@ -690,13 +689,13 @@ class NLU extends Provider {
 			$supported_post_types,
 			'classifai_process_content',
 			array(
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+				'get_callback'    => function ( $data ) {
+					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
-				'update_callback' => function ( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
 				'schema'          => [
 					'type'    => 'string',

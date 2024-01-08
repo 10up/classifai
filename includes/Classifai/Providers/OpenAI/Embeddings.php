@@ -514,7 +514,7 @@ class Embeddings extends Provider {
 					'label' => get_term( $term_id )->name,
 					'score' => $similarity,
 				];
-				$term_added++;
+				++$term_added;
 			}
 
 			// Only add the number of terms specified in settings.
@@ -522,7 +522,7 @@ class Embeddings extends Provider {
 				$terms = array_slice( $terms, 0, $number_to_add, true );
 			}
 
-			$index++;
+			++$index;
 		}
 
 		return $result;
@@ -785,13 +785,13 @@ class Embeddings extends Provider {
 			$supported_post_types,
 			'classifai_process_content',
 			[
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+				'get_callback'    => function ( $data ) {
+					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
-				'update_callback' => function ( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
 				'schema'          => [
 					'type'    => 'string',

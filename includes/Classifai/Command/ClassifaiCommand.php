@@ -109,7 +109,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} else {
 			\WP_CLI::log( 'No posts to classify.' );
 		}
-
 	}
 
 	/**
@@ -303,11 +302,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-							$errors ++;
+							++$errors;
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -316,7 +315,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -334,7 +333,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
 					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -342,7 +341,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$post_type = get_post_type( $post_id );
 				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
 					\WP_CLI::log( sprintf( 'The "%s" post type is not enabled for Text to Speech processing', $post_type ) );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -351,12 +350,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-						$errors ++;
+						++$errors;
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -434,7 +433,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
 				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -443,12 +442,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
-						$errors ++;
+						++$errors;
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -486,7 +485,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
 					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
-						$errors ++;
+						++$errors;
 						continue;
 					}
 
@@ -495,11 +494,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
-							$errors ++;
+							++$errors;
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -508,7 +507,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		}
 
@@ -613,7 +612,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					// Don't process if an item has an existing excerpt and we aren't forcing it.
 					if ( '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 						\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post->ID ) );
-						$skipped ++;
+						++$skipped;
 						continue;
 					}
 
@@ -621,7 +620,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
-						$errors ++;
+						++$errors;
 						continue;
 					}
 
@@ -637,7 +636,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						);
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -646,7 +645,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -666,7 +665,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Don't process if an item has an existing excerpt and we aren't forcing it.
 				if ( $post && '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 					\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post_id ) );
-					$skipped ++;
+					++$skipped;
 					continue;
 				}
 
@@ -674,7 +673,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				if ( is_wp_error( $result ) ) {
 					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -691,7 +690,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -919,7 +918,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} else {
 			\WP_CLI::error( "Cropped $total_success images, $total_errors errors." );
 		}
-
 	}
 
 	/**
@@ -1018,11 +1016,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
-							$errors ++;
+							++$errors;
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -1031,7 +1029,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -1049,7 +1047,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
 					\WP_CLI::error( sprintf( 'Item ID %d does not exist', $post_id ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -1057,7 +1055,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$post_type = get_post_type( $post_id );
 				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
 					\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -1066,12 +1064,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
-						$errors ++;
+						++$errors;
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -1242,7 +1240,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::warning( "Failed to classify $post_id: " . $output->get_error_message() );
 		}
 	}
-
 }
 
 try {

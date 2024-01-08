@@ -8,12 +8,11 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
-use function Classifai\get_asset_info;
-use function Classifai\render_disable_feature_link;
-
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
+use function Classifai\get_asset_info;
+use function Classifai\render_disable_feature_link;
 
 class DallE extends Provider {
 

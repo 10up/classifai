@@ -368,5 +368,4 @@ class OCR {
 
 		return $rtn;
 	}
-
 }

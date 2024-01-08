@@ -475,11 +475,11 @@ class Speech extends Provider {
 			$supported_post_types,
 			'classifai_synthesize_speech',
 			array(
-				'get_callback' => function( $object ) {
-					$audio_id = get_post_meta( $object['id'], self::AUDIO_ID_KEY, true );
+				'get_callback' => function ( $data ) {
+					$audio_id = get_post_meta( $data['id'], self::AUDIO_ID_KEY, true );
 					if (
-						( $this->get_audio_generation_initial_state( $object['id'] ) && ! $audio_id ) ||
-						( $this->get_audio_generation_subsequent_state( $object['id'] ) && $audio_id )
+						( $this->get_audio_generation_initial_state( $data['id'] ) && ! $audio_id ) ||
+						( $this->get_audio_generation_subsequent_state( $data['id'] ) && $audio_id )
 					) {
 						return true;
 					} else {
@@ -497,18 +497,18 @@ class Speech extends Provider {
 			$supported_post_types,
 			'classifai_display_generated_audio',
 			array(
-				'get_callback'    => function( $object ) {
+				'get_callback'    => function ( $data ) {
 					// Default to display the audio if available.
-					if ( metadata_exists( 'post', $object['id'], self::DISPLAY_GENERATED_AUDIO ) ) {
-						return (bool) get_post_meta( $object['id'], self::DISPLAY_GENERATED_AUDIO, true );
+					if ( metadata_exists( 'post', $data['id'], self::DISPLAY_GENERATED_AUDIO ) ) {
+						return (bool) get_post_meta( $data['id'], self::DISPLAY_GENERATED_AUDIO, true );
 					}
 					return true;
 				},
-				'update_callback' => function( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					if ( $value ) {
-						delete_post_meta( $object->ID, self::DISPLAY_GENERATED_AUDIO );
+						delete_post_meta( $data->ID, self::DISPLAY_GENERATED_AUDIO );
 					} else {
-						update_post_meta( $object->ID, self::DISPLAY_GENERATED_AUDIO, false );
+						update_post_meta( $data->ID, self::DISPLAY_GENERATED_AUDIO, false );
 					}
 				},
 				'schema'          => [
@@ -522,8 +522,8 @@ class Speech extends Provider {
 			$supported_post_types,
 			'classifai_post_audio_id',
 			array(
-				'get_callback' => function( $object ) {
-					$post_audio_id = get_post_meta( $object['id'], self::AUDIO_ID_KEY, true );
+				'get_callback' => function ( $data ) {
+					$post_audio_id = get_post_meta( $data['id'], self::AUDIO_ID_KEY, true );
 					return (int) $post_audio_id;
 				},
 				'schema'       => [
@@ -811,7 +811,6 @@ class Speech extends Provider {
 
 			<?php
 		}
-
 	}
 
 	/**

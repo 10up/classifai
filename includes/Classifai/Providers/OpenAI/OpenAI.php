@@ -32,7 +32,7 @@ trait OpenAI {
 		add_settings_section(
 			$this->feature_instance->get_option_name(),
 			$this->provider_service_name,
-			function() {
+			function () {
 				printf(
 					wp_kses(
 						/* translators: %1$s is replaced with the OpenAI sign up URL */
@@ -301,5 +301,4 @@ trait OpenAI {
 
 		return $taxonomies;
 	}
-
 }
