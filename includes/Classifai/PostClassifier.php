@@ -180,5 +180,4 @@ class PostClassifier {
 
 		return $features;
 	}
-
 }

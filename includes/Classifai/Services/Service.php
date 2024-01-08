@@ -5,8 +5,8 @@
 
 namespace Classifai\Services;
 
-use function Classifai\find_provider_class;
 use WP_Error;
+use function Classifai\find_provider_class;
 
 abstract class Service {
 
@@ -253,7 +253,7 @@ abstract class Service {
 	 * @since 1.4.0
 	 */
 	public function get_service_debug_information() {
-		$make_line = function( $provider ) {
+		$make_line = function ( $provider ) {
 			return [
 				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
 				'value' => $provider->get_provider_debug_information(),
@@ -284,5 +284,4 @@ abstract class Service {
 
 		return true;
 	}
-
 }

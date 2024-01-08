@@ -382,4 +382,3 @@ class SmartCropping {
 		return new \WP_Error( 'classifai_smart_cropping_failed', 'A Smart Cropping error occurred.' );
 	}
 }
-

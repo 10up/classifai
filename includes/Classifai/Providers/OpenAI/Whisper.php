@@ -7,9 +7,8 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use function Classifai\clean_input;
-
 use WP_Error;
+use function Classifai\clean_input;
 
 class Whisper extends Provider {
 
@@ -337,5 +336,4 @@ class Whisper extends Provider {
 			__( 'Latest response', 'classifai' )      => $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) ),
 		];
 	}
-
 }

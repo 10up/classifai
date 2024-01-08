@@ -15,8 +15,8 @@ use function Classifai\get_asset_info;
  * @return void
  */
 function setup() {
-	$n = function( $function ) {
-		return __NAMESPACE__ . "\\$function";
+	$n = function ( $function_name ) {
+		return __NAMESPACE__ . "\\$function_name";
 	};
 
 	add_action( 'enqueue_block_assets', $n( 'blocks_styles' ) );

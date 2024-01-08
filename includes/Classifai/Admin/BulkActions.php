@@ -454,5 +454,4 @@ class BulkActions {
 
 		return $actions;
 	}
-
 }
