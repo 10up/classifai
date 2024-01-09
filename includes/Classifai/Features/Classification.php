@@ -182,6 +182,13 @@ class Classification extends Feature {
 		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 	}
 
+	/**
+	 * Renders the previewer window for the feature.
+	 *
+	 * @param string $active_feature The ID of the current feature.
+	 *
+	 * @return void
+	 */
 	public function render_previewer( $active_feature = '' ) {
 		if ( static::ID !== $active_feature ) {
 			return;
