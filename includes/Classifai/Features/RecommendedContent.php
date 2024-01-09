@@ -21,8 +21,6 @@ class RecommendedContent extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
-
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.

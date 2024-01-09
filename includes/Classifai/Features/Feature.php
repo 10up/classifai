@@ -29,9 +29,9 @@ abstract class Feature {
 	public $provider_instances = [];
 
 	/**
-	 * Feature constructor.
+	 * Set up necessary hooks.
 	 */
-	public function __construct() {
+	public function setup() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
