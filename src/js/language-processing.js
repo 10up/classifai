@@ -218,7 +218,7 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		if ( ! nonce ) {
+		if ( ! nonceEl ) {
 			return;
 		}
 
@@ -228,7 +228,7 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewEmeddings );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonce.value;
+		const previewerNonce = nonceEl.value;
 
 		/**
 		 * Live preview features.
