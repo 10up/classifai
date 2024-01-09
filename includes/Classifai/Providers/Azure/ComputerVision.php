@@ -367,7 +367,7 @@ class ComputerVision extends Provider {
 			'attachment',
 			'classifai_has_ocr',
 			[
-				'get_callback' => function( $params ) {
+				'get_callback' => function ( $params ) {
 					return ! empty( get_post_meta( $params['id'], 'classifai_computer_vision_ocr', true ) );
 				},
 				'schema'       => [

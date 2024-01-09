@@ -5,8 +5,8 @@
 
 namespace Classifai\Services;
 
-use function Classifai\find_provider_class;
 use WP_Error;
+use function Classifai\find_provider_class;
 
 abstract class Service {
 
@@ -83,7 +83,9 @@ abstract class Service {
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
 			foreach ( $this->features as $feature ) {
 				if ( class_exists( $feature ) ) {
-					$this->feature_classes[] = new $feature();
+					$feature_instance = new $feature();
+					$this->feature_classes[] = $feature_instance;
+					$feature_instance->setup();
 				}
 			}
 		}
@@ -167,6 +169,7 @@ abstract class Service {
 						submit_button();
 					?>
 					</form>
+					<?php do_action( 'classifai_after_feature_settings_form', $active_feature ); ?>
 					<?php
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
@@ -303,5 +306,4 @@ abstract class Service {
 
 		return true;
 	}
-
 }

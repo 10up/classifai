@@ -82,5 +82,4 @@ trait Whisper {
 
 		return $process;
 	}
-
 }

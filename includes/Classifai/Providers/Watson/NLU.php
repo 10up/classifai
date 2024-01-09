@@ -333,7 +333,7 @@ class NLU extends Provider {
 		add_settings_section(
 			$this->get_option_name(),
 			$this->provider_service_name,
-			function() {
+			function () {
 				printf(
 					wp_kses(
 						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
@@ -369,7 +369,6 @@ class NLU extends Provider {
 						);
 					echo '</strong></p></div>';
 				}
-
 			},
 			$this->get_option_name()
 		);
@@ -690,13 +689,13 @@ class NLU extends Provider {
 			$supported_post_types,
 			'classifai_process_content',
 			array(
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+				'get_callback'    => function ( $data ) {
+					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
-				'update_callback' => function ( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
 				'schema'          => [
 					'type'    => 'string',
@@ -744,6 +743,11 @@ class NLU extends Provider {
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
 					),
+					'linkTerms' => array(
+						'type'        => 'boolean',
+						'description' => esc_html__( 'Whether to link terms or not.', 'classifai' ),
+						'default'     => true,
+					),
 				),
 				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
 			]
@@ -758,7 +762,8 @@ class NLU extends Provider {
 	 * @return array|bool|string|WP_Error
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
+		$post_id    = $request->get_param( 'id' );
+		$link_terms = $request->get_param( 'linkTerms' );
 
 		if ( empty( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
@@ -766,7 +771,10 @@ class NLU extends Provider {
 
 		$result = $this->rest_endpoint_callback(
 			$post_id,
-			'classify'
+			'classify',
+			[
+				'link_terms' => $link_terms,
+			]
 		);
 
 		return rest_ensure_response(
@@ -830,7 +838,7 @@ class NLU extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'classify':
-				$return = ( new Classification() )->run( $post_id );
+				$return = ( new Classification() )->run( $post_id, $args['link_terms'] ?? true );
 				break;
 		}
 
@@ -930,10 +938,11 @@ class NLU extends Provider {
 	 * Existing terms relationships are removed before classification.
 	 *
 	 * @param int $post_id the post to classify & link
+	 * @param bool $link_terms Whether to link the terms to the post.
 	 *
 	 * @return array
 	 */
-	public function classify( $post_id ) {
+	public function classify( $post_id, $link_terms = true ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -955,23 +964,25 @@ class NLU extends Provider {
 
 		$classifier = new \Classifai\PostClassifier();
 
-		if ( \Classifai\get_feature_enabled( 'category' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+		if ( $link_terms ) {
+			if ( \Classifai\get_feature_enabled( 'category' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			}
+	
+			if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			}
+	
+			if ( \Classifai\get_feature_enabled( 'concept' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			}
+	
+			if ( \Classifai\get_feature_enabled( 'entity' ) ) {
+				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			}
 		}
 
-		if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
-		}
-
-		if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-			wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
-		}
-
-		$output = $classifier->classify_and_link( $post_id );
+		$output = $classifier->classify_and_link( $post_id, [], $link_terms );
 
 		if ( is_wp_error( $output ) ) {
 			update_post_meta(

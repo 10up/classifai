@@ -23,8 +23,6 @@ class Classification extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		parent::__construct();
-
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -110,6 +108,38 @@ class Classification extends Feature {
 			]
 		);
 
+		add_settings_field(
+			'classification_mode',
+			esc_html__( 'Classification mode', 'classifai' ),
+			[ $this, 'render_radio_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'classification_mode',
+				'default_value' => $settings['classification_mode'],
+				'options'       => array(
+					'manual_review'            => __( 'Manual review', 'classifai' ),
+					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
+				),
+			]
+		);
+
+		add_settings_field(
+			'classification_method',
+			esc_html__( 'Classification method', 'classifai' ),
+			[ $this, 'render_radio_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'classification_method',
+				'default_value' => $settings['classification_method'],
+				'options'       => array(
+					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
+					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
+				),
+			]
+		);
+
 		$post_types        = get_post_types_for_language_settings();
 		$post_type_options = array();
 
@@ -149,6 +179,85 @@ class Classification extends Feature {
 		 * that are registered to the feature.
 		 */
 		$this->render_provider_fields();
+		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
+	}
+
+	/**
+	 * Renders the previewer window for the feature.
+	 *
+	 * @param string $active_feature The ID of the current feature.
+	 *
+	 * @return void
+	 */
+	public function render_previewer( $active_feature = '' ) {
+		if ( static::ID !== $active_feature ) {
+			return;
+		}
+
+		$settings = $this->get_settings();
+
+		if ( ! $settings['status'] ) {
+			return;
+		}
+
+		?>
+		<div id="classifai-post-preview-app">
+			<?php
+				$supported_post_statuses = \Classifai\get_supported_post_statuses();
+				$supported_post_types    = \Classifai\get_supported_post_types();
+
+				$posts_to_preview = get_posts(
+					array(
+						'post_type'      => $supported_post_types,
+						'post_status'    => $supported_post_statuses,
+						'posts_per_page' => 10,
+					)
+				);
+
+				$features = array(
+					'category' => array(
+						'name'    => esc_html__( 'Category', 'classifai' ),
+						'enabled' => \Classifai\get_feature_enabled( 'category' ),
+						'plural'  => 'categories',
+					),
+					'keyword'  => array(
+						'name'    => esc_html__( 'Keyword', 'classifai' ),
+						'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
+						'plural'  => 'keywords',
+					),
+					'entity'   => array(
+						'name'    => esc_html__( 'Entity', 'classifai' ),
+						'enabled' => \Classifai\get_feature_enabled( 'entity' ),
+						'plural'  => 'entities',
+					),
+					'concept'  => array(
+						'name'    => esc_html__( 'Concept', 'classifai' ),
+						'enabled' => \Classifai\get_feature_enabled( 'concept' ),
+						'plural'  => 'concepts',
+					),
+				);
+			?>
+			<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
+			<div id="classifai-post-preview-controls">
+				<select id="classifai-preview-post-selector">
+					<?php foreach ( $posts_to_preview as $post ) : ?>
+						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<?php wp_nonce_field( "classifai-previewer-action", "classifai-previewer-nonce" ); ?>
+				<button type="button" class="button" id="get-classifier-preview-data-btn">
+					<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
+				</button>
+			</div>
+			<div id="classifai-post-preview-wrapper">
+				<?php foreach ( $features as $feature_slug => $feature ) : ?>
+					<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
+						<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -164,9 +273,11 @@ class Classification extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'post_statuses' => [],
-			'post_types'    => [],
-			'provider'      => NLU::ID,
+			'post_statuses'         => [],
+			'post_types'            => [],
+			'classification_mode'   => 'automatic_classification',
+			'classification_method' => 'existing_terms',
+			'provider'              => NLU::ID,
 		];
 
 		return apply_filters(
@@ -190,9 +301,11 @@ class Classification extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings                  = parent::sanitize_settings( $new_settings );
-		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
-		$new_settings['post_types']    = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
+		$new_settings                          = parent::sanitize_settings( $new_settings );
+		$new_settings['post_statuses']         = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
+		$new_settings['post_types']            = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
+		$new_settings['classification_mode']   = sanitize_text_field( $new_settings['classification_mode'] ?? $settings['classification_mode'] );
+		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
@@ -221,7 +334,7 @@ class Classification extends Feature {
 		if ( NLU::ID === $provider_instance::ID ) {
 			/** @var NLU $provider_instance */
 			$result = call_user_func_array(
-				[ $provider_instance, 'classify_post' ],
+				[ $provider_instance, 'classify' ],
 				[ ...$args ]
 			);
 		} else if ( Embeddings::ID === $provider_instance::ID ) {

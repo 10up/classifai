@@ -229,5 +229,4 @@ class RSSImporterCommand extends \WP_CLI_Command {
 			return $response;
 		}
 	}
-
 }

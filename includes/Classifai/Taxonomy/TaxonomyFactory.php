@@ -96,7 +96,7 @@ class TaxonomyFactory {
 
 			return $instance;
 		} else {
-			throw new \Exception( "Mapping not found for Taxonomy: $taxonomy " );
+			throw new \Exception( esc_html( "Mapping not found for Taxonomy: $taxonomy " ) );
 		}
 	}
 
@@ -118,5 +118,4 @@ class TaxonomyFactory {
 	public function get_supported_taxonomies() {
 		return array_keys( $this->mapping );
 	}
-
 }

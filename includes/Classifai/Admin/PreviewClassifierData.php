@@ -20,7 +20,7 @@ class PreviewClassifierData {
 	public function get_post_classifier_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-action' ) ) {
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
@@ -45,13 +45,7 @@ class PreviewClassifierData {
 	public function get_post_search_results() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if (
-			! $nonce
-			|| (
-				! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' )
-				&& ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-nonce' )
-			)
-		) {
+		if ( ! ( $nonce && wp_verify_nonce( $nonce, 'classifai-previewer-nonce' ) ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
@@ -105,7 +99,7 @@ class PreviewClassifierData {
 			if ( 'categories' === $feature ) {
 				$classified_data[ $feature ] = array_filter(
 					$classified_data[ $feature ],
-					function( $item ) use ( $taxonomy ) {
+					function ( $item ) use ( $taxonomy ) {
 						$keep  = false;
 						$parts = explode( '/', $item['label'] );
 						$parts = array_filter( $parts );
@@ -128,7 +122,7 @@ class PreviewClassifierData {
 
 			$classified_data[ $feature ] = array_filter(
 				$classified_data[ $feature ],
-				function( $item ) use ( $taxonomy, $key ) {
+				function ( $item ) use ( $taxonomy, $key ) {
 					$name = $item['text'];
 					if ( 'keyword' === $key ) {
 						$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
@@ -148,4 +142,3 @@ class PreviewClassifierData {
 		return $classified_data;
 	}
 }
-

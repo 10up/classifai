@@ -95,7 +95,6 @@ const ClassifAIGenerateTagsButton = () => {
 				setFeatureTaxonomies( resp.feature_taxonomies );
 			}
 
-			resp.terms = resp.terms?.data?.terms;
 			const taxonomies = resp.terms;
 			const taxTerms = {};
 			const taxTermsExisting = {};
@@ -279,7 +278,7 @@ const ClassifAIGenerateTagsButton = () => {
 					{ __( 'Save', 'classifai' ) }
 				</Button>
 			</div>
-			<DisableFeatureButton feature="feature_classification" />
+			<DisableFeatureButton feature="content_classification" />
 		</>
 	);
 

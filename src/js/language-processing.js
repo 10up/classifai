@@ -4,20 +4,16 @@ import '../scss/language-processing.scss';
 ( () => {
 	let featureStatuses = {};
 
-	const nonceElementNLU = document.getElementById(
-		'classifai-previewer-watson_nlu-nonce'
+	const nonceEl = document.getElementById(
+		'classifai-previewer-nonce'
 	);
 
-	const nonceElementEmbeddings = document.getElementById(
-		'classifai-previewer-openai_embeddings-nonce'
-	);
-
-	if ( ! nonceElementNLU && ! nonceElementEmbeddings ) {
+	if ( ! nonceEl ) {
 		return;
 	}
 
 	const previewWatson = () => {
-		if ( ! nonceElementNLU ) {
+		if ( ! nonceEl ) {
 			return;
 		}
 
@@ -27,21 +23,21 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewWatson );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElementNLU.value;
+		const previewerNonce = nonceEl.value;
 
 		/** Feature statuses. */
 		featureStatuses = {
 			categoriesStatus: document.getElementById(
-				'classifai-settings-category'
+				'category'
 			).checked,
 			keywordsStatus: document.getElementById(
-				'classifai-settings-keyword'
+				'keyword'
 			).checked,
 			entitiesStatus: document.getElementById(
-				'classifai-settings-entity'
+				'entity'
 			).checked,
 			conceptsStatus: document.getElementById(
-				'classifai-settings-concept'
+				'concept'
 			).checked,
 		};
 
@@ -54,23 +50,23 @@ import '../scss/language-processing.scss';
 
 		document
 			.querySelectorAll(
-				'#classifai-settings-category, #classifai-settings-keyword, #classifai-settings-entity, #classifai-settings-concept'
+				'#category, #keyword, #entity, #concept'
 			)
 			.forEach( ( item ) => {
 				item.addEventListener( 'change', ( e ) => {
-					if ( 'classifai-settings-category' === e.target.id ) {
+					if ( 'category' === e.target.id ) {
 						featureStatuses.categoriesStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-keyword' === e.target.id ) {
+					if ( 'keyword' === e.target.id ) {
 						featureStatuses.keywordsStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-entity' === e.target.id ) {
+					if ( 'entity' === e.target.id ) {
 						featureStatuses.entitiesStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-concept' === e.target.id ) {
+					if ( 'concept' === e.target.id ) {
 						featureStatuses.conceptsStatus = e.target.checked;
 					}
 
@@ -101,21 +97,21 @@ import '../scss/language-processing.scss';
 			/** Category thresholds. */
 			const categoryThreshold = Number(
 				document.querySelector(
-					'#classifai-settings-category_threshold'
+					'#category_threshold'
 				).value
 			);
 			const keywordThreshold = Number(
 				document.querySelector(
-					'#classifai-settings-keyword_threshold'
+					'#keyword_threshold'
 				).value
 			);
 			const entityThreshold = Number(
-				document.querySelector( '#classifai-settings-entity_threshold' )
+				document.querySelector( '#entity_threshold' )
 					.value
 			);
 			const conceptThreshold = Number(
 				document.querySelector(
-					'#classifai-settings-concept_threshold'
+					'#concept_threshold'
 				).value
 			);
 
@@ -222,7 +218,7 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		if ( ! nonceElementEmbeddings ) {
+		if ( ! nonce ) {
 			return;
 		}
 
@@ -232,7 +228,7 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewEmeddings );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElementEmbeddings.value;
+		const previewerNonce = nonce.value;
 
 		/**
 		 * Live preview features.
@@ -372,15 +368,12 @@ import '../scss/language-processing.scss';
 	 * @param {Object} event Choices.js's 'search' event object.
 	 */
 	function searchPosts( event ) {
-		const nonceElement = nonceElementEmbeddings
-			? nonceElementEmbeddings
-			: nonceElementNLU;
-		if ( ! nonceElement ) {
+		if ( ! nonceEl ) {
 			return;
 		}
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElement.value;
+		const previewerNonce = nonceEl.value;
 
 		/*
 		 * Post types.

@@ -172,10 +172,9 @@ class Plugin {
 	/**
 	 * Enqueue the admin scripts.
 	 *
-	 * @param string $hook_suffix The current admin page.
 	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
-	public function enqueue_admin_assets( $hook_suffix ) {
+	public function enqueue_admin_assets() {
 		$user_profile     = new Admin\UserProfile();
 		$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 

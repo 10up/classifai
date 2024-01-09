@@ -7,15 +7,15 @@
 
 namespace Classifai\Blocks\RecommendedContentBlock;
 
-use function Classifai\get_asset_info;
 use Classifai\Providers\Azure\Personalizer;
+use function Classifai\get_asset_info;
 
 /**
  * Register the block
  */
 function register() {
-	$n = function( $function ) {
-		return __NAMESPACE__ . "\\$function";
+	$n = function ( $function_name ) {
+		return __NAMESPACE__ . "\\$function_name";
 	};
 
 	$personalizer = new Personalizer( false );
@@ -48,13 +48,11 @@ function register() {
 /**
  * Render callback method for the block
  *
- * @param array  $attributes The blocks attributes.
- * @param string $content    Data returned from InnerBlocks.Content.
- * @param array  $block      Block information such as context.
+ * @param array $attributes The blocks attributes.
  *
  * @return string The rendered block markup.
  */
-function render_block_callback( $attributes, $content, $block ) {
+function render_block_callback( $attributes ) {
 	// Render block in Gutenberg Editor.
 	if ( defined( 'REST_REQUEST' ) && \REST_REQUEST ) {
 		$personalizer = new Personalizer( false );

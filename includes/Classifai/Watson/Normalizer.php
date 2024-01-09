@@ -74,5 +74,4 @@ class Normalizer {
 
 		return $post_content;
 	}
-
 }

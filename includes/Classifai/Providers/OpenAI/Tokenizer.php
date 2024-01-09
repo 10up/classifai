@@ -130,5 +130,4 @@ class Tokenizer {
 
 		return trim( $trimmed_content );
 	}
-
 }
