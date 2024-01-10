@@ -253,11 +253,11 @@ class Embeddings extends Provider {
 			// Sanitize the taxonomy checkboxes.
 			$taxonomies = $this->get_taxonomies_for_settings();
 			foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
-				if ( isset( $new_settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $new_settings['taxonomies'][ $taxonomy_key ] ) {
-					$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $new_settings['taxonomies'][ $taxonomy_key ] ?? $settings['taxonomies'][ $taxonomy_key ] );
+				if ( isset( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) && '0' !== $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) {
+					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ?? $settings[ static::ID ]['taxonomies'][ $taxonomy_key ] );
 					$this->trigger_taxonomy_update( $taxonomy_key );
 				} else {
-					$new_settings['taxonomies'][ $taxonomy_key ] = '0';
+					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = '0';
 				}
 			}
 		}
@@ -365,7 +365,7 @@ class Embeddings extends Provider {
 	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' ) ) {
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
@@ -476,7 +476,7 @@ class Embeddings extends Provider {
 		}
 
 		$settings             = ( new Classification() )->get_settings();
-		$number_to_add        = $settings['number_of_terms'] ?? 1;
+		$number_to_add        = $settings[ static::ID ]['number_of_terms'] ?? 1;
 		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
 
 		if ( empty( $embedding_similarity ) ) {
@@ -544,6 +544,10 @@ class Embeddings extends Provider {
 		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
+			if ( is_numeric( $tax ) ) {
+				continue;
+			}
+
 			$terms = get_terms(
 				[
 					'taxonomy'   => $tax,
@@ -652,7 +656,7 @@ class Embeddings extends Provider {
 
 		// This check should have already run but if someone were to call
 		// this method directly, we run it again.
-		if ( $feature->is_enabled() ) {
+		if ( ! $feature->is_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -674,7 +678,7 @@ class Embeddings extends Provider {
 			return false;
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
