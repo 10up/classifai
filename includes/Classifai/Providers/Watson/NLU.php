@@ -174,6 +174,42 @@ class NLU extends Provider {
 			]
 		);
 
+		add_settings_field(
+			static::ID . 'classification_mode',
+			esc_html__( 'Classification mode', 'classifai' ),
+			[ $this->feature_instance, 'render_radio_group' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'classification_mode',
+				'default_value' => $settings['classification_mode'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'options'       => array(
+					'manual_review'            => __( 'Manual review', 'classifai' ),
+					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
+				),
+			]
+		);
+
+		add_settings_field(
+			static::ID . 'classification_method',
+			esc_html__( 'Classification method', 'classifai' ),
+			[ $this->feature_instance, 'render_radio_group' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'classification_method',
+				'default_value' => $settings['classification_method'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'options'       => array(
+					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
+					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
+				),
+			]
+		);
+
 		foreach ( $this->nlu_features as $classify_by => $labels ) {
 			add_settings_field(
 				static::ID . '_' . $classify_by,
@@ -199,10 +235,12 @@ class NLU extends Provider {
 	 */
 	public function get_default_provider_settings() {
 		$common_settings = [
-			'endpoint_url' => '',
-			'apikey'       => '',
-			'username'     => '',
-			'password'     => '',
+			'endpoint_url'          => '',
+			'apikey'                => '',
+			'username'              => '',
+			'password'              => '',
+			'classification_mode'   => 'automatic_classification',
+			'classification_method' => 'existing_terms',
 		];
 
 		switch ( $this->feature_instance::ID ) {
@@ -535,6 +573,9 @@ class NLU extends Provider {
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		}
+
+		$new_settings[ static::ID ]['classification_mode']   = sanitize_text_field( $new_settings[ static::ID ]['classification_mode'] ?? $settings[ static::ID ]['classification_mode'] );
+		$new_settings[ static::ID ]['classification_method'] = sanitize_text_field( $new_settings[ static::ID ]['classification_method'] ?? $settings[ static::ID ]['classification_method'] );
 
 		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
 		$new_settings[ static::ID ]['username']     = sanitize_text_field( $new_settings[ static::ID ]['username'] ?? $settings[ static::ID ]['username'] );

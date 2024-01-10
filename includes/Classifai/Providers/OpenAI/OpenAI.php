@@ -17,7 +17,7 @@ trait OpenAI {
 	 *
 	 * @var string
 	 */
-	protected $completions_url = 'https://api.openai.com/v1/completions';
+	protected $model_url = 'https://api.openai.com/v1/models';
 
 	/**
 	 * Add our OpenAI API settings field.
@@ -141,18 +141,7 @@ trait OpenAI {
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
-		$response = $request->post(
-			$this->completions_url,
-			[
-				'body' => wp_json_encode(
-					[
-						'model'      => 'ada',
-						'prompt'     => 'hi',
-						'max_tokens' => 1,
-					]
-				),
-			]
-		);
+		$response = $request->get( $this->model_url );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
@@ -288,7 +277,8 @@ trait OpenAI {
 	 * @return array
 	 */
 	public function get_supported_taxonomies( $feature ) {
-		$settings   = $feature->get_settings();
+		$provider   = $feature->get_feature_provider_instance();
+		$settings   = $feature->get_settings( $provider::ID );
 		$taxonomies = [];
 
 		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {

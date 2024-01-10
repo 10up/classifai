@@ -182,7 +182,7 @@ function get_watson_username() {
 function get_classification_mode() {
 	$feature  = new Classification();
 	$settings = $feature->get_settings();
-	$value    = $settings['classification_mode'] ?? '';
+	$value    = $settings[ NLU::ID ]['classification_mode'] ?? '';
 
 	if ( $feature->is_feature_enabled() ) {
 		if ( empty( $value ) ) {

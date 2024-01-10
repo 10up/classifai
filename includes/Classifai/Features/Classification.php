@@ -108,38 +108,6 @@ class Classification extends Feature {
 			]
 		);
 
-		add_settings_field(
-			'classification_mode',
-			esc_html__( 'Classification mode', 'classifai' ),
-			[ $this, 'render_radio_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'classification_mode',
-				'default_value' => $settings['classification_mode'],
-				'options'       => array(
-					'manual_review'            => __( 'Manual review', 'classifai' ),
-					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
-				),
-			]
-		);
-
-		add_settings_field(
-			'classification_method',
-			esc_html__( 'Classification method', 'classifai' ),
-			[ $this, 'render_radio_group' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'classification_method',
-				'default_value' => $settings['classification_method'],
-				'options'       => array(
-					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
-					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
-				),
-			]
-		);
-
 		$post_types        = get_post_types_for_language_settings();
 		$post_type_options = array();
 
@@ -273,11 +241,9 @@ class Classification extends Feature {
 	protected function get_default_settings() {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
-			'post_statuses'         => [],
-			'post_types'            => [],
-			'classification_mode'   => 'automatic_classification',
-			'classification_method' => 'existing_terms',
-			'provider'              => NLU::ID,
+			'post_statuses' => [],
+			'post_types'    => [],
+			'provider'      => NLU::ID,
 		];
 
 		return apply_filters(
@@ -301,11 +267,9 @@ class Classification extends Feature {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
-		$new_settings                          = parent::sanitize_settings( $new_settings );
-		$new_settings['post_statuses']         = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
-		$new_settings['post_types']            = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
-		$new_settings['classification_mode']   = sanitize_text_field( $new_settings['classification_mode'] ?? $settings['classification_mode'] );
-		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
+		$new_settings                  = parent::sanitize_settings( $new_settings );
+		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['roles'];
+		$new_settings['post_types']    = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['roles'];
 
 		// Sanitization of the provider-level settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
