@@ -148,6 +148,11 @@ class UserProfile {
 					continue;
 				}
 				foreach ( $provider_features as $feature => $feature_name ) {
+					// Check if feature is enabled.
+					if ( ! $provider_class->is_enabled( $feature ) ) {
+						continue;
+					}
+
 					$access_control = new AccessControl( $provider_class, $feature );
 
 					// Check if feature has user based opt-out enabled.

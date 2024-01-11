@@ -44,5 +44,4 @@ class EntityTaxonomy extends AbstractTaxonomy {
 		return \Classifai\get_feature_enabled( 'entity' ) &&
 			\Classifai\get_feature_taxonomy( 'entity' ) === $this->get_name();
 	}
-
 }

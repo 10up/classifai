@@ -2,8 +2,8 @@
 
 namespace Classifai\Admin;
 
-use \Classifai\Providers\Azure\TextToSpeech;
-use \Classifai\Watson\Normalizer;
+use Classifai\Providers\Azure\TextToSpeech;
+use Classifai\Watson\Normalizer;
 use function Classifai\get_classification_mode;
 
 /**

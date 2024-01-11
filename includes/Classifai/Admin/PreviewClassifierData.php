@@ -105,7 +105,7 @@ class PreviewClassifierData {
 			if ( 'categories' === $feature ) {
 				$classified_data[ $feature ] = array_filter(
 					$classified_data[ $feature ],
-					function( $item ) use ( $taxonomy ) {
+					function ( $item ) use ( $taxonomy ) {
 						$keep  = false;
 						$parts = explode( '/', $item['label'] );
 						$parts = array_filter( $parts );
@@ -128,7 +128,7 @@ class PreviewClassifierData {
 
 			$classified_data[ $feature ] = array_filter(
 				$classified_data[ $feature ],
-				function( $item ) use ( $taxonomy, $key ) {
+				function ( $item ) use ( $taxonomy, $key ) {
 					$name = $item['text'];
 					if ( 'keyword' === $key ) {
 						$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
@@ -148,4 +148,3 @@ class PreviewClassifierData {
 		return $classified_data;
 	}
 }
-

@@ -1,14 +1,14 @@
-# Copyright (C) 2023 10up
+# Copyright (C) 2024 10up
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 2.5.0\n"
+"Project-Id-Version: ClassifAI 2.5.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2023-12-13 15:16:19+00:00\n"
+"POT-Creation-Date: 2024-01-11 16:22:16+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2023-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2024-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "X-Generator: node-wp-i18n 1.2.7\n"
@@ -49,72 +49,72 @@ msgid ""
 "install</a> the stable version of ClassifAI instead."
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:153
-#: includes/Classifai/Admin/BulkActions.php:405
+#: includes/Classifai/Admin/BulkActions.php:184
+#: includes/Classifai/Admin/BulkActions.php:440
 msgid "Classify"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:160
-#: includes/Classifai/Admin/BulkActions.php:414
+#: includes/Classifai/Admin/BulkActions.php:192
+#: includes/Classifai/Admin/BulkActions.php:449
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:278
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:333
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:660
 msgid "Generate excerpt"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:168
-#: includes/Classifai/Admin/BulkActions.php:423
+#: includes/Classifai/Admin/BulkActions.php:200
+#: includes/Classifai/Admin/BulkActions.php:458
 #: includes/Classifai/Providers/Azure/TextToSpeech.php:78
 msgid "Text to speech"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:188
+#: includes/Classifai/Admin/BulkActions.php:220
 msgid "Scan image"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:192
+#: includes/Classifai/Admin/BulkActions.php:224
 msgid "Smart crop"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:196
-#: includes/Classifai/Providers/OpenAI/Whisper.php:152
+#: includes/Classifai/Admin/BulkActions.php:228
+#: includes/Classifai/Providers/OpenAI/Whisper.php:151
 msgid "Transcribe audio"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:332
+#: includes/Classifai/Admin/BulkActions.php:367
 msgid "Classified"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:336
+#: includes/Classifai/Admin/BulkActions.php:371
 msgid "Excerpts generated for"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:340
+#: includes/Classifai/Admin/BulkActions.php:375
 msgid "Text to speech conversion done for"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:344
+#: includes/Classifai/Admin/BulkActions.php:379
 msgid "Scanned"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:348
+#: includes/Classifai/Admin/BulkActions.php:383
 msgid "Cropped"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:352
+#: includes/Classifai/Admin/BulkActions.php:387
 msgid "Transcribed"
 msgstr ""
 
-#: includes/Classifai/Admin/BulkActions.php:358
+#: includes/Classifai/Admin/BulkActions.php:393
 #. translators: %1$s: action, %2$s: number of posts, %3$s: post type
 msgid "%1$s %2$s %3$s."
 msgid_plural "%1$s %2$s %3$ss."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/Classifai/Admin/BulkActions.php:451
-#: includes/Classifai/Providers/OpenAI/Whisper.php:149
-#: includes/Classifai/Providers/OpenAI/Whisper.php:199
+#: includes/Classifai/Admin/BulkActions.php:486
+#: includes/Classifai/Providers/OpenAI/Whisper.php:148
+#: includes/Classifai/Providers/OpenAI/Whisper.php:198
 msgid "Transcribe"
 msgstr ""
 
@@ -200,7 +200,7 @@ msgstr ""
 
 #: includes/Classifai/Admin/SavePostHandler.php:407
 #: includes/Classifai/Providers/Azure/TextToSpeech.php:706
-#: includes/Classifai/Providers/Watson/NLU.php:993
+#: includes/Classifai/Providers/Watson/NLU.php:992
 msgid "Post"
 msgstr ""
 
@@ -219,12 +219,12 @@ msgid "Opt out of using the %s feature."
 msgstr ""
 
 #: includes/Classifai/Admin/templates/classifai-header.php:27
-#: includes/Classifai/Plugin.php:239
+#: includes/Classifai/Plugin.php:238
 msgid "Settings"
 msgstr ""
 
 #: includes/Classifai/Admin/templates/classifai-header.php:36
-#: includes/Classifai/Plugin.php:234
+#: includes/Classifai/Plugin.php:233
 msgid "Set up"
 msgstr ""
 
@@ -334,26 +334,26 @@ msgid ""
 "like language processing, image processing, and content recommendations."
 msgstr ""
 
-#: includes/Classifai/Plugin.php:190
+#: includes/Classifai/Plugin.php:189
 msgid "API Password"
 msgstr ""
 
-#: includes/Classifai/Plugin.php:191
+#: includes/Classifai/Plugin.php:190
 #: includes/Classifai/Providers/Azure/ComputerVision.php:975
 #: includes/Classifai/Providers/Azure/Personalizer.php:152
 #: includes/Classifai/Providers/Azure/TextToSpeech.php:179
 #: includes/Classifai/Providers/OpenAI/OpenAI.php:78
-#: includes/Classifai/Providers/Watson/NLU.php:383
+#: includes/Classifai/Providers/Watson/NLU.php:382
 msgid "API Key"
 msgstr ""
 
-#: includes/Classifai/Plugin.php:192
-#: includes/Classifai/Providers/Watson/NLU.php:402
+#: includes/Classifai/Plugin.php:191
+#: includes/Classifai/Providers/Watson/NLU.php:401
 msgid "Use an API Key instead?"
 msgstr ""
 
-#: includes/Classifai/Plugin.php:193
-#: includes/Classifai/Providers/Watson/NLU.php:401
+#: includes/Classifai/Plugin.php:192
+#: includes/Classifai/Providers/Watson/NLU.php:400
 msgid "Use a username/password instead?"
 msgstr ""
 
@@ -366,8 +366,8 @@ msgid "Enables ability to select which roles can access this feature."
 msgstr ""
 
 #: includes/Classifai/Providers/AccessControl.php:230
-#: includes/Classifai/Providers/OpenAI/DallE.php:404
-#: includes/Classifai/Providers/OpenAI/Whisper.php:336
+#: includes/Classifai/Providers/OpenAI/DallE.php:403
+#: includes/Classifai/Providers/OpenAI/Whisper.php:335
 msgid "Allowed roles"
 msgstr ""
 
@@ -661,9 +661,9 @@ msgstr ""
 #: includes/Classifai/Providers/Azure/Personalizer.php:779
 #: includes/Classifai/Providers/Azure/TextToSpeech.php:454
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:659
-#: includes/Classifai/Providers/OpenAI/DallE.php:402
+#: includes/Classifai/Providers/OpenAI/DallE.php:401
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:360
-#: includes/Classifai/Providers/OpenAI/Whisper.php:334
+#: includes/Classifai/Providers/OpenAI/Whisper.php:333
 msgid "Authenticated"
 msgstr ""
 
@@ -671,13 +671,13 @@ msgstr ""
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:659
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:660
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:663
+#: includes/Classifai/Providers/OpenAI/DallE.php:401
 #: includes/Classifai/Providers/OpenAI/DallE.php:402
-#: includes/Classifai/Providers/OpenAI/DallE.php:403
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:360
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:361
+#: includes/Classifai/Providers/OpenAI/Whisper.php:333
 #: includes/Classifai/Providers/OpenAI/Whisper.php:334
-#: includes/Classifai/Providers/OpenAI/Whisper.php:335
-#: includes/Classifai/Providers/Watson/NLU.php:915
+#: includes/Classifai/Providers/Watson/NLU.php:914
 #: includes/Classifai/Services/ServicesManager.php:324
 msgid "yes"
 msgstr ""
@@ -686,13 +686,13 @@ msgstr ""
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:659
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:660
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:663
+#: includes/Classifai/Providers/OpenAI/DallE.php:401
 #: includes/Classifai/Providers/OpenAI/DallE.php:402
-#: includes/Classifai/Providers/OpenAI/DallE.php:403
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:360
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:361
+#: includes/Classifai/Providers/OpenAI/Whisper.php:333
 #: includes/Classifai/Providers/OpenAI/Whisper.php:334
-#: includes/Classifai/Providers/OpenAI/Whisper.php:335
-#: includes/Classifai/Providers/Watson/NLU.php:915
+#: includes/Classifai/Providers/Watson/NLU.php:914
 #: includes/Classifai/Services/ServicesManager.php:324
 msgid "no"
 msgstr ""
@@ -700,8 +700,8 @@ msgstr ""
 #: includes/Classifai/Providers/Azure/ComputerVision.php:1325
 #: includes/Classifai/Providers/Azure/Personalizer.php:780
 #: includes/Classifai/Providers/Azure/TextToSpeech.php:455
-#: includes/Classifai/Providers/Watson/NLU.php:355
-#: includes/Classifai/Providers/Watson/NLU.php:916
+#: includes/Classifai/Providers/Watson/NLU.php:354
+#: includes/Classifai/Providers/Watson/NLU.php:915
 msgid "API URL"
 msgstr ""
 
@@ -923,15 +923,15 @@ msgstr ""
 msgid "Controls the display of the audio player on the front-end."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:898
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:897
 msgid "Play audio"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:898
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:897
 msgid "Pause audio"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/TextToSpeech.php:917
+#: includes/Classifai/Providers/Azure/TextToSpeech.php:916
 msgid "Listen to this"
 msgstr ""
 
@@ -1091,10 +1091,10 @@ msgid "Allowed roles (resize)"
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/ChatGPT.php:668
-#: includes/Classifai/Providers/OpenAI/DallE.php:407
+#: includes/Classifai/Providers/OpenAI/DallE.php:406
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:366
-#: includes/Classifai/Providers/OpenAI/Whisper.php:337
-#: includes/Classifai/Providers/Watson/NLU.php:920
+#: includes/Classifai/Providers/OpenAI/Whisper.php:336
+#: includes/Classifai/Providers/Watson/NLU.php:919
 msgid "Latest response"
 msgstr ""
 
@@ -1134,134 +1134,134 @@ msgid ""
 "your settings."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:48
-#: includes/Classifai/Providers/OpenAI/DallE.php:156
-#: includes/Classifai/Providers/OpenAI/DallE.php:219
-#: includes/Classifai/Providers/OpenAI/DallE.php:403
+#: includes/Classifai/Providers/OpenAI/DallE.php:47
+#: includes/Classifai/Providers/OpenAI/DallE.php:155
+#: includes/Classifai/Providers/OpenAI/DallE.php:218
+#: includes/Classifai/Providers/OpenAI/DallE.php:402
 msgid "Generate images"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:53
+#: includes/Classifai/Providers/OpenAI/DallE.php:52
 msgid "OpenAI DALL·E"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:56
+#: includes/Classifai/Providers/OpenAI/DallE.php:55
 msgid "Image generation"
 msgstr ""
 
+#: includes/Classifai/Providers/OpenAI/DallE.php:82
 #: includes/Classifai/Providers/OpenAI/DallE.php:83
-#: includes/Classifai/Providers/OpenAI/DallE.php:84
 msgid "Generate Images"
 msgstr ""
 
+#: includes/Classifai/Providers/OpenAI/DallE.php:82
 #: includes/Classifai/Providers/OpenAI/DallE.php:83
-#: includes/Classifai/Providers/OpenAI/DallE.php:84
 msgid "Generate Image"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:146
+#: includes/Classifai/Providers/OpenAI/DallE.php:145
 #. translators: %1$s is replaced with the OpenAI DALL·E URL
 msgid "Image generated by <a href=\"%s\">OpenAI's DALL·E</a>"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:156
-#: includes/Classifai/Providers/OpenAI/DallE.php:221
+#: includes/Classifai/Providers/OpenAI/DallE.php:155
+#: includes/Classifai/Providers/OpenAI/DallE.php:220
 msgid "Generate image"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:157
+#: includes/Classifai/Providers/OpenAI/DallE.php:156
 msgid "Something went wrong. No results found"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:158
+#: includes/Classifai/Providers/OpenAI/DallE.php:157
 msgid "Select image"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:200
+#: includes/Classifai/Providers/OpenAI/DallE.php:199
 msgid "Enter a prompt below to generate images."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:202
+#: includes/Classifai/Providers/OpenAI/DallE.php:201
 msgid "Enter a prompt below to generate an image."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:209
+#: includes/Classifai/Providers/OpenAI/DallE.php:208
 msgid ""
 "Once images are generated, choose one or more of those to import into your "
 "Media Library and then choose one image to insert."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:211
+#: includes/Classifai/Providers/OpenAI/DallE.php:210
 msgid ""
 "Once an image is generated, you can import it into your Media Library and "
 "then select to insert."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:215
+#: includes/Classifai/Providers/OpenAI/DallE.php:214
 msgid "Enter prompt"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:231
+#: includes/Classifai/Providers/OpenAI/DallE.php:230
 msgid "Images generated from prompt:"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:233
+#: includes/Classifai/Providers/OpenAI/DallE.php:232
 msgid "Image generated from prompt:"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:253
+#: includes/Classifai/Providers/OpenAI/DallE.php:252
 msgid "Import into Media Library"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:254
+#: includes/Classifai/Providers/OpenAI/DallE.php:253
 msgid "Import and Insert"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:276
+#: includes/Classifai/Providers/OpenAI/DallE.php:275
 msgid "Enable image generation"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:284
+#: includes/Classifai/Providers/OpenAI/DallE.php:283
 msgid ""
 "When enabled, a new Generate images tab will be shown in the media upload "
 "flow, allowing you to generate and import images."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:293
-#: includes/Classifai/Providers/OpenAI/DallE.php:405
+#: includes/Classifai/Providers/OpenAI/DallE.php:292
+#: includes/Classifai/Providers/OpenAI/DallE.php:404
 msgid "Number of images"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:301
+#: includes/Classifai/Providers/OpenAI/DallE.php:300
 msgid ""
 "Number of images that will be generated in one request. Note that each "
 "image will incur separate costs."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:307
-#: includes/Classifai/Providers/OpenAI/DallE.php:406
+#: includes/Classifai/Providers/OpenAI/DallE.php:306
+#: includes/Classifai/Providers/OpenAI/DallE.php:405
 msgid "Image size"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:319
+#: includes/Classifai/Providers/OpenAI/DallE.php:318
 msgid "Size of generated images."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:420
+#: includes/Classifai/Providers/OpenAI/DallE.php:419
 msgid "A prompt is required to generate an image."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:438
+#: includes/Classifai/Providers/OpenAI/DallE.php:437
 msgid "Sorry, you are not allowed to do that."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:442
+#: includes/Classifai/Providers/OpenAI/DallE.php:441
 msgid ""
 "Image generation is disabled or OpenAI authentication failed. Please check "
 "your settings."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/DallE.php:459
+#: includes/Classifai/Providers/OpenAI/DallE.php:458
 msgid ""
 "Your image prompt is too long. Please ensure it doesn't exceed 1000 "
 "characters."
@@ -1282,7 +1282,7 @@ msgstr ""
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:158
 #: includes/Classifai/Providers/Watson/NLU.php:51
 #: includes/Classifai/Providers/Watson/NLU.php:90
-#: includes/Classifai/Providers/Watson/NLU.php:433
+#: includes/Classifai/Providers/Watson/NLU.php:432
 msgid "Classify content"
 msgstr ""
 
@@ -1292,7 +1292,7 @@ msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:175
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:362
-#: includes/Classifai/Providers/Watson/NLU.php:918
+#: includes/Classifai/Providers/Watson/NLU.php:917
 msgid "Post types"
 msgstr ""
 
@@ -1361,12 +1361,12 @@ msgid "No data returned from OpenAI."
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:917
-#: includes/Classifai/Providers/Watson/NLU.php:970
+#: includes/Classifai/Providers/Watson/NLU.php:969
 msgid "ClassifAI Language Processing"
 msgstr ""
 
 #: includes/Classifai/Providers/OpenAI/Embeddings.php:947
-#: includes/Classifai/Providers/Watson/NLU.php:1001
+#: includes/Classifai/Providers/Watson/NLU.php:1000
 msgid "Automatically tag content on update"
 msgstr ""
 
@@ -1396,21 +1396,21 @@ msgstr ""
 msgid "The transcription result is invalid."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:33
-#: includes/Classifai/Providers/OpenAI/Whisper.php:335
+#: includes/Classifai/Providers/OpenAI/Whisper.php:32
+#: includes/Classifai/Providers/OpenAI/Whisper.php:334
 msgid "Generate transcripts"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:38
+#: includes/Classifai/Providers/OpenAI/Whisper.php:37
 msgid "OpenAI Whisper"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:41
-#: includes/Classifai/Providers/OpenAI/Whisper.php:253
+#: includes/Classifai/Providers/OpenAI/Whisper.php:40
+#: includes/Classifai/Providers/OpenAI/Whisper.php:252
 msgid "Generate transcripts from audio files"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:70
+#: includes/Classifai/Providers/OpenAI/Whisper.php:69
 #: includes/Classifai/Services/ImageProcessing.php:360
 #: includes/Classifai/Services/LanguageProcessing.php:403
 #: includes/Classifai/Services/LanguageProcessing.php:527
@@ -1419,28 +1419,28 @@ msgstr ""
 msgid "Please set up valid authentication with OpenAI."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:74
+#: includes/Classifai/Providers/OpenAI/Whisper.php:73
 msgid "User role does not have permission."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:78
+#: includes/Classifai/Providers/OpenAI/Whisper.php:77
 msgid "User does not have permission to edit this attachment."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:83
+#: includes/Classifai/Providers/OpenAI/Whisper.php:82
 msgid "Transcripts are not enabled."
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:149
-#: includes/Classifai/Providers/OpenAI/Whisper.php:199
+#: includes/Classifai/Providers/OpenAI/Whisper.php:148
+#: includes/Classifai/Providers/OpenAI/Whisper.php:198
 msgid "Re-transcribe"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:184
+#: includes/Classifai/Providers/OpenAI/Whisper.php:183
 msgid "ClassifAI Audio Processing"
 msgstr ""
 
-#: includes/Classifai/Providers/OpenAI/Whisper.php:261
+#: includes/Classifai/Providers/OpenAI/Whisper.php:260
 msgid "Automatically generate transcripts for supported audio files."
 msgstr ""
 
@@ -1495,7 +1495,7 @@ msgid "Image description"
 msgstr ""
 
 #: includes/Classifai/Providers/Provider.php:654
-#: includes/Classifai/Providers/Watson/NLU.php:933
+#: includes/Classifai/Providers/Watson/NLU.php:932
 msgid "N/A"
 msgstr ""
 
@@ -1573,70 +1573,70 @@ msgid ""
 "watsonplatform.net\" href=\"%s\">here</a> for details."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:368
+#: includes/Classifai/Providers/Watson/NLU.php:367
 msgid "API Username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:441
+#: includes/Classifai/Providers/Watson/NLU.php:440
 msgid "Enables the automatic content classification of posts."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:449
+#: includes/Classifai/Providers/Watson/NLU.php:448
 msgid "Classification mode"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:461
+#: includes/Classifai/Providers/Watson/NLU.php:460
 msgid "Classification method"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:469
+#: includes/Classifai/Providers/Watson/NLU.php:468
 msgid "Recommend terms even if they do not exist on the site"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:470
+#: includes/Classifai/Providers/Watson/NLU.php:469
 msgid "Only recommend terms that already exist on the site"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:477
+#: includes/Classifai/Providers/Watson/NLU.php:476
 msgid "Post Types to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:488
+#: includes/Classifai/Providers/Watson/NLU.php:487
 msgid "Post Statuses to Classify"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:687
+#: includes/Classifai/Providers/Watson/NLU.php:686
 msgid "Watson Category Settings"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:692
+#: includes/Classifai/Providers/Watson/NLU.php:691
 msgid "Enable"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:746
+#: includes/Classifai/Providers/Watson/NLU.php:745
 msgid "Please enter your credentials."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:878
+#: includes/Classifai/Providers/Watson/NLU.php:877
 msgid ""
 "OpenAI Embeddings classification is turned on. This may conflict with the "
 "NLU classification feature. It is possible to run both features but if they "
 "use the same taxonomies, one will overwrite the other."
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:915
+#: includes/Classifai/Providers/Watson/NLU.php:914
 msgid "Configured"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:917
+#: includes/Classifai/Providers/Watson/NLU.php:916
 msgid "API username"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:919
+#: includes/Classifai/Providers/Watson/NLU.php:918
 msgid "Features"
 msgstr ""
 
-#: includes/Classifai/Providers/Watson/NLU.php:1008
+#: includes/Classifai/Providers/Watson/NLU.php:1007
 #. translators: %s Post type label
 msgid "Classify %s"
 msgstr ""
