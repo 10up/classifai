@@ -1170,7 +1170,7 @@ class ChatGPT extends Provider {
 
 		$prompts = array_map(
 			function ( $prompt ) use ( &amp;$has_default ) {
-				$default = $prompt['default'] &amp;&amp; ! $has_default;
+				$default = isset( $prompt['default'] ) &amp;&amp; $prompt['default'] &amp;&amp; ! $has_default;
 
 				if ( $default ) {
 					$has_default = true;
