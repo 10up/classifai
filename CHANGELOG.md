@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [2.5.1] - 2024-01-10
+## [2.5.1] - 2024-01-11
 ### Changed
 - Switch from using the Completions API to the Models API to verify credentials (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#654](https://github.com/10up/classifai/pull/654)).
 - Update `10up/phpcs-composer` to version 3.0.0 (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#641](https://github.com/10up/classifai/pull/641)).
@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ### Security
 - Bump `tj-actions/changed-files` from 37 to 41 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#649](https://github.com/10up/classifai/pull/649)).
+- Bump `follow-redirects` from 1.15.3 to 1.15.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#657](https://github.com/10up/classifai/pull/657)).
 
 ## [2.5.0] - 2023-12-13
 **Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
