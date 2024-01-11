@@ -210,6 +210,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.find( 'a.action__remove_prompt' )
 			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.first()
 			.find( '.button-primary' )
 			.click();
 		cy.get(
