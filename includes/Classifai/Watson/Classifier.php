@@ -124,5 +124,4 @@ class Classifier {
 
 		return wp_json_encode( $options );
 	}
-
 }

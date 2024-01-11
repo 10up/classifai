@@ -7,6 +7,8 @@ use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Providers\OpenAI\Whisper;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
+use Classifai\Providers\Watson\NLU;
+
 use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_supported_post_types;
 use function Classifai\get_tts_supported_post_types;
@@ -56,6 +58,11 @@ class BulkActions {
 	private $text_to_speech;
 
 	/**
+	 * @var \Classifai\Providers\Watson\NLU
+	 */
+	private $ibm_watson_nlu;
+
+	/**
 	 * Register the actions needed.
 	 */
 	public function register() {
@@ -72,11 +79,32 @@ class BulkActions {
 		$this->chat_gpt       = new ChatGPT( false );
 		$this->embeddings     = new Embeddings( false );
 		$this->text_to_speech = new TextToSpeech( false );
+		$this->ibm_watson_nlu = new NLU( false );
 
 		$embeddings_post_types     = [];
-		$nlu_post_types            = get_supported_post_types();
-		$text_to_speech_post_types = get_tts_supported_post_types();
+		$nlu_post_types            = [];
+		$text_to_speech_post_types = [];
 		$chat_gpt_post_types       = [];
+
+		// Set up the NLU post types if the feature is enabled. Otherwise clear.
+		if (
+			$this->ibm_watson_nlu &&
+			$this->ibm_watson_nlu->is_feature_enabled( 'content_classification' )
+		) {
+			$nlu_post_types = get_supported_post_types();
+		} else {
+			$this->ibm_watson_nlu = null;
+		}
+
+		// Set up the NLU post types if the feature is enabled. Otherwise clear.
+		if (
+			$this->text_to_speech &&
+			$this->text_to_speech->is_feature_enabled( 'content_classification' )
+		) {
+			$text_to_speech_post_types = get_tts_supported_post_types();
+		} else {
+			$this->text_to_speech = null;
+		}
 
 		// Set up the save post handler if we have any post types.
 		if ( ! empty( $nlu_post_types ) || ! empty( $text_to_speech_post_types ) ) {
@@ -98,11 +126,6 @@ class BulkActions {
 			$embeddings_post_types = $this->embeddings->supported_post_types();
 		} else {
 			$this->embeddings = null;
-		}
-
-		// Clear our TextToSpeech handler if no post types are set up.
-		if ( empty( $text_to_speech_post_types ) ) {
-			$this->text_to_speech = null;
 		}
 
 		// Merge our post types together and make them unique.
@@ -147,15 +170,24 @@ class BulkActions {
 		$nlu_post_types = get_supported_post_types();
 
 		if (
-			! empty( $nlu_post_types ) ||
-			( is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) && ! empty( $this->embeddings->supported_post_types() ) )
+			(
+				is_a( $this->ibm_watson_nlu, '\Classifai\Providers\Watson\NLU' ) &&
+				$this->ibm_watson_nlu->is_feature_enabled( 'content_classification' ) &&
+				! empty( $nlu_post_types )
+			) ||
+			(
+				is_a( $this->embeddings, '\Classifai\Providers\OpenAI\Embeddings' ) &&
+				$this->embeddings->is_feature_enabled( 'classification' ) &&
+				! empty( $this->embeddings->supported_post_types() )
+			)
 		) {
 			$bulk_actions['classify'] = __( 'Classify', 'classifai' );
 		}
 
 		if (
 			is_a( $this->chat_gpt, '\Classifai\Providers\OpenAI\ChatGPT' ) &&
-			in_array( get_current_screen()->post_type, array_keys( get_post_types_for_language_settings() ), true )
+			in_array( get_current_screen()->post_type, array_keys( get_post_types_for_language_settings() ), true ) &&
+			$this->chat_gpt->is_feature_enabled( 'excerpt_generation' )
 		) {
 			$bulk_actions['generate_excerpt'] = __( 'Generate excerpt', 'classifai' );
 		}
@@ -221,7 +253,10 @@ class BulkActions {
 		foreach ( $post_ids as $post_id ) {
 			if ( 'classify' === $doaction ) {
 				// Handle NLU classification.
-				if ( is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' ) ) {
+				if (
+					is_a( $this->ibm_watson_nlu, '\Classifai\Providers\Watson\NLU' ) &&
+					is_a( $this->save_post_handler, '\Classifai\Admin\SavePostHandler' )
+				) {
 					$action = 'classified';
 					$this->save_post_handler->classify( $post_id );
 				}
@@ -454,5 +489,4 @@ class BulkActions {
 
 		return $actions;
 	}
-
 }

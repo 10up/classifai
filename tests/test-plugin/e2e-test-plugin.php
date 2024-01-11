@@ -19,6 +19,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/models.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {

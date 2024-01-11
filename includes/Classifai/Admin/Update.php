@@ -59,7 +59,7 @@ class Update {
 		);
 
 		$this->updater->addResultFilter(
-			function( $plugin_info, $http_response = null ) {
+			function ( $plugin_info ) {
 				$plugin_info->icons = array(
 					'svg' => CLASSIFAI_PLUGIN_URL . 'assets/img/icon.svg',
 				);

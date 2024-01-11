@@ -392,5 +392,4 @@ class ImageProcessing extends Service {
 		unset( $form_fields['watson-entity'] );
 		return $form_fields;
 	}
-
 }
