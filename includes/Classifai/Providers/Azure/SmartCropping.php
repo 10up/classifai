@@ -296,7 +296,7 @@ class SmartCropping {
 	 * @return string
 	 */
 	public function get_api_url() {
-		return sprintf( '%s%s', trailingslashit( $this->settings['url'] ), static::API_PATH );
+		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH );
 	}
 
 	/**
