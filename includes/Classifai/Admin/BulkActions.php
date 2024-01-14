@@ -41,6 +41,11 @@ class BulkActions {
 	private $media_processing_features = [];
 
 	/**
+	 * @var \Classifai\Providers\Watson\NLU
+	 */
+	private $ibm_watson_nlu;
+
+	/**
 	 * Register the actions needed.
 	 */
 	public function register() {
