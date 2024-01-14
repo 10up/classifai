@@ -13,11 +13,11 @@ use function Classifai\get_all_post_statuses;
 trait OpenAI {
 
 	/**
-	 * OpenAI completions URL
+	 * OpenAI model URL
 	 *
 	 * @var string
 	 */
-	protected $completions_url = 'https://api.openai.com/v1/completions';
+	protected $model_url = 'https://api.openai.com/v1/models';
 
 	/**
 	 * Add our OpenAI API settings field.
@@ -139,18 +139,7 @@ trait OpenAI {
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
-		$response = $request->post(
-			$this->completions_url,
-			[
-				'body' => wp_json_encode(
-					[
-						'model'      => 'ada',
-						'prompt'     => 'hi',
-						'max_tokens' => 1,
-					]
-				),
-			]
-		);
+		$response = $request->get( $this->model_url );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
