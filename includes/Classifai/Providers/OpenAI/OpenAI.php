@@ -13,7 +13,7 @@ use function Classifai\get_all_post_statuses;
 trait OpenAI {
 
 	/**
-	 * OpenAI completions URL
+	 * OpenAI model URL
 	 *
 	 * @var string
 	 */
