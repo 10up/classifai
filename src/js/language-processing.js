@@ -4,9 +4,7 @@ import '../scss/language-processing.scss';
 ( () => {
 	let featureStatuses = {};
 
-	const nonceEl = document.getElementById(
-		'classifai-previewer-nonce'
-	);
+	const nonceEl = document.getElementById( 'classifai-previewer-nonce' );
 
 	if ( ! nonceEl ) {
 		return;
@@ -27,18 +25,10 @@ import '../scss/language-processing.scss';
 
 		/** Feature statuses. */
 		featureStatuses = {
-			categoriesStatus: document.getElementById(
-				'category'
-			).checked,
-			keywordsStatus: document.getElementById(
-				'keyword'
-			).checked,
-			entitiesStatus: document.getElementById(
-				'entity'
-			).checked,
-			conceptsStatus: document.getElementById(
-				'concept'
-			).checked,
+			categoriesStatus: document.getElementById( 'category' ).checked,
+			keywordsStatus: document.getElementById( 'keyword' ).checked,
+			entitiesStatus: document.getElementById( 'entity' ).checked,
+			conceptsStatus: document.getElementById( 'concept' ).checked,
 		};
 
 		const plurals = {
@@ -49,9 +39,7 @@ import '../scss/language-processing.scss';
 		};
 
 		document
-			.querySelectorAll(
-				'#category, #keyword, #entity, #concept'
-			)
+			.querySelectorAll( '#category, #keyword, #entity, #concept' )
 			.forEach( ( item ) => {
 				item.addEventListener( 'change', ( e ) => {
 					if ( 'category' === e.target.id ) {
@@ -96,23 +84,16 @@ import '../scss/language-processing.scss';
 		function showPreviewWatson( e ) {
 			/** Category thresholds. */
 			const categoryThreshold = Number(
-				document.querySelector(
-					'#category_threshold'
-				).value
+				document.querySelector( '#category_threshold' ).value
 			);
 			const keywordThreshold = Number(
-				document.querySelector(
-					'#keyword_threshold'
-				).value
+				document.querySelector( '#keyword_threshold' ).value
 			);
 			const entityThreshold = Number(
-				document.querySelector( '#entity_threshold' )
-					.value
+				document.querySelector( '#entity_threshold' ).value
 			);
 			const conceptThreshold = Number(
-				document.querySelector(
-					'#concept_threshold'
-				).value
+				document.querySelector( '#concept_threshold' ).value
 			);
 
 			const postId = document.getElementById(

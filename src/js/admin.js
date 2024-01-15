@@ -46,11 +46,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$userFieldWrapper = $userField.closest( '.classifai-setup-form-field' );
 	}
 
-	if (
-		document
-			.getElementById( 'password' )
-			.closest( 'tr' )
-	) {
+	if ( document.getElementById( 'password' ).closest( 'tr' ) ) {
 		[ $passwordFieldTitle ] = document
 			.getElementById( 'password' )
 			.closest( 'tr' )
