@@ -14,7 +14,7 @@ class Notifications {
 	 *
 	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 		return is_admin();
 	}
 

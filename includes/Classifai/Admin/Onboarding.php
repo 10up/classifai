@@ -155,8 +155,6 @@ class Onboarding {
 
 	/**
 	 * Handle the submission of the step of the onboarding wizard.
-	 *
-	 * @return void
 	 */
 	public function handle_step_submission() {
 		if ( ! isset( $_POST['classifai-setup-step-nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai-setup-step-nonce'] ) ), 'classifai-setup-step-action' ) ) {
@@ -312,7 +310,9 @@ class Onboarding {
 	}
 
 	/**
-	 * Sanitize variables using sanitize_text_field and wp_unslash. Arrays are cleaned recursively.
+	 * Sanitize variables using sanitize_text_field and wp_unslash.
+	 *
+	 * Arrays are cleaned recursively.
 	 * Non-scalar values are ignored.
 	 *
 	 * @param string|array $data Data to sanitize.
@@ -327,13 +327,12 @@ class Onboarding {
 	}
 
 	/**
-	 * Render classifai setup settings with the given fields.
+	 * Render setup settings with the given fields.
 	 *
 	 * @param string   $setting_name The name of the setting.
 	 * @param string[] $fields       The fields to render.
-	 * @return void
 	 */
-	public function render_classifai_setup_settings( $setting_name, $fields = array() ) {
+	public function render_classifai_setup_settings( string $setting_name, array $fields = array() ) {
 		global $wp_settings_sections, $wp_settings_fields;
 
 		if ( ! isset( $wp_settings_fields[ $setting_name ][ $setting_name ] ) ) {
@@ -394,12 +393,11 @@ class Onboarding {
 	}
 
 	/**
-	 * Render classifai setup feature settings.
+	 * Render setup feature settings.
 	 *
 	 * @param string $feature $feature to setup.
-	 * @return void
 	 */
-	public function render_classifai_setup_feature( $feature ) {
+	public function render_classifai_setup_feature( string $feature ) {
 		global $wp_settings_fields;
 		$features      = $this->get_features( false );
 		$feature_class = $features[ $feature ] ?? null;
@@ -469,7 +467,7 @@ class Onboarding {
 	 * @param bool $nested Whether to return the features in a nested array or not.
 	 * @return array The Onboarding features.
 	 */
-	public function get_features( $nested = true ) {
+	public function get_features( bool $nested = true ): array {
 		if ( empty( $this->features ) ) {
 			$services = Plugin::$instance->services;
 			if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
@@ -517,6 +515,7 @@ class Onboarding {
 				$features[ $feature_slug ] = $feature;
 			}
 		}
+
 		return $features;
 	}
 
@@ -525,7 +524,7 @@ class Onboarding {
 	 *
 	 * @return array The onboarding options.
 	 */
-	public function get_onboarding_options() {
+	public function get_onboarding_options(): array {
 		return get_option( 'classifai_onboarding_options', array() );
 	}
 
@@ -534,7 +533,7 @@ class Onboarding {
 	 *
 	 * @return bool True if onboarding is completed, false otherwise.
 	 */
-	public function is_onboarding_completed() {
+	public function is_onboarding_completed(): bool {
 		$options = $this->get_onboarding_options();
 		return isset( $options['status'] ) && 'completed' === $options['status'];
 	}
@@ -544,7 +543,7 @@ class Onboarding {
 	 *
 	 * @param array $options The options to update.
 	 */
-	public function update_onboarding_options( $options ) {
+	public function update_onboarding_options( array $options ) {
 		if ( ! is_array( $options ) ) {
 			return;
 		}
@@ -586,10 +585,11 @@ class Onboarding {
 	 *
 	 * @return array Array of enabled providers.
 	 */
-	public function get_enabled_features() {
+	public function get_enabled_features(): array {
 		$features           = $this->get_features( false );
 		$onboarding_options = $this->get_onboarding_options();
 		$enabled_features   = $onboarding_options['enabled_features'] ?? array();
+
 		foreach ( $enabled_features as $feature_key => $value ) {
 			if ( ! isset( $features[ $feature_key ] ) ) {
 				unset( $enabled_features[ $feature_key ] );
@@ -607,10 +607,10 @@ class Onboarding {
 	 * @param string $current_feature Current feature.
 	 * @return string|bool Next provider to setup or false if none.
 	 */
-	public function get_next_feature( $current_feature ) {
+	public function get_next_feature( string $current_feature ) {
 		$enabled_features = $this->get_enabled_features();
-		$keys = array_keys( $enabled_features );
-		$index = array_search( $current_feature, $keys, true );
+		$keys             = array_keys( $enabled_features );
+		$index            = array_search( $current_feature, $keys, true );
 
 		if ( false === $index ) {
 			return false;
@@ -633,7 +633,7 @@ class Onboarding {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$step = absint( wp_unslash( $_GET['step'] ) );
+		$step               = absint( wp_unslash( $_GET['step'] ) );
 		$onboarding_options = $this->get_onboarding_options();
 		$step_completed     = isset( $onboarding_options['step_completed'] ) ? absint( $onboarding_options['step_completed'] ) : 0;
 
@@ -647,7 +647,7 @@ class Onboarding {
 	 *
 	 * @return array
 	 */
-	public function get_configured_features() {
+	public function get_configured_features(): array {
 		$features            = $this->get_features( false );
 		$configured_features = array();
 

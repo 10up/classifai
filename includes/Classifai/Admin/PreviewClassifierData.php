@@ -68,8 +68,9 @@ class PreviewClassifierData {
 	 * Filter classifier preview based on the feature settings.
 	 *
 	 * @param array $classified_data The classified data.
+	 * @return array
 	 */
-	public function filter_classify_preview_data( $classified_data ) {
+	public function filter_classify_preview_data( array $classified_data ): array {
 		if ( is_wp_error( $classified_data ) ) {
 			return $classified_data;
 		}

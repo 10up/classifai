@@ -33,10 +33,9 @@ class UserProfile {
 	}
 
 	/**
-	 * Add ClassifAI features opt-out checkboxes to user profile and edit user.
+	 * Add features opt-out checkboxes to user profile and edit user.
 	 *
 	 * @param \WP_User $user User object.
-	 * @return void
 	 */
 	public function user_settings( \WP_User $user ) {
 		$user_id = $user->ID;
@@ -46,7 +45,7 @@ class UserProfile {
 			return;
 		}
 
-		// Bail if user is not allowed to access ClassifAI features.
+		// Bail if user is not allowed to access features.
 		$features = $this->get_allowed_features( $user->ID );
 		if ( empty( $features ) ) {
 			return;
@@ -88,12 +87,11 @@ class UserProfile {
 	}
 
 	/**
-	 * Save ClassifAI features opt-out settings.
+	 * Save features opt-out settings.
 	 *
 	 * @param int $user_id User ID.
-	 * @return void
 	 */
-	public function save_user_settings( $user_id ) {
+	public function save_user_settings( int $user_id ) {
 		if (
 			! isset( $_POST['classifai_out_out_features_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_out_out_features_nonce'] ) ), 'classifai_out_out_features' )
@@ -118,7 +116,7 @@ class UserProfile {
 	 * @param int $user_id User ID.
 	 * @return array List of features.
 	 */
-	public function get_allowed_features( $user_id ) {
+	public function get_allowed_features( int $user_id ): array {
 		$user = get_user_by( 'id', $user_id );
 		if ( ! $user ) {
 			return array();
