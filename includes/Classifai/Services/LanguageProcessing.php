@@ -4,6 +4,7 @@
  */
 
 namespace Classifai\Services;
+
 class LanguageProcessing extends Service {
 
 	/**
@@ -30,7 +31,17 @@ class LanguageProcessing extends Service {
 	 *
 	 * @return array
 	 */
-	public static function get_service_providers() {
+	public static function get_service_providers(): array {
+		/**
+		 * Filter the service providers for Language Processing service.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_language_processing_service_providers
+		 *
+		 * @param {array} $providers Array of available providers for the service.
+		 *
+		 * @return {array} The filtered available providers.
+		 */
 		return apply_filters(
 			'classifai_language_processing_service_providers',
 			[
