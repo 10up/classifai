@@ -10,7 +10,7 @@ classifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );
 classifai_define( 'CLASSIFAI_PLUGIN_VERSION', $plugin_version );
 classifai_define( 'CLASSIFAI_PLUGIN_DIR', __DIR__ );
 classifai_define( 'CLASSIFAI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
-classifai_define( 'CLASSIFAI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
+classifai_define( 'CLASSIFAI_PLUGIN_BASENAME', plugin_basename( __DIR__ . '/classifai.php' ) );
 
 // IBM Watson constants
 
