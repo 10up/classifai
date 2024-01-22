@@ -54,11 +54,4 @@ class LanguageProcessing extends Service {
 			]
 		);
 	}
-
-	/**
-	 * Create endpoints for Language Processing.
-	 *
-	 * @since 1.8.0
-	 */
-	public function register_endpoints() {}
 }

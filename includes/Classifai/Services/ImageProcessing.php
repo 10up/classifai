@@ -91,11 +91,6 @@ class ImageProcessing extends Service {
 	}
 
 	/**
-	 * Create endpoints for services
-	 */
-	public function register_endpoints() {}
-
-	/**
 	 * Register a common image tag taxonomy
 	 */
 	protected function register_image_tags_taxonomy() {

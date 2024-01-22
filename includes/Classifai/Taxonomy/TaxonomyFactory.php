@@ -39,8 +39,10 @@ class TaxonomyFactory {
 	public $taxonomies = [];
 
 	/**
-	 * Builds all supported taxonomies. This is bound to the 'init' hook
-	 * to allow both frontend and backend to get these taxonomies.
+	 * Builds all supported taxonomies.
+	 *
+	 * This is bound to the 'init' hook to allow both
+	 * frontend and backend to get these taxonomies.
 	 */
 	public function build_all() {
 		$supported_post_types = \Classifai\get_supported_post_types();
@@ -55,10 +57,9 @@ class TaxonomyFactory {
 	 *
 	 * @param string $taxonomy            The taxonomy name.
 	 * @param array  $supported_post_types The supported post types.
-	 *
 	 * @return BaseTaxonomy A base taxonomy subclass instance.
 	 */
-	public function build_if( $taxonomy, $supported_post_types = [] ) {
+	public function build_if( string $taxonomy, array $supported_post_types = [] ) {
 		if ( ! $this->exists( $taxonomy ) ) {
 			$this->taxonomies[ $taxonomy ] = $this->build( $taxonomy );
 			$instance                      = $this->taxonomies[ $taxonomy ];
@@ -76,14 +77,14 @@ class TaxonomyFactory {
 
 	/**
 	 * Instantiates and returns a instance for the specified taxonomy.
+	 *
 	 * An exception is thrown if an invalid taxonomy name was specified.
 	 *
 	 * @param string $taxonomy The taxonomy name
-	 *
 	 * @return \Taxonomy\Taxonomy\BaseTaxonomy A base taxonomy subclass instance.
 	 * @throws \Exception An exception.
 	 */
-	public function build( $taxonomy ) {
+	public function build( string $taxonomy ) {
 		if ( ! empty( $this->mapping[ $taxonomy ] ) ) {
 			$class = $this->mapping[ $taxonomy ];
 
@@ -106,7 +107,7 @@ class TaxonomyFactory {
 	 * @param string $taxonomy The taxonomy name
 	 * @return bool True if the taxonomy exists else false
 	 */
-	public function exists( $taxonomy ) {
+	public function exists( string $taxonomy ): bool {
 		return ! empty( $this->taxonomies[ $taxonomy ] );
 	}
 
@@ -115,7 +116,7 @@ class TaxonomyFactory {
 	 *
 	 * @return array List of taxonomy names
 	 */
-	public function get_supported_taxonomies() {
+	public function get_supported_taxonomies(): array {
 		return array_keys( $this->mapping );
 	}
 }
