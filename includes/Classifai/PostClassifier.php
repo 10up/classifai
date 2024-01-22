@@ -8,6 +8,8 @@ use Classifai\Providers\Watson\NLU;
 /**
  * PostClassifier classifies and links WP posts to Taxonomy Terms based
  * on IBM Watson NLU API output.
+ *
+ * TODO: this seems to be specific to IBM Watson so would prefer this lives within that directory.
  */
 class PostClassifier {
 

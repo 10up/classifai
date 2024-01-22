@@ -32,7 +32,7 @@ function get_plugin() {
  * @param string $provider The provider service name to get settings from, defaults to the first one found.
  * @return array The array of ClassifAi settings.
  */
-function get_plugin_settings( $service = '', $provider = '' ) {
+function get_plugin_settings( string $service = '', string $provider = '' ): array {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
@@ -88,7 +88,7 @@ function get_plugin_settings( $service = '', $provider = '' ) {
  *
  * @param array $settings The settings we're saving.
  */
-function set_plugin_settings( $settings ) {
+function set_plugin_settings( array $settings ) {
 	update_option( 'classifai_settings', $settings );
 }
 
@@ -129,6 +129,8 @@ function reset_plugin_settings() {
 	}
 }
 
+// TODO: would prefer any Watson specific functionality is removed from here.
+
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
@@ -137,7 +139,7 @@ function reset_plugin_settings() {
  *
  * @return string
  */
-function get_watson_api_url() {
+function get_watson_api_url(): string {
 	$settings = ( new Classification() )->get_settings();
 	$creds    = ! empty( $settings[ NLU::ID ] ) ? $settings[ NLU::ID ] : [];
 
@@ -150,7 +152,6 @@ function get_watson_api_url() {
 	}
 }
 
-
 /**
  * Returns the currently configured Watson username. Lookup order is,
  *
@@ -159,7 +160,7 @@ function get_watson_api_url() {
  *
  * @return string
  */
-function get_watson_username() {
+function get_watson_username(): string {
 	$settings = ( new Classification() )->get_settings( NLU::ID );
 	$username = ! empty( $settings['username'] ) ? $settings['username'] : '';
 
@@ -179,7 +180,7 @@ function get_watson_username() {
  *
  * @return string
  */
-function get_classification_mode() {
+function get_classification_mode(): string {
 	$feature  = new Classification();
 	$settings = $feature->get_settings();
 	$value    = $settings[ NLU::ID ]['classification_mode'] ?? '';
@@ -206,7 +207,7 @@ function get_classification_mode() {
  *
  * @return string
  */
-function get_classification_method() {
+function get_classification_method(): string {
 	$feature  = new Classification();
 	$settings = $feature->get_settings();
 
@@ -221,7 +222,7 @@ function get_classification_method() {
  *
  * @return string
  */
-function get_watson_password() {
+function get_watson_password(): string {
 	$settings = ( new Classification() )->get_settings( NLU::ID );
 	$password = ! empty( $settings['password'] ) ? $settings['password'] : '';
 
@@ -241,7 +242,7 @@ function get_watson_password() {
  *
  * @return array
  */
-function get_post_types_for_language_settings() {
+function get_post_types_for_language_settings(): array {
 	$post_types = get_post_types( [ 'public' => true ], 'objects' );
 	$post_types = array_filter( $post_types, 'is_post_type_viewable' );
 
@@ -268,7 +269,7 @@ function get_post_types_for_language_settings() {
  *
  * @return array
  */
-function get_post_statuses_for_language_settings() {
+function get_post_statuses_for_language_settings(): array {
 	$post_statuses = get_all_post_statuses();
 
 	/**
@@ -285,12 +286,13 @@ function get_post_statuses_for_language_settings() {
 }
 
 /**
- * The list of post types that get the ClassifAI taxonomies. Defaults
- * to 'post'.
+ * The list of post types that get the ClassifAI taxonomies.
+ *
+ * Defaults to 'post'.
  *
  * return array
  */
-function get_supported_post_types() {
+function get_supported_post_types(): array {
 	$feature    = new Classification();
 	$settings   = $feature->get_settings();
 	$post_types = [];
@@ -321,7 +323,7 @@ function get_supported_post_types() {
  *
  * @return array Supported Post Types.
  */
-function get_tts_supported_post_types() {
+function get_tts_supported_post_types(): array {
 	$feature    = new TextToSpeech( null );
 	$selected   = $feature->get_settings( 'post_types' );
 	$post_types = [];
@@ -336,12 +338,13 @@ function get_tts_supported_post_types() {
 }
 
 /**
- * The list of post statuses that get the ClassifAI taxonomies. Defaults
- * to 'publish'.
+ * The list of post statuses that get the ClassifAI taxonomies.
+ *
+ * Defaults to 'publish'.
  *
  * @return array
  */
-function get_supported_post_statuses() {
+function get_supported_post_statuses(): array {
 	$feature       = new Classification();
 	$settings      = $feature->get_settings();
 	$post_statuses = [];
@@ -373,7 +376,7 @@ function get_supported_post_statuses() {
  * @param string $classify_by category,keyword,entity,concept
  * @return bool
  */
-function get_feature_enabled( $classify_by ) {
+function get_feature_enabled( string $classify_by ): bool {
 	$feature  = new Classification();
 	$settings = $feature->get_settings( NLU::ID );
 
@@ -388,9 +391,9 @@ function get_feature_enabled( $classify_by ) {
  *
  * @since 1.6.0
  *
- * @return true
+ * @return bool
  */
-function language_processing_features_enabled() {
+function language_processing_features_enabled(): bool {
 	$features = [
 		'category',
 		'concept',
@@ -417,9 +420,9 @@ function language_processing_features_enabled() {
  * Any results below the threshold will be ignored.
  *
  * @param string $feature The feature whose threshold to lookup
- * @return int
+ * @return float
  */
-function get_feature_threshold( $feature ) {
+function get_feature_threshold( string $feature ): float {
 	$settings  = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
 	$threshold = 0;
 
@@ -441,6 +444,7 @@ function get_feature_threshold( $feature ) {
 	}
 
 	$threshold = empty( $threshold ) ? 0.7 : $threshold / 100;
+
 	/**
 	 * Filter the threshold for a specific feature. Any results below the
 	 * threshold will be ignored.
@@ -448,22 +452,23 @@ function get_feature_threshold( $feature ) {
 	 * @since 1.0.0
 	 * @hook classifai_feature_threshold
 	 *
-	 * @param {string} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
+	 * @param {float} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
 	 * @param {string} $feature   The feature in question.
 	 *
-	 * @return {string} The filtered threshold.
+	 * @return {float} The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
 }
 
 /**
- * Returns the Taxonomy for the specified NLU feature. Returns defaults
- * in config.php if options have not been configured.
+ * Returns the Taxonomy for the specified NLU feature.
+ *
+ * Returns defaults in config.php if options have not been configured.
  *
  * @param string $classify_by NLU feature name
  * @return string Taxonomy mapped to the feature
  */
-function get_feature_taxonomy( $classify_by = '' ) {
+function get_feature_taxonomy( string $classify_by = '' ): string {
 	$taxonomy = 0;
 
 	$feature  = new Classification();
@@ -502,7 +507,7 @@ function get_feature_taxonomy( $classify_by = '' ) {
  *
  * @return int
  */
-function computer_vision_max_filesize() {
+function computer_vision_max_filesize(): int {
 	/**
 	 * Filters the Computer Vision maximum allowed filesize.
 	 *
@@ -525,7 +530,7 @@ function computer_vision_max_filesize() {
  * @param array $size_2 Associative array containing width and height values.
  * @return int Returns -1 if $size_1 is larger, 1 if $size_2 is larger, and 0 if they are equal.
  */
-function sort_images_by_size_cb( $size_1, $size_2 ) {
+function sort_images_by_size_cb( array $size_1, array $size_2 ): int {
 	$size_1_total = $size_1['width'] + $size_1['height'];
 	$size_2_total = $size_2['width'] + $size_2['height'];
 
@@ -547,7 +552,7 @@ function sort_images_by_size_cb( $size_1, $size_2 ) {
  * @param int    $max        The maximum acceptable size.
  * @return string|null The image URL, or null if no acceptable image found.
  */
-function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max = MB_IN_BYTES ) {
+function get_largest_acceptable_image_url( string $full_image, string $full_url, array $sizes, int $max = MB_IN_BYTES ) {
 	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( $file_size && $max >= $file_size ) {
 		return $full_url;
@@ -582,7 +587,7 @@ function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max 
  * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
  * @return string|null The image URL, or null if no acceptable image found.
  */
-function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $metadata, $width = [ 0, 4200 ], $height = [ 0, 4200 ], $max_size = MB_IN_BYTES ) {
+function get_largest_size_and_dimensions_image_url( string $full_image, string $full_url, array $metadata, array $width = [ 0, 4200 ], array $height = [ 0, 4200 ], int $max_size = MB_IN_BYTES ) {
 	// Check if the full size image meets our filesize and dimension requirements
 	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if (
@@ -618,10 +623,9 @@ function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $met
  * Allows returning modified image URL for a given attachment.
  *
  * @param int $post_id Post ID.
- *
  * @return mixed
  */
-function get_modified_image_source_url( $post_id ) {
+function get_modified_image_source_url( int $post_id ) {
 	/**
 	 * Filter to modify image source URL in order to allow scanning images,
 	 * stored on third party storages that cannot be used by
@@ -643,9 +647,10 @@ function get_modified_image_source_url( $post_id ) {
 /**
  * Check if attachment is PDF document.
  *
- * @param \WP_post $post Post object for the attachment being viewed.
+ * @param \WP_Post $post Post object for the attachment being viewed.
+ * @return bool
  */
-function attachment_is_pdf( $post ) {
+function attachment_is_pdf( \WP_Post $post ): bool {
 	$mime_type          = get_post_mime_type( $post );
 	$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 
@@ -663,7 +668,7 @@ function attachment_is_pdf( $post ) {
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
  * @return string|array
  */
-function get_asset_info( $slug, $attribute = null ) {
+function get_asset_info( string $slug, string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
 		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
@@ -682,7 +687,7 @@ function get_asset_info( $slug, $attribute = null ) {
  *
  * @return array Array of services.
  */
-function get_services_menu() {
+function get_services_menu(): array {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
@@ -704,7 +709,6 @@ function get_services_menu() {
  * @param string  $key               $_GET or $_POST array key.
  * @param boolean $is_get            If the request is $_GET. Defaults to false.
  * @param string  $sanitize_callback Sanitize callback. Defaults to `sanitize_text_field`
- *
  * @return string|boolean Sanitized string or `false` as fallback.
  */
 function clean_input( string $key = '', bool $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
@@ -751,7 +755,7 @@ function find_provider_class( array $provider_classes = [], string $provider_id 
  *
  * @return array
  */
-function get_all_post_statuses() {
+function get_all_post_statuses(): array {
 	$all_statuses = wp_list_pluck(
 		get_post_stati(
 			[],
@@ -835,6 +839,7 @@ function render_disable_feature_link( string $feature ) {
 	$user_profile     = new UserProfile();
 	$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 	$profile_url      = get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section';
+
 	if ( ! empty( $allowed_features ) && isset( $allowed_features[ $feature ] ) ) {
 		?>
 		<a href="<?php echo esc_url( $profile_url ); ?>" target="_blank" rel="noopener noreferrer" class="classifai-disable-feature-link" aria-label="<?php esc_attr_e( 'Opt out of using this ClassifAI feature', 'classifai' ); ?>">
