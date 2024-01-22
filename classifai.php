@@ -59,13 +59,14 @@ if ( ! classifai_site_meets_php_requirements() ) {
 }
 
 /**
- * Small wrapper around PHP's define function. The defined constant is
- * ignored if it has already been defined. This allows the
- * config.local.php to override any constant in config.php.
+ * Small wrapper around PHP's define function.
  *
- * @param string $name The constant name
- * @param mixed  $value The constant value
- * @return void
+ * The defined constant is ignored if it has already
+ * been defined. This allows these constants to be
+ * overridden.
+ *
+ * @param string $name The constant name.
+ * @param mixed  $value The constant value.
  */
 function classifai_define( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -73,16 +74,7 @@ function classifai_define( $name, $value ) {
 	}
 }
 
-if ( file_exists( __DIR__ . '/config.test.php' ) && defined( 'PHPUNIT_RUNNER' ) ) {
-	require_once __DIR__ . '/config.test.php';
-}
-
-if ( file_exists( __DIR__ . '/config.local.php' ) ) {
-	require_once __DIR__ . '/config.local.php';
-}
-
 require_once __DIR__ . '/config.php';
-classifai_define( 'CLASSIFAI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
  * Loads the CLASSIFAI PHP autoloader if possible.
