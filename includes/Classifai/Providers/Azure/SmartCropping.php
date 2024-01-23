@@ -96,7 +96,7 @@ class SmartCropping {
 	 *
 	 * @return int
 	 */
-	public function get_max_pixel_dimension() {
+	public function get_max_pixel_dimension(): int {
 		/**
 		 * Filters the maximum allowable width or height of an image to be cropped. Default 1024.
 		 *
@@ -116,9 +116,9 @@ class SmartCropping {
 	 * @since 1.5.0
 	 *
 	 * @param string $size An image size.
-	 * @return boolean
+	 * @return bool
 	 */
-	public function should_crop( $size ) {
+	public function should_crop( string $size ): bool {
 		if ( 'thumbnail' === $size ) {
 			return boolval( get_option( 'thumbnail_crop', false ) );
 		}
@@ -166,7 +166,7 @@ class SmartCropping {
 	 * @param int   $attachment_id Attachment ID.
 	 * @return array Filtered image attachment metadata.
 	 */
-	public function generate_attachment_metadata( $metadata, $attachment_id ) {
+	public function generate_attachment_metadata( array $metadata, int $attachment_id ): array {
 		if ( ! isset( $metadata['sizes'] ) || empty( $metadata['sizes'] ) ) {
 			return $metadata;
 		}
@@ -200,7 +200,7 @@ class SmartCropping {
 	 * @param array $size_data Attachment metadata size data.
 	 * @return string|\WP_Error The thumbnail file name or WP_Error on failure.
 	 */
-	public function get_cropped_thumbnail( $attachment_id, $size_data ) {
+	public function get_cropped_thumbnail( int $attachment_id, array $size_data ) {
 		/**
 		 * Filters the image URL to send to Computer Vision for smart cropping. A non-null value will override default
 		 * plugin behavior.
@@ -295,7 +295,7 @@ class SmartCropping {
 	 *
 	 * @return string
 	 */
-	public function get_api_url() {
+	public function get_api_url(): string {
 		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH );
 	}
 
@@ -307,7 +307,7 @@ class SmartCropping {
 	 * @param array $data Data for an attachment image size.
 	 * @return string|\WP_Error
 	 */
-	public function request_cropped_thumbnail( $data ) {
+	public function request_cropped_thumbnail( array $data ) {
 		$url = add_query_arg(
 			[
 				'height'        => $data['height'],

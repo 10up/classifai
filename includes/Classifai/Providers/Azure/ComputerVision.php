@@ -206,7 +206,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'endpoint_url'  => '',
 			'api_key'       => '',
@@ -251,10 +251,9 @@ class ComputerVision extends Provider {
 	 * Sanitization
 	 *
 	 * @param array $new_settings The settings being saved.
-	 *
 	 * @return array|mixed
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ) {
 		$settings = $this->feature_instance->get_settings();
 
 		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
@@ -301,7 +300,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_alt_text_settings() {
+	public function get_alt_text_settings(): array {
 		$alt_generator  = new DescriptiveTextGenerator();
 		$settings       = $alt_generator->get_settings( static::ID );
 		$enabled_fields = array();
@@ -394,10 +393,9 @@ class ComputerVision extends Provider {
 	 * Filter the post content to inject aria-describedby attribute.
 	 *
 	 * @param string $content Post content.
-	 *
 	 * @return string
 	 */
-	public function add_ocr_aria_describedby( $content ) {
+	public function add_ocr_aria_describedby( string $content ): string {
 		$modified = false;
 
 		if ( ! is_singular() || empty( $content ) ) {
@@ -451,7 +449,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @param \WP_Post $post The post object.
 	 */
-	public function setup_attachment_meta_box( $post ) {
+	public function setup_attachment_meta_box( \WP_Post $post ) {
 		if (
 			wp_attachment_is_image( $post ) &&
 			(
@@ -488,7 +486,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @param \WP_Post $post The post object.
 	 */
-	public function attachment_data_meta_box( $post ) {
+	public function attachment_data_meta_box( \WP_Post $post ) {
 		$alt_generator  = new DescriptiveTextGenerator();
 		$image_tagging  = new ImageTagsGenerator();
 		$image_to_text  = new ImageTextExtraction();
@@ -545,7 +543,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @param \WP_Post $post The post object.
 	 */
-	public function attachment_pdf_data_meta_box( $post ) {
+	public function attachment_pdf_data_meta_box( \WP_Post $post ) {
 		$status  = self::get_read_status( $post->ID );
 		$read    = (bool) $status['read'] ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
 		$running = (bool) $status['running'];
@@ -570,7 +568,7 @@ class ComputerVision extends Provider {
 	 * @param array    $form_fields Array of fields
 	 * @param \WP_post $post        Post object for the attachment being viewed.
 	 */
-	public function add_rescan_button_to_media_modal( $form_fields, $post ) {
+	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ) {
 		$pdf_to_text   = new PDFTextExtraction();
 		$alt_generator = new DescriptiveTextGenerator();
 		$image_to_text = new ImageTextExtraction();
@@ -681,7 +679,7 @@ class ComputerVision extends Provider {
 	 * Callback to get the status of the PDF read.
 	 *
 	 * @param  int $attachment_id The attachment ID.
-	 * @return array Read and running status.
+	 * @return array|null Read and running status.
 	 */
 	public static function get_read_status( $attachment_id = null ) {
 		if ( empty( $attachment_id ) || ! is_numeric( $attachment_id ) ) {
@@ -704,10 +702,11 @@ class ComputerVision extends Provider {
 	}
 
 	/**
+	 * Determine if we need to rescan the image.
 	 *
 	 * @param int $attachment_id Post id for the attachment
 	 */
-	public function maybe_rescan_image( $attachment_id ) {
+	public function maybe_rescan_image( int $attachment_id ) {
 		if ( clean_input( 'rescan-pdf' ) ) {
 			$this->read_pdf( $attachment_id );
 			return; // We can exit early, if this is a call for PDF scanning - everything else relates to images.
@@ -759,7 +758,7 @@ class ComputerVision extends Provider {
 	 * @param int   $attachment_id Attachment ID.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function smart_crop_image( $metadata, $attachment_id ) {
+	public function smart_crop_image( array $metadata, int $attachment_id ): array {
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
@@ -805,10 +804,9 @@ class ComputerVision extends Provider {
 	 *
 	 * @param array $metadata      The metadata for the image.
 	 * @param int   $attachment_id Post ID for the attachment.
-	 *
 	 * @return mixed
 	 */
-	public function generate_image_alt_tags( $metadata, $attachment_id ) {
+	public function generate_image_alt_tags( array $metadata, int $attachment_id ) {
 		$feature = new ImageTagsGenerator();
 
 		if ( $feature->is_feature_enabled() ) {
@@ -853,7 +851,7 @@ class ComputerVision extends Provider {
 	 * @param boolean $force Whether to force processing or not. Default false.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ) {
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ): array {
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -899,10 +897,9 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string                      $image_url Path to the uploaded image.
 	 * @param \Classifai\Features\Feature $feature   Feature instance
-	 *
 	 * @return bool|object|WP_Error
 	 */
-	protected function scan_image( $image_url, $feature = null ) {
+	protected function scan_image( string $image_url, \Classifai\Features\Feature $feature = null ) {
 		$settings = $feature->get_settings( static::ID );
 
 		// Check if valid authentication is in place.
@@ -950,10 +947,9 @@ class ComputerVision extends Provider {
 	 * Build and return the API endpoint based on settings.
 	 *
 	 * @param \Classifai\Features\Feature $feature Feature instance
-	 *
 	 * @return string
 	 */
-	protected function prep_api_url( $feature = null ) {
+	protected function prep_api_url( \Classifai\Features\Feature $feature = null ): string {
 		$settings     = $feature->get_settings( static::ID );
 		$api_features = [];
 
@@ -974,10 +970,9 @@ class ComputerVision extends Provider {
 	 * Generate the alt tags for the image being uploaded.
 	 *
 	 * @param int $attachment_id Post ID for the attachment.
-	 *
 	 * @return string|WP_Error
 	 */
-	public function generate_alt_tags( $attachment_id ) {
+	public function generate_alt_tags( int $attachment_id ) {
 		$rtn = '';
 
 		$enabled_fields = $this->get_alt_text_settings();
@@ -1064,7 +1059,7 @@ class ComputerVision extends Provider {
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 */
-	public function read_pdf( $attachment_id ) {
+	public function read_pdf( int $attachment_id ) {
 		$feature         = new PDFTextExtraction();
 		$settings        = $feature->get_settings( static::ID );
 		$should_read_pdf = $feature->is_feature_enabled();
@@ -1095,7 +1090,7 @@ class ComputerVision extends Provider {
 	 * @param string $operation_url Operation URL for checking the read status.
 	 * @param int    $attachment_id Attachment ID.
 	 */
-	public function do_read_cron( $operation_url, $attachment_id ) {
+	public function do_read_cron( string $operation_url, int $attachment_id ) {
 		$settings = ( new PDFTextExtraction() )->get_settings( static::ID );
 
 		( new Read( $settings, intval( $attachment_id ) ) )->check_read_result( $operation_url );
@@ -1105,10 +1100,9 @@ class ComputerVision extends Provider {
 	 * Generate the image tags for the image being uploaded.
 	 *
 	 * @param int $attachment_id Post ID for the attachment.
-	 *
 	 * @return string|array|WP_Error
 	 */
-	public function generate_image_tags( $attachment_id ) {
+	public function generate_image_tags( int $attachment_id ) {
 		$rtn      = '';
 		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
@@ -1183,10 +1177,9 @@ class ComputerVision extends Provider {
 	 *
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
-	 *
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( $url, $api_key ) {
+	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn     = false;
 		$request = wp_remote_post(
 			trailingslashit( $url ) . $this->analyze_url,
@@ -1317,7 +1310,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	public function computer_vision_endpoint_callback( $request ) {
+	public function computer_vision_endpoint_callback( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$custom_atts   = $request->get_attributes();
 		$route_to_call = empty( $custom_atts['args']['route'] ) ? false : strtolower( $custom_atts['args']['route'][0] );
@@ -1346,7 +1339,7 @@ class ComputerVision extends Provider {
 	 * @param array  $args          Optional arguments to pass to the route.
 	 * @return array|string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call = [], $args = [] ) {
+	public function rest_endpoint_callback( int $post_id, string $route_to_call = '', array $args = [] ) {
 		// Check to be sure the post both exists and is an attachment.
 		if ( ! get_post( $post_id ) || 'attachment' !== get_post_type( $post_id ) ) {
 			/* translators: %1$s: the attachment ID */
@@ -1400,7 +1393,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function descriptive_text_generator_permissions_check( $request ) {
+	public function descriptive_text_generator_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
 
@@ -1427,7 +1420,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function image_tags_generator_permissions_check( $request ) {
+	public function image_tags_generator_permissions_check( WP_REST_Request $request ) {
 		$attachment_id      = $request->get_param( 'id' );
 		$post_type          = get_post_type_object( 'attachment' );
 		$image_tags_feature = new ImageTagsGenerator();
@@ -1466,7 +1459,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function smart_crop_permissions_check( $request ) {
+	public function smart_crop_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
 
@@ -1493,7 +1486,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function pdf_read_permissions_check( $request ) {
+	public function pdf_read_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
 
@@ -1520,7 +1513,7 @@ class ComputerVision extends Provider {
 	 * @param WP_REST_Request $request Request object.
 	 * @return bool|WP_Error
 	 */
-	public function image_text_extractor_permissions_check( $request ) {
+	public function image_text_extractor_permissions_check( WP_REST_Request $request ) {
 		$attachment_id = $request->get_param( 'id' );
 		$post_type     = get_post_type_object( 'attachment' );
 
@@ -1548,7 +1541,7 @@ class ComputerVision extends Provider {
 	 *                       DISTINCT, fields (SELECT), and LIMITS clauses.
 	 * @return array The modified clauses.
 	 */
-	public function filter_attachment_query_keywords( $clauses ) {
+	public function filter_attachment_query_keywords( array $clauses ): array {
 		global $wpdb;
 		remove_filter( 'posts_clauses', __FUNCTION__ );
 
@@ -1575,28 +1568,28 @@ class ComputerVision extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
-			$descriptive_text  = array_filter(
+			$descriptive_text = array_filter(
 				$provider_settings['descriptive_text_fields'],
-				function( $type ) {
+				function ( $type ) {
 					return '0' !== $type;
 				}
 			);
 
 			$debug_info[ __( 'Generate descriptive text', 'classifai' ) ] = implode( ', ', $descriptive_text );
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ]      = $provider_settings['descriptive_confidence_threshold'];
-			$debug_info[ __( 'Latest response:', 'classifai' ) ]           = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response' ) );
+			$debug_info[ __( 'Latest response:', 'classifai' ) ]          = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response' ) );
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
 			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'];
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ] = $provider_settings['tag_confidence_threshold'];
-			$debug_info[ __( 'Latest response:', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_tags_latest_response' ) );
+			$debug_info[ __( 'Latest response:', 'classifai' ) ]     = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_tags_latest_response' ) );
 		}
 
 		if ( $this->feature_instance instanceof ImageCropping ) {

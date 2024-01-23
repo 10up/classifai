@@ -55,7 +55,7 @@ class Read {
 	 * @param int     $attachment_id Attachment ID to process.
 	 * @param boolean $force         Whether to force processing or not.
 	 */
-	public function __construct( array $settings, $attachment_id, bool $force = false ) {
+	public function __construct( array $settings, int $attachment_id, bool $force = false ) {
 		$this->settings      = $settings;
 		$this->attachment_id = $attachment_id;
 		$this->force         = $force;
@@ -65,19 +65,18 @@ class Read {
 	 * Builds the API url.
 	 *
 	 * @param string $path Path to append to API URL.
-	 *
 	 * @return string
 	 */
-	public function get_api_url( $path = '' ) {
+	public function get_api_url( string $path = '' ): string {
 		return sprintf( '%s%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH, $path );
 	}
 
 	/**
 	 * Returns whether Read processing should be applied to the attachment
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function should_process() {
+	public function should_process(): bool {
 		// Bypass check if this is a force request
 		if ( $this->force ) {
 			return true;
@@ -220,10 +219,9 @@ class Read {
 	 * Use WP Cron to periodically check the status of the read operation.
 	 *
 	 * @param string $operation_url Operation URL for checking the read status.
-	 *
 	 * @return WP_Error|null|array
 	 */
-	public function check_read_result( $operation_url ) {
+	public function check_read_result( string $operation_url ) {
 		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
 			$response = vip_safe_wp_remote_get( $operation_url );
 		} else {
@@ -281,11 +279,10 @@ class Read {
 	/**
 	 * Update document description using text received from Read API.
 	 *
-	 * @param array $data          Read result.
-	 *
+	 * @param array $data Read result.
 	 * @return WP_Error|array
 	 */
-	public function update_document_description( $data ) {
+	public function update_document_description( array $data ) {
 		if ( empty( $data['analyzeResult'] ) || empty( $data['analyzeResult']['readResults'] ) ) {
 			return $this->log_error( new WP_Error( 'invalid_read_result', esc_html__( 'The Read result is invalid.', 'classifai' ) ) );
 		}
@@ -343,7 +340,7 @@ class Read {
 	 *
 	 * @param WP_Error $error WP_Error object.
 	 */
-	private function log_error( $error ) {
+	private function log_error( WP_Error $error ) {
 		update_post_meta( $this->attachment_id, '_classifai_azure_read_error', $error->get_error_message() );
 
 		return $error;
@@ -352,11 +349,12 @@ class Read {
 	/**
 	 * Log the status of read process to database.
 	 *
-	 * @param array $data Response body of the read result.
-	 *
 	 * @see https://centraluseuap.dev.cognitive.microsoft.com/docs/services/computer-vision-v3-2/operations/5d9869604be85dee480c8750
+	 *
+	 * @param array $data Response body of the read result.
+	 * @return array
 	 */
-	private function update_status( $data ) {
+	private function update_status( array $data ): array {
 		update_post_meta( $this->attachment_id, '_classifai_azure_read_status', $data );
 
 		return $data;

@@ -94,7 +94,7 @@ class OCR {
 	 *
 	 * @return string
 	 */
-	public function get_api_url() {
+	public function get_api_url(): string {
 		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH );
 	}
 
@@ -104,9 +104,9 @@ class OCR {
 	 * @since 1.6.0
 	 *
 	 * @param int $attachment_id Attachment ID.
-	 * @return boolean
+	 * @return bool
 	 */
-	public function should_process( int $attachment_id ) {
+	public function should_process( int $attachment_id ): bool {
 		// Bypass check if this is a force request
 		if ( $this->force ) {
 			return true;

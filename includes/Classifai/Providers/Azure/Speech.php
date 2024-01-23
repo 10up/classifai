@@ -5,10 +5,9 @@
 
 namespace Classifai\Providers\Azure;
 
-use \Classifai\Admin\SavePostHandler;
-use \Classifai\Providers\Provider;
-use \Classifai\Watson\Normalizer;
-use \Classifai\Features\TextToSpeech;
+use Classifai\Providers\Provider;
+use Classifai\Watson\Normalizer;
+use Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;
 use WP_REST_Server;
@@ -138,8 +137,6 @@ class Speech extends Provider {
 
 	/**
 	 * Render the provider fields.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -202,7 +199,7 @@ class Speech extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
 			'endpoint_url'  => '',
@@ -225,7 +222,7 @@ class Speech extends Provider {
 	 * @param array $new_settings The settings being saved.
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings               = $this->feature_instance->get_settings();
 		$is_credentials_changed = false;
 
@@ -291,7 +288,7 @@ class Speech extends Provider {
 	 * @param array $args Overridable args.
 	 * @return array
 	 */
-	public function connect_to_service( array $args = array() ) {
+	public function connect_to_service( array $args = array() ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
@@ -387,7 +384,7 @@ class Speech extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_voices_select_options() {
+	public function get_voices_select_options(): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 		$voices   = $settings['voices'];
 		$options  = array();
@@ -425,7 +422,7 @@ class Speech extends Provider {
 	 *                                    points to a non-existent post returns `null`. Defaults to global $post.
 	 * @return bool                     The initial state of audio generation. Default true.
 	 */
-	public function get_audio_generation_initial_state( $post = null ) {
+	public function get_audio_generation_initial_state( $post = null ): bool {
 		/**
 		 * Initial state of the audio generation toggle when no audio already exists for the post.
 		 *
@@ -450,7 +447,7 @@ class Speech extends Provider {
 	 *                                   points to a non-existent post returns `null`. Defaults to global $post.
 	 * @return bool                    The subsequent state of audio generation. Default false.
 	 */
-	public function get_audio_generation_subsequent_state( $post = null ) {
+	public function get_audio_generation_subsequent_state( $post = null ): bool {
 		/**
 		 * Subsequent state of the audio generation toggle when audio exists for the post.
 		 *
@@ -540,7 +537,7 @@ class Speech extends Provider {
 	 * @param int $post_id Post ID.
 	 * @return bool|int|WP_Error
 	 */
-	public function synthesize_speech( $post_id ) {
+	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_post_id_missing',
@@ -690,10 +687,10 @@ class Speech extends Provider {
 	/**
 	 * Handles audio generation on rest updates / inserts.
 	 *
-	 * @param WP_Post         $post     Inserted or updated post object.
-	 * @param WP_REST_Request $request  Request object.
+	 * @param \WP_Post         $post     Inserted or updated post object.
+	 * @param \WP_REST_Request $request  Request object.
 	 */
-	public function rest_handle_audio( $post, $request ) {
+	public function rest_handle_audio( \WP_Post $post, \WP_REST_Request $request ) {
 		$audio_id = get_post_meta( $request->get_param( 'id' ), self::AUDIO_ID_KEY, true );
 
 		// Since we have dynamic generation option agnostic to meta saves we need a flag to differentiate audio generation accurately
@@ -719,7 +716,7 @@ class Speech extends Provider {
 	 *
 	 * @param string $post_type Post type.
 	 */
-	public function add_meta_box( $post_type ) {
+	public function add_meta_box( string $post_type ) {
 		if ( ! in_array( $post_type, get_tts_supported_post_types(), true ) ) {
 			return;
 		}
@@ -740,7 +737,7 @@ class Speech extends Provider {
 	 *
 	 * @param \WP_Post $post WP_Post object.
 	 */
-	public function render_meta_box( $post ) {
+	public function render_meta_box( \WP_Post $post ) {
 		wp_nonce_field( 'classifai_text_to_speech_meta_action', 'classifai_text_to_speech_meta' );
 
 		$source_url = false;
@@ -818,7 +815,7 @@ class Speech extends Provider {
 	 *
 	 * @param int $post_id Post ID.
 	 */
-	public function save_post_metadata( $post_id ) {
+	public function save_post_metadata( int $post_id ) {
 
 		if ( ! in_array( get_post_type( $post_id ), get_tts_supported_post_types(), true ) ) {
 			return;
@@ -849,7 +846,7 @@ class Speech extends Provider {
 	 * @param string $content Post content.
 	 * @return string
 	 */
-	public function render_post_audio_controls( $content ) {
+	public function render_post_audio_controls( string $content ): string {
 
 		$_post = get_post();
 
@@ -992,7 +989,7 @@ class Speech extends Provider {
 	 *
 	 * @return array
 	 */
-	protected function get_post_types_select_options() {
+	protected function get_post_types_select_options(): array {
 		$post_types = get_post_types_for_language_settings();
 		$options    = array();
 
@@ -1005,8 +1002,6 @@ class Speech extends Provider {
 
 	/**
 	 * Registers REST endpoints for this provider.
-	 *
-	 * @return void
 	 */
 	public function register_endpoints() {
 		register_rest_route(
@@ -1085,15 +1080,15 @@ class Speech extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof TextToSpeech ) {
-			$post_types        = array_filter(
+			$post_types = array_filter(
 				$settings['post_types'],
-				function( $value ) {
+				function ( $value ) {
 					return '0' !== $value;
 				}
 			);
