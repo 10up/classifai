@@ -3,9 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\Azure\Speech;
-
-use function Classifai\find_provider_class;
+use Classifai\Providers\Azure\Speech;
 
 /**
  * Class TitleGeneration
@@ -22,6 +20,8 @@ class TextToSpeech extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Text to Speech', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -31,23 +31,11 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Text to speech', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	protected function get_providers() {
+	protected function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -136,7 +124,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_post_types_select_options() {
+	protected function get_post_types_select_options(): array {
 		$post_types = \Classifai\get_post_types_for_language_settings();
 		$options    = array();
 
@@ -157,7 +145,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'post_types' => [],
@@ -179,7 +167,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @return array Supported Post Types.
 	 */
-	public function get_tts_supported_post_types() {
+	public function get_tts_supported_post_types(): array {
 		$selected   = $this->get_settings( 'post_types' );
 		$post_types = [];
 
@@ -196,10 +184,9 @@ class TextToSpeech extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -229,7 +216,6 @@ class TextToSpeech extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

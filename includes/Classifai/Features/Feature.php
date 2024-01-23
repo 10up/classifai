@@ -15,6 +15,13 @@ abstract class Feature {
 	const ID = '';
 
 	/**
+	 * Feature label.
+	 *
+	 * @var string
+	 */
+	public $label = '';
+
+	/**
 	 * User role array.
 	 *
 	 * @var array
@@ -46,9 +53,9 @@ abstract class Feature {
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
 
 		/**
-		 * Filter the allowed WordPress roles for ChatGTP
+		 * Filter the allowed WordPress roles for a feature.
 		 *
-		 * @since 2.3.0
+		 * @since 3.0.0
 		 * @hook classifai_{feature}_roles
 		 *
 		 * @param {array} $roles            Array of arrays containing role information.
@@ -64,7 +71,22 @@ abstract class Feature {
 	 *
 	 * @return string
 	 */
-	abstract public function get_label();
+	public function get_label(): string {
+		/**
+		 * Filter the feature label.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_label
+		 *
+		 * @param {string} $label Feature label.
+		 *
+		 * @return {string} Filtered label.
+		 */
+		return apply_filters(
+			'classifai_' . static::ID . '_label',
+			$this->label
+		);
+	}
 
 	/**
 	 * Set up the fields for each section.
@@ -79,7 +101,7 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		return [
 			'status'             => '0',
 			'role_based_access'  => '1',
@@ -96,17 +118,16 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract protected function get_providers();
+	abstract protected function get_providers(): array;
 
 	/**
 	 * Sanitizes the settings before saving.
 	 *
-	 * @param array $settings The settings to be sanitized on save.
-	 *
 	 * @internal
+	 * @param array $settings The settings to be sanitized on save.
 	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
+	public function sanitize_settings( array $settings ): array {
 		$new_settings             = $settings;
 		$current_settings         = $this->get_settings();
 		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
@@ -156,7 +177,7 @@ abstract class Feature {
 	 *
 	 * @return bool
 	 */
-	public function has_access() {
+	public function has_access(): bool {
 		$access        = false;
 		$user_id       = get_current_user_id();
 		$user          = get_user_by( 'id', $user_id );
@@ -194,11 +215,11 @@ abstract class Feature {
 		/**
 		 * Filter to override user access to a ClassifAI feature.
 		 *
-		 * @since 2.4.0
+		 * @since 3.0.0
 		 * @hook classifai_{$feature}_has_access
 		 *
-		 * @param {bool}   $access   Current access value.
-		 * @param {array}  $settings Feature settings.
+		 * @param {bool}  $access   Current access value.
+		 * @param {array} $settings Feature settings.
 		 *
 		 * @return {bool} Should the user have access?
 		 */
@@ -206,15 +227,19 @@ abstract class Feature {
 	}
 
 	/**
-	 * Returns true if the feature meets all the criteria to be enabled. False otherwise.
+	 * Determine if a feature is enabled.
+	 *
+	 * Returns true if the feature meets all the criteria to
+	 * be enabled. False otherwise.
+	 *
 	 * Criteria:
 	 *  - Provider is configured.
 	 *  - User has access to the feature.
 	 *  - Feature is turned on.
 	 *
-	 * @return boolean|\WP_Error
+	 * @return bool
 	 */
-	public function is_feature_enabled() {
+	public function is_feature_enabled(): bool {
 		$is_feature_enabled = false;
 		$settings           = $this->get_settings();
 
@@ -243,6 +268,7 @@ abstract class Feature {
 
 	/**
 	 * Determine if the feature is turned on.
+	 *
 	 * Note: This function does not check if the user has access to the feature.
 	 *
 	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
@@ -250,7 +276,7 @@ abstract class Feature {
 	 *
 	 * @return bool
 	 */
-	public function is_enabled() {
+	public function is_enabled(): bool {
 		$settings = $this->get_settings();
 
 		// Check if feature is turned on.
@@ -261,7 +287,7 @@ abstract class Feature {
 		/**
 		 * Filter to override a specific classifai feature enabled.
 		 *
-		 * @since 2.5.0
+		 * @since 3.0.0
 		 * @hook classifai_{$feature}_is_enabled
 		 *
 		 * @param {bool}  $is_enabled Is the feature enabled?
@@ -290,7 +316,7 @@ abstract class Feature {
 	 *
 	 * @return string
 	 */
-	public function get_option_name() {
+	public function get_option_name(): string {
 		return 'classifai_' . static::ID;
 	}
 
@@ -298,7 +324,6 @@ abstract class Feature {
 	 * Returns the settings for the feature.
 	 *
 	 * @param string $index The index of the setting to return.
-	 *
 	 * @return array|string
 	 */
 	public function get_settings( $index = false ) {
@@ -318,7 +343,7 @@ abstract class Feature {
 	 *
 	 * @return array
 	 */
-	public function get_provider_default_settings() {
+	public function get_provider_default_settings(): array {
 		$provider_settings = [];
 
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
@@ -334,8 +359,6 @@ abstract class Feature {
 
 	/**
 	 * Renders the fields of the provider selected for the feature.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
@@ -352,19 +375,16 @@ abstract class Feature {
 	 *
 	 * @internal
 	 *
-	 * @param array $settings Settings data from the database.
-	 * @param array $default  Default feature and providers settings data.
-	 *
+	 * @param array $settings  Settings data from the database.
+	 * @param array $defaults  Default feature and providers settings data.
 	 * @return array
 	 */
-	protected function merge_settings( $settings = [], $default = [] ) {
-		foreach ( $default as $key => $value ) {
+	protected function merge_settings( array $settings = [], array $defaults = [] ): array {
+		foreach ( $defaults as $key => $value ) {
 			if ( ! isset( $settings[ $key ] ) ) {
-				$settings[ $key ] = $default[ $key ];
-			} else {
-				if ( is_array( $value ) ) {
-					$settings[ $key ] = $this->merge_settings( $settings[ $key ], $default[ $key ] );
-				}
+				$settings[ $key ] = $defaults[ $key ];
+			} elseif ( is_array( $value ) ) {
+				$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
 			}
 		}
 
@@ -379,7 +399,7 @@ abstract class Feature {
 	 * @param array $services Array of provider classes.
 	 * @return array
 	 */
-	protected function get_provider_instances( $services ) {
+	protected function get_provider_instances( array $services ): array {
 		$provider_instances = [];
 
 		foreach ( $services as $provider_class ) {
@@ -393,10 +413,9 @@ abstract class Feature {
 	 * Returns the instance of the provider set for the feature.
 	 *
 	 * @param string $provider_id The ID of the provider.
-	 *
 	 * @return \Classifai\Providers
 	 */
-	public function get_feature_provider_instance( $provider_id = '' ) {
+	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
 		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
 
@@ -415,7 +434,7 @@ abstract class Feature {
 	 *
 	 * @return bool
 	 */
-	public function is_configured() {
+	public function is_configured(): bool {
 		$settings      = $this->get_settings();
 		$provider_id   = $settings['provider'];
 		$is_configured = false;
@@ -429,17 +448,26 @@ abstract class Feature {
 
 	/**
 	 * Can the feature be initialized?
+	 *
+	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 		return $this->is_configured();
 	}
 
-	public static function get_debug_value_text( $setting_value, $type = 0 ) {
+	/**
+	 * Get the debug value text.
+	 *
+	 * @param mixed   $setting_value The value of the setting.
+	 * @param integer $type The type of debug value to return.
+	 * @return string
+	 */
+	public static function get_debug_value_text( $setting_value, $type = 0 ): string {
 		$debug_value = '';
 
-		if ( empty ( $setting_value ) ) {
+		if ( empty( $setting_value ) ) {
 			$boolean = false;
-		} else if ( 'no' === $setting_value ) {
+		} elseif ( 'no' === $setting_value ) {
 			$boolean = false;
 		} else {
 			$boolean = true;
@@ -462,13 +490,13 @@ abstract class Feature {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$feature_settings = $this->get_settings();
 		$provider         = $this->get_feature_provider_instance();
 
 		$roles = array_filter(
 			$feature_settings['roles'],
-			function( $role ) {
+			function ( $role ) {
 				return '0' !== $role;
 			}
 		);
@@ -491,6 +519,17 @@ abstract class Feature {
 			);
 		}
 
+		/**
+		 * Filter to add feature-level debug information.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_debug_information
+		 *
+		 * @param {array} $all_debug_info Debug information
+		 * @param {object} $this Current feature class.
+		 *
+		 * @return {array} Returns debug information.
+		 */
 		return apply_filters(
 			'classifai_' . self::ID . '_debug_information',
 			$all_debug_info,
@@ -504,7 +543,7 @@ abstract class Feature {
 	 * @param array $args The args passed to add_settings_field.
 	 * @return string
 	 */
-	protected function get_data_attribute( $args ) {
+	protected function get_data_attribute( array $args ): string {
 		$data_attr     = $args['data_attr'] ?? [];
 		$data_attr_str = '';
 
@@ -528,8 +567,6 @@ abstract class Feature {
 
 	/**
 	 * Add settings fields for Role/User based access.
-	 *
-	 * @return void
 	 */
 	protected function add_access_control_fields() {
 		$settings = $this->get_settings();
@@ -626,7 +663,7 @@ abstract class Feature {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_input( $args ) {
+	public function render_input( array $args ) {
 		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
 		$type          = $args['input_type'] ?? 'text';
@@ -693,7 +730,7 @@ abstract class Feature {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_prompt_repeater_field( array $args ): void {
+	public function render_prompt_repeater_field( array $args ) {
 		$option_index      = $args['option_index'] ?? false;
 		$setting_index     = $this->get_settings( $option_index );
 		$prompts           = $setting_index[ $args['label_for'] ] ?? '';
@@ -795,7 +832,7 @@ abstract class Feature {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_select( $args ) {
+	public function render_select( array $args ) {
 		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
 		$setting_index = $this->get_settings( $option_index );
 		$saved         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
@@ -879,9 +916,8 @@ abstract class Feature {
 	 *
 	 * @param array $args The args passed to add_settings_field.
 	 */
-	public function render_auto_caption_fields( $args ) {
+	public function render_auto_caption_fields( array $args ) {
 		$setting_index = $this->get_settings();
-
 		$default_value = '';
 
 		if ( isset( $setting_index['enable_image_captions'] ) ) {
@@ -943,6 +979,7 @@ abstract class Feature {
 		$setting_index = $this->get_settings();
 		$value         = $setting_index[ $args['label_for'] ] ?? '';
 		$options       = $args['options'] ?? [];
+
 		if ( ! is_array( $options ) ) {
 			return;
 		}

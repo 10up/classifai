@@ -3,7 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\OpenAI\Whisper;
+use Classifai\Providers\OpenAI\Whisper;
 
 /**
  * Class AudioTranscriptsGeneration
@@ -20,6 +20,8 @@ class AudioTranscriptsGeneration extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Audio Transcripts Generation', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -29,23 +31,21 @@ class AudioTranscriptsGeneration extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Audio Transcripts Generation', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	public function get_providers() {
+	public function get_providers(): array {
+		/**
+		 * Filter the feature providers.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_providers
+		 *
+		 * @param {array} $providers Feature providers.
+		 *
+		 * @return {array} Filtered providers.
+		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -118,7 +118,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
+	public function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'provider' => Whisper::ID,
@@ -138,10 +138,9 @@ class AudioTranscriptsGeneration extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -162,7 +161,6 @@ class AudioTranscriptsGeneration extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

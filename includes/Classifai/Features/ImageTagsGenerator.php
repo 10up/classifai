@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use \Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Services\ImageProcessing;
 
 /**
@@ -20,6 +20,8 @@ class ImageTagsGenerator extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Image Tags Generator', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -29,25 +31,11 @@ class ImageTagsGenerator extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Image Tags Generator', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
-	 *
-	 * @internal
 	 *
 	 * @return array
 	 */
-	protected function get_providers() {
+	protected function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -122,7 +110,7 @@ class ImageTagsGenerator extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'provider' => ComputerVision::ID,
@@ -142,12 +130,9 @@ class ImageTagsGenerator extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
-	 * @internal
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -168,7 +153,6 @@ class ImageTagsGenerator extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

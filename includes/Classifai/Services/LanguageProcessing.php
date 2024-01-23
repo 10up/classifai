@@ -19,14 +19,6 @@ class LanguageProcessing extends Service {
 	}
 
 	/**
-	 * Init service for Language Processing.
-	 */
-	public function init() {
-		parent::init();
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-	}
-
-	/**
 	 * Get service providers for Language Processing.
 	 *
 	 * @return array

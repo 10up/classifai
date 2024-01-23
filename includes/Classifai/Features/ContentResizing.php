@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use \Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Services\LanguageProcessing;
 
 /**
@@ -20,6 +20,8 @@ class ContentResizing extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Content Resizing', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -29,23 +31,11 @@ class ContentResizing extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Content Resizing', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	protected function get_providers() {
+	protected function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -118,7 +108,7 @@ class ContentResizing extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'provider' => \Classifai\Providers\OpenAI\ChatGPT::ID,
@@ -138,10 +128,9 @@ class ContentResizing extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -162,7 +151,6 @@ class ContentResizing extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

@@ -34,7 +34,6 @@ class ImageProcessing extends Service {
 		$this->register_image_tags_taxonomy();
 
 		add_filter( 'attachment_fields_to_edit', [ $this, 'custom_fields_edit' ] );
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
 	}
 

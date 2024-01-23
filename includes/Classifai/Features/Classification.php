@@ -3,8 +3,8 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\Watson\NLU;
-use \Classifai\Providers\OpenAI\Embeddings;
+use Classifai\Providers\Watson\NLU;
+use Classifai\Providers\OpenAI\Embeddings;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_post_types_for_language_settings;
 
@@ -23,6 +23,8 @@ class Classification extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Classification', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -32,23 +34,11 @@ class Classification extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Classification', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	public function get_providers() {
+	public function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -154,10 +144,8 @@ class Classification extends Feature {
 	 * Renders the previewer window for the feature.
 	 *
 	 * @param string $active_feature The ID of the current feature.
-	 *
-	 * @return void
 	 */
-	public function render_previewer( $active_feature = '' ) {
+	public function render_previewer( string $active_feature = '' ) {
 		if ( static::ID !== $active_feature ) {
 			return;
 		}
@@ -238,7 +226,7 @@ class Classification extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'post_statuses' => [],
@@ -260,10 +248,9 @@ class Classification extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -286,7 +273,6 @@ class Classification extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {
@@ -301,7 +287,7 @@ class Classification extends Feature {
 				[ $provider_instance, 'classify' ],
 				[ ...$args ]
 			);
-		} else if ( Embeddings::ID === $provider_instance::ID ) {
+		} elseif ( Embeddings::ID === $provider_instance::ID ) {
 			/** @var Embeddings $provider_instance */
 			$result = call_user_func_array(
 				[ $provider_instance, 'generate_embeddings_for_post' ],

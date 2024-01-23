@@ -3,7 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\OpenAI\DallE;
+use Classifai\Providers\OpenAI\DallE;
 
 /**
  * Class TitleGeneration
@@ -20,6 +20,8 @@ class ImageGeneration extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Image Generation', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -29,23 +31,11 @@ class ImageGeneration extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Image Generation', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	public function get_providers() {
+	public function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -64,7 +54,7 @@ class ImageGeneration extends Feature {
 		$roles = get_editable_roles() ?? [];
 		$roles = array_filter(
 			$roles,
-			function( $role ) {
+			function ( $role ) {
 				return isset( $role['capabilities'], $role['capabilities']['upload_files'] ) && $role['capabilities']['upload_files'];
 			}
 		);
@@ -141,9 +131,9 @@ class ImageGeneration extends Feature {
 	/**
 	 * Returns true if the feature meets all the criteria to be enabled.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function is_feature_enabled() {
+	public function is_feature_enabled(): bool {
 		$settings           = $this->get_settings();
 		$is_feature_enabled = parent::is_feature_enabled() && current_user_can( 'upload_files' );
 
@@ -161,7 +151,7 @@ class ImageGeneration extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'provider' => DallE::ID,
@@ -181,10 +171,9 @@ class ImageGeneration extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -205,7 +194,6 @@ class ImageGeneration extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

@@ -3,8 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\Personalizer as PersonalizerService;
-use \Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
-use \Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
 
 /**
  * Class RecommendedContent
@@ -21,6 +20,8 @@ class RecommendedContent extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->label = __( 'Recommended Content', 'classifai' );
+
 		/**
 		 * Every feature must set the `provider_instances` variable with the list of provider instances
 		 * that are registered to a service.
@@ -30,23 +31,11 @@ class RecommendedContent extends Feature {
 	}
 
 	/**
-	 * Returns the label of the feature.
-	 *
-	 * @return string
-	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Recommended Content', 'classifai' )
-		);
-	}
-
-	/**
 	 * Returns the providers supported by the feature.
 	 *
 	 * @return array
 	 */
-	public function get_providers() {
+	public function get_providers(): array {
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
 			[
@@ -119,7 +108,7 @@ class RecommendedContent extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
+	protected function get_default_settings(): array {
 		$provider_settings = $this->get_provider_default_settings();
 		$feature_settings  = [
 			'provider' => PersonalizerProvider::ID,
@@ -139,10 +128,9 @@ class RecommendedContent extends Feature {
 	 * Sanitizes the settings before saving.
 	 *
 	 * @param array $new_settings The settings to be sanitized on save.
-	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
 		// Sanitization of the feature-level settings.
@@ -163,7 +151,6 @@ class RecommendedContent extends Feature {
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {
