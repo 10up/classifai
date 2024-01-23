@@ -31,9 +31,18 @@ abstract class Feature {
 	/**
 	 * Array of provider classes.
 	 *
+	 * This contains all the providers that are registered to the service.
+	 *
 	 * @var \Classifai\Providers\Provider[]
 	 */
 	public $provider_instances = [];
+
+	/**
+	 * Array of providers supported by the feature.
+	 *
+	 * @var \Classifai\Providers\Provider[]
+	 */
+	public $supported_providers = [];
 
 	/**
 	 * Set up necessary hooks.
@@ -118,7 +127,22 @@ abstract class Feature {
 	 * @internal
 	 * @return array
 	 */
-	abstract protected function get_providers(): array;
+	protected function get_providers(): array {
+		/**
+		 * Filter the feature providers.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_providers
+		 *
+		 * @param {array} $providers Feature providers.
+		 *
+		 * @return {array} Filtered providers.
+		 */
+		return apply_filters(
+			'classifai_' . static::ID . '_providers',
+			$this->supported_providers
+		);
+	}
 
 	/**
 	 * Sanitizes the settings before saving.

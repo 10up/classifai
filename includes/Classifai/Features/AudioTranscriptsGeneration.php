@@ -22,36 +22,13 @@ class AudioTranscriptsGeneration extends Feature {
 	public function __construct() {
 		$this->label = __( 'Audio Transcripts Generation', 'classifai' );
 
-		/**
-		 * Every feature must set the `provider_instances` variable with the list of provider instances
-		 * that are registered to a service.
-		 */
-		$service_providers        = LanguageProcessing::get_service_providers();
-		$this->provider_instances = $this->get_provider_instances( $service_providers );
-	}
+		// Contains all providers that are registered to the service.
+		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
 
-	/**
-	 * Returns the providers supported by the feature.
-	 *
-	 * @return array
-	 */
-	public function get_providers(): array {
-		/**
-		 * Filter the feature providers.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_{feature}_providers
-		 *
-		 * @param {array} $providers Feature providers.
-		 *
-		 * @return {array} Filtered providers.
-		 */
-		return apply_filters(
-			'classifai_' . static::ID . '_providers',
-			[
-				Whisper::ID => __( 'OpenAI Whisper', 'classifai' ),
-			]
-		);
+		// Contains just the providers this feature supports.
+		$this->supported_providers = [
+			Whisper::ID => __( 'OpenAI Whisper', 'classifai' ),
+		];
 	}
 
 	/**

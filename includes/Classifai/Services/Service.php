@@ -164,8 +164,8 @@ abstract class Service {
 				?>
 
 				<h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->feature_classes as $feature_classes ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_classes::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_classes::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_classes->get_label() ); ?></a>
+					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_label() ); ?></a>
 					<?php endforeach; ?>
 				</h2>
 
