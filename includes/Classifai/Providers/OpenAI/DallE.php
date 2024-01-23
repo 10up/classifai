@@ -64,8 +64,6 @@ class DallE extends Provider {
 
 	/**
 	 * Register settings for the provider.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -140,7 +138,7 @@ class DallE extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
@@ -188,7 +186,7 @@ class DallE extends Provider {
 	 *
 	 * @param string $hook_suffix The current admin page.
 	 */
-	public function enqueue_admin_scripts( $hook_suffix = '' ) {
+	public function enqueue_admin_scripts( string $hook_suffix = '' ) {
 		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'upload.php' !== $hook_suffix ) {
 			return;
 		}
@@ -375,7 +373,7 @@ class DallE extends Provider {
 	 * @param array $new_settings Array of settings about to be saved.
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
@@ -497,8 +495,6 @@ class DallE extends Provider {
 
 	/**
 	 * Registers REST endpoints for this provider.
-	 *
-	 * @return void
 	 */
 	public function register_endpoints() {
 		register_rest_route(

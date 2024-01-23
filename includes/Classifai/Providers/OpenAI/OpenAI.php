@@ -95,7 +95,7 @@ trait OpenAI {
 	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	public function sanitize_api_key_settings( array $new_settings = [], $settings ) {
+	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
 		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
@@ -151,7 +151,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_post_types_for_settings() {
+	public function get_post_types_for_settings(): array {
 		$post_types     = [];
 		$post_type_objs = get_post_types( [], 'objects' );
 		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
@@ -180,7 +180,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_post_statuses_for_settings() {
+	public function get_post_statuses_for_settings(): array {
 		$post_statuses = get_all_post_statuses();
 
 		/**
@@ -202,7 +202,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_taxonomies_for_settings() {
+	public function get_taxonomies_for_settings(): array {
 		$taxonomies = get_taxonomies( [], 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
 		$supported  = [];
@@ -228,11 +228,10 @@ trait OpenAI {
 	/**
 	 * The list of supported post types.
 	 *
-	 * @param \Classifai\Features\Feature $feature
-	 *
+	 * @param \Classifai\Features\Feature $feature Feature to check.
 	 * @return array
 	 */
-	public function get_supported_post_types( $feature ) {
+	public function get_supported_post_types( \Classifai\Features\Feature $feature ): array {
 		$settings   = $feature->get_settings();
 		$post_types = [];
 
@@ -250,11 +249,10 @@ trait OpenAI {
 	/**
 	 * The list of supported post statuses.
 	 *
-	 * @param \Classifai\Features\Feature $feature
-	 *
+	 * @param \Classifai\Features\Feature $feature Feature to check
 	 * @return array
 	 */
-	public function get_supported_post_statuses( $feature ) {
+	public function get_supported_post_statuses( \Classifai\Features\Feature $feature ): array {
 		$settings      = $feature->get_settings();
 		$post_statuses = [];
 
@@ -272,11 +270,10 @@ trait OpenAI {
 	/**
 	 * The list of supported taxonomies.
 	 *
-	 * @param \Classifai\Features\Feature $feature
-	 *
+	 * @param \Classifai\Features\Feature $feature Feature to check.
 	 * @return array
 	 */
-	public function get_supported_taxonomies( $feature ) {
+	public function get_supported_taxonomies( \Classifai\Features\Feature $feature ): array {
 		$provider   = $feature->get_feature_provider_instance();
 		$settings   = $feature->get_settings( $provider::ID );
 		$taxonomies = [];

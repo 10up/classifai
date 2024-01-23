@@ -8,11 +8,12 @@ namespace Classifai\Providers\OpenAI;
 use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use function Classifai\clean_input;
-use function Classifai\get_asset_info;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
+
+use function Classifai\clean_input;
+use function Classifai\get_asset_info;
 
 class Whisper extends Provider {
 
@@ -48,19 +49,19 @@ class Whisper extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		if ( ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
-			add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
-			add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
-			add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-			add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
+		if ( ! ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
+			return;
 		}
+
+		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
 	}
 
 	/**
 	 * Register settings for this provider.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -101,7 +102,7 @@ class Whisper extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
@@ -121,7 +122,7 @@ class Whisper extends Provider {
 	 * @param array $new_settings New settings.
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
@@ -132,8 +133,6 @@ class Whisper extends Provider {
 
 	/**
 	 * Enqueue assets.
-	 *
-	 * @return void
 	 */
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(
@@ -151,7 +150,7 @@ class Whisper extends Provider {
 	 * @param int $attachment_id Attachment ID to process.
 	 * @return WP_Error|bool
 	 */
-	public function transcribe_audio( $attachment_id = 0 ) {
+	public function transcribe_audio( int $attachment_id = 0 ) {
 		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
@@ -176,7 +175,7 @@ class Whisper extends Provider {
 	 * @param \WP_Post $attachment Attachment object.
 	 * @return array
 	 */
-	public function add_buttons_to_media_modal( $form_fields, $attachment ) {
+	public function add_buttons_to_media_modal( array $form_fields, \WP_Post $attachment ): array {
 		$feature    = new AudioTranscriptsGeneration();
 		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $attachment->ID, $settings[ static::ID ] );
@@ -202,7 +201,7 @@ class Whisper extends Provider {
 	 *
 	 * @param \WP_Post $post Post object.
 	 */
-	public function setup_attachment_meta_box( $post ) {
+	public function setup_attachment_meta_box( \WP_Post $post ) {
 		$feature    = new AudioTranscriptsGeneration();
 		$settings   = $feature->get_settings();
 		$transcribe = new Transcribe( $post->ID, $settings[ static::ID ] );
@@ -226,7 +225,7 @@ class Whisper extends Provider {
 	 *
 	 * @param \WP_Post $post Post object.
 	 */
-	public function attachment_meta_box( $post ) {
+	public function attachment_meta_box( \WP_Post $post ) {
 		$text = empty( get_the_content( null, false, $post ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
 
 		wp_nonce_field( 'classifai_openai_whisper_meta_action', 'classifai_openai_whisper_meta' );
@@ -249,7 +248,7 @@ class Whisper extends Provider {
 	 *
 	 * @param int $attachment_id Attachment ID.
 	 */
-	public function maybe_transcribe_audio( $attachment_id ) {
+	public function maybe_transcribe_audio( int $attachment_id ) {
 		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
@@ -278,8 +277,6 @@ class Whisper extends Provider {
 
 	/**
 	 * Register REST endpoints for this provider.
-	 *
-	 * @return void
 	 */
 	public function register_endpoints() {
 		register_rest_route(

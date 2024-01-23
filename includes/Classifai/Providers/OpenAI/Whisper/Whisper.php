@@ -49,7 +49,7 @@ trait Whisper {
 	 * @param string $path Path to append to API URL.
 	 * @return string
 	 */
-	public function get_api_url( $path = '' ) {
+	public function get_api_url( string $path = '' ): string {
 		return sprintf( '%s%s', trailingslashit( $this->whisper_url ), $path );
 	}
 
@@ -59,9 +59,9 @@ trait Whisper {
 	 * Ensure the file is a supported format and is under the maximum file size.
 	 *
 	 * @param int $attachment_id Attachment ID to process.
-	 * @return boolean
+	 * @return bool
 	 */
-	public function should_process( int $attachment_id ) {
+	public function should_process( int $attachment_id ): bool {
 		$mime_type          = get_post_mime_type( $attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
