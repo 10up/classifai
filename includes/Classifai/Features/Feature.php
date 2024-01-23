@@ -102,16 +102,67 @@ abstract class Feature {
 	 *
 	 * @internal
 	 */
-	abstract protected function setup_fields_sections();
+	public function setup_fields_sections() {
+		$settings = $this->get_settings();
+
+		add_settings_section(
+			$this->get_option_name() . '_section',
+			esc_html__( 'Feature settings', 'classifai' ),
+			'__return_empty_string',
+			$this->get_option_name()
+		);
+
+		// Add the enable field.
+		add_settings_field(
+			'status',
+			esc_html__( 'Enable feature', 'classifai' ),
+			[ $this, 'render_input' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'status',
+				'input_type'    => 'checkbox',
+				'default_value' => $settings['status'],
+				'description'   => $this->get_enable_description(),
+			]
+		);
+
+		// Add all the needed provider fields.
+		$this->add_provider_fields();
+
+		// Add any needed custom fields.
+		$this->add_custom_settings_fields();
+
+		// Add user/role-based access fields.
+		$this->add_access_control_fields();
+	}
+
+	/**
+	 * Get the description for the enable field.
+	 *
+	 * @return string
+	 */
+	public function get_enable_description(): string {
+		return '';
+	}
+
+	/**
+	 * Add any needed custom fields.
+	 */
+	public function add_custom_settings_fields() {
+	}
 
 	/**
 	 * Returns the default settings for the feature.
+	 *
+	 * The root-level keys are the setting keys that are independent of the provider.
+	 * Provider specific settings should be nested under the provider key.
 	 *
 	 * @internal
 	 * @return array
 	 */
 	protected function get_default_settings(): array {
-		return [
+		$shared_defaults   = [
 			'status'             => '0',
 			'role_based_access'  => '1',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
@@ -119,28 +170,26 @@ abstract class Feature {
 			'users'              => [],
 			'user_based_opt_out' => 'no',
 		];
-	}
+		$provider_settings = $this->get_provider_default_settings();
+		$feature_settings  = $this->get_feature_default_settings();
 
-	/**
-	 * Returns the providers supported by the feature.
-	 *
-	 * @internal
-	 * @return array
-	 */
-	protected function get_providers(): array {
 		/**
-		 * Filter the feature providers.
+		 * Filter the default settings for a feature.
 		 *
 		 * @since 3.0.0
-		 * @hook classifai_{feature}_providers
+		 * @hook classifai_{feature}_get_default_settings
 		 *
-		 * @param {array} $providers Feature providers.
+		 * @param {array} $defaults Default feature settings.
 		 *
-		 * @return {array} Filtered providers.
+		 * @return {array} Filtered default feature settings.
 		 */
 		return apply_filters(
-			'classifai_' . static::ID . '_providers',
-			$this->supported_providers
+			'classifai_' . static::ID . '_get_default_settings',
+			array_merge(
+				$shared_defaults,
+				$feature_settings,
+				$provider_settings
+			)
 		);
 	}
 
@@ -152,8 +201,10 @@ abstract class Feature {
 	 * @return array
 	 */
 	public function sanitize_settings( array $settings ): array {
-		$new_settings             = $settings;
-		$current_settings         = $this->get_settings();
+		$new_settings     = $settings;
+		$current_settings = $this->get_settings();
+
+		// Sanitize the shared settings.
 		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
 		$new_settings['provider'] = isset( $settings['provider'] ) ? sanitize_text_field( $settings['provider'] ) : $current_settings['provider'];
 
@@ -193,133 +244,40 @@ abstract class Feature {
 		} else {
 			$new_settings['user_based_opt_out'] = '1';
 		}
-		return $new_settings;
+
+		// Sanitize the feature specific settings.
+		$new_settings = $this->sanitize_default_feature_settings( $new_settings );
+
+		// Sanitize the provider specific settings.
+		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
+		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
+
+		/**
+		 * Filter to change settings before they're saved.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_sanitize_settings
+		 *
+		 * @param {array} $new_settings     Settings being saved.
+		 * @param {array} $current_settings Existing settings.
+		 *
+		 * @return {array} Filtered settings.
+		 */
+		return apply_filters(
+			'classifai_' . static::ID . '_sanitize_settings',
+			$new_settings,
+			$current_settings
+		);
 	}
 
 	/**
-	 * Determine if the current user has access to the feature
+	 * Sanitize the default feature settings.
 	 *
-	 * @return bool
+	 * @param array $settings Settings to sanitize.
+	 * @return array
 	 */
-	public function has_access(): bool {
-		$access        = false;
-		$user_id       = get_current_user_id();
-		$user          = get_user_by( 'id', $user_id );
-		$user_roles    = $user->roles ?? [];
-		$settings      = $this->get_settings();
-		$feature_roles = $settings['roles'] ?? [];
-		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
-
-		$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
-		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
-		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
-
-		/*
-		 * Checks if Role-based access is enabled and user role has access to the feature.
-		 */
-		if ( $role_based_access_enabled ) {
-			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
-		}
-
-		/*
-		 * Checks if User-based access is enabled and user has access to the feature.
-		 */
-		if ( ! $access && $user_based_access_enabled ) {
-			$access = ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) );
-		}
-
-		/*
-		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
-		 */
-		if ( $access && $user_based_opt_out_enabled ) {
-			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
-			$access             = ( ! in_array( static::ID, $opted_out_features, true ) );
-		}
-
-		/**
-		 * Filter to override user access to a ClassifAI feature.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_{$feature}_has_access
-		 *
-		 * @param {bool}  $access   Current access value.
-		 * @param {array} $settings Feature settings.
-		 *
-		 * @return {bool} Should the user have access?
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_has_access', $access, $settings );
-	}
-
-	/**
-	 * Determine if a feature is enabled.
-	 *
-	 * Returns true if the feature meets all the criteria to
-	 * be enabled. False otherwise.
-	 *
-	 * Criteria:
-	 *  - Provider is configured.
-	 *  - User has access to the feature.
-	 *  - Feature is turned on.
-	 *
-	 * @return bool
-	 */
-	public function is_feature_enabled(): bool {
-		$is_feature_enabled = false;
-		$settings           = $this->get_settings();
-
-		// Check if provider is configured, user has access to the feature and the feature is turned on.
-		if (
-			$this->is_configured() &&
-			$this->has_access() &&
-			$this->is_enabled()
-		) {
-			$is_feature_enabled = true;
-		}
-
-		/**
-		 * Filter to override permission to a specific classifai feature.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_{$feature}_is_feature_enabled
-		 *
-		 * @param {bool}  $is_feature_enabled Is the feature enabled?
-		 * @param {array} $settings           Current feature settings.
-		 *
-		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
-	}
-
-	/**
-	 * Determine if the feature is turned on.
-	 *
-	 * Note: This function does not check if the user has access to the feature.
-	 *
-	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
-	 * - Use `has_access()` to check if the user has access to the feature.
-	 *
-	 * @return bool
-	 */
-	public function is_enabled(): bool {
-		$settings = $this->get_settings();
-
-		// Check if feature is turned on.
-		$feature_status = ( isset( $settings['status'] ) && 1 === (int) $settings['status'] );
-		$is_configured  = $this->is_configured();
-		$is_enabled     = $feature_status && $is_configured;
-
-		/**
-		 * Filter to override a specific classifai feature enabled.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_{$feature}_is_enabled
-		 *
-		 * @param {bool}  $is_enabled Is the feature enabled?
-		 * @param {array} $settings   Current feature settings.
-		 *
-		 * @return {bool} Returns true if the feature is enabled, false otherwise.
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_is_enabled', $is_enabled, $settings );
+	public function sanitize_default_feature_settings( array $settings ): array {
+		return $settings;
 	}
 
 	/**
@@ -382,9 +340,34 @@ abstract class Feature {
 	}
 
 	/**
-	 * Renders the fields of the provider selected for the feature.
+	 * Returns the default settings for the feature.
+	 *
+	 * @return array
 	 */
-	public function render_provider_fields() {
+	abstract public function get_feature_default_settings(): array;
+
+	/**
+	 * Add the provider fields.
+	 *
+	 * Will add a field to choose the provider and any
+	 * fields the selected provider has registered.
+	 */
+	public function add_provider_fields() {
+		$settings = $this->get_settings();
+
+		add_settings_field(
+			'provider',
+			esc_html__( 'Select a provider', 'classifai' ),
+			[ $this, 'render_select' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'provider',
+				'options'       => $this->get_providers(),
+				'default_value' => $settings['provider'],
+			]
+		);
+
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
 
@@ -416,170 +399,26 @@ abstract class Feature {
 	}
 
 	/**
-	 * Returns array of instances of provider classes registered for the service.
+	 * Returns the providers supported by the feature.
 	 *
 	 * @internal
-	 *
-	 * @param array $services Array of provider classes.
 	 * @return array
 	 */
-	protected function get_provider_instances( array $services ): array {
-		$provider_instances = [];
-
-		foreach ( $services as $provider_class ) {
-			$provider_instances[] = new $provider_class( $this );
-		}
-
-		return $provider_instances;
-	}
-
-	/**
-	 * Returns the instance of the provider set for the feature.
-	 *
-	 * @param string $provider_id The ID of the provider.
-	 * @return \Classifai\Providers
-	 */
-	public function get_feature_provider_instance( string $provider_id = '' ) {
-		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
-		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
-
-		if ( is_wp_error( $provider_instance ) ) {
-			return null;
-		}
-
-		$provider_class    = get_class( $provider_instance );
-		$provider_instance = new $provider_class( $this );
-
-		return $provider_instance;
-	}
-
-	/**
-	 * Returns whether the provider is configured or not.
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		$settings      = $this->get_settings();
-		$provider_id   = $settings['provider'];
-		$is_configured = false;
-
-		if ( ! empty( $settings ) && ! empty( $settings[ $provider_id ]['authenticated'] ) ) {
-			$is_configured = true;
-		}
-
-		return $is_configured;
-	}
-
-	/**
-	 * Can the feature be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register(): bool {
-		return $this->is_configured();
-	}
-
-	/**
-	 * Get the debug value text.
-	 *
-	 * @param mixed   $setting_value The value of the setting.
-	 * @param integer $type The type of debug value to return.
-	 * @return string
-	 */
-	public static function get_debug_value_text( $setting_value, $type = 0 ): string {
-		$debug_value = '';
-
-		if ( empty( $setting_value ) ) {
-			$boolean = false;
-		} elseif ( 'no' === $setting_value ) {
-			$boolean = false;
-		} else {
-			$boolean = true;
-		}
-
-		switch ( $type ) {
-			case 0:
-				$debug_value = $boolean ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' );
-				break;
-			case 1:
-				$debug_value = $boolean ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
-				break;
-		}
-
-		return $debug_value;
-	}
-
-	/**
-	 * Returns an array of feature-level debug info.
-	 *
-	 * @return array
-	 */
-	public function get_debug_information(): array {
-		$feature_settings = $this->get_settings();
-		$provider         = $this->get_feature_provider_instance();
-
-		$roles = array_filter(
-			$feature_settings['roles'],
-			function ( $role ) {
-				return '0' !== $role;
-			}
-		);
-
-		$common_debug_info = [
-			__( 'Authenticated', 'classifai' )          => self::get_debug_value_text( $this->is_configured() ),
-			__( 'Status', 'classifai' )                 => self::get_debug_value_text( $feature_settings['status'], 1 ),
-			__( 'Role-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['role_based_access'], 1 ),
-			__( 'Allowed roles (titles)', 'classifai' ) => implode( ', ', $roles ?? [] ),
-			__( 'User-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['user_based_access'], 1 ),
-			__( 'Allowed users (titles)', 'classifai' ) => implode( ', ', $feature_settings['users'] ?? [] ),
-			__( 'User based opt-out', 'classifai' )     => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
-			__( 'Provider', 'classifai' )               => $feature_settings['provider'],
-		];
-
-		if ( method_exists( $provider, 'get_debug_information' ) ) {
-			$all_debug_info = array_merge(
-				$common_debug_info,
-				$provider->get_debug_information()
-			);
-		}
-
+	protected function get_providers(): array {
 		/**
-		 * Filter to add feature-level debug information.
+		 * Filter the feature providers.
 		 *
 		 * @since 3.0.0
-		 * @hook classifai_{feature}_debug_information
+		 * @hook classifai_{feature}_providers
 		 *
-		 * @param {array} $all_debug_info Debug information
-		 * @param {object} $this Current feature class.
+		 * @param {array} $providers Feature providers.
 		 *
-		 * @return {array} Returns debug information.
+		 * @return {array} Filtered providers.
 		 */
 		return apply_filters(
-			'classifai_' . self::ID . '_debug_information',
-			$all_debug_info,
-			$this,
+			'classifai_' . static::ID . '_providers',
+			$this->supported_providers
 		);
-	}
-
-	/**
-	 * Returns the data attribute string for an input.
-	 *
-	 * @param array $args The args passed to add_settings_field.
-	 * @return string
-	 */
-	protected function get_data_attribute( array $args ): string {
-		$data_attr     = $args['data_attr'] ?? [];
-		$data_attr_str = '';
-
-		foreach ( $data_attr as $attr_key => $attr_value ) {
-			if ( is_scalar( $attr_value ) ) {
-				$data_attr_str .= 'data-' . $attr_key . '="' . esc_attr( $attr_value ) . '"';
-			} else {
-				$data_attr_str .= 'data-' . $attr_key . '="' . esc_attr( wp_json_encode( $attr_value ) ) . '"';
-			}
-		}
-
-		return $data_attr_str;
 	}
 
 	/**
@@ -1058,5 +897,298 @@ abstract class Feature {
 		if ( ! empty( $args['description'] ) ) {
 			echo '<span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
 		}
+	}
+
+	/**
+	 * Determine if the current user has access to the feature
+	 *
+	 * @return bool
+	 */
+	public function has_access(): bool {
+		$access        = false;
+		$user_id       = get_current_user_id();
+		$user          = get_user_by( 'id', $user_id );
+		$user_roles    = $user->roles ?? [];
+		$settings      = $this->get_settings();
+		$feature_roles = $settings['roles'] ?? [];
+		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
+
+		$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
+		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
+		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
+
+		/*
+		 * Checks if Role-based access is enabled and user role has access to the feature.
+		 */
+		if ( $role_based_access_enabled ) {
+			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
+		}
+
+		/*
+		 * Checks if User-based access is enabled and user has access to the feature.
+		 */
+		if ( ! $access && $user_based_access_enabled ) {
+			$access = ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) );
+		}
+
+		/*
+		 * Checks if User-based opt-out is enabled and user has opted out from the feature.
+		 */
+		if ( $access && $user_based_opt_out_enabled ) {
+			$opted_out_features = (array) get_user_meta( $user_id, 'classifai_opted_out_features', true );
+			$access             = ( ! in_array( static::ID, $opted_out_features, true ) );
+		}
+
+		/**
+		 * Filter to override user access to a ClassifAI feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_has_access
+		 *
+		 * @param {bool}  $access   Current access value.
+		 * @param {array} $settings Feature settings.
+		 *
+		 * @return {bool} Should the user have access?
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_has_access', $access, $settings );
+	}
+
+	/**
+	 * Determine if a feature is enabled.
+	 *
+	 * Returns true if the feature meets all the criteria to
+	 * be enabled. False otherwise.
+	 *
+	 * Criteria:
+	 *  - Provider is configured.
+	 *  - User has access to the feature.
+	 *  - Feature is turned on.
+	 *
+	 * @return bool
+	 */
+	public function is_feature_enabled(): bool {
+		$is_feature_enabled = false;
+		$settings           = $this->get_settings();
+
+		// Check if provider is configured, user has access to the feature and the feature is turned on.
+		if (
+			$this->is_configured() &&
+			$this->has_access() &&
+			$this->is_enabled()
+		) {
+			$is_feature_enabled = true;
+		}
+
+		/**
+		 * Filter to override permission to a specific classifai feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_is_feature_enabled
+		 *
+		 * @param {bool}  $is_feature_enabled Is the feature enabled?
+		 * @param {array} $settings           Current feature settings.
+		 *
+		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
+	}
+
+	/**
+	 * Determine if the feature is turned on.
+	 *
+	 * Note: This function does not check if the user has access to the feature.
+	 *
+	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
+	 * - Use `has_access()` to check if the user has access to the feature.
+	 *
+	 * @return bool
+	 */
+	public function is_enabled(): bool {
+		$settings = $this->get_settings();
+
+		// Check if feature is turned on.
+		$feature_status = ( isset( $settings['status'] ) && 1 === (int) $settings['status'] );
+		$is_configured  = $this->is_configured();
+		$is_enabled     = $feature_status && $is_configured;
+
+		/**
+		 * Filter to override a specific classifai feature enabled.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{$feature}_is_enabled
+		 *
+		 * @param {bool}  $is_enabled Is the feature enabled?
+		 * @param {array} $settings   Current feature settings.
+		 *
+		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_is_enabled', $is_enabled, $settings );
+	}
+
+	/**
+	 * Returns array of instances of provider classes registered for the service.
+	 *
+	 * @internal
+	 *
+	 * @param array $services Array of provider classes.
+	 * @return array
+	 */
+	protected function get_provider_instances( array $services ): array {
+		$provider_instances = [];
+
+		foreach ( $services as $provider_class ) {
+			$provider_instances[] = new $provider_class( $this );
+		}
+
+		return $provider_instances;
+	}
+
+	/**
+	 * Returns the instance of the provider set for the feature.
+	 *
+	 * @param string $provider_id The ID of the provider.
+	 * @return \Classifai\Providers
+	 */
+	public function get_feature_provider_instance( string $provider_id = '' ) {
+		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );
+		$provider_instance = find_provider_class( $this->provider_instances ?? [], $provider_id );
+
+		if ( is_wp_error( $provider_instance ) ) {
+			return null;
+		}
+
+		$provider_class    = get_class( $provider_instance );
+		$provider_instance = new $provider_class( $this );
+
+		return $provider_instance;
+	}
+
+	/**
+	 * Returns whether the provider is configured or not.
+	 *
+	 * @return bool
+	 */
+	public function is_configured(): bool {
+		$settings      = $this->get_settings();
+		$provider_id   = $settings['provider'];
+		$is_configured = false;
+
+		if ( ! empty( $settings ) && ! empty( $settings[ $provider_id ]['authenticated'] ) ) {
+			$is_configured = true;
+		}
+
+		return $is_configured;
+	}
+
+	/**
+	 * Can the feature be initialized?
+	 *
+	 * @return bool
+	 */
+	public function can_register(): bool {
+		return $this->is_configured();
+	}
+
+	/**
+	 * Get the debug value text.
+	 *
+	 * @param mixed   $setting_value The value of the setting.
+	 * @param integer $type The type of debug value to return.
+	 * @return string
+	 */
+	public static function get_debug_value_text( $setting_value, $type = 0 ): string {
+		$debug_value = '';
+
+		if ( empty( $setting_value ) ) {
+			$boolean = false;
+		} elseif ( 'no' === $setting_value ) {
+			$boolean = false;
+		} else {
+			$boolean = true;
+		}
+
+		switch ( $type ) {
+			case 0:
+				$debug_value = $boolean ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' );
+				break;
+			case 1:
+				$debug_value = $boolean ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+				break;
+		}
+
+		return $debug_value;
+	}
+
+	/**
+	 * Returns an array of feature-level debug info.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$feature_settings = $this->get_settings();
+		$provider         = $this->get_feature_provider_instance();
+
+		$roles = array_filter(
+			$feature_settings['roles'],
+			function ( $role ) {
+				return '0' !== $role;
+			}
+		);
+
+		$common_debug_info = [
+			__( 'Authenticated', 'classifai' )          => self::get_debug_value_text( $this->is_configured() ),
+			__( 'Status', 'classifai' )                 => self::get_debug_value_text( $feature_settings['status'], 1 ),
+			__( 'Role-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['role_based_access'], 1 ),
+			__( 'Allowed roles (titles)', 'classifai' ) => implode( ', ', $roles ?? [] ),
+			__( 'User-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['user_based_access'], 1 ),
+			__( 'Allowed users (titles)', 'classifai' ) => implode( ', ', $feature_settings['users'] ?? [] ),
+			__( 'User based opt-out', 'classifai' )     => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
+			__( 'Provider', 'classifai' )               => $feature_settings['provider'],
+		];
+
+		if ( method_exists( $provider, 'get_debug_information' ) ) {
+			$all_debug_info = array_merge(
+				$common_debug_info,
+				$provider->get_debug_information()
+			);
+		}
+
+		/**
+		 * Filter to add feature-level debug information.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_debug_information
+		 *
+		 * @param {array} $all_debug_info Debug information
+		 * @param {object} $this Current feature class.
+		 *
+		 * @return {array} Returns debug information.
+		 */
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$all_debug_info,
+			$this,
+		);
+	}
+
+	/**
+	 * Returns the data attribute string for an input.
+	 *
+	 * @param array $args The args passed to add_settings_field.
+	 * @return string
+	 */
+	protected function get_data_attribute( array $args ): string {
+		$data_attr     = $args['data_attr'] ?? [];
+		$data_attr_str = '';
+
+		foreach ( $data_attr as $attr_key => $attr_value ) {
+			if ( is_scalar( $attr_value ) ) {
+				$data_attr_str .= 'data-' . $attr_key . '="' . esc_attr( $attr_value ) . '"';
+			} else {
+				$data_attr_str .= 'data-' . $attr_key . '="' . esc_attr( wp_json_encode( $attr_value ) ) . '"';
+			}
+		}
+
+		return $data_attr_str;
 	}
 }

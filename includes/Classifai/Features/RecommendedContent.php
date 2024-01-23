@@ -32,106 +32,23 @@ class RecommendedContent extends Feature {
 	}
 
 	/**
-	 * Sets up the fields and sections for the feature.
+	 * Get the description for the enable field.
+	 *
+	 * @return string
 	 */
-	public function setup_fields_sections() {
-		$settings = $this->get_settings();
-
-		/*
-		 * These are the feature-level fields that are
-		 * independent of the provider.
-		 */
-		add_settings_section(
-			$this->get_option_name() . '_section',
-			esc_html__( 'Feature settings', 'classifai' ),
-			'__return_empty_string',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'status',
-			esc_html__( 'Enable Recommended content block.', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'status',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['status'],
-				'description'   => __( 'Enables the ability to generate recommended content data for the block.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access fields.
-		$this->add_access_control_fields();
-
-		add_settings_field(
-			'provider',
-			esc_html__( 'Select a provider', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'provider',
-				'options'       => $this->get_providers(),
-				'default_value' => $settings['provider'],
-			]
-		);
-
-		/*
-		 * The following renders the fields of all the providers
-		 * that are registered to the feature.
-		 */
-		$this->render_provider_fields();
+	public function get_enable_description(): string {
+		return esc_html__( 'Enables the ability to generate recommended content data for the block.', 'classifai' );
 	}
 
 	/**
 	 * Returns the default settings for the feature.
 	 *
-	 * The root-level keys are the setting keys that are independent of the provider.
-	 * Provider specific settings should be nested under the provider key.
-	 *
-	 * @todo Add a filter hook to allow other plugins to add their own settings.
-	 *
 	 * @return array
 	 */
-	protected function get_default_settings(): array {
-		$provider_settings = $this->get_provider_default_settings();
-		$feature_settings  = [
+	public function get_feature_default_settings(): array {
+		return [
 			'provider' => PersonalizerProvider::ID,
 		];
-
-		return apply_filters(
-			'classifai_' . static::ID . '_get_default_settings',
-			array_merge(
-				parent::get_default_settings(),
-				$feature_settings,
-				$provider_settings
-			)
-		);
-	}
-
-	/**
-	 * Sanitizes the settings before saving.
-	 *
-	 * @param array $new_settings The settings to be sanitized on save.
-	 * @return array
-	 */
-	public function sanitize_settings( array $new_settings ): array {
-		$settings = $this->get_settings();
-
-		// Sanitization of the feature-level settings.
-		$new_settings = parent::sanitize_settings( $new_settings );
-
-		// Sanitization of the provider-level settings.
-		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
-		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
-
-		return apply_filters(
-			'classifai_' . static::ID . '_sanitize_settings',
-			$new_settings,
-			$settings
-		);
 	}
 
 	/**
