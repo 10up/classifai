@@ -769,7 +769,7 @@ class NLU extends Provider {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
-					'id' => array(
+					'id'        => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',

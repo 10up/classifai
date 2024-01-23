@@ -566,7 +566,7 @@ class ComputerVision extends Provider {
 	 * Adds the rescan buttons to the media modal.
 	 *
 	 * @param array    $form_fields Array of fields
-	 * @param \WP_post $post        Post object for the attachment being viewed.
+	 * @param \WP_Post $post        Post object for the attachment being viewed.
 	 */
 	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ) {
 		$pdf_to_text   = new PDFTextExtraction();

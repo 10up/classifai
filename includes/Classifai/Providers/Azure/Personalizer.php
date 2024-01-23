@@ -800,7 +800,7 @@ class Personalizer extends Provider {
 			}
 		}
 
-		echo $this->render_recommended_content( $attributes );
+		echo $this->render_recommended_content( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		exit();
 	}

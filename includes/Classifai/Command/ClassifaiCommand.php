@@ -880,7 +880,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						$smart_cropping = new SmartCropping( $settings );
 
 						if ( ! $smart_cropping->should_crop( $size ) ) {
-							continue;
+							break;
 						}
 
 						$data = [

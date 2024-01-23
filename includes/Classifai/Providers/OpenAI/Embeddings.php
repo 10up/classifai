@@ -973,7 +973,7 @@ class Embeddings extends Provider {
 				<input type="number" id="%1$s_%2$s_%3$s_%4$s" class="small-text" name="%1$s[%2$s][%3$s][%4$s]" value="%6$s" />
 			</p>',
 			esc_attr( $this->feature_instance->get_option_name() ),
-			$args['option_index'],
+			esc_attr( $args['option_index'] ),
 			esc_attr( $args['label_for'] ?? '' ),
 			esc_attr( $option_value ),
 			esc_html__( 'Threshold (%)', 'classifai' ),
