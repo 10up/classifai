@@ -36,7 +36,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 * @return SmartCropping
 	 */
 	public function get_smart_cropping(
-		array $args = [ 'url' => 'my-api-url.com', 'api_key' => 'my-key' ]
+		array $args = [ 'endpoint_url' => 'my-api-url.com', 'api_key' => 'my-key' ]
 	) : SmartCropping  {
 		return new SmartCropping( $args );
 	}

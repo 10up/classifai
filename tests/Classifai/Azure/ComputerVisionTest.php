@@ -29,7 +29,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	/**
 	 * Tests the function providing debug information.
 	 */
-	public function test_get_provider_debug_information() {
+	public function test_get_debug_information() {
 		$this->assertEquals(
 			[
 				'Authenticated',
@@ -39,7 +39,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Latest response - Smart Cropping',
 				'Latest response - OCR',
 			],
-			array_keys( $this->provider->get_provider_debug_information() )
+			array_keys( $this->provider->test_get_debug_information() )
 		);
 
 		$this->assertEquals(
@@ -51,7 +51,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Latest response - Smart Cropping' => 'N/A',
 				'Latest response - OCR'            => 'N/A',
 			],
-			$this->provider->get_provider_debug_information(
+			$this->provider->test_get_debug_information(
 				[
 					'url'               => 'my-azure-url.com',
 					'caption_threshold' => 77,
