@@ -159,10 +159,10 @@ class NLU extends Provider {
 			function ( $args = [] ) {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
-					$args['class'] ? esc_attr( $args['class'] ) : '',
-					$this->use_username_password()
+					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						? esc_html__( 'Use a username/password instead?', 'classifai' )
-						: esc_html__( 'Use an API Key instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			},
 			$this->feature_instance->get_option_name(),
