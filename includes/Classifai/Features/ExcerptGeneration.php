@@ -23,11 +23,11 @@ class ExcerptGeneration extends Feature {
 	const ID = 'feature_excerpt_generation';
 
 	/**
-	 * Prompt for generating excerpts
+	 * Prompt for generating excerpts.
 	 *
 	 * @var string
 	 */
-	protected $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
+	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
 
 	/**
 	 * Constructor.
@@ -293,7 +293,7 @@ class ExcerptGeneration extends Feature {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->prompt,
 				'default_value' => $settings['generate_excerpt_prompt'],
-				'description'   => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => esc_html__( "Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
 			]
 		);
 

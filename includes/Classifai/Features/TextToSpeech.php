@@ -6,7 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
 
 /**
- * Class TitleGeneration
+ * Class TextToSpeech
  */
 class TextToSpeech extends Feature {
 	/**

@@ -45,20 +45,6 @@ class ChatGPT extends Provider {
 	protected $max_tokens = 16385;
 
 	/**
-	 * Prompt for generating excerpts
-	 *
-	 * @var string
-	 */
-	protected $generate_excerpt_prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
-
-	/**
-	 * Prompt for generating titles
-	 *
-	 * @var string
-	 */
-	protected $generate_title_prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
-
-	/**
 	 * Prompt for shrinking content
 	 *
 	 * @var string
@@ -124,57 +110,12 @@ class ChatGPT extends Provider {
 		);
 
 		switch ( $this->feature_instance::ID ) {
-			case TitleGeneration::ID:
-				$this->add_title_generation_fields();
-				break;
-
 			case ContentResizing::ID:
 				$this->add_content_resizing_fields();
 				break;
 		}
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-	}
-
-	/**
-	 * Renders fields for the Title generation feature.
-	 */
-	private function add_title_generation_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		add_settings_field(
-			static::ID . '_number_of_titles',
-			esc_html__( 'Number of titles', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'number_of_titles',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $settings['number_of_titles'],
-				'description'   => esc_html__( 'Number of titles that will be generated in one request.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_generate_title_prompt',
-			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
-			[ $this->feature_instance, 'render_prompt_repeater_field' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
-				'default_value' => $settings['generate_title_prompt'],
-				'description'   => esc_html__( 'Enter a custom prompt, if desired.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
 	}
 
 	/**
@@ -246,21 +187,6 @@ class ChatGPT extends Provider {
 		];
 
 		switch ( $this->feature_instance::ID ) {
-			case TitleGeneration::ID:
-				return array_merge(
-					$common_settings,
-					[
-						'number_of_titles'      => 1,
-						'generate_title_prompt' => array(
-							array(
-								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-								'prompt'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
-								'original' => 1,
-							),
-						),
-					]
-				);
-
 			case ContentResizing::ID:
 				return array_merge(
 					$common_settings,
@@ -299,11 +225,6 @@ class ChatGPT extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		if ( $this->feature_instance instanceof TitleGeneration ) {
-			$new_settings[ static::ID ]['number_of_titles']      = $this->sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
-			$new_settings[ static::ID ]['generate_title_prompt'] = sanitize_prompts( 'generate_title_prompt', $new_settings );
-		}
-
 		if ( $this->feature_instance instanceof ContentResizing ) {
 			$new_settings[ static::ID ]['number_of_suggestions'] = $this->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
 			$new_settings[ static::ID ]['condense_text_prompt']  = sanitize_prompts( 'condense_text_prompt', $new_settings );
@@ -325,18 +246,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Sanitisation callback for number of responses.
-	 *
-	 * @param string $key The key of the value we are sanitizing.
-	 * @param array  $new_settings The settings array.
-	 * @param array  $settings     Current array.
-	 * @return int
-	 */
-	public function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
-		return absint( $new_settings[ static::ID ][ $key ] ?? $settings[ static::ID ][ $key ] ?? '' );
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 *
 	 * This only fires if can_register returns true.
@@ -344,27 +253,6 @@ class ChatGPT extends Provider {
 	public function register() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
-	}
-
-	/**
-	 * Returns localised data for title generation.
-	 */
-	public function get_localised_vars() {
-		global $post;
-
-		return [
-			'enabledFeatures' => [
-				0 => [
-					'feature'       => 'title',
-					'path'          => '/classifai/v1/openai/generate-title/',
-					'buttonText'    => __( 'Generate titles', 'classifai' ),
-					'modalTitle'    => __( 'Select a title', 'classifai' ),
-					'selectBtnText' => __( 'Select', 'classifai' ),
-				],
-			],
-			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-		];
 	}
 
 	/**
@@ -375,25 +263,6 @@ class ChatGPT extends Provider {
 
 		if ( empty( $post ) ) {
 			return;
-		}
-
-		if ( ( new TitleGeneration() )->is_feature_enabled() ) {
-			wp_enqueue_script(
-				'classifai-post-status-info',
-				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
-				get_asset_info( 'post-status-info', 'dependencies' ),
-				get_asset_info( 'post-status-info', 'version' ),
-				true
-			);
-
-			wp_add_inline_script(
-				'classifai-post-status-info',
-				sprintf(
-					'var classifaiChatGPTData = %s;',
-					wp_json_encode( $this->get_localised_vars() )
-				),
-				'before'
-			);
 		}
 
 		if ( ( new ContentResizing() )->is_feature_enabled() ) {
@@ -422,7 +291,6 @@ class ChatGPT extends Provider {
 	 */
 	public function enqueue_admin_assets( string $hook_suffix ) {
 		$prompt_features = array(
-			'feature_title_generation',
 			'feature_content_resizing',
 		);
 
@@ -452,41 +320,6 @@ class ChatGPT extends Provider {
 
 		// Load asset in new post and edit post screens.
 		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			$screen = get_current_screen();
-
-			// Load the assets for the classic editor.
-			if ( $screen && ! $screen->is_block_editor() ) {
-				if (
-					post_type_supports( $screen->post_type, 'title' ) &&
-					( new TitleGeneration() )->is_feature_enabled()
-				) {
-					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
-						'all'
-					);
-
-					wp_enqueue_script(
-						'classifai-generate-title-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-						array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-title-classic', 'version' ),
-						true
-					);
-
-					wp_add_inline_script(
-						'classifai-generate-title-classic-js',
-						sprintf(
-							'var classifaiChatGPTData = %s;',
-							wp_json_encode( $this->get_localised_vars() )
-						),
-						'before'
-					);
-				}
-			}
-
 			wp_enqueue_style(
 				'classifai-language-processing-style',
 				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
@@ -494,23 +327,6 @@ class ChatGPT extends Provider {
 				get_asset_info( 'language-processing', 'version' ),
 			);
 		}
-	}
-
-	/**
-	 * HTML template for title generation result popup.
-	 */
-	public function register_generated_titles_template() {
-		?>
-		<div id="classifai-openai__results" style="display: none;">
-			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
-			<div id="classifai-openai__modal" style="opacity: 0;">
-				<h2 id="classifai-openai__results-title"></h2>
-				<div id="classifai-openai__close-modal-button"></div>
-				<div id="classifai-openai__results-content">
-				</div>
-			</div>
-		</div>
-		<?php
 	}
 
 	/**
@@ -536,7 +352,7 @@ class ChatGPT extends Provider {
 				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 			case 'title':
-				$return = ( new TitleGeneration() )->run( $post_id, $args );
+				$return = $this->generate_titles( $post_id, $args );
 				break;
 			case 'resize_content':
 				$return = ( new ContentResizing() )->run( $post_id, $args );
@@ -578,7 +394,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['generate_excerpt_prompt'] ) ?? $this->feature_instance->prompt );
+		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -682,7 +498,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['generate_title_prompt'] ) ?? $this->generate_title_prompt );
+		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -935,48 +751,6 @@ class ChatGPT extends Provider {
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1/openai',
-			'generate-title(?:/(?P<id>\d+))?',
-			[
-				[
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'generate_post_title' ],
-					'args'                => [
-						'id' => [
-							'required'          => true,
-							'type'              => 'integer',
-							'sanitize_callback' => 'absint',
-							'description'       => esc_html__( 'Post ID to generate title for.', 'classifai' ),
-						],
-						'n'  => [
-							'type'              => 'integer',
-							'minimum'           => 1,
-							'maximum'           => 10,
-							'sanitize_callback' => 'absint',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Number of titles to generate', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
-				],
-				[
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'generate_post_title' ],
-					'args'                => [
-						'content' => [
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Content to generate a title for', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
-				],
-			]
-		);
-
-		register_rest_route(
-			'classifai/v1/openai',
 			'resize-content',
 			[
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -1004,64 +778,6 @@ class ChatGPT extends Provider {
 				],
 			]
 		);
-	}
-
-	/**
-	 * Handle request to generate title for given post ID.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function generate_post_title( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		return rest_ensure_response(
-			$this->rest_endpoint_callback(
-				$post_id,
-				'title',
-				[
-					'num'     => $request->get_param( 'n' ),
-					'content' => $request->get_param( 'content' ),
-				]
-			)
-		);
-	}
-
-	/**
-	 * Check if a given request has access to generate a title.
-	 *
-	 * This check ensures we have a proper post ID, the current user
-	 * making the request has access to that post, that we are
-	 * properly authenticated with OpenAI and that title generation
-	 * is turned on.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function generate_post_title_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$post_type     = get_post_type( $post_id );
-		$post_type_obj = get_post_type_object( $post_type );
-
-		// Ensure the post type is allowed in REST endpoints.
-		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
-			return false;
-		}
-
-		$feature = new TitleGeneration();
-
-		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Title generation not currently enabled.', 'classifai' ) );
-		}
-
-		return true;
 	}
 
 	/**

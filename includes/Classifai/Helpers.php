@@ -933,3 +933,15 @@ function get_default_prompt( array $prompts ): ?string {
 
 	return $default_prompt;
 }
+
+/**
+ * Sanitisation callback for number of responses.
+ *
+ * @param string $key The key of the value we are sanitizing.
+ * @param array  $new_settings The settings array.
+ * @param array  $settings     Current array.
+ * @return int
+ */
+function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
+	return absint( $new_settings[ $key ] ?? $settings[ $key ] ?? '' );
+}

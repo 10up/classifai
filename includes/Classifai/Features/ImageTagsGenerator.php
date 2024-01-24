@@ -6,7 +6,7 @@ use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Services\ImageProcessing;
 
 /**
- * Class TitleGeneration
+ * Class ImageTagsGenerator
  */
 class ImageTagsGenerator extends Feature {
 	/**

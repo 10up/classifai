@@ -9,7 +9,7 @@ use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_post_types_for_language_settings;
 
 /**
- * Class TitleGeneration
+ * Class Classification
  */
 class Classification extends Feature {
 	/**

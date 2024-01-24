@@ -6,7 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\DallE;
 
 /**
- * Class TitleGeneration
+ * Class ImageGeneration
  */
 class ImageGeneration extends Feature {
 	/**
