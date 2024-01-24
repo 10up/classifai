@@ -324,7 +324,6 @@ class TitleGeneration extends Feature {
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
 			[
-				'option_index'  => static::ID,
 				'label_for'     => 'number_of_titles',
 				'input_type'    => 'number',
 				'min'           => 1,
@@ -341,7 +340,6 @@ class TitleGeneration extends Feature {
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
 			[
-				'option_index'  => static::ID,
 				'label_for'     => 'generate_title_prompt',
 				'placeholder'   => $this->prompt,
 				'default_value' => $settings['generate_title_prompt'],

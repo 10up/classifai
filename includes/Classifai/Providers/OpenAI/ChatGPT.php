@@ -10,11 +10,7 @@ use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Watson\Normalizer;
-use WP_REST_Server;
-use WP_REST_Request;
 use WP_Error;
-use function Classifai\get_asset_info;
-use function Classifai\sanitize_prompts;
 use function Classifai\get_default_prompt;
 
 class ChatGPT extends Provider {
@@ -45,20 +41,6 @@ class ChatGPT extends Provider {
 	protected $max_tokens = 16385;
 
 	/**
-	 * Prompt for shrinking content
-	 *
-	 * @var string
-	 */
-	protected $condense_text_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
-
-	/**
-	 * Prompt for growing content
-	 *
-	 * @var string
-	 */
-	protected $expand_text_prompt = 'Increase the content length no more than 2 to 4 sentences.';
-
-	/**
 	 * OpenAI ChatGPT constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
@@ -71,8 +53,12 @@ class ChatGPT extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
+	}
 
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	/**
+	 * Register any needed hooks.
+	 */
+	public function register() {
 	}
 
 	/**
@@ -109,70 +95,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
-				$this->add_content_resizing_fields();
-				break;
-		}
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-	}
-
-	/**
-	 * Renders fields for the Content resizing feature.
-	 */
-	private function add_content_resizing_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		add_settings_field(
-			static::ID . '_number_of_suggestions',
-			esc_html__( 'Number of suggestions', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'number_of_suggestions',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $settings['number_of_suggestions'],
-				'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_condense_text_prompt',
-			$args['label'] ?? esc_html__( 'Condense text prompt', 'classifai' ),
-			[ $this->feature_instance, 'render_prompt_repeater_field' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'condense_text_prompt',
-				'placeholder'   => esc_html__( 'Decrease the content length no more than 2 to 4 sentences.', 'classifai' ),
-				'default_value' => $settings['condense_text_prompt'],
-				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_expand_text_prompt',
-			$args['label'] ?? esc_html__( 'Expand text prompt', 'classifai' ),
-			[ $this->feature_instance, 'render_prompt_repeater_field' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'expand_text_prompt',
-				'placeholder'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
-				'default_value' => $settings['expand_text_prompt'],
-				'description'   => esc_html__( 'Enter your custom prompt.', 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
 	}
 
 	/**
@@ -186,30 +109,6 @@ class ChatGPT extends Provider {
 			'authenticated' => false,
 		];
 
-		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
-				return array_merge(
-					$common_settings,
-					[
-						'number_of_suggestions' => 1,
-						'condense_text_prompt'  => array(
-							array(
-								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-								'prompt'   => esc_html__( 'Descrease the content length no more than 2 to 4 sentences.', 'classifai' ),
-								'original' => 1,
-							),
-						),
-						'expand_text_prompt'    => array(
-							array(
-								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-								'prompt'   => esc_html__( 'Increase the content length no more than 2 to 4 sentences.', 'classifai' ),
-								'original' => 1,
-							),
-						),
-					]
-				);
-		}
-
 		return $common_settings;
 	}
 
@@ -220,22 +119,17 @@ class ChatGPT extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings                                    = $this->feature_instance->get_settings();
-		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$settings         = $this->feature_instance->get_settings();
+		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
-
-		if ( $this->feature_instance instanceof ContentResizing ) {
-			$new_settings[ static::ID ]['number_of_suggestions'] = $this->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
-			$new_settings[ static::ID ]['condense_text_prompt']  = sanitize_prompts( 'condense_text_prompt', $new_settings );
-			$new_settings[ static::ID ]['expand_text_prompt']    = sanitize_prompts( 'expand_text_prompt', $new_settings );
-		}
 
 		return $new_settings;
 	}
 
 	/**
-	 * Sanitisation callback for api key.
+	 * Sanitize the API key.
 	 *
 	 * @param array $new_settings The settings array.
 	 * @return string
@@ -243,90 +137,6 @@ class ChatGPT extends Provider {
 	public function sanitize_api_key( array $new_settings ): string {
 		$settings = $this->feature_instance->get_settings();
 		return sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] ?? '' );
-	}
-
-	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
-	 */
-	public function register() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-	}
-
-	/**
-	 * Enqueue the editor scripts.
-	 */
-	public function enqueue_editor_assets() {
-		global $post;
-
-		if ( empty( $post ) ) {
-			return;
-		}
-
-		if ( ( new ContentResizing() )->is_feature_enabled() ) {
-			wp_enqueue_script(
-				'classifai-content-resizing-plugin-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
-				get_asset_info( 'content-resizing-plugin', 'dependencies' ),
-				get_asset_info( 'content-resizing-plugin', 'version' ),
-				true
-			);
-
-			wp_enqueue_style(
-				'classifai-content-resizing-plugin-css',
-				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
-				[],
-				get_asset_info( 'content-resizing-plugin', 'version' ),
-				'all'
-			);
-		}
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 *
-	 * @param string $hook_suffix The current admin page.
-	 */
-	public function enqueue_admin_assets( string $hook_suffix ) {
-		$prompt_features = array(
-			'feature_content_resizing',
-		);
-
-		// Load jQuery UI Dialog for prompt deletion.
-		if (
-			(
-				'tools_page_classifai' === $hook_suffix
-				&& ( isset( $_GET['tab'], $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				&& 'language_processing' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				&& in_array( $_GET['feature'], $prompt_features, true ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			) ||
-			'admin_page_classifai_setup' === $hook_suffix
-		) {
-			wp_enqueue_script( 'jquery-ui-dialog' );
-			wp_enqueue_style( 'wp-jquery-ui-dialog' );
-
-			add_action(
-				'admin_footer',
-				static function () {
-					printf(
-						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
-						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
-					);
-				}
-			);
-		}
-
-		// Load asset in new post and edit post screens.
-		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			wp_enqueue_style(
-				'classifai-language-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-				[],
-				get_asset_info( 'language-processing', 'version' ),
-			);
-		}
 	}
 
 	/**
@@ -355,7 +165,7 @@ class ChatGPT extends Provider {
 				$return = $this->generate_titles( $post_id, $args );
 				break;
 			case 'resize_content':
-				$return = ( new ContentResizing() )->run( $post_id, $args );
+				$return = $this->resize_content( $post_id, $args );
 				break;
 		}
 
@@ -485,7 +295,7 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings[ static::ID ]['number_of_titles'] ?? 1,
+				'num'     => $settings['number_of_titles'] ?? 1,
 				'content' => '',
 			]
 		);
@@ -593,16 +403,16 @@ class ChatGPT extends Provider {
 		$args = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
+				'num' => $settings['number_of_suggestions'] ?? 1,
 			]
 		);
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['condense_text_prompt'] ) ?? $this->condense_text_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
 		} else {
-			$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['expand_text_prompt'] ) ?? $this->expand_text_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
 		}
 
 		/**
@@ -744,99 +554,9 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Registers REST endpoints for this provider.
-	 *
-	 * @return void
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1/openai',
-			'resize-content',
-			[
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'resize_post_content' ],
-				'permission_callback' => [ $this, 'resize_post_content_permissions_check' ],
-				'args'                => [
-					'id'          => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to resize the content for.', 'classifai' ),
-					],
-					'content'     => [
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
-					],
-					'resize_type' => [
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'The type of resize operation. "expand" or "condense".', 'classifai' ),
-					],
-				],
-			]
-		);
-	}
-
-	/**
-	 * Handle request to resize content.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function resize_post_content( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		return rest_ensure_response(
-			$this->rest_endpoint_callback(
-				$post_id,
-				'resize_content',
-				[
-					'content'     => $request->get_param( 'content' ),
-					'resize_type' => $request->get_param( 'resize_type' ),
-				]
-			)
-		);
-	}
-
-	/**
-	 * Check if a given request has access to resize content.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function resize_post_content_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$post_type     = get_post_type( $post_id );
-		$post_type_obj = get_post_type_object( $post_type );
-
-		// Ensure the post type is allowed in REST endpoints.
-		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
-			return false;
-		}
-
-		$feature = new ContentResizing();
-
-		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Content resizing is not currently enabled.', 'classifai' ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Returns the debug information for the provider settings.
 	 *
-	 * TODO: this should be in feature.
+	 * TODO: this should be in feature. Or at least any settings moved to the feature should be
 	 *
 	 * @return array
 	 */

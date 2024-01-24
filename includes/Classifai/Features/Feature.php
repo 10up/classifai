@@ -573,8 +573,8 @@ abstract class Feature {
 				<?php
 				break;
 		}
-
 		?>
+
 		<input
 			type="<?php echo esc_attr( $type ); ?>"
 			id="<?php echo esc_attr( $args['label_for'] ); ?>"
@@ -582,6 +582,7 @@ abstract class Feature {
 			name="<?php echo esc_attr( $this->get_option_name() ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?>[<?php echo esc_attr( $args['label_for'] ); ?>]"
 			<?php echo $this->get_data_attribute( $args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
+
 		<?php
 		if ( ! empty( $args['description'] ) ) {
 			echo '<span class="description classifai-input-description">' . wp_kses_post( $args['description'] ) . '</span>';

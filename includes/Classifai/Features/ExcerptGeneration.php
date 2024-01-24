@@ -289,7 +289,6 @@ class ExcerptGeneration extends Feature {
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
 			[
-				'option_index'  => static::ID,
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->prompt,
 				'default_value' => $settings['generate_excerpt_prompt'],
