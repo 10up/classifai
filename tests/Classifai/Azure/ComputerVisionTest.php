@@ -39,7 +39,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'Latest response - Smart Cropping',
 				'Latest response - OCR',
 			],
-			array_keys( $this->provider->test_get_debug_information() )
+			array_keys( $this->provider->get_debug_information() )
 		);
 
 		$this->assertEquals(

@@ -290,7 +290,7 @@ function get_post_statuses_for_language_settings(): array {
  *
  * Defaults to 'post'.
  *
- * return array
+ * @return array
  */
 function get_supported_post_types(): array {
 	$feature    = new Classification();

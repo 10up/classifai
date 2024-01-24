@@ -80,6 +80,7 @@ class NLU extends Provider {
 			],
 		];
 
+		// TODO: if no feature is passed in, seems like this might break
 		$this->feature_instance = $feature;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );

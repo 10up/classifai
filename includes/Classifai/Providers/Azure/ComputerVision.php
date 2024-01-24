@@ -758,7 +758,7 @@ class ComputerVision extends Provider {
 	 * @param int   $attachment_id Attachment ID.
 	 * @return array Filtered attachment metadata.
 	 */
-	public function smart_crop_image( array $metadata, int $attachment_id ): array {
+	public function smart_crop_image( $metadata, int $attachment_id ): array {
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 

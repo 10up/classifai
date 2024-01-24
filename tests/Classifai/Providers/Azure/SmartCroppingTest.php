@@ -144,8 +144,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 		$this->assertWPError(
 			$this->get_smart_cropping(
 				[
-					'url'     => 'my-bad-url.com',
-					'api_key' => 'my-key',
+					'endpoint_url' => 'my-bad-url.com',
+					'api_key'      => 'my-key',
 				]
 			)->get_cropped_thumbnail(
 				$attachment,
@@ -214,8 +214,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			$this->assertWPError(
 				$this->get_smart_cropping(
 					[
-						'url'     => 'my-bad-url.com',
-						'api_key' => 'my-key',
+						'endpoint_url' => 'my-bad-url.com',
+						'api_key'      => 'my-key',
 					]
 				)->request_cropped_thumbnail(
 					[

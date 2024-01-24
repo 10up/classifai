@@ -144,10 +144,10 @@ class ServicesManager {
 	/**
 	 * Sanitize settings.
 	 *
-	 * @param array $settings The settings to be sanitized.
+	 * @param mixed $settings The settings to be sanitized.
 	 * @return array
 	 */
-	public function sanitize_settings( array $settings ): array {
+	public function sanitize_settings( $settings ): array {
 		$new_settings = [];
 
 		if ( isset( $settings['email'] )
@@ -258,7 +258,7 @@ class ServicesManager {
 	 *
 	 * @return array
 	 */
-	public function get_services() {
+	public function get_services(): array {
 		return $this->services;
 	}
 
@@ -316,12 +316,13 @@ class ServicesManager {
 	/**
 	 * Hit license API to see if key/email is valid
 	 *
-	 * @param  string $email Email address.
-	 * @param  string $license_key License key.
 	 * @since  1.2
+	 *
+	 * @param string $email Email address.
+	 * @param string $license_key License key.
 	 * @return bool
 	 */
-	public function check_license_key( $email, $license_key ) {
+	public function check_license_key( string $email, string $license_key ): bool {
 
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
@@ -348,12 +349,13 @@ class ServicesManager {
 	/**
 	 * Adds debug information to the ClassifAI Site Health screen.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param array      $debug_information Array of lines representing debug information.
 	 * @param array|null $settings Settings array. If empty, will be fetched.
 	 * @return array Array with lines added.
-	 * @since 1.4.0
 	 */
-	public function add_debug_information( $debug_information, $settings = null ) {
+	public function add_debug_information( array $debug_information, $settings = null ): array {
 		if ( is_null( $settings ) ) {
 			$settings = $this->sanitize_settings( $this->get_settings() );
 		}

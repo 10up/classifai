@@ -6,7 +6,7 @@ namespace Classifai\Tests\Watson;
 
 use \WP_UnitTestCase;
 use \Classifai\Providers\Watson\NLU;
-
+use Classifai\Features\Classification;
 
 /**
  * Class NLUSettingsTest
@@ -33,7 +33,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 		// Add the settings
 		update_option( 'classifai_watson_nlu', $this->settings );
 
-		$this->provider = new NLU( 'service_name' );
+		$this->provider = new NLU( new Classification() );
 	}
 
 	/**
