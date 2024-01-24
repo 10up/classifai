@@ -147,7 +147,7 @@ class BulkActions {
 					break;
 
 				case ExcerptGeneration::ID:
-					$excerpt = ( new ExcerptGeneration() )->run( $post_id );
+					$excerpt = ( new ExcerptGeneration() )->run( $post_id, 'excerpt' );
 					$action  = $doaction;
 
 					if ( ! is_wp_error( $excerpt ) ) {

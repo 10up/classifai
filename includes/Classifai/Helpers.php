@@ -848,3 +848,88 @@ function render_disable_feature_link( string $feature ) {
 		<?php
 	}
 }
+
+/**
+ * Sanitize the prompt data.
+ * This is used for the repeater field.
+ *
+ * @since 2.4.0
+ *
+ * @param array $prompt_key Prompt key.
+ * @param array $new_settings   Settings data.
+ * @return array Sanitized prompt data.
+ */
+function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {
+	if ( isset( $new_settings[ $prompt_key ] ) && is_array( $new_settings[ $prompt_key ] ) ) {
+
+		$prompts = $new_settings[ $prompt_key ];
+
+		// Remove any prompts that don't have a title and prompt.
+		$prompts = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
+			}
+		);
+
+		// Sanitize the prompts and make sure only one prompt is marked as default.
+		$has_default = false;
+
+		$prompts = array_map(
+			function ( $prompt ) use ( &$has_default ) {
+				$default = isset( $prompt['default'] ) && $prompt['default'] && ! $has_default;
+
+				if ( $default ) {
+					$has_default = true;
+				}
+
+				return array(
+					'title'    => sanitize_text_field( $prompt['title'] ),
+					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'default'  => absint( $default ),
+					'original' => absint( $prompt['original'] ),
+				);
+			},
+			$prompts
+		);
+
+		// If there is no default, use the first prompt.
+		if ( false === $has_default && ! empty( $prompts ) ) {
+			$prompts[0]['default'] = 1;
+		}
+
+		return $prompts;
+	}
+
+	return array();
+}
+
+/**
+ * Get the default prompt for use.
+ *
+ * @since 2.4.0
+ *
+ * @param array $prompts Prompt data.
+ * @return string|null Default prompt.
+ */
+function get_default_prompt( array $prompts ): ?string {
+	$default_prompt = null;
+
+	if ( ! empty( $prompts ) ) {
+		$prompt_data = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return $prompt['default'] && ! $prompt['original'];
+			}
+		);
+
+		if ( ! empty( $prompt_data ) ) {
+			$default_prompt = current( $prompt_data )['prompt'];
+		} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
+			// If there is no default, use the first prompt, unless it's the original prompt.
+			$default_prompt = $prompts[0]['prompt'];
+		}
+	}
+
+	return $default_prompt;
+}

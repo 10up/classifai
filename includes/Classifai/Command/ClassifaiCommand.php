@@ -616,7 +616,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						continue;
 					}
 
-					$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
+					$result = ( new ExcerptGeneration() )->run( $post->ID, 'excerpt' );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
@@ -669,7 +669,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					continue;
 				}
 
-				$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
+				$result = ( new ExcerptGeneration() )->run( $post_id, 'excerpt' );
 
 				if ( is_wp_error( $result ) ) {
 					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );

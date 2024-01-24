@@ -83,7 +83,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				disabled={ isLoading }
 				data-id={ postId }
 				onClick={ () =>
-					buttonClick( '/classifai/v1/openai/generate-excerpt/' )
+					buttonClick( '/classifai/v1/generate-excerpt/' )
 				}
 			>
 				{ buttonText }

@@ -2,6 +2,8 @@
 
 namespace Classifai\Features;
 
+use WP_REST_Request;
+use WP_Error;
 use function Classifai\find_provider_class;
 
 abstract class Feature {
@@ -596,7 +598,7 @@ abstract class Feature {
 	public function render_prompt_repeater_field( array $args ) {
 		$option_index      = $args['option_index'] ?? false;
 		$setting_index     = $this->get_settings( $option_index );
-		$prompts           = $setting_index[ $args['label_for'] ] ?? '';
+		$prompts           = $setting_index[ $args['label_for'] ] ?? [];
 		$class             = $args['class'] ?? 'large-text';
 		$placeholder       = $args['placeholder'] ?? '';
 		$field_name_prefix = sprintf(
@@ -614,8 +616,8 @@ abstract class Feature {
 
 		<?php foreach ( $prompts as $prompt ) : ?>
 			<?php
-			$is_default_prompt  = ( isset( $prompt['default'] ) && 1 === $prompt['default'] ) || 1 === $prompt_count;
-			$is_original_prompt = isset( $prompt['original'] ) && 1 === $prompt['original'];
+			$is_default_prompt  = ( isset( $prompt['default'] ) && 1 === (int) $prompt['default'] ) || 1 === $prompt_count;
+			$is_original_prompt = isset( $prompt['original'] ) && 1 === (int) $prompt['original'];
 			?>
 
 			<fieldset class="classifai-field-type-prompt-setting">
@@ -1190,5 +1192,57 @@ abstract class Feature {
 		}
 
 		return $data_attr_str;
+	}
+
+	/**
+	 * Register any needed endpoints.
+	 */
+	public function register_endpoints() {}
+
+	/**
+	 * Generic callback that can be used for all custom endpoints.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response|WP_Error
+	 */
+	public function rest_endpoint_callback( WP_REST_Request $request ) {
+		return rest_ensure_response( new WP_Error( 'invalid_route', esc_html__( 'Invalid route.', 'classifai' ) ) );
+	}
+
+	/**
+	 * Runs the feature.
+	 *
+	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
+	 * @return mixed
+	 */
+	public function run( ...$args ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'];
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		if ( ! is_callable( [ $provider_instance, 'rest_endpoint_callback' ] ) ) {
+			return new WP_Error( 'invalid_route', esc_html__( 'The selected provider does not have a valid callback in place.', 'classifai' ) );
+		}
+
+		/**
+		 * Filter the results of running the feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_run
+		 *
+		 * @param {mixed} $result Result of running the feature.
+		 * @param {Classifai\Providers} $provider_instance Provider used.
+		 * @param {mixed} $args Arguments used by the feature.
+		 * @param {Feature} $this Current feature class.
+		 *
+		 * @return {mixed} Results.
+		 */
+		return apply_filters(
+			'classifai_' . static::ID . '_run',
+			$provider_instance->rest_endpoint_callback( ...$args ),
+			$provider_instance,
+			$args,
+			$this
+		);
 	}
 }

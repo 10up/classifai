@@ -14,6 +14,8 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 use function Classifai\get_asset_info;
+use function Classifai\sanitize_prompts;
+use function Classifai\get_default_prompt;
 
 class ChatGPT extends Provider {
 
@@ -89,8 +91,6 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Render the provider fields.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -128,10 +128,6 @@ class ChatGPT extends Provider {
 				$this->add_title_generation_fields();
 				break;
 
-			case ExcerptGeneration::ID:
-				$this->add_excerpt_generation_fields();
-				break;
-
 			case ContentResizing::ID:
 				$this->add_content_resizing_fields();
 				break;
@@ -141,9 +137,7 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Renders te fields for Title generation feature.
-	 *
-	 * @return void
+	 * Renders fields for the Title generation feature.
 	 */
 	private function add_title_generation_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -184,34 +178,7 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Renders te fields for Excerpt generation feature.
-	 *
-	 * @return void
-	 */
-	private function add_excerpt_generation_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		add_settings_field(
-			static::ID . '_generate_excerpt_prompt',
-			$args['label'] ?? esc_html__( 'Prompt', 'classifai' ),
-			[ $this->feature_instance, 'render_prompt_repeater_field' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
-				'default_value' => $settings['generate_excerpt_prompt'],
-				'description'   => esc_html__( "Enter your custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-	}
-
-	/**
-	 * Renders te fields for Content resizing feature.
-	 *
-	 * @return void
+	 * Renders fields for the Content resizing feature.
 	 */
 	private function add_content_resizing_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -272,7 +239,7 @@ class ChatGPT extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
@@ -288,20 +255,6 @@ class ChatGPT extends Provider {
 							array(
 								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 								'prompt'   => esc_html__( 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.', 'classifai' ),
-								'original' => 1,
-							),
-						),
-					]
-				);
-
-			case ExcerptGeneration::ID:
-				return array_merge(
-					$common_settings,
-					[
-						'generate_excerpt_prompt' => array(
-							array(
-								'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-								'prompt'   => esc_html__( 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.', 'classifai' ),
 								'original' => 1,
 							),
 						),
@@ -340,7 +293,7 @@ class ChatGPT extends Provider {
 	 * @param array $new_settings The settings array.
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
@@ -348,17 +301,13 @@ class ChatGPT extends Provider {
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$new_settings[ static::ID ]['number_of_titles']      = $this->sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
-			$new_settings[ static::ID ]['generate_title_prompt'] = $this->sanitize_prompts( 'generate_title_prompt', $new_settings );
-		}
-
-		if ( $this->feature_instance instanceof ExcerptGeneration ) {
-			$new_settings[ static::ID ]['generate_excerpt_prompt'] = $this->sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
+			$new_settings[ static::ID ]['generate_title_prompt'] = sanitize_prompts( 'generate_title_prompt', $new_settings );
 		}
 
 		if ( $this->feature_instance instanceof ContentResizing ) {
 			$new_settings[ static::ID ]['number_of_suggestions'] = $this->sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
-			$new_settings[ static::ID ]['condense_text_prompt']  = $this->sanitize_prompts( 'condense_text_prompt', $new_settings );
-			$new_settings[ static::ID ]['expand_text_prompt']    = $this->sanitize_prompts( 'expand_text_prompt', $new_settings );
+			$new_settings[ static::ID ]['condense_text_prompt']  = sanitize_prompts( 'condense_text_prompt', $new_settings );
+			$new_settings[ static::ID ]['expand_text_prompt']    = sanitize_prompts( 'expand_text_prompt', $new_settings );
 		}
 
 		return $new_settings;
@@ -368,10 +317,9 @@ class ChatGPT extends Provider {
 	 * Sanitisation callback for api key.
 	 *
 	 * @param array $new_settings The settings array.
-	 *
 	 * @return string
 	 */
-	public function sanitize_api_key( $new_settings ) {
+	public function sanitize_api_key( array $new_settings ): string {
 		$settings = $this->feature_instance->get_settings();
 		return sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] ?? '' );
 	}
@@ -382,10 +330,9 @@ class ChatGPT extends Provider {
 	 * @param string $key The key of the value we are sanitizing.
 	 * @param array  $new_settings The settings array.
 	 * @param array  $settings     Current array.
-	 *
-	 * @return integer
+	 * @return int
 	 */
-	public function sanitize_number_of_responses_field( $key, $new_settings, $settings ) {
+	public function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
 		return absint( $new_settings[ static::ID ][ $key ] ?? $settings[ static::ID ][ $key ] ?? '' );
 	}
 
@@ -428,17 +375,6 @@ class ChatGPT extends Provider {
 
 		if ( empty( $post ) ) {
 			return;
-		}
-
-		if ( ( new ExcerptGeneration() )->is_feature_enabled() ) {
-			// This script removes the core excerpt panel and replaces it with our own.
-			wp_enqueue_script(
-				'classifai-post-excerpt',
-				CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-				array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
-				get_asset_info( 'post-excerpt', 'version' ),
-				true
-			);
 		}
 
 		if ( ( new TitleGeneration() )->is_feature_enabled() ) {
@@ -487,7 +423,6 @@ class ChatGPT extends Provider {
 	public function enqueue_admin_assets( string $hook_suffix ) {
 		$prompt_features = array(
 			'feature_title_generation',
-			'feature_excerpt_generation',
 			'feature_content_resizing',
 		);
 
@@ -550,42 +485,6 @@ class ChatGPT extends Provider {
 						'before'
 					);
 				}
-
-				if (
-					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					( new ExcerptGeneration() )->is_feature_enabled()
-				) {
-					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
-						'all'
-					);
-
-					wp_enqueue_script(
-						'classifai-generate-excerpt-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-						array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-excerpt-classic', 'version' ),
-						true
-					);
-
-					wp_add_inline_script(
-						'classifai-generate-excerpt-classic-js',
-						sprintf(
-							'var classifaiGenerateExcerpt = %s;',
-							wp_json_encode(
-								[
-									'path'           => '/classifai/v1/openai/generate-excerpt/',
-									'buttonText'     => __( 'Generate excerpt', 'classifai' ),
-									'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
-								]
-							)
-						),
-						'before'
-					);
-				}
 			}
 
 			wp_enqueue_style(
@@ -624,17 +523,17 @@ class ChatGPT extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
-		$route_to_call = strtolower( $route_to_call );
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$return = '';
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'excerpt':
-				$return = ( new ExcerptGeneration() )->run( $post_id, $args );
+				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 			case 'title':
 				$return = ( new TitleGeneration() )->run( $post_id, $args );
@@ -679,7 +578,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
+		$excerpt_prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['generate_excerpt_prompt'] ) ?? $this->feature_instance->prompt );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -783,7 +682,7 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['generate_title_prompt'] ) ?? $this->generate_title_prompt );
+		$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['generate_title_prompt'] ) ?? $this->generate_title_prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -885,9 +784,9 @@ class ChatGPT extends Provider {
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['condense_text_prompt'] ) ?? $this->condense_text_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['condense_text_prompt'] ) ?? $this->condense_text_prompt );
 		} else {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings[ static::ID ]['expand_text_prompt'] ) ?? $this->expand_text_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings[ static::ID ]['expand_text_prompt'] ) ?? $this->expand_text_prompt );
 		}
 
 		/**
@@ -975,7 +874,7 @@ class ChatGPT extends Provider {
 	 * @param string $post_content The post content.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ) {
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ): string {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -1029,93 +928,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Sanitize the prompt data.
-	 * This is used for the repeater field.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @param array $prompt_key Prompt key.
-	 * @param array $new_settings   Settings data.
-	 *
-	 * @return array Sanitized prompt data.
-	 */
-	public function sanitize_prompts( $prompt_key = '', array $new_settings ): array {
-		if ( isset( $new_settings[ self::ID ][ $prompt_key ] ) && is_array( $new_settings[ self::ID ][ $prompt_key ] ) ) {
-
-			$prompts = $new_settings[ self::ID ][ $prompt_key ];
-
-			// Remove any prompts that don't have a title and prompt.
-			$prompts = array_filter(
-				$prompts,
-				function ( $prompt ) {
-					return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
-				}
-			);
-
-			// Sanitize the prompts and make sure only one prompt is marked as default.
-			$has_default = false;
-
-			$prompts = array_map(
-				function ( $prompt ) use ( &$has_default ) {
-					$default = isset( $prompt['default'] ) && $prompt['default'] && ! $has_default;
-
-					if ( $default ) {
-						$has_default = true;
-					}
-
-					return array(
-						'title'    => sanitize_text_field( $prompt['title'] ),
-						'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
-						'default'  => absint( $default ),
-						'original' => absint( $prompt['original'] ),
-					);
-				},
-				$prompts
-			);
-
-			// If there is no default, use the first prompt.
-			if ( false === $has_default && ! empty( $prompts ) ) {
-				$prompts[0]['default'] = 1;
-			}
-
-			return $prompts;
-		}
-
-		return array();
-	}
-
-	/**
-	 * Get the default prompt for use.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @param array $prompts Prompt data.
-	 *
-	 * @return string|null Default prompt.
-	 */
-	public function get_default_prompt( array $prompts ): ?string {
-		$default_prompt = null;
-
-		if ( ! empty( $prompts ) ) {
-			$prompt_data = array_filter(
-				$prompts,
-				function ( $prompt ) {
-					return $prompt['default'] && ! $prompt['original'];
-				}
-			);
-
-			if ( ! empty( $prompt_data ) ) {
-				$default_prompt = current( $prompt_data )['prompt'];
-			} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
-				// If there is no default, use the first prompt, unless it's the original prompt.
-				$default_prompt = $prompts[0]['prompt'];
-			}
-		}
-
-		return $default_prompt;
-	}
-
-	/**
 	 * Registers REST endpoints for this provider.
 	 *
 	 * @return void
@@ -1159,46 +971,6 @@ class ChatGPT extends Provider {
 						],
 					],
 					'permission_callback' => [ $this, 'generate_post_title_permissions_check' ],
-				],
-			]
-		);
-
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-excerpt(?:/(?P<id>\d+))?',
-			[
-				[
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'generate_post_excerpt' ],
-					'args'                => [
-						'id' => [
-							'required'          => true,
-							'type'              => 'integer',
-							'sanitize_callback' => 'absint',
-							'description'       => esc_html__( 'Post ID to generate excerpt for.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
-				],
-				[
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => [ $this, 'generate_post_excerpt' ],
-					'args'                => [
-						'content' => [
-							'required'          => true,
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Content to summarize into an excerpt.', 'classifai' ),
-						],
-						'title'   => [
-							'type'              => 'string',
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
-							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
-						],
-					],
-					'permission_callback' => [ $this, 'generate_post_excerpt_permissions_check' ],
 				],
 			]
 		);
@@ -1293,66 +1065,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Handle request to generate excerpt for given post ID.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function generate_post_excerpt( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-		$content = $request->get_param( 'content' );
-		$title   = $request->get_param( 'title' );
-
-		return rest_ensure_response(
-			$this->rest_endpoint_callback(
-				$post_id,
-				'excerpt',
-				[
-					'content' => $content,
-					'title'   => $title,
-				]
-			)
-		);
-	}
-
-	/**
-	 * Check if a given request has access to generate an excerpt.
-	 *
-	 * This check ensures we have a proper post ID, the current user
-	 * making the request has access to that post, that we are
-	 * properly authenticated with OpenAI and that excerpt generation
-	 * is turned on.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function generate_post_excerpt_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$post_type     = get_post_type( $post_id );
-		$post_type_obj = get_post_type_object( $post_type );
-
-		// Ensure the post type is allowed in REST endpoints.
-		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
-			return false;
-		}
-
-		$feature = new ExcerptGeneration();
-
-		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Handle request to resize content.
 	 *
 	 * @param WP_REST_Request $request The full request object.
@@ -1408,9 +1120,11 @@ class ChatGPT extends Provider {
 	/**
 	 * Returns the debug information for the provider settings.
 	 *
+	 * TODO: this should be in feature.
+	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];
