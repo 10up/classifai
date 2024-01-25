@@ -161,7 +161,7 @@ class Whisper extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( int $post_id = 0, string $route_to_call = '', array $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid attachment ID is required to generate a transcript.', 'classifai' ) );
 		}
@@ -201,9 +201,9 @@ class Whisper extends Provider {
 			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
 		}
 
-		$settings = $feature->get_settings();
+		$settings = $feature->get_settings( static::ID );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to Whisper.

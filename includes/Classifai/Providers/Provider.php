@@ -146,12 +146,12 @@ abstract class Provider {
 	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * @param int    $post_id       The Post Id we're processing.
+	 * @param mixed  $item The item we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
-	 * @param array  $args          Optional arguments to pass to the route.
+	 * @param array  $args Optional arguments to pass to the route.
 	 * @return mixed
 	 */
-	public function rest_endpoint_callback( int $post_id, string $route_to_call, array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function rest_endpoint_callback( $item, string $route_to_call, array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return null;
 	}
 

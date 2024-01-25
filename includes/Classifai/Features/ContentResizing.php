@@ -54,11 +54,18 @@ class ContentResizing extends Feature {
 
 	/**
 	 * Set up necessary hooks.
+	 *
+	 * We utilize this so we can register the REST route.
 	 */
 	public function setup() {
 		parent::setup();
-
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Set up necessary hooks.
+	 */
+	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
