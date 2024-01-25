@@ -7,13 +7,7 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use WP_REST_Server;
-use WP_REST_Request;
 use WP_Error;
-
-use function Classifai\clean_input;
-use function Classifai\get_asset_info;
 
 class Whisper extends Provider {
 
@@ -25,6 +19,42 @@ class Whisper extends Provider {
 	 * @var string
 	 */
 	const ID = 'openai_whisper';
+
+	/**
+	 * OpenAI Whisper URL
+	 *
+	 * @var string
+	 */
+	protected $whisper_url = 'https://api.openai.com/v1/audio/';
+
+	/**
+	 * OpenAI Whisper model
+	 *
+	 * @var string
+	 */
+	protected $whisper_model = 'whisper-1';
+
+	/**
+	 * Supported file formats
+	 *
+	 * @var array
+	 */
+	public $file_formats = [
+		'mp3',
+		'mp4',
+		'mpeg',
+		'mpga',
+		'm4a',
+		'wav',
+		'webm',
+	];
+
+	/**
+	 * Maximum file size our model supports
+	 *
+	 * @var int
+	 */
+	public $max_file_size = 25 * MB_IN_BYTES;
 
 	/**
 	 * OpenAI Whisper constructor.
@@ -39,25 +69,22 @@ class Whisper extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
-
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
+	 * Register any needed hooks.
 	 */
 	public function register() {
-		if ( ! ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
-			return;
-		}
+	}
 
-		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
+	/**
+	 * Builds the API url.
+	 *
+	 * @param string $path Path to append to API URL.
+	 * @return string
+	 */
+	public function get_api_url( string $path = '' ): string {
+		return sprintf( '%s%s', trailingslashit( $this->whisper_url ), $path );
 	}
 
 	/**
@@ -108,12 +135,7 @@ class Whisper extends Provider {
 			'authenticated' => false,
 		];
 
-		switch ( $this->feature_instance::ID ) {
-			case AudioTranscriptsGeneration::ID:
-				return $common_settings;
-		}
-
-		return [];
+		return $common_settings;
 	}
 
 	/**
@@ -132,213 +154,93 @@ class Whisper extends Provider {
 	}
 
 	/**
-	 * Enqueue assets.
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id The Post ID we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
 	 */
-	public function enqueue_media_scripts() {
-		wp_enqueue_script(
-			'classifai-media-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
-			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
-			get_asset_info( 'media', 'version' ),
-			true
-		);
+	public function rest_endpoint_callback( int $post_id = 0, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid attachment ID is required to generate a transcript.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'transcript':
+				$return = $this->transcribe_audio( $post_id, $args );
+				break;
+		}
+
+		return $return;
 	}
 
 	/**
 	 * Start the audio transcription process.
 	 *
-	 * @param int $attachment_id Attachment ID to process.
+	 * @param int   $attachment_id Attachment ID to process.
+	 * @param array $args Optional arguments passed in.
 	 * @return WP_Error|bool
 	 */
-	public function transcribe_audio( int $attachment_id = 0 ) {
+	public function transcribe_audio( int $attachment_id = 0, array $args = [] ) {
 		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
 
 		$feature = new AudioTranscriptsGeneration();
-		$enabled = $feature->is_feature_enabled();
 
-		if ( is_wp_error( $enabled ) ) {
-			return $enabled;
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcript generation is disabled. Please check your settings.', 'classifai' ) );
 		}
 
-		$settings   = $feature->get_settings( static::ID );
-		$transcribe = new Transcribe( intval( $attachment_id ), $settings );
-
-		return $transcribe->process();
-	}
-
-	/**
-	 * Add new buttons to the media modal.
-	 *
-	 * @param array    $form_fields Existing form fields.
-	 * @param \WP_Post $attachment Attachment object.
-	 * @return array
-	 */
-	public function add_buttons_to_media_modal( array $form_fields, \WP_Post $attachment ): array {
-		$feature    = new AudioTranscriptsGeneration();
-		$settings   = $feature->get_settings();
-		$transcribe = new Transcribe( $attachment->ID, $settings[ static::ID ] );
-
-		if ( ! $transcribe->should_process( $attachment->ID ) ) {
-			return $form_fields;
+		if ( ! $feature->should_process( $attachment_id ) ) {
+			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
 		}
 
-		$text = empty( get_the_content( null, false, $attachment ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
+		$settings = $feature->get_settings();
 
-		$form_fields['retranscribe'] = [
-			'label'        => __( 'Transcribe audio', 'classifai' ),
-			'input'        => 'html',
-			'html'         => '<button class="button secondary" id="classifai-retranscribe" data-id="' . esc_attr( absint( $attachment->ID ) ) . '">' . esc_html( $text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
-			'show_in_edit' => false,
-		];
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		return $form_fields;
-	}
-
-	/**
-	 * Add metabox on single attachment view to allow for transcription.
-	 *
-	 * @param \WP_Post $post Post object.
-	 */
-	public function setup_attachment_meta_box( \WP_Post $post ) {
-		$feature    = new AudioTranscriptsGeneration();
-		$settings   = $feature->get_settings();
-		$transcribe = new Transcribe( $post->ID, $settings[ static::ID ] );
-
-		if ( ! $transcribe->should_process( $post->ID ) ) {
-			return;
-		}
-
-		add_meta_box(
-			'attachment_meta_box',
-			__( 'ClassifAI Audio Processing', 'classifai' ),
-			[ $this, 'attachment_meta_box' ],
-			'attachment',
-			'side',
-			'high'
-		);
-	}
-
-	/**
-	 * Display the attachment meta box.
-	 *
-	 * @param \WP_Post $post Post object.
-	 */
-	public function attachment_meta_box( \WP_Post $post ) {
-		$text = empty( get_the_content( null, false, $post ) ) ? __( 'Transcribe', 'classifai' ) : __( 'Re-transcribe', 'classifai' );
-
-		wp_nonce_field( 'classifai_openai_whisper_meta_action', 'classifai_openai_whisper_meta' );
-		?>
-
-		<div class="misc-publishing-actions">
-			<div class="misc-pub-section">
-				<label for="retranscribe">
-					<input type="checkbox" value="yes" id="retranscribe" name="retranscribe"/>
-					<?php echo esc_html( $text ); ?>
-				</label>
-			</div>
-		</div>
-
-		<?php
-	}
-
-	/**
-	 * Transcribe audio on attachment save, if option is selected.
-	 *
-	 * @param int $attachment_id Attachment ID.
-	 */
-	public function maybe_transcribe_audio( int $attachment_id ) {
-		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
-		}
-
-		$feature = new AudioTranscriptsGeneration();
-		$enabled = $feature->is_feature_enabled();
-
-		if ( is_wp_error( $enabled ) ) {
-			return;
-		}
-
-		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $attachment_id ) ) {
-			return;
-		}
-
-		if ( empty( $_POST['classifai_openai_whisper_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_openai_whisper_meta'] ) ), 'classifai_openai_whisper_meta_action' ) ) {
-			return;
-		}
-
-		if ( clean_input( 'retranscribe' ) ) {
-			// Remove to avoid infinite loop.
-			remove_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
-			$this->transcribe_audio( $attachment_id );
-		}
-	}
-
-	/**
-	 * Register REST endpoints for this provider.
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-transcript/(?P<id>\d+)',
+		/**
+		 * Filter the request body before sending to Whisper.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_whisper_transcribe_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to Whisper.
+		 * @param {int} $attachment_id ID of attachment we are transcribing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_whisper_transcribe_request_body',
 			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_audio_transcript' ],
-				'args'                => [
-					'id' => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Attachment ID to generate transcript for.', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'generate_audio_transcript_permissions_check' ],
-			]
+				'file'            => get_attached_file( $attachment_id ) ?? '',
+				'model'           => $this->whisper_model,
+				'response_format' => 'json',
+				'temperature'     => 0,
+			],
+			$attachment_id
 		);
-	}
 
-	/**
-	 * Handle request to generate a transcript for given attachment ID.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function generate_audio_transcript( WP_REST_Request $request ) {
-		$attachment_id = $request->get_param( 'id' );
+		// Make our API request.
+		$response = $request->post_form(
+			$this->get_api_url( 'transcriptions' ),
+			$body
+		);
 
-		return rest_ensure_response( ( new AudioTranscriptsGeneration() )->run( $attachment_id ) );
-	}
+		set_transient( 'classifai_openai_whisper_latest_response', $response, DAY_IN_SECONDS * 30 );
 
-	/**
-	 * Check if a given request has access to generate a transcript.
-	 *
-	 * This check ensures we have a valid user with proper capabilities
-	 * making the request, that we are properly authenticated with OpenAI
-	 * and that transcription is turned on.
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function generate_audio_transcript_permissions_check( WP_REST_Request $request ) {
-		$attachment_id = $request->get_param( 'id' );
-		$post_type     = get_post_type_object( 'attachment' );
-
-		// Ensure attachments are allowed in REST endpoints.
-		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
-			return false;
+		// Extract out the text response, if it exists.
+		if ( ! is_wp_error( $response ) && isset( $response['text'] ) ) {
+			$response = $response['text'];
 		}
 
-		// Ensure we have a logged in user that can upload and change files.
-		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
-			return false;
-		}
-
-		if ( ! ( new AudioTranscriptsGeneration() )->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Audio transciption is not currently enabled.', 'classifai' ) );
-		}
-
-		return true;
+		return $response;
 	}
 
 	/**
@@ -346,10 +248,9 @@ class Whisper extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+	public function get_debug_information(): array {
+		$settings   = $this->feature_instance->get_settings();
+		$debug_info = [];
 
 		if ( $this->feature_instance instanceof AudioTranscriptsGeneration ) {
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_whisper_latest_response' ) );

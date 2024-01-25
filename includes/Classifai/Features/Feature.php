@@ -53,6 +53,18 @@ abstract class Feature {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
 		add_action( 'admin_init', [ $this, 'register_setting' ] );
 		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+
+		if ( $this->is_feature_enabled() ) {
+			$this->feature_setup();
+		}
+	}
+
+	/**
+	 * Setup any hooks the feature needs.
+	 *
+	 * TODO: make this abstract once implemented in all features.
+	 */
+	public function feature_setup() {
 	}
 
 	/**
@@ -333,7 +345,7 @@ abstract class Feature {
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
 
-			if ( method_exists( $provider, 'get_default_provider_settings' ) ) {
+			if ( $provider && method_exists( $provider, 'get_default_provider_settings' ) ) {
 				$provider_settings[ $provider_id ] = $provider->get_default_provider_settings();
 			}
 		}
@@ -373,7 +385,7 @@ abstract class Feature {
 		foreach ( array_keys( $this->get_providers() ) as $provider_id ) {
 			$provider = $this->get_feature_provider_instance( $provider_id );
 
-			if ( method_exists( $provider, 'render_provider_fields' ) ) {
+			if ( $provider && method_exists( $provider, 'render_provider_fields' ) ) {
 				$provider->render_provider_fields();
 			}
 		}

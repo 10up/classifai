@@ -47,9 +47,7 @@ class ExcerptGeneration extends Feature {
 	/**
 	 * Set up necessary hooks.
 	 */
-	public function setup() {
-		parent::setup();
-
+	public function feature_setup() {
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );

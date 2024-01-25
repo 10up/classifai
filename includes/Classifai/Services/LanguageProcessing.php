@@ -41,7 +41,6 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Whisper',
-				'Classifai\Providers\OpenAI\DallE',
 				'Classifai\Providers\Azure\Speech',
 			]
 		);

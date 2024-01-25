@@ -57,6 +57,7 @@ class ImageProcessing extends Service {
 			'classifai_language_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
+				'Classifai\Providers\OpenAI\DallE',
 			]
 		);
 	}

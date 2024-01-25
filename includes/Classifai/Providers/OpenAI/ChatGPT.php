@@ -141,14 +141,13 @@ class ChatGPT extends Provider {
 
 	/**
 	 * Common entry point for all REST endpoints for this provider.
-	 * This is called by the Service.
 	 *
-	 * @param int    $post_id The Post Id we're processing.
+	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
+	public function rest_endpoint_callback( int $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}

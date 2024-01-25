@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use Classifai\Services\LanguageProcessing;
+use Classifai\Services\ImageProcessing;
 use Classifai\Providers\OpenAI\DallE;
 
 /**
@@ -23,7 +23,7 @@ class ImageGeneration extends Feature {
 		$this->label = __( 'Image Generation', 'classifai' );
 
 		// Contains all providers that are registered to the service.
-		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
+		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [

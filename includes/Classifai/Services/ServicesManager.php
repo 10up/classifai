@@ -72,7 +72,6 @@ class ServicesManager {
 			'\Classifai\Features\ContentResizing',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
-			'\Classifai\Features\ImageGeneration',
 		];
 	}
 
@@ -85,6 +84,7 @@ class ServicesManager {
 			'\Classifai\Features\ImageTagsGenerator',
 			'\Classifai\Features\ImageCropping',
 			'\Classifai\Features\ImageTextExtraction',
+			'\Classifai\Features\ImageGeneration',
 			'\Classifai\Features\PDFTextExtraction',
 		];
 	}

@@ -344,7 +344,7 @@ class BulkActions {
 
 				case AudioTranscriptsGeneration::ID:
 					if ( wp_attachment_is( 'audio', $attachment_id ) ) {
-						( new AudioTranscriptsGeneration() )->run( $attachment_id );
+						( new AudioTranscriptsGeneration() )->run( $attachment_id, 'transcript' );
 					}
 					break;
 			}
