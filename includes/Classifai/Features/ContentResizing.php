@@ -144,7 +144,7 @@ class ContentResizing extends Feature {
 	public function rest_endpoint_callback( WP_REST_Request $request ) {
 		$route = $request->get_route();
 
-		if ( '/classifai/v1/resize-content' === $route ) {
+		if ( strpos( $route, '/classifai/v1/resize-content' ) === 0 ) {
 			return rest_ensure_response(
 				$this->run(
 					$request->get_param( 'id' ),

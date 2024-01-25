@@ -5,8 +5,10 @@
 
 namespace Classifai\Services;
 
+use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Taxonomy\ImageTagTaxonomy;
+
 use function Classifai\get_asset_info;
 use function Classifai\find_provider_class;
 
@@ -76,18 +78,16 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		$provider = find_provider_class( $this->provider_classes ?? [], ComputerVision::ID );
-		if ( ! is_wp_error( $provider ) ) {
-			wp_add_inline_script(
-				'classifai-media-script',
-				'const classifaiMediaVars = ' . wp_json_encode(
-					array(
-						'enabledAltTextFields' => $provider->get_alt_text_settings() ? $provider->get_alt_text_settings() : array(),
-					)
-				),
-				'before'
-			);
-		}
+		$feature = new DescriptiveTextGenerator();
+		wp_add_inline_script(
+			'classifai-media-script',
+			'const classifaiMediaVars = ' . wp_json_encode(
+				array(
+					'enabledAltTextFields' => $feature->get_alt_text_settings() ? $feature->get_alt_text_settings() : array(),
+				)
+			),
+			'before'
+		);
 	}
 
 	/**
