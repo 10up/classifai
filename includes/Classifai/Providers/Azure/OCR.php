@@ -1,6 +1,6 @@
 <?php
 /**
- * Provides OCR detection with the Computer Vision service.
+ * Provides OCR detection with the AI Vision service.
  *
  * @since 1.6.0
  * @package Classifai
@@ -15,7 +15,7 @@ use function Classifai\get_largest_size_and_dimensions_image_url;
 /**
  * OCR class
  *
- * Connects to Computer Vision's ocr endpoint to detect text.
+ * Connects to AI Vision's ocr endpoint to detect text.
  *
  * @see https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/recognizeprintedtext/
  * @since 1.6.0
@@ -23,7 +23,7 @@ use function Classifai\get_largest_size_and_dimensions_image_url;
 class OCR {
 
 	/**
-	 * The Computer Vision API path to the OCR service.
+	 * The AI Vision API path to the OCR service.
 	 *
 	 * @since 1.6.0
 	 *
@@ -41,22 +41,13 @@ class OCR {
 	private $settings;
 
 	/**
-	 * Force processing
+	 * Image scan results.
 	 *
 	 * @since 1.6.0
 	 *
 	 * @var bool|object
 	 */
 	private $scan;
-
-	/**
-	 * Force processing
-	 *
-	 * @since 1.6.0
-	 *
-	 * @var boolean
-	 */
-	private $force;
 
 	/**
 	 * Media types to process.
@@ -73,18 +64,16 @@ class OCR {
 	];
 
 	/**
-	 * OCR constructor
+	 * OCR constructor.
 	 *
 	 * @since 1.6.0
 	 *
 	 * @param array       $settings Computer Vision settings.
 	 * @param bool|object $scan     Previously run image scan.
-	 * @param boolean     $force    Whether to force processing or not.
 	 */
-	public function __construct( array $settings, $scan, bool $force ) {
+	public function __construct( array $settings, $scan ) {
 		$this->settings = $settings;
 		$this->scan     = $scan;
-		$this->force    = $force;
 	}
 
 	/**
@@ -107,11 +96,6 @@ class OCR {
 	 * @return bool
 	 */
 	public function should_process( int $attachment_id ): bool {
-		// Bypass check if this is a force request
-		if ( $this->force ) {
-			return true;
-		}
-
 		$mime_type          = get_post_mime_type( $attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
@@ -191,7 +175,7 @@ class OCR {
 	}
 
 	/**
-	 * Get and save the OCR data
+	 * Get the OCR data
 	 *
 	 * @since 1.6.0
 	 *
@@ -251,42 +235,10 @@ class OCR {
 				 *
 				 * @return {string} The filtered text data.
 				 */
-				$text = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $scan );
+				$rtn = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $scan );
 
-				$content = get_the_content( null, false, $attachment_id );
-
-				$post_args = [
-					'ID'           => $attachment_id,
-					'post_content' => sanitize_text_field( $text ),
-				];
-
-				/**
-				 * Filter the post arguments before saving the text to post_content.
-				 *
-				 * This enables text to be stored in a different post or post meta field,
-				 * or do other post data setting based on scan results.
-				 *
-				 * @since 1.6.0
-				 * @hook classifai_ocr_text_post_args
-				 *
-				 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
-				 * @param {int}    $attachment_id ID of the attachment post.
-				 * @param {object} $scan          The full scan results from the API.
-				 * @param {string} $text          The text data to be saved.
-				 * @param {object} $scan          The full scan results from the API.
-				 *
-				 * @return {string} The filtered text data.
-				 */
-				$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $text, $scan );
-
-				if ( $content !== $text ) {
-					wp_update_post( $post_args );
-
-					$rtn = $text;
-
-					// Save all the results for later
-					update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
-				}
+				// Save all the results for later
+				update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $scan );
 			}
 		} else {
 			$rtn = $scan;

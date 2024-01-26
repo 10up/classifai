@@ -314,31 +314,50 @@ class BulkActions {
 			switch ( $doaction ) {
 				case DescriptiveTextGenerator::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new DescriptiveTextGenerator() )->run( $attachment_id );
+						$desc_text        = new DescriptiveTextGenerator();
+						$desc_text_result = $desc_text->run( $attachment_id, 'descriptive_text' );
+
+						if ( $desc_text_result && ! is_wp_error( $desc_text_result ) ) {
+							$desc_text->save( $desc_text_result, $attachment_id );
+						}
 					}
 					break;
 
 				case ImageTagsGenerator::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageTagsGenerator() )->run( $attachment_id );
+						$image_tags  = new ImageTagsGenerator();
+						$tags_result = $image_tags->run( $attachment_id, 'tags' );
+
+						if ( ! empty( $tags_result ) && ! is_wp_error( $tags_result ) ) {
+							$image_tags->save( $tags_result, $attachment_id );
+						}
 					}
 					break;
 
 				case ImageCropping::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageCropping() )->run( $current_meta, $attachment_id );
+						$crop        = new ImageCropping();
+						$crop_result = $crop->run( $attachment_id, 'crop', $current_meta );
+						if ( ! empty( $crop_result ) && ! is_wp_error( $crop_result ) ) {
+							$ocr_meta = $crop->save( $crop_result, $attachment_id );
+							wp_update_attachment_metadata( $attachment_id, $ocr_meta );
+						}
 					}
 					break;
 
 				case ImageTextExtraction::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageTextExtraction() )->run( $current_meta, $attachment_id, true );
+						$ocr        = new ImageTextExtraction();
+						$ocr_result = $ocr->run( $attachment_id, 'ocr' );
+						if ( $ocr_result && ! is_wp_error( $ocr_result ) ) {
+							$ocr->save( $ocr_result, $attachment_id );
+						}
 					}
 					break;
 
 				case PDFTextExtraction::ID:
 					if ( attachment_is_pdf( $attachment_id ) ) {
-						( new PDFTextExtraction() )->run( $attachment_id );
+						( new PDFTextExtraction() )->run( $attachment_id, 'read_pdf' );
 					}
 					break;
 

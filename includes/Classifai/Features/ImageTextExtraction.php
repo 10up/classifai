@@ -10,9 +10,6 @@ use WP_Error;
 use DOMDocument;
 
 use function Classifai\get_asset_info;
-use function Classifai\computer_vision_max_filesize;
-use function Classifai\get_largest_acceptable_image_url;
-use function Classifai\get_modified_image_source_url;
 use function Classifai\clean_input;
 
 /**
@@ -62,6 +59,7 @@ class ImageTextExtraction extends Feature {
 
 		add_filter( 'the_content', [ $this, 'add_ocr_aria_describedby' ] );
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_ocr_text' ], 9, 2 );
 	}
 
 	/**
@@ -75,13 +73,12 @@ class ImageTextExtraction extends Feature {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'rest_endpoint_callback' ],
 				'args'                => [
-					'id'    => [
+					'id' => [
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Image ID to read text from.', 'classifai' ),
 					],
-					'route' => [ 'ocr' ],
 				],
 				'permission_callback' => [ $this, 'image_text_extractor_permissions_check' ],
 			]
@@ -124,20 +121,75 @@ class ImageTextExtraction extends Feature {
 	public function rest_endpoint_callback( WP_REST_Request $request ) {
 		$route = $request->get_route();
 
-		if ( strpos( $route, '/classifai/v1/alt-tags' ) === 0 ) {
-			return rest_ensure_response(
-				$this->run(
-					$request->get_param( 'id' ),
-					'excerpt',
-					[
-						'content' => $request->get_param( 'content' ),
-						'title'   => $request->get_param( 'title' ),
-					]
-				)
-			);
+		if ( strpos( $route, '/classifai/v1/ocr' ) === 0 ) {
+			$result = $this->run( $request->get_param( 'id' ), 'ocr' );
+
+			if ( $result && ! is_wp_error( $result ) ) {
+				$this->save( $result, $request->get_param( 'id' ) );
+			}
+
+			return rest_ensure_response( $result );
 		}
 
 		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Generate the tags for the image being uploaded.
+	 *
+	 * @param array $metadata      The metadata for the image.
+	 * @param int   $attachment_id Post ID for the attachment.
+	 * @return array
+	 */
+	public function generate_ocr_text( array $metadata, int $attachment_id ): array {
+		if ( ! $this->is_feature_enabled() ) {
+			return $metadata;
+		}
+
+		$result = $this->run( $attachment_id, 'ocr' );
+
+		if ( $result && ! is_wp_error( $result ) ) {
+			$this->save( $result, $attachment_id );
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Save the OCR text.
+	 *
+	 * @param string $result The result to save.
+	 * @param int    $attachment_id The attachment ID.
+	 */
+	public function save( string $result, int $attachment_id ) {
+		$content = get_the_content( null, false, $attachment_id );
+
+		$post_args = [
+			'ID'           => $attachment_id,
+			'post_content' => sanitize_text_field( $result ),
+		];
+
+		/**
+		 * Filter the post arguments before saving the text to post_content.
+		 *
+		 * This enables text to be stored in a different post or post meta field,
+		 * or do other post data setting based on scan results.
+		 *
+		 * @since 1.6.0
+		 * @hook classifai_ocr_text_post_args
+		 *
+		 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
+		 * @param {int}    $attachment_id ID of the attachment post.
+		 * @param {object} $scan          The full scan results from the API.
+		 * @param {string} $text          The text data to be saved.
+		 *
+		 * @return {string} The filtered text data.
+		 */
+		$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $result );
+
+		if ( $content !== $result ) {
+			wp_update_post( $post_args );
+		}
 	}
 
 	/**
@@ -245,22 +297,12 @@ class ImageTextExtraction extends Feature {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_rescan_image( int $attachment_id ) {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
-		// Allow rescanning images that are not stored in local storage.
-		$image_url = get_modified_image_source_url( $attachment_id );
-
-		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
-			$image_url = get_largest_acceptable_image_url(
-				get_attached_file( $attachment_id ),
-				wp_get_attachment_url( $attachment_id ),
-				$metadata['sizes'] ?? [],
-				computer_vision_max_filesize()
-			);
-		}
-
 		if ( clean_input( 'rescan-ocr' ) ) {
-			$this->run( $attachment_id, 'ocr', $metadata );
+			$result = $this->run( $attachment_id, 'ocr' );
+
+			if ( $result && ! is_wp_error( $result ) ) {
+				$this->save( $result, $attachment_id );
+			}
 		}
 	}
 
@@ -361,34 +403,5 @@ class ImageTextExtraction extends Feature {
 		return [
 			'provider' => ComputerVision::ID,
 		];
-	}
-
-	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 * @return mixed
-	 */
-	public function run( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? ComputerVision::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( ComputerVision::ID === $provider_instance::ID ) {
-			/** @var ComputerVision $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'ocr_processing' ],
-				[ ...$args ]
-			);
-		}
-
-		return apply_filters(
-			'classifai_' . static::ID . '_run',
-			$result,
-			$provider_instance,
-			$args,
-			$this
-		);
 	}
 }

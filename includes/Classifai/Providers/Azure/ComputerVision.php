@@ -13,15 +13,10 @@ use Classifai\Features\ImageCropping;
 use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\Provider;
 use WP_Error;
-use WP_REST_Server;
-use WP_REST_Request;
-use WP_REST_Response;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
 use function Classifai\get_modified_image_source_url;
-use function Classifai\attachment_is_pdf;
-use function Classifai\clean_input;
 
 class ComputerVision extends Provider {
 
@@ -246,90 +241,10 @@ class ComputerVision extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
-		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
-		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+		add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
+		add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
+		add_filter( 'classifai_feature_pdf_to_text_generation_read_status', [ $this, 'get_read_status' ], 10, 2 );
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-
-		if ( ( new PDFTextExtraction() )->is_feature_enabled() ) {
-			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
-			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
-			add_action( 'wp_ajax_classifai_get_read_status', [ $this, 'get_read_status_ajax' ] );
-		}
-	}
-
-	/**
-	 * Adds a meta box for rescanning options if the settings are configured
-	 *
-	 * @param \WP_Post $post The post object.
-	 */
-	public function setup_attachment_meta_box( \WP_Post $post ) {
-		if ( ( new PDFTextExtraction() )->is_feature_enabled() && attachment_is_pdf( $post ) ) {
-			add_meta_box(
-				'attachment_meta_box',
-				__( 'ClassifAI PDF Processing', 'classifai' ),
-				[ $this, 'attachment_pdf_data_meta_box' ],
-				'attachment',
-				'side',
-				'high'
-			);
-		}
-	}
-
-	/**
-	 * Display PDF scanning actions.
-	 *
-	 * @param \WP_Post $post The post object.
-	 */
-	public function attachment_pdf_data_meta_box( \WP_Post $post ) {
-		$status  = self::get_read_status( $post->ID );
-		$read    = (bool) $status['read'] ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
-		$running = (bool) $status['running'];
-		?>
-		<div class="misc-publishing-actions">
-			<div class="misc-pub-section">
-				<label for="rescan-pdf">
-					<input type="checkbox" value="yes" id="rescan-pdf" name="rescan-pdf" <?php disabled( $running ); ?>/>
-					<?php echo esc_html( $read ); ?>
-					<?php if ( $running ) : ?>
-						<?php echo ' - ' . esc_html__( 'In progress!', 'classifai' ); ?>
-					<?php endif; ?>
-				</label>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Adds the rescan buttons to the media modal.
-	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
-	 * @return array
-	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
-		$pdf_to_text = new PDFTextExtraction();
-
-		// PDF to text.
-		if ( $pdf_to_text->is_feature_enabled() && attachment_is_pdf( $post ) ) {
-			$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
-			$status    = get_post_meta( $post->ID, '_classifai_azure_read_status', true );
-			if ( ! empty( $status['status'] ) && 'running' === $status['status'] ) {
-				$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
-			} else {
-				$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
-			}
-
-			$form_fields['rescan_pdf'] = [
-				'label'        => __( 'Scan PDF for text', 'classifai' ),
-				'input'        => 'html',
-				'html'         => $html,
-				'show_in_edit' => false,
-			];
-		}
-
-		return $form_fields;
 	}
 
 	/**
@@ -362,21 +277,21 @@ class ComputerVision extends Provider {
 			exit();
 		}
 
-		wp_send_json_success( self::get_read_status( $attachment_id ) );
+		wp_send_json_success( self::get_read_status( [], $attachment_id ) );
 	}
 
 	/**
 	 * Callback to get the status of the PDF read.
 	 *
-	 * @param  int $attachment_id The attachment ID.
-	 * @return array|null Read and running status.
+	 * @param array $status Current status.
+	 * @param int   $attachment_id The attachment ID.
+	 * @return array Read and running status.
 	 */
-	public static function get_read_status( $attachment_id = null ) {
+	public static function get_read_status( array $status = [], $attachment_id = null ) {
 		if ( empty( $attachment_id ) || ! is_numeric( $attachment_id ) ) {
-			return;
+			return $status;
 		}
 
-		// Cast to an integer
 		$attachment_id = (int) $attachment_id;
 
 		$read    = ! empty( get_the_content( null, false, $attachment_id ) );
@@ -392,15 +307,17 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Determine if we need to rescan the image.
+	 * Wrapper action callback for Read cron job.
 	 *
-	 * @param int $attachment_id Post id for the attachment
+	 * @param string $operation_url Operation URL for checking the read status.
+	 * @param int    $attachment_id Attachment ID.
 	 */
-	public function maybe_rescan_image( int $attachment_id ) {
-		if ( clean_input( 'rescan-pdf' ) ) {
-			$this->read_pdf( $attachment_id );
-			return;
-		}
+	public function do_read_cron( string $operation_url, int $attachment_id ) {
+		error_log( 'do_read_cron' );
+		$feature  = new PDFTextExtraction();
+		$settings = $feature->get_settings( static::ID );
+
+		( new Read( $settings, intval( $attachment_id ), $feature ) )->check_read_result( $operation_url );
 	}
 
 	/**
@@ -458,19 +375,16 @@ class ComputerVision extends Provider {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @filter wp_generate_attachment_metadata
-	 *
-	 * @param array   $metadata Attachment metadata.
-	 * @param int     $attachment_id Attachment ID.
-	 * @param boolean $force Whether to force processing or not. Default false.
-	 * @return array Filtered attachment metadata.
+	 * @param array $metadata Attachment metadata.
+	 * @param int   $attachment_id Attachment ID.
+	 * @return string|WP_Error
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0, bool $force = false ): array {
+	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
-			return $metadata;
+			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
 		}
 
 		$should_ocr_scan = $feature->is_feature_enabled();
@@ -487,23 +401,179 @@ class ComputerVision extends Provider {
 		 *
 		 * @return {bool} Whether to run OCR scanning.
 		 */
-		if ( ! $force && ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
-			return $metadata;
+		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
+			return '';
 		}
 
 		$image_url = wp_get_attachment_url( $attachment_id );
 		$scan      = $this->scan_image( $image_url, $feature );
 
-		$ocr      = new OCR( $settings, $scan, $force );
+		$ocr      = new OCR( $settings, $scan );
 		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
 
 		set_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response', $scan, DAY_IN_SECONDS * 30 );
 
-		if ( $force ) {
-			return $response;
+		return $response;
+	}
+
+	/**
+	 * Generate alt tags for an image.
+	 *
+	 * @param string $image_url URL of image to process.
+	 * @param int    $attachment_id Post ID for the attachment.
+	 * @return string|WP_Error
+	 */
+	public function generate_alt_tags( string $image_url, int $attachment_id ) {
+		$feature = new DescriptiveTextGenerator();
+		$rtn     = '';
+
+		$details = $this->scan_image( $image_url, $feature );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
 		}
 
-		return $metadata;
+		$captions = $details->description->captions ?? [];
+
+		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
+
+		/**
+		 * Filter the captions returned from the API.
+		 *
+		 * @since 1.4.0
+		 * @hook classifai_computer_vision_captions
+		 *
+		 * @param {array} $captions The returned caption data.
+		 *
+		 * @return {array} The filtered caption data.
+		 */
+		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
+
+		// Process the returned captions to see if they pass the threshold.
+		if ( is_array( $captions ) && ! empty( $captions ) ) {
+			$settings  = $feature->get_settings( static::ID );
+			$threshold = $settings['descriptive_confidence_threshold'];
+
+			// Check the first caption to see if it passes the threshold.
+			if ( $captions[0]->confidence * 100 > $threshold ) {
+				$rtn = $captions[0]->text;
+			} else {
+				/**
+				 * Fires if there were no captions returned.
+				 *
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_caption_failed
+				 *
+				 * @param {array} $tags      The caption data.
+				 * @param {int}   $threshold The caption_threshold setting.
+				 */
+				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
+			}
+
+			// Save all the results for later.
+			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+		}
+
+		return $rtn;
+	}
+
+	/**
+	 * Read PDF content and update the description of attachment.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return string|WP_Error
+	 */
+	public function read_pdf( int $attachment_id ) {
+		$feature         = new PDFTextExtraction();
+		$settings        = $feature->get_settings( static::ID );
+		$should_read_pdf = $feature->is_feature_enabled();
+
+		if ( ! $should_read_pdf ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'PDF Text Extraction is disabled. Please check your settings.', 'classifai' ) );
+		}
+
+		// Direct file system access is required for the current implementation of this feature.
+		if ( ! function_exists( 'get_filesystem_method' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		$access_type = get_filesystem_method();
+
+		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
+			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.' );
+		}
+
+		$read = new Read( $settings, intval( $attachment_id ), $feature );
+
+		return $read->read_document();
+	}
+
+	/**
+	 * Generate the image tags for the passed in image.
+	 *
+	 * @param string $image_url URL of image to process.
+	 * @param int    $attachment_id Post ID for the attachment.
+	 * @return array|WP_Error
+	 */
+	public function generate_image_tags( string $image_url, int $attachment_id ) {
+		$rtn      = [];
+		$feature  = new ImageTagsGenerator();
+		$settings = $feature->get_settings( static::ID );
+
+		$details = $this->scan_image( $image_url, $feature );
+
+		if ( is_wp_error( $details ) ) {
+			return $details;
+		}
+
+		$tags = $details->tags ?? [];
+
+		set_transient( 'classifai_azure_computer_vision_image_tags_latest_response', $details, DAY_IN_SECONDS * 30 );
+
+		/**
+		 * Filter the tags returned from the API.
+		 *
+		 * @since 1.4.0
+		 * @hook classifai_computer_vision_image_tags
+		 *
+		 * @param {array} $tags The image tag data.
+		 *
+		 * @return {array} The filtered image tags.
+		 */
+		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
+
+		// Process the returned tags to see if they pass the threshold.
+		if ( is_array( $tags ) && ! empty( $tags ) ) {
+			$threshold   = $settings['tag_confidence_threshold'];
+			$custom_tags = [];
+
+			// Save each tag if it passes the threshold.
+			foreach ( $tags as $tag ) {
+				if ( $tag->confidence * 100 > $threshold ) {
+					$custom_tags[] = $tag->name;
+				}
+			}
+
+			if ( ! empty( $custom_tags ) ) {
+				$rtn = $custom_tags;
+			} else {
+				/**
+				 * Fires if there were no tags added.
+				 *
+				 * @since 1.5.0
+				 * @hook classifai_computer_vision_image_tag_failed
+				 *
+				 * @param {array} $tags      The image tag data.
+				 * @param {int}   $threshold The tag_threshold setting.
+				 */
+				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
+			}
+
+			// Save all the tags for later.
+			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
+		}
+
+		return $rtn;
 	}
 
 	/**
@@ -581,170 +651,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Generate alt tags for an image.
-	 *
-	 * @param string $image_url URL of image to process.
-	 * @param int    $attachment_id Post ID for the attachment.
-	 * @return string
-	 */
-	public function generate_alt_tags( string $image_url, int $attachment_id ): string {
-		$feature = new DescriptiveTextGenerator();
-		$rtn     = '';
-
-		$details  = $this->scan_image( $image_url, $feature );
-		$captions = $details->description->captions ?? [];
-
-		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
-
-		/**
-		 * Filter the captions returned from the API.
-		 *
-		 * @since 1.4.0
-		 * @hook classifai_computer_vision_captions
-		 *
-		 * @param {array} $captions The returned caption data.
-		 *
-		 * @return {array} The filtered caption data.
-		 */
-		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
-
-		// Process the returned captions to see if they pass the threshold.
-		if ( is_array( $captions ) && ! empty( $captions ) ) {
-			$settings  = $feature->get_settings( static::ID );
-			$threshold = $settings['descriptive_confidence_threshold'];
-
-			// Check the first caption to see if it passes the threshold.
-			if ( $captions[0]->confidence * 100 > $threshold ) {
-				$rtn = $captions[0]->text;
-			} else {
-				/**
-				 * Fires if there were no captions returned.
-				 *
-				 * @since 1.5.0
-				 * @hook classifai_computer_vision_caption_failed
-				 *
-				 * @param {array} $tags      The caption data.
-				 * @param {int}   $threshold The caption_threshold setting.
-				 */
-				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
-			}
-
-			// Save all the results for later.
-			// TODO: do we need this?
-			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
-		}
-
-		$rtn = 'This is darin';
-		return $rtn;
-	}
-
-	/**
-	 * Read PDF content and update the description of attachment.
-	 *
-	 * @param int $attachment_id Attachment ID.
-	 */
-	public function read_pdf( int $attachment_id ) {
-		$feature         = new PDFTextExtraction();
-		$settings        = $feature->get_settings( static::ID );
-		$should_read_pdf = $feature->is_feature_enabled();
-
-		if ( ! $should_read_pdf ) {
-			return false;
-		}
-
-		// Direct file system access is required for the current implementation of this feature.
-		if ( ! function_exists( 'get_filesystem_method' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-		}
-
-		$access_type = get_filesystem_method();
-
-		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
-			return new WP_Error( 'invalid_access_type', 'Invalid access type! Direct file system access is required.' );
-		}
-
-		$read = new Read( $settings, intval( $attachment_id ) );
-
-		return $read->read_document();
-	}
-
-	/**
-	 * Wrapper action callback for Read cron job.
-	 *
-	 * @param string $operation_url Operation URL for checking the read status.
-	 * @param int    $attachment_id Attachment ID.
-	 */
-	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		$settings = ( new PDFTextExtraction() )->get_settings( static::ID );
-
-		( new Read( $settings, intval( $attachment_id ) ) )->check_read_result( $operation_url );
-	}
-
-	/**
-	 * Generate the image tags for the passed in image.
-	 *
-	 * @param string $image_url URL of image to process.
-	 * @param int    $attachment_id Post ID for the attachment.
-	 * @return array
-	 */
-	public function generate_image_tags( string $image_url, int $attachment_id ): array {
-		$rtn      = [];
-		$feature  = new ImageTagsGenerator();
-		$settings = $feature->get_settings( static::ID );
-
-		$details = $this->scan_image( $image_url, $feature );
-		$tags    = $details->tags ?? [];
-
-		set_transient( 'classifai_azure_computer_vision_image_tags_latest_response', $details, DAY_IN_SECONDS * 30 );
-
-		/**
-		 * Filter the tags returned from the API.
-		 *
-		 * @since 1.4.0
-		 * @hook classifai_computer_vision_image_tags
-		 *
-		 * @param {array} $tags The image tag data.
-		 *
-		 * @return {array} The filtered image tags.
-		 */
-		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
-
-		// Process the returned tags to see if they pass the threshold.
-		if ( is_array( $tags ) && ! empty( $tags ) ) {
-			$threshold   = $settings['tag_confidence_threshold'];
-			$custom_tags = [];
-
-			// Save each tag if it passes the threshold.
-			foreach ( $tags as $tag ) {
-				if ( $tag->confidence * 100 > $threshold ) {
-					$custom_tags[] = $tag->name;
-				}
-			}
-
-			if ( ! empty( $custom_tags ) ) {
-				$rtn = $custom_tags;
-			} else {
-				/**
-				 * Fires if there were no tags added.
-				 *
-				 * @since 1.5.0
-				 * @hook classifai_computer_vision_image_tag_failed
-				 *
-				 * @param {array} $tags      The image tag data.
-				 * @param {int}   $threshold The tag_threshold setting.
-				 */
-				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
-			}
-
-			// Save all the tags for later.
-			// TODO: do we need this?
-			update_post_meta( $attachment_id, 'classifai_computer_vision_image_tags', $tags );
-		}
-
-		return $rtn;
-	}
-
-	/**
 	 * Setup fields
 	 */
 	public function setup_fields_sections() {}
@@ -782,56 +688,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Register the REST API endpoints for this provider.
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1',
-			'read-pdf/(?P<id>\d+)',
-			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'computer_vision_endpoint_callback' ],
-				'args'                => [
-					'id'    => [
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
-					],
-					'route' => [ 'read-pdf' ],
-				],
-				'permission_callback' => [ $this, 'pdf_read_permissions_check' ],
-			]
-		);
-	}
-
-	/**
-	 * REST request callback for Computer Vision features.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return WP_Error|WP_REST_Response
-	 */
-	public function computer_vision_endpoint_callback( WP_REST_Request $request ) {
-		$attachment_id = $request->get_param( 'id' );
-		$custom_atts   = $request->get_attributes();
-		$route_to_call = empty( $custom_atts['args']['route'] ) ? false : strtolower( $custom_atts['args']['route'][0] );
-
-		// Check to be sure the post both exists and is an attachment.
-		if ( ! get_post( $attachment_id ) || 'attachment' !== get_post_type( $attachment_id ) ) {
-			/* translators: %1$s: the attachment ID */
-			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), [ 'status' => 404 ] );
-		}
-
-		// If no args, we can't pass the call into the active provider.
-		if ( false === $route_to_call ) {
-			return new WP_Error( 'no_route', esc_html__( 'No route indicated for the provider class to use.', 'classifai' ), [ 'status' => 404 ] );
-		}
-
-		// Call the provider endpoint function
-		return rest_ensure_response( $this->rest_endpoint_callback( $attachment_id, $route_to_call ) );
-	}
-
-	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
 	 * @param int    $attachment_id The attachment ID we're processing.
@@ -846,18 +702,21 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'incorrect_ID', sprintf( esc_html__( '%1$d is not found or is not an attachment', 'classifai' ), $attachment_id ), [ 'status' => 404 ] );
 		}
 
-		$metadata  = wp_get_attachment_metadata( $attachment_id );
+		if ( 'read_pdf' === $route_to_call ) {
+			return $this->read_pdf( $attachment_id );
+		}
+
+		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		switch ( $route_to_call ) {
+			case 'ocr':
+				return $this->ocr_processing( $metadata, $attachment_id );
+
+			case 'crop':
+				return $this->smart_crop_image( $metadata, $attachment_id );
+		}
+
 		$image_url = get_modified_image_source_url( $attachment_id );
-
-		if ( 'ocr' === $route_to_call ) {
-			$feature = new ImageTextExtraction();
-			return $feature->run( $metadata, $attachment_id, true );
-		}
-
-		if ( 'read-pdf' === $route_to_call ) {
-			$feature = new PDFTextExtraction();
-			return $feature->run( $attachment_id );
-		}
 
 		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
 			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
@@ -882,37 +741,7 @@ class ComputerVision extends Provider {
 
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );
-
-			case 'crop':
-				return $this->smart_crop_image( $metadata, $attachment_id );
 		}
-	}
-
-	/**
-	 * REST request permissions check for PDFTextExtraction feature.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return bool|WP_Error
-	 */
-	public function pdf_read_permissions_check( WP_REST_Request $request ) {
-		$attachment_id = $request->get_param( 'id' );
-		$post_type     = get_post_type_object( 'attachment' );
-
-		// Ensure attachments are allowed in REST endpoints.
-		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
-			return false;
-		}
-
-		// Ensure we have a logged in user that can upload and change files.
-		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
-			return false;
-		}
-
-		if ( ! ( new PDFTextExtraction() )->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'PDF Text Extraction is disabled or Microsoft Azure authentication failed. Please check your settings.', 'classifai' ) );
-		}
-
-		return true;
 	}
 
 	/**

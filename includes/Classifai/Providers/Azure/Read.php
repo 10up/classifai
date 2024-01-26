@@ -1,6 +1,6 @@
 <?php
 /**
- * Scan PDF files to extract visible text with the Computer Vision Read service.
+ * Scan PDF files to extract visible text with the AI Vision Read service.
  *
  * @since 1.6.1
  * @package Classifai
@@ -14,14 +14,14 @@ use function Classifai\computer_vision_max_filesize;
 /**
  * Read class
  *
- * Connects to Computer Vision's Read endpoint to detect text.
+ * Connects to AI Vision's Read endpoint to detect text.
  *
  * @see https://docs.microsoft.com/en-us/rest/api/cognitiveservices/computervision/recognizeprintedtext/
  */
 class Read {
 
 	/**
-	 * The Computer Vision API path to the Read service.
+	 * The AI Vision API path to the Read service.
 	 *
 	 * @var string
 	 */
@@ -37,28 +37,28 @@ class Read {
 	/**
 	 * Attachment ID to process.
 	 *
-	 * @var boolean
+	 * @var int
 	 */
 	private $attachment_id;
 
 	/**
-	 * Force processing
+	 * Feature instance.
 	 *
-	 * @var boolean
+	 * @var \Classifai\Features\PDFTextExtraction
 	 */
-	private $force;
+	private $feature;
 
 	/**
 	 * Constructor
 	 *
-	 * @param array   $settings      Computer Vision settings.
-	 * @param int     $attachment_id Attachment ID to process.
-	 * @param boolean $force         Whether to force processing or not.
+	 * @param array             $settings Computer Vision settings.
+	 * @param int               $attachment_id Attachment ID to process.
+	 * @param PDFTextExtraction $feature Feature instance.
 	 */
-	public function __construct( array $settings, int $attachment_id, bool $force = false ) {
+	public function __construct( array $settings, int $attachment_id, $feature ) {
 		$this->settings      = $settings;
 		$this->attachment_id = $attachment_id;
-		$this->force         = $force;
+		$this->feature       = $feature;
 	}
 
 	/**
@@ -72,16 +72,11 @@ class Read {
 	}
 
 	/**
-	 * Returns whether Read processing should be applied to the attachment
+	 * Check if Read processing should be applied to the attachment.
 	 *
 	 * @return bool
 	 */
 	public function should_process(): bool {
-		// Bypass check if this is a force request
-		if ( $this->force ) {
-			return true;
-		}
-
 		$mime_type          = get_post_mime_type( $this->attachment_id );
 		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 		$process            = false;
@@ -200,9 +195,11 @@ class Read {
 
 		if ( 202 === wp_remote_retrieve_response_code( $response ) ) {
 			$operation_url = wp_remote_retrieve_header( $response, 'Operation-Location' );
+
 			if ( ! filter_var( $operation_url, FILTER_VALIDATE_URL ) ) {
 				return $this->log_error( new WP_Error( 'invalid_read_operation_url', esc_html__( 'Operation URL is invalid.', 'classifai' ) ) );
 			}
+
 			return $this->check_read_result( $operation_url );
 		}
 
@@ -321,12 +318,7 @@ class Read {
 		 */
 		$lines_of_text = apply_filters( 'classifai_azure_read_text_result', $lines_of_text, $this->attachment_id, $data );
 
-		$update = wp_update_post(
-			[
-				'ID'           => $this->attachment_id,
-				'post_content' => implode( ' ', $lines_of_text ),
-			]
-		);
+		$update = $this->feature->save( implode( ' ', $lines_of_text ), $this->attachment_id );
 
 		if ( is_wp_error( $update ) ) {
 			return $this->log_error( $update );

@@ -8,9 +8,6 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 
-use function Classifai\computer_vision_max_filesize;
-use function Classifai\get_largest_acceptable_image_url;
-use function Classifai\get_modified_image_source_url;
 use function Classifai\clean_input;
 use function Classifai\check_term_permissions;
 

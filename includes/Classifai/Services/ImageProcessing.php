@@ -6,11 +6,9 @@
 namespace Classifai\Services;
 
 use Classifai\Features\DescriptiveTextGenerator;
-use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Taxonomy\ImageTagTaxonomy;
 
 use function Classifai\get_asset_info;
-use function Classifai\find_provider_class;
 
 class ImageProcessing extends Service {
 

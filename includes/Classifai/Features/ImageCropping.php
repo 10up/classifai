@@ -63,7 +63,7 @@ class ImageCropping extends Feature {
 		add_action( 'edit_attachment', [ $this, 'maybe_crop_image' ] );
 
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
-		add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_smart_crops' ], 7, 2 );
 	}
 
 	/**
@@ -77,13 +77,12 @@ class ImageCropping extends Feature {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'rest_endpoint_callback' ],
 				'args'                => [
-					'id'    => [
+					'id' => [
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Image ID to generate smart crop.', 'classifai' ),
 					],
-					'route' => [ 'smart-crop' ],
 				],
 				'permission_callback' => [ $this, 'smart_crop_permissions_check' ],
 			]
@@ -147,7 +146,7 @@ class ImageCropping extends Feature {
 	 * @param int   $attachment_id Post ID for the attachment.
 	 * @return array
 	 */
-	public function smart_crop_image( array $metadata, int $attachment_id ): array {
+	public function generate_smart_crops( array $metadata, int $attachment_id ): array {
 		if ( ! $this->is_feature_enabled() ) {
 			return $metadata;
 		}

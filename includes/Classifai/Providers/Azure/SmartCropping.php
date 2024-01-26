@@ -181,7 +181,7 @@ class SmartCropping {
 		 * @return {null|string} URL to be sent to Computer Vision for smart cropping.
 		 */
 		$url = apply_filters( 'classifai_smart_cropping_source_url', null, $attachment_id );
-$url = 'https://recipes.darinkotter.com/wp-content/uploads/sites/3/2023/11/test.png';
+
 		if ( empty( $url ) ) {
 			$url = get_largest_acceptable_image_url(
 				get_attached_file( $attachment_id ),
