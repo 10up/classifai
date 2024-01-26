@@ -1,6 +1,6 @@
 <?php
 /**
- * Azure Computer vision
+ * Azure AI Vision
  */
 
 namespace Classifai\Providers\Azure;
@@ -10,6 +10,7 @@ use Classifai\Features\ImageTagsGenerator;
 use Classifai\Features\ImageTextExtraction;
 use Classifai\Features\PDFTextExtraction;
 use Classifai\Features\ImageCropping;
+use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\Provider;
 use WP_Error;
 use WP_REST_Server;
@@ -251,10 +252,6 @@ class ComputerVision extends Provider {
 		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 
-		if ( ( new ImageCropping() )->is_feature_enabled() ) {
-			add_filter( 'wp_generate_attachment_metadata', [ $this, 'smart_crop_image' ], 7, 2 );
-		}
-
 		if ( ( new PDFTextExtraction() )->is_feature_enabled() ) {
 			add_action( 'add_attachment', [ $this, 'read_pdf' ] );
 			add_action( 'classifai_retry_get_read_result', [ $this, 'do_read_cron' ], 10, 2 );
@@ -407,21 +404,20 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Adds smart-cropped image thumbnails to the attachment metadata.
+	 * Generate smart-cropped image thumbnails.
 	 *
 	 * @since 1.5.0
-	 * @filter wp_generate_attachment_metadata
 	 *
 	 * @param array $metadata Attachment metadata.
 	 * @param int   $attachment_id Attachment ID.
-	 * @return array Filtered attachment metadata.
+	 * @return array|WP_Error
 	 */
-	public function smart_crop_image( $metadata, int $attachment_id ): array {
+	public function smart_crop_image( array $metadata, int $attachment_id ) {
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
 		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
-			return $metadata;
+			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
 		}
 
 		$should_smart_crop = $feature->is_feature_enabled();
@@ -439,7 +435,7 @@ class ComputerVision extends Provider {
 		 * @return {bool} Whether to apply smart cropping.
 		 */
 		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
-			return $metadata;
+			return [];
 		}
 
 		// Direct file system access is required for the current implementation of this feature.
@@ -449,12 +445,12 @@ class ComputerVision extends Provider {
 
 		$access_type = get_filesystem_method();
 		if ( 'direct' !== $access_type || ! WP_Filesystem() ) {
-			return $metadata;
+			return new WP_Error( 'access', esc_html__( 'Access to the filesystem is required for this feature to work.', 'classifai' ) );
 		}
 
-		$smart_cropping = new \Classifai\Providers\Azure\SmartCropping( $settings );
+		$smart_cropping = new SmartCropping( $settings );
 
-		return $smart_cropping->generate_attachment_metadata( $metadata, intval( $attachment_id ) );
+		return $smart_cropping->generate_cropped_images( $metadata, intval( $attachment_id ) );
 	}
 
 	/**
@@ -887,9 +883,8 @@ class ComputerVision extends Provider {
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );
 
-			case 'smart-crop':
-				$feature = new ImageCropping();
-				return $feature->run( $metadata, $attachment_id );
+			case 'crop':
+				return $this->smart_crop_image( $metadata, $attachment_id );
 		}
 	}
 
