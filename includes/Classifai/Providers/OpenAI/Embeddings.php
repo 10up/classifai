@@ -11,8 +11,9 @@ use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Watson\Normalizer;
 use Classifai\Features\Classification;
-use function Classifai\get_asset_info;
 use WP_Error;
+
+use function Classifai\get_asset_info;
 
 class Embeddings extends Provider {
 
@@ -59,8 +60,6 @@ class Embeddings extends Provider {
 
 	/**
 	 * Render the provider fields.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -135,7 +134,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'         => '',
 			'number_of_terms' => 1,
@@ -167,16 +166,18 @@ class Embeddings extends Provider {
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
-		if ( $feature->is_feature_enabled() && $feature->get_feature_provider_instance()::ID === static::ID ) {
-			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
-			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
-			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
-			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
-			add_action( 'save_post', [ $this, 'save_metabox' ] );
-			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		if ( ! $feature->is_feature_enabled() || $feature->get_feature_provider_instance()::ID !== static::ID ) {
+			return;
 		}
+
+		add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
+		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
+		add_action( 'save_post', [ $this, 'save_metabox' ] );
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
 	/**
@@ -239,10 +240,9 @@ class Embeddings extends Provider {
 	 * Sanitization for the options being saved.
 	 *
 	 * @param array $new_settings Array of settings about to be saved.
-	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->feature_instance->get_settings();
 
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
@@ -268,9 +268,9 @@ class Embeddings extends Provider {
 	/**
 	 * The list of supported post types.
 	 *
-	 * return array
+	 * @return array
 	 */
-	public function supported_post_types() {
+	public function supported_post_types(): array {
 		/**
 		 * Filter post types supported for embeddings.
 		 *
@@ -292,7 +292,7 @@ class Embeddings extends Provider {
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return float
 	 */
-	public function get_threshold( $taxonomy = '' ) {
+	public function get_threshold( string $taxonomy = '' ): float {
 		$settings  = ( new Classification() )->get_settings();
 		$threshold = 1;
 
@@ -322,7 +322,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function supported_post_statuses() {
+	public function supported_post_statuses(): array {
 		/**
 		 * Filter post statuses supported for embeddings.
 		 *
@@ -341,7 +341,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function supported_taxonomies() {
+	public function supported_taxonomies(): array {
 		/**
 		 * Filter taxonomies supported for embeddings.
 		 *
@@ -362,7 +362,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data() {
+	public function get_post_classifier_embeddings_preview_data(): array {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -381,10 +381,9 @@ class Embeddings extends Provider {
 	 *
 	 * @param int  $post_id ID of post being saved.
 	 * @param bool $dryrun Whether to run the process or just return the data.
-	 *
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( $post_id, $dryrun = false ) {
+	public function generate_embeddings_for_post( int $post_id, bool $dryrun = false ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
@@ -467,7 +466,6 @@ class Embeddings extends Provider {
 	 * Get the terms of a post based on embeddings.
 	 *
 	 * @param array $embedding Embedding data.
-	 *
 	 * @return array|WP_Error
 	 */
 	private function get_terms( array $embedding = [] ) {
@@ -535,10 +533,9 @@ class Embeddings extends Provider {
 	 *
 	 * @param array $embedding Embedding data.
 	 * @param bool  $consider_threshold Whether to consider the threshold setting.
-	 *
 	 * @return array
 	 */
-	private function get_embeddings_similarity( $embedding, $consider_threshold = true ) {
+	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
 		$embedding_similarity = [];
 		$taxonomies           = $this->supported_taxonomies();
 		$calculations         = new EmbeddingCalculations();
@@ -617,7 +614,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param int $term_id ID of term being saved.
 	 */
-	public function generate_embeddings_for_term( $term_id ) {
+	public function generate_embeddings_for_term( int $term_id ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return;
@@ -741,7 +738,7 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ) {
+	public function get_content( int $id = 0, string $type = 'post' ): string {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -810,7 +807,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $post_type Post type name.
 	 */
-	public function add_metabox( $post_type ) {
+	public function add_metabox( string $post_type ) {
 		if ( ! in_array( $post_type, $this->get_supported_post_types( new Classification() ), true ) ) {
 			return;
 		}
@@ -831,10 +828,9 @@ class Embeddings extends Provider {
 	/**
 	 * Render metabox.
 	 *
-	 * @param WP_POST $post A WordPress post instance.
-	 * @return void
+	 * @param \WP_Post $post A WordPress post instance.
 	 */
-	public function render_metabox( $post ) {
+	public function render_metabox( \WP_Post $post ) {
 
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
 		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
@@ -858,9 +854,8 @@ class Embeddings extends Provider {
 	 * Handles saving the metabox.
 	 *
 	 * @param int $post_id Current post ID.
-	 * @return void
 	 */
-	public function save_metabox( $post_id ) {
+	public function save_metabox( int $post_id ) {
 
 		if ( empty( $_POST['classifai_language_processing_meta'] ) ) {
 			return;
@@ -966,13 +961,11 @@ class Embeddings extends Provider {
 	 *
 	 * @since 2.5.0
 	 *
-	 * @param array  $args          The args passed to add_settings_field
-	 * @param string $option_value  The option value.
-	 * @param string $value         The value.
-	 *
-	 * @return void
+	 * @param array  $args         The args passed to add_settings_field
+	 * @param string $option_value The option value.
+	 * @param string $value        The value.
 	 */
-	public function render_threshold_field( $args, $option_value, $value ) {
+	public function render_threshold_field( array $args, string $option_value, string $value ) {
 		printf(
 			'<p class="threshold_wrapper">
 				<label for="%1$s_%2$s_%3$s_%4$s">%5$s</label>
@@ -980,7 +973,7 @@ class Embeddings extends Provider {
 				<input type="number" id="%1$s_%2$s_%3$s_%4$s" class="small-text" name="%1$s[%2$s][%3$s][%4$s]" value="%6$s" />
 			</p>',
 			esc_attr( $this->feature_instance->get_option_name() ),
-			$args['option_index'],
+			esc_attr( $args['option_index'] ),
 			esc_attr( $args['label_for'] ?? '' ),
 			esc_attr( $option_value ),
 			esc_html__( 'Threshold (%)', 'classifai' ),
@@ -993,7 +986,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];

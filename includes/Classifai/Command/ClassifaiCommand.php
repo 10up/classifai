@@ -13,10 +13,7 @@ use Classifai\Watson\Normalizer;
 use Classifai\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
-use Classifai\Providers\OpenAI\Whisper;
-use Classifai\Providers\OpenAI\Whisper\Transcribe;
 use Classifai\Providers\OpenAI\Embeddings;
-use WP_Error;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -404,6 +401,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		$audio_transcription = new AudioTranscriptsGeneration();
 		$feature_settings    = $audio_transcription->get_settings();
+		$provider_instance   = $audio_transcription->get_feature_provider_instance( $feature_settings['provider'] );
 
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
@@ -430,19 +428,20 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			foreach ( $attachment_ids as $attachment_id ) {
 				$attachment = get_post( $attachment_id );
-				$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
-				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
+				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $audio_transcription, (bool) $opts['force'] ) ) {
 					++$errors;
 					continue;
 				}
 
 				if ( ! $dry_run ) {
-					$result = $transcribe->process();
+					$result = $audio_transcription->run( $attachment_id, 'transcript' );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
 						++$errors;
+					} else {
+						$result = $audio_transcription->add_transcription( $result, $attachment_id );
 					}
 				}
 
@@ -456,12 +455,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			$paged      = 1;
 			$mime_types = [];
-			$transcribe = new Transcribe( 1, [] );
 
 			// Get all the mime types for the file formats we support.
 			foreach ( wp_get_mime_types() as $extensions => $mime ) {
 				foreach ( explode( '|', $extensions ) as $ext ) {
-					if ( in_array( $ext, $transcribe->file_formats, true ) ) {
+					if ( in_array( $ext, $provider_instance->file_formats ?? [ 'mp3' ], true ) ) {
 						$mime_types[] = $mime;
 					}
 				}
@@ -482,19 +480,20 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $attachments as $attachment_id ) {
 					$attachment = get_post( $attachment_id );
-					$transcribe = new Transcribe( $attachment_id, $feature_settings[ Whisper::ID ] );
 
-					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
+					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $audio_transcription, (bool) $opts['force'] ) ) {
 						++$errors;
 						continue;
 					}
 
 					if ( ! $dry_run ) {
-						$result = $transcribe->process();
+						$result = $audio_transcription->run( $attachment_id, 'transcript' );
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
 							++$errors;
+						} else {
+							$result = $audio_transcription->add_transcription( $result, $attachment_id );
 						}
 					}
 
@@ -616,7 +615,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						continue;
 					}
 
-					$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
+					$result = ( new ExcerptGeneration() )->run( $post->ID, 'excerpt' );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
@@ -669,7 +668,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					continue;
 				}
 
-				$result = ( new ExcerptGeneration() )->run( (int) $post->ID, [] );
+				$result = ( new ExcerptGeneration() )->run( $post_id, 'excerpt' );
 
 				if ( is_wp_error( $result ) ) {
 					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
@@ -709,13 +708,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Determine if an attachment should be transcribed.
 	 *
-	 * @param \WP_Post|null $attachment Attachment we are processing.
-	 * @param int           $attachment_id Attachment ID.
-	 * @param Transcribe    $transcribe Transcribe instance.
-	 * @param boolean       $force Whether to force processing.
-	 * @return boolean
+	 * @param \WP_Post|null              $attachment Attachment we are processing.
+	 * @param int                        $attachment_id Attachment ID.
+	 * @param AudioTranscriptsGeneration $audio_transcription AudioTranscriptsGeneration instance.
+	 * @param bool                       $force Whether to force processing.
+	 * @return bool
 	 */
-	private function should_transcribe_attachment( $attachment, int $attachment_id, Transcribe $transcribe, bool $force = false ) {
+	private function should_transcribe_attachment( $attachment, int $attachment_id, AudioTranscriptsGeneration $audio_transcription, bool $force = false ) {
 		// Ensure we have a valid ID.
 		if ( ! $attachment ) {
 			\WP_CLI::error( sprintf( 'Item ID %d does not exist', $attachment_id ), false );
@@ -729,8 +728,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		// Ensure the attachment meets the requirements for processing.
-		if ( ! $transcribe->should_process( $attachment_id ) ) {
-			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ), false );
+		if ( ! $audio_transcription->should_process( $attachment_id ) ) {
+			$feature_settings  = $audio_transcription->get_settings();
+			$provider_instance = $audio_transcription->get_feature_provider_instance( $feature_settings['provider'] );
+
+			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $provider_instance->file_formats ?? [ 'mp3' ] ), $provider_instance->max_file_size ?? 25 * MB_IN_BYTES ), false );
 			return false;
 		}
 
@@ -880,7 +882,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						$smart_cropping = new SmartCropping( $settings );
 
 						if ( ! $smart_cropping->should_crop( $size ) ) {
-							continue;
+							break;
 						}
 
 						$data = [

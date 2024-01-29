@@ -9,10 +9,7 @@ use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
-use WP_REST_Request;
 use WP_REST_Server;
-use function Classifai\get_asset_info;
-use function Classifai\render_disable_feature_link;
 
 class DallE extends Provider {
 
@@ -47,8 +44,6 @@ class DallE extends Provider {
 		);
 
 		$this->feature_instance = $feature_instance;
-
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
@@ -57,15 +52,68 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'admin_menu', [ $this, 'register_generate_media_page' ], 0 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_scripts' ] );
-		add_action( 'print_media_templates', [ $this, 'print_media_templates' ] );
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Register any needed endpoints.
+	 *
+	 * This endpoint is registered in the feature class
+	 * but we need to add additional arguments to it
+	 * that this provider supports.
+	 */
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'generate-image',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this->feature_instance, 'rest_endpoint_callback' ],
+				'args'                => [
+					'prompt' => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
+					],
+					'n'      => [
+						'type'              => 'integer',
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+					],
+					'size'   => [
+						'type'              => 'string',
+						'enum'              => [
+							'256x256',
+							'512x512',
+							'1024x1024',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
+					],
+					'format' => [
+						'type'              => 'string',
+						'enum'              => [
+							'url',
+							'b64_json',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this->feature_instance, 'generate_image_permissions_check' ],
+			]
+		);
 	}
 
 	/**
 	 * Register settings for the provider.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -140,7 +188,7 @@ class DallE extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
@@ -161,221 +209,12 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Registers a Media > Generate Image submenu
-	 */
-	public function register_generate_media_page() {
-		$image_generation = new ImageGeneration();
-
-		if ( $image_generation->is_feature_enabled() ) {
-			$settings         = $image_generation->get_settings( static::ID );
-			$number_of_images = absint( $settings['number_of_images'] );
-
-			add_submenu_page(
-				'upload.php',
-				$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
-				$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
-				'upload_files',
-				esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
-				''
-			);
-		}
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 *
-	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
-	 *
-	 * @param string $hook_suffix The current admin page.
-	 */
-	public function enqueue_admin_scripts( $hook_suffix = '' ) {
-		if ( 'post.php' !== $hook_suffix && 'post-new.php' !== $hook_suffix && 'upload.php' !== $hook_suffix ) {
-			return;
-		}
-
-		$image_generation = new ImageGeneration();
-
-		if ( $image_generation->is_feature_enabled() ) {
-			$settings         = $image_generation->get_settings( static::ID );
-			$number_of_images = absint( $settings['number_of_images'] );
-
-			wp_enqueue_media();
-
-			wp_enqueue_style(
-				'classifai-image-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
-				[],
-				get_asset_info( 'media-modal', 'version' ),
-				'all'
-			);
-
-			wp_enqueue_script(
-				'classifai-generate-images',
-				CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-				array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
-				get_asset_info( 'media-modal', 'version' ),
-				true
-			);
-
-			wp_enqueue_script(
-				'classifai-inserter-media-category',
-				CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
-				get_asset_info( 'inserter-media-category', 'dependencies' ),
-				get_asset_info( 'inserter-media-category', 'version' ),
-				true
-			);
-
-			/**
-			 * Filter the default attribution added to generated images.
-			 *
-			 * @since 2.1.0
-			 * @hook classifai_dalle_caption
-			 *
-			 * @param {string} $caption Attribution to be added as a caption to the image.
-			 *
-			 * @return {string} Caption.
-			 */
-			$caption = apply_filters(
-				'classifai_dalle_caption',
-				sprintf(
-					/* translators: %1$s is replaced with the OpenAI DALL·E URL */
-					esc_html__( 'Image generated by <a href="%s">OpenAI\'s DALL·E</a>', 'classifai' ),
-					'https://openai.com/research/dall-e'
-				)
-			);
-
-			wp_localize_script(
-				'classifai-generate-images',
-				'classifaiDalleData',
-				[
-					'endpoint'   => 'classifai/v1/openai/generate-image',
-					'tabText'    => $number_of_images > 1 ? esc_html__( 'Generate images', 'classifai' ) : esc_html__( 'Generate image', 'classifai' ),
-					'errorText'  => esc_html__( 'Something went wrong. No results found', 'classifai' ),
-					'buttonText' => esc_html__( 'Select image', 'classifai' ),
-					'caption'    => $caption,
-				]
-			);
-
-			if ( 'upload.php' === $hook_suffix ) {
-				$action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-				if ( 'classifai-generate-image' === $action ) {
-					wp_enqueue_script(
-						'classifai-generate-images-media-upload',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-						array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
-						get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
-						true
-					);
-
-					wp_localize_script(
-						'classifai-generate-images-media-upload',
-						'classifaiGenerateImages',
-						[
-							'upload_url' => esc_url( admin_url( 'upload.php' ) ),
-						]
-					);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Print the templates we need for our media modal integration.
-	 */
-	public function print_media_templates() {
-		$image_generation = new ImageGeneration();
-
-		if ( $image_generation->is_feature_enabled() ) :
-			$settings         = $image_generation->get_settings( static::ID );
-			$number_of_images = absint( $settings['number_of_images'] );
-			?>
-
-			<?php // Template for the Generate images tab content. Includes prompt input. ?>
-		<script type="text/html" id="tmpl-dalle-prompt">
-			<div class="prompt-view">
-				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
-					} else {
-						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
-					}
-					?>
-				</p>
-				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
-					} else {
-						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
-					}
-					?>
-				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $this->max_prompt_chars ); ?>"></textarea>
-				<button type="button" class="button button-secondary button-large button-generate">
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Generate images', 'classifai' );
-					} else {
-						esc_html_e( 'Generate image', 'classifai' );
-					}
-					?>
-				</button>
-				<span class="error"></span>
-			</div>
-			<div class="generated-images">
-				<h2 class="prompt-text hidden">
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Images generated from prompt:', 'classifai' );
-					} else {
-						esc_html_e( 'Image generated from prompt:', 'classifai' );
-					}
-					?>
-					<span></span>
-				</h2>
-				<span class="spinner"></span>
-				<ul></ul>
-				<p>
-					<?php render_disable_feature_link( 'feature_image_generation' ); ?>
-				</p>
-			</div>
-		</script>
-
-			<?php
-			// Template for a single generated image.
-		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation */
-			?>
-		<script type="text/html" id="tmpl-dalle-image">
-			<div class="generated-image">
-				<img src="data:image/png;base64,{{{ data.url }}}" />
-				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
-				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
-				<span class="spinner"></span>
-				<span class="error"></span>
-			</div>
-		</script>
-			<?php
-		/* phpcs:enable WordPressVIPMinimum.Security.Mustache.OutputNotation */
-			?>
-
-			<?php
-		endif;
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {}
-
-	/**
 	 * Sanitization for the options being saved.
 	 *
 	 * @param array $new_settings Array of settings about to be saved.
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings                                    = $this->feature_instance->get_settings();
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
@@ -397,6 +236,28 @@ class DallE extends Provider {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param string $prompt The prompt used to generate an image.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
+	 */
+	public function rest_endpoint_callback( $prompt = '', string $route_to_call = '', array $args = [] ) {
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'image_gen':
+				$return = $this->generate_image( $prompt, $args );
+				break;
+		}
+
+		return $return;
 	}
 
 	/**
@@ -496,105 +357,11 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Registers REST endpoints for this provider.
-	 *
-	 * @return void
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1/openai',
-			'generate-image',
-			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_image_endpoint_callback' ],
-				'args'                => [
-					'prompt' => [
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
-					],
-					'n'      => [
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'maximum'           => 10,
-						'sanitize_callback' => 'absint',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-					],
-					'size'   => [
-						'type'              => 'string',
-						'enum'              => [
-							'256x256',
-							'512x512',
-							'1024x1024',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-					],
-					'format' => [
-						'type'              => 'string',
-						'enum'              => [
-							'url',
-							'b64_json',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
-			]
-		);
-	}
-
-	/**
-	 * Handle request to generate an image for a given prompt.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return \WP_REST_Response|WP_Error
-	 */
-	public function generate_image_endpoint_callback( WP_REST_Request $request ) {
-		return rest_ensure_response(
-			( new ImageGeneration() )->run(
-				$request->get_param( 'prompt' ),
-				[
-					'num'    => $request->get_param( 'n' ),
-					'size'   => $request->get_param( 'size' ),
-					'format' => $request->get_param( 'format' ),
-				]
-			)
-		);
-	}
-
-	/**
-	 * Check if a given request has access to generate an image.
-	 *
-	 * This check ensures we have a valid user with proper capabilities
-	 * making the request, that we are properly authenticated with OpenAI
-	 * and that image generation is turned on.
-	 *
-	 * @return WP_Error|bool
-	 */
-	public function generate_image_permissions_check() {
-		$image_generation = new ImageGeneration();
-
-		// Ensure the feature is enabled. Also runs a user check.
-		if ( ! $image_generation->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Image generation not currently enabled.', 'classifai' ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];

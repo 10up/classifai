@@ -3,12 +3,10 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use \Classifai\Providers\Azure\Speech;
-
-use function Classifai\find_provider_class;
+use Classifai\Providers\Azure\Speech;
 
 /**
- * Class TitleGeneration
+ * Class TextToSpeech
  */
 class TextToSpeech extends Feature {
 	/**
@@ -22,74 +20,31 @@ class TextToSpeech extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		/**
-		 * Every feature must set the `provider_instances` variable with the list of provider instances
-		 * that are registered to a service.
-		 */
-		$service_providers        = LanguageProcessing::get_service_providers();
-		$this->provider_instances = $this->get_provider_instances( $service_providers );
+		$this->label = __( 'Text to Speech', 'classifai' );
+
+		// Contains all providers that are registered to the service.
+		$this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
+
+		// Contains just the providers this feature supports.
+		$this->supported_providers = [
+			Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
+		];
 	}
 
 	/**
-	 * Returns the label of the feature.
+	 * Get the description for the enable field.
 	 *
 	 * @return string
 	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Text to speech', 'classifai' )
-		);
+	public function get_enable_description(): string {
+		return esc_html__( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' );
 	}
 
 	/**
-	 * Returns the providers supported by the feature.
-	 *
-	 * @return array
+	 * Add any needed custom fields.
 	 */
-	protected function get_providers() {
-		return apply_filters(
-			'classifai_' . static::ID . '_providers',
-			[
-				Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
-			]
-		);
-	}
-
-	/**
-	 * Sets up the fields and sections for the feature.
-	 */
-	public function setup_fields_sections() {
-		$settings = $this->get_settings();
-
-		/*
-		 * These are the feature-level fields that are
-		 * independent of the provider.
-		 */
-		add_settings_section(
-			$this->get_option_name() . '_section',
-			esc_html__( 'Feature settings', 'classifai' ),
-			'__return_empty_string',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'status',
-			esc_html__( 'Enable text to speech', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'status',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['status'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access fields.
-		$this->add_access_control_fields();
-
+	public function add_custom_settings_fields() {
+		$settings          = $this->get_settings();
 		$post_types        = \Classifai\get_post_types_for_language_settings();
 		$post_type_options = array();
 
@@ -110,25 +65,6 @@ class TextToSpeech extends Feature {
 				'description'    => __( 'Choose which post types support this feature.', 'classifai' ),
 			]
 		);
-
-		add_settings_field(
-			'provider',
-			esc_html__( 'Select a provider', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'provider',
-				'options'       => $this->get_providers(),
-				'default_value' => $settings['provider'],
-			]
-		);
-
-		/*
-		 * The following renders the fields of all the providers
-		 * that are registered to the feature.
-		 */
-		$this->render_provider_fields();
 	}
 
 	/**
@@ -136,7 +72,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * @return array
 	 */
-	protected function get_post_types_select_options() {
+	protected function get_post_types_select_options(): array {
 		$post_types = \Classifai\get_post_types_for_language_settings();
 		$options    = array();
 
@@ -148,38 +84,11 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Returns the default settings for the feature.
-	 *
-	 * The root-level keys are the setting keys that are independent of the provider.
-	 * Provider specific settings should be nested under the provider key.
-	 *
-	 * @todo Add a filter hook to allow other plugins to add their own settings.
-	 *
-	 * @return array
-	 */
-	protected function get_default_settings() {
-		$provider_settings = $this->get_provider_default_settings();
-		$feature_settings  = [
-			'post_types' => [],
-			'provider'   => Speech::ID,
-		];
-
-		return apply_filters(
-			'classifai_' . static::ID . '_get_default_settings',
-			array_merge(
-				parent::get_default_settings(),
-				$feature_settings,
-				$provider_settings
-			)
-		);
-	}
-
-	/**
 	 * The list of post types that TTS supports.
 	 *
 	 * @return array Supported Post Types.
 	 */
-	public function get_tts_supported_post_types() {
+	public function get_tts_supported_post_types(): array {
 		$selected   = $this->get_settings( 'post_types' );
 		$post_types = [];
 
@@ -193,18 +102,26 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * Sanitizes the settings before saving.
-	 *
-	 * @param array $new_settings The settings to be sanitized on save.
+	 * Returns the default settings for the feature.
 	 *
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
-		$settings = $this->get_settings();
+	public function get_feature_default_settings(): array {
+		return [
+			'post_types' => [],
+			'provider'   => Speech::ID,
+		];
+	}
 
-		// Sanitization of the feature-level settings.
-		$new_settings = parent::sanitize_settings( $new_settings );
-		$post_types   = \Classifai\get_post_types_for_language_settings();
+	/**
+	 * Sanitizes the default feature settings.
+	 *
+	 * @param array $new_settings Settings being saved.
+	 * @return array
+	 */
+	public function sanitize_default_feature_settings( array $new_settings ): array {
+		$settings   = $this->get_settings();
+		$post_types = \Classifai\get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
@@ -214,22 +131,13 @@ class TextToSpeech extends Feature {
 			}
 		}
 
-		// Sanitization of the provider-level settings.
-		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
-		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
-
-		return apply_filters(
-			'classifai_' . static::ID . '_sanitize_settings',
-			$new_settings,
-			$settings
-		);
+		return $new_settings;
 	}
 
 	/**
 	 * Runs the feature.
 	 *
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
 	 * @return mixed
 	 */
 	public function run( ...$args ) {

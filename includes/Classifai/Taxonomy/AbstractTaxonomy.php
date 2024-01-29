@@ -33,21 +33,21 @@ abstract class AbstractTaxonomy {
 	 *
 	 * @return string
 	 */
-	abstract public function get_name();
+	abstract public function get_name(): string;
 
 	/**
 	 * Get the singular taxonomy label.
 	 *
 	 * @return string
 	 */
-	abstract public function get_singular_label();
+	abstract public function get_singular_label(): string;
 
 	/**
 	 * Get the plural taxonomy label.
 	 *
 	 * @return string
 	 */
-	abstract public function get_plural_label();
+	abstract public function get_plural_label(): string;
 
 	/**
 	 * Return true or false based on whether to show this taxonomy. Maps
@@ -55,7 +55,7 @@ abstract class AbstractTaxonomy {
 	 *
 	 * @return bool
 	 */
-	abstract public function get_visibility();
+	abstract public function get_visibility(): bool;
 
 	/**
 	 * Register hooks and actions.
@@ -73,7 +73,7 @@ abstract class AbstractTaxonomy {
 	 *
 	 * @return array
 	 */
-	public function get_options() {
+	public function get_options(): array {
 		$visibility = $this->get_visibility();
 
 		return array(
@@ -93,18 +93,16 @@ abstract class AbstractTaxonomy {
 	 *
 	 * @return string
 	 */
-	public function update_count_callback() {
+	public function update_count_callback(): string {
 		return '';
 	}
-
-
 
 	/**
 	 * Get the labels for the taxonomy.
 	 *
 	 * @return array
 	 */
-	public function get_labels() {
+	public function get_labels(): array {
 		$plural_label   = $this->get_plural_label();
 		$singular_label = $this->get_singular_label();
 

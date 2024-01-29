@@ -33,7 +33,7 @@ class Tokenizer {
 	 *
 	 * @param int $max_tokens Maximum tokens the model supports.
 	 */
-	public function __construct( $max_tokens ) {
+	public function __construct( int $max_tokens ) {
 		$this->max_tokens = $max_tokens;
 
 		/**
@@ -69,7 +69,7 @@ class Tokenizer {
 	 * @param string $content Content to analyze.
 	 * @return int
 	 */
-	public function tokens_in_content( string $content = '' ) {
+	public function tokens_in_content( string $content = '' ): int {
 		$tokens = ceil( mb_strlen( $content ) / $this->characters_in_token );
 
 		return (int) $tokens;
@@ -81,7 +81,7 @@ class Tokenizer {
 	 * @param int $words Number of words we want.
 	 * @return int
 	 */
-	public function tokens_in_words( int $words = 1 ) {
+	public function tokens_in_words( int $words = 1 ): int {
 		$tokens = ceil( $this->tokens_per_word * absint( $words ) );
 
 		return (int) $tokens;
@@ -94,7 +94,7 @@ class Tokenizer {
 	 * @param int    $max_tokens Maximum tokens our content can have.
 	 * @return string
 	 */
-	public function trim_content( string $content = '', int $max_tokens = 0 ) {
+	public function trim_content( string $content = '', int $max_tokens = 0 ): string {
 		// Remove linebreaks that may have been added.
 		$content = str_replace( "\n\n", ' ', $content );
 

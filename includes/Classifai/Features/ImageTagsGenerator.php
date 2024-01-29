@@ -2,11 +2,17 @@
 
 namespace Classifai\Features;
 
-use \Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Services\ImageProcessing;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
+
+use function Classifai\clean_input;
+use function Classifai\check_term_permissions;
 
 /**
- * Class TitleGeneration
+ * Class ImageTagsGenerator
  */
 class ImageTagsGenerator extends Feature {
 	/**
@@ -20,177 +26,332 @@ class ImageTagsGenerator extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		/**
-		 * Every feature must set the `provider_instances` variable with the list of provider instances
-		 * that are registered to a service.
-		 */
-		$service_providers        = ImageProcessing::get_service_providers();
-		$this->provider_instances = $this->get_provider_instances( $service_providers );
+		$this->label = __( 'Image Tags Generator', 'classifai' );
+
+		// Contains all providers that are registered to the service.
+		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
+
+		// Contains just the providers this feature supports.
+		$this->supported_providers = [
+			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+		];
 	}
 
 	/**
-	 * Returns the label of the feature.
+	 * Set up necessary hooks.
+	 *
+	 * We utilize this so we can register the REST route.
+	 */
+	public function setup() {
+		parent::setup();
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Set up necessary hooks.
+	 */
+	public function feature_setup() {
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
+
+		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
+		add_filter( 'wp_generate_attachment_metadata', [ $this, 'generate_image_tags' ], 8, 2 );
+	}
+
+	/**
+	 * Register any needed endpoints.
+	 */
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'image-tags/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'rest_endpoint_callback' ],
+				'args'                => [
+					'id' => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate tags for.', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'image_tags_generator_permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Check if a given request has access to generate image tags.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function image_tags_generator_permissions_check( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! $this->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Image tagging is disabled. Please check your settings.', 'classifai' ) );
+		}
+
+		$settings = $this->get_settings();
+		if ( ! empty( $settings ) && isset( $settings['tag_taxonomy'] ) ) {
+			$permission = check_term_permissions( $settings['tag_taxonomy'] );
+
+			if ( is_wp_error( $permission ) ) {
+				return $permission;
+			}
+		} else {
+			return new WP_Error( 'invalid_settings', esc_html__( 'Ensure the service settings have been saved.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Generic request handler for all our custom routes.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_endpoint_callback( WP_REST_Request $request ) {
+		$route = $request->get_route();
+
+		if ( strpos( $route, '/classifai/v1/image-tags' ) === 0 ) {
+			$result = $this->run( $request->get_param( 'id' ), 'tags' );
+
+			if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
+				$this->save( $result, $request->get_param( 'id' ) );
+			}
+
+			return rest_ensure_response( $result );
+		}
+
+		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Generate the tags for the image being uploaded.
+	 *
+	 * @param array $metadata      The metadata for the image.
+	 * @param int   $attachment_id Post ID for the attachment.
+	 * @return array
+	 */
+	public function generate_image_tags( array $metadata, int $attachment_id ): array {
+		if ( ! $this->is_feature_enabled() ) {
+			return $metadata;
+		}
+
+		$result = $this->run( $attachment_id, 'tags' );
+
+		if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
+			$this->save( $result, $attachment_id );
+		}
+
+		return $metadata;
+	}
+
+	/**
+	 * Save the returned result based on our settings.
+	 *
+	 * @param array $result The results to save.
+	 * @param int   $attachment_id The attachment ID.
+	 */
+	public function save( array $result, int $attachment_id ) {
+		$settings = $this->get_settings();
+		$taxonomy = $settings['tag_taxonomy'];
+
+		foreach ( $result as $tag ) {
+			wp_add_object_terms( $attachment_id, $tag, $taxonomy );
+		}
+
+		wp_update_term_count_now( $result, $taxonomy );
+	}
+
+	/**
+	 * Adds a meta box for rescanning options if the settings are configured.
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function setup_attachment_meta_box( \WP_Post $post ) {
+		global $wp_meta_boxes;
+
+		if ( ! wp_attachment_is_image( $post ) || ! $this->is_feature_enabled() ) {
+			return;
+		}
+
+		// Add our content to the metabox.
+		add_action( 'classifai_render_attachment_metabox', [ $this, 'attachment_data_meta_box_content' ] );
+
+		// If the metabox was already registered, don't add it again.
+		if ( isset( $wp_meta_boxes['attachment']['side']['high']['classifai_image_processing'] ) ) {
+			return;
+		}
+
+		// Register the metabox if needed.
+		add_meta_box(
+			'classifai_image_processing',
+			__( 'ClassifAI Image Processing', 'classifai' ),
+			[ $this, 'attachment_data_meta_box' ],
+			'attachment',
+			'side',
+			'high'
+		);
+	}
+
+	/**
+	 * Render the meta box.
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function attachment_data_meta_box( \WP_Post $post ) {
+		/**
+		 * Allows more fields to be rendered in attachment metabox.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_render_attachment_metabox
+		 *
+		 * @param {WP_Post} $post The post object.
+		 * @param {object} $this The Provider object.
+		 */
+		do_action( 'classifai_render_attachment_metabox', $post, $this );
+	}
+
+	/**
+	 * Display meta data
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function attachment_data_meta_box_content( \WP_Post $post ) {
+		$tags = ! empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Rescan image for new tags', 'classifai' ) : __( 'Generate image tags', 'classifai' );
+		?>
+
+		<?php if ( $this->is_feature_enabled() ) : ?>
+			<div class="misc-pub-section">
+				<label for="rescan-tags">
+					<input type="checkbox" value="yes" id="rescan-tags" name="rescan-tags"/>
+					<?php echo esc_html( $tags ); ?>
+				</label>
+			</div>
+			<?php
+		endif;
+	}
+
+	/**
+	 * Determine if we need to rescan the image.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function maybe_rescan_image( int $attachment_id ) {
+		if ( clean_input( 'rescan-tags' ) ) {
+			$result = $this->run( $attachment_id, 'tags' );
+
+			if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
+				$this->save( $result, $attachment_id );
+			}
+		}
+	}
+
+	/**
+	 * Adds the rescan buttons to the media modal.
+	 *
+	 * @param array    $form_fields Array of fields
+	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @return array
+	 */
+	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
+		if ( ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
+			return $form_fields;
+		}
+
+		$image_tags_text = empty( wp_get_object_terms( $post->ID, 'classifai-image-tags' ) ) ? __( 'Generate', 'classifai' ) : __( 'Rescan', 'classifai' );
+
+		$form_fields['rescan_captions'] = [
+			'label'        => __( 'Image tags', 'classifai' ),
+			'input'        => 'html',
+			'show_in_edit' => false,
+			'html'         => '<button class="button secondary" id="classifai-rescan-image-tags" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $image_tags_text ) . '</button><span class="spinner" style="display:none;float:none;"></span><span class="error" style="display:none;color:#bc0b0b;padding:5px;"></span>',
+		];
+
+		return $form_fields;
+	}
+
+	/**
+	 * Get the description for the enable field.
 	 *
 	 * @return string
 	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'Image Tags Generator', 'classifai' )
-		);
+	public function get_enable_description(): string {
+		return esc_html__( 'Image tags will be added automatically.', 'classifai' );
 	}
 
 	/**
-	 * Returns the providers supported by the feature.
-	 *
-	 * @internal
-	 *
-	 * @return array
+	 * Add any needed custom fields.
 	 */
-	protected function get_providers() {
-		return apply_filters(
-			'classifai_' . static::ID . '_providers',
-			[
-				ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
-			]
-		);
-	}
+	public function add_custom_settings_fields() {
+		$settings              = $this->get_settings();
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$options               = [];
 
-	/**
-	 * Sets up the fields and sections for the feature.
-	 */
-	public function setup_fields_sections() {
-		$settings = $this->get_settings();
-
-		/*
-		 * These are the feature-level fields that are
-		 * independent of the provider.
-		 */
-		add_settings_section(
-			$this->get_option_name() . '_section',
-			esc_html__( 'Feature settings', 'classifai' ),
-			'__return_empty_string',
-			$this->get_option_name()
-		);
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$options[ $name ] = $taxonomy->label;
+		}
 
 		add_settings_field(
-			'status',
-			esc_html__( 'Enable image tag generation', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'status',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['status'],
-				'description'   => __( 'Image tags will be added automatically.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access fields.
-		$this->add_access_control_fields();
-
-		add_settings_field(
-			'provider',
-			esc_html__( 'Select a provider', 'classifai' ),
+			'tag_taxonomy',
+			esc_html__( 'Tag taxonomy', 'classifai' ),
 			[ $this, 'render_select' ],
 			$this->get_option_name(),
 			$this->get_option_name() . '_section',
 			[
-				'label_for'     => 'provider',
-				'options'       => $this->get_providers(),
-				'default_value' => $settings['provider'],
+				'label_for'     => 'tag_taxonomy',
+				'options'       => $options,
+				'default_value' => $settings['tag_taxonomy'],
 			]
 		);
-
-		/*
-		 * The following renders the fields of all the providers
-		 * that are registered to the feature.
-		 */
-		$this->render_provider_fields();
 	}
 
 	/**
 	 * Returns the default settings for the feature.
 	 *
-	 * The root-level keys are the setting keys that are independent of the provider.
-	 * Provider specific settings should be nested under the provider key.
-	 *
-	 * @internal
-	 *
-	 * @todo Add a filter hook to allow other plugins to add their own settings.
-	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
-		$provider_settings = $this->get_provider_default_settings();
-		$feature_settings  = [
-			'provider' => ComputerVision::ID,
-		];
+	public function get_feature_default_settings(): array {
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$options               = [];
 
-		return apply_filters(
-			'classifai_' . static::ID . '_get_default_settings',
-			array_merge(
-				parent::get_default_settings(),
-				$feature_settings,
-				$provider_settings
-			)
-		);
-	}
-
-	/**
-	 * Sanitizes the settings before saving.
-	 *
-	 * @param array $new_settings The settings to be sanitized on save.
-	 *
-	 * @internal
-	 *
-	 * @return array
-	 */
-	public function sanitize_settings( $new_settings ) {
-		$settings = $this->get_settings();
-
-		// Sanitization of the feature-level settings.
-		$new_settings = parent::sanitize_settings( $new_settings );
-
-		// Sanitization of the provider-level settings.
-		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
-		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
-
-		return apply_filters(
-			'classifai_' . static::ID . '_sanitize_settings',
-			$new_settings,
-			$settings
-		);
-	}
-
-	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
-	 * @return mixed
-	 */
-	public function run( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? ComputerVision::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( ComputerVision::ID === $provider_instance::ID ) {
-			/** @var ComputerVision $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'generate_image_tags' ],
-				[ ...$args ]
-			);
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$options[ $name ] = $taxonomy->label;
 		}
 
-		return apply_filters(
-			'classifai_' . static::ID . '_run',
-			$result,
-			$provider_instance,
-			$args,
-			$this
-		);
+		return [
+			'tag_taxonomy' => array_key_first( $options ),
+			'provider'     => ComputerVision::ID,
+		];
+	}
+
+	/**
+	 * Sanitizes the default feature settings.
+	 *
+	 * @param array $new_settings Settings being saved.
+	 * @return array
+	 */
+	public function sanitize_default_feature_settings( array $new_settings ): array {
+		$settings = $this->get_settings();
+
+		$new_settings['tag_taxonomy'] = $new_settings['tag_taxonomy'] ?? $settings['tag_taxonomy'];
+
+		return $new_settings;
 	}
 }

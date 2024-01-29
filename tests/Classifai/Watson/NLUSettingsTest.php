@@ -6,7 +6,7 @@ namespace Classifai\Tests\Watson;
 
 use \WP_UnitTestCase;
 use \Classifai\Providers\Watson\NLU;
-
+use Classifai\Features\Classification;
 
 /**
  * Class NLUSettingsTest
@@ -33,7 +33,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 		// Add the settings
 		update_option( 'classifai_watson_nlu', $this->settings );
 
-		$this->provider = new NLU( 'service_name' );
+		$this->provider = new NLU( new Classification() );
 	}
 
 	/**
@@ -55,7 +55,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 	/**
 	 * Tests the function providing debug information.
 	 */
-	public function test_get_provider_debug_information() {
+	public function test_get_debug_information() {
 		$this->assertEquals(
 			[
 				'Configured',
@@ -65,7 +65,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 				'Features',
 				'Latest response',
 			],
-			array_keys( $this->provider->get_provider_debug_information() )
+			array_keys( $this->provider->get_debug_information() )
 		);
 
 		$this->assertEquals(
@@ -77,7 +77,7 @@ class NLUSettingsTest extends WP_UnitTestCase {
 				'Features'        => '{"feature":true}',
 				'Latest response' => 'N/A',
 			],
-			$this->provider->get_provider_debug_information(
+			$this->provider->get_debug_information(
 				[
 					'credentials' => [
 						'watson_url'      => 'my-watson-url.com',

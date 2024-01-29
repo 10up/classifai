@@ -18,15 +18,6 @@ use function Classifai\attachment_is_pdf;
 class BulkActions {
 
 	/**
-	 * Check to see if we can register this class.
-	 *
-	 * @return bool
-	 */
-	public function can_register() {
-		return is_admin();
-	}
-
-	/**
 	 * Array of language processing features.
 	 *
 	 * @var \Classifai\Features\Feature[]
@@ -41,9 +32,13 @@ class BulkActions {
 	private $media_processing_features = [];
 
 	/**
-	 * @var \Classifai\Providers\Watson\NLU
+	 * Check to see if we can register this class.
+	 *
+	 * @return bool
 	 */
-	private $ibm_watson_nlu;
+	public function can_register(): bool {
+		return is_admin();
+	}
 
 	/**
 	 * Register the actions needed.
@@ -90,13 +85,12 @@ class BulkActions {
 	}
 
 	/**
-	 * Register Classifai bulk actions.
+	 * Register Language Processing bulk actions.
 	 *
 	 * @param array $bulk_actions Current bulk actions.
-	 *
 	 * @return array
 	 */
-	public function register_language_processing_actions( $bulk_actions ) {
+	public function register_language_processing_actions( array $bulk_actions ): array {
 		foreach ( $this->language_processing_features as $feature ) {
 			if ( ! $feature->is_feature_enabled() ) {
 				continue;
@@ -128,12 +122,11 @@ class BulkActions {
 	 * @param string $redirect_to Redirect URL after bulk actions.
 	 * @param string $doaction    Action ID.
 	 * @param array  $post_ids    Post ids to apply bulk actions to.
-	 *
 	 * @return string
 	 */
-	public function language_processing_actions_handler( $redirect_to, $doaction, $post_ids ) {
+	public function language_processing_actions_handler( string $redirect_to, string $doaction, array $post_ids ): string {
 		$feature_ids = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return $feature::ID;
 			},
 			$this->language_processing_features
@@ -154,7 +147,7 @@ class BulkActions {
 					break;
 
 				case ExcerptGeneration::ID:
-					$excerpt = ( new ExcerptGeneration() )->run( $post_id );
+					$excerpt = ( new ExcerptGeneration() )->run( $post_id, 'excerpt' );
 					$action  = $doaction;
 
 					if ( ! is_wp_error( $excerpt ) ) {
@@ -188,14 +181,13 @@ class BulkActions {
 	}
 
 	/**
-	 * Register Classifai row action.
+	 * Register Language Processing row actions.
 	 *
 	 * @param array    $actions Current row actions.
 	 * @param \WP_Post $post    Post object.
-	 *
 	 * @return array
 	 */
-	public function register_language_processing_row_action( $actions, $post ) {
+	public function register_language_processing_row_action( array $actions, \WP_Post $post ): array {
 		foreach ( $this->language_processing_features as $feature ) {
 			if ( ! $feature->is_feature_enabled() ) {
 				continue;
@@ -232,7 +224,7 @@ class BulkActions {
 	}
 
 	/**
-	 * Register bulk actions for the Computer Vision provider.
+	 * Register Image Processing hooks.
 	 */
 	public function register_image_processing_hooks() {
 		$this->media_processing_features = [
@@ -250,13 +242,12 @@ class BulkActions {
 	}
 
 	/**
-	 * Register Classifai media bulk actions.
+	 * Register Image Processing bulk actions.
 	 *
 	 * @param array $bulk_actions Current bulk actions.
-	 *
 	 * @return array
 	 */
-	public function register_media_processing_media_bulk_actions( $bulk_actions ) {
+	public function register_media_processing_media_bulk_actions( array $bulk_actions ): array {
 		foreach ( $this->media_processing_features as $feature ) {
 			if ( ! $feature->is_feature_enabled() ) {
 				continue;
@@ -295,17 +286,16 @@ class BulkActions {
 	}
 
 	/**
-	 * Handle media bulk actions.
+	 * Handle Image Processing bulk actions.
 	 *
 	 * @param string $redirect_to       Redirect URL after bulk actions.
 	 * @param string $doaction          Action ID.
 	 * @param array  $attachment_ids    Attachment ids to apply bulk actions to.
-	 *
 	 * @return string
 	 */
-	public function media_processing_bulk_action_handler( $redirect_to, $doaction, $attachment_ids ) {
+	public function media_processing_bulk_action_handler( string $redirect_to, string $doaction, array $attachment_ids ): string {
 		$feature_ids = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return $feature::ID;
 			},
 			$this->media_processing_features
@@ -324,37 +314,56 @@ class BulkActions {
 			switch ( $doaction ) {
 				case DescriptiveTextGenerator::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new DescriptiveTextGenerator() )->run( $attachment_id );
+						$desc_text        = new DescriptiveTextGenerator();
+						$desc_text_result = $desc_text->run( $attachment_id, 'descriptive_text' );
+
+						if ( $desc_text_result && ! is_wp_error( $desc_text_result ) ) {
+							$desc_text->save( $desc_text_result, $attachment_id );
+						}
 					}
 					break;
 
 				case ImageTagsGenerator::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageTagsGenerator() )->run( $attachment_id );
+						$image_tags  = new ImageTagsGenerator();
+						$tags_result = $image_tags->run( $attachment_id, 'tags' );
+
+						if ( ! empty( $tags_result ) && ! is_wp_error( $tags_result ) ) {
+							$image_tags->save( $tags_result, $attachment_id );
+						}
 					}
 					break;
 
 				case ImageCropping::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageCropping() )->run( $current_meta, $attachment_id );
+						$crop        = new ImageCropping();
+						$crop_result = $crop->run( $attachment_id, 'crop', $current_meta );
+						if ( ! empty( $crop_result ) && ! is_wp_error( $crop_result ) ) {
+							$ocr_meta = $crop->save( $crop_result, $attachment_id );
+							wp_update_attachment_metadata( $attachment_id, $ocr_meta );
+						}
 					}
 					break;
 
 				case ImageTextExtraction::ID:
 					if ( wp_attachment_is_image( $attachment_id ) ) {
-						( new ImageTextExtraction() )->run( $current_meta, $attachment_id, true );
+						$ocr        = new ImageTextExtraction();
+						$ocr_result = $ocr->run( $attachment_id, 'ocr' );
+						if ( $ocr_result && ! is_wp_error( $ocr_result ) ) {
+							$ocr->save( $ocr_result, $attachment_id );
+						}
 					}
 					break;
 
 				case PDFTextExtraction::ID:
 					if ( attachment_is_pdf( $attachment_id ) ) {
-						( new PDFTextExtraction() )->run( $attachment_id );
+						( new PDFTextExtraction() )->run( $attachment_id, 'read_pdf' );
 					}
 					break;
 
 				case AudioTranscriptsGeneration::ID:
 					if ( wp_attachment_is( 'audio', $attachment_id ) ) {
-						( new AudioTranscriptsGeneration() )->run( $attachment_id );
+						( new AudioTranscriptsGeneration() )->run( $attachment_id, 'transcript' );
 					}
 					break;
 			}
@@ -374,13 +383,13 @@ class BulkActions {
 	}
 
 	/**
-	 * Register media row actions.
+	 * Register Image Processing row actions.
 	 *
 	 * @param array    $actions An array of action links for each attachment.
 	 * @param \WP_Post $post WP_Post object for the current attachment.
 	 * @return array
 	 */
-	public function register_media_processing_row_action( $actions, $post ) {
+	public function register_media_processing_row_action( array $actions, \WP_Post $post ): array {
 		if ( attachment_is_pdf( $post ) && ( new PDFTextExtraction() )->is_feature_enabled() ) {
 			$actions[ PDFTextExtraction::ID ] = sprintf(
 				'<a href="%s">%s</a>',
@@ -442,7 +451,7 @@ class BulkActions {
 		$action          = '';
 		$post_type       = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$all_feature_ids = array_map(
-			function( $feature ) {
+			function ( $feature ) {
 				return $feature::ID;
 			},
 			array_merge( $this->language_processing_features, $this->media_processing_features )
@@ -503,7 +512,6 @@ class BulkActions {
 			case Classification::ID:
 				$action_text = __( 'Classification done for', 'classifai' );
 				break;
-
 		}
 
 		$output  = '<div id="message" class="notice notice-success is-dismissible fade"><p>';

@@ -47,7 +47,7 @@ abstract class Service {
 	 * @param string $menu_slug    Slug for the settings page.
 	 * @param array  $providers    Array of provider classes for this service
 	 */
-	public function __construct( $display_name, $menu_slug, $providers ) {
+	public function __construct( string $display_name, string $menu_slug, array $providers ) {
 		$this->menu_slug    = $menu_slug;
 		$this->display_name = $display_name;
 		$this->providers    = $providers;
@@ -78,12 +78,22 @@ abstract class Service {
 			$this->register_providers();
 		}
 
+		/**
+		 * Filter the list of features for the service.
+		 *
+		 * @since 3.0.0
+		 * @hook {$this->menu_slug}_features
+		 *
+		 * @param {array} $this->features Array of available features for the service.
+		 *
+		 * @return {array} The filtered available features.
+		 */
 		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
 
 		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
 			foreach ( $this->features as $feature ) {
 				if ( class_exists( $feature ) ) {
-					$feature_instance = new $feature();
+					$feature_instance        = new $feature();
 					$this->feature_classes[] = $feature_instance;
 					$feature_instance->setup();
 				}
@@ -109,7 +119,7 @@ abstract class Service {
 	 *
 	 * @return string
 	 */
-	public function get_menu_slug() {
+	public function get_menu_slug(): string {
 		return $this->menu_slug;
 	}
 
@@ -118,7 +128,7 @@ abstract class Service {
 	 *
 	 * @return string
 	 */
-	public function get_display_name() {
+	public function get_display_name(): string {
 		return $this->display_name;
 	}
 
@@ -146,16 +156,16 @@ abstract class Service {
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
 
 				<?php
-				if ( empty( $this->provider_classes ) ) {
-					echo '<p>' . esc_html__( 'No providers available for this service.', 'classifai' ) . '</p>';
+				if ( empty( $this->feature_classes ) ) {
+					echo '<p>' . esc_html__( 'No features available for this service.', 'classifai' ) . '</p>';
 					echo '</div></div>';
 					return;
 				}
 				?>
 
 				<h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->feature_classes as $feature_classes ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_classes::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_classes::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_classes->get_label() ); ?></a>
+					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_label() ); ?></a>
 					<?php endforeach; ?>
 				</h2>
 
@@ -169,8 +179,21 @@ abstract class Service {
 						submit_button();
 					?>
 					</form>
-					<?php do_action( 'classifai_after_feature_settings_form', $active_feature ); ?>
+
 					<?php
+					/**
+					 * Fires after the settings form for a feature.
+					 *
+					 * @since 3.0.0
+					 * @hook classifai_after_feature_settings_form
+					 *
+					 * @param {array} $active_feature Array of active features.
+					 */
+					do_action( 'classifai_after_feature_settings_form', $active_feature );
+					?>
+
+					<?php
+					// TODO: can we move this code into the right feature class?
 					// Find the right provider class.
 					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
 					if ( 'openai_embeddings' === $active_tab ) {
@@ -260,22 +283,24 @@ abstract class Service {
 	/**
 	 * Adds plugin debug information to be printed on the Site Health screen.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param array $debug_information Array of associative arrays corresponding to lines of debug information.
 	 * @return array Array with lines added.
-	 * @since 1.4.0
 	 */
-	public function add_service_debug_information( $debug_information ) {
+	public function add_service_debug_information( array $debug_information ): array {
 		return array_merge( $debug_information, $this->get_service_debug_information() );
 	}
 
 	/**
 	 * Provides debug information for the service.
 	 *
-	 * @return array Array of associative arrays representing lines of debug information.
 	 * @since 1.4.0
+	 *
+	 * @return array Array of associative arrays representing lines of debug information.
 	 */
-	public function get_service_debug_information() {
-		$make_line = function( $feature ) {
+	public function get_service_debug_information(): array {
+		$make_line = function ( $feature ) {
 			return [
 				'label' => sprintf( '%s', $feature->get_label() ),
 				'value' => $feature->get_debug_information(),

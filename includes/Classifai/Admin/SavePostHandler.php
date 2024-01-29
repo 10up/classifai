@@ -2,10 +2,9 @@
 
 namespace Classifai\Admin;
 
-use Classifai\Features\Classification;
 use Classifai\Features\TextToSpeech;
-use \Classifai\Providers\Azure\Speech;
-use \Classifai\Watson\Normalizer;
+use Classifai\Providers\Azure\Speech;
+use Classifai\Watson\Normalizer;
 use function Classifai\get_classification_mode;
 
 /**
@@ -31,8 +30,10 @@ class SavePostHandler {
 
 	/**
 	 * Check to see if we can register this class.
+	 *
+	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 
 		$should_register = false;
 		if ( $this->is_configured() && ( is_admin() || $this->is_rest_route() ) ) {
@@ -58,7 +59,7 @@ class SavePostHandler {
 	 *
 	 * @return bool
 	 */
-	public function is_configured() {
+	public function is_configured(): bool {
 		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
 	}
 
@@ -69,10 +70,9 @@ class SavePostHandler {
 	 *                          or an array of values.
 	 * @param int    $object_id Object ID.
 	 * @param string $meta_key  Meta key.
-	 *
 	 * @return mixed
 	 */
-	public function default_post_metadata( $value, $object_id, $meta_key ) {
+	public function default_post_metadata( $value, int $object_id, string $meta_key ) {
 		if ( '_classifai_process_content' === $meta_key ) {
 			if ( 'automatic_classification' === get_classification_mode() ) {
 				return 'yes';
@@ -94,7 +94,7 @@ class SavePostHandler {
 	 *
 	 * @param int $post_id The post that was saved
 	 */
-	public function did_save_post( $post_id ) {
+	public function did_save_post( int $post_id ) {
 		if ( ! empty( $_GET['classic-editor'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
@@ -135,10 +135,9 @@ class SavePostHandler {
 	 *
 	 * @param int  $post_id the post to classify & link.
 	 * @param bool $link_terms Whether to link the terms to the post.
-	 *
 	 * @return array
 	 */
-	public function classify( $post_id, $link_terms = true ) {
+	public function classify( int $post_id, bool $link_terms = true ): array {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -209,7 +208,7 @@ class SavePostHandler {
 	 * @param int $post_id Post ID.
 	 * @return bool|int|WP_Error
 	 */
-	public function synthesize_speech( $post_id ) {
+	public function synthesize_speech( int $post_id ) {
 		if ( empty( $post_id ) ) {
 			return new \WP_Error(
 				'azure_text_to_speech_post_id_missing',
@@ -433,7 +432,7 @@ class SavePostHandler {
 	 *
 	 * @return bool
 	 */
-	public function is_rest_route() {
+	public function is_rest_route(): bool {
 
 		if ( ! isset( $_SERVER['REQUEST_URI'] ) ) {
 			return false;
@@ -462,8 +461,6 @@ class SavePostHandler {
 
 	/**
 	 * Classify post manually.
-	 *
-	 * @return void
 	 */
 	public function classifai_classify_post() {
 		if ( ! empty( $_GET['classifai_classify_post_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['classifai_classify_post_nonce'] ) ), 'classifai_classify_post_action' ) ) {
@@ -488,7 +485,7 @@ class SavePostHandler {
 	 * @param string[] $removable_query_args An array of query variable names to remove from a URL.
 	 * @return string[]
 	 */
-	public function classifai_removable_query_args( $removable_query_args ) {
+	public function classifai_removable_query_args( array $removable_query_args ): array {
 		$removable_query_args[] = 'classifai_classify';
 		return $removable_query_args;
 	}

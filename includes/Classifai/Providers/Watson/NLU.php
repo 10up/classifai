@@ -11,11 +11,12 @@ use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
-use function Classifai\get_asset_info;
-use function Classifai\check_term_permissions;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Server;
+
+use function Classifai\get_asset_info;
+use function Classifai\check_term_permissions;
 
 class NLU extends Provider {
 
@@ -79,6 +80,7 @@ class NLU extends Provider {
 			],
 		];
 
+		// TODO: if no feature is passed in, seems like this might break
 		$this->feature_instance = $feature;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
@@ -86,8 +88,6 @@ class NLU extends Provider {
 
 	/**
 	 * Renders settings fields for this provider.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -119,7 +119,6 @@ class NLU extends Provider {
 				'label_for'     => 'username',
 				'default_value' => $settings['username'],
 				'input_type'    => 'text',
-				'default_value' => 'apikey',
 				'large'         => true,
 				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hidden' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
 			]
@@ -158,13 +157,13 @@ class NLU extends Provider {
 		add_settings_field(
 			static::ID . '_toggle',
 			'',
-			function( $args = [] ) {
+			function ( $args = [] ) {
 				printf(
 					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
-					$args['class'] ?? '',
-					$this->use_username_password()
+					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						? esc_html__( 'Use a username/password instead?', 'classifai' )
-						: esc_html__( 'Use an API Key instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				);
 			},
 			$this->feature_instance->get_option_name(),
@@ -233,7 +232,7 @@ class NLU extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'endpoint_url'          => '',
 			'apikey'                => '',
@@ -417,7 +416,7 @@ class NLU extends Provider {
 	 *
 	 * @return bool
 	 */
-	protected function use_username_password() {
+	protected function use_username_password(): bool {
 		$feature  = new Classification();
 		$settings = $feature->get_settings( static::ID );
 
@@ -432,10 +431,8 @@ class NLU extends Provider {
 	 * Render the NLU features settings.
 	 *
 	 * @param array $args Settings for the inputs
-	 *
-	 * @return void
 	 */
-	public function render_nlu_feature_settings( $args ) {
+	public function render_nlu_feature_settings( array $args ) {
 		$feature      = $args['feature'];
 		$labels       = $args['labels'];
 		$option_index = $args['option_index'];
@@ -493,7 +490,7 @@ class NLU extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_supported_taxonomies() {
+	public function get_supported_taxonomies(): array {
 		$taxonomies = \get_taxonomies( [], 'objects' );
 		$supported  = [];
 
@@ -508,10 +505,9 @@ class NLU extends Provider {
 	 * Helper to ensure the authentication works.
 	 *
 	 * @param array $settings The list of settings to be saved
-	 *
 	 * @return bool|WP_Error
 	 */
-	protected function nlu_authentication_check( $settings ) {
+	protected function nlu_authentication_check( array $settings ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $settings[ static::ID ]['username'] )
 			|| empty( $settings[ static::ID ]['password'] )
@@ -555,10 +551,9 @@ class NLU extends Provider {
 	 * Sanitization for the options being saved.
 	 *
 	 * @param array $new_settings Array of settings about to be saved.
-	 *
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings      = $this->feature_instance->get_settings();
 		$authenticated = $this->nlu_authentication_check( $new_settings );
 
@@ -604,10 +599,9 @@ class NLU extends Provider {
 	 * Format the result of most recent request.
 	 *
 	 * @param array|WP_Error $data Response data to format.
-	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( $data ) {
+	protected function get_formatted_latest_response( $data ): string {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
@@ -634,12 +628,12 @@ class NLU extends Provider {
 	/**
 	 * Add metabox to enable/disable language processing on post/post types.
 	 *
-	 * @param string  $post_type Post Type.
-	 * @param WP_Post $post      WP_Post object.
-	 *
 	 * @since 1.8.0
+	 *
+	 * @param string   $post_type Post Type.
+	 * @param \WP_Post $post      WP_Post object.
 	 */
-	public function add_classifai_meta_box( $post_type, $post ) {
+	public function add_classifai_meta_box( string $post_type, \WP_Post $post ) {
 		$supported_post_types = \Classifai\get_supported_post_types();
 		$post_statuses        = \Classifai\get_supported_post_statuses();
 		$post_status          = get_post_status( $post );
@@ -659,11 +653,11 @@ class NLU extends Provider {
 	/**
 	 * Render metabox content.
 	 *
-	 * @param WP_Post $post WP_Post object.
-	 *
 	 * @since 1.8.0
+	 *
+	 * @param \WP_Post $post WP_Post object.
 	 */
-	public function render_classifai_meta_box( $post ) {
+	public function render_classifai_meta_box( \WP_Post $post ) {
 		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
 		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
@@ -694,11 +688,11 @@ class NLU extends Provider {
 	/**
 	 * Save language processing meta data on post/post types.
 	 *
-	 * @param int $post_id Post ID.
-	 *
 	 * @since 1.8.0
+	 *
+	 * @param int $post_id Post ID.
 	 */
-	public function classifai_save_post_metadata( $post_id ) {
+	public function classifai_save_post_metadata( int $post_id ) {
 		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
 			return;
 		}
@@ -755,7 +749,7 @@ class NLU extends Provider {
 	 *
 	 * @return bool
 	 */
-	public function is_configured() {
+	public function is_configured(): bool {
 		$is_configured = parent::is_configured();
 
 		if ( ! $is_configured ) {
@@ -767,8 +761,6 @@ class NLU extends Provider {
 
 	/**
 	 * Register REST endpoints.
-	 *
-	 * @return void
 	 */
 	public function register_endpoints() {
 		register_rest_route(
@@ -778,7 +770,7 @@ class NLU extends Provider {
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'generate_post_tags' ],
 				'args'                => array(
-					'id' => array(
+					'id'        => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
@@ -799,7 +791,6 @@ class NLU extends Provider {
 	 * Handle request to generate tags for given post ID.
 	 *
 	 * @param WP_REST_Request $request The full request object.
-	 *
 	 * @return array|bool|string|WP_Error
 	 */
 	public function generate_post_tags( WP_REST_Request $request ) {
@@ -867,7 +858,7 @@ class NLU extends Provider {
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		$route_to_call = strtolower( $route_to_call );
 
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -890,10 +881,9 @@ class NLU extends Provider {
 	 * Handle request to generate tags for given post ID.
 	 *
 	 * @param int $post_id The Post Id we're processing.
-	 *
 	 * @return mixed
 	 */
-	public function classify_post( $post_id ) {
+	public function classify_post( int $post_id ) {
 		try {
 			if ( empty( $post_id ) ) {
 				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
@@ -978,12 +968,11 @@ class NLU extends Provider {
 	 * Classifies the post specified with the PostClassifier object.
 	 * Existing terms relationships are removed before classification.
 	 *
-	 * @param int $post_id the post to classify & link
+	 * @param int  $post_id the post to classify & link
 	 * @param bool $link_terms Whether to link the terms to the post.
-	 *
-	 * @return array
+	 * @return array|bool
 	 */
-	public function classify( $post_id, $link_terms = true ) {
+	public function classify( int $post_id, bool $link_terms = true ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -1009,15 +998,15 @@ class NLU extends Provider {
 			if ( \Classifai\get_feature_enabled( 'category' ) ) {
 				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
 			}
-	
+
 			if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
 				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
 			}
-	
+
 			if ( \Classifai\get_feature_enabled( 'concept' ) ) {
 				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
 			}
-	
+
 			if ( \Classifai\get_feature_enabled( 'entity' ) ) {
 				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
 			}
@@ -1049,7 +1038,7 @@ class NLU extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];

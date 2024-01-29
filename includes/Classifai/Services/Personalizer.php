@@ -5,11 +5,6 @@
 
 namespace Classifai\Services;
 
-use WP_REST_Server;
-use WP_REST_Request;
-use WP_Error;
-use function Classifai\find_provider_class;
-
 class Personalizer extends Service {
 
 	/**
@@ -24,18 +19,21 @@ class Personalizer extends Service {
 	}
 
 	/**
-	 * Register the rest API endpoints
-	 */
-	public function init() {
-		parent::init();
-	}
-
-	/**
 	 * Get service providers for Recommendation service.
 	 *
 	 * @return array
 	 */
-	public static function get_service_providers() {
+	public static function get_service_providers(): array {
+		/**
+		 * Filter the service providers for Recommendation service.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_recommendation_service_providers
+		 *
+		 * @param {array} $providers Array of available providers for the service.
+		 *
+		 * @return {array} The filtered available providers.
+		 */
 		return apply_filters(
 			'classifai_recommendation_service_providers',
 			[

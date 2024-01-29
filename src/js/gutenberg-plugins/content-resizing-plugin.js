@@ -185,7 +185,7 @@ const ContentResizingPlugin = () => {
 	 */
 	async function getResizedContent() {
 		let __textArray = [];
-		const apiUrl = `${ wpApiSettings.root }classifai/v1/openai/resize-content`;
+		const apiUrl = `${ wpApiSettings.root }classifai/v1/resize-content`;
 		const postId = select( editorStore ).getCurrentPostId();
 		const formData = new FormData();
 

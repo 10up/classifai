@@ -2,11 +2,17 @@
 
 namespace Classifai\Features;
 
-use \Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Services\ImageProcessing;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
+
+use function Classifai\attachment_is_pdf;
+use function Classifai\clean_input;
 
 /**
- * Class TitleGeneration
+ * Class PDFTextExtraction
  */
 class PDFTextExtraction extends Feature {
 	/**
@@ -20,177 +26,247 @@ class PDFTextExtraction extends Feature {
 	 * Constructor.
 	 */
 	public function __construct() {
-		/**
-		 * Every feature must set the `provider_instances` variable with the list of provider instances
-		 * that are registered to a service.
-		 */
-		$service_providers        = ImageProcessing::get_service_providers();
-		$this->provider_instances = $this->get_provider_instances( $service_providers );
+		$this->label = __( 'PDF Text Extraction', 'classifai' );
+
+		// Contains all providers that are registered to the service.
+		$this->provider_instances = $this->get_provider_instances( ImageProcessing::get_service_providers() );
+
+		// Contains just the providers this feature supports.
+		$this->supported_providers = [
+			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+		];
 	}
 
 	/**
-	 * Returns the label of the feature.
+	 * Set up necessary hooks.
+	 *
+	 * We utilize this so we can register the REST route.
+	 */
+	public function setup() {
+		parent::setup();
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Set up necessary hooks.
+	 */
+	public function feature_setup() {
+		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
+		add_action( 'add_attachment', [ $this, 'read_pdf' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_rescan_pdf' ] );
+
+		add_filter( 'attachment_fields_to_edit', [ $this, 'add_rescan_button_to_media_modal' ], 10, 2 );
+	}
+
+	/**
+	 * Register any needed endpoints.
+	 */
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'read-pdf/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'rest_endpoint_callback' ],
+				'args'                => [
+					'id' => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Image ID to generate alt text for.', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'read_pdf_permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Check if a given request has access to read a PDF.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool|WP_Error
+	 */
+	public function read_pdf_permissions_check( WP_REST_Request $request ) {
+		$attachment_id = $request->get_param( 'id' );
+		$post_type     = get_post_type_object( 'attachment' );
+
+		// Ensure attachments are allowed in REST endpoints.
+		if ( empty( $post_type ) || empty( $post_type->show_in_rest ) ) {
+			return false;
+		}
+
+		// Ensure we have a logged in user that can upload and change files.
+		if ( empty( $attachment_id ) || ! current_user_can( 'edit_post', $attachment_id ) || ! current_user_can( 'upload_files' ) ) {
+			return false;
+		}
+
+		if ( ! $this->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'PDF Text Extraction is disabled. Please check your settings.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Generic request handler for all our custom routes.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_endpoint_callback( WP_REST_Request $request ) {
+		$route = $request->get_route();
+
+		if ( strpos( $route, '/classifai/v1/read-pdf' ) === 0 ) {
+			return rest_ensure_response(
+				$this->run( $request->get_param( 'id' ), 'read_pdf' )
+			);
+		}
+
+		return parent::rest_endpoint_callback( $request );
+	}
+
+	/**
+	 * Adds a meta box for rescanning options if the settings are configured.
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function setup_attachment_meta_box( \WP_Post $post ) {
+		if ( ! attachment_is_pdf( $post ) || ! $this->is_feature_enabled() ) {
+			return;
+		}
+
+		add_meta_box(
+			'classifai_pdf_processing',
+			__( 'ClassifAI PDF Processing', 'classifai' ),
+			[ $this, 'attachment_data_meta_box' ],
+			'attachment',
+			'side',
+			'high'
+		);
+	}
+
+	/**
+	 * Render the meta box.
+	 *
+	 * @param \WP_Post $post The post object.
+	 */
+	public function attachment_data_meta_box( \WP_Post $post ) {
+		/**
+		 * Filter the status of the PDF read operation.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_feature_pdf_to_text_generation_read_status
+		 *
+		 * @param {array} $status Status of the PDF read operation.
+		 * @param {int} $post_id ID of attachment.
+		 *
+		 * @return {array} Status.
+		 */
+		$status = apply_filters( 'classifai_' . static::ID . '_read_status', [], $post->ID );
+
+		$read    = ! empty( $status['read'] ) && (bool) $status['read'] ? __( 'Rescan PDF for text', 'classifai' ) : __( 'Scan PDF for text', 'classifai' );
+		$running = ! empty( $status['running'] ) && (bool) $status['running'];
+		?>
+
+		<div class="misc-publishing-actions">
+			<div class="misc-pub-section">
+				<label for="rescan-pdf">
+					<input type="checkbox" value="yes" id="rescan-pdf" name="rescan-pdf" <?php disabled( $running ); ?>/>
+					<?php echo esc_html( $read ); ?>
+					<?php if ( $running ) : ?>
+						<?php echo ' - ' . esc_html__( 'In progress!', 'classifai' ); ?>
+					<?php endif; ?>
+				</label>
+			</div>
+		</div>
+
+		<?php
+	}
+
+	/**
+	 * Read text out of newly uploaded PDFs.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function read_pdf( int $attachment_id ) {
+		$this->run( $attachment_id, 'read_pdf' );
+	}
+
+	/**
+	 * Determine if we need to rescan the PDF.
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 */
+	public function maybe_rescan_pdf( int $attachment_id ) {
+		if ( clean_input( 'rescan-pdf' ) ) {
+			$this->run( $attachment_id, 'read_pdf' );
+		}
+	}
+
+	/**
+	 * Save the returned result.
+	 *
+	 * @param string $result The result to save.
+	 * @param int    $attachment_id The attachment ID.
+	 */
+	public function save( string $result, int $attachment_id ) {
+		return wp_update_post(
+			[
+				'ID'           => $attachment_id,
+				'post_content' => $result,
+			]
+		);
+	}
+
+	/**
+	 * Adds the rescan buttons to the media modal.
+	 *
+	 * @param array    $form_fields Array of fields
+	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @return array
+	 */
+	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
+		if ( ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
+			return $form_fields;
+		}
+
+		$read_text = empty( get_the_content( null, false, $post ) ) ? __( 'Scan', 'classifai' ) : __( 'Rescan', 'classifai' );
+		$status    = apply_filters( 'classifai_' . static::ID . '_read_status', [], $post->ID );
+
+		if ( ! empty( $status['running'] ) && (bool) $status['running'] ) {
+			$html = '<button class="button secondary" disabled>' . esc_html__( 'In progress!', 'classifai' ) . '</button>';
+		} else {
+			$html = '<button class="button secondary" id="classifai-rescan-pdf" data-id="' . esc_attr( absint( $post->ID ) ) . '">' . esc_html( $read_text ) . '</button>';
+		}
+
+		$form_fields['rescan_pdf'] = [
+			'label'        => __( 'Scan PDF for text', 'classifai' ),
+			'input'        => 'html',
+			'html'         => $html,
+			'show_in_edit' => false,
+		];
+
+		return $form_fields;
+	}
+
+	/**
+	 * Get the description for the enable field.
 	 *
 	 * @return string
 	 */
-	public function get_label() {
-		return apply_filters(
-			'classifai_' . static::ID . '_label',
-			__( 'PDF Text Extraction', 'classifai' )
-		);
-	}
-
-	/**
-	 * Returns the providers supported by the feature.
-	 *
-	 * @internal
-	 *
-	 * @return array
-	 */
-	protected function get_providers() {
-		return apply_filters(
-			'classifai_' . static::ID . '_providers',
-			[
-				ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
-			]
-		);
-	}
-
-	/**
-	 * Sets up the fields and sections for the feature.
-	 */
-	public function setup_fields_sections() {
-		$settings = $this->get_settings();
-
-		/*
-		 * These are the feature-level fields that are
-		 * independent of the provider.
-		 */
-		add_settings_section(
-			$this->get_option_name() . '_section',
-			esc_html__( 'Feature settings', 'classifai' ),
-			'__return_empty_string',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'status',
-			esc_html__( 'Enable text extraction from images', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'status',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['status'],
-				'description'   => __( 'Extract visible text from multi-pages PDF documents. Store the result as the attachment description.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access fields.
-		$this->add_access_control_fields();
-
-		add_settings_field(
-			'provider',
-			esc_html__( 'Select a provider', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'provider',
-				'options'       => $this->get_providers(),
-				'default_value' => $settings['provider'],
-			]
-		);
-
-		/*
-		 * The following renders the fields of all the providers
-		 * that are registered to the feature.
-		 */
-		$this->render_provider_fields();
+	public function get_enable_description(): string {
+		return esc_html__( 'Extract visible text from multi-pages PDF documents. Store the result as the attachment description.', 'classifai' );
 	}
 
 	/**
 	 * Returns the default settings for the feature.
 	 *
-	 * The root-level keys are the setting keys that are independent of the provider.
-	 * Provider specific settings should be nested under the provider key.
-	 *
-	 * @internal
-	 *
-	 * @todo Add a filter hook to allow other plugins to add their own settings.
-	 *
 	 * @return array
 	 */
-	protected function get_default_settings() {
-		$provider_settings = $this->get_provider_default_settings();
-		$feature_settings  = [
+	public function get_feature_default_settings(): array {
+		return [
 			'provider' => ComputerVision::ID,
 		];
-
-		return apply_filters(
-			'classifai_' . static::ID . '_get_default_settings',
-			array_merge(
-				parent::get_default_settings(),
-				$feature_settings,
-				$provider_settings
-			)
-		);
-	}
-
-	/**
-	 * Sanitizes the settings before saving.
-	 *
-	 * @param array $new_settings The settings to be sanitized on save.
-	 *
-	 * @internal
-	 *
-	 * @return array
-	 */
-	public function sanitize_settings( $new_settings ) {
-		$settings = $this->get_settings();
-
-		// Sanitization of the feature-level settings.
-		$new_settings = parent::sanitize_settings( $new_settings );
-
-		// Sanitization of the provider-level settings.
-		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
-		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
-
-		return apply_filters(
-			'classifai_' . static::ID . '_sanitize_settings',
-			$new_settings,
-			$settings
-		);
-	}
-
-	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 *
-	 * @return mixed
-	 */
-	public function run( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? ComputerVision::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( ComputerVision::ID === $provider_instance::ID ) {
-			/** @var ComputerVision $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'read_pdf' ],
-				[ ...$args ]
-			);
-		}
-
-		return apply_filters(
-			'classifai_' . static::ID . '_run',
-			$result,
-			$provider_instance,
-			$args,
-			$this
-		);
 	}
 }
