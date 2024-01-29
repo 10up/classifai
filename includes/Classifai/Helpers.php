@@ -3,7 +3,6 @@
 namespace Classifai;
 
 use Classifai\Features\Classification;
-use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
@@ -314,25 +313,6 @@ function get_supported_post_types(): array {
 	 * @return {array} Array of post types.
 	 */
 	$post_types = apply_filters( 'classifai_post_types', $post_types );
-
-	return $post_types;
-}
-
-/**
- * The list of post types that TTS supports.
- *
- * @return array Supported Post Types.
- */
-function get_tts_supported_post_types(): array {
-	$feature    = new TextToSpeech( null );
-	$selected   = $feature->get_settings( 'post_types' );
-	$post_types = [];
-
-	foreach ( $selected as $post_type => $enabled ) {
-		if ( ! empty( $enabled ) ) {
-			$post_types[] = $post_type;
-		}
-	}
 
 	return $post_types;
 }
