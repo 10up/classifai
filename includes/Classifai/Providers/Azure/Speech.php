@@ -6,7 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
-use Classifai\Watson\Normalizer;
+use Classifai\Normalizer;
 use Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;

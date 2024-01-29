@@ -1,16 +1,16 @@
 <?php
 
-namespace Classifai\Admin;
+namespace Classifai\Providers\Watson;
 
-use function Classifai\get_classification_mode;
+use Classifai\Providers\Watson\PostClassifier;
 
 /**
- * Classifies Posts based on the current ClassifAI configuration.
+ * Classifies Posts based on the current Watson configuration.
  */
 class SavePostHandler {
 
 	/**
-	 * @var $classifier \Classifai\PostClassifier Lazy loaded classifier object
+	 * @var PostClassifier $classifier Lazy loaded classifier object
 	 */
 	public $classifier;
 
@@ -96,10 +96,10 @@ class SavePostHandler {
 			return;
 		}
 
-		$supported     = \Classifai\get_supported_post_types();
+		$supported     = get_supported_post_types();
 		$post_type     = get_post_type( $post_id );
 		$post_status   = get_post_status( $post_id );
-		$post_statuses = \Classifai\get_supported_post_statuses();
+		$post_statuses = get_supported_post_statuses();
 
 		/**
 		 * Filter post statuses for post type or ID.
@@ -132,9 +132,9 @@ class SavePostHandler {
 	 *
 	 * @param int  $post_id the post to classify & link.
 	 * @param bool $link_terms Whether to link the terms to the post.
-	 * @return array
+	 * @return object|bool
 	 */
-	public function classify( int $post_id, bool $link_terms = true ): array {
+	public function classify( int $post_id, bool $link_terms = true ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -157,20 +157,20 @@ class SavePostHandler {
 		$classifier = $this->get_classifier();
 
 		if ( $link_terms ) {
-			if ( \Classifai\get_feature_enabled( 'category' ) ) {
-				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'category' ) );
+			if ( get_feature_enabled( 'category' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'category' ) );
 			}
 
-			if ( \Classifai\get_feature_enabled( 'keyword' ) ) {
-				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'keyword' ) );
+			if ( get_feature_enabled( 'keyword' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'keyword' ) );
 			}
 
-			if ( \Classifai\get_feature_enabled( 'concept' ) ) {
-				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'concept' ) );
+			if ( get_feature_enabled( 'concept' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'concept' ) );
 			}
 
-			if ( \Classifai\get_feature_enabled( 'entity' ) ) {
-				wp_delete_object_term_relationships( $post_id, \Classifai\get_feature_taxonomy( 'entity' ) );
+			if ( get_feature_enabled( 'entity' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'entity' ) );
 			}
 		}
 
@@ -196,11 +196,13 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Lazy initializes the Post Classifier object
+	 * Lazy initializes the Post Classifier object.
+	 *
+	 * @return PostClassifier
 	 */
-	public function get_classifier() {
+	public function get_classifier(): PostClassifier {
 		if ( is_null( $this->classifier ) ) {
-			$this->classifier = new \Classifai\PostClassifier();
+			$this->classifier = new PostClassifier();
 		}
 
 		return $this->classifier;
@@ -234,7 +236,7 @@ class SavePostHandler {
 			?>
 			<div class="notice notice-error is-dismissible">
 				<p>
-					Error: Failed to classify content with the IBM Watson NLU API.
+					<?php esc_html_e( 'Error: Failed to classify content with the IBM Watson NLU API.', 'classifai' ); ?>
 				</p>
 				<p>
 					<?php echo esc_html( $code ); ?>
@@ -322,8 +324,8 @@ class SavePostHandler {
 	/**
 	 * Add "classifai_classify" in list of query variable names to remove.
 	 *
-	 * @param string[] $removable_query_args An array of query variable names to remove from a URL.
-	 * @return string[]
+	 * @param [] $removable_query_args An array of query variable names to remove from a URL.
+	 * @return []
 	 */
 	public function classifai_removable_query_args( array $removable_query_args ): array {
 		$removable_query_args[] = 'classifai_classify';

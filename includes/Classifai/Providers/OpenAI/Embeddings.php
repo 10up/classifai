@@ -9,7 +9,7 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
-use Classifai\Watson\Normalizer;
+use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use WP_Error;
 
@@ -94,7 +94,7 @@ class Embeddings extends Provider {
 
 		add_settings_field(
 			static::ID . '_number_of_terms',
-			esc_html__( 'Number of titles', 'classifai' ),
+			esc_html__( 'Number of terms', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -992,7 +992,7 @@ class Embeddings extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof Classification ) {
-			$debug_info[ __( 'Number of titles', 'classifai' ) ]               = $provider_settings['number_of_titles'] ?? 1;
+			$debug_info[ __( 'Number of terms', 'classifai' ) ]                = $provider_settings['number_of_terms'] ?? 1;
 			$debug_info[ __( 'Taxonomy (category)', 'classifai' ) ]            = $provider_settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
 			$debug_info[ __( 'Taxonomy (category threshold)', 'classifai' ) ]  = $provider_settings['taxonomies']['category_threshold'];
 			$debug_info[ __( 'Taxonomy (tag)', 'classifai' ) ]                 = $provider_settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );

@@ -2,6 +2,9 @@
 
 namespace Classifai\Taxonomy;
 
+use function Classifai\Providers\Watson\get_feature_enabled;
+use function Classifai\Providers\Watson\get_feature_taxonomy;
+
 /**
  * The Classifai Category Taxonomy.
  *
@@ -49,7 +52,7 @@ class CategoryTaxonomy extends AbstractTaxonomy {
 	 * @return bool
 	 */
 	public function get_visibility(): bool {
-		return \Classifai\get_feature_enabled( 'category' ) &&
-			\Classifai\get_feature_taxonomy( 'category' ) === $this->get_name();
+		return get_feature_enabled( 'category' ) &&
+			get_feature_taxonomy( 'category' ) === $this->get_name();
 	}
 }

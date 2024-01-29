@@ -9,7 +9,7 @@ use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
-use Classifai\Watson\Normalizer;
+use Classifai\Normalizer;
 use WP_Error;
 use function Classifai\get_default_prompt;
 
