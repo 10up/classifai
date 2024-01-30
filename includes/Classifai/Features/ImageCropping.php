@@ -273,10 +273,8 @@ class ImageCropping extends Feature {
 
 	/**
 	 * Display meta data.
-	 *
-	 * @param \WP_Post $post The post object.
 	 */
-	public function attachment_data_meta_box_content( \WP_Post $post ) {
+	public function attachment_data_meta_box_content() {
 		$smart_crop = get_transient( 'classifai_azure_computer_vision_image_cropping_latest_response' ) ? __( 'Regenerate smart thumbnail', 'classifai' ) : __( 'Create smart thumbnail', 'classifai' );
 		?>
 

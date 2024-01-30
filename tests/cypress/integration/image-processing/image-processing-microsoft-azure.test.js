@@ -6,13 +6,27 @@ describe( 'Image processing Tests', () => {
 
 	before( () => {
 		cy.login();
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
-		cy.get( '#computer_vision_enable_image_captions_description' ).check();
-		cy.get( '#enable_image_tagging' ).check();
-		cy.get( '#enable_smart_cropping' ).check();
-		cy.get( '#enable_ocr' ).check();
-		cy.get( '#submit' ).click();
+
+		const imageProcessingFeatures = [
+			'feature_descriptive_text_generator',
+			'feature_image_tags_generator',
+			'feature_image_cropping',
+			'feature_image_to_text_generator',
+			'feature_pdf_to_text_generation',
+		];
+
+		imageProcessingFeatures.forEach( ( feature ) => {
+			cy.visit(
+				`/wp-admin/tools.php?page=classifai&tab=image_processing&feature=${ feature }`
+			);
+			cy.get( '#status' ).check();
+			cy.get( '#endpoint_url' )
+				.clear()
+				.type( 'http://e2e-test-image-processing.test' );
+			cy.get( '#api_key' ).clear().type( 'password' );
+			cy.get( '#submit' ).click();
+		} );
+
 		cy.optInAllFeatures();
 	} );
 
@@ -20,24 +34,14 @@ describe( 'Image processing Tests', () => {
 		cy.login();
 	} );
 
-	it( 'Can save Azure AI Vision "Image Processing" settings', () => {
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-
-		cy.get( '#url' )
-			.clear()
-			.type( 'http://e2e-test-image-processing.test' );
-		cy.get( '#api_key' ).clear().type( 'password' );
-		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
-		cy.get( '#computer_vision_enable_image_captions_description' ).check();
-		cy.get( '#enable_image_tagging' ).check();
-		cy.get( '#enable_smart_cropping' ).check();
-		cy.get( '#enable_ocr' ).check();
-		cy.get( '#submit' ).click();
-
-		cy.get( '.notice' ).contains( 'Settings saved.' );
-	} );
-
 	it( 'Can see Azure AI Vision Image processing actions on edit media page and verify Generated data.', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+		);
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
+		).check();
+		cy.get( '#submit' ).click();
 		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
@@ -56,20 +60,20 @@ describe( 'Image processing Tests', () => {
 			} );
 
 		// Verify Metabox with Image processing actions.
-		cy.get( '.postbox-header h2, #attachment_meta_box h2' )
+		cy.get( '.postbox-header h2, #classifai_image_processing h2' )
 			.first()
 			.contains( 'ClassifAI Image Processing' );
 		cy.get(
-			'.misc-publishing-actions label[for=rescan-captions]'
+			'#classifai_image_processing label[for=rescan-captions]'
 		).contains( 'No descriptive text? Rescan image' );
-		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).contains(
+		cy.get( '#classifai_image_processing label[for=rescan-tags]' ).contains(
 			'Rescan image for new tags'
 		);
-		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).contains(
+		cy.get( '#classifai_image_processing label[for=rescan-ocr]' ).contains(
 			'Rescan for text'
 		);
 		cy.get(
-			'.misc-publishing-actions label[for=rescan-smart-crop]'
+			'#classifai_image_processing label[for=rescan-smart-crop]'
 		).should( 'exist' );
 
 		// Verify generated Data.
@@ -89,7 +93,7 @@ describe( 'Image processing Tests', () => {
 			} );
 	} );
 
-	it( 'Can see Azure AI Vision Image processing actions on media model', () => {
+	it( 'Can see Azure AI Vision Image processing actions on media modal', () => {
 		const imageId = imageEditLink.split( 'post=' )[ 1 ]?.split( '&' )[ 0 ];
 		mediaModelLink = `wp-admin/upload.php?item=${ imageId }`;
 		cy.visit( mediaModelLink );
@@ -109,26 +113,75 @@ describe( 'Image processing Tests', () => {
 		};
 
 		// Disable features
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#computer_vision_enable_image_captions_alt' ).uncheck();
-		cy.get( '#computer_vision_enable_image_captions_caption' ).uncheck();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+		);
+		cy.wait( 1000 );
 		cy.get(
-			'#computer_vision_enable_image_captions_description'
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
 		).uncheck();
-		cy.get( '#enable_image_tagging' ).uncheck();
-		cy.get( '#enable_smart_cropping' ).uncheck();
-		cy.get( '#enable_ocr' ).uncheck();
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_caption'
+		).uncheck();
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_description'
+		).uncheck();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_tags_generator'
+		);
+		cy.get( '#status' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_cropping'
+		);
+		cy.get( '#status' ).uncheck();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_to_text_generator'
+		);
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is not available.
 		cy.verifyAIVisionEnabled( false, options );
 
 		// Enable features.
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
-		cy.get( '#enable_image_tagging' ).check();
-		cy.get( '#enable_smart_cropping' ).check();
-		cy.get( '#enable_ocr' ).check();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+		);
+		cy.wait( 1000 );
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
+		).check();
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_caption'
+		).check();
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_description'
+		).check();
+		cy.get( '#status' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_tags_generator'
+		);
+		cy.get( '#status' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_cropping'
+		);
+		cy.get( '#status' ).check();
+		cy.get( '#submit' ).click();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_to_text_generator'
+		);
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -142,59 +195,46 @@ describe( 'Image processing Tests', () => {
 		};
 
 		// Enable features.
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#computer_vision_enable_image_captions_alt' ).check();
-		cy.get( '#enable_image_tagging' ).check();
-		cy.get( '#enable_smart_cropping' ).check();
-		cy.get( '#enable_ocr' ).check();
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+		);
+		cy.wait( 1000 );
+		cy.get(
+			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
+		).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Disable access to admin role.
-		cy.disableFeatureForRoles(
-			'image_captions',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'image_tagging',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'smart_cropping',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'ocr',
-			[ 'administrator' ],
-			'computer_vision'
-		);
+		cy.disableFeatureForRoles( 'feature_descriptive_text_generator', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_tags_generator', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_cropping', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_to_text_generator', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyAIVisionEnabled( false, options );
 
 		// Enable access to admin role.
-		cy.enableFeatureForRoles(
-			'image_captions',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForRoles(
-			'image_tagging',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForRoles(
-			'smart_cropping',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForRoles(
-			'ocr',
-			[ 'administrator' ],
-			'computer_vision'
-		);
+		cy.enableFeatureForRoles( 'feature_descriptive_text_generator', [
+			'administrator',
+		] );
+		cy.enableFeatureForRoles( 'feature_image_tags_generator', [
+			'administrator',
+		] );
+		cy.enableFeatureForRoles( 'feature_image_cropping', [
+			'administrator',
+		] );
+		cy.enableFeatureForRoles( 'feature_image_to_text_generator', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyAIVisionEnabled( true, options );
@@ -207,46 +247,30 @@ describe( 'Image processing Tests', () => {
 		};
 
 		// Disable access to admin role.
-		cy.disableFeatureForRoles(
-			'image_captions',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'image_tagging',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'smart_cropping',
-			[ 'administrator' ],
-			'computer_vision'
-		);
-		cy.disableFeatureForRoles(
-			'ocr',
-			[ 'administrator' ],
-			'computer_vision'
-		);
+		cy.disableFeatureForRoles( 'feature_descriptive_text_generator', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_tags_generator', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_cropping', [
+			'administrator',
+		] );
+		cy.disableFeatureForRoles( 'feature_image_to_text_generator', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyAIVisionEnabled( false, options );
 
-		cy.enableFeatureForUsers(
-			'image_captions',
-			[ 'admin' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForUsers(
-			'image_tagging',
-			[ 'admin' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForUsers(
-			'smart_cropping',
-			[ 'admin' ],
-			'computer_vision'
-		);
-		cy.enableFeatureForUsers( 'ocr', [ 'admin' ], 'computer_vision' );
+		cy.enableFeatureForUsers( 'feature_descriptive_text_generator', [
+			'admin',
+		] );
+		cy.enableFeatureForUsers( 'feature_image_tags_generator', [ 'admin' ] );
+		cy.enableFeatureForUsers( 'feature_image_cropping', [ 'admin' ] );
+		cy.enableFeatureForUsers( 'feature_image_to_text_generator', [
+			'admin',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyAIVisionEnabled( true, options );
@@ -259,25 +283,25 @@ describe( 'Image processing Tests', () => {
 		};
 
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'image_captions', 'computer_vision' );
-		cy.enableFeatureOptOut( 'image_tagging', 'computer_vision' );
-		cy.enableFeatureOptOut( 'smart_cropping', 'computer_vision' );
-		cy.enableFeatureOptOut( 'ocr', 'computer_vision' );
+		cy.enableFeatureOptOut( 'feature_descriptive_text_generator' );
+		cy.enableFeatureOptOut( 'feature_image_tags_generator' );
+		cy.enableFeatureOptOut( 'feature_image_cropping' );
+		cy.enableFeatureOptOut( 'feature_image_to_text_generator' );
 
 		// opt-out
-		cy.optOutFeature( 'image_captions' );
-		cy.optOutFeature( 'image_tagging' );
-		cy.optOutFeature( 'smart_cropping' );
-		cy.optOutFeature( 'ocr' );
+		cy.optOutFeature( 'feature_descriptive_text_generator' );
+		cy.optOutFeature( 'feature_image_tags_generator' );
+		cy.optOutFeature( 'feature_image_cropping' );
+		cy.optOutFeature( 'feature_image_to_text_generator' );
 
 		// Verify that the feature is not available.
 		cy.verifyAIVisionEnabled( false, options );
 
 		// opt-in
-		cy.optInFeature( 'image_captions' );
-		cy.optInFeature( 'image_tagging' );
-		cy.optInFeature( 'smart_cropping' );
-		cy.optInFeature( 'ocr' );
+		cy.optInFeature( 'feature_descriptive_text_generator' );
+		cy.optInFeature( 'feature_image_tags_generator' );
+		cy.optInFeature( 'feature_image_cropping' );
+		cy.optInFeature( 'feature_image_to_text_generator' );
 
 		// Verify that the feature is available.
 		cy.verifyAIVisionEnabled( true, options );

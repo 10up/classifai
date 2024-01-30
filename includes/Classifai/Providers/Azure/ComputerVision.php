@@ -329,6 +329,10 @@ class ComputerVision extends Provider {
 	 * @return array|WP_Error
 	 */
 	public function smart_crop_image( array $metadata, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
@@ -379,6 +383,10 @@ class ComputerVision extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -423,6 +431,10 @@ class ComputerVision extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function generate_alt_tags( string $image_url, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature = new DescriptiveTextGenerator();
 		$rtn     = '';
 
@@ -515,6 +527,10 @@ class ComputerVision extends Provider {
 	 * @return array|WP_Error
 	 */
 	public function generate_image_tags( string $image_url, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$rtn      = [];
 		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
@@ -706,6 +722,10 @@ class ComputerVision extends Provider {
 		}
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
+
+		if ( ! $metadata ) {
+			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
+		}
 
 		switch ( $route_to_call ) {
 			case 'ocr':

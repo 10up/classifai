@@ -2,13 +2,26 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#classifai-settings-post' ).check();
-		cy.get( '#classifai-settings-publish' ).check();
-		cy.get( '#classifai-settings-category' ).check();
-		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
-		cy.get( '#classifai-settings-enable_content_classification' ).check();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get( '#endpoint_url' )
+			.clear()
+			.type( 'http://e2e-test-nlu-server.test/' );
+		cy.get( '#password' ).clear().type( 'password' );
+		cy.get( '#classifai-waston-cred-toggle' ).click();
+		cy.get( '#classifai_feature_classification_post_types_post' ).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_publish'
+		).check();
+		cy.get( '#status' ).check();
+		cy.get( '#submit' ).click();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_method_recommended_terms'
+		).check();
+		cy.wait( 1000 );
+		cy.get( '#category' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -21,34 +34,31 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	it( 'Can save IBM Watson "Language Processing" settings', () => {
 		// Disable content classification by openai.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_embeddings'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#enable_classification' ).uncheck();
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
-		);
+		cy.get( '#status' ).check();
+		cy.get( '#classifai_feature_classification_post_types_post' ).check();
+		cy.get( '#classifai_feature_classification_post_types_page' ).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_draft'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_pending'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_private'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_publish'
+		).check();
 
-		cy.get( '#classifai-settings-watson_url' )
-			.clear()
-			.type( 'http://e2e-test-nlu-server.test/' );
-		cy.get( '#classifai-settings-watson_password' )
-			.clear()
-			.type( 'password' );
-
-		cy.get( '#classifai-settings-automatic_classification' ).check();
-		cy.get( '#classifai-settings-post' ).check();
-		cy.get( '#classifai-settings-page' ).check();
-		cy.get( '#classifai-settings-draft' ).check();
-		cy.get( '#classifai-settings-pending' ).check();
-		cy.get( '#classifai-settings-private' ).check();
-		cy.get( '#classifai-settings-publish' ).check();
-
-		cy.get( '#classifai-settings-category' ).check();
-		cy.get( '#classifai-settings-keyword' ).check();
-		cy.get( '#classifai-settings-entity' ).check();
-		cy.get( '#classifai-settings-concept' ).check();
+		cy.get( '#category' ).check();
+		cy.get( '#keyword' ).check();
+		cy.get( '#entity' ).check();
+		cy.get( '#concept' ).check();
 		cy.get( '#submit' ).click();
 	} );
 
@@ -94,7 +104,10 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
 
-		cy.get( '#classifai-settings-manual_review' ).check();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_mode_manual_review'
+		).check();
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -177,10 +190,13 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.deactivatePlugin( 'classic-editor' );
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
 
-		cy.get( '#classifai-settings-automatic_classification' ).check();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_mode_automatic_classification'
+		).check();
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -251,21 +267,13 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 
 		// Update Threshold to 75.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
 
-		cy.get( '#classifai-settings-category_threshold' )
-			.clear()
-			.type( threshold );
-		cy.get( '#classifai-settings-keyword_threshold' )
-			.clear()
-			.type( threshold );
-		cy.get( '#classifai-settings-entity_threshold' )
-			.clear()
-			.type( threshold );
-		cy.get( '#classifai-settings-concept_threshold' )
-			.clear()
-			.type( threshold );
+		cy.get( '#category_threshold' ).clear().type( threshold );
+		cy.get( '#keyword_threshold' ).clear().type( threshold );
+		cy.get( '#entity_threshold' ).clear().type( threshold );
+		cy.get( '#concept_threshold' ).clear().type( threshold );
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -303,22 +311,17 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		const threshold1 = 75;
 		// Update classification method to "Add recommended terms" and threshold value.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
 
-		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
-		cy.get( '#classifai-settings-category_threshold' )
-			.clear()
-			.type( threshold1 );
-		cy.get( '#classifai-settings-keyword_threshold' )
-			.clear()
-			.type( threshold1 );
-		cy.get( '#classifai-settings-entity_threshold' )
-			.clear()
-			.type( threshold1 );
-		cy.get( '#classifai-settings-concept_threshold' )
-			.clear()
-			.type( threshold1 );
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_method_recommended_terms'
+		).check();
+		cy.get( '#category_threshold' ).clear().type( threshold1 );
+		cy.get( '#keyword_threshold' ).clear().type( threshold1 );
+		cy.get( '#entity_threshold' ).clear().type( threshold1 );
+		cy.get( '#concept_threshold' ).clear().type( threshold1 );
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -349,22 +352,17 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		const threshold2 = 70;
 		// Update classification method to "Only classify based on existing terms" and threshold value.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
 
-		cy.get( '#watson_nlu_classification_method_existing_terms' ).check();
-		cy.get( '#classifai-settings-category_threshold' )
-			.clear()
-			.type( threshold2 );
-		cy.get( '#classifai-settings-keyword_threshold' )
-			.clear()
-			.type( threshold2 );
-		cy.get( '#classifai-settings-entity_threshold' )
-			.clear()
-			.type( threshold2 );
-		cy.get( '#classifai-settings-concept_threshold' )
-			.clear()
-			.type( threshold2 );
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_method_existing_terms'
+		).check();
+		cy.get( '#category_threshold' ).clear().type( threshold2 );
+		cy.get( '#keyword_threshold' ).clear().type( threshold2 );
+		cy.get( '#entity_threshold' ).clear().type( threshold2 );
+		cy.get( '#concept_threshold' ).clear().type( threshold2 );
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -393,23 +391,32 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 
 		// Update classification method back to "Add recommended terms".
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
 
-		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
+		cy.get(
+			'#classifai_feature_classification_classification_method_recommended_terms'
+		).check();
 		cy.get( '#submit' ).click();
 	} );
 
 	it( 'Can create post and tags get created by ClassifAI', () => {
 		const threshold = 70;
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#watson_nlu_classification_method_recommended_terms' ).check();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get(
+			'#classifai_feature_classification_classification_method_recommended_terms'
+		).check();
 		cy.get( '#classifai-settings-category_taxonomy' ).select( 'post_tag' );
 		cy.get( '#classifai-settings-keyword_taxonomy' ).select( 'post_tag' );
 		cy.get( '#classifai-settings-entity_taxonomy' ).select( 'post_tag' );
 		cy.get( '#classifai-settings-concept_taxonomy' ).select( 'post_tag' );
+		cy.get( '#category_threshold' ).clear().type( threshold );
+		cy.get( '#keyword_threshold' ).clear().type( threshold );
+		cy.get( '#entity_threshold' ).clear().type( threshold );
+		cy.get( '#concept_threshold' ).clear().type( threshold );
 		cy.get( '#submit' ).click();
 
 		// Create Test Post
@@ -436,9 +443,9 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	it( 'Can enable/disable Natural Language Understanding features.', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#classifai-settings-enable_content_classification' ).uncheck();
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is not available.
@@ -446,9 +453,9 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#classifai-settings-enable_content_classification' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -458,13 +465,11 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 	it( 'Can limit Natural Language Understanding features by roles', () => {
 		// Disable access to admin role.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
+		cy.get( '#role_based_access' ).check();
 		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).check();
-		cy.get(
-			'#watson_nlu_content_classification_roles_administrator'
+			'#classifai_feature_classification_roles_administrator'
 		).uncheck();
 
 		cy.get( '#submit' ).click();
@@ -477,11 +482,9 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
+		cy.get( '#role_based_access' ).check();
 		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).check();
-		cy.get(
-			'#watson_nlu_content_classification_roles_administrator'
+			'#classifai_feature_classification_roles_administrator'
 		).check();
 
 		cy.get( '#submit' ).click();
@@ -496,12 +499,8 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).uncheck();
-		cy.get(
-			'#classifai-settings-content_classification_user_based_access'
-		).uncheck();
+		cy.get( '#role_based_access' ).uncheck();
+		cy.get( '#user_based_access' ).uncheck();
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
 
@@ -512,27 +511,23 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).uncheck();
-		cy.get(
-			'#classifai-settings-content_classification_user_based_access'
-		).check();
+		cy.get( '#role_based_access' ).uncheck();
+		cy.get( '#user_based_access' ).check();
 		cy.get( 'body' ).then( ( $body ) => {
 			if (
 				$body.find(
-					'#content_classification_users-container .components-form-token-field__remove-token'
+					'.allowed_users_row .components-form-token-field__remove-token'
 				).length > 0
 			) {
 				cy.get(
-					'#content_classification_users-container .components-form-token-field__remove-token'
+					'.allowed_users_row .components-form-token-field__remove-token'
 				).click( {
 					multiple: true,
 				} );
 			}
 		} );
 		cy.get(
-			'#content_classification_users-container input.components-form-token-field__input'
+			'.allowed_users_row input.components-form-token-field__input'
 		).type( 'admin' );
 		cy.wait( 1000 );
 		cy.get(
@@ -548,12 +543,8 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).check();
-		cy.get(
-			'#classifai-settings-content_classification_user_based_access'
-		).uncheck();
+		cy.get( '#role_based_access' ).check();
+		cy.get( '#user_based_access' ).uncheck();
 
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -564,27 +555,21 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get(
-			'#classifai-settings-content_classification_role_based_access'
-		).check();
-		cy.get(
-			'#classifai-settings-content_classification_user_based_access'
-		).check();
-		cy.get(
-			'#classifai-settings-content_classification_user_based_opt_out'
-		).check();
+		cy.get( '#role_based_access' ).check();
+		cy.get( '#user_based_access' ).check();
+		cy.get( '#user_based_opt_out' ).check();
 
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
 
 		// opt-out
-		cy.optOutFeature( 'content_classification' );
+		cy.optOutFeature( 'feature_classification' );
 
 		// Verify that the feature is not available.
 		cy.verifyClassifyContentEnabled( false );
 
 		// opt-in
-		cy.optInFeature( 'content_classification' );
+		cy.optInFeature( 'feature_classification' );
 
 		// Verify that the feature is available.
 		cy.verifyClassifyContentEnabled( true );
