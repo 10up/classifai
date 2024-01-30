@@ -390,7 +390,7 @@ abstract class Feature {
 	}
 
 	/**
-	 * Merges the data settings with the default settings recursively,
+	 * Merges the data settings with the default settings recursively.
 	 *
 	 * @internal
 	 *

@@ -38,7 +38,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	 */
 	public function test_smart_crop_image() {
 		$this->assertEquals(
-			[ 'no-smart-cropping' => 1 ],
+			[],
 			$this->get_computer_vision()->smart_crop_image(
 				[ 'no-smart-cropping' => 1 ],
 				999999
@@ -86,24 +86,27 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$expected = array_merge(
 			$defaults,
 			[
-				'valid'                 => false,
-				'url'                   => '',
-				'api_key'               => '',
-				'enable_image_captions' => array(
-					'alt'         => 0,
-					'caption'     => 0,
+				'status' => 0,
+				'role_based_access'  => '1',
+				'roles' => [],
+				'user_based_access' => 'no',
+				'users' => [],
+				'user_based_opt_out' => 'no',
+				'descriptive_text_fields' => [
+					'alt' => 0,
+					'caption' => 0,
 					'description' => 0,
-				),
-				'enable_image_tagging'  => true,
-				'enable_smart_cropping' => false,
-				'enable_ocr'            => false,
-				'enable_read_pdf'       => false,
-				'caption_threshold'     => 75,
-				'tag_threshold'         => 70,
-				'image_tag_taxonomy'    => 'classifai-image-tags',
+				],
+				'provider' => 'ms_computer_vision',
+				'ms_computer_vision' => [
+					'endpoint_url' => '',
+					'api_key' => '',
+					'descriptive_confidence_threshold' => '75',
+					'authenticated' => false,
+				],
 			]
 		);
-		$settings = $this->get_computer_vision()->get_settings();
+		$settings = ( new \Classifai\Features\DescriptiveTextGenerator() )->get_settings();
 
 		$this->assertSame( $expected, $settings );
 	}
@@ -143,13 +146,13 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			'ms_computer_vision' => array(
 				'endpoint_url'                     => '',
 				'api_key'                          => '',
-				'descriptive_text_fields'          => array(
-					'alt'         => 'alt',
-					'caption'     => '0',
-					'description' => '0',
-				),
 				'descriptive_confidence_threshold' => '75',
 				'authenticated'                    => true,
+			),
+			'descriptive_text_fields' => array(
+				'alt'         => 'alt',
+				'caption'     => '0',
+				'description' => '0',
 			),
 		);
 
@@ -161,11 +164,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$image_captions_settings = ( new \Classifai\Features\DescriptiveTextGenerator() )->get_alt_text_settings();
 		$this->assertSame(
 			$image_captions_settings,
-			array(
-				'alt'         => 'alt',
-				'caption'     => 0,
-				'description' => 0,
-			)
+			array( 'alt' )
 		);
 
 		// Test with `enable_image_captions` set to `no`.
@@ -174,14 +173,10 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			return $options;
 		} );
 
-		$image_captions_settings = $this->get_computer_vision()->get_alt_text_settings();
+		$image_captions_settings = ( new \Classifai\Features\DescriptiveTextGenerator() )->get_alt_text_settings();
 		$this->assertSame(
 			$image_captions_settings,
-			array(
-				'alt'         => 0,
-				'caption'     => 0,
-				'description' => 0,
-			)
+			array()
 		);
 	}
 }

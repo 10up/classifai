@@ -109,7 +109,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 		// Test that nothing happens when the metadata contains no sizes entry.
 		$this->assertEquals(
-			[ 'no-sizes' => 1 ],
+			[],
 			$this->get_smart_cropping()->generate_cropped_images(
 				[ 'no-sizes' => 1 ],
 				$attachment

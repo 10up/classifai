@@ -316,8 +316,8 @@ class NLU extends Provider {
 			'apikey'                => '',
 			'username'              => '',
 			'password'              => '',
-			'classification_mode'   => 'automatic_classification',
-			'classification_method' => 'existing_terms',
+			'classification_mode'   => 'manual_review',
+			'classification_method' => 'recommended_terms',
 		];
 
 		switch ( $this->feature_instance::ID ) {

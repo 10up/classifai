@@ -5,9 +5,6 @@
 
 namespace Classifai\Services;
 
-use WP_Error;
-use function Classifai\find_provider_class;
-
 abstract class Service {
 
 	/**

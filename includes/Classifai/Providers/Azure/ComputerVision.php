@@ -788,6 +788,14 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
+			if ( ! isset( $provider_settings['descriptive_text_fields'] ) || ! is_array( $provider_settings['descriptive_text_fields'] ) ) {
+				$provider_settings['descriptive_text_fields'] = array(
+					'alt'         => 0,
+					'caption'     => 0,
+					'description' => 0,
+				);
+			}
+
 			$descriptive_text = array_filter(
 				$provider_settings['descriptive_text_fields'],
 				function ( $type ) {
@@ -801,7 +809,7 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
-			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'];
+			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'] ?? 'image_tags';
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ] = $provider_settings['tag_confidence_threshold'];
 			$debug_info[ __( 'Latest response:', 'classifai' ) ]     = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_tags_latest_response' ) );
 		}
