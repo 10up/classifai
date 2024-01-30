@@ -52,19 +52,16 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		};
 
 		add_filter( 'filesystem_method', $filter_file_system_method );
-		$this->assertEquals(
+		$this->assertWPError( $this->get_computer_vision()->smart_crop_image(
 			[ 'not-direct-file-system-method' => 1 ],
-			$this->get_computer_vision()->smart_crop_image(
-				[ 'not-direct-file-system-method' => 1 ],
-				999999
-			)
-		);
+			999999
+		) );
 		remove_filter( 'filesystem_method', $filter_file_system_method );
 
 		// Test that SmartCropping is initiated and runs, as will be indicated in the coverage report, though it won't
 		// actually do anything because the data and attachment are invalid.
 		$this->assertEquals(
-			[ 'my-data' => 1 ],
+			[],
 			$this->get_computer_vision()->smart_crop_image(
 				[ 'my-data' => 1 ],
 				999999
@@ -86,7 +83,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$expected = array_merge(
 			$defaults,
 			[
-				'status' => 0,
+				'status' => '0',
 				'role_based_access'  => '1',
 				'roles' => [],
 				'user_based_access' => 'no',
@@ -101,8 +98,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'ms_computer_vision' => [
 					'endpoint_url' => '',
 					'api_key' => '',
-					'descriptive_confidence_threshold' => '75',
 					'authenticated' => false,
+					'descriptive_confidence_threshold' => 75,
 				],
 			]
 		);
@@ -168,7 +165,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		);
 
 		// Test with `enable_image_captions` set to `no`.
-		$options['ms_computer_vision']['descriptive_text_fields']['alt'] = '0';
+		$options['descriptive_text_fields']['alt'] = '0';
 		add_filter( 'pre_option_classifai_feature_descriptive_text_generator', function() use( $options ) {
 			return $options;
 		} );
