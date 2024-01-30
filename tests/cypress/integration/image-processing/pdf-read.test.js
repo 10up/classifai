@@ -3,7 +3,9 @@ import { getPDFData } from '../../plugins/functions';
 describe( 'PDF read Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation' );
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		);
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
@@ -15,7 +17,9 @@ describe( 'PDF read Tests', () => {
 
 	let pdfEditLink = '';
 	it( 'Can save "PDF scanning" settings', () => {
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation' );
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		);
 
 		cy.get( '#endpoint_url' )
 			.clear()
@@ -93,10 +97,9 @@ describe( 'PDF read Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_pdf_to_text_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_pdf_to_text_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.visit( pdfEditLink );
@@ -105,10 +108,9 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_pdf_to_text_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_pdf_to_text_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.visit( pdfEditLink );
@@ -119,10 +121,9 @@ describe( 'PDF read Tests', () => {
 
 	it( 'Can enable/disable PDF scanning feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_pdf_to_text_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_pdf_to_text_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.visit( pdfEditLink );
@@ -131,10 +132,9 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_pdf_to_text_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_pdf_to_text_generation', [
+			'admin',
+		] );
 
 		// Verify that the feature is available.
 		cy.visit( pdfEditLink );

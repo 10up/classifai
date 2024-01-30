@@ -21,7 +21,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		);
 
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_content_resizing_roles_administrator' ).check();
+		cy.get(
+			'#classifai_feature_content_resizing_roles_administrator'
+		).check();
 		cy.get( '#submit' ).click();
 
 		cy.createPost( {
@@ -79,7 +81,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Add three custom shrink prompts.
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset' )
@@ -87,7 +89,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -95,7 +97,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Add three custom grow prompts.
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset:first' )
@@ -103,7 +105,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -111,77 +113,77 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Set the data for each prompt.
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][1][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][1][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom shrink prompt' );
 
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][2][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][2][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][3][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][3][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom shrink prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][1][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][1][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom grow prompt' );
 
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][2][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][2][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][3][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][3][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom grow prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][3][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
 			.click( { force: true } );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][3][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
@@ -189,7 +191,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][2][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
@@ -198,13 +200,13 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][condense_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
 			.should( 'have.length', 3 );
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][2][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
@@ -214,7 +216,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[openai_chatgpt][expand_text_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -294,19 +296,17 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable resize content feature by role', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_content_resizing',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_content_resizing',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );
@@ -314,19 +314,15 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable resize content feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_content_resizing',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_content_resizing',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_content_resizing', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );

@@ -126,8 +126,8 @@ Cypress.Commands.add( 'optInAllFeatures', () => {
 /**
  * Enable role based access for a feature.
  *
- * @param {string} feature  The feature to enable.
- * @param {string} roles    The roles to enable.
+ * @param {string} feature The feature to enable.
+ * @param {string} roles   The roles to enable.
  */
 Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 	cy.visit(
@@ -144,46 +144,40 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 /**
  * Disable role based access for a feature.
  *
- * @param {string} feature  The feature to disable.
- * @param {string} roles    The roles to disable.
+ * @param {string} feature The feature to disable.
+ * @param {string} roles   The roles to disable.
  */
-Cypress.Commands.add(
-	'disableFeatureForRoles',
-	( feature, roles ) => {
-		cy.visit(
-			`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
-		);
-		cy.get( '#status' ).check();
-		cy.get( `#role_based_access` ).check();
-		roles.forEach( ( role ) => {
-			cy.get( `#classifai_${ feature }_roles_${ role }` ).uncheck();
-		} );
-		cy.get( '#submit' ).click();
-		cy.get( '.notice' ).contains( 'Settings saved.' );
-	}
-);
+Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
+	cy.visit(
+		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
+	);
+	cy.get( '#status' ).check();
+	cy.get( `#role_based_access` ).check();
+	roles.forEach( ( role ) => {
+		cy.get( `#classifai_${ feature }_roles_${ role }` ).uncheck();
+	} );
+	cy.get( '#submit' ).click();
+	cy.get( '.notice' ).contains( 'Settings saved.' );
+} );
 
 /**
  * Enable user based access for a feature.
  *
- * @param {string} feature  The feature to enable.
- * @param {string} users    The users to enable.
+ * @param {string} feature The feature to enable.
+ * @param {string} users   The users to enable.
  */
 Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 	cy.visit(
 		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
 	);
 	cy.get( `#user_based_access` ).check();
-	cy.wait(1000)
+	cy.wait( 1000 );
 	cy.get( '.allowed_users_row' ).then( ( $body ) => {
 		if (
-			$body.find(
-				`.components-form-token-field__remove-token`
-			).length > 0
+			$body.find( `.components-form-token-field__remove-token` ).length >
+			0
 		) {
-			cy.get(
-				`.components-form-token-field__remove-token`
-			).click( {
+			cy.get( `.components-form-token-field__remove-token` ).click( {
 				multiple: true,
 			} );
 		}
@@ -194,9 +188,7 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 			`.allowed_users_row input.components-form-token-field__input`
 		).type( user );
 
-		cy.get(
-			'[aria-label="admin (admin)"]'
-		).click();
+		cy.get( '[aria-label="admin (admin)"]' ).click();
 	} );
 	cy.get( '#submit' ).click();
 	cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -205,7 +197,7 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 /**
  * Enable user based opt-out for a feature.
  *
- * @param {string} feature  The feature to enable.
+ * @param {string} feature The feature to enable.
  */
 Cypress.Commands.add( 'enableFeatureOptOut', ( feature ) => {
 	cy.visit(
@@ -322,11 +314,11 @@ Cypress.Commands.add(
  */
 Cypress.Commands.add( 'verifyTextToSpeechEnabled', ( enabled = true ) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
-	console.log( shouldExist )
+
 	cy.visit( '/wp-admin/edit.php' );
 	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
 	cy.closeWelcomeGuide();
-	cy.get( 'body' ).then( $body => {
+	cy.get( 'body' ).then( ( $body ) => {
 		if ( $body.find( '.classifai-panel' ).length ) {
 			$body.find( '.classifai-panel' ).click();
 		}
@@ -420,17 +412,17 @@ Cypress.Commands.add(
 		const shouldExist = enabled ? 'exist' : 'not.exist';
 		// Verify with Image processing features in attachment metabox.
 		cy.visit( options.imageEditLink );
-		cy.get( '.misc-publishing-actions label[for=rescan-captions]' ).should(
+		cy.get(
+			'#classifai_image_processing label[for=rescan-captions]'
+		).should( shouldExist );
+		cy.get( '#classifai_image_processing label[for=rescan-tags]' ).should(
 			shouldExist
 		);
-		cy.get( '.misc-publishing-actions label[for=rescan-tags]' ).should(
-			shouldExist
-		);
-		cy.get( '.misc-publishing-actions label[for=rescan-ocr]' ).should(
+		cy.get( '#classifai_image_processing label[for=rescan-ocr]' ).should(
 			shouldExist
 		);
 		cy.get(
-			'.misc-publishing-actions label[for=rescan-smart-crop]'
+			'#classifai_image_processing label[for=rescan-smart-crop]'
 		).should( shouldExist );
 
 		// Verify with Image processing features in media model.

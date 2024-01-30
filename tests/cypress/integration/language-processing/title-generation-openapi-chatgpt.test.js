@@ -123,7 +123,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 		// Add three custom prompts.
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][0][default]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset' )
@@ -131,7 +131,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][0][default]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -139,40 +139,40 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 		// Set the data for each prompt.
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][1][title]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][1][prompt]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom title prompt' );
 
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][2][title]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][2][prompt]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][3][title]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][3][prompt]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom title prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][3][default]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
@@ -180,7 +180,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][2][default]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
@@ -189,7 +189,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_feature_title_generation[openai_chatgpt][generate_title_prompt][0][default]"]'
+			'[name="classifai_feature_title_generation[generate_title_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -290,19 +290,17 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_title_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_title_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyTitleGenerationEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_title_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_title_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyTitleGenerationEnabled( true );
@@ -310,19 +308,15 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 	it( 'Can enable/disable title generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_title_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_title_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyTitleGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_title_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_title_generation', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyTitleGenerationEnabled( true );

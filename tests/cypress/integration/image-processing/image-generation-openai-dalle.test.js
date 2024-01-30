@@ -2,7 +2,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
@@ -15,13 +15,15 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can save OpenAI "Image Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_image_generation_roles_administrator' ).check();
+		cy.get(
+			'#classifai_feature_image_generation_roles_administrator'
+		).check();
 		cy.get( '#number_of_images' ).select( '2' );
 		cy.get( '#image_size' ).select( '512x512' );
 		cy.get( '#submit' ).click();
@@ -80,7 +82,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	it( 'Can enable/disable image generation feature', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
@@ -90,7 +92,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
@@ -101,11 +103,13 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can generate image directly in media library', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_image_generation_roles_administrator' ).check();
+		cy.get(
+			'#classifai_feature_image_generation_roles_administrator'
+		).check();
 		cy.get( '#submit' ).click();
 
 		cy.visit( '/wp-admin/upload.php' );
@@ -128,25 +132,23 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	it( 'Can enable/disable image generation feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_image_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_image_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyImageGenerationEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_image_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_image_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyImageGenerationEnabled( true );
@@ -154,19 +156,15 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can enable/disable image generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_image_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_image_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyImageGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_image_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_image_generation', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyImageGenerationEnabled( true );

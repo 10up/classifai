@@ -117,7 +117,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		// Add three custom prompts.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][0][default]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset' )
@@ -125,7 +125,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][0][default]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
 		)
 			.parents( 'td' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -133,40 +133,40 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		// Set the data for each prompt.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][1][title]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][1][prompt]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom excerpt prompt' );
 
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][2][title]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][2][prompt]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][3][title]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][3][prompt]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom excerpt prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][3][default]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
@@ -174,7 +174,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][2][default]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
@@ -183,7 +183,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[openai_chatgpt][generate_excerpt_prompt][0][default]"]'
+			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -263,19 +263,17 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_excerpt_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_excerpt_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyExcerptGenerationEnabled( false );
 
 		// enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_excerpt_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_excerpt_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyExcerptGenerationEnabled( true );
@@ -283,24 +281,17 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can enable/disable excerpt generation feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_excerpt_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_excerpt_generation', [
+			'administrator',
+		] );
 
-		cy.enableFeatureForUsers(
-			'feature_excerpt_generation',
-			[]
-		);
+		cy.enableFeatureForUsers( 'feature_excerpt_generation', [] );
 
 		// Verify that the feature is not available.
 		cy.verifyExcerptGenerationEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_excerpt_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_excerpt_generation', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyExcerptGenerationEnabled( true );
@@ -308,7 +299,10 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'User can opt-out excerpt generation feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'feature_excerpt_generation', 'openai_chatgpt' );
+		cy.enableFeatureOptOut(
+			'feature_excerpt_generation',
+			'openai_chatgpt'
+		);
 
 		// opt-out
 		cy.optOutFeature( 'feature_excerpt_generation' );

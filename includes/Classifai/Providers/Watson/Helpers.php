@@ -207,16 +207,15 @@ function get_feature_enabled( string $classify_by ): bool {
  * @return float
  */
 function get_feature_threshold( string $feature ): float {
-	$settings  = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$threshold = 0;
+	$classification_feature = new Classification();
+	$settings               = $classification_feature->get_settings( NLU::ID );
+	$threshold              = 0;
 
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature . '_threshold' ] ) ) {
-			$threshold = filter_var(
-				$settings['features'][ $feature . '_threshold' ],
-				FILTER_VALIDATE_INT
-			);
-		}
+	if ( ! empty( $settings ) && ! empty( $settings[ $feature . '_threshold' ] ) ) {
+		$threshold = filter_var(
+			$settings[ $feature . '_threshold' ],
+			FILTER_VALIDATE_INT
+		);
 	}
 
 	if ( empty( $threshold ) ) {
@@ -237,7 +236,7 @@ function get_feature_threshold( string $feature ): float {
 	 * @hook classifai_feature_threshold
 	 *
 	 * @param {float} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
-	 * @param {string} $feature   The feature in question.
+	 * @param {string} $feature  The feature in question.
 	 *
 	 * @return {float} The filtered threshold.
 	 */

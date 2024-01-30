@@ -4,7 +4,9 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
-		cy.get( '#classifai_feature_text_to_speech_generation_post_types_post' ).check( 'post' );
+		cy.get(
+			'#classifai_feature_text_to_speech_generation_post_types_post'
+		).check( 'post' );
 		cy.get( '#endpoint_url' ).clear();
 		cy.get( '#endpoint_url' ).type( 'https://service.com' );
 		cy.get( '#api_key' ).type( 'password' );
@@ -112,7 +114,9 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
-		cy.get( '#classifai_feature_text_to_speech_generation_post_types_post' ).uncheck( 'post' );
+		cy.get(
+			'#classifai_feature_text_to_speech_generation_post_types_post'
+		).uncheck( 'post' );
 		cy.get( '#submit' ).click();
 
 		cy.visit( '/text-to-speech-test/' );
@@ -135,7 +139,9 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_text_to_speech_generation_post_types_post' ).check( 'post' );
+		cy.get(
+			'#classifai_feature_text_to_speech_generation_post_types_post'
+		).check( 'post' );
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -147,23 +153,23 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
-		cy.get( '#classifai_feature_text_to_speech_generation_post_types_post' ).check( 'post' );
+		cy.get(
+			'#classifai_feature_text_to_speech_generation_post_types_post'
+		).check( 'post' );
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_text_to_speech_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_text_to_speech_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_text_to_speech_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_text_to_speech_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyTextToSpeechEnabled( true );
@@ -171,19 +177,17 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 
 	it( 'Can enable/disable text to speech feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_text_to_speech_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_text_to_speech_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_text_to_speech_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_text_to_speech_generation', [
+			'admin',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyTextToSpeechEnabled( true );

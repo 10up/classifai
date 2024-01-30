@@ -24,7 +24,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_audio_transcripts_generation_roles_administrator' ).check();
+		cy.get(
+			'#classifai_feature_audio_transcripts_generation_roles_administrator'
+		).check();
 		cy.get( '#submit' ).click();
 	} );
 
@@ -114,19 +116,17 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		};
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_audio_transcripts_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_audio_transcripts_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_audio_transcripts_generation',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_audio_transcripts_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifySpeechToTextEnabled( true, options );
@@ -139,19 +139,17 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		};
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_audio_transcripts_generation',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_audio_transcripts_generation', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_audio_transcripts_generation',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_audio_transcripts_generation', [
+			'admin',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifySpeechToTextEnabled( true, options );

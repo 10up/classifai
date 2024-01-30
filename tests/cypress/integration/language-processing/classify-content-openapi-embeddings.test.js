@@ -23,9 +23,17 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 		cy.get( '#status' ).check();
 		cy.get( '#classifai_feature_classification_post_types_post' ).check();
-		cy.get( '#classifai_feature_classification_post_statuses_publish' ).check();
-		cy.get( '#classifai_feature_classification_openai_embeddings_taxonomies_category' ).check();
-		cy.get( '#classifai_feature_classification_openai_embeddings_taxonomies_category_threshold' ).clear().type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
+		cy.get(
+			'#classifai_feature_classification_post_statuses_publish'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_openai_embeddings_taxonomies_category_threshold'
+		)
+			.clear()
+			.type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
 		cy.get( '#number_of_terms' ).clear().type( 1 );
 		cy.get( '#submit' ).click();
 	} );
@@ -50,7 +58,9 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
-		cy.get( '#classifai_feature_classification_openai_embeddings_taxonomies_category' ).uncheck();
+		cy.get(
+			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
+		).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Create test term.
@@ -93,9 +103,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 				)
 				.should( 'be.checked' );
 			cy.wrap( $panel )
-				.find(
-					'.editor-post-taxonomies__hierarchical-terms-list'
-				)
+				.find( '.editor-post-taxonomies__hierarchical-terms-list' )
 				.children()
 				.contains( 'Test' );
 		} );
@@ -164,8 +172,12 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 
 		cy.get( '#status' ).check();
 		cy.get( '#classifai_feature_classification_post_types_post' ).check();
-		cy.get( '#classifai_feature_classification_post_statuses_publish' ).check();
-		cy.get( '#classifai_feature_classification_openai_embeddings_taxonomies_category' ).check();
+		cy.get(
+			'#classifai_feature_classification_post_statuses_publish'
+		).check();
+		cy.get(
+			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
+		).check();
 		cy.get( '#number_of_terms' ).clear().type( 1 );
 		cy.get( '#submit' ).click();
 
@@ -212,19 +224,17 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#submit' ).click();
 
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_classification',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_classification', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyClassifyContentEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'feature_classification',
-			[ 'administrator' ]
-		);
+		cy.enableFeatureForRoles( 'feature_classification', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyClassifyContentEnabled( true );
@@ -232,19 +242,15 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 
 	it( 'Can enable/disable content classification feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'feature_classification',
-			[ 'administrator' ]
-		);
+		cy.disableFeatureForRoles( 'feature_classification', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyClassifyContentEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'feature_classification',
-			[ 'admin' ]
-		);
+		cy.enableFeatureForUsers( 'feature_classification', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyClassifyContentEnabled( true );

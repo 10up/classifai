@@ -118,7 +118,7 @@ class NLU extends Provider {
 				'default_value' => $settings['username'],
 				'input_type'    => 'text',
 				'large'         => true,
-				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hidden' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hide-username' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 

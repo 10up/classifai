@@ -64,9 +64,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 	$toggler.addEventListener( 'click', ( e ) => {
 		e.preventDefault();
-		$userFieldWrapper.classList.toggle( 'hidden' );
+		$userFieldWrapper.classList.toggle( 'hide-username' );
 
-		if ( $userFieldWrapper.classList.contains( 'hidden' ) ) {
+		if ( $userFieldWrapper.classList.contains( 'hide-username' ) ) {
 			$toggler.innerText = ClassifAI.use_password;
 			$passwordFieldTitle.innerText = ClassifAI.api_key;
 			$userField.value = 'apikey';

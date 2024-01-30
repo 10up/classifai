@@ -723,6 +723,10 @@ class ComputerVision extends Provider {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
+		if ( ! $metadata ) {
+			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
+		}
+
 		switch ( $route_to_call ) {
 			case 'ocr':
 				return $this->ocr_processing( $metadata, $attachment_id );
