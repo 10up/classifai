@@ -63,8 +63,6 @@ class Personalizer extends Provider {
 
 	/**
 	 * Render the provider fields.
-	 *
-	 * @return void
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
@@ -118,7 +116,7 @@ class Personalizer extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_provider_settings() {
+	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'endpoint_url'  => '',
 			'api_key'       => '',
@@ -139,7 +137,7 @@ class Personalizer extends Provider {
 	 * @param array $new_settings The settings array.
 	 * @return array
 	 */
-	public function sanitize_settings( $new_settings ) {
+	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->feature_instance->get_settings();
 
 		$new_settings['endpoint_url'] = esc_url_raw( $new_settings['endpoint_url'] ?? $settings['endpoint_url'] );
@@ -187,7 +185,7 @@ class Personalizer extends Provider {
 	 * @param array $attributes The block attributes.
 	 * @return array recent actions based on block attributes.
 	 */
-	protected function get_recent_actions( $attributes ) {
+	protected function get_recent_actions( array $attributes ): array {
 		$post_type      = $attributes['contentPostType'];
 		$key_attributes = array(
 			'terms' => isset( $attributes['taxQuery'] ) ? $attributes['taxQuery'] : array(),
@@ -265,9 +263,9 @@ class Personalizer extends Provider {
 	 * Get Recommended content Id from Azure personalizer.
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return Object
+	 * @return mixed
 	 */
-	public function get_recommended_content( $attributes ) {
+	public function get_recommended_content( array $attributes ) {
 		$actions = $this->get_recent_actions( $attributes );
 
 		if ( empty( $actions ) ) {
@@ -337,10 +335,9 @@ class Personalizer extends Provider {
 	 * Renders the `classifai/recommended-content-block` block on server.
 	 *
 	 * @param array $attributes The block attributes.
-	 *
 	 * @return string Returns the post content with recommended content added.
 	 */
-	public function render_recommended_content( $attributes ) {
+	public function render_recommended_content( array $attributes ): string {
 		/**
 		 * Filter the recommended content block attributes
 		 *
@@ -553,7 +550,7 @@ class Personalizer extends Provider {
 	 * @param int $post_id Post Object.
 	 * @return array
 	 */
-	protected function get_post_features( $post_id ) {
+	protected function get_post_features( int $post_id ): array {
 		$features = array(
 			'title'   => $this->get_string_words( get_the_title( $post_id ) ),
 			'excerpt' => $this->get_string_words( get_the_excerpt( $post_id ) ),
@@ -604,7 +601,7 @@ class Personalizer extends Provider {
 	 * @param string $text String of text to get words from.
 	 * @return array
 	 */
-	protected function get_string_words( $text ) {
+	protected function get_string_words( string $text ): array {
 		$str_array = preg_split( '/\s+/', $text );
 		$words     = array();
 		foreach ( $str_array as $str ) {
@@ -620,7 +617,7 @@ class Personalizer extends Provider {
 	 * @param array $rank_request Prepared Request data.
 	 * @return object|string
 	 */
-	protected function personalizer_get_ranked_action( $rank_request ) {
+	protected function personalizer_get_ranked_action( array $rank_request ) {
 		$feature  = new RecommendedContent();
 		$settings = $feature->get_settings( static::ID );
 		$result   = wp_remote_post(
@@ -641,6 +638,7 @@ class Personalizer extends Provider {
 			}
 			return $response;
 		}
+
 		return $result;
 	}
 
@@ -649,10 +647,9 @@ class Personalizer extends Provider {
 	 *
 	 * @param string $event_id Personalizer event ID.
 	 * @param int    $reward   Reward value to send.
-	 *
 	 * @return object|string
 	 */
-	public function personalizer_send_reward( $event_id, $reward ) {
+	public function personalizer_send_reward( string $event_id, int $reward ) {
 		$feature  = new RecommendedContent();
 		$settings = $feature->get_settings( static::ID );
 
@@ -685,10 +682,9 @@ class Personalizer extends Provider {
 	 *
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
-	 *
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( $url, $api_key ) {
+	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn = false;
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		$result = wp_remote_get(
@@ -713,6 +709,9 @@ class Personalizer extends Provider {
 		return $rtn;
 	}
 
+	/**
+	 * Register the REST API endpoints.
+	 */
 	public function register_endpoints() {
 		register_rest_route(
 			'classifai/v1',
@@ -772,8 +771,6 @@ class Personalizer extends Provider {
 
 	/**
 	 * Render Recommended Content over AJAX.
-	 *
-	 * @return void
 	 */
 	public function ajax_render_recommended_content() {
 		check_ajax_referer( 'classifai-recommended-block', 'security' );
@@ -803,7 +800,7 @@ class Personalizer extends Provider {
 			}
 		}
 
-		echo $this->render_recommended_content( $attributes );
+		echo $this->render_recommended_content( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		exit();
 	}
@@ -812,9 +809,8 @@ class Personalizer extends Provider {
 	 * Maybe clear transients for recent actions.
 	 *
 	 * @param int $post_id Post Id.
-	 * @return void
 	 */
-	public function maybe_clear_transient( $post_id ) {
+	public function maybe_clear_transient( int $post_id ) {
 		global $wpdb;
 		$post_type = get_post_type( $post_id );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -832,13 +828,13 @@ class Personalizer extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_debug_information() {
+	public function get_debug_information(): array {
 		$settings          = $this->feature_instance->get_settings();
 		$provider_settings = $settings[ static::ID ];
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof RecommendedContent ) {
-			$debug_info[ __( 'API URL', 'classifai' ) ] = $provider_settings['endpoint_url'];
+			$debug_info[ __( 'API URL', 'classifai' ) ]         = $provider_settings['endpoint_url'];
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) );
 		}
 

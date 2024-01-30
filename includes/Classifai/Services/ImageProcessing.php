@@ -1,14 +1,14 @@
 <?php
 /**
- * Service definition for Language Processing
+ * Service definition for Image Processing
  */
 
 namespace Classifai\Services;
 
-use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Taxonomy\ImageTagTaxonomy;
+
 use function Classifai\get_asset_info;
-use function Classifai\find_provider_class;
 
 class ImageProcessing extends Service {
 
@@ -30,9 +30,10 @@ class ImageProcessing extends Service {
 	 */
 	public function init() {
 		parent::init();
+
 		$this->register_image_tags_taxonomy();
+
 		add_filter( 'attachment_fields_to_edit', [ $this, 'custom_fields_edit' ] );
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_media_scripts' ] );
 	}
 
@@ -41,11 +42,22 @@ class ImageProcessing extends Service {
 	 *
 	 * @return array
 	 */
-	public static function get_service_providers() {
+	public static function get_service_providers(): array {
+		/**
+		 * Filter the service providers for Image Processing service.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_language_processing_service_providers
+		 *
+		 * @param {array} $providers Array of available providers for the service.
+		 *
+		 * @return {array} The filtered available providers.
+		 */
 		return apply_filters(
 			'classifai_language_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
+				'Classifai\Providers\OpenAI\DallE',
 			]
 		);
 	}
@@ -64,24 +76,17 @@ class ImageProcessing extends Service {
 			true
 		);
 
-		$provider = find_provider_class( $this->provider_classes ?? [], ComputerVision::ID );
-		if ( ! is_wp_error( $provider ) ) {
-			wp_add_inline_script(
-				'classifai-media-script',
-				'const classifaiMediaVars = ' . wp_json_encode(
-					array(
-						'enabledAltTextFields' => $provider->get_alt_text_settings() ? $provider->get_alt_text_settings() : array(),
-					)
-				),
-				'before'
-			);
-		}
+		$feature = new DescriptiveTextGenerator();
+		wp_add_inline_script(
+			'classifai-media-script',
+			'const classifaiMediaVars = ' . wp_json_encode(
+				array(
+					'enabledAltTextFields' => $feature->get_alt_text_settings() ? $feature->get_alt_text_settings() : array(),
+				)
+			),
+			'before'
+		);
 	}
-
-	/**
-	 * Create endpoints for services
-	 */
-	public function register_endpoints() {}
 
 	/**
 	 * Register a common image tag taxonomy
@@ -96,10 +101,9 @@ class ImageProcessing extends Service {
 	 * Removes the UI on attachment modals for all taxonomies introduced by this plugin.
 	 *
 	 * @param array $form_fields The forms fields being rendered on the modal.
-	 *
-	 * @return mixed
+	 * @return array
 	 */
-	public function custom_fields_edit( $form_fields ) {
+	public function custom_fields_edit( array $form_fields ): array {
 		unset( $form_fields['classifai-image-tags'] );
 		unset( $form_fields['watson-category'] );
 		unset( $form_fields['watson-keyword'] );

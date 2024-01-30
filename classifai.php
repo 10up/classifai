@@ -59,13 +59,14 @@ if ( ! classifai_site_meets_php_requirements() ) {
 }
 
 /**
- * Small wrapper around PHP's define function. The defined constant is
- * ignored if it has already been defined. This allows the
- * config.local.php to override any constant in config.php.
+ * Small wrapper around PHP's define function.
  *
- * @param string $name The constant name
- * @param mixed  $value The constant value
- * @return void
+ * The defined constant is ignored if it has already
+ * been defined. This allows these constants to be
+ * overridden.
+ *
+ * @param string $name The constant name.
+ * @param mixed  $value The constant value.
  */
 function classifai_define( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -73,39 +74,17 @@ function classifai_define( $name, $value ) {
 	}
 }
 
-if ( file_exists( __DIR__ . '/config.test.php' ) && defined( 'PHPUNIT_RUNNER' ) ) {
-	require_once __DIR__ . '/config.test.php';
-}
-
-if ( file_exists( __DIR__ . '/config.local.php' ) ) {
-	require_once __DIR__ . '/config.local.php';
-}
-
 require_once __DIR__ . '/config.php';
-classifai_define( 'CLASSIFAI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 /**
- * Loads the CLASSIFAI PHP autoloader if possible.
+ * Loads the autoloader if possible.
  *
  * @return bool True or false if autoloading was successful.
  */
 function classifai_autoload() {
-	if ( classifai_can_autoload() ) {
-		require_once classifai_autoloader();
+	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
 
-		return true;
-	} else {
-		return false;
-	}
-}
-
-/**
- * In server mode we can autoload if autoloader file exists. For
- * test environments we prevent autoloading of the plugin to prevent
- * global pollution and for better performance.
- */
-function classifai_can_autoload() {
-	if ( file_exists( classifai_autoloader() ) ) {
 		return true;
 	} else {
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
@@ -117,31 +96,18 @@ function classifai_can_autoload() {
 }
 
 /**
- * Default is Composer's autoloader
- */
-function classifai_autoloader() {
-	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
-		return CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
-	} else {
-		return CLASSIFAI_PLUGIN_DIR . '/autoload.php';
-	}
-}
-
-/**
  * Gets the installation message error.
  *
- * This was put in a function specifically because it's used both in WP-CLI and within an admin notice if not using
- * WP-CLI.
+ * Used both in a WP-CLI context and within an admin notice.
  *
  * @return string
  */
 function get_error_install_message() {
-	return esc_html__( 'Error: Please run $ composer install in the classifai plugin directory.', 'classifai' );
+	return esc_html__( 'Error: Please run $ composer install in the ClassifAI plugin directory.', 'classifai' );
 }
 
 /**
- * Plugin code entry point. Singleton instance is used to maintain a common single
- * instance of the plugin throughout the current request's lifecycle.
+ * Plugin code entry point.
  *
  * If autoloading failed an admin notice is shown and logged to
  * the PHP error_log.
@@ -167,7 +133,6 @@ function classifai_autorun() {
 	}
 }
 
-
 /**
  * Generate a notice if autoload fails.
  */
@@ -176,9 +141,8 @@ function classifai_autoload_notice() {
 	error_log( get_error_install_message() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 }
 
-
 /**
- * Register an activation hook that we can hook into.
+ * Run functionality on plugin activation.
  */
 function classifai_activation() {
 	set_transient( 'classifai_activation_notice', 'classifai', HOUR_IN_SECONDS );

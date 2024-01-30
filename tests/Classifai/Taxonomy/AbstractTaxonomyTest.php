@@ -54,19 +54,19 @@ class ThingTaxonomy extends AbstractTaxonomy {
 
 	public $name = 'thing';
 
-	public function get_name() {
+	public function get_name(): string {
 		return $this->name;
 	}
 
-	public function get_singular_label() {
+	public function get_singular_label(): string {
 		return $this->name;
 	}
 
-	public function get_plural_label() {
+	public function get_plural_label(): string {
 		return $this->name . 's';
 	}
 
-	public function get_visibility() {
+	public function get_visibility(): bool {
 		return true;
 	}
 

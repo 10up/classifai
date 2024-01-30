@@ -1,9 +1,9 @@
 <?php
 
-namespace Classifai\Admin;
+namespace Classifai\Providers\Watson;
 
 /**
- * Class for registering data necessary
+ * Handles NLU classifier preview data.
  */
 class PreviewClassifierData {
 	/**
@@ -25,8 +25,8 @@ class PreviewClassifierData {
 		}
 
 		$post_id    = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
-		$classifier = new \Classifai\Watson\Classifier();
-		$normalizer = new \Classifai\Watson\Normalizer();
+		$classifier = new Classifier();
+		$normalizer = new \Classifai\Normalizer();
 
 		$text_to_classify        = $normalizer->normalize( $post_id );
 		$body                    = $classifier->get_body( $text_to_classify );
@@ -68,13 +68,14 @@ class PreviewClassifierData {
 	 * Filter classifier preview based on the feature settings.
 	 *
 	 * @param array $classified_data The classified data.
+	 * @return array
 	 */
-	public function filter_classify_preview_data( $classified_data ) {
+	public function filter_classify_preview_data( array $classified_data ): array {
 		if ( is_wp_error( $classified_data ) ) {
 			return $classified_data;
 		}
 
-		$classify_existing_terms = 'existing_terms' === \Classifai\get_classification_method();
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 		if ( ! $classify_existing_terms ) {
 			return $classified_data;
 		}
@@ -86,7 +87,7 @@ class PreviewClassifierData {
 			'keyword'  => 'keywords',
 		];
 		foreach ( $features as $key => $feature ) {
-			$taxonomy = \Classifai\get_feature_taxonomy( $key );
+			$taxonomy = get_feature_taxonomy( $key );
 			if ( ! $taxonomy ) {
 				continue;
 			}

@@ -1,6 +1,6 @@
 <?php
 /**
- * This class manages the known services the ClassifAI provides
+ * This class manages the known services that ClassifAI provides
  */
 
 namespace Classifai\Services;
@@ -32,7 +32,7 @@ class ServicesManager {
 	 *
 	 * @param array $services The list of services available.
 	 */
-	public function __construct( $services = [] ) {
+	public function __construct( array $services = [] ) {
 		$this->services        = $services;
 		$this->service_classes = [];
 		$this->get_menu_title();
@@ -62,9 +62,9 @@ class ServicesManager {
 	}
 
 	/**
-	 * Registers providers under the Language Processing Service.
+	 * Registers features under the Language Processing Service.
 	 */
-	public function register_language_processing_features() {
+	public function register_language_processing_features(): array {
 		return [
 			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
@@ -72,27 +72,27 @@ class ServicesManager {
 			'\Classifai\Features\ContentResizing',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
-			'\Classifai\Features\ImageGeneration',
 		];
 	}
 
 	/**
-	 * Registers providers under the Image Processing Service.
+	 * Registers features under the Image Processing Service.
 	 */
-	public function register_image_processing_features() {
+	public function register_image_processing_features(): array {
 		return [
 			'\Classifai\Features\DescriptiveTextGenerator',
 			'\Classifai\Features\ImageTagsGenerator',
 			'\Classifai\Features\ImageCropping',
 			'\Classifai\Features\ImageTextExtraction',
+			'\Classifai\Features\ImageGeneration',
 			'\Classifai\Features\PDFTextExtraction',
 		];
 	}
 
 	/**
-	 * Registers providers under the Image Processing Service.
+	 * Registers features under the Recommendation Service.
 	 */
-	public function register_recommendation_service_features() {
+	public function register_recommendation_service_features(): array {
 		return [
 			'\Classifai\Features\RecommendedContent',
 		];
@@ -102,6 +102,7 @@ class ServicesManager {
 	 * Get general ClassifAI settings
 	 *
 	 * @param string $index Optional specific setting to be retrieved.
+	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
 		$settings = get_option( 'classifai_settings' );
@@ -124,11 +125,8 @@ class ServicesManager {
 		}
 	}
 
-
 	/**
 	 * Create the settings pages.
-	 *
-	 * If there are more than a single service, we'll create a top level admin menu and add subsequent items there.
 	 */
 	public function do_settings() {
 		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
@@ -138,8 +136,6 @@ class ServicesManager {
 
 	/**
 	 * Register the settings and sanitization callback method.
-	 *
-	 * It's very important that the option group matches the page slug.
 	 */
 	public function register_settings() {
 		register_setting( 'classifai_settings', 'classifai_settings', [ $this, 'sanitize_settings' ] );
@@ -148,15 +144,16 @@ class ServicesManager {
 	/**
 	 * Sanitize settings.
 	 *
-	 * @param array $settings The settings to be sanitized.
-	 *
-	 * @return mixed
+	 * @param mixed $settings The settings to be sanitized.
+	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
+	public function sanitize_settings( $settings ): array {
 		$new_settings = [];
+
 		if ( isset( $settings['email'] )
 			&& isset( $settings['license_key'] )
-			&& $this->check_license_key( $settings['email'], $settings['license_key'] ) ) {
+			&& $this->check_license_key( $settings['email'], $settings['license_key'] )
+		) {
 			$new_settings['valid_license'] = true;
 			$new_settings['email']         = sanitize_text_field( $settings['email'] );
 			$new_settings['license_key']   = sanitize_text_field( $settings['license_key'] );
@@ -164,6 +161,7 @@ class ServicesManager {
 			$new_settings['valid_license'] = false;
 			$new_settings['email']         = isset( $settings['email'] ) ? sanitize_text_field( $settings['email'] ) : '';
 			$new_settings['license_key']   = isset( $settings['license_key'] ) ? sanitize_text_field( $settings['license_key'] ) : '';
+
 			add_settings_error(
 				'registration',
 				'classifai-registration',
@@ -239,7 +237,6 @@ class ServicesManager {
 		}
 	}
 
-
 	/**
 	 * Helper to return the $menu title
 	 */
@@ -261,7 +258,7 @@ class ServicesManager {
 	 *
 	 * @return array
 	 */
-	public function get_services() {
+	public function get_services(): array {
 		return $this->services;
 	}
 
@@ -311,7 +308,7 @@ class ServicesManager {
 				<?php
 			}
 		} else {
-			// Render settings page for the first ( and only ) settings page.
+			// Render settings page for the first (and only) settings page.
 			$this->service_classes[0]->render_settings_page();
 		}
 	}
@@ -319,12 +316,13 @@ class ServicesManager {
 	/**
 	 * Hit license API to see if key/email is valid
 	 *
-	 * @param  string $email Email address.
-	 * @param  string $license_key License key.
 	 * @since  1.2
+	 *
+	 * @param string $email Email address.
+	 * @param string $license_key License key.
 	 * @return bool
 	 */
-	public function check_license_key( $email, $license_key ) {
+	public function check_license_key( string $email, string $license_key ): bool {
 
 		$request = wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
@@ -351,12 +349,13 @@ class ServicesManager {
 	/**
 	 * Adds debug information to the ClassifAI Site Health screen.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param array      $debug_information Array of lines representing debug information.
 	 * @param array|null $settings Settings array. If empty, will be fetched.
 	 * @return array Array with lines added.
-	 * @since 1.4.0
 	 */
-	public function add_debug_information( $debug_information, $settings = null ) {
+	public function add_debug_information( array $debug_information, $settings = null ): array {
 		if ( is_null( $settings ) ) {
 			$settings = $this->sanitize_settings( $this->get_settings() );
 		}

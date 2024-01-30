@@ -88,19 +88,20 @@ class AccessControl {
 	 *
 	 * @return array
 	 */
-	public function get_settings() {
+	public function get_settings(): array {
 		if ( is_null( $this->settings ) ) {
 			$this->settings = $this->provider->get_settings();
 		}
+
 		return $this->settings;
 	}
 
 	/**
 	 * Determines whether user-based access control is enabled for the current feature.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function is_user_based_access_enabled() {
+	public function is_user_based_access_enabled(): bool {
 		$settings = $this->get_settings();
 		return isset( $settings[ $this->user_based_access_key ] ) && 1 === (int) $settings[ $this->user_based_access_key ];
 	}
@@ -108,9 +109,9 @@ class AccessControl {
 	/**
 	 * Determines whether user-based opt-out is enabled for the current feature.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function is_user_based_opt_out_enabled() {
+	public function is_user_based_opt_out_enabled(): bool {
 		$settings = $this->get_settings();
 		return isset( $settings[ $this->user_based_opt_out_key ] ) && 1 === (int) $settings[ $this->user_based_opt_out_key ];
 	}
@@ -118,9 +119,9 @@ class AccessControl {
 	/**
 	 * Determines whether role-based access control is enabled for the current feature.
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function is_role_based_access_enabled() {
+	public function is_role_based_access_enabled(): bool {
 		$settings = $this->get_settings();
 		return isset( $settings[ $this->role_based_access_key ] ) && 1 === (int) $settings[ $this->role_based_access_key ];
 	}
@@ -130,9 +131,10 @@ class AccessControl {
 	 *
 	 * @return array
 	 */
-	public function get_allowed_roles() {
+	public function get_allowed_roles(): array {
 		$settings  = $this->get_settings();
 		$roles_key = $this->roles_key;
+
 		// Backward compatibility for old roles keys.
 		switch ( $this->feature ) {
 			case 'title_generation':
@@ -161,9 +163,10 @@ class AccessControl {
 	 *
 	 * @return array
 	 */
-	public function get_allowed_users() {
+	public function get_allowed_users(): array {
 		$settings = $this->get_settings();
 		$users    = $settings[ $this->users_key ] ?? [];
+
 		return array_map( 'absint', $users );
 	}
 
@@ -173,10 +176,11 @@ class AccessControl {
 	 * @param int $user_id User ID.
 	 * @return bool
 	 */
-	public function has_access( $user_id = null ) {
+	public function has_access( $user_id = null ): bool {
 		if ( ! $user_id ) {
 			$user_id = get_current_user_id();
 		}
+
 		$user_id    = (int) $user_id;
 		$user       = get_user_by( 'id', $user_id );
 		$user_roles = $user->roles ?? [];

@@ -15,13 +15,12 @@ abstract class Provider {
 	const ID = '';
 
 	/**
-	 * @var string The display name for the provider. ie. Azure
+	 * @var string The display name for the provider, i.e. Azure
 	 */
 	public $provider_name;
 
-
 	/**
-	 * @var string $provider_service_name The formal name of the service being provided. i.e Computer Vision, NLU, Rekongnition.
+	 * @var string $provider_service_name Formal name of the provider, i.e AI Vision, NLU, Rekongnition.
 	 */
 	public $provider_service_name;
 
@@ -29,7 +28,6 @@ abstract class Provider {
 	 * @var string $option_name Name of the option where the provider settings are stored.
 	 */
 	protected $option_name;
-
 
 	/**
 	 * @var string $service The name of the service this provider belongs to.
@@ -55,7 +53,7 @@ abstract class Provider {
 	 * @param string $provider_service_name The name of the Service.
 	 * @param string $option_name           Name of the option where the provider settings are stored.
 	 */
-	public function __construct( $provider_name, $provider_service_name, $option_name ) {
+	public function __construct( string $provider_name, string $provider_service_name, string $option_name ) {
 		$this->provider_name         = $provider_name;
 		$this->provider_service_name = $provider_service_name;
 		$this->option_name           = $option_name;
@@ -66,15 +64,16 @@ abstract class Provider {
 	 *
 	 * @return string
 	 */
-	public function get_provider_name() {
+	public function get_provider_name(): string {
 		return $this->provider_name;
 	}
 
-	/** Returns the name of the settings section for this provider
+	/**
+	 * Returns the name of the settings section for this provider.
 	 *
 	 * @return string
 	 */
-	public function get_settings_section() {
+	public function get_settings_section(): string {
 		return $this->option_name;
 	}
 
@@ -83,7 +82,7 @@ abstract class Provider {
 	 *
 	 * @return string
 	 */
-	public function get_option_name() {
+	public function get_option_name(): string {
 		return 'classifai_' . $this->option_name;
 	}
 
@@ -92,14 +91,16 @@ abstract class Provider {
 	 *
 	 * @return array
 	 */
-	public function get_features() {
+	public function get_features(): array {
 		return $this->features;
 	}
 
 	/**
 	 * Can the Provider be initialized?
+	 *
+	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 		return $this->is_configured();
 	}
 
@@ -119,7 +120,6 @@ abstract class Provider {
 	 * Helper to get the settings and allow for settings default values.
 	 *
 	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 *
 	 * @return string|array|mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -139,21 +139,19 @@ abstract class Provider {
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
+	public function get_default_settings(): array {
 		return [];
 	}
 
 	/**
 	 * Common entry point for all REST endpoints for this provider.
-	 * This is called by the Service.
 	 *
-	 * @param int    $post_id       The Post Id we're processing.
+	 * @param mixed  $item The item we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
-	 * @param array  $args          Optional arguments to pass to the route.
-	 *
+	 * @param array  $args Optional arguments to pass to the route.
 	 * @return mixed
 	 */
-	public function rest_endpoint_callback( $post_id, $route_to_call, $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function rest_endpoint_callback( $item, string $route_to_call, array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return null;
 	}
 
@@ -161,10 +159,9 @@ abstract class Provider {
 	 * Format the result of most recent request.
 	 *
 	 * @param array|WP_Error $data Response data to format.
-	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( $data ) {
+	protected function get_formatted_latest_response( $data ): string {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
@@ -181,7 +178,7 @@ abstract class Provider {
 	 *
 	 * @return bool
 	 */
-	public function is_configured() {
+	public function is_configured(): bool {
 		$settings = $this->get_settings();
 
 		$is_configured = false;
@@ -193,11 +190,11 @@ abstract class Provider {
 	}
 
 	/**
-	 * Adds an api key field.
+	 * Adds an API key field.
 	 *
 	 * @param array $args API key field arguments.
 	 */
-	public function add_api_key_field( $args = [] ) {
+	public function add_api_key_field( array $args = [] ) {
 		$default_settings = $this->feature_instance->get_settings();
 		$default_settings = $default_settings[ static::ID ];
 		$id               = $args['id'] ?? 'api_key';
@@ -224,7 +221,7 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	protected function has_access( string $feature ) {
+	protected function has_access( string $feature ): bool {
 		$access_control = new AccessControl( $this, $feature );
 		return $access_control->has_access();
 	}
@@ -235,7 +232,7 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_feature_enabled( string $feature ) {
+	public function is_feature_enabled( string $feature ): bool {
 		$is_feature_enabled = false;
 		$settings           = $this->get_settings();
 
@@ -264,6 +261,7 @@ abstract class Provider {
 
 	/**
 	 * Determine if the feature is turned on.
+	 *
 	 * Note: This function does not check if the user has access to the feature.
 	 *
 	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
@@ -272,7 +270,7 @@ abstract class Provider {
 	 * @param string $feature Feature to check.
 	 * @return bool
 	 */
-	public function is_enabled( string $feature ) {
+	public function is_enabled( string $feature ): bool {
 		$settings   = $this->get_settings();
 		$enable_key = 'enable_' . $feature;
 
