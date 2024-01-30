@@ -95,8 +95,12 @@ class Classification extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'post_statuses' => [],
-			'post_types'    => [],
+			'post_statuses' => [
+				'publish' => 1,
+			],
+			'post_types'    => [
+				'post' => 1,
+			],
 			'provider'      => NLU::ID,
 		];
 	}

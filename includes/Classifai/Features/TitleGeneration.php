@@ -177,7 +177,7 @@ class TitleGeneration extends Feature {
 	public function enqueue_editor_assets() {
 		global $post;
 
-		if ( empty( $post ) ) {
+		if ( empty( $post ) || ! is_admin() ) {
 			return;
 		}
 

@@ -555,8 +555,6 @@ class ChatGPT extends Provider {
 	/**
 	 * Returns the debug information for the provider settings.
 	 *
-	 * TODO: this should be in feature. Or at least any settings moved to the feature should be
-	 *
 	 * @return array
 	 */
 	public function get_debug_information(): array {

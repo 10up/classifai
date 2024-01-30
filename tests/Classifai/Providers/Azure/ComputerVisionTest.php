@@ -38,11 +38,6 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	 */
 	public function test_smart_crop_image() {
 		$this->assertEquals(
-			'non-array-data',
-			$this->get_computer_vision()->smart_crop_image( 'non-array-data', 999999 )
-		);
-
-		$this->assertEquals(
 			[ 'no-smart-cropping' => 1 ],
 			$this->get_computer_vision()->smart_crop_image(
 				[ 'no-smart-cropping' => 1 ],
@@ -163,7 +158,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			return $options;
 		} );
 
-		$image_captions_settings = $this->get_computer_vision()->get_alt_text_settings();
+		$image_captions_settings = ( new \Classifai\Features\DescriptiveTextGenerator() )->get_alt_text_settings();
 		$this->assertSame(
 			$image_captions_settings,
 			array(

@@ -61,8 +61,6 @@ abstract class Feature {
 
 	/**
 	 * Setup any hooks the feature needs.
-	 *
-	 * TODO: make this abstract once implemented in all features.
 	 */
 	public function feature_setup() {
 	}

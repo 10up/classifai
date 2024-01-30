@@ -313,7 +313,6 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		error_log( 'do_read_cron' );
 		$feature  = new PDFTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -779,9 +778,14 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
+		$settings          = [];
+		$provider_settings = [];
 		$debug_info        = [];
+
+		if ( $this->feature_instance ) {
+			$settings          = $this->feature_instance->get_settings();
+			$provider_settings = $settings[ static::ID ];
+		}
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
 			$descriptive_text = array_filter(

@@ -76,7 +76,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	public function test_get_wp_filesystem() {
 		$this->assertInstanceOf(
 			WP_Filesystem_Direct::class,
-			$this->get_smart_cropping()->get_wp_filesystem()
+			( new \Classifai\Features\ImageCropping() )->get_wp_filesystem()
 		);
 	}
 
@@ -110,14 +110,14 @@ class SmartCroppingTest extends WP_UnitTestCase {
 		// Test that nothing happens when the metadata contains no sizes entry.
 		$this->assertEquals(
 			[ 'no-sizes' => 1 ],
-			$this->get_smart_cropping()->generate_attachment_metadata(
+			$this->get_smart_cropping()->generate_cropped_images(
 				[ 'no-sizes' => 1 ],
 				$attachment
 			)
 		);
 
 		$with_filter_cb = function() use ( $attachment ) {
-			$filtered_data = $this->get_smart_cropping()->generate_attachment_metadata(
+			$filtered_data = $this->get_smart_cropping()->generate_cropped_images(
 				wp_get_attachment_metadata( $attachment ),
 				$attachment
 			);

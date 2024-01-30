@@ -23,7 +23,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	function set_up() {
 		parent::set_up();
 
-		$this->provider = new ComputerVision( 'service_name' );
+		$this->provider = new ComputerVision( new \Classifai\Features\DescriptiveTextGenerator() );
 	}
 
 	/**

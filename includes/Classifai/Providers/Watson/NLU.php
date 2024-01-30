@@ -79,7 +79,6 @@ class NLU extends Provider {
 			],
 		];
 
-		// TODO: if no feature is passed in, seems like this might break
 		$this->feature_instance = $feature;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
@@ -230,9 +229,13 @@ class NLU extends Provider {
 
 	/**
 	 * Renders the previewer window for the feature.
+	 *
+	 * @param string $active_feature The active feature.
 	 */
-	public function render_previewer() {
-		if ( ! ( new Classification() )->is_feature_enabled() ) {
+	public function render_previewer( string $active_feature ) {
+		$feature = new Classification();
+
+		if ( $feature::ID !== $active_feature || ! $feature->is_feature_enabled() ) {
 			return;
 		}
 		?>

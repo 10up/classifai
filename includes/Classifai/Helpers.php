@@ -597,7 +597,7 @@ function get_default_prompt( array $prompts ): ?string {
 		$prompt_data = array_filter(
 			$prompts,
 			function ( $prompt ) {
-				return $prompt['default'] && ! $prompt['original'];
+				return isset( $prompt['default'] ) && ! $prompt['original'];
 			}
 		);
 
