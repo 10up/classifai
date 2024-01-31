@@ -15,7 +15,7 @@
     "makepot": "wpi18n makepot && echo '.pot file updated'",
     "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes",
     "cypress:open": "cypress open --config-file tests/cypress/config.config.js",
-    "cypress:run": "cypress run --config-file tests/cypress/config.config.js",
+    "cypress:run": "cypress run --browser chrome --config-file tests/cypress/config.config.js",
     "env": "wp-env",
     "env:start": "wp-env start",
     "env:stop": "wp-env stop",

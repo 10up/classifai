@@ -60,6 +60,21 @@ class ContentResizing extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		add_action(
+			'admin_footer',
+			static function () {
+				if (
+					( isset( $_GET['tab'], $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					&& 'language_processing' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+					&& 'feature_content_resizing' === sanitize_text_field( wp_unslash( $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				) {
+					printf(
+						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
+						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
+					);
+				}
+			}
+		);
 	}
 
 	/**
@@ -193,30 +208,6 @@ class ContentResizing extends Feature {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function enqueue_admin_assets( string $hook_suffix ) {
-		// Load jQuery UI Dialog for prompt deletion.
-		if (
-			(
-				'tools_page_classifai' === $hook_suffix
-				&& ( isset( $_GET['tab'], $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				&& 'language_processing' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				&& 'feature_content_resizing' === sanitize_text_field( wp_unslash( $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			) ||
-			'admin_page_classifai_setup' === $hook_suffix
-		) {
-			wp_enqueue_script( 'jquery-ui-dialog' );
-			wp_enqueue_style( 'wp-jquery-ui-dialog' );
-
-			add_action(
-				'admin_footer',
-				static function () {
-					printf(
-						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
-						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
-					);
-				}
-			);
-		}
-
 		// Load asset in new post and edit post screens.
 		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
 			wp_enqueue_style(

@@ -160,14 +160,24 @@ class Plugin {
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
 			array( 'wp-components' ),
-			get_asset_info( 'admin', 'version' ),
+			array(
+				get_asset_info( 'admin', 'version' ),
+				array(
+					'wp-jquery-ui-dialog'
+				)
+			),
 			'all'
 		);
 
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			get_asset_info( 'admin', 'dependencies' ),
+			array_merge(
+				get_asset_info( 'admin', 'dependencies' ),
+				array(
+					'jquery-ui-dialog',
+				)
+			),
 			get_asset_info( 'admin', 'version' ),
 			true
 		);
