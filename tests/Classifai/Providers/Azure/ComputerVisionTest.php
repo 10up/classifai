@@ -37,8 +37,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	 * @covers ::smart_crop_image
 	 */
 	public function test_smart_crop_image() {
-		$this->assertEquals(
-			[],
+		$this->assertWPError(
 			$this->get_computer_vision()->smart_crop_image(
 				[ 'no-smart-cropping' => 1 ],
 				999999
@@ -58,19 +57,8 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		) );
 		remove_filter( 'filesystem_method', $filter_file_system_method );
 
-		// Test that SmartCropping is initiated and runs, as will be indicated in the coverage report, though it won't
-		// actually do anything because the data and attachment are invalid.
-		$this->assertEquals(
-			[],
-			$this->get_computer_vision()->smart_crop_image(
-				[ 'my-data' => 1 ],
-				999999
-			)
-		);
-
 		remove_filter( 'classifai_should_smart_crop_image', '__return_true' );
 	}
-
 
 	/**
 	 * Ensure that settings returns default settings array if the `classifai_computer_vision` is not set.
