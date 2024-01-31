@@ -38,7 +38,6 @@ class LanguageProcessing extends Service {
 			'classifai_language_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\Speech',
-				'Classifai\Providers\Azure\TextToSpeech',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Moderation',

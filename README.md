@@ -22,6 +22,7 @@
 * [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
 * [Set Up Azure AI Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
+* [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
 * [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
 * [FAQs](#frequently-asked-questions)
@@ -40,7 +41,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
-* Moderate incoming content for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
+* Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) _(note that we're gathering feedback on this feature and may significantly iterate depending on community input)_
@@ -50,8 +51,8 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 ### Language Processing
 
-| Tagging | Recommended Content | Excerpt Generation |                                                         Comment Moderation                                                         |
-| :-: | :-: | :-: |:----------------------------------------------------------------------------------------------------------------------------------:|
+| Tagging | Recommended Content | Excerpt Generation | Comment Moderation |
+| :-: | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI post tagging](assets/img/screenshot-1.png "Example of a Block Editor post with Watson Categories, Keywords, Concepts, and Entities.") | ![Screenshot of ClassifAI recommended content](assets/img/screenshot-2.png "Example of a Recommended Content Block with Azure AI Personalizer.") | ![Screenshot of ClassifAI excerpt generation](assets/img/screenshot-7.png "Example of automatic excerpt generation with OpenAI.") | ![Screenshot of ClassifAI comment moderation](assets/img/screenshot-13.png "Example of automatic comment moderation with OpenAI.") |
 
 | Audio Transcripts | Title Generation | Expand or Condense Text | Text to Speech |
@@ -344,23 +345,6 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
-## Set Up Comment Moderation (via OpenAI Moderation)
-
-### 1. Sign up for OpenAI
-
-* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
-* If creating a new account, complete the verification process (requires confirming your email and phone number).
-* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
-* Click `Create new secret key` and copy the key that is shown.
-
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Moderation
-
-* Enter your API Key copied from the above step into the `API Key` field.
-
-### 3. Enable Comment Moderation
-
-- Select the "Enable" checkbox in above screen.
-
 ## Set Up Image Processing (via OpenAI)
 
 ### 1. Sign up for OpenAI
@@ -388,6 +372,24 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Enter in a prompt to generate an image
 * Once images are generated, choose one or more images to import into your media library
 * Choose one image to insert into the content
+
+## Set Up Comment Moderation (via OpenAI Moderation)
+
+### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation
+
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable Comment Moderation
+
+* Select the "Enable" checkbox in above screen.
+* Select "Comments" in the "Content to moderate" section.
 
 ## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
 

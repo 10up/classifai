@@ -6,340 +6,236 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
-
+use Classifai\Features\Moderation as ModerationFeature;
 use WP_Error;
 
 class Moderation extends Provider {
 
 	use OpenAI;
 
+	const ID = 'openai_moderation';
+
+	/**
+	 * OpenAI Moderation URL
+	 *
+	 * @var string
+	 */
+	protected $moderation_url = 'https://api.openai.com/v1/moderations';
+
 	/**
 	 * OpenAI Moderation constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'OpenAI Moderation',
 			'Moderation',
-			'openai_moderation',
-			$service
+			'openai_moderation'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI Moderation', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_moderation' => __( 'Enable comments moderation', 'classifai' ),
-			),
-		);
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
+	 * Register what we need for the provider.
 	 */
 	public function register() {
-		add_filter( 'comment_row_actions', [ $this, 'comment_row_actions' ], 10, 2 );
-		add_action( 'admin_init', [ $this, 'maybe_moderate_comment' ] );
-		add_filter( 'manage_edit-comments_columns', [ $this, 'add_comment_list_columns' ] );
-		add_action( 'manage_comments_custom_column', [ $this, 'add_comment_list_column_content' ], 10, 2 );
-		add_action( 'wp_insert_comment', [ $this, 'moderate_comment' ] );
 	}
 
 	/**
-	 * Prints custom column content
-	 *
-	 * @param string $column_name Column name
-	 * @param int    $comment_id  Column ID
-	 * @return void
+	 * Render the provider fields.
 	 */
-	public function add_comment_list_column_content( $column_name, $comment_id ) {
-		if ( 'moderation_flagged' === $column_name ) {
-			$flagged = get_comment_meta( $comment_id, 'classifai_moderation_flagged', true );
-			if ( '0' === $flagged ) {
-				$flagged = 'No';
-			} elseif ( '1' === $flagged ) {
-				$flagged = 'Yes';
-			}
-			echo '<div style="text-align: center">' . esc_html( $flagged ) . '</div>';
-		}
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
 
-		if ( 'moderation_flags' === $column_name ) {
-			$flags = get_comment_meta( $comment_id, 'classifai_moderation_flags', true );
-			$flags = $flags ? $flags : [];
-			echo '<div style="text-align: center">' . esc_html( implode( ', ', $flags ) ) . '</div>';
-		}
-	}
-
-	/**
-	 * Prints custom column header
-	 *
-	 * @param array $columns Columns
-	 * @return array
-	 */
-	public function add_comment_list_columns( $columns ) {
-		$columns['moderation_flagged'] = __( 'Moderation Flagged', 'classifai' );
-		$columns['moderation_flags']   = __( 'Moderation Flags', 'classifai' );
-
-		return $columns;
-	}
-
-	/**
-	 * Moderates comment when clicked on "Moderate" action button in comment list
-	 *
-	 * @return void
-	 */
-	public function maybe_moderate_comment() {
-		$action     = sanitize_text_field( wp_unslash( $_GET['a'] ?? null ) );
-		$comment_id = sanitize_text_field( wp_unslash( $_GET['c'] ?? null ) );
-		$nonce      = sanitize_text_field( wp_unslash( $_GET['nonce'] ?? null ) );
-
-		if (
-			'moderate' === $action &&
-			$comment_id &&
-			wp_verify_nonce( $nonce, 'moderate_comment' )
-		) {
-			$this->moderate_comment( $comment_id );
-			wp_safe_redirect( '/wp-admin/edit-comments.php' );
-			exit;
-		}
-	}
-
-	/**
-	 * Add action to comment row
-	 *
-	 * @param array       $actions Comment row action
-	 * @param \WP_Comment $comment Comment object
-	 * @return mixed
-	 */
-	public function comment_row_actions( $actions, $comment ) {
-		$nonce = wp_create_nonce( 'moderate_comment' );
-
-		$actions['moderate'] = sprintf(
-			'<a href="%s" aria-label="%s">%s</a>',
-			add_query_arg(
-				[
-					'a'     => 'moderate',
-					'c'     => $comment->comment_ID,
-					'nonce' => $nonce,
-				],
-				admin_url( 'edit-comments.php' ),
-			),
-			esc_attr__( 'Moderate this comment' ),
-			esc_html__( 'Moderate', 'classifai' )
+		add_settings_field(
+			static::ID . '_api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
+					wp_kses(
+						/* translators: %1$s is replaced with the OpenAI sign up URL */
+						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://platform.openai.com/signup' )
+				),
+			]
 		);
 
-		return $actions;
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
 	/**
-	 * Check to see if the feature is enabled and a user has access.
+	 * Returns the default settings for this provider.
 	 *
-	 * @return bool|WP_Error
+	 * @return array
 	 */
-	public function is_feature_enabled() {
-		$settings = $this->get_settings();
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'api_key'       => '',
+			'authenticated' => false,
+		];
 
-		// Check if valid authentication is in place.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with OpenAI.', 'classifai' ) );
+		return $common_settings;
+	}
+
+	/**
+	 * Sanitize the settings for this provider.
+	 *
+	 * @param array $new_settings The settings array.
+	 * @return array
+	 */
+	public function sanitize_settings( array $new_settings ): array {
+		$settings         = $this->feature_instance->get_settings();
+		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+
+		return $new_settings;
+	}
+
+	/**
+	 * Sanitize the API key.
+	 *
+	 * @param array $new_settings The settings array.
+	 * @return string
+	 */
+	public function sanitize_api_key( array $new_settings ): string {
+		$settings = $this->feature_instance->get_settings();
+		return sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] ?? '' );
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $item_id The item ID we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return array|WP_Error
+	 */
+	public function rest_endpoint_callback( $item_id = 0, string $route_to_call = '', array $args = [] ) {
+		$route_to_call = strtolower( $route_to_call );
+		$return        = [];
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'comment':
+				$return = $this->moderate_comment( $item_id, $args );
+				break;
+			case 'post':
+				$return = [];
+				break;
 		}
 
-		// Check if the current user has permission.
-		$roles      = $settings['roles'] ?? [];
-		$user_roles = wp_get_current_user()->roles ?? [];
-
-		if ( empty( $roles ) || ! empty( array_diff( $user_roles, $roles ) ) ) {
-			return new WP_Error( 'no_permission', esc_html__( 'User role does not have permission.', 'classifai' ) );
-		}
-
-		if ( ! current_user_can( 'moderate_comments' ) ) {
-			return new WP_Error( 'no_permission', esc_html__( 'User does not have permission to moderate comments.', 'classifai' ) );
-		}
-
-		// Ensure feature is turned on.
-		if ( ! isset( $settings['enable_moderation'] ) || 1 !== (int) $settings['enable_moderation'] ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Comment moderation is not enabled.', 'classifai' ) );
-		}
-
-		return true;
+		return $return;
 	}
 
 	/**
 	 * Send comment to remote service for moderation.
 	 *
 	 * @param int $comment_id Attachment ID to process.
-	 * @return void
+	 * @return array|WP_Error
 	 */
-	public function moderate_comment( $comment_id = 0 ) {
-		$settings = $this->get_settings();
-		$enabled  = $this->is_feature_enabled();
-
-		if ( is_wp_error( $enabled ) ) {
-			return;
+	public function moderate_comment( int $comment_id = 0 ) {
+		// Ensure we have a valid comment.
+		if ( ! $comment_id || ! get_comment( $comment_id ) ) {
+			return new WP_Error( 'valid_id_required', esc_html__( 'A valid comment ID is required to run moderation.', 'classifai' ) );
 		}
 
-		$api_key = $settings['api_key'];
+		// Ensure the current user has proper permissions.
+		if (
+			! current_user_can( 'moderate_comments' ) ||
+			! current_user_can( 'edit_comment', $comment_id )
+		) {
+			return new WP_Error( 'permission_denied', esc_html__( 'You do not have permission to moderate comments.', 'classifai' ) );
+		}
+
+		$feature  = new ModerationFeature();
+		$settings = $feature->get_settings();
+
+		// Ensure the feature is enabled and the user has access.
+		if (
+			! $feature->is_feature_enabled() ||
+			! in_array( 'comments', $feature->get_moderation_content_settings(), true )
+		) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Moderation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 		$comment = get_comment( $comment_id );
 
-		$api_response = wp_remote_post(
-			'https://api.openai.com/v1/moderations',
+		/**
+		 * Filter the request body before sending to OpenAI.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_openai_moderation_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {int} $comment_id ID of comment we are moderating.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_openai_moderation_request_body',
 			[
-				'headers' => [
-					'Content-Type'  => 'application/json',
-					'Authorization' => 'Bearer ' . $api_key,
-				],
-				'body'    => wp_json_encode(
-					[
-						'input' => $comment->comment_content,
-					]
-				),
+				'input' => $comment->comment_content,
+			],
+			$comment_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->moderation_url,
+			[
+				'body' => wp_json_encode( $body ),
 			]
 		);
 
-		if ( ! is_wp_error( $api_response ) && 200 === wp_remote_retrieve_response_code( $api_response ) ) {
-			$body    = json_decode( wp_remote_retrieve_body( $api_response ), true );
-			$flagged = $body['results'][0]['flagged'];
+		set_transient( 'classifai_openai_moderation_latest_response', $response, DAY_IN_SECONDS * 30 );
 
-			if ( false === $flagged ) {
-				update_comment_meta( $comment_id, 'classifai_moderation_flagged', '0' );
-			} else {
-				$flagged_categories = $body['results'][0]['categories'];
-				$moderation_flags   = array_keys(
-					array_filter(
-						$flagged_categories,
-						function ( $value ) {
-							return $value;
-						}
-					)
-				);
-
-				wp_update_comment(
-					[
-						'comment_ID'       => $comment_id,
-						'comment_approved' => '0',
-					]
-				);
-				update_comment_meta( $comment_id, 'classifai_moderation_flagged', '1' );
-				update_comment_meta( $comment_id, 'classifai_moderation_flags', $moderation_flags );
-			}
-		}
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		add_settings_field(
-			'enable-moderation',
-			esc_html__( 'Moderate post comments', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_moderation',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_moderation'],
-				'description'   => __( 'Automatically moderate incoming post comments', 'classifai' ),
-			]
-		);
-
-		$roles = get_editable_roles() ?? [];
-		$roles = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
-
-		add_settings_field(
-			'roles',
-			esc_html__( 'Allowed roles', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'roles',
-				'options'        => $roles,
-				'default_values' => $default_settings['roles'],
-				'description'    => __( 'Choose which roles are allowed to moderate comments.', 'classifai' ),
-			]
-		);
-	}
-
-	/**
-	 * Sanitization for the options being saved.
-	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
-	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
-		);
-
-		if ( empty( $settings['enable_moderation'] ) || 1 !== (int) $settings['enable_moderation'] ) {
-			$new_settings['enable_moderation'] = 'no';
-		} else {
-			$new_settings['enable_moderation'] = '1';
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
 
-		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
-			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
-		} else {
-			$new_settings['roles'] = array_keys( get_editable_roles() ?? [] );
-		}
-
-		return $new_settings;
+		return $response['results'][0];
 	}
 
 	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for Whisper.
+	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
-		return [
-			'authenticated'     => false,
-			'api_key'           => '',
-			'enable_moderation' => false,
-			'roles'             => array_keys( get_editable_roles() ?? [] ),
-		];
-	}
+	public function get_debug_information() {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
 
-	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
+		if ( $this->feature_instance instanceof ModerationFeature ) {
+			$debug_info[ __( 'Content to Moderate', 'classifai' ) ] = implode( ', ', $provider_settings['content_types'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]     = $this->get_formatted_latest_response( get_transient( 'classifai_openai_moderation_latest_response' ) );
 		}
 
-		$authenticated     = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_moderation = 1 === intval( $settings['enable_moderation'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )     => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Enable moderation', 'classifai' ) => $enable_moderation ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles', 'classifai' )     => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Latest response', 'classifai' )   => $this->get_formatted_latest_response( get_transient( 'classifai_openai_moderation_latest_response' ) ),
-		];
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
-
 }
