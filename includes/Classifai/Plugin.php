@@ -53,25 +53,16 @@ class Plugin {
 		 */
 		do_action( 'before_classifai_init' );
 
-		// Initialize the services, each services handles the providers
+		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		$post_types = get_supported_post_types();
-		foreach ( $post_types as $post_type ) {
-			register_meta(
-				$post_type,
-				'_classifai_error',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
-				]
-			);
-		}
-
-		// Initialize the classifAI Onboarding.
+		// Initialize the ClassifAI Onboarding.
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
+
+		// Initialize the ClassifAI User Profile.
+		$user_profile = new Admin\UserProfile();
+		$user_profile->init();
 
 		/**
 		 * Fires after ClassifAI services are loaded.
@@ -122,7 +113,7 @@ class Plugin {
 	}
 
 	/**
-	 * Initiates classes providing admin feature sfor the plugin.
+	 * Initiates classes providing admin features.
 	 *
 	 * @since 1.4.0
 	 */
@@ -158,35 +149,53 @@ class Plugin {
 
 	/**
 	 * Enqueue the admin scripts.
+	 *
+	 * @since 2.4.0 Use get_asset_info to get the asset version and dependencies.
 	 */
 	public function enqueue_admin_assets() {
+		$user_profile     = new Admin\UserProfile();
+		$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array(),
-			CLASSIFAI_PLUGIN_VERSION,
+			array( 'wp-components' ),
+			array(
+				get_asset_info( 'admin', 'version' ),
+				array(
+					'wp-jquery-ui-dialog',
+				),
+			),
 			'all'
 		);
 
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			[],
-			CLASSIFAI_PLUGIN_VERSION,
+			array_merge(
+				get_asset_info( 'admin', 'dependencies' ),
+				array(
+					'jquery-ui-dialog',
+				)
+			),
+			get_asset_info( 'admin', 'version' ),
 			true
 		);
+
+		$localize_data = [
+			'api_password'             => __( 'API Password', 'classifai' ),
+			'api_key'                  => __( 'API Key', 'classifai' ),
+			'use_key'                  => __( 'Use an API Key instead?', 'classifai' ),
+			'use_password'             => __( 'Use a username/password instead?', 'classifai' ),
+			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
+			'opt_out_enabled_features' => array_keys( $allowed_features ),
+			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
+		];
 
 		wp_localize_script(
 			'classifai-admin-script',
 			'ClassifAI',
-			[
-				'api_password' => __( 'API Password', 'classifai' ),
-				'api_key'      => __( 'API Key', 'classifai' ),
-				'use_key'      => __( 'Use an API Key instead?', 'classifai' ),
-				'use_password' => __( 'Use a username/password instead?', 'classifai' ),
-				'ajax_nonce'   => wp_create_nonce( 'classifai' ),
-			]
+			$localize_data
 		);
 
 		if ( wp_script_is( 'wp-commands', 'registered' ) ) {
@@ -204,10 +213,9 @@ class Plugin {
 	 * Add the action links to the plugin page.
 	 *
 	 * @param array $links The Action links for the plugin.
-	 *
 	 * @return array
 	 */
-	public function filter_plugin_action_links( $links ) {
+	public function filter_plugin_action_links( $links ): array {
 
 		if ( ! is_array( $links ) ) {
 			return $links;

@@ -18,15 +18,16 @@ class DebugInfo {
 	/**
 	 * Checks whether this class's register method should run.
 	 *
-	 * @return bool
 	 * @since 1.4.0
+	 *
+	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 		return is_admin();
 	}
 
 	/**
-	 * Adds WP hook callbacks.
+	 * Adds hook callbacks.
 	 *
 	 * @since 1.4.0
 	 */
@@ -38,14 +39,13 @@ class DebugInfo {
 	 * Modifies debug information displayed on the WP Site Health screen.
 	 *
 	 * @see WP_Debug_Data::debug_data
-	 * @filter debug_information
+	 *
+	 * @since 1.4.0
 	 *
 	 * @param array $information The full array of site debug information.
 	 * @return array Filtered debug information.
-	 *
-	 * @since 1.4.0
 	 */
-	public function add_classifai_debug_information( $information ) {
+	public function add_classifai_debug_information( array $information ): array {
 		$plugin_data = get_plugin_data( CLASSIFAI_PLUGIN );
 
 		/**
@@ -75,7 +75,7 @@ class DebugInfo {
 			$fields = [];
 		}
 
-		$validate_field = function( $field ) {
+		$validate_field = function ( $field ) {
 			if ( ! is_array( $field ) ) {
 				return false;
 			}

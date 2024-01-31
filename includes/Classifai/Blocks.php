@@ -15,8 +15,8 @@ use function Classifai\get_asset_info;
  * @return void
  */
 function setup() {
-	$n = function( $function ) {
-		return __NAMESPACE__ . "\\$function";
+	$n = function ( $function_name ) {
+		return __NAMESPACE__ . "\\$function_name";
 	};
 
 	add_action( 'enqueue_block_assets', $n( 'blocks_styles' ) );
@@ -48,7 +48,7 @@ function blocks_styles() {
 		'recommended-content-block-style',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-frontend.css',
 		[],
-		CLASSIFAI_PLUGIN_VERSION
+		get_asset_info( 'recommended-content-block-frontend', 'version' )
 	);
 
 	wp_enqueue_script(

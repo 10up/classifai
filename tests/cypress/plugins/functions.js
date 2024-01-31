@@ -1,5 +1,7 @@
 import * as nluData from '../../test-plugin/nlu.json';
 import * as chatgptData from '../../test-plugin/chatgpt.json';
+import * as chatgptCustomExcerptData from '../../test-plugin/chatgpt-custom-excerpt-prompt.json';
+import * as chatgptCustomTitleData from '../../test-plugin/chatgpt-custom-title-prompt.json';
 import * as dalleData from '../../test-plugin/dalle.json';
 import * as ocrData from '../../test-plugin/ocr.json';
 import * as whisperData from '../../test-plugin/whisper.json';
@@ -10,21 +12,23 @@ import * as pdfData from '../../test-plugin/pdf.json';
  * Get Taxonomy data from test NLU json file.
  *
  * @param {string} taxonomy  Taxonomy.
- * @param {number} threshold Thresold to select terms.
+ * @param {number} threshold Threshold to select terms.
  * @return {string[]} NLU Data.
  */
-export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
+export const getNLUData = ( taxonomy = 'categories', threshold = 0.7 ) => {
 	const taxonomies = [];
-	if (taxonomy === 'categories') {
+	if ( taxonomy === 'categories' ) {
 		nluData.categories
-			.filter((el) => el.score >= threshold)
-			.forEach((cat) =>
-				taxonomies.push(...cat.label.split('/').filter((n) => n))
+			.filter( ( el ) => el.score >= threshold )
+			.forEach( ( cat ) =>
+				taxonomies.push(
+					...cat.label.split( '/' ).filter( ( n ) => n )
+				)
 			);
 	} else {
-		return nluData[taxonomy]
-			.filter((el) => el.relevance >= threshold)
-			.map((el) => el.text);
+		return nluData[ taxonomy ]
+			.filter( ( el ) => el.relevance >= threshold )
+			.map( ( el ) => el.text );
 	}
 	return taxonomies;
 };
@@ -32,14 +36,25 @@ export const getNLUData = (taxonomy = 'categories', threshold = 0.7) => {
 /**
  * Get text data from test ChatGPT json file.
  *
+ * @param {string} type Type of data to return.
  * @return {string[]} ChatGPT Data.
  */
-export const getChatGPTData = () => {
+export const getChatGPTData = ( type = 'default' ) => {
 	const text = [];
 
-	chatgptData.choices.forEach( ( el ) => {
-		text.push( el.message.content );
-	} );
+	if ( type === 'excerpt' ) {
+		chatgptCustomExcerptData.choices.forEach( ( el ) => {
+			text.push( el.message.content );
+		} );
+	} else if ( type === 'title' ) {
+		chatgptCustomTitleData.choices.forEach( ( el ) => {
+			text.push( el.message.content );
+		} );
+	} else {
+		chatgptData.choices.forEach( ( el ) => {
+			text.push( el.message.content );
+		} );
+	}
 
 	return text.join( ' ' );
 };
@@ -69,14 +84,14 @@ export const getWhisperData = () => {
  */
 export const getOCRData = () => {
 	const words = [];
-	ocrData.regions.forEach((el) => {
-		el.lines.forEach((el2) => {
-			el2.words.forEach((el3) => {
-				words.push(el3.text);
-			});
-		});
-	});
-	return words.join(' ');
+	ocrData.regions.forEach( ( el ) => {
+		el.lines.forEach( ( el2 ) => {
+			el2.words.forEach( ( el3 ) => {
+				words.push( el3.text );
+			} );
+		} );
+	} );
+	return words.join( ' ' );
 };
 
 /**
@@ -87,11 +102,11 @@ export const getOCRData = () => {
 export const getImageData = () => {
 	const data = {
 		altText: imageData.description.captions.filter(
-			(el) => el.confidence > 0.75
-		)[0].text,
+			( el ) => el.confidence > 0.75
+		)[ 0 ].text,
 		tags: imageData.tags
-			.filter((el) => el.confidence > 0.7)
-			.map((el) => el.name),
+			.filter( ( el ) => el.confidence > 0.7 )
+			.map( ( el ) => el.name ),
 	};
 	return data;
 };
@@ -102,4 +117,4 @@ export const getImageData = () => {
  * @return {string} data pdf data
  */
 export const getPDFData = () =>
-	pdfData.analyzeResult.readResults[0].lines[0].text;
+	pdfData.analyzeResult.readResults[ 0 ].lines[ 0 ].text;

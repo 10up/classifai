@@ -7,6 +7,7 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { DisableFeatureButton } from '../components';
 
 /**
  * PostExcerpt component.
@@ -82,7 +83,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				disabled={ isLoading }
 				data-id={ postId }
 				onClick={ () =>
-					buttonClick( '/classifai/v1/openai/generate-excerpt/' )
+					buttonClick( '/classifai/v1/generate-excerpt/' )
 				}
 			>
 				{ buttonText }
@@ -105,6 +106,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					{ error }
 				</span>
 			) }
+			<DisableFeatureButton feature="feature_excerpt_generation" />
 		</div>
 	);
 }

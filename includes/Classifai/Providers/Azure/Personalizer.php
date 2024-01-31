@@ -7,10 +7,14 @@ namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
 use Classifai\Blocks;
+use Classifai\Features\RecommendedContent;
 use WP_Error;
+use WP_REST_Server;
 use UAParser\Parser;
 
 class Personalizer extends Provider {
+
+	const ID = 'ms_azure_personalizer';
 
 	/**
 	 * @var string URL fragment to the Rank API endpoint
@@ -30,70 +34,51 @@ class Personalizer extends Provider {
 	/**
 	 * Personalizer constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'Microsoft Azure',
 			'AI Personalizer',
-			'personalizer',
-			$service
+			'personalizer'
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
-			'fields'   => array( 'url', 'api-key' ),
-			'features' => array(
-				'authenticated' => __( 'Recommended content block', 'classifai' ),
-			),
-		);
-	}
+		$this->feature_instance = $feature_instance;
 
-	/**
-	 * Resets settings for the Personalizer provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for Personalizer
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		return [
-			'authenticated' => false,
-			'url'           => '',
-			'api_key'       => '',
-		];
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
 	/**
 	 * Register the functionality.
 	 */
 	public function register() {
-		// Setup Blocks
-		Blocks\setup();
+		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
+			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
+			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
+			Blocks\setup();
+		}
 	}
 
 	/**
-	 * Setup fields.
+	 * Render the provider fields.
 	 */
-	public function setup_fields_sections() {
-		add_settings_section( $this->get_option_name(), $this->provider_service_name, '', $this->get_option_name() );
-		$default_settings = $this->get_default_settings();
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
 		add_settings_field(
-			'url',
+			'endpoint_url',
 			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
-				'label_for'     => 'url',
+				'option_index'  => static::ID,
+				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
-				'default_value' => $default_settings['url'],
+				'default_value' => $settings['endpoint_url'],
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				'description'   => sprintf(
 					wp_kses(
 						// translators: 1 - link to create a Personalizer resource.
@@ -109,50 +94,73 @@ class Personalizer extends Provider {
 				),
 			]
 		);
+
 		add_settings_field(
-			'api-key',
+			'api_key',
 			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
+				'option_index'  => static::ID,
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
-				'default_value' => $default_settings['api_key'],
-				'description'   => __( 'Azure AI Personalizer Key.', 'classifai' ),
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
 	}
 
 	/**
-	 * Sanitize settings.
+	 * Returns the default settings for this provider.
 	 *
-	 * @param array $settings The settings being saved.
-	 *
-	 * @return array|mixed
+	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = [];
-		if ( ! empty( $settings['url'] ) && ! empty( $settings['api_key'] ) ) {
-			$auth_check = $this->authenticate_credentials( $settings['url'], $settings['api_key'] );
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'endpoint_url'  => '',
+			'api_key'       => '',
+			'authenticated' => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case RecommendedContent::ID:
+				return $common_settings;
+		}
+
+		return $common_settings;
+	}
+
+	/**
+	 * Sanitize the settings for this provider.
+	 *
+	 * @param array $new_settings The settings array.
+	 * @return array
+	 */
+	public function sanitize_settings( array $new_settings ): array {
+		$settings = $this->feature_instance->get_settings();
+
+		$new_settings['endpoint_url'] = esc_url_raw( $new_settings['endpoint_url'] ?? $settings['endpoint_url'] );
+		$new_settings['api_key']      = sanitize_text_field( $new_settings['api_key'] ?? $settings['api_key'] );
+
+		if ( ! empty( $new_settings['endpoint_url'] ) && ! empty( $new_settings['api_key'] ) ) {
+			$auth_check = $this->authenticate_credentials( $new_settings['endpoint_url'], $new_settings['api_key'] );
+
 			if ( is_wp_error( $auth_check ) ) {
 				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
 				$new_settings['authenticated']                               = false;
 			} else {
 				$new_settings['authenticated'] = true;
 			}
-			$new_settings['url']     = esc_url_raw( $settings['url'] );
-			$new_settings['api_key'] = sanitize_text_field( $settings['api_key'] );
 		} else {
 			$new_settings['authenticated'] = false;
-			$new_settings['url']           = '';
+			$new_settings['endpoint_url']  = '';
 			$new_settings['api_key']       = '';
 
 			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
 
 		if ( ! empty( $settings_errors ) ) {
-
 			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
 
 			foreach ( $settings_errors as $code => $message ) {
@@ -177,7 +185,7 @@ class Personalizer extends Provider {
 	 * @param array $attributes The block attributes.
 	 * @return array recent actions based on block attributes.
 	 */
-	protected function get_recent_actions( $attributes ) {
+	protected function get_recent_actions( array $attributes ): array {
 		$post_type      = $attributes['contentPostType'];
 		$key_attributes = array(
 			'terms' => isset( $attributes['taxQuery'] ) ? $attributes['taxQuery'] : array(),
@@ -255,9 +263,9 @@ class Personalizer extends Provider {
 	 * Get Recommended content Id from Azure personalizer.
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return Object
+	 * @return mixed
 	 */
-	public function get_recommended_content( $attributes ) {
+	public function get_recommended_content( array $attributes ) {
 		$actions = $this->get_recent_actions( $attributes );
 
 		if ( empty( $actions ) ) {
@@ -269,14 +277,14 @@ class Personalizer extends Provider {
 			$exclude = $attributes['excludeId'];
 			$actions = array_filter(
 				$actions,
-				function( $ele ) use ( $exclude ) {
+				function ( $ele ) use ( $exclude ) {
 					return $ele['id'] && absint( $ele['id'] ) !== absint( $exclude );
 				}
 			);
 		}
 
 		$action_ids = array_map(
-			function( $ele ) {
+			function ( $ele ) {
 				return $ele['id'];
 			},
 			$actions
@@ -327,10 +335,9 @@ class Personalizer extends Provider {
 	 * Renders the `classifai/recommended-content-block` block on server.
 	 *
 	 * @param array $attributes The block attributes.
-	 *
 	 * @return string Returns the post content with recommended content added.
 	 */
-	public function render_recommended_content( $attributes ) {
+	public function render_recommended_content( array $attributes ): string {
 		/**
 		 * Filter the recommended content block attributes
 		 *
@@ -362,20 +369,20 @@ class Personalizer extends Provider {
 			// Sort ranking by probability.
 			usort(
 				$ranking,
-				function( $a, $b ) {
+				function ( $a, $b ) {
 					return $a->probability - $b->probability;
 				}
 			);
 
 			$recommended_ids = array_map(
-				function( $ele ) {
+				function ( $ele ) {
 					return absint( $ele->id );
 				},
 				$ranking
 			);
 			$recommended_ids = array_filter(
 				$recommended_ids,
-				function( $ele ) use ( $rewarded_post ) {
+				function ( $ele ) use ( $rewarded_post ) {
 					return $ele && absint( $ele ) !== absint( $rewarded_post );
 				}
 			);
@@ -543,7 +550,7 @@ class Personalizer extends Provider {
 	 * @param int $post_id Post Object.
 	 * @return array
 	 */
-	protected function get_post_features( $post_id ) {
+	protected function get_post_features( int $post_id ): array {
 		$features = array(
 			'title'   => $this->get_string_words( get_the_title( $post_id ) ),
 			'excerpt' => $this->get_string_words( get_the_excerpt( $post_id ) ),
@@ -591,11 +598,11 @@ class Personalizer extends Provider {
 	/**
 	 * Get array of words from string. Words as key of array.
 	 *
-	 * @param string $string String to get words from.
+	 * @param string $text String of text to get words from.
 	 * @return array
 	 */
-	protected function get_string_words( $string ) {
-		$str_array = preg_split( '/\s+/', $string );
+	protected function get_string_words( string $text ): array {
+		$str_array = preg_split( '/\s+/', $text );
 		$words     = array();
 		foreach ( $str_array as $str ) {
 			$words[ $str ] = 1;
@@ -610,10 +617,11 @@ class Personalizer extends Provider {
 	 * @param array $rank_request Prepared Request data.
 	 * @return object|string
 	 */
-	protected function personalizer_get_ranked_action( $rank_request ) {
-		$settings = $this->get_settings();
+	protected function personalizer_get_ranked_action( array $rank_request ) {
+		$feature  = new RecommendedContent();
+		$settings = $feature->get_settings( static::ID );
 		$result   = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $this->rank_endpoint,
+			trailingslashit( $settings['endpoint_url'] ) . $this->rank_endpoint,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -630,6 +638,7 @@ class Personalizer extends Provider {
 			}
 			return $response;
 		}
+
 		return $result;
 	}
 
@@ -638,14 +647,15 @@ class Personalizer extends Provider {
 	 *
 	 * @param string $event_id Personalizer event ID.
 	 * @param int    $reward   Reward value to send.
-	 *
 	 * @return object|string
 	 */
-	public function personalizer_send_reward( $event_id, $reward ) {
-		$settings        = $this->get_settings();
+	public function personalizer_send_reward( string $event_id, int $reward ) {
+		$feature  = new RecommendedContent();
+		$settings = $feature->get_settings( static::ID );
+
 		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
 		$result          = wp_remote_post(
-			trailingslashit( $settings['url'] ) . $reward_endpoint,
+			trailingslashit( $settings['endpoint_url'] ) . $reward_endpoint,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
@@ -672,10 +682,9 @@ class Personalizer extends Provider {
 	 *
 	 * @param string $url     Endpoint URL.
 	 * @param string $api_key Api Key.
-	 *
 	 * @return bool|WP_Error
 	 */
-	protected function authenticate_credentials( $url, $api_key ) {
+	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn = false;
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		$result = wp_remote_get(
@@ -701,23 +710,139 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param null|array $settings Settings array. If empty, settings will be retrieved.
-	 * @return array Keyed array of debug information.
-	 * @since 1.4.0
+	 * Register the REST API endpoints.
 	 */
-	public function get_provider_debug_information( $settings = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'personalizer/reward/(?P<eventId>[a-zA-Z0-9-]+)',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'reward_endpoint_callback' ],
+				'args'                => [
+					'eventId'  => [
+						'required'          => true,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Event ID to track', 'classifai' ),
+					],
+					'rewarded' => [
+						'required'          => false,
+						'type'              => 'string',
+						'enum'              => [
+							'0',
+							'1',
+						],
+						'default'           => '0',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Reward we want to send', 'classifai' ),
+					],
+					'route'    => [
+						'required'          => false,
+						'type'              => 'string',
+						'default'           => 'reward',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Route we want to call', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'reward_permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Check if a given request has access to send reward.
+	 *
+	 * This check ensures that we are properly authenticated.
+	 * TODO: add additional checks here, maybe a nonce check or rate limiting?
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function reward_permissions_check() {
+		// Check if valid authentication is in place.
+		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
+			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
 		}
 
-		$authenticated = 1 === intval( $settings['authenticated'] ?? 0 );
+		return true;
+	}
 
-		return [
-			__( 'Authenticated', 'classifai' )  => $authenticated ? __( 'Yes', 'classifai' ) : __( 'No', 'classifai' ),
-			__( 'API URL', 'classifai' )        => $settings['url'] ?? '',
-			__( 'Service Status', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) ),
-		];
+	/**
+	 * Render Recommended Content over AJAX.
+	 */
+	public function ajax_render_recommended_content() {
+		check_ajax_referer( 'classifai-recommended-block', 'security' );
+
+		if ( ! isset( $_POST['contentPostType'] ) || empty( $_POST['contentPostType'] ) ) {
+			esc_html_e( 'No results found.', 'classifai' );
+			exit();
+		}
+
+		$attributes = array(
+			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( wp_unslash( $_POST['displayLayout'] ) ) : 'grid',
+			'contentPostType'        => sanitize_text_field( wp_unslash( $_POST['contentPostType'] ) ),
+			'excludeId'              => isset( $_POST['excludeId'] ) ? absint( $_POST['excludeId'] ) : 0,
+			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( wp_unslash( $_POST['displayPostExcerpt'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( wp_unslash( $_POST['displayAuthor'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( wp_unslash( $_POST['displayPostDate'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['displayFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
+			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['addLinkToFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
+			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
+			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
+		);
+
+		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+			foreach ( $_POST['taxQuery'] as $key => $value ) {
+				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
+			}
+		}
+
+		echo $this->render_recommended_content( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+		exit();
+	}
+
+	/**
+	 * Maybe clear transients for recent actions.
+	 *
+	 * @param int $post_id Post Id.
+	 */
+	public function maybe_clear_transient( int $post_id ) {
+		global $wpdb;
+		$post_type = get_post_type( $post_id );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$transients = $wpdb->get_col( $wpdb->prepare( "SELECT `option_name` FROM {$wpdb->options} WHERE  option_name LIKE %s", '_transient_classifai_actions_' . $post_type . '%' ) );
+		// Delete all transients
+		if ( ! empty( $transients ) ) {
+			foreach ( $transients as $transient ) {
+				delete_transient( str_replace( '_transient_', '', $transient ) );
+			}
+		}
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof RecommendedContent ) {
+			$debug_info[ __( 'API URL', 'classifai' ) ]         = $provider_settings['endpoint_url'];
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_personalizer_status_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }

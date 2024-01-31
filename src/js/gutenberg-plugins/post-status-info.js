@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { DisableFeatureButton } from '../components';
 
 const { classifaiChatGPTData } = window;
 
@@ -36,6 +37,7 @@ const PostStatusInfo = () => {
 	}
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postType = select( 'core/editor' ).getCurrentPostType();
 	const postContent =
 		select( 'core/editor' ).getEditedPostAttribute( 'content' );
 	const openModal = () => setOpen( true );
@@ -84,11 +86,24 @@ const PostStatusInfo = () => {
 							</textarea>
 							<Button
 								variant="secondary"
-								onClick={ () => {
+								onClick={ async () => {
+									const isDirty =
+										select(
+											'core/editor'
+										).isEditedPostDirty();
 									dispatch( 'core/editor' ).editPost( {
 										title: data[ i ],
 									} );
 									closeModal();
+									if ( ! isDirty ) {
+										await dispatch(
+											'core'
+										).saveEditedEntityRecord(
+											'postType',
+											postType,
+											postId
+										);
+									}
 								} }
 							>
 								{ __( 'Select', 'classifai' ) }
@@ -112,6 +127,9 @@ const PostStatusInfo = () => {
 					{ isLoading && <Spinner /> }
 					{ ! isLoading && data && <RenderData data={ data } /> }
 					{ ! isLoading && error && <RenderError error={ error } /> }
+					{ ! isLoading && (
+						<DisableFeatureButton feature="feature_title_generation" />
+					) }
 				</Modal>
 			) }
 			{ classifaiChatGPTData.enabledFeatures.map( ( feature ) => {

@@ -15,6 +15,7 @@ class EmbeddingCalculations {
 	 *
 	 * @param array $source_embedding Embedding data of the source item.
 	 * @param array $compare_embedding Embedding data of the item to compare.
+	 *
 	 * @return bool|float
 	 */
 	public function similarity( array $source_embedding = [], array $compare_embedding = [] ) {
@@ -25,7 +26,7 @@ class EmbeddingCalculations {
 		// Get the combined average between the two embeddings.
 		$combined_average = array_sum(
 			array_map(
-				function( $x, $y ) {
+				function ( $x, $y ) {
 					return (float) $x * (float) $y;
 				},
 				$source_embedding,
@@ -36,7 +37,7 @@ class EmbeddingCalculations {
 		// Get the average of the source embedding.
 		$source_average = array_sum(
 			array_map(
-				function( $x ) {
+				function ( $x ) {
 					return pow( (float) $x, 2 );
 				},
 				$source_embedding
@@ -46,7 +47,7 @@ class EmbeddingCalculations {
 		// Get the average of the compare embedding.
 		$compare_average = array_sum(
 			array_map(
-				function( $x ) {
+				function ( $x ) {
 					return pow( (float) $x, 2 );
 				},
 				$compare_embedding
@@ -56,8 +57,7 @@ class EmbeddingCalculations {
 		// Do the math.
 		$distance = 1.0 - ( $combined_average / sqrt( $source_average * $compare_average ) );
 
-		// Ensure we are within the range of 0 to 2.0.
-		return max( 0, min( abs( (float) $distance ), 2.0 ) );
+		// Ensure we are within the range of 0 to 1.0.
+		return max( 0, min( abs( (float) $distance ), 1.0 ) );
 	}
-
 }

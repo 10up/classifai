@@ -4,6 +4,68 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [2.5.1] - 2024-01-11
+### Changed
+- Switch from using the Completions API to the Models API to verify credentials (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#654](https://github.com/10up/classifai/pull/654)).
+- Update `10up/phpcs-composer` to version 3.0.0 (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#641](https://github.com/10up/classifai/pull/641)).
+
+### Fixed
+- Ensure that the "Classify" row/bulk action is visible only to users who have access to it (props [@iamdharmesh](https://github.com/iamdharmesh), [@ankitguptaindia](https://github.com/ankitguptaindia), [@dkotter](https://github.com/dkotter) via [#647](https://github.com/10up/classifai/pull/647)).
+- Check for the `default` array key before we access it (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#650](https://github.com/10up/classifai/pull/650)).
+- Address all new PHPCS issues (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#641](https://github.com/10up/classifai/pull/641)).
+
+### Security
+- Bump `tj-actions/changed-files` from 37 to 41 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#649](https://github.com/10up/classifai/pull/649)).
+- Bump `follow-redirects` from 1.15.3 to 1.15.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#657](https://github.com/10up/classifai/pull/657)).
+
+## [2.5.0] - 2023-12-13
+**Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
+
+### Added
+- Ability to control access to each feature based on user role or by individual users, allowing users to opt out of features they don't want (props [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#606](https://github.com/10up/classifai/pull/606)).
+- New manual classification mode that allows you to easily select which AI suggested terms you want to add (props [@faisal-alvi](https://github.com/faisal-alvi), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#609](https://github.com/10up/classifai/pull/609)).
+- Enable/disable toggle option for the "Classify content", "Text to Speech" and "Recommended content" features (props [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#614](https://github.com/10up/classifai/pull/614)).
+- New setting option for the IBM Watson classification feature to allow you to classify content within existing terms only (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#620](https://github.com/10up/classifai/pull/620)).
+- Threshold settings added for taxonomies in the OpenAI Embeddings classification feature (props [@faisal-alvi](https://github.com/faisal-alvi), [@timatron](https://github.com/timatron), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#621](https://github.com/10up/classifai/pull/621)).
+- Ability to preview the suggested terms for the OpenAI Embeddings classification feature (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#622](https://github.com/10up/classifai/pull/622)).
+- Post autosave when a generated title is used or when a paragraph of text is resized to allow for Revisions-based rollbacks (props [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#626](https://github.com/10up/classifai/pull/626)).
+
+### Changed
+- Bump WordPress minimum from 5.8 to 6.1 (props [@faisal-alvi](https://github.com/faisal-alvi), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#609](https://github.com/10up/classifai/pull/609)).
+- Increase our max content length for any interactions with ChatGPT (props [@dkotter](https://github.com/dkotter), [@ravinderk](https://github.com/ravinderk) via [#617](https://github.com/10up/classifai/pull/617)).
+
+### Fixed
+- Ensure that when using the manual classification mode, all terms will be considered, not just the first 100 (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#638](https://github.com/10up/classifai/pull/638)).
+- Ensure that the ClassifAI panel only appears when the related feature is enabled (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#628](https://github.com/10up/classifai/pull/628)).
+- More accurate token counts when trimming content (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#616](https://github.com/10up/classifai/pull/616)).
+- Ensure that updating the "Recommended Content Block" settings works correctly (props [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#625](https://github.com/10up/classifai/pull/625)).
+
+### Security
+- Bump `axios` from 0.25.0 to 1.6.2 and `@wordpress/scripts` from 26.6.0 to 26.18.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#629](https://github.com/10up/classifai/pull/629)).
+
+## [2.4.0] - 2023-11-09
+### Added
+- Support for modifying prompts from the admin settings page (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@ravinderk](https://github.com/ravinderk), [@dkotter](https://github.com/dkotter) via [#594](https://github.com/10up/classifai/pull/594)).
+- Support for setting multiple prompts for each feature that supports prompts (props [@ravinderk](https://github.com/ravinderk), [@iamdharmesh](https://github.com/iamdharmesh), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#602](https://github.com/10up/classifai/pull/602)).
+- New filters added to allow developer control over all requests made to OpenAI (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#604](https://github.com/10up/classifai/pull/604)).
+- Documentation updates in regards to data retention (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#582](https://github.com/10up/classifai/pull/582)).
+- Example snippet to make taxonomies private to the developer docs (props [@theskinnyghost](https://github.com/theskinnyghost), [@dkotter](https://github.com/dkotter) via [#583](https://github.com/10up/classifai/pull/583)).
+- GitHub Action summary for Cypress E2E checks (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#578](https://github.com/10up/classifai/pull/578)).
+
+### Changed
+- Ensure the default prompts in ClassifAI show as the first prompt in our settings and cannot be removed or edited (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@ravinderk](https://github.com/ravinderk) via [#610](https://github.com/10up/classifai/pull/610)).
+- Fix multiple typos across the codebase (props [@parikshit-adhikari](https://github.com/parikshit-adhikari), [@shresthasurav](https://github.com/shresthasurav), [@jeffpaul](https://github.com/jeffpaul) via [#603](https://github.com/10up/classifai/pull/603), [#605](https://github.com/10up/classifai/pull/605)).
+- Use `get_asset_info` across the enqueuing of all our dependencies (props [@ravinderk](https://github.com/ravinderk), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#608](https://github.com/10up/classifai/pull/608)).
+- Bump WordPress "tested up to" version to 6.4 (props [@dkotter](https://github.com/dkotter) via [#613](https://github.com/10up/classifai/pull/613)).
+
+### Fixed
+- Ensure all hooks show in our documentation (props [@faisal-alvi](https://github.com/faisal-alvi), [@jeffpaul](https://github.com/jeffpaul), [@berkod](https://github.com/berkod), [@dkotter](https://github.com/dkotter) via [#604](https://github.com/10up/classifai/pull/604)).
+
+### Security
+- Bump `@cypress/request` from 2.88.12 to 3.0.0 and `cypress` from 12.14.0 to 13.1.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#576](https://github.com/10up/classifai/pull/576)).
+- Bump `postcss` from 8.4.24 to 8.4.31 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#584](https://github.com/10up/classifai/pull/584)).
+- Bump `@babel/traverse` from 7.22.4 to 7.23.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#601](https://github.com/10up/classifai/pull/601)).
+
 ## [2.3.0] - 2023-09-05
 **Note that this release bumps the WordPress minimum from 5.7 to 5.8.**
 
@@ -428,6 +490,9 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[2.5.1]: https://github.com/10up/classifai/compare/2.5.0...2.5.1
+[2.5.0]: https://github.com/10up/classifai/compare/2.4.0...2.5.0
+[2.4.0]: https://github.com/10up/classifai/compare/2.3.0...2.4.0
 [2.3.0]: https://github.com/10up/classifai/compare/2.2.3...2.3.0
 [2.2.3]: https://github.com/10up/classifai/compare/2.2.2...2.2.3
 [2.2.2]: https://github.com/10up/classifai/compare/2.2.1...2.2.2

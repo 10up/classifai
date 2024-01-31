@@ -1,6 +1,8 @@
 const { defineConfig } = require( 'cypress' );
 
 module.exports = defineConfig( {
+	viewportWidth: 1280,
+	viewportHeight: 1280,
 	chromeWebSecurity: false,
 	fixturesFolder: __dirname + '/fixtures',
 	screenshotsFolder: __dirname + '/screenshots',
@@ -14,6 +16,10 @@ module.exports = defineConfig( {
 		overwrite: false,
 		html: false,
 		json: true,
+	},
+	retries: {
+		runMode: 2,
+		openMode: 0,
 	},
 	e2e: {
 		// We've imported your old cypress plugins here.

@@ -2,18 +2,21 @@
 
 namespace Classifai\Command;
 
-use Classifai\Admin\SavePostHandler;
-use Classifai\Watson\APIRequest;
-use Classifai\Watson\Classifier;
-use Classifai\Watson\Normalizer;
-use Classifai\PostClassifier;
+use Classifai\Features\AudioTranscriptsGeneration;
+use Classifai\Features\Classification;
+use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\ImageCropping;
+use Classifai\Features\TextToSpeech;
+use Classifai\Providers\Watson\APIRequest;
+use Classifai\Providers\Watson\Classifier;
+use Classifai\Normalizer;
+use Classifai\Providers\Watson\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
-use Classifai\Providers\Azure\TextToSpeech;
-use Classifai\Providers\OpenAI\Whisper;
-use Classifai\Providers\OpenAI\Whisper\Transcribe;
-use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\OpenAI\Embeddings;
+
+use function Classifai\Providers\Watson\get_username;
+use function Classifai\Providers\Watson\get_password;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -106,7 +109,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} else {
 			\WP_CLI::log( 'No posts to classify.' );
 		}
-
 	}
 
 	/**
@@ -152,8 +154,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$opts = wp_parse_args( $opts, $defaults );
 
 		$classifier = new Classifier();
-		$username   = \Classifai\get_watson_username();
-		$password   = \Classifai\get_watson_password();
+		$username   = get_username();
+		$password   = get_password();
 
 		if ( empty( $username ) ) {
 			\WP_CLI::error( 'Watson Username not found in options or constant.' );
@@ -242,14 +244,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'per_page'    => 100,
 		];
 
+		$feature_speech     = new TextToSpeech();
+		$allowed_post_types = $feature_speech->get_supported_post_types();
 		$opts               = wp_parse_args( $opts, $defaults );
 		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
-		$allowed_post_types = TextToSpeech::get_supported_post_types();
 
 		$count  = 0;
 		$errors = 0;
-
-		$save_post_handler = new SavePostHandler();
 
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
@@ -297,15 +298,18 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $save_post_handler->synthesize_speech( $post_id );
+						$result = $feature_speech->run( $post_id, 'synthesize' );
+						if ( $result && ! is_wp_error( $result ) ) {
+							$result = $feature_speech->save( $result, $post_id );
+						}
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-							$errors ++;
+							++$errors;
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -314,7 +318,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -332,7 +336,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
 					\WP_CLI::log( sprintf( 'Item ID %d does not exist', $post_id ) );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -340,21 +344,24 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$post_type = get_post_type( $post_id );
 				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
 					\WP_CLI::log( sprintf( 'The "%s" post type is not enabled for Text to Speech processing', $post_type ) );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
 				if ( ! $dry_run ) {
-					$result = $save_post_handler->synthesize_speech( $post_id );
+					$result = $feature_speech->run( $post_id, 'synthesize' );
+					if ( $result && ! is_wp_error( $result ) ) {
+						$result = $feature_speech->save( $result, $post_id );
+					}
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
-						$errors ++;
+						++$errors;
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -401,8 +408,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$count  = 0;
 		$errors = 0;
 
-		$whisper  = new Whisper( false );
-		$settings = $whisper->get_settings();
+		$audio_transcription = new AudioTranscriptsGeneration();
+		$feature_settings    = $audio_transcription->get_settings();
+		$provider_instance   = $audio_transcription->get_feature_provider_instance( $feature_settings['provider'] );
 
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
@@ -429,24 +437,25 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			foreach ( $attachment_ids as $attachment_id ) {
 				$attachment = get_post( $attachment_id );
-				$transcribe = new Transcribe( $attachment_id, $settings );
 
-				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
-					$errors ++;
+				if ( ! $this->should_transcribe_attachment( $attachment, $attachment_id, $audio_transcription, (bool) $opts['force'] ) ) {
+					++$errors;
 					continue;
 				}
 
 				if ( ! $dry_run ) {
-					$result = $transcribe->process();
+					$result = $audio_transcription->run( $attachment_id, 'transcript' );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
-						$errors ++;
+						++$errors;
+					} else {
+						$result = $audio_transcription->add_transcription( $result, $attachment_id );
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -455,12 +464,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			$paged      = 1;
 			$mime_types = [];
-			$transcribe = new Transcribe( 1, [] );
 
 			// Get all the mime types for the file formats we support.
 			foreach ( wp_get_mime_types() as $extensions => $mime ) {
 				foreach ( explode( '|', $extensions ) as $ext ) {
-					if ( in_array( $ext, $transcribe->file_formats, true ) ) {
+					if ( in_array( $ext, $provider_instance->file_formats ?? [ 'mp3' ], true ) ) {
 						$mime_types[] = $mime;
 					}
 				}
@@ -481,23 +489,24 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $attachments as $attachment_id ) {
 					$attachment = get_post( $attachment_id );
-					$transcribe = new Transcribe( $attachment_id, $settings );
 
-					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $transcribe, (bool) $opts['force'] ) ) {
-						$errors ++;
+					if ( ! $this->should_transcribe_attachment( $attachment, (int) $attachment_id, $audio_transcription, (bool) $opts['force'] ) ) {
+						++$errors;
 						continue;
 					}
 
 					if ( ! $dry_run ) {
-						$result = $transcribe->process();
+						$result = $audio_transcription->run( $attachment_id, 'transcript' );
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s: %s', $attachment_id, $result->get_error_message() ), false );
-							$errors ++;
+							++$errors;
+						} else {
+							$result = $audio_transcription->add_transcription( $result, $attachment_id );
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -506,7 +515,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		}
 
@@ -564,8 +573,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$errors  = 0;
 		$skipped = 0;
 
-		$chat_gpt = new ChatGPT( false );
-
 		// Determine if this is a dry run or not.
 		if ( isset( $opts['dry-run'] ) ) {
 			if ( 'false' === $opts['dry-run'] ) {
@@ -613,15 +620,15 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					// Don't process if an item has an existing excerpt and we aren't forcing it.
 					if ( '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 						\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post->ID ) );
-						$skipped ++;
+						++$skipped;
 						continue;
 					}
 
-					$result = $chat_gpt->generate_excerpt( (int) $post->ID );
+					$result = ( new ExcerptGeneration() )->run( $post->ID, 'excerpt' );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post->ID, $result->get_error_message() ), false );
-						$errors ++;
+						++$errors;
 						continue;
 					}
 
@@ -637,7 +644,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 						);
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -646,7 +653,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -666,15 +673,15 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Don't process if an item has an existing excerpt and we aren't forcing it.
 				if ( $post && '' !== trim( $post->post_excerpt ) && ! $opts['force'] ) {
 					\WP_CLI::log( sprintf( 'Item ID %d has an existing excerpt and the force option hasn\'t been set. Skipping...', $post_id ) );
-					$skipped ++;
+					++$skipped;
 					continue;
 				}
 
-				$result = $chat_gpt->generate_excerpt( (int) $post_id );
+				$result = ( new ExcerptGeneration() )->run( $post_id, 'excerpt' );
 
 				if ( is_wp_error( $result ) ) {
 					\WP_CLI::error( sprintf( 'Error while processing item ID %d: %s', $post_id, $result->get_error_message() ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -691,7 +698,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -710,13 +717,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Determine if an attachment should be transcribed.
 	 *
-	 * @param \WP_Post|null $attachment Attachment we are processing.
-	 * @param int           $attachment_id Attachment ID.
-	 * @param Transcribe    $transcribe Transcribe instance.
-	 * @param boolean       $force Whether to force processing.
-	 * @return boolean
+	 * @param \WP_Post|null              $attachment Attachment we are processing.
+	 * @param int                        $attachment_id Attachment ID.
+	 * @param AudioTranscriptsGeneration $audio_transcription AudioTranscriptsGeneration instance.
+	 * @param bool                       $force Whether to force processing.
+	 * @return bool
 	 */
-	private function should_transcribe_attachment( $attachment, int $attachment_id, Transcribe $transcribe, bool $force = false ) {
+	private function should_transcribe_attachment( $attachment, int $attachment_id, AudioTranscriptsGeneration $audio_transcription, bool $force = false ) {
 		// Ensure we have a valid ID.
 		if ( ! $attachment ) {
 			\WP_CLI::error( sprintf( 'Item ID %d does not exist', $attachment_id ), false );
@@ -730,8 +737,11 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		// Ensure the attachment meets the requirements for processing.
-		if ( ! $transcribe->should_process( $attachment_id ) ) {
-			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $transcribe->file_formats ), $transcribe->max_file_size ), false );
+		if ( ! $audio_transcription->should_process( $attachment_id ) ) {
+			$feature_settings  = $audio_transcription->get_settings();
+			$provider_instance = $audio_transcription->get_feature_provider_instance( $feature_settings['provider'] );
+
+			\WP_CLI::error( sprintf( 'Item ID %d does not meet processing requirements. Ensure the file type is one of %s and file size is under %d bytes.', $attachment_id, implode( ', ', $provider_instance->file_formats ?? [ 'mp3' ] ), $provider_instance->max_file_size ?? 25 * MB_IN_BYTES ), false );
 			return false;
 		}
 
@@ -750,7 +760,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * ## Options
 	 *
 	 * [<attachment_ids>]
-	 * : Comma delimeted Attachment IDs to classify
+	 * : Comma delimited Attachment IDs to classify
 	 *
 	 * [--limit=<limit>]
 	 * : Limit classification to N attachments. Default 100.
@@ -836,9 +846,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options.
 	 */
 	public function crop( $args = [], $opts = [] ) {
-		$classifier     = new ComputerVision( false );
-		$settings       = $classifier->get_settings();
-		$smart_cropping = new SmartCropping( $settings );
+		$image_cropping = new ImageCropping();
+		$provider       = $image_cropping->get_feature_provider_instance();
+		$provider_class = get_class( $provider );
+		$settings       = $image_cropping->get_settings( $provider_class::ID );
 		$default_opts   = [
 			'limit' => false,
 		];
@@ -875,19 +886,24 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
 
 			foreach ( $current_meta['sizes'] as $size => $size_data ) {
-				if ( ! $smart_cropping->should_crop( $size ) ) {
-					continue;
-				}
+				switch ( $provider_class::ID ) {
+					case ComputerVision::ID:
+						$smart_cropping = new SmartCropping( $settings );
 
-				$data = [
-					'width'  => $size_data['width'],
-					'height' => $size_data['height'],
-				];
+						if ( ! $smart_cropping->should_crop( $size ) ) {
+							break;
+						}
 
-				$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
+						$data = [
+							'width'  => $size_data['width'],
+							'height' => $size_data['height'],
+						];
 
-				if ( is_wp_error( $smart_thumbnail ) ) {
-					$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
+						$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
+						if ( is_wp_error( $smart_thumbnail ) ) {
+							$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
+						}
+						break;
 				}
 			}
 		}
@@ -913,7 +929,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		} else {
 			\WP_CLI::error( "Cropped $total_success images, $total_errors errors." );
 		}
-
 	}
 
 	/**
@@ -945,6 +960,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			'post_status' => 'publish',
 			'per_page'    => 100,
 		];
+
+		$feature  = new Classification();
+		$provider = $feature->get_feature_provider_instance();
+
+		if ( Embeddings::ID !== $provider::ID ) {
+			\WP_CLI::error( 'This command is only available for the OpenAI Embeddings feature' );
+		}
 
 		$embeddings          = new Embeddings( false );
 		$opts                = wp_parse_args( $opts, $defaults );
@@ -1001,15 +1023,15 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $embeddings->generate_embeddings_for_post( $post_id );
+						$result = $feature->run( $post_id );
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
-							$errors ++;
+							++$errors;
 						}
 					}
 
-					$count ++;
+					++$count;
 				}
 
 				$this->inmemory_cleanup();
@@ -1018,7 +1040,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					\WP_CLI::log( sprintf( 'Batch %d is done, proceeding to next batch', $paged ) );
 				}
 
-				$paged ++;
+				++$paged;
 			} while ( $total );
 		} else {
 			// If no post type is specified, we have to have a list of post IDs.
@@ -1036,7 +1058,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				// Ensure we have a valid post ID.
 				if ( ! get_post( $post_id ) ) {
 					\WP_CLI::error( sprintf( 'Item ID %d does not exist', $post_id ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
@@ -1044,21 +1066,21 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				$post_type = get_post_type( $post_id );
 				if ( ! $post_type || ! in_array( $post_type, $allowed_post_types, true ) ) {
 					\WP_CLI::error( sprintf( 'The "%s" post type is not enabled for OpenAI Embeddings processing', $post_type ), false );
-					$errors ++;
+					++$errors;
 					continue;
 				}
 
 				if ( ! $dry_run ) {
-					$result = $embeddings->generate_embeddings_for_post( $post_id );
+					$result = $feature->run( $post_id );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
-						$errors ++;
+						++$errors;
 					}
 				}
 
 				$progress_bar->tick();
-				$count ++;
+				++$count;
 			}
 
 			$progress_bar->finish();
@@ -1081,8 +1103,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options.
 	 */
 	public function auth( $args = [], $opts = [] ) {
-		$username = \Classifai\get_watson_username();
-		$password = \Classifai\get_watson_password();
+		$username = get_username();
+		$password = get_password();
 
 		if ( empty( $username ) ) {
 			\WP_CLI::error( 'Watson Username not found in options or constant.' );
@@ -1219,7 +1241,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	/**
 	 * Prints the output from the NLU API.
 	 *
-	 * @param mixed $output  The variable to oputput.
+	 * @param mixed $output  The variable to output.
 	 * @param int   $post_id The post id.
 	 */
 	private function print( $output, $post_id ) {
@@ -1229,7 +1251,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			\WP_CLI::warning( "Failed to classify $post_id: " . $output->get_error_message() );
 		}
 	}
-
 }
 
 try {

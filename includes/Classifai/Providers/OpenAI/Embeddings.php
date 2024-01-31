@@ -9,15 +9,17 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
-use Classifai\Providers\Watson\NLU;
-use Classifai\Watson\Normalizer;
-use function Classifai\get_asset_info;
-use function Classifai\language_processing_features_enabled;
+use Classifai\Normalizer;
+use Classifai\Features\Classification;
 use WP_Error;
+
+use function Classifai\get_asset_info;
 
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
+
+	const ID = 'openai_embeddings';
 
 	/**
 	 * OpenAI Embeddings URL
@@ -43,24 +45,115 @@ class Embeddings extends Provider {
 	/**
 	 * OpenAI Embeddings constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'OpenAI Embeddings',
 			'Embeddings',
 			'openai_embeddings',
-			$service
+			$feature_instance
 		);
 
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI Embeddings', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_classification' => __( 'Classify content within existing term structure', 'classifai' ),
-			),
+		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Render the provider fields.
+	 */
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			static::ID . '_api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
+					wp_kses(
+						/* translators: %1$s is replaced with the OpenAI sign up URL */
+						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://platform.openai.com/signup' )
+				),
+			]
 		);
+
+		add_settings_field(
+			static::ID . '_number_of_terms',
+			esc_html__( 'Number of terms', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'   => static::ID,
+				'label_for'      => 'number_of_terms',
+				'input_type'     => 'number',
+				'min'            => 1,
+				'step'           => 1,
+				'default_values' => $settings['number_of_terms'],
+				'description'    => esc_html__( 'Maximum number of terms that will get auto-assigned.', 'classifai' ),
+				'class'          => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		add_settings_field(
+			static::ID . '_taxonomies',
+			esc_html__( 'Taxonomies', 'classifai' ),
+			[ $this, 'render_checkbox_group' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'   => static::ID,
+				'label_for'      => 'taxonomies',
+				'options'        => $this->get_taxonomies_for_settings(),
+				'default_values' => $settings['taxonomies'],
+				'description'    => __( 'Choose which taxonomies will be used for classification.', 'classifai' ),
+				'class'          => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'api_key'         => '',
+			'number_of_terms' => 1,
+			'authenticated'   => false,
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case Classification::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'taxonomies' => [
+							'category',
+						],
+					]
+				);
+		}
+
+		return $common_settings;
 	}
 
 	/**
@@ -69,17 +162,43 @@ class Embeddings extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$settings = $this->get_settings();
+		$feature = new Classification();
 
-		if ( isset( $settings['enable_classification'] ) && 1 === (int) $settings['enable_classification'] ) {
-			add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
-			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
-			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
-			add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
-			add_action( 'save_post', [ $this, 'save_metabox' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
+		if ( ! $feature->is_feature_enabled() || $feature->get_feature_provider_instance()::ID !== static::ID ) {
+			return;
 		}
+
+		add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
+		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
+		add_action( 'save_post', [ $this, 'save_metabox' ] );
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 */
+	public function enqueue_admin_assets() {
+		wp_enqueue_script(
+			'classifai-language-processing-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
+			get_asset_info( 'language-processing', 'dependencies' ),
+			get_asset_info( 'language-processing', 'version' ),
+			true
+		);
+
+		wp_enqueue_style(
+			'classifai-language-processing-style',
+			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			array(),
+			get_asset_info( 'language-processing', 'version' ),
+			'all'
+		);
 	}
 
 	/**
@@ -118,214 +237,40 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		add_settings_field(
-			'enable-classification',
-			esc_html__( 'Classify content', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_classification',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_classification'],
-				'description'   => __( 'Automatically classify content within your existing taxonomy structure.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'post-types',
-			esc_html__( 'Post types', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'post_types',
-				'options'        => $this->get_post_types_for_settings(),
-				'default_values' => $default_settings['post_types'],
-				'description'    => __( 'Choose which post types should be classified.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'post-statuses',
-			esc_html__( 'Post statuses', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'post_statuses',
-				'options'        => $this->get_post_statuses_for_settings(),
-				'default_values' => $default_settings['post_statuses'],
-				'description'    => __( 'Choose which post statuses should be classified.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'taxonomies',
-			esc_html__( 'Taxonomies', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'      => 'taxonomies',
-				'options'        => $this->get_taxonomies_for_settings(),
-				'default_values' => $default_settings['taxonomies'],
-				'description'    => __( 'Choose which taxonomies will be used for classification.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
-			'number',
-			esc_html__( 'Number of terms', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'number',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'max'           => 10,
-				'step'          => 1,
-				'default_value' => $default_settings['number'],
-				'description'   => __( 'Maximum number of terms that will get auto-assigned.', 'classifai' ),
-			]
-		);
-	}
-
-	/**
 	 * Sanitization for the options being saved.
 	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
+	 * @param array $new_settings Array of settings about to be saved.
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings )
-		);
+	public function sanitize_settings( array $new_settings ): array {
+		$settings = $this->feature_instance->get_settings();
 
-		if ( empty( $settings['enable_classification'] ) || 1 !== (int) $settings['enable_classification'] ) {
-			$new_settings['enable_classification'] = 'no';
-		} else {
-			$new_settings['enable_classification'] = '1';
+		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-			// If any NLU features are turned, show an admin notice.
-			if ( language_processing_features_enabled() ) {
-				add_settings_error(
-					'enable_classification',
-					'conflict',
-					esc_html__( 'IBM Watson NLU classification is turned on. This may conflict with the Embeddings classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
-					'warning'
-				);
+		if ( $this->feature_instance instanceof Classification ) {
+			// Sanitize the taxonomy checkboxes.
+			$taxonomies = $this->get_taxonomies_for_settings();
+			foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
+				if ( isset( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) && '0' !== $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) {
+					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ?? $settings[ static::ID ]['taxonomies'][ $taxonomy_key ] );
+					$this->trigger_taxonomy_update( $taxonomy_key );
+				} else {
+					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = '0';
+				}
 			}
-		}
-
-		// Sanitize the post type checkboxes.
-		$post_types = $this->get_post_types_for_settings();
-		foreach ( $post_types as $post_type => $post_type_label ) {
-			if ( isset( $settings['post_types'][ $post_type ] ) && '0' !== $settings['post_types'][ $post_type ] ) {
-				$new_settings['post_types'][ $post_type ] = sanitize_text_field( $settings['post_types'][ $post_type ] );
-			} else {
-				$new_settings['post_types'][ $post_type ] = '0';
-			}
-		}
-
-		// Sanitize the post statuses checkboxes.
-		$post_statuses = $this->get_post_statuses_for_settings();
-		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
-			if ( isset( $settings['post_statuses'][ $post_status_key ] ) && '0' !== $settings['post_statuses'][ $post_status_key ] ) {
-				$new_settings['post_statuses'][ $post_status_key ] = sanitize_text_field( $settings['post_statuses'][ $post_status_key ] );
-			} else {
-				$new_settings['post_statuses'][ $post_status_key ] = '0';
-			}
-		}
-
-		// Sanitize the taxonomy checkboxes.
-		$taxonomies = $this->get_taxonomies_for_settings();
-		foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
-			if ( isset( $settings['taxonomies'][ $taxonomy_key ] ) && '0' !== $settings['taxonomies'][ $taxonomy_key ] ) {
-				$new_settings['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $settings['taxonomies'][ $taxonomy_key ] );
-				$this->trigger_taxonomy_update( $taxonomy_key );
-			} else {
-				$new_settings['taxonomies'][ $taxonomy_key ] = '0';
-			}
-		}
-
-		// Sanitize the number setting.
-		if ( isset( $settings['number'] ) && is_numeric( $settings['number'] ) && (int) $settings['number'] >= 0 && (int) $settings['number'] <= 10 ) {
-			$new_settings['number'] = absint( $settings['number'] );
-		} else {
-			$new_settings['number'] = 1;
 		}
 
 		return $new_settings;
 	}
 
 	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for ChatGPT
+	 * The list of supported post types.
 	 *
 	 * @return array
 	 */
-	public function get_default_settings() {
-		return [
-			'authenticated'         => false,
-			'api_key'               => '',
-			'enable_classification' => false,
-			'post_types'            => [ 'post' ],
-			'post_statuses'         => [ 'publish' ],
-			'taxonomies'            => [ 'category' ],
-			'number'                => 1,
-		];
-	}
-
-	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated         = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_classification = 1 === intval( $settings['enable_classification'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )          => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Classification enabled', 'classifai' ) => $enable_classification ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Post types', 'classifai' )             => implode( ', ', $settings['post_types'] ?? [] ),
-			__( 'Post statuses', 'classifai' )          => implode( ', ', $settings['post_statuses'] ?? [] ),
-			__( 'Taxonomies', 'classifai' )             => implode( ', ', $settings['taxonomies'] ?? [] ),
-			__( 'Number of terms', 'classifai' )        => $settings['number'] ?? 1,
-			__( 'Latest response', 'classifai' )        => $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) ),
-		];
-	}
-
-	/**
-	 * The list of supported post types.
-	 *
-	 * return array
-	 */
-	public function supported_post_types() {
+	public function supported_post_types(): array {
 		/**
 		 * Filter post types supported for embeddings.
 		 *
@@ -336,7 +281,40 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post types.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types() );
+		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types( new Classification() ) );
+	}
+
+	/**
+	 * Get the threshold for the similarity calculation.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return float
+	 */
+	public function get_threshold( string $taxonomy = '' ): float {
+		$settings  = ( new Classification() )->get_settings();
+		$threshold = 1;
+
+		if ( ! empty( $taxonomy ) ) {
+			$threshold = isset( $settings['taxonomies'][ $taxonomy . '_threshold' ] ) ? $settings['taxonomies'][ $taxonomy . '_threshold' ] : 75;
+		}
+
+		// Convert $threshold (%) to decimal.
+		$threshold = 1 - ( (float) $threshold / 100 );
+
+		/**
+		 * Filter the threshold for the similarity calculation.
+		 *
+		 * @since 2.5.0
+		 * @hook classifai_threshold
+		 *
+		 * @param {float} $threshold The threshold to use.
+		 * @param {string} $taxonomy The taxonomy to get the threshold for.
+		 *
+		 * @return {float} The threshold to use.
+		 */
+		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
 	}
 
 	/**
@@ -344,7 +322,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function supported_post_statuses() {
+	public function supported_post_statuses(): array {
 		/**
 		 * Filter post statuses supported for embeddings.
 		 *
@@ -355,7 +333,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of post statuses.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses() );
+		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses( new Classification() ) );
 	}
 
 	/**
@@ -363,7 +341,7 @@ class Embeddings extends Provider {
 	 *
 	 * @return array
 	 */
-	public function supported_taxonomies() {
+	public function supported_taxonomies(): array {
 		/**
 		 * Filter taxonomies supported for embeddings.
 		 *
@@ -374,15 +352,38 @@ class Embeddings extends Provider {
 		 *
 		 * @return {array} Array of taxonomies.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies() );
+		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies( new Classification() ) );
+	}
+
+	/**
+	 * Get the data to preview terms.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @return array
+	 */
+	public function get_post_classifier_embeddings_preview_data(): array {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
+			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
+		}
+
+		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+
+		$embeddings_terms = $this->generate_embeddings_for_post( $post_id, true );
+
+		return wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
 	 * Trigger embedding generation for content being saved.
 	 *
-	 * @param int $post_id ID of post being saved.
+	 * @param int  $post_id ID of post being saved.
+	 * @param bool $dryrun Whether to run the process or just return the data.
+	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( $post_id ) {
+	public function generate_embeddings_for_post( int $post_id, bool $dryrun = false ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
@@ -397,14 +398,17 @@ class Embeddings extends Provider {
 
 		// Only run on supported post types and statuses.
 		if (
-			! in_array( $post->post_type, $this->supported_post_types(), true ) ||
-			! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			! $dryrun
+			&& (
+				! in_array( $post->post_type, $this->supported_post_types(), true ) ||
+				! in_array( $post->post_status, $this->supported_post_statuses(), true )
+			)
 		) {
 			return;
 		}
 
 		// Don't run if turned off for this particular post.
-		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
+		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) && ! $dryrun ) {
 			return;
 		}
 
@@ -412,8 +416,12 @@ class Embeddings extends Provider {
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
-			$this->set_terms( $post_id, $embeddings );
+			if ( $dryrun ) {
+				return $this->get_terms( $embeddings );
+			} else {
+				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+				return $this->set_terms( $post_id, $embeddings );
+			}
 		}
 	}
 
@@ -432,43 +440,9 @@ class Embeddings extends Provider {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
 		}
 
-		$settings             = $this->get_settings();
-		$number_to_add        = $settings['number'] ?? 1;
-		$embedding_similarity = [];
-		$taxonomies           = $this->supported_taxonomies();
-		$calculations         = new EmbeddingCalculations();
-
-		foreach ( $taxonomies as $tax ) {
-			$terms = get_terms(
-				[
-					'taxonomy'   => $tax,
-					'hide_empty' => false,
-					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					// 'number'  => 500, TODO: see if we need a limit here.
-				]
-			);
-
-			if ( is_wp_error( $terms ) || empty( $terms ) ) {
-				continue;
-			}
-
-			// Get embedding similarity for each term.
-			foreach ( $terms as $term_id ) {
-				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-					continue;
-				}
-
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
-
-				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $calculations->similarity( $embedding, $term_embedding );
-					}
-				}
-			}
-		}
+		$settings             = ( new Classification() )->get_settings();
+		$number_to_add        = $settings['number_of_terms'] ?? 1;
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
 			return;
@@ -486,6 +460,126 @@ class Embeddings extends Provider {
 
 			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
 		}
+	}
+
+	/**
+	 * Get the terms of a post based on embeddings.
+	 *
+	 * @param array $embedding Embedding data.
+	 * @return array|WP_Error
+	 */
+	private function get_terms( array $embedding = [] ) {
+		if ( empty( $embedding ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
+		}
+
+		$settings             = ( new Classification() )->get_settings();
+		$number_to_add        = $settings[ static::ID ]['number_of_terms'] ?? 1;
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
+
+		if ( empty( $embedding_similarity ) ) {
+			return;
+		}
+
+		// Set terms based on similarity.
+		$index  = 0;
+		$result = [];
+
+		foreach ( $embedding_similarity as $tax => $terms ) {
+			// Get the taxonomy name.
+			$taxonomy = get_taxonomy( $tax );
+			$tax_name = $taxonomy->labels->singular_name;
+
+			// Sort embeddings from lowest to highest.
+			asort( $terms );
+
+			// Return the terms.
+			$result[ $index ] = new \stdClass();
+
+			$result[ $index ]->{$tax_name} = [];
+
+			$term_added = 0;
+			foreach ( $terms as $term_id => $similarity ) {
+				// Stop if we have added the number of terms specified in settings.
+				if ( $number_to_add <= $term_added ) {
+					break;
+				}
+
+				// Convert $similarity to percentage.
+				$similarity = round( ( 1 - $similarity ), 10 );
+
+				$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+					'label' => get_term( $term_id )->name,
+					'score' => $similarity,
+				];
+				++$term_added;
+			}
+
+			// Only add the number of terms specified in settings.
+			if ( count( $terms ) > $number_to_add ) {
+				$terms = array_slice( $terms, 0, $number_to_add, true );
+			}
+
+			++$index;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Get the similarity between an embedding and all terms.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param array $embedding Embedding data.
+	 * @param bool  $consider_threshold Whether to consider the threshold setting.
+	 * @return array
+	 */
+	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
+		$embedding_similarity = [];
+		$taxonomies           = $this->supported_taxonomies();
+		$calculations         = new EmbeddingCalculations();
+
+		foreach ( $taxonomies as $tax ) {
+			if ( is_numeric( $tax ) ) {
+				continue;
+			}
+
+			$terms = get_terms(
+				[
+					'taxonomy'   => $tax,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					// 'number'  => 500, TODO: see if we need a limit here.
+				]
+			);
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
+
+			// Get threshold setting for this taxonomy.
+			$threshold = $this->get_threshold( $tax );
+
+			// Get embedding similarity for each term.
+			foreach ( $terms as $term_id ) {
+				if ( ! current_user_can( 'assign_term', $term_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+					continue;
+				}
+
+				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+
+				if ( $term_embedding ) {
+					$similarity = $calculations->similarity( $embedding, $term_embedding );
+					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
+					}
+				}
+			}
+		}
+
+		return $embedding_similarity;
 	}
 
 	/**
@@ -520,7 +614,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param int $term_id ID of term being saved.
 	 */
-	public function generate_embeddings_for_term( $term_id ) {
+	public function generate_embeddings_for_term( int $term_id ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return;
@@ -554,11 +648,11 @@ class Embeddings extends Provider {
 	 * @return array|boolean|WP_Error
 	 */
 	public function generate_embeddings( int $id = 0, $type = 'post' ) {
-		$settings = $this->get_settings();
+		$feature  = new Classification();
+		$settings = $feature->get_settings();
 
-		// This check should have already run but if someone were to call
-		// this method directly, we run it again.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( isset( $settings['enable_classification'] ) && 'no' === $settings['enable_classification'] ) ) {
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -580,7 +674,7 @@ class Embeddings extends Provider {
 			return false;
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '' );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -643,7 +737,7 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ) {
+	public function get_content( int $id = 0, string $type = 'post' ): string {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -685,19 +779,19 @@ class Embeddings extends Provider {
 	 * Add `classifai_process_content` to the REST API for view/edit.
 	 */
 	public function add_process_content_meta_to_rest_api() {
-		$supported_post_types = $this->supported_post_types();
+		$supported_post_types = $this->supported_post_types( new Classification() );
 
 		register_rest_field(
 			$supported_post_types,
 			'classifai_process_content',
 			[
-				'get_callback'    => function( $object ) {
-					$process_content = get_post_meta( $object['id'], '_classifai_process_content', true );
+				'get_callback'    => function ( $data ) {
+					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
 					return ( 'no' === $process_content ) ? 'no' : 'yes';
 				},
-				'update_callback' => function ( $value, $object ) {
+				'update_callback' => function ( $value, $data ) {
 					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $object->ID, '_classifai_process_content', $value );
+					return update_post_meta( $data->ID, '_classifai_process_content', $value );
 				},
 				'schema'          => [
 					'type'    => 'string',
@@ -712,8 +806,8 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $post_type Post type name.
 	 */
-	public function add_metabox( $post_type ) {
-		if ( ! in_array( $post_type, $this->get_supported_post_types(), true ) ) {
+	public function add_metabox( string $post_type ) {
+		if ( ! in_array( $post_type, $this->get_supported_post_types( new Classification() ), true ) ) {
 			return;
 		}
 
@@ -733,10 +827,9 @@ class Embeddings extends Provider {
 	/**
 	 * Render metabox.
 	 *
-	 * @param WP_POST $post A WordPress post instance.
-	 * @return void
+	 * @param \WP_Post $post A WordPress post instance.
 	 */
-	public function render_metabox( $post ) {
+	public function render_metabox( \WP_Post $post ) {
 
 		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
 		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
@@ -749,7 +842,7 @@ class Embeddings extends Provider {
 			<p>
 				<label for="classifai-process-content" class="classifai-preview-toggle">
 					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
-					<strong><?php esc_html_e( 'Process content on update', 'classifai' ); ?></strong>
+					<strong><?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?></strong>
 				</label>
 			</p>
 		</div>
@@ -760,9 +853,8 @@ class Embeddings extends Provider {
 	 * Handles saving the metabox.
 	 *
 	 * @param int $post_id Current post ID.
-	 * @return void
 	 */
-	public function save_metabox( $post_id ) {
+	public function save_metabox( int $post_id ) {
 
 		if ( empty( $_POST['classifai_language_processing_meta'] ) ) {
 			return;
@@ -800,4 +892,122 @@ class Embeddings extends Provider {
 		}
 	}
 
+	/**
+	 * Render a group of checkboxes.
+	 *
+	 * @param array $args The args passed to add_settings_field
+	 */
+	public function render_checkbox_group( array $args = array() ) {
+		$setting_index = $this->feature_instance->get_settings( static::ID );
+		$options       = $args['options'] ?? [];
+		$option_index  = $args['option_index'];
+
+		if ( ! is_array( $options ) ) {
+			return;
+		}
+
+		// Iterate through all of our options.
+		foreach ( $options as $option_value => $option_label ) {
+			$value                 = '';
+			$default_key           = array_search( $option_value, $args['default_values'], true );
+			$option_value_theshold = $option_value . '_threshold';
+
+			// Get saved value, if any.
+			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
+				$value           = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
+				$threshold_value = $setting_index[ $args['label_for'] ][ $option_value_theshold ] ?? '';
+			}
+
+			// If no saved value, check if we have a default value.
+			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
+				$value = $args['default_values'][ $default_key ];
+			}
+
+			// Render checkbox.
+			printf(
+				'<p>
+					<label for="%1$s_%2$s_%3$s_%4$s">
+						<input type="hidden" name="%1$s[%2$s][%3$s][%4$s]" value="0" />
+						<input type="checkbox" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" value="%4$s" %5$s />
+						%6$s
+					</label>
+				</p>',
+				esc_attr( $this->feature_instance->get_option_name() ),
+				esc_attr( $option_index ),
+				esc_attr( $args['label_for'] ?? '' ),
+				esc_attr( $option_value ),
+				checked( $value, $option_value, false ),
+				esc_html( $option_label )
+			);
+
+			// Render Threshold field.
+			if ( 'taxonomies' === $args['label_for'] ) {
+				$this->render_threshold_field( $args, $option_value_theshold, $threshold_value );
+			}
+		}
+
+		// Render description, if any.
+		if ( ! empty( $args['description'] ) ) {
+			printf(
+				'<span class="description">%s</span>',
+				esc_html( $args['description'] )
+			);
+		}
+	}
+
+	/**
+	 * Render a threshold field.
+	 *
+	 * @since 2.5.0
+	 *
+	 * @param array  $args         The args passed to add_settings_field
+	 * @param string $option_value The option value.
+	 * @param string $value        The value.
+	 */
+	public function render_threshold_field( array $args, string $option_value, string $value ) {
+		printf(
+			'<p class="threshold_wrapper">
+				<label for="%1$s_%2$s_%3$s_%4$s">%5$s</label>
+				<br>
+				<input type="number" id="%1$s_%2$s_%3$s_%4$s" class="small-text" name="%1$s[%2$s][%3$s][%4$s]" value="%6$s" />
+			</p>',
+			esc_attr( $this->feature_instance->get_option_name() ),
+			esc_attr( $args['option_index'] ),
+			esc_attr( $args['label_for'] ?? '' ),
+			esc_attr( $option_value ),
+			esc_html__( 'Threshold (%)', 'classifai' ),
+			$value ? esc_attr( $value ) : 75
+		);
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof Classification ) {
+			$debug_info[ __( 'Number of terms', 'classifai' ) ]                = $provider_settings['number_of_terms'] ?? 1;
+			$debug_info[ __( 'Taxonomy (category)', 'classifai' ) ]            = $provider_settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (category threshold)', 'classifai' ) ]  = $provider_settings['taxonomies']['category_threshold'];
+			$debug_info[ __( 'Taxonomy (tag)', 'classifai' ) ]                 = $provider_settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (tag threshold)', 'classifai' ) ]       = $provider_settings['taxonomies']['post_tag_threshold'];
+			$debug_info[ __( 'Taxonomy (format)', 'classifai' ) ]              = $provider_settings['taxonomies']['post_format'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (format threshold)', 'classifai' ) ]    = $provider_settings['taxonomies']['post_format_threshold'];
+			$debug_info[ __( 'Taxonomy (image tag)', 'classifai' ) ]           = $provider_settings['taxonomies']['classifai-image-tags'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
+			$debug_info[ __( 'Taxonomy (image tag threshold)', 'classifai' ) ] = $provider_settings['taxonomies']['classifai-image-tags_threshold'];
+			$debug_info[ __( 'Latest response', 'classifai' ) ]                = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
+	}
 }

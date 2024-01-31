@@ -26,12 +26,21 @@ class APIRequest {
 	public $api_key;
 
 	/**
+	 * The feature name.
+	 *
+	 * @var string
+	 */
+	public $feature;
+
+	/**
 	 * OpenAI APIRequest constructor.
 	 *
 	 * @param string $api_key OpenAI API key.
+	 * @param string $feature Feature name.
 	 */
-	public function __construct( string $api_key = '' ) {
+	public function __construct( string $api_key = '', string $feature = '' ) {
 		$this->api_key = $api_key;
+		$this->feature = $feature;
 	}
 
 	/**
@@ -42,8 +51,55 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function get( string $url, array $options = [] ) {
+		/**
+		 * Filter the URL for the get request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_get_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $options The options for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		$url = apply_filters( 'classifai_openai_api_request_get_url', $url, $options, $this->feature );
+
+		/**
+		 * Filter the options for the get request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_get_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		$options = apply_filters( 'classifai_openai_api_request_get_options', $options, $url, $this->feature );
+
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+
+		/**
+		 * Filter the response from OpenAI for a get request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_response_get
+		 *
+		 * @param {string} $url Request URL.
+		 * @param {array} $options Request body options.
+		 * @param {string} $this->feature Feature name.
+		 *
+		 * @return {array} API response.
+		 */
+		return apply_filters(
+			'classifai_openai_api_response_get',
+			$this->get_result( wp_remote_get( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$url,
+			$options,
+			$this->feature
+		);
 	}
 
 	/**
@@ -60,8 +116,56 @@ class APIRequest {
 				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
+
+		/**
+		 * Filter the URL for the post request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $options The options for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		$url = apply_filters( 'classifai_openai_api_request_post_url', $url, $options, $this->feature );
+
+		/**
+		 * Filter the options for the post request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		$options = apply_filters( 'classifai_openai_api_request_post_options', $options, $url, $this->feature );
+
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+
+		/**
+		 * Filter the response from OpenAI for a post request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_response_post
+		 *
+		 * @param {string} $url Request URL.
+		 * @param {array} $options Request body options.
+		 * @param {string} $this->feature Feature name.
+		 *
+		 * @return {array} API response.
+		 */
+		return apply_filters(
+			'classifai_openai_api_response_post',
+			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$url,
+			$options,
+			$this->feature
+		);
 	}
 
 	/**
@@ -72,6 +176,19 @@ class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function post_form( string $url = '', array $body = [] ) {
+		/**
+		 * Filter the URL for the post form request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_form_url
+		 *
+		 * @param {string} $url The URL for the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {string} The URL for the request.
+		 */
+		$url = apply_filters( 'classifai_openai_api_request_post_form_url', $url, $this->feature );
+
 		$boundary = wp_generate_password( 24, false );
 		$payload  = '';
 
@@ -95,17 +212,54 @@ class APIRequest {
 
 		$payload .= '--' . $boundary . '--';
 
-		$options = [
-			'body'    => $payload,
-			'headers' => [
-				'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+		/**
+		 * Filter the options for the post form request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_request_post_form_options
+		 *
+		 * @param {array} $options The options for the request.
+		 * @param {string} $url The URL for the request.
+		 * @param {array} $body The body of the request.
+		 * @param {string} $this->feature The feature name.
+		 *
+		 * @return {array} The options for the request.
+		 */
+		$options = apply_filters(
+			'classifai_openai_api_request_post_form_options',
+			[
+				'body'    => $payload,
+				'headers' => [
+					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+				],
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			],
-			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-		];
+			$url,
+			$body,
+			$this->feature
+		);
 
 		$this->add_headers( $options );
 
-		return $this->get_result( wp_remote_post( $url, $options ) );
+		/**
+		 * Filter the response from OpenAI for a post form request.
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_api_response_post_form
+		 *
+		 * @param {string} $url Request URL.
+		 * @param {array} $options Request body options.
+		 * @param {string} $this->feature Feature name.
+		 *
+		 * @return {array} API response.
+		 */
+		return apply_filters(
+			'classifai_openai_api_response_post_form',
+			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$url,
+			$options,
+			$this->feature
+		);
 	}
 
 	/**
@@ -171,5 +325,4 @@ class APIRequest {
 	public function get_api_key() {
 		return $this->api_key;
 	}
-
 }

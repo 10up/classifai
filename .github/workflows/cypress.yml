@@ -8,6 +8,7 @@ on:
   pull_request:
     branches:
       - develop
+
 jobs:
   cypress:
     name: ${{ matrix.core.name }}
@@ -16,11 +17,11 @@ jobs:
       matrix:
         core:
           - {name: 'WP latest', version: 'latest'}
-          - {name: 'WP minimum', version: 'WordPress/WordPress#5.8'}
-          - {name: 'WP trunk', version: 'WordPress/WordPress#master'}
+          - {name: 'WP minimum', version: 'WordPress/WordPress#6.1'}
+          # - {name: 'WP trunk', version: 'WordPress/WordPress#master'}
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: npm install
@@ -51,7 +52,7 @@ jobs:
         cat ./tests/cypress/reports/mochawesome.md >> $GITHUB_STEP_SUMMARY
 
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: cypress-artifact-classifai

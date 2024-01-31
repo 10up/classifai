@@ -20,15 +20,16 @@
     },
     "files": [
       "includes/Classifai/Helpers.php",
-      "includes/Classifai/Blocks.php"
+      "includes/Classifai/Blocks.php",
+      "includes/Classifai/Providers/Watson/Helpers.php"
     ]
   },
   "require-dev": {
-    "10up/phpcs-composer": "dev-master",
+    "10up/phpcs-composer": "^3.0",
     "yoast/phpunit-polyfills": "^1.0.0"
   },
   "scripts": {
-    "lint": "phpcs . --runtime-set testVersion 7.4-",
+    "lint": "phpcs -s . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf ."
   },
   "minimum-stability": "dev",

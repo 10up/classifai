@@ -22,6 +22,7 @@ import {
 } from '@wordpress/wordcount';
 import { __ } from '@wordpress/i18n';
 
+import { DisableFeatureButton } from '../components';
 import '../../scss/content-resizing-plugin.scss';
 
 const aiIconSvg = (
@@ -41,7 +42,7 @@ const aiIconSvg = (
 );
 
 /**
- * Custom store to access common data in a block and a higer order
+ * Custom store to access common data in a block and a higher order
  * component created through filters.
  */
 const DEFAULT_STATE = {
@@ -110,7 +111,7 @@ const resizeContentStore = createReduxStore( 'resize-content-store', {
 register( resizeContentStore );
 
 const ContentResizingPlugin = () => {
-	// Holds the original text of the block being procesed.
+	// Holds the original text of the block being processed.
 	const [ blockContentAsPlainText, setBlockContentAsPlainText ] =
 		useState( '' );
 
@@ -184,7 +185,7 @@ const ContentResizingPlugin = () => {
 	 */
 	async function getResizedContent() {
 		let __textArray = [];
-		const apiUrl = `${ wpApiSettings.root }classifai/v1/openai/resize-content`;
+		const apiUrl = `${ wpApiSettings.root }classifai/v1/resize-content`;
 		const postId = select( editorStore ).getCurrentPostId();
 		const formData = new FormData();
 
@@ -221,7 +222,11 @@ const ContentResizingPlugin = () => {
 	 *
 	 * @param {string} updateWith The content that will be used to replace the selection.
 	 */
-	function updateContent( updateWith ) {
+	async function updateContent( updateWith ) {
+		const isDirty = await select( 'core/editor' ).isEditedPostDirty();
+		const postId = select( 'core/editor' ).getCurrentPostId();
+		const postType = select( 'core/editor' ).getCurrentPostType();
+
 		dispatch( blockEditorStore ).updateBlockAttributes(
 			selectedBlock.clientId,
 			{
@@ -236,6 +241,15 @@ const ContentResizingPlugin = () => {
 			updateWith.length
 		);
 		resetStates();
+
+		// If no edited values in post trigger save.
+		if ( ! isDirty ) {
+			await dispatch( 'core' ).saveEditedEntityRecord(
+				'postType',
+				postType,
+				postId
+			);
+		}
 	}
 
 	// We don't want to use the reszing feature when multiple blocks are selected.
@@ -316,6 +330,7 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
+			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
 

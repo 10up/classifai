@@ -17,9 +17,9 @@ class Tokenizer {
 	/**
 	 * How many characters in one token (roughly)
 	 *
-	 * @var int
+	 * @var float
 	 */
-	public $characters_in_token = 4;
+	public $characters_in_token = 3.5;
 
 	/**
 	 * How many tokens a word will take (roughly)
@@ -33,8 +33,34 @@ class Tokenizer {
 	 *
 	 * @param int $max_tokens Maximum tokens the model supports.
 	 */
-	public function __construct( $max_tokens ) {
+	public function __construct( int $max_tokens ) {
 		$this->max_tokens = $max_tokens;
+
+		/**
+		 * How many characters in one token (roughly)
+		 *
+		 * @since 2.4..0
+		 * @hook classifai_openai_characters_in_token
+		 *
+		 * @param {int} $characters_in_token How many characters in one token (roughly)
+		 * @param {int} $max_tokens Maximum tokens the model supports.
+		 *
+		 * @return {int}
+		 */
+		$this->characters_in_token = apply_filters( 'classifai_openai_characters_in_token', $this->characters_in_token, $max_tokens );
+
+		/**
+		 * How many tokens a word will take (roughly)
+		 *
+		 * @since 2.4.0
+		 * @hook classifai_openai_tokens_per_word
+		 *
+		 * @param {int} $tokens_per_word How many tokens a word will take (roughly)
+		 * @param {int} $max_tokens Maximum tokens the model supports.
+		 *
+		 * @return {int}
+		 */
+		$this->tokens_per_word = apply_filters( 'classifai_openai_tokens_per_word', $this->tokens_per_word, $max_tokens );
 	}
 
 	/**
@@ -43,7 +69,7 @@ class Tokenizer {
 	 * @param string $content Content to analyze.
 	 * @return int
 	 */
-	public function tokens_in_content( string $content = '' ) {
+	public function tokens_in_content( string $content = '' ): int {
 		$tokens = ceil( mb_strlen( $content ) / $this->characters_in_token );
 
 		return (int) $tokens;
@@ -55,7 +81,7 @@ class Tokenizer {
 	 * @param int $words Number of words we want.
 	 * @return int
 	 */
-	public function tokens_in_words( int $words = 1 ) {
+	public function tokens_in_words( int $words = 1 ): int {
 		$tokens = ceil( $this->tokens_per_word * absint( $words ) );
 
 		return (int) $tokens;
@@ -68,7 +94,7 @@ class Tokenizer {
 	 * @param int    $max_tokens Maximum tokens our content can have.
 	 * @return string
 	 */
-	public function trim_content( string $content = '', int $max_tokens = 0 ) {
+	public function trim_content( string $content = '', int $max_tokens = 0 ): string {
 		// Remove linebreaks that may have been added.
 		$content = str_replace( "\n\n", ' ', $content );
 
@@ -91,7 +117,7 @@ class Tokenizer {
 		 * can be and trim it up.
 		 */
 		$tokens_to_trim     = $content_tokens - $max_tokens;
-		$characters_to_trim = $tokens_to_trim * $this->characters_in_token;
+		$characters_to_trim = (int) ceil( $tokens_to_trim * $this->characters_in_token );
 		$max_content_length = mb_strlen( $content ) - $characters_to_trim;
 		$trimmed_content    = mb_substr( $content, 0, $max_content_length );
 
@@ -104,5 +130,4 @@ class Tokenizer {
 
 		return trim( $trimmed_content );
 	}
-
 }

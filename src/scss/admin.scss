@@ -2,54 +2,63 @@
 	--classifai-admin-theme-color: #007cba;
 	--classifai-admin-theme-color--rgb: 0, 124, 186;
 	--classifai-admin-theme-color-darker-10: #006ba1;
+	--classifai-highlight-color: #007cba;
 }
 
 body.admin-color-light {
 	--classifai-admin-theme-color: #0085ba;
 	--classifai-admin-theme-color--rgb: 0, 133, 186;
 	--classifai-admin-theme-color-darker-10: #0073a1;
+	--classifai-highlight-color: #04a4cc;
 }
 
 body.admin-color-modern {
 	--classifai-admin-theme-color: #3858e9;
 	--classifai-admin-theme-color--rgb: 56, 88, 233;
 	--classifai-admin-theme-color-darker-10: #2145e6;
+	--classifai-highlight-color: #3858e9;
 }
 
 body.admin-color-blue {
 	--classifai-admin-theme-color: #096484;
 	--classifai-admin-theme-color--rgb: 9, 100, 132;
 	--classifai-admin-theme-color-darker-10: #07526c;
+	--classifai-highlight-color: #096484;
 }
 
 body.admin-color-coffee {
 	--classifai-admin-theme-color: #46403c;
 	--classifai-admin-theme-color--rgb: 70, 64, 60;
 	--classifai-admin-theme-color-darker-10: #383330;
+	--classifai-highlight-color: #c7a589;
 }
 
 body.admin-color-ectoplasm {
 	--classifai-admin-theme-color: #523f6d;
 	--classifai-admin-theme-color--rgb: 82, 63, 109;
 	--classifai-admin-theme-color-darker-10: #46365d;
+	--classifai-highlight-color: #a3b745;
 }
 
 body.admin-color-midnight {
 	--classifai-admin-theme-color: #e14d43;
 	--classifai-admin-theme-color--rgb: 225, 77, 67;
 	--classifai-admin-theme-color-darker-10: #dd382d;
+	--classifai-highlight-color: #e14d43;
 }
 
 body.admin-color-ocean {
 	--classifai-admin-theme-color: #627c83;
 	--classifai-admin-theme-color--rgb: 98, 124, 131;
 	--classifai-admin-theme-color-darker-10: #576e74;
+	--classifai-highlight-color: #9ebaa0;
 }
 
 body.admin-color-sunrise {
 	--classifai-admin-theme-color: #dd823b;
 	--classifai-admin-theme-color--rgb: 221, 130, 59;
 	--classifai-admin-theme-color-darker-10: #d97426;
+	--classifai-highlight-color: #dd823b;
 }
 
 #classifai-activation-notice {
@@ -244,11 +253,110 @@ input.classifai-button {
 			max-width: 600px;
 		}
 
-		.classifai-input-description {
+		.description {
 			display: block;
 			margin-top: 8px;
 			max-width: 600px;
 			line-height: 1.4;
+		}
+
+		tr.allowed_users_row {
+			.classifai-search-users-container {
+				max-width: 600px;
+
+				label.components-form-token-field__label{
+					display: none;
+				}
+			}
+		}
+
+		.components-form-token-field__input-container.is-active {
+			border-color: var(--classifai-highlight-color);
+			box-shadow: 0 0 0 1px var(--classifai-highlight-color);
+			outline: 2px solid transparent;
+		}
+
+		.components-form-token-field__suggestion {
+			box-sizing: border-box;
+		}
+
+		.components-form-token-field__suggestion.is-selected {
+			background: var(--classifai-highlight-color);
+		}
+
+		.classifai-field-type-prompt-setting {
+			padding: 5px 20px;
+			border: 1px solid #f0f0f1;
+			position: relative;
+			display: flex;
+			flex-direction:column;
+			max-width: 600px;
+
+			&:first-child {
+				> input,
+				> label {
+					display: none;
+				}
+			}
+
+			&:nth-child(2n + 1) {
+				background-color: #f0f0f1;
+			}
+
+			label {
+				display: block;
+			}
+
+			input, textarea {
+				margin-right: 0;
+				display: block;
+			}
+
+			input[type="text"] {
+				width: 90%;
+			}
+
+			/* Style for prompt action items container */
+			.actions-rows {
+				display: flex;
+				margin: 0.35em 0 .5em!important;
+
+				/* Style for prompt actions */
+				a {
+					cursor: pointer;
+					text-decoration: none;
+					margin-left: 8px;
+
+					&.action__remove_prompt {
+						color: #b32d2e;
+					}
+				}
+
+				/* action items separator */
+				a:before {
+					content: '|';
+					color: #a7aaad;
+				}
+
+				/* Styling for default prompt first action */
+				a:first-child {
+					margin-left: 0;
+
+					&.selected {
+						color: #a7aaad;
+						pointer-events: none;
+					}
+
+					&:before {
+						content: '';
+					}
+				}
+
+			}
+
+			+ button {
+				margin-top: 10px;
+			}
 		}
 	}
 
@@ -257,6 +365,17 @@ input.classifai-button {
 		height: 38px;
 		font-size: 14px;
 		margin-bottom: 4px;
+	}
+
+	.hide-username {
+		display: none;
+	}
+
+	.components-form-token-field__input-container input[type=text].components-form-token-field__input {
+		height: auto;
+		font-size: 14px;
+		margin-bottom: 0px;
+		min-height: 32px;
 	}
 
 	h2.nav-tab-wrapper.classifai-nav-wrapper {
@@ -404,9 +523,11 @@ input.classifai-button {
 		margin-left: -10px;
 	}
 
-	&__wrapper {
+	&__wrapper,
+	.classifai-wrap {
 		max-width: 1232px;
 		margin: 0px auto;
+		padding: 0px;
 	}
 
 	&__content {
@@ -544,21 +665,23 @@ input.classifai-button {
 		}
 
 		.classifai-setup-form {
-
 			.classifai-step3-content & {
 				margin: 0 auto;
-				max-width: 480px;
+			}
+
+			.classifai-setup-form-field-label {
+				text-align: left;
 			}
 
 			.classifai-setup-form-field {
-				margin-top: 40px;
+				padding: 0px;
 			}
 
-			label {
+			.classifai-setup-form-field-label > label {
 				display: block;
 				font-weight: 700;
 				text-transform: uppercase;
-				margin-bottom: 20px;
+				margin-bottom: 0px;
 			}
 
 			input[type="text"],
@@ -576,28 +699,45 @@ input.classifai-button {
 
 		.classifai-step3-content {
 			margin: 0 auto;
+			max-width: 840px;
+			width: 100%;
 
 			.classifai-setup-title {
 				text-align: center;
 				margin-bottom: 12px;
 			}
 
-			.classifai-setup-form,
-			.classifai-setup-footer {
-				margin: 0 auto;
-				max-width: 480px;
+			.classifai-setup-form {
+				padding-left: 48px;
+				width: 70%;
+				box-sizing: border-box;
+
+				@media screen and (max-width: 782px) {
+					padding-left: 18px;
+				}
+
+				@media screen and (max-width: 600px) {
+					width: 100%;
+					padding-left: 0px;
+					margin-bottom: 20px;
+				}
 			}
 
 			.classifai-setup-footer {
-				margin-top: 40px;
+				margin-top: 20px;
 			}
 		}
 
 		.classifai-tabs {
 			display: block;
+			width: 30%;
+			box-sizing: border-box;
+
+			@media screen and (max-width: 600px) {
+				width: 100%;
+			}
 
 			&.tabs-center {
-				margin: auto;
 				margin-bottom: 24px;
 			}
 
@@ -609,12 +749,11 @@ input.classifai-button {
 			a.tab {
 				text-decoration: none;
 				position: relative;
-				display: inline-block;
-				transition: all ease .3s;
+				display: block;
+				transition: all ease 0.3s;
 				padding: 16px 12px;
 				transform: translate3d(0, 0, 0);
 				color: #1d2327;
-				white-space: nowrap;
 				cursor: pointer;
 				font-size: 14px;
 
@@ -626,24 +765,10 @@ input.classifai-button {
 					color: var(--classifai-admin-theme-color);
 				}
 
-				&:after {
-					transition: all .3s cubic-bezier(1, 0, 0, 1);
-					will-change: transform, box-shadow, opacity;
-					position: absolute;
-					content: '';
-					height: 3px;
-					bottom: 0px;
-					left: 0px;
-					right: 0px;
-					border-radius: 3px 3px 0px 0px;
-					background: var(--classifai-admin-theme-color);
-					box-shadow: 0px 4px 10px 3px rgba(var(--classifai-admin-theme-color--rgb), .15);
-					opacity: 0;
-					transform: scale(0, 1);
-				}
-
 				&.active {
-					color: var(--classifai-admin-theme-color);
+					background: #f0f0f0;
+					box-shadow: none;
+					border-radius: 4px;
 					font-weight: 600;
 
 					&:after {
@@ -654,13 +779,29 @@ input.classifai-button {
 			}
 		}
 
+		.classifai-providers-wrapper {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+
 		p.classifai-setup-error {
 			text-align: center;
 			color: red;
 		}
 
-		span.classifai-input-description {
+		span.description {
 			font-size: 12px;
+		}
+
+		.dashicons-clock {
+			color: #a7aaad;
+		}
+		.dashicons-yes-alt{
+			color: #48BE1E;
+		}
+		.dashicons-warning {
+			color: #dba617;
 		}
 	}
 }
@@ -722,4 +863,63 @@ input.classifai-button {
 	position: absolute;
 	right: 12px;
 	top: 70px;
+}
+
+// Start: Classify Post Modal
+.classify-post-componenet {
+	hr {
+		margin-bottom: 20px;
+	}
+}
+.classify-modal {
+    width: 500px;
+
+	hr {
+		margin-bottom: 20px;
+	}
+}
+
+.classifai-modal__notes {
+    max-width: 350px;
+    float: left;
+    font-size: 10px;
+}
+
+.classifai-modal__footer {
+    overflow: hidden;
+
+	button {
+		float: right;
+	}
+}
+
+.editor-post-publish-panel {
+	.classifai-modal__footer {
+		button {
+			float: none;
+			margin-top: 10px;
+		}
+	}
+}
+// End: Classify Post Modal
+
+// Profile page
+#classifai-profile-features-section tr.classifai-features-row {
+	th {
+		padding: 10px 10px 10px 0;
+	}
+
+	td {
+		padding: 10px 10px;
+	}
+}
+
+a.components-button.classifai-disable-feature-link {
+    display: block;
+    margin-top: 12px;
+}
+
+div.classifai-openai__result-disable-link {
+    display: block;
+    padding: 0 1em 1.5em 1em;
 }

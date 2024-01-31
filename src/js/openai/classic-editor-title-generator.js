@@ -1,6 +1,8 @@
+import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import '../../scss/openai/classic-editor-title-generator.scss';
 
+const ClassifAI = window.ClassifAI || {};
 const classifaiChatGPTData = window.classifaiChatGPTData || {};
 const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 	( acc, cur ) => ( { [ cur.feature ]: cur } ),
@@ -15,14 +17,31 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 	} );
 
 	/**
-	 * This function is solely responsibe for rendering, generating
+	 * Returns whether the post has unsaved changes or not.
+	 *
+	 * @return {boolean} Whether the post has unsaved change or not.
+	 */
+	function isPostChanged() {
+		const editor = window.tinymce && window.tinymce.get( 'content' );
+		let changed = false;
+
+		if ( wp.autosave ) {
+			changed = wp.autosave.server.postChanged();
+		} else if ( editor ) {
+			changed = ! editor.isHidden() && editor.isDirty();
+		}
+		return changed;
+	}
+
+	/**
+	 * This function is solely responsible for rendering, generating
 	 * and applying the generated title for the classic editor.
 	 */
 	function generateTitleInit() {
 		// Boolean indicating whether title generation is in progress.
 		let isProcessing = false;
 
-		// Creates and appens the "Generate titles" button.
+		// Creates and appends the "Generate titles" button.
 		$( '<span />', {
 			text: scriptData?.title?.buttonText ?? '',
 			class: 'classifai-openai__title-generate-btn--text',
@@ -55,8 +74,11 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 			const textarea = selectBtnEl
 				.closest( '.classifai-openai__result-item' )
 				.find( 'textarea' );
-
+			const isDirty = isPostChanged();
 			$( '#title' ).val( textarea.val() ).trigger( 'input' );
+			if ( ! isDirty && wp.autosave ) {
+				wp.autosave.server.triggerSave();
+			}
 			hidePopup();
 		};
 
@@ -102,6 +124,29 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 						)
 						.appendTo( '#classifai-openai__results-content' );
 				} );
+
+				// Append disable feature link.
+				if (
+					ClassifAI?.opt_out_enabled_features?.includes(
+						'feature_title_generation'
+					)
+				) {
+					$( '<a>', {
+						text: __(
+							'Disable this ClassifAI feature',
+							'classifai'
+						),
+						href: ClassifAI?.profile_url,
+						target: '_blank',
+						rel: 'noopener noreferrer',
+						class: 'classifai-disable-feature-link',
+					} )
+						.wrap(
+							`<div class="classifai-openai__result-disable-link" />`
+						)
+						.parent()
+						.appendTo( '#classifai-openai__modal' );
+				}
 
 				$( '#classifai-openai__results' )
 					.show()
