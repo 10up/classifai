@@ -93,15 +93,12 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit( '/wp-admin/post-new.php' );
-		cy.get( '#title' ).type( 'Text to Speech test classic' );
-		cy.get('#content_ifr').then( $iframe => {
-			const doc = $iframe.contents().find( 'body#tinymce' );
-			cy.wrap( doc ).find( 'p:last-child' ).type( "This feature uses Microsoft's Text to Speech capabilities." );
+		cy.createClassicPost( {
+			title: 'Text to Speech test classic',
+			content:
+				"This feature uses Microsoft's Text to Speech capabilities.",
+			postType: 'post',
 		} );
-		cy.wait( 2000 );
-		cy.get( '#publish' ).click();
-		cy.get( '#message' ).should( 'contain.text', 'Post published' );
 
 		cy.get( '#classifai-text-to-speech-meta-box' ).should( 'exist' );
 		cy.get( '#classifai_synthesize_speech' ).check();
