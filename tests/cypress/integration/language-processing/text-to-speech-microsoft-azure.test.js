@@ -93,7 +93,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.classicCreatePost( {
+		cy.createClassicPost( {
 			title: 'Text to Speech test classic',
 			content:
 				"This feature uses Microsoft's Text to Speech capabilities.",
@@ -111,6 +111,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	} );
 
 	it( 'Disable support for post type Post', () => {
+		cy.disableClassicEditor();
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
