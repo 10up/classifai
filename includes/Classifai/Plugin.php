@@ -53,27 +53,14 @@ class Plugin {
 		 */
 		do_action( 'before_classifai_init' );
 
-		// Initialize the services, each services handles the providers
+		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		$post_types = get_supported_post_types();
-		foreach ( $post_types as $post_type ) {
-			register_meta(
-				$post_type,
-				'_classifai_error',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
-				]
-			);
-		}
-
-		// Initialize the classifAI Onboarding.
+		// Initialize the ClassifAI Onboarding.
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
-		// Initialize the classifAI User Profile.
+		// Initialize the ClassifAI User Profile.
 		$user_profile = new Admin\UserProfile();
 		$user_profile->init();
 
@@ -126,7 +113,7 @@ class Plugin {
 	}
 
 	/**
-	 * Initiates classes providing admin feature sfor the plugin.
+	 * Initiates classes providing admin features.
 	 *
 	 * @since 1.4.0
 	 */
@@ -173,14 +160,24 @@ class Plugin {
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
 			array( 'wp-components' ),
-			get_asset_info( 'admin', 'version' ),
+			array(
+				get_asset_info( 'admin', 'version' ),
+				array(
+					'wp-jquery-ui-dialog',
+				),
+			),
 			'all'
 		);
 
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			get_asset_info( 'admin', 'dependencies' ),
+			array_merge(
+				get_asset_info( 'admin', 'dependencies' ),
+				array(
+					'jquery-ui-dialog',
+				)
+			),
 			get_asset_info( 'admin', 'version' ),
 			true
 		);
@@ -216,10 +213,9 @@ class Plugin {
 	 * Add the action links to the plugin page.
 	 *
 	 * @param array $links The Action links for the plugin.
-	 *
 	 * @return array
 	 */
-	public function filter_plugin_action_links( $links ) {
+	public function filter_plugin_action_links( $links ): array {
 
 		if ( ! is_array( $links ) ) {
 			return $links;

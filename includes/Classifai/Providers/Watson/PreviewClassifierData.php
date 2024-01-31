@@ -1,9 +1,9 @@
 <?php
 
-namespace Classifai\Admin;
+namespace Classifai\Providers\Watson;
 
 /**
- * Class for registering data necessary
+ * Handles NLU classifier preview data.
  */
 class PreviewClassifierData {
 	/**
@@ -20,13 +20,13 @@ class PreviewClassifierData {
 	public function get_post_classifier_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-action' ) ) {
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
 		$post_id    = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
-		$classifier = new \Classifai\Watson\Classifier();
-		$normalizer = new \Classifai\Watson\Normalizer();
+		$classifier = new Classifier();
+		$normalizer = new \Classifai\Normalizer();
 
 		$text_to_classify        = $normalizer->normalize( $post_id );
 		$body                    = $classifier->get_body( $text_to_classify );
@@ -45,13 +45,7 @@ class PreviewClassifierData {
 	public function get_post_search_results() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
-		if (
-			! $nonce
-			|| (
-				! wp_verify_nonce( $nonce, 'classifai-previewer-openai_embeddings-action' )
-				&& ! wp_verify_nonce( $nonce, 'classifai-previewer-watson_nlu-nonce' )
-			)
-		) {
+		if ( ! ( $nonce && wp_verify_nonce( $nonce, 'classifai-previewer-nonce' ) ) ) {
 			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
 		}
 
@@ -74,13 +68,14 @@ class PreviewClassifierData {
 	 * Filter classifier preview based on the feature settings.
 	 *
 	 * @param array $classified_data The classified data.
+	 * @return array
 	 */
-	public function filter_classify_preview_data( $classified_data ) {
+	public function filter_classify_preview_data( array $classified_data ): array {
 		if ( is_wp_error( $classified_data ) ) {
 			return $classified_data;
 		}
 
-		$classify_existing_terms = 'existing_terms' === \Classifai\get_classification_method();
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
 		if ( ! $classify_existing_terms ) {
 			return $classified_data;
 		}
@@ -92,7 +87,7 @@ class PreviewClassifierData {
 			'keyword'  => 'keywords',
 		];
 		foreach ( $features as $key => $feature ) {
-			$taxonomy = \Classifai\get_feature_taxonomy( $key );
+			$taxonomy = get_feature_taxonomy( $key );
 			if ( ! $taxonomy ) {
 				continue;
 			}

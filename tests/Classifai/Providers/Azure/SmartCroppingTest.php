@@ -36,7 +36,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 * @return SmartCropping
 	 */
 	public function get_smart_cropping(
-		array $args = [ 'url' => 'my-api-url.com', 'api_key' => 'my-key' ]
+		array $args = [ 'endpoint_url' => 'my-api-url.com', 'api_key' => 'my-key' ]
 	) : SmartCropping  {
 		return new SmartCropping( $args );
 	}
@@ -76,7 +76,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	public function test_get_wp_filesystem() {
 		$this->assertInstanceOf(
 			WP_Filesystem_Direct::class,
-			$this->get_smart_cropping()->get_wp_filesystem()
+			( new \Classifai\Features\ImageCropping() )->get_wp_filesystem()
 		);
 	}
 
@@ -109,22 +109,22 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 		// Test that nothing happens when the metadata contains no sizes entry.
 		$this->assertEquals(
-			[ 'no-sizes' => 1 ],
-			$this->get_smart_cropping()->generate_attachment_metadata(
+			[],
+			$this->get_smart_cropping()->generate_cropped_images(
 				[ 'no-sizes' => 1 ],
 				$attachment
 			)
 		);
 
 		$with_filter_cb = function() use ( $attachment ) {
-			$filtered_data = $this->get_smart_cropping()->generate_attachment_metadata(
+			$filtered_data = $this->get_smart_cropping()->generate_cropped_images(
 				wp_get_attachment_metadata( $attachment ),
 				$attachment
 			);
 
 			$this->assertEquals(
-				'33772-150x150.jpg',
-				$filtered_data['sizes']['thumbnail']['file']
+				150,
+				$filtered_data['thumbnail']['width']
 			);
 		};
 
@@ -144,8 +144,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 		$this->assertWPError(
 			$this->get_smart_cropping(
 				[
-					'url'     => 'my-bad-url.com',
-					'api_key' => 'my-key',
+					'endpoint_url' => 'my-bad-url.com',
+					'api_key'      => 'my-key',
 				]
 			)->get_cropped_thumbnail(
 				$attachment,
@@ -155,29 +155,29 @@ class SmartCroppingTest extends WP_UnitTestCase {
 
 		$with_filter_cb = function() use ( $attachment ) {
 
-			// Get the uploaded image url
-			$cropped_thumbnail_url = $this->get_smart_cropping()->get_cropped_thumbnail(
+			// Get the uploaded image data.
+			$cropped_thumbnail_data = $this->get_smart_cropping()->get_cropped_thumbnail(
 				$attachment,
-				wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
+				wp_get_attachment_metadata( $attachment )['sizes']['thumbnail'],
 			);
-			// Strip out everything before /wp-content/ because it won't match.
-			$prepped_url = substr( $cropped_thumbnail_url,  strpos( $cropped_thumbnail_url , '/wp-content/' ) );
 
+			$cropped_images['thumbnail'] = [
+				'width'  => 150,
+				'height' => 150,
+				'data'   => $cropped_thumbnail_data,
+			];
+
+			$meta = ( new \Classifai\Features\ImageCropping() )->save( $cropped_images, $attachment );
 
 			$this->assertEquals(
-				sprintf( '%s/33772-150x150.jpg', wp_upload_dir()['path'] ),
-				$cropped_thumbnail_url
+				file_get_contents( DIR_TESTDATA .'/images/33772.jpg' ),
+				$cropped_thumbnail_data
 			);
 
-			// Test when file operations fail.
-			add_filter( 'classifai_smart_crop_wp_filesystem', '__return_false' );
-			$this->assertWPError(
-				$this->get_smart_cropping()->get_cropped_thumbnail(
-					$attachment,
-					wp_get_attachment_metadata( $attachment )['sizes']['thumbnail']
-				)
+			$this->assertEquals(
+				'33772-150x150.jpg',
+				$meta['sizes']['thumbnail']['file']
 			);
-			remove_filter( 'classifai_smart_crop_wp_filesystem', '__return_false' );
 		};
 
 		$this->with_http_request_filter( $with_filter_cb );
@@ -214,8 +214,8 @@ class SmartCroppingTest extends WP_UnitTestCase {
 			$this->assertWPError(
 				$this->get_smart_cropping(
 					[
-						'url'     => 'my-bad-url.com',
-						'api_key' => 'my-key',
+						'endpoint_url' => 'my-bad-url.com',
+						'api_key'      => 'my-key',
 					]
 				)->request_cropped_thumbnail(
 					[

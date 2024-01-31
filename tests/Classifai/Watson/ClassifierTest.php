@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai\Providers\Watson;
 
 class ClassifierTest extends \WP_UnitTestCase {
 
@@ -21,7 +21,7 @@ class ClassifierTest extends \WP_UnitTestCase {
 	function test_it_has_a_request_object() {
 		$actual = $this->classifier->get_request();
 		$this->assertInstanceOf(
-			'\Classifai\Watson\APIRequest',
+			'\Classifai\Providers\Watson\APIRequest',
 			$actual
 		);
 	}

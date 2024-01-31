@@ -136,7 +136,7 @@ import { __ } from '@wordpress/i18n';
 			transcribeButton.addEventListener( 'click', ( e ) =>
 				handleClick( {
 					button: e.target,
-					endpoint: '/classifai/v1/openai/generate-transcript/',
+					endpoint: '/classifai/v1/generate-transcript/',
 					callback: ( resp ) => {
 						if ( resp ) {
 							const textField =
