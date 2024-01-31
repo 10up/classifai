@@ -163,8 +163,8 @@ class Plugin {
 			array(
 				get_asset_info( 'admin', 'version' ),
 				array(
-					'wp-jquery-ui-dialog'
-				)
+					'wp-jquery-ui-dialog',
+				),
 			),
 			'all'
 		);
