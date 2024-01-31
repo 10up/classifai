@@ -181,7 +181,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#number_of_terms' ).clear().type( 1 );
 		cy.get( '#submit' ).click();
 
-		cy.classicCreatePost( {
+		cy.createClassicPost( {
 			title: 'Embeddings test classic',
 			content: "This feature uses OpenAI's Embeddings capabilities.",
 			postType: 'post',
@@ -194,6 +194,8 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 	} );
 
 	it( 'Can enable/disable content classification feature ', () => {
+		cy.disableClassicEditor();
+
 		// Disable feature.
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
@@ -220,6 +222,9 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
+
+		// Disable user-based access.
+		cy.get( '#user_based_access' ).uncheck();
 
 		cy.get( '#submit' ).click();
 

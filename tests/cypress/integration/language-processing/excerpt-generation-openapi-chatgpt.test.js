@@ -90,10 +90,11 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		const data = getChatGPTData();
 
-		cy.visit( '/wp-admin/post-new.php' );
-		cy.get( '#title' ).type( 'Test ChatGPT post' );
-		cy.get( '#publish' ).click();
-		cy.get( '#message' ).should( 'contain.text', 'Post published' );
+		cy.createClassicPost( {
+			title: 'Excerpt test classic',
+			content: 'Test GPT content.',
+			postType: 'post',
+		} );
 
 		// Ensure excerpt metabox is shown.
 		cy.get( '#show-settings-link' ).click();
@@ -111,6 +112,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can set multiple custom excerpt generation prompts, select one as the default and delete one.', () => {
 		cy.disableClassicEditor();
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
 		);

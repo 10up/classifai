@@ -651,9 +651,8 @@ class Embeddings extends Provider {
 		$feature  = new Classification();
 		$settings = $feature->get_settings();
 
-		// This check should have already run but if someone were to call
-		// this method directly, we run it again.
-		if ( ! $feature->is_enabled() ) {
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 

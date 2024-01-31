@@ -61,6 +61,8 @@ abstract class Feature {
 
 	/**
 	 * Setup any hooks the feature needs.
+	 *
+	 * Only fires if the feature is enabled.
 	 */
 	public function feature_setup() {
 	}
@@ -1218,7 +1220,7 @@ abstract class Feature {
 	 * @param WP_REST_Request $request The full request object.
 	 * @return \WP_REST_Response|WP_Error
 	 */
-	public function rest_endpoint_callback( WP_REST_Request $request ) {
+	public function rest_endpoint_callback( WP_REST_Request $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		return rest_ensure_response( new WP_Error( 'invalid_route', esc_html__( 'Invalid route.', 'classifai' ) ) );
 	}
 

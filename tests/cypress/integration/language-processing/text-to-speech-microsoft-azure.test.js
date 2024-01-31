@@ -114,6 +114,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	} );
 
 	it( 'Disable support for post type Post', () => {
+		cy.disableClassicEditor();
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
