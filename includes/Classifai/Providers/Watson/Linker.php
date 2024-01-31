@@ -1,8 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
-
-use function Classifai\get_classification_method;
+namespace Classifai\Providers\Watson;
 
 /**
  * Linker connects Watson classification results with Taxonomy Terms.
@@ -36,10 +34,9 @@ class Linker {
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $options Unused.
 	 * @param bool  $link_terms Whether to link the terms to the post or return the term ids.
-	 *
 	 * @return array The terms that were linked.
 	 */
-	public function link( $post_id, $output, $options = [], $link_terms = true ) {
+	public function link( int $post_id, array $output, array $options = [], bool $link_terms = true ): array {
 		$all_terms = [];
 
 		if ( ! empty( $output['categories'] ) ) {
@@ -91,12 +88,11 @@ class Linker {
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $categories The list of categories to link
 	 * @param bool  $link_categories Whether link categories to post or return array of term ids.
-	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = \Classifai\get_feature_taxonomy( 'category' );
+		$taxonomy                = get_feature_taxonomy( 'category' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $categories as $category ) {
@@ -160,12 +156,11 @@ class Linker {
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $keywords NLU returned keywords
 	 * @param bool  $link_keywords Whether link keywords to post or return array of term ids.
-	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = \Classifai\get_feature_taxonomy( 'keyword' );
+		$taxonomy                = get_feature_taxonomy( 'keyword' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $keywords as $keyword ) {
@@ -220,12 +215,11 @@ class Linker {
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $concepts The NLU returned concepts.
 	 * @param bool  $link_concepts Whether link concepts to post or return array of term ids.
-	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = \Classifai\get_feature_taxonomy( 'concept' );
+		$taxonomy                = get_feature_taxonomy( 'concept' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $concepts as $concept ) {
@@ -287,12 +281,11 @@ class Linker {
 	 * @param int   $post_id The id of the post to link.
 	 * @param array $entities The entities returned by the NLU api
 	 * @param bool  $link_entities Whether link entities to post or return array of term ids.
-	 *
 	 * @return array|\WP_Error List of the terms to link. WP_Error class object on error.
 	 */
 	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = \Classifai\get_feature_taxonomy( 'entity' );
+		$taxonomy                = get_feature_taxonomy( 'entity' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $entities as $entity ) {
@@ -356,12 +349,13 @@ class Linker {
 	 * Checks whether an NLU category can be linked based on its score.
 	 *
 	 * @param array $category The category to check.
+	 * @return bool
 	 */
-	public function can_link_category( $category ) {
+	public function can_link_category( array $category ): bool {
 		if ( ! empty( $category['label'] ) ) {
 			if ( ! empty( $category['score'] ) ) {
 				$score     = floatval( $category['score'] );
-				$threshold = \Classifai\get_feature_threshold( 'category' );
+				$threshold = get_feature_threshold( 'category' );
 				return $score >= $threshold;
 			} else {
 				return false;
@@ -375,12 +369,13 @@ class Linker {
 	 * Checks whether an NLU keyword can be linked based on its relevance.
 	 *
 	 * @param array $keyword The keyword to check.
+	 * @return bool
 	 */
-	public function can_link_keyword( $keyword ) {
+	public function can_link_keyword( $keyword ): bool {
 		if ( ! empty( $keyword['text'] ) ) {
 			if ( ! empty( $keyword['relevance'] ) ) {
 				$relevance = floatval( $keyword['relevance'] );
-				$threshold = \Classifai\get_feature_threshold( 'keyword' );
+				$threshold = get_feature_threshold( 'keyword' );
 				return $relevance >= $threshold;
 			}
 		} else {
@@ -392,12 +387,13 @@ class Linker {
 	 * Checks whether an NLU concept can be linked based on its relevance.
 	 *
 	 * @param array $concept The concept to check.
+	 * @return bool
 	 */
-	public function can_link_concept( $concept ) {
+	public function can_link_concept( $concept ): bool {
 		if ( ! empty( $concept['text'] ) ) {
 			if ( ! empty( $concept['relevance'] ) ) {
 				$relevance = floatval( $concept['relevance'] );
-				$threshold = \Classifai\get_feature_threshold( 'concept' );
+				$threshold = get_feature_threshold( 'concept' );
 				return $relevance >= $threshold;
 			}
 		} else {
@@ -409,12 +405,13 @@ class Linker {
 	 * Checks whether an NLU entity can be linked based in its relevance.
 	 *
 	 * @param array $entity The entity to check.
+	 * @return bool
 	 */
-	public function can_link_entity( $entity ) {
+	public function can_link_entity( $entity ): bool {
 		if ( ! empty( $entity['text'] ) ) {
 			if ( ! empty( $entity['relevance'] ) ) {
 				$relevance = floatval( $entity['relevance'] );
-				$threshold = \Classifai\get_feature_threshold( 'entity' );
+				$threshold = get_feature_threshold( 'entity' );
 				return $relevance >= $threshold;
 			}
 		} else {

@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings;
+
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_post_types_for_language_settings;
 
@@ -85,85 +86,6 @@ class Classification extends Feature {
 				'description'    => __( 'Choose which post types are allowed to use this feature.', 'classifai' ),
 			]
 		);
-
-		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
-	}
-
-	/**
-	 * Renders the previewer window for the feature.
-	 *
-	 * @param string $active_feature The ID of the current feature.
-	 */
-	public function render_previewer( string $active_feature = '' ) {
-		if ( static::ID !== $active_feature ) {
-			return;
-		}
-
-		$settings = $this->get_settings();
-
-		if ( ! $settings['status'] ) {
-			return;
-		}
-
-		?>
-		<div id="classifai-post-preview-app">
-			<?php
-				// TODO: why this methods and not get_post_statuses_for_language_settings?
-				$supported_post_statuses = \Classifai\get_supported_post_statuses();
-				$supported_post_types    = \Classifai\get_supported_post_types();
-
-				$posts_to_preview = get_posts(
-					array(
-						'post_type'      => $supported_post_types,
-						'post_status'    => $supported_post_statuses,
-						'posts_per_page' => 10,
-					)
-				);
-
-				$features = array(
-					'category' => array(
-						'name'    => esc_html__( 'Category', 'classifai' ),
-						'enabled' => \Classifai\get_feature_enabled( 'category' ),
-						'plural'  => 'categories',
-					),
-					'keyword'  => array(
-						'name'    => esc_html__( 'Keyword', 'classifai' ),
-						'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
-						'plural'  => 'keywords',
-					),
-					'entity'   => array(
-						'name'    => esc_html__( 'Entity', 'classifai' ),
-						'enabled' => \Classifai\get_feature_enabled( 'entity' ),
-						'plural'  => 'entities',
-					),
-					'concept'  => array(
-						'name'    => esc_html__( 'Concept', 'classifai' ),
-						'enabled' => \Classifai\get_feature_enabled( 'concept' ),
-						'plural'  => 'concepts',
-					),
-				);
-				?>
-			<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
-			<div id="classifai-post-preview-controls">
-				<select id="classifai-preview-post-selector">
-					<?php foreach ( $posts_to_preview as $post ) : ?>
-						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
-				<button type="button" class="button" id="get-classifier-preview-data-btn">
-					<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
-				</button>
-			</div>
-			<div id="classifai-post-preview-wrapper">
-				<?php foreach ( $features as $feature_slug => $feature ) : ?>
-					<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-						<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
-					</div>
-				<?php endforeach; ?>
-			</div>
-		</div>
-		<?php
 	}
 
 	/**
@@ -173,8 +95,12 @@ class Classification extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'post_statuses' => [],
-			'post_types'    => [],
+			'post_statuses' => [
+				'publish' => 1,
+			],
+			'post_types'    => [
+				'post' => 1,
+			],
 			'provider'      => NLU::ID,
 		];
 	}

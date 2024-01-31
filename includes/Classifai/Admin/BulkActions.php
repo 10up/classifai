@@ -161,7 +161,12 @@ class BulkActions {
 					break;
 
 				case TextToSpeech::ID:
-					( new TextToSpeech() )->run( $post_id );
+					$tts     = new TextToSpeech();
+					$results = $tts->run( $post_id, 'synthesize' );
+
+					if ( $results && ! is_wp_error( $results ) ) {
+						$tts->save( $results, $post_id );
+					}
 					$action = $doaction;
 					break;
 			}

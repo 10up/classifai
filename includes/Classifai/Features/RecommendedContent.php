@@ -70,13 +70,5 @@ class RecommendedContent extends Feature {
 				[ ...$args ]
 			);
 		}
-
-		return apply_filters(
-			'classifai_' . static::ID . '_run',
-			$result,
-			$provider_instance,
-			$args,
-			$this
-		);
 	}
 }

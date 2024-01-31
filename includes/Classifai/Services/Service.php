@@ -5,9 +5,6 @@
 
 namespace Classifai\Services;
 
-use WP_Error;
-use function Classifai\find_provider_class;
-
 abstract class Service {
 
 	/**
@@ -191,89 +188,6 @@ abstract class Service {
 					 */
 					do_action( 'classifai_after_feature_settings_form', $active_feature );
 					?>
-
-					<?php
-					// TODO: can we move this code into the right feature class?
-					// Find the right provider class.
-					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
-					if ( 'openai_embeddings' === $active_tab ) {
-						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
-					}
-
-					if (
-						! is_wp_error( $provider )
-						&& ! empty(
-							$provider->can_register()
-							&& ( $provider->is_feature_enabled( 'content_classification' ) || $provider->is_feature_enabled( 'classification' ) )
-						)
-					) :
-						?>
-					<div id="classifai-post-preview-app">
-						<?php
-							$supported_post_statuses = \Classifai\get_supported_post_statuses();
-							$supported_post_types    = \Classifai\get_supported_post_types();
-
-							$posts_to_preview = get_posts(
-								array(
-									'post_type'      => $supported_post_types,
-									'post_status'    => $supported_post_statuses,
-									'posts_per_page' => 10,
-								)
-							);
-
-							$features = array(
-								'category' => array(
-									'name'    => esc_html__( 'Category', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'category' ),
-									'plural'  => 'categories',
-								),
-								'keyword'  => array(
-									'name'    => esc_html__( 'Keyword', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
-									'plural'  => 'keywords',
-								),
-								'entity'   => array(
-									'name'    => esc_html__( 'Entity', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'entity' ),
-									'plural'  => 'entities',
-								),
-								'concept'  => array(
-									'name'    => esc_html__( 'Concept', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'concept' ),
-									'plural'  => 'concepts',
-								),
-							);
-							?>
-
-						<?php if ( 'watson_nlu' === $active_tab || 'openai_embeddings' === $active_tab ) : ?>
-						<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
-						<div id="classifai-post-preview-controls">
-							<select id="classifai-preview-post-selector">
-								<?php foreach ( $posts_to_preview as $post ) : ?>
-									<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-								<?php endforeach; ?>
-							</select>
-							<?php wp_nonce_field( "classifai-previewer-$active_tab-action", "classifai-previewer-$active_tab-nonce" ); ?>
-							<button type="button" class="button" id="get-classifier-preview-data-btn">
-								<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
-							</button>
-						</div>
-						<div id="classifai-post-preview-wrapper">
-							<?php
-							if ( 'watson_nlu' === $active_tab ) :
-								foreach ( $features as $feature_slug => $feature ) :
-									?>
-									<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-										<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
-									</div>
-									<?php
-								endforeach;
-							endif;
-							?>
-					</div>
-						<?php endif; ?>
-					</div>
-					<?php endif; ?>
 				</div>
 			</div>
 		</div>
@@ -308,27 +222,5 @@ abstract class Service {
 		};
 
 		return array_map( $make_line, $this->feature_classes );
-	}
-
-	/**
-	 * Check if the current user has permission to create and assign terms.
-	 *
-	 * @param string $tax Taxonomy name.
-	 * @return bool|WP_Error
-	 */
-	public function check_term_permissions( string $tax = '' ) {
-		$taxonomy = get_taxonomy( $tax );
-
-		if ( empty( $taxonomy ) || empty( $taxonomy->show_in_rest ) ) {
-			return new WP_Error( 'invalid_taxonomy', esc_html__( 'Taxonomy not found. Double check your settings.', 'classifai' ) );
-		}
-
-		$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
-
-		if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
-			return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
-		}
-
-		return true;
 	}
 }

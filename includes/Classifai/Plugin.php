@@ -56,20 +56,6 @@ class Plugin {
 		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		// TODO: is there a better place for this?
-		$post_types = get_supported_post_types();
-		foreach ( $post_types as $post_type ) {
-			register_meta(
-				$post_type,
-				'_classifai_error',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
-				]
-			);
-		}
-
 		// Initialize the ClassifAI Onboarding.
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();

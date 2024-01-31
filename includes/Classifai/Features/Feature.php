@@ -61,8 +61,6 @@ abstract class Feature {
 
 	/**
 	 * Setup any hooks the feature needs.
-	 *
-	 * TODO: make this abstract once implemented in all features.
 	 */
 	public function feature_setup() {
 	}
@@ -392,7 +390,7 @@ abstract class Feature {
 	}
 
 	/**
-	 * Merges the data settings with the default settings recursively,
+	 * Merges the data settings with the default settings recursively.
 	 *
 	 * @internal
 	 *
@@ -854,7 +852,8 @@ abstract class Feature {
 	 * @param array $args The args passed to add_settings_field
 	 */
 	public function render_radio_group( array $args = array() ) {
-		$setting_index = $this->get_settings();
+		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
+		$setting_index = $this->get_settings( $option_index );
 		$value         = $setting_index[ $args['label_for'] ] ?? '';
 		$options       = $args['options'] ?? [];
 
@@ -867,12 +866,13 @@ abstract class Feature {
 			// Render radio button.
 			printf(
 				'<p>
-					<label for="%1$s_%2$s_%3$s">
-						<input type="radio" id="%1$s_%2$s_%3$s" name="%1$s[%2$s]" value="%3$s" %4$s />
-						%5$s
+					<label for="%1$s_%3$s_%4$s">
+						<input type="radio" id="%1$s_%3$s_%4$s" name="%1$s%2$s[%3$s]" value="%4$s" %5$s />
+						%6$s
 					</label>
 				</p>',
 				esc_attr( $this->get_option_name() ),
+				$option_index ? '[' . esc_attr( $option_index ) . ']' : '',
 				esc_attr( $args['label_for'] ),
 				esc_attr( $option_value ),
 				checked( $value, $option_value, false ),

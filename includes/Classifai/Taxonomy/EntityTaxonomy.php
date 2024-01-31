@@ -2,6 +2,9 @@
 
 namespace Classifai\Taxonomy;
 
+use function Classifai\Providers\Watson\get_feature_enabled;
+use function Classifai\Providers\Watson\get_feature_taxonomy;
+
 /**
  * The ClassifAI Entity Taxonomy.
  *
@@ -49,7 +52,7 @@ class EntityTaxonomy extends AbstractTaxonomy {
 	 * @return bool
 	 */
 	public function get_visibility(): bool {
-		return \Classifai\get_feature_enabled( 'entity' ) &&
-			\Classifai\get_feature_taxonomy( 'entity' ) === $this->get_name();
+		return get_feature_enabled( 'entity' ) &&
+			get_feature_taxonomy( 'entity' ) === $this->get_name();
 	}
 }

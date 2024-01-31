@@ -313,7 +313,6 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id Attachment ID.
 	 */
 	public function do_read_cron( string $operation_url, int $attachment_id ) {
-		error_log( 'do_read_cron' );
 		$feature  = new PDFTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -330,6 +329,10 @@ class ComputerVision extends Provider {
 	 * @return array|WP_Error
 	 */
 	public function smart_crop_image( array $metadata, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature  = new ImageCropping();
 		$settings = $feature->get_settings( static::ID );
 
@@ -380,6 +383,10 @@ class ComputerVision extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature  = new ImageTextExtraction();
 		$settings = $feature->get_settings( static::ID );
 
@@ -424,6 +431,10 @@ class ComputerVision extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function generate_alt_tags( string $image_url, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$feature = new DescriptiveTextGenerator();
 		$rtn     = '';
 
@@ -516,6 +527,10 @@ class ComputerVision extends Provider {
 	 * @return array|WP_Error
 	 */
 	public function generate_image_tags( string $image_url, int $attachment_id ) {
+		if ( ! wp_attachment_is_image( $attachment_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
 		$rtn      = [];
 		$feature  = new ImageTagsGenerator();
 		$settings = $feature->get_settings( static::ID );
@@ -708,6 +723,10 @@ class ComputerVision extends Provider {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
+		if ( ! $metadata ) {
+			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
+		}
+
 		switch ( $route_to_call ) {
 			case 'ocr':
 				return $this->ocr_processing( $metadata, $attachment_id );
@@ -779,11 +798,24 @@ class ComputerVision extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
+		$settings          = [];
+		$provider_settings = [];
 		$debug_info        = [];
 
+		if ( $this->feature_instance ) {
+			$settings          = $this->feature_instance->get_settings();
+			$provider_settings = $settings[ static::ID ];
+		}
+
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
+			if ( ! isset( $provider_settings['descriptive_text_fields'] ) || ! is_array( $provider_settings['descriptive_text_fields'] ) ) {
+				$provider_settings['descriptive_text_fields'] = array(
+					'alt'         => 0,
+					'caption'     => 0,
+					'description' => 0,
+				);
+			}
+
 			$descriptive_text = array_filter(
 				$provider_settings['descriptive_text_fields'],
 				function ( $type ) {
@@ -797,7 +829,7 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
-			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'];
+			$debug_info[ __( 'Tag taxonomy', 'classifai' ) ]         = $provider_settings['tag_taxonomy'] ?? 'image_tags';
 			$debug_info[ __( 'Confidence threshold', 'classifai' ) ] = $provider_settings['tag_confidence_threshold'];
 			$debug_info[ __( 'Latest response:', 'classifai' ) ]     = $this->get_formatted_latest_response( get_transient( 'classifai_azure_computer_vision_image_tags_latest_response' ) );
 		}

@@ -1,5 +1,4 @@
 {
-  "core": "WordPress/WordPress#6.1",
   "plugins": [".", "./tests/test-plugin", "https://downloads.wordpress.org/plugin/classic-editor.zip"],
   "env": {
     "tests": {

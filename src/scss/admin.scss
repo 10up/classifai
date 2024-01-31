@@ -367,6 +367,10 @@ input.classifai-button {
 		margin-bottom: 4px;
 	}
 
+	.hide-username {
+		display: none;
+	}
+
 	.components-form-token-field__input-container input[type=text].components-form-token-field__input {
 		height: auto;
 		font-size: 14px;

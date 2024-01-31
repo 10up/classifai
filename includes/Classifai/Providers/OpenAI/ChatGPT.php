@@ -9,7 +9,7 @@ use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
-use Classifai\Watson\Normalizer;
+use Classifai\Normalizer;
 use WP_Error;
 use function Classifai\get_default_prompt;
 
@@ -555,8 +555,6 @@ class ChatGPT extends Provider {
 	/**
 	 * Returns the debug information for the provider settings.
 	 *
-	 * TODO: this should be in feature. Or at least any settings moved to the feature should be
-	 *
 	 * @return array
 	 */
 	public function get_debug_information(): array {
@@ -565,17 +563,17 @@ class ChatGPT extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
-			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_titles'];
-			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] );
+			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_titles'] ?? 1;
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
-			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'];
-			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] );
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
-			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'];
-			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $provider_settings['expand_text_prompt'] );
-			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['condense_text_prompt'] );
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $provider_settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['condense_text_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_content_resizing_latest_response' ) );
 		}
 

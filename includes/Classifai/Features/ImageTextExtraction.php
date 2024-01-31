@@ -21,7 +21,7 @@ class ImageTextExtraction extends Feature {
 	 *
 	 * @var string
 	 */
-	const ID = 'feature_image_to_text_generation';
+	const ID = 'feature_image_to_text_generator';
 
 	/**
 	 * Constructor.

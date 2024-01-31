@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai\Providers\Watson;
 
 class APIRequestTest extends \WP_UnitTestCase {
 

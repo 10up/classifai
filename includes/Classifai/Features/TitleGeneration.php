@@ -177,7 +177,7 @@ class TitleGeneration extends Feature {
 	public function enqueue_editor_assets() {
 		global $post;
 
-		if ( empty( $post ) ) {
+		if ( empty( $post ) || ! is_admin() ) {
 			return;
 		}
 
@@ -384,7 +384,7 @@ class TitleGeneration extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['number_of_titles']      = sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
-		$new_settings['generate_title_prompt'] = sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
+		$new_settings['generate_title_prompt'] = sanitize_prompts( 'generate_title_prompt', $new_settings );
 
 		return $new_settings;
 	}

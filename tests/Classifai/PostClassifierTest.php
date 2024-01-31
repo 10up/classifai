@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai;
+namespace Classifai\Providers\Watson;
 
 use Classifai\Taxonomy\TaxonomyFactory;
 
@@ -19,22 +19,22 @@ class PostClassifierTest extends \WP_UnitTestCase {
 
 	function test_it_has_an_api_request() {
 		$actual = $this->classifier->get_api_request();
-		$this->assertInstanceOf( 'Classifai\Watson\APIRequest', $actual );
+		$this->assertInstanceOf( 'Classifai\Providers\Watson\APIRequest', $actual );
 	}
 
 	function test_it_has_a_normalizer() {
 		$actual = $this->classifier->get_normalizer();
-		$this->assertInstanceOf( 'Classifai\Watson\Normalizer', $actual );
+		$this->assertInstanceOf( 'Classifai\Normalizer', $actual );
 	}
 
 	function test_it_has_a_linker() {
 		$actual = $this->classifier->get_linker();
-		$this->assertInstanceOf( 'Classifai\Watson\Linker', $actual );
+		$this->assertInstanceOf( 'Classifai\Providers\Watson\Linker', $actual );
 	}
 
 	function test_it_has_a_classifier() {
 		$actual = $this->classifier->get_classifier();
-		$this->assertInstanceOf( 'Classifai\Watson\Classifier', $actual );
+		$this->assertInstanceOf( 'Classifai\Providers\Watson\Classifier', $actual );
 	}
 
 	function test_it_can_link_post() {

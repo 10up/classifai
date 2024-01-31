@@ -7,13 +7,16 @@ use Classifai\Features\Classification;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\ImageCropping;
 use Classifai\Features\TextToSpeech;
-use Classifai\Watson\APIRequest;
-use Classifai\Watson\Classifier;
-use Classifai\Watson\Normalizer;
-use Classifai\PostClassifier;
+use Classifai\Providers\Watson\APIRequest;
+use Classifai\Providers\Watson\Classifier;
+use Classifai\Normalizer;
+use Classifai\Providers\Watson\PostClassifier;
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\OpenAI\Embeddings;
+
+use function Classifai\Providers\Watson\get_username;
+use function Classifai\Providers\Watson\get_password;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -151,8 +154,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$opts = wp_parse_args( $opts, $defaults );
 
 		$classifier = new Classifier();
-		$username   = \Classifai\get_watson_username();
-		$password   = \Classifai\get_watson_password();
+		$username   = get_username();
+		$password   = get_password();
 
 		if ( empty( $username ) ) {
 			\WP_CLI::error( 'Watson Username not found in options or constant.' );
@@ -242,7 +245,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		];
 
 		$feature_speech     = new TextToSpeech();
-		$allowed_post_types = $feature_speech->get_tts_supported_post_types();
+		$allowed_post_types = $feature_speech->get_supported_post_types();
 		$opts               = wp_parse_args( $opts, $defaults );
 		$opts['per_page']   = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
 
@@ -295,7 +298,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $feature_speech->run( $post_id );
+						$result = $feature_speech->run( $post_id, 'synthesize' );
+						if ( $result && ! is_wp_error( $result ) ) {
+							$result = $feature_speech->save( $result, $post_id );
+						}
 
 						if ( is_wp_error( $result ) ) {
 							\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
@@ -343,7 +349,10 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				if ( ! $dry_run ) {
-					$result = $feature_speech->run( $post_id );
+					$result = $feature_speech->run( $post_id, 'synthesize' );
+					if ( $result && ! is_wp_error( $result ) ) {
+						$result = $feature_speech->save( $result, $post_id );
+					}
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::log( sprintf( 'Error while processing item ID %s: %s', $post_id, $result->get_error_message() ) );
@@ -1094,8 +1103,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * @param array $opts Options.
 	 */
 	public function auth( $args = [], $opts = [] ) {
-		$username = \Classifai\get_watson_username();
-		$password = \Classifai\get_watson_password();
+		$username = get_username();
+		$password = get_password();
 
 		if ( empty( $username ) ) {
 			\WP_CLI::error( 'Watson Username not found in options or constant.' );
