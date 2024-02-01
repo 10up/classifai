@@ -276,6 +276,10 @@ input.classifai-button {
 			outline: 2px solid transparent;
 		}
 
+		.components-form-token-field__suggestion {
+			box-sizing: border-box;
+		}
+
 		.components-form-token-field__suggestion.is-selected {
 			background: var(--classifai-highlight-color);
 		}
@@ -361,6 +365,10 @@ input.classifai-button {
 		height: 38px;
 		font-size: 14px;
 		margin-bottom: 4px;
+	}
+
+	.hide-username {
+		display: none;
 	}
 
 	.components-form-token-field__input-container input[type=text].components-form-token-field__input {
@@ -515,9 +523,11 @@ input.classifai-button {
 		margin-left: -10px;
 	}
 
-	&__wrapper {
+	&__wrapper,
+	.classifai-wrap {
 		max-width: 1232px;
 		margin: 0px auto;
+		padding: 0px;
 	}
 
 	&__content {
@@ -655,21 +665,23 @@ input.classifai-button {
 		}
 
 		.classifai-setup-form {
-
 			.classifai-step3-content & {
 				margin: 0 auto;
-				max-width: 480px;
+			}
+
+			.classifai-setup-form-field-label {
+				text-align: left;
 			}
 
 			.classifai-setup-form-field {
-				margin-top: 40px;
+				padding: 0px;
 			}
 
-			label {
+			.classifai-setup-form-field-label > label {
 				display: block;
 				font-weight: 700;
 				text-transform: uppercase;
-				margin-bottom: 20px;
+				margin-bottom: 0px;
 			}
 
 			input[type="text"],
@@ -687,28 +699,45 @@ input.classifai-button {
 
 		.classifai-step3-content {
 			margin: 0 auto;
+			max-width: 840px;
+			width: 100%;
 
 			.classifai-setup-title {
 				text-align: center;
 				margin-bottom: 12px;
 			}
 
-			.classifai-setup-form,
-			.classifai-setup-footer {
-				margin: 0 auto;
-				max-width: 480px;
+			.classifai-setup-form {
+				padding-left: 48px;
+				width: 70%;
+				box-sizing: border-box;
+
+				@media screen and (max-width: 782px) {
+					padding-left: 18px;
+				}
+
+				@media screen and (max-width: 600px) {
+					width: 100%;
+					padding-left: 0px;
+					margin-bottom: 20px;
+				}
 			}
 
 			.classifai-setup-footer {
-				margin-top: 40px;
+				margin-top: 20px;
 			}
 		}
 
 		.classifai-tabs {
 			display: block;
+			width: 30%;
+			box-sizing: border-box;
+
+			@media screen and (max-width: 600px) {
+				width: 100%;
+			}
 
 			&.tabs-center {
-				margin: auto;
 				margin-bottom: 24px;
 			}
 
@@ -720,12 +749,11 @@ input.classifai-button {
 			a.tab {
 				text-decoration: none;
 				position: relative;
-				display: inline-block;
-				transition: all ease .3s;
+				display: block;
+				transition: all ease 0.3s;
 				padding: 16px 12px;
 				transform: translate3d(0, 0, 0);
 				color: #1d2327;
-				white-space: nowrap;
 				cursor: pointer;
 				font-size: 14px;
 
@@ -737,24 +765,10 @@ input.classifai-button {
 					color: var(--classifai-admin-theme-color);
 				}
 
-				&:after {
-					transition: all .3s cubic-bezier(1, 0, 0, 1);
-					will-change: transform, box-shadow, opacity;
-					position: absolute;
-					content: '';
-					height: 3px;
-					bottom: 0px;
-					left: 0px;
-					right: 0px;
-					border-radius: 3px 3px 0px 0px;
-					background: var(--classifai-admin-theme-color);
-					box-shadow: 0px 4px 10px 3px rgba(var(--classifai-admin-theme-color--rgb), .15);
-					opacity: 0;
-					transform: scale(0, 1);
-				}
-
 				&.active {
-					color: var(--classifai-admin-theme-color);
+					background: #f0f0f0;
+					box-shadow: none;
+					border-radius: 4px;
 					font-weight: 600;
 
 					&:after {
@@ -765,6 +779,12 @@ input.classifai-button {
 			}
 		}
 
+		.classifai-providers-wrapper {
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+		}
+
 		p.classifai-setup-error {
 			text-align: center;
 			color: red;
@@ -772,6 +792,16 @@ input.classifai-button {
 
 		span.description {
 			font-size: 12px;
+		}
+
+		.dashicons-clock {
+			color: #a7aaad;
+		}
+		.dashicons-yes-alt{
+			color: #48BE1E;
+		}
+		.dashicons-warning {
+			color: #dba617;
 		}
 	}
 }

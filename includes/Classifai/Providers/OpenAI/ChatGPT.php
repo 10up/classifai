@@ -5,14 +5,19 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Features\ContentResizing;
+use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
-use Classifai\Watson\Normalizer;
+use Classifai\Normalizer;
 use WP_Error;
-use function Classifai\get_asset_info;
+use function Classifai\get_default_prompt;
 
 class ChatGPT extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
+
+	const ID = 'openai_chatgpt';
 
 	/**
 	 * OpenAI ChatGPT URL
@@ -36,655 +41,119 @@ class ChatGPT extends Provider {
 	protected $max_tokens = 16385;
 
 	/**
-	 * Prompt for generating excerpts
-	 *
-	 * @var string
-	 */
-	protected $generate_excerpt_prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
-
-	/**
-	 * Prompt for generating titles
-	 *
-	 * @var string
-	 */
-	protected $generate_title_prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
-
-	/**
-	 * Prompt for shrinking content
-	 *
-	 * @var string
-	 */
-	protected $shrink_content_prompt = 'Decrease the content length no more than 2 to 4 sentences.';
-
-	/**
-	 * Prompt for growing content
-	 *
-	 * @var string
-	 */
-	protected $grow_content_prompt = 'Increase the content length no more than 2 to 4 sentences.';
-
-	/**
 	 * OpenAI ChatGPT constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
-	public function __construct( $service ) {
+	public function __construct( $feature_instance = null ) {
 		parent::__construct(
 			'OpenAI ChatGPT',
 			'ChatGPT',
-			'openai_chatgpt',
-			$service
+			'openai_chatgpt'
 		);
 
-		// Features provided by this provider.
-		$this->features = array(
-			'title_generation'   => __( 'Generate titles', 'classifai' ),
-			'excerpt_generation' => __( 'Generate excerpts', 'classifai' ),
-			'resize_content'     => __( 'Resize content', 'classifai' ),
-		);
-
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'OpenAI ChatGPT', 'classifai' ),
-			'fields'   => array( 'api-key' ),
-			'features' => array(
-				'enable_excerpt'        => __( 'Excerpt generation', 'classifai' ),
-				'enable_titles'         => __( 'Title generation', 'classifai' ),
-				'enable_resize_content' => __( 'Content resizing', 'classifai' ),
-			),
-		);
+		$this->feature_instance = $feature_instance;
 	}
 
 	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
+	 * Register any needed hooks.
 	 */
 	public function register() {
-		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-		add_action( 'edit_form_before_permalink', [ $this, 'register_generated_titles_template' ] );
 	}
 
 	/**
-	 * Returns localised data for title generation.
+	 * Render the provider fields.
 	 */
-	public function get_localised_vars() {
-		global $post;
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
 
-		return [
-			'enabledFeatures' => [
-				0 => [
-					'feature'       => 'title',
-					'path'          => '/classifai/v1/openai/generate-title/',
-					'buttonText'    => __( 'Generate titles', 'classifai' ),
-					'modalTitle'    => __( 'Select a title', 'classifai' ),
-					'selectBtnText' => __( 'Select', 'classifai' ),
-				],
-			],
-			'noPermissions'   => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-		];
-	}
-
-	/**
-	 * Enqueue the editor scripts.
-	 */
-	public function enqueue_editor_assets() {
-		global $post;
-
-		if ( empty( $post ) ) {
-			return;
-		}
-
-		if ( $this->is_feature_enabled( 'excerpt_generation' ) ) {
-			// This script removes the core excerpt panel and replaces it with our own.
-			wp_enqueue_script(
-				'classifai-post-excerpt',
-				CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-				array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
-				get_asset_info( 'post-excerpt', 'version' ),
-				true
-			);
-		}
-
-		if ( $this->is_feature_enabled( 'title_generation' ) ) {
-			wp_enqueue_script(
-				'classifai-post-status-info',
-				CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
-				get_asset_info( 'post-status-info', 'dependencies' ),
-				get_asset_info( 'post-status-info', 'version' ),
-				true
-			);
-
-			wp_add_inline_script(
-				'classifai-post-status-info',
-				sprintf(
-					'var classifaiChatGPTData = %s;',
-					wp_json_encode( $this->get_localised_vars() )
+		add_settings_field(
+			static::ID . '_api_key',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'api_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['api_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
+					wp_kses(
+						/* translators: %1$s is replaced with the OpenAI sign up URL */
+						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://platform.openai.com/signup' )
 				),
-				'before'
-			);
-		}
+			]
+		);
 
-		if ( $this->is_feature_enabled( 'resize_content' ) ) {
-			wp_enqueue_script(
-				'classifai-content-resizing-plugin-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
-				get_asset_info( 'content-resizing-plugin', 'dependencies' ),
-				get_asset_info( 'content-resizing-plugin', 'version' ),
-				true
-			);
-
-			wp_enqueue_style(
-				'classifai-content-resizing-plugin-css',
-				CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
-				[],
-				get_asset_info( 'content-resizing-plugin', 'version' ),
-				'all'
-			);
-		}
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
 	/**
-	 * Enqueue the admin scripts.
+	 * Returns the default settings for this provider.
 	 *
-	 * @param string $hook_suffix The current admin page.
+	 * @return array
 	 */
-	public function enqueue_admin_assets( string $hook_suffix ) {
-		// Load asset in OpenAI ChatGPT settings page.
-		if (
-			'tools_page_classifai' === $hook_suffix
-			&& ( isset( $_GET['tab'], $_GET['provider'] ) ) // phpcs:ignore
-			&& 'language_processing' === $_GET['tab'] // phpcs:ignore
-			&& 'openai_chatgpt' === $_GET['provider'] // phpcs:ignore
-		) {
-			wp_enqueue_script( 'jquery-ui-dialog' );
-			wp_enqueue_style( 'wp-jquery-ui-dialog' );
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'api_key'       => '',
+			'authenticated' => false,
+		];
 
-			add_action(
-				'admin_footer',
-				static function () {
-					printf(
-						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
-						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
-					);
-				}
-			);
-		}
-
-		// Load asset in new post and edit post screens.
-		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			$screen = get_current_screen();
-
-			// Load the assets for the classic editor.
-			if ( $screen && ! $screen->is_block_editor() ) {
-				if (
-					post_type_supports( $screen->post_type, 'title' ) &&
-					$this->is_feature_enabled( 'title_generation' )
-				) {
-					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
-						'all'
-					);
-
-					wp_enqueue_script(
-						'classifai-generate-title-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.js',
-						array_merge( get_asset_info( 'generate-title-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-title-classic', 'version' ),
-						true
-					);
-
-					wp_add_inline_script(
-						'classifai-generate-title-classic-js',
-						sprintf(
-							'var classifaiChatGPTData = %s;',
-							wp_json_encode( $this->get_localised_vars() )
-						),
-						'before'
-					);
-				}
-
-				if (
-					post_type_supports( $screen->post_type, 'excerpt' ) &&
-					$this->is_feature_enabled( 'excerpt_generation' )
-				) {
-					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
-						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
-						'all'
-					);
-
-					wp_enqueue_script(
-						'classifai-generate-excerpt-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-						array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-excerpt-classic', 'version' ),
-						true
-					);
-
-					wp_add_inline_script(
-						'classifai-generate-excerpt-classic-js',
-						sprintf(
-							'var classifaiGenerateExcerpt = %s;',
-							wp_json_encode(
-								[
-									'path'           => '/classifai/v1/openai/generate-excerpt/',
-									'buttonText'     => __( 'Generate excerpt', 'classifai' ),
-									'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
-								]
-							)
-						),
-						'before'
-					);
-				}
-			}
-
-			wp_enqueue_style(
-				'classifai-language-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-				[],
-				get_asset_info( 'language-processing', 'version' ),
-			);
-		}
+		return $common_settings;
 	}
 
 	/**
-	 * HTML template for title generation result popup.
-	 */
-	public function register_generated_titles_template() {
-		?>
-		<div id="classifai-openai__results" style="display: none;">
-			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
-			<div id="classifai-openai__modal" style="opacity: 0;">
-				<h2 id="classifai-openai__results-title"></h2>
-				<div id="classifai-openai__close-modal-button"></div>
-				<div id="classifai-openai__results-content">
-				</div>
-			</div>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		$default_settings = $this->get_default_settings();
-
-		// Add API fields.
-		$this->setup_api_fields( $default_settings['api_key'] );
-
-		// Add excerpt fields.
-		add_settings_section(
-			$this->get_option_name() . '_excerpt',
-			esc_html__( 'Excerpt settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-excerpt',
-			esc_html__( 'Generate excerpt', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'enable_excerpt',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_excerpt'],
-				'description'   => __( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access settings for excerpt.
-		$this->add_access_settings( 'excerpt_generation', $this->get_option_name() . '_excerpt' );
-
-		add_settings_field(
-			'length',
-			esc_html__( 'Excerpt length', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'length',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $default_settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for excerpt generation.
-		add_settings_field(
-			'generate_excerpt_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_excerpt',
-			[
-				'label_for'     => 'generate_excerpt_prompt',
-				'placeholder'   => $this->generate_excerpt_prompt,
-				'default_value' => $default_settings['generate_excerpt_prompt'],
-				'description'   => __( 'Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item\'s title.', 'classifai' ),
-			]
-		);
-
-		// Add title fields.
-		add_settings_section(
-			$this->get_option_name() . '_title',
-			esc_html__( 'Title settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-titles',
-			esc_html__( 'Generate titles', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'enable_titles',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_titles'],
-				'description'   => __( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access settings for titles.
-		$this->add_access_settings( 'title_generation', $this->get_option_name() . '_title' );
-
-		add_settings_field(
-			'number-titles',
-			esc_html__( 'Number of titles', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'number_titles',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number_titles'],
-				'description'   => __( 'Number of titles that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for generating titles.
-		add_settings_field(
-			'generate_title_prompt',
-			esc_html__( 'Prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_title',
-			[
-				'label_for'     => 'generate_title_prompt',
-				'placeholder'   => $this->generate_title_prompt,
-				'default_value' => $default_settings['generate_title_prompt'],
-			]
-		);
-
-		// Add content resizing fields.
-		add_settings_section(
-			$this->get_option_name() . '_resize_content_settings',
-			esc_html__( 'Content resizing settings', 'classifai' ),
-			'',
-			$this->get_option_name()
-		);
-
-		add_settings_field(
-			'enable-resize-content',
-			esc_html__( 'Enable content resizing', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'enable_resize_content',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_resize_content'],
-				'description'   => __( '"Condense this text" and "Expand this text" menu items will be added to the paragraph block\'s toolbar menu.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access settings for resizing content.
-		$this->add_access_settings( 'resize_content', $this->get_option_name() . '_resize_content_settings' );
-
-		add_settings_field(
-			'number-resize-content',
-			esc_html__( 'Number of suggestions', 'classifai' ),
-			[ $this, 'render_select' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'number_resize_content',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $default_settings['number_resize_content'],
-				'description'   => __( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		// Custom prompt for shrinking content.
-		add_settings_field(
-			'shrink_content_prompt',
-			esc_html__( 'Condense text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'shrink_content_prompt',
-				'placeholder'   => $this->shrink_content_prompt,
-				'default_value' => $default_settings['shrink_content_prompt'],
-			]
-		);
-
-		// Custom prompt for growing content.
-		add_settings_field(
-			'grow_content_prompt',
-			esc_html__( 'Expand text prompt', 'classifai' ),
-			[ $this, 'render_prompt_repeater_field' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_resize_content_settings',
-			[
-				'label_for'     => 'grow_content_prompt',
-				'placeholder'   => $this->grow_content_prompt,
-				'default_value' => $default_settings['grow_content_prompt'],
-			]
-		);
-	}
-
-	/**
-	 * Sanitization for the options being saved.
+	 * Sanitize the settings for this provider.
 	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
-	 * @return array The sanitized settings to be saved.
+	 * @param array $new_settings The settings array.
+	 * @return array
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings = $this->get_settings();
-		$new_settings = array_merge(
-			$new_settings,
-			$this->sanitize_api_key_settings( $new_settings, $settings ),
-			$this->sanitize_access_settings( $settings, 'excerpt_generation' ),
-			$this->sanitize_access_settings( $settings, 'title_generation' ),
-			$this->sanitize_access_settings( $settings, 'resize_content' ),
-		);
+	public function sanitize_settings( array $new_settings ): array {
+		$settings         = $this->feature_instance->get_settings();
+		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
 
-		if ( empty( $settings['enable_excerpt'] ) || 1 !== (int) $settings['enable_excerpt'] ) {
-			$new_settings['enable_excerpt'] = 'no';
-		} else {
-			$new_settings['enable_excerpt'] = '1';
-		}
-
-		if ( isset( $settings['length'] ) && is_numeric( $settings['length'] ) && (int) $settings['length'] >= 0 ) {
-			$new_settings['length'] = absint( $settings['length'] );
-		} else {
-			$new_settings['length'] = 55;
-		}
-
-		if ( isset( $settings['generate_excerpt_prompt'] ) && is_array( $settings['generate_excerpt_prompt'] ) ) {
-			$new_settings['generate_excerpt_prompt'] = $this->sanitize_prompts( $settings['generate_excerpt_prompt'] );
-		} else {
-			$new_settings['generate_excerpt_prompt'] = array();
-		}
-
-		if ( empty( $settings['enable_titles'] ) || 1 !== (int) $settings['enable_titles'] ) {
-			$new_settings['enable_titles'] = 'no';
-		} else {
-			$new_settings['enable_titles'] = '1';
-		}
-
-		if ( isset( $settings['number_titles'] ) && is_numeric( $settings['number_titles'] ) && (int) $settings['number_titles'] >= 1 && (int) $settings['number_titles'] <= 10 ) {
-			$new_settings['number_titles'] = absint( $settings['number_titles'] );
-		} else {
-			$new_settings['number_titles'] = 1;
-		}
-
-		if ( isset( $settings['generate_title_prompt'] ) && is_array( $settings['generate_title_prompt'] ) ) {
-			$new_settings['generate_title_prompt'] = $this->sanitize_prompts( $settings['generate_title_prompt'] );
-		} else {
-			$new_settings['generate_title_prompt'] = array();
-		}
-
-		if ( empty( $settings['enable_resize_content'] ) || 1 !== (int) $settings['enable_resize_content'] ) {
-			$new_settings['enable_resize_content'] = 'no';
-		} else {
-			$new_settings['enable_resize_content'] = '1';
-		}
-
-		if ( isset( $settings['number_resize_content'] ) && is_numeric( $settings['number_resize_content'] ) && (int) $settings['number_resize_content'] >= 1 && (int) $settings['number_resize_content'] <= 10 ) {
-			$new_settings['number_resize_content'] = absint( $settings['number_resize_content'] );
-		} else {
-			$new_settings['number_resize_content'] = 1;
-		}
-
-		if ( isset( $settings['shrink_content_prompt'] ) && is_array( $settings['shrink_content_prompt'] ) ) {
-			$new_settings['shrink_content_prompt'] = $this->sanitize_prompts( $settings['shrink_content_prompt'] );
-		} else {
-			$new_settings['shrink_content_prompt'] = array();
-		}
-
-		if ( isset( $settings['grow_content_prompt'] ) && is_array( $settings['grow_content_prompt'] ) ) {
-			$new_settings['grow_content_prompt'] = $this->sanitize_prompts( $settings['grow_content_prompt'] );
-		} else {
-			$new_settings['grow_content_prompt'] = array();
-		}
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		return $new_settings;
 	}
 
 	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
-	 * Default settings for ChatGPT
+	 * Sanitize the API key.
 	 *
-	 * @return array
+	 * @param array $new_settings The settings array.
+	 * @return string
 	 */
-	public function get_default_settings() {
-		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/user.php';
-		}
-		$default_settings = parent::get_default_settings() ?? [];
-		$excerpt_length   = absint( apply_filters( 'excerpt_length', 55 ) );
-
-		return array_merge(
-			$default_settings,
-			[
-				'authenticated'           => false,
-				'api_key'                 => '',
-				'enable_excerpt'          => false,
-				'length'                  => $excerpt_length,
-				'generate_excerpt_prompt' => array(
-					array(
-						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->generate_excerpt_prompt,
-						'original' => 1,
-					),
-				),
-				'enable_titles'           => false,
-				'number_titles'           => 1,
-				'generate_title_prompt'   => array(
-					array(
-						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->generate_title_prompt,
-						'original' => 1,
-					),
-				),
-				'enable_resize_content'   => false,
-				'number_resize_content'   => 1,
-				'shrink_content_prompt'   => array(
-					array(
-						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->shrink_content_prompt,
-						'original' => 1,
-					),
-				),
-				'grow_content_prompt'     => array(
-					array(
-						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-						'prompt'   => $this->grow_content_prompt,
-						'original' => 1,
-					),
-				),
-			]
-		);
-	}
-
-	/**
-	 * Provides debug information related to the provider.
-	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
-		}
-
-		$authenticated  = 1 === intval( $settings['authenticated'] ?? 0 );
-		$enable_excerpt = 1 === intval( $settings['enable_excerpt'] ?? 0 );
-		$enable_titles  = 1 === intval( $settings['enable_titles'] ?? 0 );
-
-		return [
-			__( 'Authenticated', 'classifai' )           => $authenticated ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Generate excerpt', 'classifai' )        => $enable_excerpt ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (excerpt)', 'classifai' ) => implode( ', ', $settings['roles'] ?? [] ),
-			__( 'Excerpt length', 'classifai' )          => $settings['length'] ?? 55,
-			__( 'Generate titles', 'classifai' )         => $enable_titles ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'Allowed roles (titles)', 'classifai' )  => implode( ', ', $settings['title_roles'] ?? [] ),
-			__( 'Number of titles', 'classifai' )        => absint( $settings['number_titles'] ?? 1 ),
-			__( 'Allowed roles (resize)', 'classifai' )  => implode( ', ', $settings['resize_content_roles'] ?? [] ),
-			__( 'Number of suggestions', 'classifai' )   => absint( $settings['number_resize_content'] ?? 1 ),
-			__( 'Latest response', 'classifai' )         => $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_latest_response' ) ),
-		];
+	public function sanitize_api_key( array $new_settings ): string {
+		$settings = $this->feature_instance->get_settings();
+		return sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] ?? '' );
 	}
 
 	/**
 	 * Common entry point for all REST endpoints for this provider.
-	 * This is called by the Service.
 	 *
-	 * @param int    $post_id The Post Id we're processing.
+	 * @param int    $post_id The Post ID we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, $route_to_call = '', $args = [] ) {
-		$route_to_call = strtolower( $route_to_call );
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$return = '';
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
@@ -714,7 +183,8 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
+		$feature  = new ExcerptGeneration();
+		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
@@ -725,15 +195,15 @@ class ChatGPT extends Provider {
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'excerpt_generation' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( $this->get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $this->generate_excerpt_prompt );
+		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -792,7 +262,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		// Extract out the text response, if it exists.
 		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
@@ -819,24 +289,25 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
+		$feature  = new TitleGeneration();
+		$settings = $feature->get_settings();
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings['number_titles'] ?? 1,
+				'num'     => $settings['number_of_titles'] ?? 1,
 				'content' => '',
 			]
 		);
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ! $this->is_feature_enabled( 'title_generation' ) ) {
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$prompt = esc_textarea( $this->get_default_prompt( $settings['generate_title_prompt'] ) ?? $this->generate_title_prompt );
+		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
 		/**
 		 * Filter the prompt we will send to ChatGPT.
@@ -891,7 +362,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_openai_chatgpt_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -925,26 +396,22 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings();
-		$args     = wp_parse_args(
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
+		$args = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num' => $settings['number_resize_content'] ?? 1,
+				'num' => $settings['number_of_suggestions'] ?? 1,
 			]
 		);
 
-		// These checks (and the one above) happen in the REST permission_callback,
-		// but we run them again here in case this method is called directly.
-		if ( empty( $settings ) || ( isset( $settings['authenticated'] ) && false === $settings['authenticated'] ) || ( ! $this->is_feature_enabled( 'resize_content' ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Resizing content is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
-		}
-
-		$request = new APIRequest( $settings['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		if ( 'shrink' === $args['resize_type'] ) {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['shrink_content_prompt'] ) ?? $this->shrink_content_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
 		} else {
-			$prompt = esc_textarea( $this->get_default_prompt( $settings['grow_content_prompt'] ) ?? $this->grow_content_prompt );
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
 		}
 
 		/**
@@ -1000,7 +467,7 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		set_transient( 'classifai_openai_chatgpt_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_openai_chatgpt_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -1032,7 +499,7 @@ class ChatGPT extends Provider {
 	 * @param string $post_content The post content.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ) {
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ): string {
 		$tokenizer  = new Tokenizer( $this->max_tokens );
 		$normalizer = new Normalizer();
 
@@ -1086,140 +553,35 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Retrieves the allowed WordPress roles for OpenAI ChatGPT.
+	 * Returns the debug information for the provider settings.
 	 *
-	 * @since 2.4.0
-	 *
-	 * @return array An associative array where the keys are role keys and the values are role names.
+	 * @return array
 	 */
-	public function get_roles() {
-		$default_settings = $this->get_default_settings();
-		$roles            = get_editable_roles() ?? [];
-		$roles            = array_combine( array_keys( $roles ), array_column( $roles, 'name' ) );
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
 
-		/**
-		 * Filter the allowed WordPress roles for ChatGTP
-		 *
-		 * @since 2.3.0
-		 * @hook classifai_chatgpt_allowed_roles
-		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
-		 *
-		 * @return {array} Roles array.
-		 */
-		$roles = apply_filters( 'classifai_chatgpt_allowed_roles', $roles, $default_settings );
+		if ( $this->feature_instance instanceof TitleGeneration ) {
+			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_titles'] ?? 1;
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_title_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ContentResizing ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $provider_settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_content_resizing_latest_response' ) );
+		}
 
-		return $roles;
-	}
-
-	/**
-	 * Sanitize the prompt data.
-	 * This is used for the repeater field.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @param array $prompts Prompt data.
-	 *
-	 * @return array Sanitized prompt data.
-	 */
-	public function sanitize_prompts( array $prompts ): array {
-		// Remove any prompts that don't have a title and prompt.
-		$prompts = array_filter(
-			$prompts,
-			function ( $prompt ) {
-				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
-			}
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
 		);
-
-		// Sanitize the prompts and make sure only one prompt is marked as default.
-		$has_default = false;
-
-		$prompts = array_map(
-			function ( $prompt ) use ( &$has_default ) {
-				$default = isset( $prompt['default'] ) && $prompt['default'] && ! $has_default;
-
-				if ( $default ) {
-					$has_default = true;
-				}
-
-				return array(
-					'title'    => sanitize_text_field( $prompt['title'] ),
-					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
-					'default'  => absint( $default ),
-					'original' => absint( $prompt['original'] ),
-				);
-			},
-			$prompts
-		);
-
-		// If there is no default, use the first prompt.
-		if ( false === $has_default && ! empty( $prompts ) ) {
-			$prompts[0]['default'] = 1;
-		}
-
-		return $prompts;
-	}
-
-	/**
-	 * Get the default prompt for use.
-	 *
-	 * @since 2.4.0
-	 *
-	 * @param array $prompts Prompt data.
-	 *
-	 * @return string|null Default prompt.
-	 */
-	public function get_default_prompt( array $prompts ): ?string {
-		$default_prompt = null;
-
-		if ( ! empty( $prompts ) ) {
-			$prompt_data = array_filter(
-				$prompts,
-				function ( $prompt ) {
-					return $prompt['default'] && ! $prompt['original'];
-				}
-			);
-
-			if ( ! empty( $prompt_data ) ) {
-				$default_prompt = current( $prompt_data )['prompt'];
-			} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
-				// If there is no default, use the first prompt, unless it's the original prompt.
-				$default_prompt = $prompts[0]['prompt'];
-			}
-		}
-
-		return $default_prompt;
-	}
-
-	/**
-	 * Determine if the feature is turned on.
-	 * Note: This function does not check if the user has access to the feature.
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_enabled( string $feature ) {
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
-
-		// Handle different enable keys.
-		switch ( $feature ) {
-			case 'title_generation':
-				$enable_key = 'enable_titles';
-				break;
-
-			case 'excerpt_generation':
-				$enable_key = 'enable_excerpt';
-				break;
-
-			default:
-				break;
-		}
-
-		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
-
-		/** This filter is documented in includes/Classifai/Providers/Provider.php */
-		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }
