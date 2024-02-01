@@ -56,12 +56,6 @@ class Speech extends Provider {
 	}
 
 	/**
-	 * Register the actions needed.
-	 */
-	public function register() {
-	}
-
-	/**
 	 * Render the provider fields.
 	 */
 	public function render_provider_fields() {

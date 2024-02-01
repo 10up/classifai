@@ -43,13 +43,6 @@ class ComputerVision extends Provider {
 	}
 
 	/**
-	 * Resets settings for the ComputerVision provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
 	 * Renders the provider fields.
 	 */
 	public function render_provider_fields() {
@@ -664,11 +657,6 @@ class ComputerVision extends Provider {
 
 		return $endpoint;
 	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {}
 
 	/**
 	 * Authenticates our credentials.

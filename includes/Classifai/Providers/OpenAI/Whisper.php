@@ -72,12 +72,6 @@ class Whisper extends Provider {
 	}
 
 	/**
-	 * Register any needed hooks.
-	 */
-	public function register() {
-	}
-
-	/**
 	 * Builds the API url.
 	 *
 	 * @param string $path Path to append to API URL.

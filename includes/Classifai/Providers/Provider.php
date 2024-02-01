@@ -25,16 +25,6 @@ abstract class Provider {
 	public $provider_service_name;
 
 	/**
-	 * @var string $option_name Name of the option where the provider settings are stored.
-	 */
-	protected $option_name;
-
-	/**
-	 * @var string $service The name of the service this provider belongs to.
-	 */
-	protected $service;
-
-	/**
 	 * Feature instance.
 	 *
 	 * @var \Classifai\Features\Feature
@@ -78,60 +68,12 @@ abstract class Provider {
 	}
 
 	/**
-	 * Get the option name.
-	 *
-	 * @return string
-	 */
-	public function get_option_name(): string {
-		return 'classifai_' . $this->option_name;
-	}
-
-	/**
 	 * Get provider features.
 	 *
 	 * @return array
 	 */
 	public function get_features(): array {
 		return $this->features;
-	}
-
-	/**
-	 * Can the Provider be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register(): bool {
-		return $this->is_configured();
-	}
-
-	/**
-	 * Register the functionality for the Provider.
-	 */
-	abstract public function register();
-
-	/**
-	 * Initialization routine
-	 */
-	public function register_admin() {
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
-	}
-
-	/**
-	 * Helper to get the settings and allow for settings default values.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 * @return string|array|mixed
-	 */
-	public function get_settings( $index = false ) {
-		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
-		$settings = wp_parse_args( $settings, $defaults );
-
-		if ( $index && isset( $settings[ $index ] ) ) {
-			return $settings[ $index ];
-		}
-
-		return $settings;
 	}
 
 	/**
@@ -174,22 +116,6 @@ abstract class Provider {
 	}
 
 	/**
-	 * Returns whether the provider is configured or not.
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		$settings = $this->get_settings();
-
-		$is_configured = false;
-		if ( ! empty( $settings ) && ! empty( $settings['authenticated'] ) ) {
-			$is_configured = true;
-		}
-
-		return $is_configured;
-	}
-
-	/**
 	 * Adds an API key field.
 	 *
 	 * @param array $args API key field arguments.
@@ -215,79 +141,4 @@ abstract class Provider {
 		);
 	}
 
-	/**
-	 * Determine if the current user has access of the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	protected function has_access( string $feature ): bool {
-		$access_control = new AccessControl( $this, $feature );
-		return $access_control->has_access();
-	}
-
-	/**
-	 * Determine if the feature is enabled and current user can access the feature
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_feature_enabled( string $feature ): bool {
-		$is_feature_enabled = false;
-		$settings           = $this->get_settings();
-
-		// Check if provider is configured, user has access to the feature and the feature is turned on.
-		if (
-			$this->is_configured() &&
-			$this->has_access( $feature ) &&
-			$this->is_enabled( $feature )
-		) {
-			$is_feature_enabled = true;
-		}
-
-		/**
-		 * Filter to override permission to a specific classifai feature.
-		 *
-		 * @since 2.4.0
-		 * @hook classifai_{$this->option_name}_enable_{$feature}
-		 *
-		 * @param {bool}  $is_feature_enabled Is the feature enabled?
-		 * @param {array} $settings           Current feature settings.
-		 *
-		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
-		 */
-		return apply_filters( "classifai_{$this->option_name}_enable_{$feature}", $is_feature_enabled, $settings );
-	}
-
-	/**
-	 * Determine if the feature is turned on.
-	 *
-	 * Note: This function does not check if the user has access to the feature.
-	 *
-	 * - Use `is_feature_enabled()` to check if the user has access to the feature and feature is turned on.
-	 * - Use `has_access()` to check if the user has access to the feature.
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_enabled( string $feature ): bool {
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
-
-		// Check if feature is turned on.
-		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] );
-
-		/**
-		 * Filter to override a specific classifai feature enabled.
-		 *
-		 * @since 2.5.0
-		 * @hook classifai_is_{$feature}_enabled
-		 *
-		 * @param {bool}  $is_enabled Is the feature enabled?
-		 * @param {array} $settings   Current feature settings.
-		 *
-		 * @return {bool} Returns true if the feature is enabled, false otherwise.
-		 */
-		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
-	}
 }

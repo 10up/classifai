@@ -232,13 +232,6 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
-	}
-
-	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
 	 * @param string $prompt The prompt used to generate an image.

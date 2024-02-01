@@ -56,12 +56,6 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Register any needed hooks.
-	 */
-	public function register() {
-	}
-
-	/**
 	 * Render the provider fields.
 	 */
 	public function render_provider_fields() {
