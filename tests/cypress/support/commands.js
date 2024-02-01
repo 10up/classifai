@@ -245,6 +245,23 @@ Cypress.Commands.add( 'verifyClassifyContentEnabled', ( enabled = true ) => {
  *
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
  */
+Cypress.Commands.add( 'verifyModerationEnabled', ( enabled = true ) => {
+	const shouldExist = enabled ? 'exist' : 'not.exist';
+
+	cy.visit( '/wp-admin/edit-comments.php' );
+
+	cy.get( '#bulk-action-selector-top option:contains(Moderate)' ).should(
+		shouldExist
+	);
+	cy.get( '#moderation_flagged' ).should( shouldExist );
+	cy.get( '#moderation_flags' ).should( shouldExist );
+} );
+
+/**
+ * Verify that the excerpt generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
 Cypress.Commands.add( 'verifyExcerptGenerationEnabled', ( enabled = true ) => {
 	const shouldExist = enabled ? 'exist' : 'not.exist';
 	cy.visit( '/wp-admin/edit.php' );

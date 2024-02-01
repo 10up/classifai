@@ -7,7 +7,9 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
 		);
 		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_excerpt_generation_post_types_post' ).check();
+		cy.get(
+			'#classifai_feature_excerpt_generation_post_types_post'
+		).check();
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();

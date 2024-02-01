@@ -37,11 +37,12 @@ class LanguageProcessing extends Service {
 		return apply_filters(
 			'classifai_language_processing_service_providers',
 			[
-				'Classifai\Providers\Watson\NLU',
+				'Classifai\Providers\Azure\Speech',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
+				'Classifai\Providers\OpenAI\Moderation',
 				'Classifai\Providers\OpenAI\Whisper',
-				'Classifai\Providers\Azure\Speech',
+				'Classifai\Providers\Watson\NLU',
 			]
 		);
 	}

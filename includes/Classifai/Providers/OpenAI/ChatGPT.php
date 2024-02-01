@@ -11,11 +11,12 @@ use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use WP_Error;
+
 use function Classifai\get_default_prompt;
 
 class ChatGPT extends Provider {
 
-	use \Classifai\Providers\OpenAI\OpenAI;
+	use OpenAI;
 
 	const ID = 'openai_chatgpt';
 
