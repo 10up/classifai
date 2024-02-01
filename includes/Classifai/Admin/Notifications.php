@@ -3,7 +3,6 @@
 namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
-use Classifai\Features\ImageTagsGenerator;
 
 class Notifications {
 
