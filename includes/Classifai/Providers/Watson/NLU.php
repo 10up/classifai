@@ -224,6 +224,7 @@ class NLU extends Provider {
 			);
 		}
 
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 	}
 
@@ -233,9 +234,14 @@ class NLU extends Provider {
 	 * @param string $active_feature The active feature.
 	 */
 	public function render_previewer( string $active_feature ) {
-		$feature = new Classification();
+		$feature  = new Classification();
+		$provider = $feature->get_feature_provider_instance();
 
-		if ( $feature::ID !== $active_feature || ! $feature->is_feature_enabled() ) {
+		if (
+			self::ID !== $provider::ID ||
+			$feature::ID !== $active_feature ||
+			! $feature->is_feature_enabled()
+		) {
 			return;
 		}
 		?>

@@ -7,8 +7,6 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 
-use function Classifai\get_plugin_settings;
-
 /**
  * Returns the currently configured Watson API URL. Lookup order is,
  *
