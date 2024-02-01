@@ -10,8 +10,11 @@ import '../scss/language-processing.scss';
 		return;
 	}
 
+	const providerSelect = document.getElementById( 'provider' );
+	const provider = providerSelect.value;
+
 	const previewWatson = () => {
-		if ( ! nonceEl ) {
+		if ( 'ibm_watson_nlu' !== provider ) {
 			return;
 		}
 
@@ -199,7 +202,7 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		if ( ! nonceEl ) {
+		if ( 'openai_embeddings' !== provider ) {
 			return;
 		}
 
@@ -341,6 +344,7 @@ import '../scss/language-processing.scss';
 	);
 	const selectElChoices = new Choices( selectEl, {
 		noResultsText: '',
+		allowHTML: true,
 	} );
 
 	/**
@@ -349,10 +353,6 @@ import '../scss/language-processing.scss';
 	 * @param {Object} event Choices.js's 'search' event object.
 	 */
 	function searchPosts( event ) {
-		if ( ! nonceEl ) {
-			return;
-		}
-
 		/** Previewer nonce. */
 		const previewerNonce = nonceEl.value;
 
