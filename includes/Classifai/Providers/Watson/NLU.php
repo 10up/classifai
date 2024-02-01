@@ -364,7 +364,6 @@ class NLU extends Provider {
 		if ( $feature->is_feature_enabled() && $feature->get_feature_provider_instance()::ID === static::ID ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-			add_action( 'admin_notices', [ $this, 'thresholds_update_notice' ] );
 
 			// Add classifai meta box to classic editor.
 			add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
@@ -817,42 +816,6 @@ class NLU extends Provider {
 				],
 			)
 		);
-	}
-
-	/**
-	 * Display a dismissable admin notice when a threshold still at the default 70% and IBM Watson NLU active
-	 */
-	public function thresholds_update_notice() {
-		$config = $this->is_configured();
-
-		$thresholds = [
-			$config['features']['category_threshold'] ?? 55,
-			$config['features']['keyword_threshold'] ?? 55,
-			$config['features']['entity_threshold'] ?? 55,
-			$config['features']['concept_threshold'] ?? 55,
-		];
-
-		if ( ! in_array( 70, $thresholds, true ) ) {
-			return;
-		}
-
-		?>
-		<div class='notice notice-warning is-dismissible'>
-			<p>
-				<?php
-				printf(
-					esc_html__( '%1$s %2$s', 'classifai' ),
-					esc_html__( 'The latest version of ClassifAI comes with an update to the Language Processing option with IBM Watson that provides best results if you change the default threshold from 70% to 55%.', 'classifai' ),
-					sprintf(
-						'<a href="%s">%s</a>',
-						esc_url( admin_url( 'tools.php?page=classifai&tab=language_processing&provider=watson_nlu' ) ),
-						esc_html__( 'Click here to adjust those settings.', 'text-domain' )
-					)
-				);
-				?>
-			</p>
-		</div>
-		<?php
 	}
 
 	/**
