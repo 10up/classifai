@@ -38,15 +38,6 @@ class SmartCropping {
 	private $settings;
 
 	/**
-	 * WP_Filesystem_Base instance.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @var WP_Filesystem_Base
-	 */
-	private $wp_filesystem;
-
-	/**
 	 * SmartCropping constructor
 	 *
 	 * @since 1.5.0
@@ -58,37 +49,6 @@ class SmartCropping {
 	}
 
 	/**
-	 * Provides the global WP_Filesystem_Base class instance.
-	 *
-	 * @since 1.5.0
-	 *
-	 * @return WP_Filesystem_Base
-	 */
-	public function get_wp_filesystem() {
-		global $wp_filesystem;
-
-		if ( is_null( $this->wp_filesystem ) ) {
-			if ( ! $wp_filesystem ) {
-				WP_Filesystem(); // Initiates the global.
-			}
-
-			$this->wp_filesystem = $wp_filesystem;
-		}
-
-		/**
-		 * Filters the filesystem class instance used to save image files.
-		 *
-		 * @since 1.5.0
-		 * @hook classifai_smart_crop_wp_filesystem
-		 *
-		 * @param {WP_Filesystem_Base} $this->wp_filesystem Filesystem class for saving images.
-		 *
-		 * @return {WP_Filesystem_Base} Filtered Filesystem class.
-		 */
-		return apply_filters( 'classifai_smart_crop_wp_filesystem', $this->wp_filesystem );
-	}
-
-	/**
 	 * Provides the maximum allowable width or height in pixels accepted by the generateThumbnail endpoint.
 	 *
 	 * @since 1.5.0
@@ -96,7 +56,7 @@ class SmartCropping {
 	 *
 	 * @return int
 	 */
-	public function get_max_pixel_dimension() {
+	public function get_max_pixel_dimension(): int {
 		/**
 		 * Filters the maximum allowable width or height of an image to be cropped. Default 1024.
 		 *
@@ -116,9 +76,9 @@ class SmartCropping {
 	 * @since 1.5.0
 	 *
 	 * @param string $size An image size.
-	 * @return boolean
+	 * @return bool
 	 */
-	public function should_crop( $size ) {
+	public function should_crop( string $size ): bool {
 		if ( 'thumbnail' === $size ) {
 			return boolval( get_option( 'thumbnail_crop', false ) );
 		}
@@ -158,17 +118,17 @@ class SmartCropping {
 	}
 
 	/**
-	 * Filters attachment meta data
-	 *
-	 * @since 1.5.0
+	 * Generate cropped image sizes.
 	 *
 	 * @param array $metadata Image attachment metadata.
-	 * @param int   $attachment_id Attachment ID.
-	 * @return array Filtered image attachment metadata.
+	 * @param int   $attachment_id Attachment ID
+	 * @return array|\WP_Error
 	 */
-	public function generate_attachment_metadata( $metadata, $attachment_id ) {
+	public function generate_cropped_images( array $metadata, int $attachment_id ) {
+		$cropped_images = [];
+
 		if ( ! isset( $metadata['sizes'] ) || empty( $metadata['sizes'] ) ) {
-			return $metadata;
+			return $cropped_images;
 		}
 
 		foreach ( $metadata['sizes'] as $size => $size_data ) {
@@ -181,14 +141,20 @@ class SmartCropping {
 				'height' => $size_data['height'],
 			];
 
-			$better_thumb_filename = $this->get_cropped_thumbnail( $attachment_id, $data );
+			$data = $this->get_cropped_thumbnail( $attachment_id, $size_data );
 
-			if ( ! is_wp_error( $better_thumb_filename ) ) {
-				$metadata['sizes'][ $size ]['file'] = basename( $better_thumb_filename );
+			if ( is_wp_error( $data ) ) {
+				return $data;
 			}
+
+			$cropped_images[ $size ] = [
+				'width'  => $size_data['width'],
+				'height' => $size_data['height'],
+				'data'   => $data,
+			];
 		}
 
-		return $metadata;
+		return $cropped_images;
 	}
 
 	/**
@@ -198,12 +164,13 @@ class SmartCropping {
 	 *
 	 * @param int   $attachment_id Attachment ID.
 	 * @param array $size_data Attachment metadata size data.
-	 * @return string|\WP_Error The thumbnail file name or WP_Error on failure.
+	 * @return string|\WP_Error
 	 */
-	public function get_cropped_thumbnail( $attachment_id, $size_data ) {
+	public function get_cropped_thumbnail( int $attachment_id, array $size_data ) {
 		/**
-		 * Filters the image URL to send to Computer Vision for smart cropping. A non-null value will override default
-		 * plugin behavior.
+		 * Filters the image URL to send to AI Vision for smart cropping.
+		 *
+		 * A non-null value will override default plugin behavior.
 		 *
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_source_url
@@ -235,56 +202,10 @@ class SmartCropping {
 		];
 
 		$new_thumb_image = $this->request_cropped_thumbnail( $data );
-		set_transient( 'classifai_azure_computer_vision_smart_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
 
-		if ( is_wp_error( $new_thumb_image ) ) {
-			return $new_thumb_image;
-		}
+		set_transient( 'classifai_azure_computer_vision_image_cropping_latest_response', $new_thumb_image, DAY_IN_SECONDS * 30 );
 
-		if ( empty( $new_thumb_image ) ) {
-			return new \WP_Error( 'classifai_smart_cropping_empty_image', 'Empty cropped image.' );
-		}
-
-		$attached_file       = get_attached_file( $attachment_id );
-		$file_path_info      = pathinfo( $attached_file );
-		$new_thumb_file_name = str_replace(
-			$file_path_info['filename'],
-			sprintf(
-				'%s-%dx%d',
-				$file_path_info['filename'],
-				$size_data['width'],
-				$size_data['height']
-			),
-			$attached_file
-		);
-
-		/**
-		 * Filters the file name of the smart-cropped image. By default, the filename mirrors what is generated by
-		 * core -- e.g., my-thumb-150x150.jpg -- so will override the core-generated image. Apply this filter to keep
-		 * the original file in the file system.
-		 *
-		 * @since 1.5.0
-		 * @hook classifai_smart_cropping_thumb_file_name
-		 *
-		 * @param {string} Default file name.
-		 * @param {int}    The ID of the attachment being processed.
-		 * @param {array}  Width and height data for the image.
-		 *
-		 * @return {string} Filtered file name.
-		 */
-		$new_thumb_file_name = apply_filters(
-			'classifai_smart_cropping_thumb_file_name',
-			$new_thumb_file_name,
-			$attachment_id,
-			$size_data
-		);
-
-		$filesystem = $this->get_wp_filesystem();
-		if ( $filesystem && $filesystem->put_contents( $new_thumb_file_name, $new_thumb_image ) ) {
-			return $new_thumb_file_name;
-		}
-
-		return new \WP_Error( 'classifai_smart_cropping_filesystem_error', 'Filesystem error. Can not write cropped thumbnail file.' );
+		return $new_thumb_image;
 	}
 
 	/**
@@ -294,8 +215,8 @@ class SmartCropping {
 	 *
 	 * @return string
 	 */
-	public function get_api_url() {
-		return sprintf( '%s%s', trailingslashit( $this->settings['url'] ), static::API_PATH );
+	public function get_api_url(): string {
+		return sprintf( '%s%s', trailingslashit( $this->settings['endpoint_url'] ), static::API_PATH );
 	}
 
 	/**
@@ -306,7 +227,7 @@ class SmartCropping {
 	 * @param array $data Data for an attachment image size.
 	 * @return string|\WP_Error
 	 */
-	public function request_cropped_thumbnail( $data ) {
+	public function request_cropped_thumbnail( array $data ) {
 		$url = add_query_arg(
 			[
 				'height'        => $data['height'],
@@ -382,4 +303,3 @@ class SmartCropping {
 		return new \WP_Error( 'classifai_smart_cropping_failed', 'A Smart Cropping error occurred.' );
 	}
 }
-

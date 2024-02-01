@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai;
 
 class NormalizeTest extends \WP_UnitTestCase {
 

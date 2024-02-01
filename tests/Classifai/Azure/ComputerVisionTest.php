@@ -23,35 +23,29 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	function set_up() {
 		parent::set_up();
 
-		$this->provider = new ComputerVision( 'service_name' );
+		$this->provider = new ComputerVision( new \Classifai\Features\DescriptiveTextGenerator() );
 	}
 
 	/**
 	 * Tests the function providing debug information.
 	 */
-	public function test_get_provider_debug_information() {
+	public function test_get_debug_information() {
 		$this->assertEquals(
 			[
-				'Authenticated',
-				'API URL',
-				'Caption threshold',
-				'Latest response - Image Scan',
-				'Latest response - Smart Cropping',
-				'Latest response - OCR',
+				'Generate descriptive text',
+				'Confidence threshold',
+				'Latest response:',
 			],
-			array_keys( $this->provider->get_provider_debug_information() )
+			array_keys( $this->provider->get_debug_information() )
 		);
 
 		$this->assertEquals(
 			[
-				'Authenticated'                    => 'yes',
-				'API URL'                          => 'my-azure-url.com',
-				'Caption threshold'                => 77,
-				'Latest response - Image Scan'     => 'N/A',
-				'Latest response - Smart Cropping' => 'N/A',
-				'Latest response - OCR'            => 'N/A',
+				'Generate descriptive text' => '0, 0, 0',
+				'Confidence threshold'      => 75,
+				'Latest response:'          => 'N/A',
 			],
-			$this->provider->get_provider_debug_information(
+			$this->provider->get_debug_information(
 				[
 					'url'               => 'my-azure-url.com',
 					'caption_threshold' => 77,

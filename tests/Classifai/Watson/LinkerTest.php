@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai\Providers\Watson;
 
 class LinkerTest extends \WP_UnitTestCase {
 

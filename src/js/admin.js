@@ -32,9 +32,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 ( () => {
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
-	const $userField = document.getElementById(
-		'classifai-settings-watson_username'
-	);
+	const $userField = document.getElementById( 'username' );
 
 	if ( $toggler === null || $userField === null ) {
 		return;
@@ -48,31 +46,27 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$userFieldWrapper = $userField.closest( '.classifai-setup-form-field' );
 	}
 
-	if (
-		document
-			.getElementById( 'classifai-settings-watson_password' )
-			.closest( 'tr' )
-	) {
+	if ( document.getElementById( 'password' ).closest( 'tr' ) ) {
 		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( 'tr' )
 			.getElementsByTagName( 'label' );
 	} else if (
 		document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( '.classifai-setup-form-field' )
 	) {
 		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( '.classifai-setup-form-field' )
 			.getElementsByTagName( 'label' );
 	}
 
 	$toggler.addEventListener( 'click', ( e ) => {
 		e.preventDefault();
-		$userFieldWrapper.classList.toggle( 'hidden' );
+		$userFieldWrapper.classList.toggle( 'hide-username' );
 
-		if ( $userFieldWrapper.classList.contains( 'hidden' ) ) {
+		if ( $userFieldWrapper.classList.contains( 'hide-username' ) ) {
 			$toggler.innerText = ClassifAI.use_password;
 			$passwordFieldTitle.innerText = ClassifAI.api_key;
 			$userField.value = 'apikey';
@@ -392,3 +386,28 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		return $newPromptFieldset;
 	}
 } )();
+
+/**
+ * Feature-first refactor settings field:
+ * @param {Object} $ jQuery object
+ */
+( function ( $ ) {
+	$( function () {
+		const providerSelectEl = $( 'select#provider' );
+
+		providerSelectEl.on( 'change', function () {
+			const providerId = $( this ).val();
+			const providerRows = $( '.classifai-provider-field' );
+			const providerClass = `.provider-scope-${ providerId }`;
+
+			providerRows.addClass( 'hidden' );
+			providerRows.find( ':input' ).prop( 'disabled', true );
+
+			$( providerClass ).removeClass( 'hidden' );
+			$( providerClass ).find( ':input' ).prop( 'disabled', false );
+		} );
+
+		// Trigger 'change' on page load.
+		providerSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );

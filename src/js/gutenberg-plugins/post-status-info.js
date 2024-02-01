@@ -37,6 +37,7 @@ const PostStatusInfo = () => {
 	}
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
+	const postType = select( 'core/editor' ).getCurrentPostType();
 	const postContent =
 		select( 'core/editor' ).getEditedPostAttribute( 'content' );
 	const openModal = () => setOpen( true );
@@ -85,11 +86,24 @@ const PostStatusInfo = () => {
 							</textarea>
 							<Button
 								variant="secondary"
-								onClick={ () => {
+								onClick={ async () => {
+									const isDirty =
+										select(
+											'core/editor'
+										).isEditedPostDirty();
 									dispatch( 'core/editor' ).editPost( {
 										title: data[ i ],
 									} );
 									closeModal();
+									if ( ! isDirty ) {
+										await dispatch(
+											'core'
+										).saveEditedEntityRecord(
+											'postType',
+											postType,
+											postId
+										);
+									}
 								} }
 							>
 								{ __( 'Select', 'classifai' ) }
@@ -114,7 +128,7 @@ const PostStatusInfo = () => {
 					{ ! isLoading && data && <RenderData data={ data } /> }
 					{ ! isLoading && error && <RenderError error={ error } /> }
 					{ ! isLoading && (
-						<DisableFeatureButton feature="title_generation" />
+						<DisableFeatureButton feature="feature_title_generation" />
 					) }
 				</Modal>
 			) }

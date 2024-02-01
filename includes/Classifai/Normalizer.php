@@ -1,10 +1,10 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai;
 
 /**
  * Normalize takes the post_content within a post and cleans it up for
- * sending to the Watson NLU API. Shortcodes, appreviations, HTML tags
+ * sending to various APIs. Shortcodes, appreviations, HTML tags
  * are all stripped out here.
  *
  * A 'classifai_normalize' filter is provided to extend this to add
@@ -14,6 +14,7 @@ class Normalizer {
 
 	/**
 	 * Creates a plain text normalized version of the post's content.
+	 *
 	 * The post title is also included in the content to improve
 	 * accuracy.
 	 *
@@ -74,5 +75,4 @@ class Normalizer {
 
 		return $post_content;
 	}
-
 }

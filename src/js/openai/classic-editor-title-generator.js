@@ -17,6 +17,23 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 	} );
 
 	/**
+	 * Returns whether the post has unsaved changes or not.
+	 *
+	 * @return {boolean} Whether the post has unsaved change or not.
+	 */
+	function isPostChanged() {
+		const editor = window.tinymce && window.tinymce.get( 'content' );
+		let changed = false;
+
+		if ( wp.autosave ) {
+			changed = wp.autosave.server.postChanged();
+		} else if ( editor ) {
+			changed = ! editor.isHidden() && editor.isDirty();
+		}
+		return changed;
+	}
+
+	/**
 	 * This function is solely responsible for rendering, generating
 	 * and applying the generated title for the classic editor.
 	 */
@@ -57,8 +74,11 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 			const textarea = selectBtnEl
 				.closest( '.classifai-openai__result-item' )
 				.find( 'textarea' );
-
+			const isDirty = isPostChanged();
 			$( '#title' ).val( textarea.val() ).trigger( 'input' );
+			if ( ! isDirty && wp.autosave ) {
+				wp.autosave.server.triggerSave();
+			}
 			hidePopup();
 		};
 
@@ -108,7 +128,7 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 				// Append disable feature link.
 				if (
 					ClassifAI?.opt_out_enabled_features?.includes(
-						'title_generation'
+						'feature_title_generation'
 					)
 				) {
 					$( '<a>', {

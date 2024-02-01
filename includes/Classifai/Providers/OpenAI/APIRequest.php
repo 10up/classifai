@@ -228,7 +228,7 @@ class APIRequest {
 		$options = apply_filters(
 			'classifai_openai_api_request_post_form_options',
 			[
-				'body' => $payload,
+				'body'    => $payload,
 				'headers' => [
 					'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
 				],
@@ -325,5 +325,4 @@ class APIRequest {
 	public function get_api_key() {
 		return $this->api_key;
 	}
-
 }
