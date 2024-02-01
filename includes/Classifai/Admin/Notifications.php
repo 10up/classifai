@@ -159,7 +159,6 @@ EOD;
 	public function thresholds_update_notice() {
 		$features = [
 			'feature_descriptive_text_generator' => 'Classifai\Features\DescriptiveTextGenerator',
-			'feature_image_tags_generator'       => 'Classifai\Features\ImageTagsGenerator',
 		];
 
 		foreach ( $features as $name => $feature_class ) {
@@ -182,11 +181,6 @@ EOD;
 				case DescriptiveTextGenerator::ID:
 					$key     = 'descriptive_confidence_threshold';
 					$message = __( 'The previous recommended threshold for descriptive text generation was 75% but we find better results now at around 55%.', 'classifai' );
-					break;
-
-				case ImageTagsGenerator::ID:
-					$key     = 'tag_confidence_threshold';
-					$message = __( 'The previous recommended threshold for image tagging was 70% but we find better results now at around 55%.', 'classifai' );
 					break;
 			}
 

@@ -151,7 +151,7 @@ class ComputerVision extends Provider {
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['tag_confidence_threshold'],
-				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 55.', 'classifai' ),
+				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
@@ -183,7 +183,7 @@ class ComputerVision extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'tag_confidence_threshold' => 55,
+						'tag_confidence_threshold' => 70,
 					]
 				);
 		}
