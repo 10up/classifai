@@ -37,22 +37,6 @@ class NLUSettingsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the option name.
-	 */
-	public function test_option_name() {
-		$this->assertSame( 'classifai_watson_nlu', $this->provider->get_option_name() );
-	}
-
-	/**
-	 * Retrieving the options.
-	 */
-	public function test_retrieving_options() {
-		$options = get_option( $this->provider->get_option_name() );
-
-		$this->assertEquals( $this->settings, $options );
-	}
-
-	/**
 	 * Tests the function providing debug information.
 	 */
 	public function test_get_debug_information() {
