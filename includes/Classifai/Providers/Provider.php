@@ -64,5 +64,4 @@ abstract class Provider {
 			]
 		);
 	}
-
 }
