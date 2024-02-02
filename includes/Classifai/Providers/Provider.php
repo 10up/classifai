@@ -15,66 +15,11 @@ abstract class Provider {
 	const ID = '';
 
 	/**
-	 * @var string The display name for the provider, i.e. Azure
-	 */
-	public $provider_name;
-
-	/**
-	 * @var string $provider_service_name Formal name of the provider, i.e AI Vision, NLU, Rekongnition.
-	 */
-	public $provider_service_name;
-
-	/**
 	 * Feature instance.
 	 *
 	 * @var \Classifai\Features\Feature
 	 */
 	protected $feature_instance = null;
-
-	/**
-	 * @var array $features Array of features provided by this provider.
-	 */
-	protected $features = array();
-
-
-	/**
-	 * Provides the provider name.
-	 *
-	 * @return string
-	 */
-	public function get_provider_name(): string {
-		return $this->provider_name;
-	}
-
-	/**
-	 * Get provider features.
-	 *
-	 * @return array
-	 */
-	public function get_features(): array {
-		return $this->features;
-	}
-
-	/**
-	 * Default settings for Provider.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings(): array {
-		return [];
-	}
-
-	/**
-	 * Common entry point for all REST endpoints for this provider.
-	 *
-	 * @param mixed  $item The item we're processing.
-	 * @param string $route_to_call The name of the route we're going to be processing.
-	 * @param array  $args Optional arguments to pass to the route.
-	 * @return mixed
-	 */
-	public function rest_endpoint_callback( $item, string $route_to_call, array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		return null;
-	}
 
 	/**
 	 * Format the result of most recent request.
