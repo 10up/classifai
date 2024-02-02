@@ -4,6 +4,7 @@ namespace Classifai\Command;
 
 use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Features\Classification;
+use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\ImageCropping;
 use Classifai\Features\TextToSpeech;
@@ -788,8 +789,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$attachment_ids = $this->get_attachment_to_classify( $opts );
 		}
 
-		$total      = count( $attachment_ids );
-		$classifier = new ComputerVision( false );
+		$total = count( $attachment_ids );
 
 		if ( empty( $total ) ) {
 			return \WP_CLI::log( 'No images to classify.' );
@@ -812,8 +812,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			$current_meta = wp_get_attachment_metadata( $attachment_id );
 			\WP_CLI::line( 'Processing ' . $attachment_id );
-			$classifier->generate_image_alt_tags( $current_meta, $attachment_id );
-			$classifier->smart_crop_image( $current_meta, $attachment_id );
+			$feature = new DescriptiveTextGenerator();
+			$result  = $feature->run( $attachment_id, 'descriptive_text' );
+			$feature->save( $result, $attachment_id );
+
+			$feature = new ImageCropping();
+			$result  = $feature->run( $attachment_id, 'crop' );
+			$feature->save( $result, $attachment_id );
 		}
 
 		$progress_bar->finish();
