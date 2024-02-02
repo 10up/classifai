@@ -42,12 +42,6 @@ class NLU extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance (Optional, only required in admin).
 	 */
 	public function __construct( $feature = null ) {
-		parent::__construct(
-			'IBM Watson',
-			'Natural Language Understanding',
-			'watson_nlu'
-		);
-
 		$this->nlu_features = [
 			'category' => [
 				'feature'           => __( 'Category', 'classifai' ),

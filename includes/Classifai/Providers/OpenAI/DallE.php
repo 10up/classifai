@@ -37,12 +37,6 @@ class DallE extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'OpenAI',
-			'DALL·E',
-			'openai_dalle'
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 

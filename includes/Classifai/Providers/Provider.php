@@ -36,18 +36,6 @@ abstract class Provider {
 	 */
 	protected $features = array();
 
-	/**
-	 * Provider constructor.
-	 *
-	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
-	 * @param string $provider_service_name The name of the Service.
-	 * @param string $option_name           Name of the option where the provider settings are stored.
-	 */
-	public function __construct( string $provider_name, string $provider_service_name, string $option_name ) {
-		$this->provider_name         = $provider_name;
-		$this->provider_service_name = $provider_service_name;
-		$this->option_name           = $option_name;
-	}
 
 	/**
 	 * Provides the provider name.
@@ -56,15 +44,6 @@ abstract class Provider {
 	 */
 	public function get_provider_name(): string {
 		return $this->provider_name;
-	}
-
-	/**
-	 * Returns the name of the settings section for this provider.
-	 *
-	 * @return string
-	 */
-	public function get_settings_section(): string {
-		return $this->option_name;
 	}
 
 	/**

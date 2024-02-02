@@ -48,13 +48,6 @@ class Embeddings extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'OpenAI Embeddings',
-			'Embeddings',
-			'openai_embeddings',
-			$feature_instance
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 

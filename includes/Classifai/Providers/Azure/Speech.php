@@ -44,12 +44,6 @@ class Speech extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			self::FEATURE_NAME,
-			'azure_text_to_speech'
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		do_action( 'classifai_' . static::ID . '_init', $this );

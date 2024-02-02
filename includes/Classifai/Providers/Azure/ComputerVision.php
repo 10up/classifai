@@ -33,12 +33,6 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			'AI Vision',
-			'computer_vision'
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 

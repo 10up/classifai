@@ -62,12 +62,6 @@ class Whisper extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'OpenAI Whisper',
-			'Whisper',
-			'openai_whisper'
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 
