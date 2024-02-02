@@ -447,11 +447,11 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'system',
-						'content' => $prompt,
+						'content' => 'You will be provided with a content delimited by triple quotes. ' . $prompt,
 					],
 					[
 						'role'    => 'user',
-						'content' => esc_html( $args['content'] ),
+						'content' => '"""' . esc_html( $args['content'] ) . '"""',
 					],
 				],
 				'temperature' => 0.9,
