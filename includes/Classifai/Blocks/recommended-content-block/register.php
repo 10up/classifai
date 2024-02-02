@@ -7,6 +7,7 @@
 
 namespace Classifai\Blocks\RecommendedContentBlock;
 
+use Classifai\Features\RecommendedContent;
 use Classifai\Providers\Azure\Personalizer;
 use function Classifai\get_asset_info;
 
@@ -18,7 +19,6 @@ function register() {
 		return __NAMESPACE__ . "\\$function_name";
 	};
 
-	$personalizer = new Personalizer( false );
 	wp_register_script(
 		'recommended-content-block-editor-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block.js',
@@ -31,7 +31,7 @@ function register() {
 		'recommended-content-block-editor-script',
 		sprintf(
 			'var hasRecommendedContentAccess = %d;',
-			$personalizer->is_feature_enabled( 'recommended_content' )
+			( new RecommendedContent() )->is_feature_enabled()
 		),
 		'before'
 	);
