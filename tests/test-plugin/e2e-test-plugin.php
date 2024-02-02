@@ -25,7 +25,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
-		$body_json = isset( $parsed_args['body'] ) ? wp_unslash( $parsed_args['body'] ) : false;
+		$body_json = $parsed_args['body'] ?? false;
 
 		if ( $body_json ) {
 			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
@@ -38,7 +38,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-excerpt-prompt.json' );
 			} else if ( 'This is a custom title prompt' === $prompt ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
-			} else if ( 'This is a custom shrink prompt' === $prompt || 'This is a custom grow prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom shrink prompt' ) || str_contains( $prompt, 'This is a custom grow prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
 			}
 		}
