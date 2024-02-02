@@ -705,7 +705,7 @@ class ComputerVision extends Provider {
 
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
-		if ( ! $metadata ) {
+		if ( ! $metadata || ! is_array( $metadata ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
 		}
 

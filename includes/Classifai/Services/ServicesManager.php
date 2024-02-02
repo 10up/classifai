@@ -72,6 +72,7 @@ class ServicesManager {
 			'\Classifai\Features\ContentResizing',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
+			'\Classifai\Features\Moderation',
 		];
 	}
 
