@@ -10,6 +10,8 @@ use Classifai\Features\ImageTagsGenerator;
 use Classifai\Features\ImageTextExtraction;
 use Classifai\Features\PDFTextExtraction;
 use Classifai\Features\TextToSpeech;
+use Classifai\Features\Moderation;
+
 use function Classifai\attachment_is_pdf;
 
 /**
@@ -58,6 +60,7 @@ class BulkActions {
 			new Classification(),
 			new ExcerptGeneration(),
 			new TextToSpeech(),
+			new Moderation(),
 		];
 
 		foreach ( $this->language_processing_features as $feature ) {
@@ -66,6 +69,14 @@ class BulkActions {
 			}
 
 			$settings = $feature->get_settings();
+
+			if (
+				Moderation::ID === $feature::ID &&
+				in_array( 'comments', $feature->get_moderation_content_settings(), true )
+			) {
+				add_filter( 'bulk_actions-edit-comments', [ $this, 'register_bulk_actions_comments' ] );
+				add_filter( 'handle_bulk_actions-edit-comments', [ $this, 'bulk_action_handler_comments' ], 10, 3 );
+			}
 
 			if ( ! isset( $settings['post_types'] ) ) {
 				continue;
@@ -181,6 +192,80 @@ class BulkActions {
 
 		$redirect_to = remove_query_arg( $args_to_remove, $redirect_to );
 		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $post_ids ), $redirect_to );
+
+		return esc_url_raw( $redirect_to );
+	}
+
+	/**
+	 * Register comment bulk actions.
+	 *
+	 * @param array $bulk_actions Current bulk actions.
+	 * @return array
+	 */
+	public function register_bulk_actions_comments( array $bulk_actions ): array {
+		foreach ( $this->language_processing_features as $feature ) {
+			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
+
+			switch ( $feature::ID ) {
+				case Moderation::ID:
+					$bulk_actions[ $feature::ID ] = esc_html__( 'Moderate', 'classifai' );
+					break;
+			}
+		}
+
+		return $bulk_actions;
+	}
+
+	/**
+	 * Handle comment bulk actions.
+	 *
+	 * @param string $redirect_to Redirect URL after bulk actions.
+	 * @param string $doaction    Action ID.
+	 * @param array  $comment_ids Comment ids to apply bulk actions to.
+	 * @return string
+	 */
+	public function bulk_action_handler_comments( string $redirect_to, string $doaction, array $comment_ids ): string {
+		$feature_ids = array_map(
+			function ( $feature ) {
+				return $feature::ID;
+			},
+			$this->language_processing_features
+		);
+
+		if (
+			empty( $comment_ids ) ||
+			! in_array( $doaction, $feature_ids, true )
+		) {
+			return $redirect_to;
+		}
+
+		foreach ( $comment_ids as $comment_id ) {
+			switch ( $doaction ) {
+				case Moderation::ID:
+					$moderation_feature = new Moderation();
+
+					$result = $moderation_feature->run( $comment_id, 'comment' );
+					if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
+						$moderation_feature->save_comment( $result, $comment_id );
+					}
+
+					$action = $doaction;
+
+					break;
+			}
+		}
+
+		$args_to_remove = array_map(
+			function ( $feature ) {
+				return "bulk_{$feature}";
+			},
+			$feature_ids
+		);
+
+		$redirect_to = remove_query_arg( $args_to_remove, $redirect_to );
+		$redirect_to = add_query_arg( rawurlencode( "bulk_{$action}" ), count( $comment_ids ), $redirect_to );
 
 		return esc_url_raw( $redirect_to );
 	}
@@ -516,6 +601,10 @@ class BulkActions {
 
 			case Classification::ID:
 				$action_text = __( 'Classification done for', 'classifai' );
+				break;
+
+			case Moderation::ID:
+				$action_text = __( 'Moderation done for', 'classifai' );
 				break;
 		}
 

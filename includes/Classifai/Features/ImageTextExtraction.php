@@ -301,6 +301,8 @@ class ImageTextExtraction extends Feature {
 			$result = $this->run( $attachment_id, 'ocr' );
 
 			if ( $result && ! is_wp_error( $result ) ) {
+				// Ensure we don't re-run this when the attachment is updated.
+				remove_action( 'edit_attachment', [ $this, 'maybe_rescan_image' ] );
 				$this->save( $result, $attachment_id );
 			}
 		}

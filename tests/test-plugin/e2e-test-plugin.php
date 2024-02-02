@@ -42,6 +42,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
 			}
 		}
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/moderations' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/moderation.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false ) {

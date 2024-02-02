@@ -211,6 +211,9 @@ class PDFTextExtraction extends Feature {
 	 * @param int    $attachment_id The attachment ID.
 	 */
 	public function save( string $result, int $attachment_id ) {
+		// Ensure we don't re-run this when the attachment is updated.
+		remove_action( 'edit_attachment', [ $this, 'maybe_rescan_pdf' ] );
+
 		return wp_update_post(
 			[
 				'ID'           => $attachment_id,

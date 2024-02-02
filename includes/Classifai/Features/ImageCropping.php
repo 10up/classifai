@@ -295,10 +295,8 @@ class ImageCropping extends Feature {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function maybe_crop_image( int $attachment_id ) {
-		$metadata = wp_get_attachment_metadata( $attachment_id );
-
 		if ( clean_input( 'rescan-smart-crop' ) ) {
-			$result = $this->run( $attachment_id, 'crop', $metadata );
+			$result = $this->run( $attachment_id, 'crop' );
 
 			if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
 				$meta = $this->save( $result, $attachment_id );
