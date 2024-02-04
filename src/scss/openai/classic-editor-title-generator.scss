@@ -81,6 +81,11 @@
 		padding: 1rem;
 		padding-bottom: 1.5rem;
 		gap: 1rem;
+
+		& .error {
+			color: #dc3232;
+			font-size: 1rem;
+		}
 	}
 
 	&__close-modal-button {
