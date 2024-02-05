@@ -178,7 +178,6 @@ abstract class Feature {
 	protected function get_default_settings(): array {
 		$shared_defaults   = [
 			'status'             => '0',
-			'role_based_access'  => '1',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
 			'user_based_access'  => 'no',
 			'users'              => [],
@@ -221,12 +220,6 @@ abstract class Feature {
 		// Sanitize the shared settings.
 		$new_settings['status']   = $settings['status'] ?? $current_settings['status'];
 		$new_settings['provider'] = isset( $settings['provider'] ) ? sanitize_text_field( $settings['provider'] ) : $current_settings['provider'];
-
-		if ( empty( $settings['role_based_access'] ) || 1 !== (int) $settings['role_based_access'] ) {
-			$new_settings['role_based_access'] = 'no';
-		} else {
-			$new_settings['role_based_access'] = '1';
-		}
 
 		// Allowed roles.
 		if ( isset( $settings['roles'] ) && is_array( $settings['roles'] ) ) {
@@ -449,27 +442,6 @@ abstract class Feature {
 		$settings = $this->get_settings();
 
 		add_settings_field(
-			'role_based_access',
-			esc_html__( 'Enable role-based access', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'role_based_access',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['role_based_access'],
-				'description'   => __( 'Enables ability to select which roles can access this feature.', 'classifai' ),
-				'class'         => 'classifai-role-based-access',
-			]
-		);
-
-		// Add hidden class if role-based access is disabled.
-		$class = 'allowed_roles_row';
-		if ( ! isset( $settings['role_based_access'] ) || '1' !== $settings['role_based_access'] ) {
-			$class .= ' hidden';
-		}
-
-		add_settings_field(
 			'roles',
 			esc_html__( 'Allowed roles', 'classifai' ),
 			[ $this, 'render_checkbox_group' ],
@@ -480,7 +452,7 @@ abstract class Feature {
 				'options'        => $this->roles,
 				'default_values' => $settings['roles'],
 				'description'    => __( 'Choose which roles are allowed to access this feature.', 'classifai' ),
-				'class'          => $class,
+				'class'          => 'allowed_roles_row',
 			]
 		);
 
@@ -930,21 +902,18 @@ abstract class Feature {
 		$feature_roles = $settings['roles'] ?? [];
 		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
 
-		$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
 		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
 		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
 		/*
-		 * Checks if Role-based access is enabled and user role has access to the feature.
+		 * Checks if the user role has access to the feature.
 		 */
-		if ( $role_based_access_enabled ) {
-			// For super admins that don't have a specific role on a site, treat them as admins.
-			if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
-				$user_roles = [ 'administrator' ];
-			}
-
-			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
+		// For super admins that don't have a specific role on a site, treat them as admins.
+		if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
+			$user_roles = [ 'administrator' ];
 		}
+
+		$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
 
 		/*
 		 * Checks if User-based access is enabled and user has access to the feature.
@@ -1160,7 +1129,6 @@ abstract class Feature {
 		$common_debug_info = [
 			__( 'Authenticated', 'classifai' )          => self::get_debug_value_text( $this->is_configured() ),
 			__( 'Status', 'classifai' )                 => self::get_debug_value_text( $feature_settings['status'], 1 ),
-			__( 'Role-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['role_based_access'], 1 ),
 			__( 'Allowed roles (titles)', 'classifai' ) => implode( ', ', $roles ?? [] ),
 			__( 'User-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['user_based_access'], 1 ),
 			__( 'Allowed users (titles)', 'classifai' ) => implode( ', ', $feature_settings['users'] ?? [] ),

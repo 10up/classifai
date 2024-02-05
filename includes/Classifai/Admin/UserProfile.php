@@ -147,7 +147,6 @@ class UserProfile {
 					continue;
 				}
 
-				$role_based_access_enabled  = isset( $settings['role_based_access'] ) && 1 === (int) $settings['role_based_access'];
 				$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
 				$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
@@ -158,19 +157,17 @@ class UserProfile {
 
 				// Check if user has access to the feature by role.
 				$allowed_roles = $settings['roles'] ?? [];
-				if ( $role_based_access_enabled ) {
-					// For super admins that don't have a specific role on a site, treat them as admins.
-					if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
-						$user_roles = [ 'administrator' ];
-					}
+				// For super admins that don't have a specific role on a site, treat them as admins.
+				if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
+					$user_roles = [ 'administrator' ];
+				}
 
-					if (
-						! empty( $allowed_roles ) &&
-						! empty( array_intersect( $user_roles, $allowed_roles ) )
-					) {
-						$allowed_features[ $feature_class::ID ] = $feature_class->get_label();
-						continue;
-					}
+				if (
+					! empty( $allowed_roles ) &&
+					! empty( array_intersect( $user_roles, $allowed_roles ) )
+				) {
+					$allowed_features[ $feature_class::ID ] = $feature_class->get_label();
+					continue;
 				}
 
 				// Check if user has access to the feature.
