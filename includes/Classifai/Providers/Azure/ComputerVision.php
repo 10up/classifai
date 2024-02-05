@@ -33,20 +33,7 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			'AI Vision',
-			'computer_vision'
-		);
-
 		$this->feature_instance = $feature_instance;
-	}
-
-	/**
-	 * Resets settings for the ComputerVision provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
 
 	/**
@@ -664,11 +651,6 @@ class ComputerVision extends Provider {
 
 		return $endpoint;
 	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {}
 
 	/**
 	 * Authenticates our credentials.

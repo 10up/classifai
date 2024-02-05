@@ -37,12 +37,6 @@ class Personalizer extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			'AI Personalizer',
-			'personalizer'
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
@@ -161,13 +155,13 @@ class Personalizer extends Provider {
 		}
 
 		if ( ! empty( $settings_errors ) ) {
-			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->feature_instance->get_option_name() ), 'code' );
 
 			foreach ( $settings_errors as $code => $message ) {
 
 				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
 					add_settings_error(
-						$this->get_option_name(),
+						$this->feature_instance->get_option_name(),
 						$code,
 						esc_html( $message ),
 						'error'

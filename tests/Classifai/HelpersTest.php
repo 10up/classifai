@@ -42,14 +42,6 @@ class HelpersTest extends \WP_UnitTestCase {
 		$this->assertInstanceOf( '\Classifai\Plugin', $actual );
 	}
 
-	function test_it_has_plugin_settings() {
-		$this->markTestSkipped();
-		update_option( 'classifai_settings', [ 'post_types' => [ 'foo' ] ] );
-
-		$actual = get_plugin_settings();
-		$this->assertEquals( [ 'foo' ], $actual['post_types'] );
-	}
-
 	function test_it_has_default_supported_post_types() {
 		$actual = get_supported_post_types();
 		$this->assertEquals( ['post'], $actual );

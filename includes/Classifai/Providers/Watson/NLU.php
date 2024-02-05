@@ -42,12 +42,6 @@ class NLU extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance (Optional, only required in admin).
 	 */
 	public function __construct( $feature = null ) {
-		parent::__construct(
-			'IBM Watson',
-			'Natural Language Understanding',
-			'watson_nlu'
-		);
-
 		$this->nlu_features = [
 			'category' => [
 				'feature'           => __( 'Category', 'classifai' ),
@@ -354,14 +348,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Resets the settings for the NLU provider.
-	 */
-	public function reset_settings() {
-		$settings = $this->get_default_settings() ?? [];
-		update_option( $this->get_option_name(), $settings );
-	}
-
-	/**
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
@@ -443,55 +429,6 @@ class NLU extends Provider {
 			array(),
 			get_asset_info( 'language-processing', 'version' ),
 			'all'
-		);
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		// Add the settings section.
-		add_settings_section(
-			$this->get_option_name(),
-			$this->provider_service_name,
-			function () {
-				printf(
-					wp_kses(
-						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
-						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
-					),
-					esc_url( 'https://cloud.ibm.com/registration' ),
-					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
-				);
-
-				$credentials = $this->get_settings( 'credentials' );
-				$watson_url  = $credentials['watson_url'] ?? '';
-
-				if ( ! empty( $watson_url ) && strpos( $watson_url, 'watsonplatform.net' ) !== false ) {
-					echo '<div class="notice notice-error"><p><strong>';
-						printf(
-							wp_kses(
-								/* translators: %s is the link to the IBM Watson documentation */
-								__( 'The `watsonplatform.net` endpoint URLs were retired on 26 May 2021. Please update the endpoint url. Check <a title="Deprecated Endpoint: watsonplatform.net" href="%s">here</a> for details.', 'classifai' ),
-								[
-									'a' => [
-										'href'  => [],
-										'title' => [],
-									],
-								]
-							),
-							esc_url( 'https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change' )
-						);
-					echo '</strong></p></div>';
-				}
-			},
-			$this->get_option_name()
 		);
 	}
 

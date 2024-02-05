@@ -15,145 +15,11 @@ abstract class Provider {
 	const ID = '';
 
 	/**
-	 * @var string The display name for the provider, i.e. Azure
-	 */
-	public $provider_name;
-
-	/**
-	 * @var string $provider_service_name Formal name of the provider, i.e AI Vision, NLU, Rekongnition.
-	 */
-	public $provider_service_name;
-
-	/**
-	 * @var string $option_name Name of the option where the provider settings are stored.
-	 */
-	protected $option_name;
-
-	/**
-	 * @var string $service The name of the service this provider belongs to.
-	 */
-	protected $service;
-
-	/**
 	 * Feature instance.
 	 *
 	 * @var \Classifai\Features\Feature
 	 */
 	protected $feature_instance = null;
-
-	/**
-	 * @var array $features Array of features provided by this provider.
-	 */
-	protected $features = array();
-
-	/**
-	 * Provider constructor.
-	 *
-	 * @param string $provider_name         The name of the Provider that will appear in the admin tab
-	 * @param string $provider_service_name The name of the Service.
-	 * @param string $option_name           Name of the option where the provider settings are stored.
-	 */
-	public function __construct( string $provider_name, string $provider_service_name, string $option_name ) {
-		$this->provider_name         = $provider_name;
-		$this->provider_service_name = $provider_service_name;
-		$this->option_name           = $option_name;
-	}
-
-	/**
-	 * Provides the provider name.
-	 *
-	 * @return string
-	 */
-	public function get_provider_name(): string {
-		return $this->provider_name;
-	}
-
-	/**
-	 * Returns the name of the settings section for this provider.
-	 *
-	 * @return string
-	 */
-	public function get_settings_section(): string {
-		return $this->option_name;
-	}
-
-	/**
-	 * Get the option name.
-	 *
-	 * @return string
-	 */
-	public function get_option_name(): string {
-		return 'classifai_' . $this->option_name;
-	}
-
-	/**
-	 * Get provider features.
-	 *
-	 * @return array
-	 */
-	public function get_features(): array {
-		return $this->features;
-	}
-
-	/**
-	 * Can the Provider be initialized?
-	 *
-	 * @return bool
-	 */
-	public function can_register(): bool {
-		return $this->is_configured();
-	}
-
-	/**
-	 * Register the functionality for the Provider.
-	 */
-	abstract public function register();
-
-	/**
-	 * Initialization routine
-	 */
-	public function register_admin() {
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
-	}
-
-	/**
-	 * Helper to get the settings and allow for settings default values.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 * @return string|array|mixed
-	 */
-	public function get_settings( $index = false ) {
-		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
-		$settings = wp_parse_args( $settings, $defaults );
-
-		if ( $index && isset( $settings[ $index ] ) ) {
-			return $settings[ $index ];
-		}
-
-		return $settings;
-	}
-
-	/**
-	 * Default settings for Provider.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings(): array {
-		return [];
-	}
-
-	/**
-	 * Common entry point for all REST endpoints for this provider.
-	 *
-	 * @param mixed  $item The item we're processing.
-	 * @param string $route_to_call The name of the route we're going to be processing.
-	 * @param array  $args Optional arguments to pass to the route.
-	 * @return mixed
-	 */
-	public function rest_endpoint_callback( $item, string $route_to_call, array $args = [] ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		return null;
-	}
 
 	/**
 	 * Format the result of most recent request.
@@ -171,22 +37,6 @@ abstract class Provider {
 		}
 
 		return preg_replace( '/,"/', ', "', wp_json_encode( $data ) );
-	}
-
-	/**
-	 * Returns whether the provider is configured or not.
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		$settings = $this->get_settings();
-
-		$is_configured = false;
-		if ( ! empty( $settings ) && ! empty( $settings['authenticated'] ) ) {
-			$is_configured = true;
-		}
-
-		return $is_configured;
 	}
 
 	/**
