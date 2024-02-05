@@ -12,8 +12,6 @@ use Classifai\Providers\Watson\APIRequest;
 use Classifai\Providers\Watson\Classifier;
 use Classifai\Normalizer;
 use Classifai\Providers\Watson\PostClassifier;
-use Classifai\Providers\Azure\ComputerVision;
-use Classifai\Providers\Azure\SmartCropping;
 use Classifai\Providers\OpenAI\Embeddings;
 
 use function Classifai\Providers\Watson\get_username;
@@ -804,21 +802,26 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$message = "Classifying $limit_total images ...";
 
 		$progress_bar = \WP_CLI\Utils\make_progress_bar( $message, $limit_total );
+		$text_feature = new DescriptiveTextGenerator();
+		$crop_feature = new ImageCropping();
 
 		for ( $index = 0; $index < $limit_total; $index++ ) {
 			$attachment_id = $attachment_ids[ $index ];
 
 			$progress_bar->tick();
 
-			$current_meta = wp_get_attachment_metadata( $attachment_id );
 			\WP_CLI::line( 'Processing ' . $attachment_id );
-			$feature = new DescriptiveTextGenerator();
-			$result  = $feature->run( $attachment_id, 'descriptive_text' );
-			$feature->save( $result, $attachment_id );
 
-			$feature = new ImageCropping();
-			$result  = $feature->run( $attachment_id, 'crop' );
-			$feature->save( $result, $attachment_id );
+			$text_result = $text_feature->run( $attachment_id, 'descriptive_text' );
+			if ( $text_result && ! is_wp_error( $text_result ) ) {
+				$text_feature->save( $text_result, $attachment_id );
+			}
+
+			$crop_result = $crop_feature->run( $attachment_id, 'crop' );
+			if ( ! empty( $crop_result ) && ! is_wp_error( $crop_result ) ) {
+				$meta = $crop_feature->save( $crop_result, $attachment_id );
+				wp_update_attachment_metadata( $attachment_id, $meta );
+			}
 		}
 
 		$progress_bar->finish();
@@ -888,28 +891,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 			$progress_bar->tick();
 
-			$current_meta = wp_get_attachment_metadata( $attachment_id );
-
-			foreach ( $current_meta['sizes'] as $size => $size_data ) {
-				switch ( $provider_class::ID ) {
-					case ComputerVision::ID:
-						$smart_cropping = new SmartCropping( $settings );
-
-						if ( ! $smart_cropping->should_crop( $size ) ) {
-							break;
-						}
-
-						$data = [
-							'width'  => $size_data['width'],
-							'height' => $size_data['height'],
-						];
-
-						$smart_thumbnail = $smart_cropping->get_cropped_thumbnail( $attachment_id, $data );
-						if ( is_wp_error( $smart_thumbnail ) ) {
-							$errors[ $attachment_id . ':' . $size_data['width'] . 'x' . $size_data['height'] ] = $smart_thumbnail;
-						}
-						break;
-				}
+			$crop_result = $image_cropping->run( $attachment_id, 'crop' );
+			if ( ! empty( $crop_result ) && ! is_wp_error( $crop_result ) ) {
+				$meta = $image_cropping->save( $crop_result, $attachment_id );
+				wp_update_attachment_metadata( $attachment_id, $meta );
+			} else {
+				$errors[ $attachment_id ] = $crop_result;
 			}
 		}
 
