@@ -72,9 +72,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 			$defaults,
 			[
 				'status' => '0',
-				'role_based_access'  => '1',
 				'roles' => [],
-				'user_based_access' => 'no',
 				'users' => [],
 				'user_based_opt_out' => 'no',
 				'descriptive_text_fields' => [

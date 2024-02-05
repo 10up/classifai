@@ -223,8 +223,8 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing'
 		);
 
-		// Disable user-based access.
-		cy.get( '#user_based_access' ).uncheck();
+		// Disable access for all users.
+		cy.disableFeatureForUsers();
 
 		cy.get( '#submit' ).click();
 
