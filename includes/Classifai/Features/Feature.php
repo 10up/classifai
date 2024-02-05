@@ -179,7 +179,6 @@ abstract class Feature {
 		$shared_defaults   = [
 			'status'             => '0',
 			'roles'              => array_combine( array_keys( $this->roles ), array_keys( $this->roles ) ),
-			'user_based_access'  => 'no',
 			'users'              => [],
 			'user_based_opt_out' => 'no',
 		];
@@ -226,12 +225,6 @@ abstract class Feature {
 			$new_settings['roles'] = array_map( 'sanitize_text_field', $settings['roles'] );
 		} else {
 			$new_settings['roles'] = $current_settings['roles'];
-		}
-
-		if ( empty( $settings['user_based_access'] ) || 1 !== (int) $settings['user_based_access'] ) {
-			$new_settings['user_based_access'] = 'no';
-		} else {
-			$new_settings['user_based_access'] = '1';
 		}
 
 		// Allowed users.
@@ -457,27 +450,6 @@ abstract class Feature {
 		);
 
 		add_settings_field(
-			'user_based_access',
-			esc_html__( 'Enable user-based access', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'user_based_access',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['user_based_access'],
-				'description'   => __( 'Enables ability to select which users can access this feature.', 'classifai' ),
-				'class'         => 'classifai-user-based-access',
-			]
-		);
-
-		// Add hidden class if user-based access is disabled.
-		$users_class = 'allowed_users_row';
-		if ( ! isset( $settings['user_based_access'] ) || '1' !== $settings['user_based_access'] ) {
-			$users_class .= ' hidden';
-		}
-
-		add_settings_field(
 			'users',
 			esc_html__( 'Allowed users', 'classifai' ),
 			[ $this, 'render_allowed_users' ],
@@ -487,7 +459,7 @@ abstract class Feature {
 				'label_for'     => 'users',
 				'default_value' => $settings['users'],
 				'description'   => __( 'Users who have access to this feature.', 'classifai' ),
-				'class'         => $users_class,
+				'class'         => 'allowed_users_row',
 			]
 		);
 
@@ -902,7 +874,6 @@ abstract class Feature {
 		$feature_roles = $settings['roles'] ?? [];
 		$feature_users = array_map( 'absint', $settings['users'] ?? [] );
 
-		$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
 		$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
 		/*
@@ -916,9 +887,9 @@ abstract class Feature {
 		$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
 
 		/*
-		 * Checks if User-based access is enabled and user has access to the feature.
+		 * Checks if has access to the feature.
 		 */
-		if ( ! $access && $user_based_access_enabled ) {
+		if ( ! $access ) {
 			$access = ( ! empty( $feature_users ) && ! empty( in_array( $user_id, $feature_users, true ) ) );
 		}
 
@@ -1130,7 +1101,6 @@ abstract class Feature {
 			__( 'Authenticated', 'classifai' )          => self::get_debug_value_text( $this->is_configured() ),
 			__( 'Status', 'classifai' )                 => self::get_debug_value_text( $feature_settings['status'], 1 ),
 			__( 'Allowed roles (titles)', 'classifai' ) => implode( ', ', $roles ?? [] ),
-			__( 'User-based access', 'classifai' )      => self::get_debug_value_text( $feature_settings['user_based_access'], 1 ),
 			__( 'Allowed users (titles)', 'classifai' ) => implode( ', ', $feature_settings['users'] ?? [] ),
 			__( 'User based opt-out', 'classifai' )     => self::get_debug_value_text( $feature_settings['user_based_opt_out'], 1 ),
 			__( 'Provider', 'classifai' )               => $feature_settings['provider'],

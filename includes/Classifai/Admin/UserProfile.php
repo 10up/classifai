@@ -147,7 +147,6 @@ class UserProfile {
 					continue;
 				}
 
-				$user_based_access_enabled  = isset( $settings['user_based_access'] ) && 1 === (int) $settings['user_based_access'];
 				$user_based_opt_out_enabled = isset( $settings['user_based_opt_out'] ) && 1 === (int) $settings['user_based_opt_out'];
 
 				// Bail if user opt-out is not enabled.
@@ -173,7 +172,6 @@ class UserProfile {
 				// Check if user has access to the feature.
 				$allowed_users = $settings['users'] ?? [];
 				if (
-					$user_based_access_enabled &&
 					! empty( $allowed_users ) &&
 					in_array( $user_id, $allowed_users, true )
 				) {
