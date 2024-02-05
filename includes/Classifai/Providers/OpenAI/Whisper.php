@@ -175,7 +175,7 @@ class Whisper extends Provider {
 	 * @return WP_Error|bool
 	 */
 	public function transcribe_audio( int $attachment_id = 0, array $args = [] ) {
-		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) ) {
+		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
 

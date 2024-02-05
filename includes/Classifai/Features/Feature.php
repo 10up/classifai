@@ -901,6 +901,10 @@ abstract class Feature {
 			$access             = ( ! in_array( static::ID, $opted_out_features, true ) );
 		}
 
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			$access = true;
+		}
+
 		/**
 		 * Filter to override user access to a ClassifAI feature.
 		 *
