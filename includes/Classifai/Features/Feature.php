@@ -938,6 +938,11 @@ abstract class Feature {
 		 * Checks if Role-based access is enabled and user role has access to the feature.
 		 */
 		if ( $role_based_access_enabled ) {
+			// For super admins that don't have a specific role on a site, treat them as admins.
+			if ( is_multisite() && is_super_admin( $user_id ) && empty( $user_roles ) ) {
+				$user_roles = [ 'administrator' ];
+			}
+
 			$access = ( ! empty( $feature_roles ) && ! empty( array_intersect( $user_roles, $feature_roles ) ) );
 		}
 
