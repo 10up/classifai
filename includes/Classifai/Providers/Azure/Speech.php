@@ -240,7 +240,7 @@ class Speech extends Provider {
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(
-				$this->get_option_name(),
+				$this->feature_instance->get_option_name(),
 				'azure-text-to-request-failed',
 				esc_html__( 'Azure Speech to Text: HTTP request failed.', 'classifai' ),
 				'error'
@@ -254,7 +254,7 @@ class Speech extends Provider {
 		// Return and render error if HTTP response status code is other than 200.
 		if ( WP_Http::OK !== $http_code ) {
 			add_settings_error(
-				$this->get_option_name(),
+				$this->feature_instance->get_option_name(),
 				'azure-text-to-speech-auth-failed',
 				esc_html__( 'Connection to Azure Text to Speech failed.', 'classifai' ),
 				'error'
