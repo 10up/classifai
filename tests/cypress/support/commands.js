@@ -25,6 +25,15 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
 
+const imageProcessingFeatures = [
+	'feature_descriptive_text_generator',
+	'feature_image_tags_generator',
+	'feature_image_cropping',
+	'feature_image_to_text_generator',
+	'feature_image_generation',
+	'feature_pdf_to_text_generation',
+];
+
 /**
  * Verify that the post has the expected taxonomy terms.
  *
@@ -130,10 +139,22 @@ Cypress.Commands.add( 'optInAllFeatures', () => {
  * @param {string} roles   The roles to enable.
  */
 Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
+	let tab = 'language_processing';
+	if ( imageProcessingFeatures.includes( feature ) ) {
+		tab = 'image_processing';
+	}
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
+		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
 	);
-	cy.get( `#role_based_access` ).check();
+
+	// Disable access for all roles.
+	cy.get( '.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+		multiple: true,
+	} );
+
+	// Disable access for all users.
+	cy.disableFeatureForUsers();
+
 	roles.forEach( ( role ) => {
 		cy.get( `#classifai_${ feature }_roles_${ role }` ).check();
 	} );
@@ -148,14 +169,22 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
  * @param {string} roles   The roles to disable.
  */
 Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
+	let tab = 'language_processing';
+	if ( imageProcessingFeatures.includes( feature ) ) {
+		tab = 'image_processing';
+	}
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
+		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
 	);
 	cy.get( '#status' ).check();
-	cy.get( `#role_based_access` ).check();
+
 	roles.forEach( ( role ) => {
 		cy.get( `#classifai_${ feature }_roles_${ role }` ).uncheck();
 	} );
+
+	// Disable access for all users.
+	cy.disableFeatureForUsers();
+
 	cy.get( '#submit' ).click();
 	cy.get( '.notice' ).contains( 'Settings saved.' );
 } );
@@ -167,21 +196,21 @@ Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
  * @param {string} users   The users to enable.
  */
 Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
+	let tab = 'language_processing';
+	if ( imageProcessingFeatures.includes( feature ) ) {
+		tab = 'image_processing';
+	}
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
+		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
 	);
-	cy.get( `#user_based_access` ).check();
-	cy.wait( 1000 );
-	cy.get( '.allowed_users_row' ).then( ( $body ) => {
-		if (
-			$body.find( `.components-form-token-field__remove-token` ).length >
-			0
-		) {
-			cy.get( `.components-form-token-field__remove-token` ).click( {
-				multiple: true,
-			} );
-		}
+
+	// Disable access for all roles.
+	cy.get( 'tr.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+		multiple: true,
 	} );
+
+	// Disable access for all users.
+	cy.disableFeatureForUsers();
 
 	users.forEach( ( user ) => {
 		cy.get(
@@ -195,17 +224,36 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 } );
 
 /**
+ * Disable user based access of all users for a feature.
+ */
+Cypress.Commands.add( 'disableFeatureForUsers', () => {
+	// Disable access for all users.
+	cy.get( '.allowed_users_row' ).then( ( $body ) => {
+		if (
+			$body.find( `.components-form-token-field__remove-token` ).length >
+			0
+		) {
+			cy.get( `.components-form-token-field__remove-token` ).click( {
+				multiple: true,
+			} );
+		}
+	} );
+} );
+
+/**
  * Enable user based opt-out for a feature.
  *
  * @param {string} feature The feature to enable.
  */
 Cypress.Commands.add( 'enableFeatureOptOut', ( feature ) => {
+	let tab = 'language_processing';
+	if ( imageProcessingFeatures.includes( feature ) ) {
+		tab = 'image_processing';
+	}
 	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
+		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
 	);
-	cy.get( `#role_based_access` ).check();
 	cy.get( `#classifai_${ feature }_roles_administrator` ).check();
-	cy.get( `#user_based_access` ).uncheck();
 	cy.get( `#user_based_opt_out` ).check();
 
 	cy.get( '#submit' ).click();

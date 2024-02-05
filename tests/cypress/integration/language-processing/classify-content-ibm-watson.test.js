@@ -467,7 +467,6 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
-		cy.get( '#role_based_access' ).check();
 		cy.get(
 			'#classifai_feature_classification_roles_administrator'
 		).uncheck();
@@ -482,7 +481,6 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get( '#role_based_access' ).check();
 		cy.get(
 			'#classifai_feature_classification_roles_administrator'
 		).check();
@@ -499,8 +497,15 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get( '#role_based_access' ).uncheck();
-		cy.get( '#user_based_access' ).uncheck();
+
+		// Disable access for all roles.
+		cy.get( '.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+			multiple: true,
+		} );
+
+		// Disable access for all users.
+		cy.disableFeatureForUsers();
+
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
 
@@ -511,8 +516,12 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get( '#role_based_access' ).uncheck();
-		cy.get( '#user_based_access' ).check();
+
+		// Disable access for all roles.
+		cy.get( '.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+			multiple: true,
+		} );
+
 		cy.get( 'body' ).then( ( $body ) => {
 			if (
 				$body.find(
@@ -543,8 +552,14 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get( '#role_based_access' ).check();
-		cy.get( '#user_based_access' ).uncheck();
+
+		// Enable access for all roles.
+		cy.get( '.allowed_roles_row input[type="checkbox"]' ).check( {
+			multiple: true,
+		} );
+
+		// Disable access for all users.
+		cy.disableFeatureForUsers();
 
 		cy.get( '#submit' ).click();
 		cy.get( '.notice' ).contains( 'Settings saved.' );
@@ -555,8 +570,13 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=watson_nlu'
 		);
-		cy.get( '#role_based_access' ).check();
-		cy.get( '#user_based_access' ).check();
+		// Enable access for all roles.
+		cy.get( '.allowed_roles_row input[type="checkbox"]' ).check( {
+			multiple: true,
+		} );
+
+		// Disable access for all users.
+		cy.disableFeatureForUsers();
 		cy.get( '#user_based_opt_out' ).check();
 
 		cy.get( '#submit' ).click();

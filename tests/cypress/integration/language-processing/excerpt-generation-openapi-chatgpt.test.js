@@ -27,7 +27,6 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#api_key' ).clear().type( 'password' );
 
 		cy.get( '#status' ).check();
-		cy.get( '#role_based_access' ).check();
 		cy.get(
 			'#classifai_feature_excerpt_generation_roles_administrator'
 		).check();
