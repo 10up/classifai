@@ -70,7 +70,22 @@ class Personalizer extends Provider {
 
 		<div class="notice notice-warning">
 			<p>
-				<?php esc_html_e( 'As of September 2023, new Personalizer resources can no longer be created in Azure. This is currently the only provider available for the Recommended Content feature and as such, this feature will not work unless you had previously created a Personalizer resource. The Azure AI Personalizer provider is deprecated and will be removed in a future release. We hope to replace this provider with another one in a coming release to continue to support this feature.', 'classifai' ); ?>
+				<?php
+				printf(
+					wp_kses(
+						// translators: 1 - link to Personalizer documentation; 2 - link to GitHub issue.
+						__( '<a href="%1$s" target="_blank">As of September 2023</a>, new Personalizer resources can no longer be created in Azure. This is currently the only provider available for the Recommended Content feature and as such, this feature will not work unless you had previously created a Personalizer resource. The Azure AI Personalizer provider is deprecated and will be removed in a future release. We hope to replace this provider with another one in a coming release to continue to support this feature (see <a href="%2$s" target="_blank">issue#392</a>).', 'classifai' ),
+						array(
+							'a' => array(
+								'href'   => array(),
+								'target' => array(),
+							),
+						)
+					),
+					'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/',
+					'https://github.com/10up/classifai/issues/392'
+				)
+				?>
 			</p>
 		</div>
 
@@ -97,8 +112,8 @@ class Personalizer extends Provider {
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				'description'   => sprintf(
 					wp_kses(
-						// translators: 1 - link to create a Personalizer resource.
-						__( 'Azure AI Personalizer Endpoint; <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint. Note that as of September 2023, it is no longer possible to create this resource. Previously created Personalizer resources can still be used.', 'classifai' ),
+						// translators: 1 - link to create a Personalizer resource; 2 - link to GitHub issue.
+						__( 'Azure AI Personalizer Endpoint; <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint. Note that <a href="%2$s" target="_blank">as of September 2023</a>, it is no longer possible to create this resource. Previously created Personalizer resources can still be used.', 'classifai' ),
 						array(
 							'a' => array(
 								'href'   => array(),
@@ -106,7 +121,8 @@ class Personalizer extends Provider {
 							),
 						)
 					),
-					esc_url( 'https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer' )
+					'https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer',
+					'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/'
 				),
 			]
 		);
