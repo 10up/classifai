@@ -104,54 +104,71 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 
 			apiFetch( {
 				path,
-			} ).then( ( result ) => {
-				generateTextEl.css( 'opacity', '1' );
-				spinnerEl.hide();
-				isProcessing = false;
+			} )
+				.then( ( result ) => {
+					generateTextEl.css( 'opacity', '1' );
+					spinnerEl.hide();
+					isProcessing = false;
 
-				result.forEach( ( title ) => {
-					$( '<textarea>', {
-						text: title,
-					} )
+					result.forEach( ( title ) => {
+						$( '<textarea>', {
+							text: title,
+						} )
+							.wrap(
+								`<div class="classifai-openai__result-item" />`
+							)
+							.parent()
+							.append(
+								$( '<button />', {
+									text: scriptData.title.selectBtnText,
+									type: 'button',
+									class: 'button classifai-openai__select-title',
+								} )
+							)
+							.appendTo( '#classifai-openai__results-content' );
+					} );
+
+					// Append disable feature link.
+					if (
+						ClassifAI?.opt_out_enabled_features?.includes(
+							'feature_title_generation'
+						)
+					) {
+						$( '<a>', {
+							text: __(
+								'Disable this ClassifAI feature',
+								'classifai'
+							),
+							href: ClassifAI?.profile_url,
+							target: '_blank',
+							rel: 'noopener noreferrer',
+							class: 'classifai-disable-feature-link',
+						} )
+							.wrap(
+								`<div class="classifai-openai__result-disable-link" />`
+							)
+							.parent()
+							.appendTo( '#classifai-openai__modal' );
+					}
+
+					$( '#classifai-openai__results' )
+						.show()
+						.addClass( 'classifai-openai--fade-in' );
+				} )
+				.catch( ( error ) => {
+					generateTextEl.css( 'opacity', '1' );
+					spinnerEl.hide();
+					isProcessing = false;
+
+					$( '<span class="error">' )
+						.text( error?.message )
 						.wrap( `<div class="classifai-openai__result-item" />` )
-						.parent()
-						.append(
-							$( '<button />', {
-								text: scriptData.title.selectBtnText,
-								type: 'button',
-								class: 'button classifai-openai__select-title',
-							} )
-						)
 						.appendTo( '#classifai-openai__results-content' );
+
+					$( '#classifai-openai__results' )
+						.show()
+						.addClass( 'classifai-openai--fade-in' );
 				} );
-
-				// Append disable feature link.
-				if (
-					ClassifAI?.opt_out_enabled_features?.includes(
-						'feature_title_generation'
-					)
-				) {
-					$( '<a>', {
-						text: __(
-							'Disable this ClassifAI feature',
-							'classifai'
-						),
-						href: ClassifAI?.profile_url,
-						target: '_blank',
-						rel: 'noopener noreferrer',
-						class: 'classifai-disable-feature-link',
-					} )
-						.wrap(
-							`<div class="classifai-openai__result-disable-link" />`
-						)
-						.parent()
-						.appendTo( '#classifai-openai__modal' );
-				}
-
-				$( '#classifai-openai__results' )
-					.show()
-					.addClass( 'classifai-openai--fade-in' );
-			} );
 		};
 
 		// Event handler registration to generate the title.

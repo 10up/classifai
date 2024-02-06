@@ -37,6 +37,12 @@
 		}
 	}
 
+	.classifai-openai__excerpt-generate-error {
+		display: none;
+		color: #dc3232;
+		text-align: right;
+	}
+
 	.classifai-openai__excerpt-generate-disable-link {
 		text-align: right;
 		margin-top: 6px;
@@ -81,6 +87,11 @@
 		padding: 1rem;
 		padding-bottom: 1.5rem;
 		gap: 1rem;
+
+		& .error {
+			color: #dc3232;
+			font-size: 1rem;
+		}
 	}
 
 	&__close-modal-button {
