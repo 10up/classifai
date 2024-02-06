@@ -47,12 +47,34 @@ class Personalizer extends Provider {
 	 * Register the functionality.
 	 */
 	public function register() {
+		add_action( 'classifai_before_feature_nav', [ $this, 'show_deprecation_message' ] );
+
 		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
 			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
 			Blocks\setup();
 		}
+	}
+
+	/**
+	 * Show a deprecation message for the provider.
+	 *
+	 * @param string $active_feature Feature currently shown.
+	 */
+	public function show_deprecation_message( string $active_feature ) {
+		if ( 'feature_recommended_content' !== $active_feature ) {
+			return;
+		}
+		?>
+
+		<div class="notice notice-warning">
+			<p>
+				<?php esc_html_e( 'As of September 2023, new Personalizer resources can no longer be created in Azure. This is currently the only provider available for the Recommended Content feature and as such, this feature will not work unless you had previously created a Personalizer resource. The Azure AI Personalizer provider is deprecated and will be removed in a future release. We hope to replace this provider with another one in a coming release to continue to support this feature.', 'classifai' ); ?>
+			</p>
+		</div>
+
+		<?php
 	}
 
 	/**
@@ -76,7 +98,7 @@ class Personalizer extends Provider {
 				'description'   => sprintf(
 					wp_kses(
 						// translators: 1 - link to create a Personalizer resource.
-						__( 'Azure AI Personalizer Endpoint, <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
+						__( 'Azure AI Personalizer Endpoint; <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint. Note that as of September 2023, it is no longer possible to create this resource. Previously created Personalizer resources can still be used.', 'classifai' ),
 						array(
 							'a' => array(
 								'href'   => array(),
