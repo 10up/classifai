@@ -14,6 +14,8 @@ use Classifai\Features\Classification;
 use WP_Error;
 
 use function Classifai\get_asset_info;
+use function Classifai\Providers\Watson\get_supported_post_statuses;
+use function Classifai\Providers\Watson\get_supported_post_types;
 
 class Embeddings extends Provider {
 
@@ -48,13 +50,6 @@ class Embeddings extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'OpenAI Embeddings',
-			'Embeddings',
-			'openai_embeddings',
-			$feature_instance
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 
@@ -127,6 +122,58 @@ class Embeddings extends Provider {
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
+	}
+
+	/**
+	 * Renders the previewer window for the feature.
+	 *
+	 * @param string $active_feature The active feature.
+	 */
+	public function render_previewer( string $active_feature ) {
+		$feature  = new Classification();
+		$provider = $feature->get_feature_provider_instance();
+
+		if (
+			self::ID !== $provider::ID ||
+			$feature::ID !== $active_feature ||
+			! $feature->is_feature_enabled()
+		) {
+			return;
+		}
+		?>
+
+		<div id="classifai-post-preview-app">
+			<?php
+			$supported_post_statuses = get_supported_post_statuses();
+			$supported_post_types    = get_supported_post_types();
+
+			$posts_to_preview = get_posts(
+				array(
+					'post_type'      => $supported_post_types,
+					'post_status'    => $supported_post_statuses,
+					'posts_per_page' => 10,
+				)
+			);
+			?>
+
+			<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
+			<div id="classifai-post-preview-controls">
+				<select id="classifai-preview-post-selector">
+					<?php foreach ( $posts_to_preview as $post ) : ?>
+						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
+					<?php endforeach; ?>
+				</select>
+				<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
+				<button type="button" class="button" id="get-classifier-preview-data-btn">
+					<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
+				</button>
+			</div>
+			<div id="classifai-post-preview-wrapper">
+			</div>
+		</div>
+
+		<?php
 	}
 
 	/**
@@ -674,7 +721,7 @@ class Embeddings extends Provider {
 			return false;
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $this->get_option_name() );
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.

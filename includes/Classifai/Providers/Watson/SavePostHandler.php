@@ -26,41 +26,6 @@ class SavePostHandler {
 	}
 
 	/**
-	 * Check to see if we can register this class.
-	 *
-	 * @return bool
-	 */
-	public function can_register(): bool {
-
-		$should_register = false;
-		if ( $this->is_configured() && ( is_admin() || $this->is_rest_route() ) ) {
-			$should_register = true;
-		}
-
-		/**
-		 * Filter whether ClassifAI should register this class.
-		 *
-		 * @since 1.8.0
-		 * @hook classifai_should_register_save_post_handler
-		 *
-		 * @param  {bool} $should_register Whether the class should be registered.
-		 * @return {bool} Whether the class should be registered.
-		 */
-		$should_register = apply_filters( 'classifai_should_register_save_post_handler', $should_register );
-
-		return $should_register;
-	}
-
-	/**
-	 * Check if ClassifAI is properly configured.
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		return ! empty( get_option( 'classifai_configured' ) ) && ! empty( get_option( 'classifai_watson_nlu' )['credentials']['watson_url'] );
-	}
-
-	/**
 	 * Sets the default value for the _classifai_process_content meta key.
 	 *
 	 * @param mixed  $value     The value get_metadata() should return - a single metadata value,

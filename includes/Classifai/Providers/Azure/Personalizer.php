@@ -37,12 +37,6 @@ class Personalizer extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			'AI Personalizer',
-			'personalizer'
-		);
-
 		$this->feature_instance = $feature_instance;
 
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
@@ -140,34 +134,34 @@ class Personalizer extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->feature_instance->get_settings();
 
-		$new_settings['endpoint_url'] = esc_url_raw( $new_settings['endpoint_url'] ?? $settings['endpoint_url'] );
-		$new_settings['api_key']      = sanitize_text_field( $new_settings['api_key'] ?? $settings['api_key'] );
+		$new_settings['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
+		$new_settings['api_key']      = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
 
-		if ( ! empty( $new_settings['endpoint_url'] ) && ! empty( $new_settings['api_key'] ) ) {
-			$auth_check = $this->authenticate_credentials( $new_settings['endpoint_url'], $new_settings['api_key'] );
+		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
+			$auth_check = $this->authenticate_credentials( $new_settings[ static::ID ]['endpoint_url'], $new_settings[ static::ID ]['api_key'] );
 
 			if ( is_wp_error( $auth_check ) ) {
 				$settings_errors['classifai-registration-credentials-error'] = $auth_check->get_error_message();
-				$new_settings['authenticated']                               = false;
+				$new_settings[ static::ID ]['authenticated']                 = false;
 			} else {
-				$new_settings['authenticated'] = true;
+				$new_settings[ static::ID ]['authenticated'] = true;
 			}
 		} else {
-			$new_settings['authenticated'] = false;
-			$new_settings['endpoint_url']  = '';
-			$new_settings['api_key']       = '';
+			$new_settings[ static::ID ]['authenticated'] = false;
+			$new_settings[ static::ID ]['endpoint_url']  = '';
+			$new_settings[ static::ID ]['api_key']       = '';
 
 			$settings_errors['classifai-registration-credentials-empty'] = __( 'Please enter your credentials', 'classifai' );
 		}
 
 		if ( ! empty( $settings_errors ) ) {
-			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->get_option_name() ), 'code' );
+			$registered_settings_errors = wp_list_pluck( get_settings_errors( $this->feature_instance->get_option_name() ), 'code' );
 
 			foreach ( $settings_errors as $code => $message ) {
 
 				if ( ! in_array( $code, $registered_settings_errors, true ) ) {
 					add_settings_error(
-						$this->get_option_name(),
+						$this->feature_instance->get_option_name(),
 						$code,
 						esc_html( $message ),
 						'error'
