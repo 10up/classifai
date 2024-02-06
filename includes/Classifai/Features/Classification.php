@@ -11,6 +11,9 @@ use WP_Error;
 
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\get_post_types_for_language_settings;
+use function Classifai\check_term_permissions;
+use function Classifai\get_classification_feature_enabled;
+use function Classifai\get_classification_feature_taxonomy;
 
 /**
  * Class Classification
@@ -53,6 +56,7 @@ class Classification extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
+		// var_dump( $this->get_settings() ); die;
 	}
 
 	/**
@@ -120,11 +124,11 @@ class Classification extends Feature {
 
 		// For all enabled features, ensure the user has proper permissions to add/edit terms.
 		// foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
-		// 	if ( ! get_feature_enabled( $feature ) ) {
+		// 	if ( ! get_classification_feature_enabled( $feature ) ) {
 		// 		continue;
 		// 	}
 
-		// 	$taxonomy   = get_feature_taxonomy( $feature );
+		// 	$taxonomy   = get_classification_feature_taxonomy( $feature );
 		// 	$permission = check_term_permissions( $taxonomy );
 
 		// 	if ( is_wp_error( $permission ) ) {
@@ -190,8 +194,67 @@ class Classification extends Feature {
 	 * Add any needed custom fields.
 	 */
 	public function add_custom_settings_fields() {
-		$settings      = $this->get_settings();
-		$post_statuses = get_post_statuses_for_language_settings();
+		$settings          = $this->get_settings();
+		$provider_instance = $this->get_feature_provider_instance();
+		$nlu_features      = array();
+		$post_statuses     = get_post_statuses_for_language_settings();
+		$post_types        = get_post_types_for_language_settings();
+		$post_type_options = array();
+
+		if ( ! empty( $provider_instance->nlu_features ) ) {
+			$nlu_features = $provider_instance->nlu_features;
+		}
+
+		foreach ( $post_types as $post_type ) {
+			$post_type_options[ $post_type->name ] = $post_type->label;
+		}
+
+		add_settings_field(
+			'classification_mode',
+			esc_html__( 'Classification mode', 'classifai' ),
+			[ $this, 'render_radio_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'classification_mode',
+				'default_value' => $settings['classification_mode'],
+				'options'       => array(
+					'manual_review'            => __( 'Manual review', 'classifai' ),
+					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
+				),
+			]
+		);
+
+		add_settings_field(
+			'classification_method',
+			esc_html__( 'Classification method', 'classifai' ),
+			[ $this, 'render_radio_group' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'classification_method',
+				'default_value' => $settings['classification_method'],
+				'options'       => array(
+					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
+					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
+				),
+			]
+		);
+
+		foreach ( $nlu_features as $classify_by => $labels ) {
+			add_settings_field(
+				$classify_by,
+				esc_html( $labels['feature'] ),
+				[ $this, 'render_nlu_feature_settings' ],
+				$this->get_option_name(),
+				$this->get_option_name() . '_section',
+				[
+					'feature'       => $classify_by,
+					'labels'        => $labels,
+					'default_value' => $settings[ $classify_by ],
+				]
+			);
+		}
 
 		add_settings_field(
 			'post_statuses',
@@ -206,13 +269,6 @@ class Classification extends Feature {
 				'description'    => __( 'Choose which post statuses are allowed to use this feature.', 'classifai' ),
 			]
 		);
-
-		$post_types        = get_post_types_for_language_settings();
-		$post_type_options = array();
-
-		foreach ( $post_types as $post_type ) {
-			$post_type_options[ $post_type->name ] = $post_type->label;
-		}
 
 		add_settings_field(
 			'post_types',
@@ -236,13 +292,15 @@ class Classification extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'post_statuses' => [
+			'post_statuses'         => [
 				'publish' => 1,
 			],
-			'post_types'    => [
+			'post_types'            => [
 				'post' => 1,
 			],
-			'provider'      => NLU::ID,
+			'classification_mode'   => 'manual_review',
+			'classification_method' => 'recommended_terms',
+			'provider'              => NLU::ID,
 		];
 	}
 
@@ -253,10 +311,24 @@ class Classification extends Feature {
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings = $this->get_settings();
+		$settings          = $this->get_settings();
+		$provider_instance = $this->get_feature_provider_instance();
+
+		$new_settings['classification_mode'] = sanitize_text_field( $new_settings['classification_mode'] ?? $settings['classification_mode'] );
+
+		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['post_statuses'];
-		$new_settings['post_types']    = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['post_types'];
+
+		$new_settings['post_types'] = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['post_types'];
+
+		if ( ! empty( $provider_instance->nlu_features ) ) {
+			foreach ( $provider_instance->nlu_features as $feature_name => $feature ) {
+				$new_settings[ $feature_name ]               = absint( $new_settings[ $feature_name ] ?? $settings[ $feature_name ] );
+				$new_settings[ "{$feature_name}_threshold" ] = absint( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
+				$new_settings[ "{$feature_name}_taxonomy" ]  = sanitize_text_field( $new_settings[ "{$feature_name}_taxonomy" ] ?? $settings[ "{$feature_name}_taxonomy" ] );
+			}
+		}
 
 		return $new_settings;
 	}
@@ -359,32 +431,124 @@ class Classification extends Feature {
 	/**
 	 * Get all feature taxonomies.
 	 *
-	 * @return array|WP_Error
+	 * @return array
 	 */
-	public function get_all_feature_taxonomies() {
-		// Get all feature taxonomies.
+	public function get_all_feature_taxonomies(): array {
 		$feature_taxonomies = [];
-		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
-			if ( get_feature_enabled( $feature ) ) {
-				$taxonomy   = get_feature_taxonomy( $feature );
-				$permission = check_term_permissions( $taxonomy );
+		$provider_instance  = $this->get_feature_provider_instance();
 
-				if ( is_wp_error( $permission ) ) {
-					return $permission;
-				}
+		if ( empty( $provider_instance->nlu_features ) ) {
+			return $feature_taxonomies;
+		}
 
-				if ( 'post_tag' === $taxonomy ) {
-					$taxonomy = 'tags';
-				}
-
-				if ( 'category' === $taxonomy ) {
-					$taxonomy = 'categories';
-				}
-
-				$feature_taxonomies[] = $taxonomy;
+		foreach ( $provider_instance->nlu_features as $feature_name => $feature ) {
+			if ( ! get_classification_feature_enabled( $feature_name ) ) {
+				continue;
 			}
+
+			$taxonomy   = get_classification_feature_taxonomy( $feature_name );
+			$permission = check_term_permissions( $taxonomy );
+
+			if ( is_wp_error( $permission ) ) {
+				continue;
+			}
+
+			if ( 'post_tag' === $taxonomy ) {
+				$taxonomy = 'tags';
+			}
+
+			if ( 'category' === $taxonomy ) {
+				$taxonomy = 'categories';
+			}
+
+			$feature_taxonomies[] = $taxonomy;
 		}
 
 		return $feature_taxonomies;
+	}
+
+	/**
+	 * Render the NLU features settings.
+	 *
+	 * @param array $args Settings for the inputs
+	 */
+	public function render_nlu_feature_settings( array $args ) {
+		$feature = $args['feature'];
+		$labels  = $args['labels'];
+
+		$taxonomies = $this->get_supported_taxonomies();
+		$features   = $this->get_settings();
+		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
+
+		// Enable classification type
+		$feature_args = [
+			'label_for'  => $feature,
+			'input_type' => 'checkbox',
+		];
+
+		$threshold_args = [
+			'label_for'     => "{$feature}_threshold",
+			'input_type'    => 'number',
+			'default_value' => $labels['threshold_default'],
+		];
+		?>
+
+		<legend class="screen-reader-text">
+			<?php esc_html_e( 'Classification Taxonomy Settings', 'classifai' ); ?>
+		</legend>
+
+		<p>
+			<?php $this->render_input( $feature_args ); ?>
+			<label for="classifai-settings-<?php echo esc_attr( $feature ); ?>">
+				<?php esc_html_e( 'Enable', 'classifai' ); ?>
+			</label>
+		</p>
+
+		<p>
+			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>">
+				<?php echo esc_html( $labels['threshold'] ); ?>
+			</label><br/>
+			<?php $this->render_input( $threshold_args ); ?>
+		</p>
+
+		<p>
+			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
+			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( self::ID ); ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
+					<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?>>
+						<?php echo esc_html( $singular_name ); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Return the list of supported taxonomies
+	 *
+	 * @return array
+	 */
+	public function get_supported_taxonomies(): array {
+		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_feature_classification_setting_taxonomies
+		 *
+		 * @param {array} $supported Array of supported taxonomies.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
 	}
 }

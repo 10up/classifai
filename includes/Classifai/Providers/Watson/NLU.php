@@ -11,11 +11,8 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\Providers\Watson\PostClassifier;
 use WP_Error;
-use WP_REST_Request;
-use WP_REST_Server;
 
 use function Classifai\get_asset_info;
-use function Classifai\check_term_permissions;
 
 class NLU extends Provider {
 
@@ -32,9 +29,11 @@ class NLU extends Provider {
 	public $save_post_handler;
 
 	/**
-	 * @var $nlu_features array The list of NLU features
+	 * NLU features that are supported by this provider
+	 *
+	 * @var array
 	 */
-	protected $nlu_features = [];
+	public $nlu_features = [];
 
 	/**
 	 * Watson NLU constructor.
@@ -163,61 +162,8 @@ class NLU extends Provider {
 			]
 		);
 
-		add_settings_field(
-			static::ID . '_classification_mode',
-			esc_html__( 'Classification mode', 'classifai' ),
-			[ $this->feature_instance, 'render_radio_group' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'classification_mode',
-				'default_value' => $settings['classification_mode'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'options'       => array(
-					'manual_review'            => __( 'Manual review', 'classifai' ),
-					'automatic_classification' => __( 'Automatic classification', 'classifai' ),
-				),
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_classification_method',
-			esc_html__( 'Classification method', 'classifai' ),
-			[ $this->feature_instance, 'render_radio_group' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'classification_method',
-				'default_value' => $settings['classification_method'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'options'       => array(
-					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
-					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
-				),
-			]
-		);
-
-		foreach ( $this->nlu_features as $classify_by => $labels ) {
-			add_settings_field(
-				static::ID . '_' . $classify_by,
-				esc_html( $labels['feature'] ),
-				[ $this, 'render_nlu_feature_settings' ],
-				$this->feature_instance->get_option_name(),
-				$this->feature_instance->get_option_name() . '_section',
-				[
-					'option_index'  => static::ID,
-					'feature'       => $classify_by,
-					'labels'        => $labels,
-					'default_value' => $settings[ $classify_by ],
-					'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				]
-			);
-		}
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
+		// add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 	}
 
 	/**
@@ -304,43 +250,55 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Modify the default settings for the classification feature.
+	 *
+	 * @param array   $settings Current settings.
+	 * @param Feature $feature_instance The feature instance.
+	 * @return array
+	 */
+	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
+			return $settings;
+		}
+
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		return array_merge(
+			$settings,
+			[
+				'category'           => true,
+				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
+
+				'keyword'            => true,
+				'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+				'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+
+				'concept'            => false,
+				'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+				'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+
+				'entity'             => false,
+				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
+			]
+		);
+	}
+
+	/**
 	 * Returns the default settings for this provider.
 	 *
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
 		$common_settings = [
-			'endpoint_url'          => '',
-			'apikey'                => '',
-			'username'              => '',
-			'password'              => '',
-			'classification_mode'   => 'manual_review',
-			'classification_method' => 'recommended_terms',
+			'endpoint_url' => '',
+			'apikey'       => '',
+			'username'     => '',
+			'password'     => '',
 		];
-
-		switch ( $this->feature_instance::ID ) {
-			case Classification::ID:
-				return array_merge(
-					$common_settings,
-					[
-						'category'           => true,
-						'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-						'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
-
-						'keyword'            => true,
-						'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-						'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-						'concept'            => false,
-						'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-						'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-						'entity'             => false,
-						'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-						'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-					]
-				);
-		}
 
 		return $common_settings;
 	}
@@ -349,25 +307,30 @@ class NLU extends Provider {
 	 * Register what we need for the plugin.
 	 */
 	public function register() {
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
 		$feature = new Classification();
 
-		if ( $feature->is_feature_enabled() && $feature->get_feature_provider_instance()::ID === static::ID ) {
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		if (
+			$feature->is_feature_enabled() &&
+			$feature->get_feature_provider_instance()::ID === static::ID
+		) {
+	// 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+	// 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
-			// Add classifai meta box to classic editor.
-			add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-			add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
+	// 		// Add classifai meta box to classic editor.
+	// 		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
+	// 		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
 
-			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+	// 		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 
 			$this->taxonomy_factory = new TaxonomyFactory();
 			$this->taxonomy_factory->build_all();
 
-			$this->save_post_handler = new SavePostHandler();
-			$this->save_post_handler->register();
+	// 		$this->save_post_handler = new SavePostHandler();
+	// 		$this->save_post_handler->register();
 
-			new PreviewClassifierData();
+	// 		new PreviewClassifierData();
 		}
 	}
 
@@ -447,80 +410,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Render the NLU features settings.
-	 *
-	 * @param array $args Settings for the inputs
-	 */
-	public function render_nlu_feature_settings( array $args ) {
-		$feature      = $args['feature'];
-		$labels       = $args['labels'];
-		$option_index = $args['option_index'];
-
-		$taxonomies = $this->get_supported_taxonomies();
-		$features   = $this->feature_instance->get_settings( static::ID );
-		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
-
-		// Enable classification type
-		$feature_args = [
-			'label_for'    => $feature,
-			'option_index' => $option_index,
-			'input_type'   => 'checkbox',
-		];
-
-		$threshold_args = [
-			'label_for'     => "{$feature}_threshold",
-			'option_index'  => $option_index,
-			'input_type'    => 'number',
-			'default_value' => $labels['threshold_default'],
-		];
-		?>
-
-		<fieldset>
-		<legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
-
-		<p>
-			<?php $this->feature_instance->render_input( $feature_args ); ?>
-			<label
-				for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
-		</p>
-
-		<p>
-			<label
-				for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br/>
-			<?php $this->feature_instance->render_input( $threshold_args ); ?>
-		</p>
-
-		<p>
-			<label
-				for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
-			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"
-				name="<?php echo esc_attr( $this->feature_instance->get_option_name() ); ?>[<?php echo esc_attr( self::ID ); ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
-				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-					<option
-						value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
-				<?php endforeach; ?>
-			</select>
-		</p>
-		<?php
-	}
-
-	/**
-	 * Return the list of supported taxonomies
-	 *
-	 * @return array
-	 */
-	public function get_supported_taxonomies(): array {
-		$taxonomies = \get_taxonomies( [], 'objects' );
-		$supported  = [];
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
-		}
-
-		return $supported;
-	}
-
-	/**
 	 * Helper to ensure the authentication works.
 	 *
 	 * @param array $settings The list of settings to be saved
@@ -588,28 +477,9 @@ class NLU extends Provider {
 			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		$new_settings[ static::ID ]['classification_mode']   = sanitize_text_field( $new_settings[ static::ID ]['classification_mode'] ?? $settings[ static::ID ]['classification_mode'] );
-		$new_settings[ static::ID ]['classification_method'] = sanitize_text_field( $new_settings[ static::ID ]['classification_method'] ?? $settings[ static::ID ]['classification_method'] );
-
 		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
 		$new_settings[ static::ID ]['username']     = sanitize_text_field( $new_settings[ static::ID ]['username'] ?? $settings[ static::ID ]['username'] );
 		$new_settings[ static::ID ]['password']     = sanitize_text_field( $new_settings[ static::ID ]['password'] ?? $settings[ static::ID ]['password'] );
-
-		$new_settings[ static::ID ]['category']           = absint( $new_settings[ static::ID ]['category'] ?? $settings[ static::ID ]['category'] );
-		$new_settings[ static::ID ]['category_threshold'] = absint( $new_settings[ static::ID ]['category_threshold'] ?? $settings[ static::ID ]['category_threshold'] );
-		$new_settings[ static::ID ]['category_taxonomy']  = sanitize_text_field( $new_settings[ static::ID ]['category_taxonomy'] ?? $settings[ static::ID ]['category_taxonomy'] );
-
-		$new_settings[ static::ID ]['keyword']           = absint( $new_settings[ static::ID ]['keyword'] ?? $settings[ static::ID ]['keyword'] );
-		$new_settings[ static::ID ]['keyword_threshold'] = absint( $new_settings[ static::ID ]['keyword_threshold'] ?? $settings[ static::ID ]['keyword_threshold'] );
-		$new_settings[ static::ID ]['keyword_taxonomy']  = sanitize_text_field( $new_settings[ static::ID ]['keyword_taxonomy'] ?? $settings[ static::ID ]['keyword_taxonomy'] );
-
-		$new_settings[ static::ID ]['entity']           = absint( $new_settings[ static::ID ]['entity'] ?? $settings[ static::ID ]['entity'] );
-		$new_settings[ static::ID ]['entity_threshold'] = absint( $new_settings[ static::ID ]['entity_threshold'] ?? $settings[ static::ID ]['entity_threshold'] );
-		$new_settings[ static::ID ]['entity_taxonomy']  = sanitize_text_field( $new_settings[ static::ID ]['entity_taxonomy'] ?? $settings[ static::ID ]['entity_taxonomy'] );
-
-		$new_settings[ static::ID ]['concept']           = absint( $new_settings[ static::ID ]['concept'] ?? $settings[ static::ID ]['concept'] );
-		$new_settings[ static::ID ]['concept_threshold'] = absint( $new_settings[ static::ID ]['concept_threshold'] ?? $settings[ static::ID ]['concept_threshold'] );
-		$new_settings[ static::ID ]['concept_taxonomy']  = sanitize_text_field( $new_settings[ static::ID ]['concept_taxonomy'] ?? $settings[ static::ID ]['concept_taxonomy'] );
 
 		return $new_settings;
 	}

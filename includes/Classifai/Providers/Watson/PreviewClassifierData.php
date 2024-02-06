@@ -2,6 +2,8 @@
 
 namespace Classifai\Providers\Watson;
 
+use function Classifai\get_classification_feature_taxonomy;
+
 /**
  * Handles NLU classifier preview data.
  */
@@ -87,7 +89,7 @@ class PreviewClassifierData {
 			'keyword'  => 'keywords',
 		];
 		foreach ( $features as $key => $feature ) {
-			$taxonomy = get_feature_taxonomy( $key );
+			$taxonomy = get_classification_feature_taxonomy( $key );
 			if ( ! $taxonomy ) {
 				continue;
 			}

@@ -6,7 +6,7 @@ use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
 use function Classifai\Providers\Watson\get_supported_post_types;
 use function Classifai\Providers\Watson\get_feature_threshold;
-use function Classifai\Providers\Watson\get_feature_taxonomy;
+use function Classifai\get_classification_feature_taxonomy;
 
 /**
  * @group helpers
@@ -121,7 +121,7 @@ class HelpersTest extends \WP_UnitTestCase {
 		];
 
 		foreach ( $expected as $feature => $taxonomy ) {
-			$actual = get_feature_taxonomy( $feature );
+			$actual = get_classification_feature_taxonomy( $feature );
 			$this->assertEquals( $taxonomy, $actual );
 		}
 	}
@@ -152,7 +152,7 @@ class HelpersTest extends \WP_UnitTestCase {
 		];
 
 		foreach ( $expected as $feature => $taxonomy ) {
-			$actual = get_feature_taxonomy( $feature );
+			$actual = get_classification_feature_taxonomy( $feature );
 			$this->assertEquals( $taxonomy, $actual );
 		}
 	}

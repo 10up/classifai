@@ -577,3 +577,56 @@ function get_default_prompt( array $prompts ): ?string {
 function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
 	return absint( $new_settings[ $key ] ?? $settings[ $key ] ?? '' );
 }
+
+/**
+ * Returns a bool based on whether the specified classification feature is enabled.
+ *
+ * @param string $classify_by Feature to check.
+ * @return bool
+ */
+function get_classification_feature_enabled( string $classify_by ): bool {
+	$settings = ( new Classification() )->get_settings();
+
+	return filter_var(
+		$settings[ $classify_by ],
+		FILTER_VALIDATE_BOOLEAN
+	);
+}
+
+/**
+ * Returns the Taxonomy for the specified NLU feature.
+ *
+ * Returns defaults in config.php if options have not been configured.
+ *
+ * @param string $classify_by NLU feature name.
+ * @return string
+ */
+function get_classification_feature_taxonomy( string $classify_by = '' ): string {
+	$taxonomy = '';
+	$settings = ( new Classification() )->get_settings();
+
+	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
+		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
+	}
+
+	if ( empty( $taxonomy ) ) {
+		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
+
+		if ( defined( $constant ) ) {
+			$taxonomy = constant( $constant );
+		}
+	}
+
+	/**
+	 * Filter the Taxonomy for the specified NLU feature.
+	 *
+	 * @since 3.0.0
+	 * @hook classifai_feature_classification_taxonomy_for_feature
+	 *
+	 * @param {string} $taxonomy The slug of the taxonomy to use.
+	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 *
+	 * @return {string} The filtered taxonomy slug.
+	 */
+	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
+}

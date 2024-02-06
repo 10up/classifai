@@ -4,6 +4,9 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Providers\Watson\PostClassifier;
 
+use function Classifai\get_classification_feature_enabled;
+use function Classifai\get_classification_feature_taxonomy;
+
 /**
  * Classifies Posts based on the current Watson configuration.
  */
@@ -122,20 +125,20 @@ class SavePostHandler {
 		$classifier = $this->get_classifier();
 
 		if ( $link_terms ) {
-			if ( get_feature_enabled( 'category' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'category' ) );
+			if ( get_classification_feature_enabled( 'category' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_classification_feature_taxonomy( 'category' ) );
 			}
 
-			if ( get_feature_enabled( 'keyword' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'keyword' ) );
+			if ( get_classification_feature_enabled( 'keyword' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_classification_feature_taxonomy( 'keyword' ) );
 			}
 
-			if ( get_feature_enabled( 'concept' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'concept' ) );
+			if ( get_classification_feature_enabled( 'concept' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_classification_feature_taxonomy( 'concept' ) );
 			}
 
-			if ( get_feature_enabled( 'entity' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'entity' ) );
+			if ( get_classification_feature_enabled( 'entity' ) ) {
+				wp_delete_object_term_relationships( $post_id, get_classification_feature_taxonomy( 'entity' ) );
 			}
 		}
 

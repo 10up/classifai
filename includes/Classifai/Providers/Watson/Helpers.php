@@ -111,22 +111,6 @@ function get_classification_mode(): string {
 }
 
 /**
- * Returns a bool based on whether the specified feature is enabled
- *
- * @param string $classify_by category,keyword,entity,concept
- * @return bool
- */
-function get_feature_enabled( string $classify_by ): bool {
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-
-	return filter_var(
-		$settings[ $classify_by ],
-		FILTER_VALIDATE_BOOLEAN
-	);
-}
-
-/**
  * Returns the feature threshold based on current configuration. Lookup
  * order is.
  *
@@ -173,44 +157,4 @@ function get_feature_threshold( string $feature ): float {
 	 * @return {float} The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
-}
-
-/**
- * Returns the Taxonomy for the specified NLU feature.
- *
- * Returns defaults in config.php if options have not been configured.
- *
- * @param string $classify_by NLU feature name
- * @return string Taxonomy mapped to the feature
- */
-function get_feature_taxonomy( string $classify_by = '' ): string {
-	$taxonomy = 0;
-
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-
-	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
-		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
-	}
-
-	if ( empty( $taxonomy ) ) {
-		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
-
-		if ( defined( $constant ) ) {
-			$taxonomy = constant( $constant );
-		}
-	}
-
-	/**
-	 * Filter the Taxonomy for the specified NLU feature.
-	 *
-	 * @since 1.1.0
-	 * @hook classifai_taxonomy_for_feature
-	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $classify_by  The NLU feature this taxonomy is for.
-	 *
-	 * @return {string} The filtered taxonomy slug.
-	 */
-	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $classify_by );
 }

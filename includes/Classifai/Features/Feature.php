@@ -192,6 +192,7 @@ abstract class Feature {
 		 * @hook classifai_{feature}_get_default_settings
 		 *
 		 * @param {array} $defaults Default feature settings.
+		 * @param {object} $this Feature instance.
 		 *
 		 * @return {array} Filtered default feature settings.
 		 */
@@ -201,7 +202,8 @@ abstract class Feature {
 				$shared_defaults,
 				$feature_settings,
 				$provider_settings
-			)
+			),
+			$this
 		);
 	}
 

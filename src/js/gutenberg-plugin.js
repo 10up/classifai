@@ -300,7 +300,7 @@ const ClassifAIGenerateTagsButton = () => {
 				onClick={ ( e ) => {
 					handleClick( {
 						button: e.target,
-						endpoint: '/classifai/v1/generate-tags/',
+						endpoint: '/classifai/v1/classify/',
 						callback: buttonClickCallBack,
 						callbackArgs: {
 							openPopup: true,
@@ -333,7 +333,7 @@ const ClassifAIGenerateTagsButton = () => {
 							onClick={ ( e ) => {
 								handleClick( {
 									button: e.target,
-									endpoint: '/classifai/v1/generate-tags/',
+									endpoint: '/classifai/v1/classify/',
 									callback: buttonClickCallBack,
 									buttonText,
 									linkTerms: false,

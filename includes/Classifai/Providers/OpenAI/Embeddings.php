@@ -45,6 +45,13 @@ class Embeddings extends Provider {
 	protected $max_tokens = 8191;
 
 	/**
+	 * NLU features that are supported by this provider.
+	 *
+	 * @var array
+	 */
+	public $nlu_features = [];
+
+	/**
 	 * OpenAI Embeddings constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
