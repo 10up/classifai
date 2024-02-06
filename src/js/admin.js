@@ -33,6 +33,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 ( () => {
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
 	const $userField = document.getElementById( 'username' );
+	const isSetupPage = document.querySelector( '.classifai-setup-form' )
+		? true
+		: false;
 
 	if ( $toggler === null || $userField === null ) {
 		return;
@@ -42,8 +45,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	let $passwordFieldTitle = null;
 	if ( $userField.closest( 'tr' ) ) {
 		$userFieldWrapper = $userField.closest( 'tr' );
-	} else if ( $userField.closest( '.classifai-setup-form-field' ) ) {
-		$userFieldWrapper = $userField.closest( '.classifai-setup-form-field' );
+		if ( isSetupPage ) {
+			$userFieldWrapper = $userField.closest( 'td' );
+		}
 	}
 
 	if ( document.getElementById( 'password' ).closest( 'tr' ) ) {
@@ -51,20 +55,27 @@ document.addEventListener( 'DOMContentLoaded', function () {
 			.getElementById( 'password' )
 			.closest( 'tr' )
 			.getElementsByTagName( 'label' );
-	} else if (
-		document
-			.getElementById( 'password' )
-			.closest( '.classifai-setup-form-field' )
-	) {
-		[ $passwordFieldTitle ] = document
-			.getElementById( 'password' )
-			.closest( '.classifai-setup-form-field' )
-			.getElementsByTagName( 'label' );
+
+		if ( isSetupPage ) {
+			$passwordFieldTitle = document.querySelector(
+				'label[for="password"]'
+			);
+		}
 	}
 
 	$toggler.addEventListener( 'click', ( e ) => {
 		e.preventDefault();
 		$userFieldWrapper.classList.toggle( 'hide-username' );
+
+		if (
+			isSetupPage &&
+			document.querySelector( 'label[for="username"]' )
+		) {
+			document
+				.querySelector( 'label[for="username"]' )
+				.closest( 'th' )
+				.classList.toggle( 'hide-username' );
+		}
 
 		if ( $userFieldWrapper.classList.contains( 'hide-username' ) ) {
 			$toggler.innerText = ClassifAI.use_password;
