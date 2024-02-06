@@ -243,11 +243,11 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'system',
-						'content' => $prompt,
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 					],
 					[
 						'role'    => 'user',
-						'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '',
+						'content' => '"""' . $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '"""',
 					],
 				],
 				'temperature' => 0.9,
@@ -342,11 +342,11 @@ class ChatGPT extends Provider {
 				'messages'    => [
 					[
 						'role'    => 'system',
-						'content' => $prompt,
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 					],
 					[
 						'role'    => 'user',
-						'content' => $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '',
+						'content' => '"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
 					],
 				],
 				'temperature' => 0.9,
