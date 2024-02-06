@@ -74,8 +74,6 @@ class NLU extends Provider {
 		];
 
 		$this->feature_instance = $feature;
-
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 	}
 
 	/**
@@ -781,109 +779,6 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Register REST endpoints.
-	 */
-	public function register_endpoints() {
-		$post_types = get_supported_post_types();
-		foreach ( $post_types as $post_type ) {
-			register_meta(
-				$post_type,
-				'_classifai_error',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
-				]
-			);
-		}
-
-		register_rest_route(
-			'classifai/v1',
-			'generate-tags/(?P<id>\d+)',
-			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this, 'generate_post_tags' ],
-				'args'                => array(
-					'id'        => array(
-						'required'          => true,
-						'type'              => 'integer',
-						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Post ID to generate tags.', 'classifai' ),
-					),
-					'linkTerms' => array(
-						'type'        => 'boolean',
-						'description' => esc_html__( 'Whether to link terms or not.', 'classifai' ),
-						'default'     => true,
-					),
-				),
-				'permission_callback' => [ $this, 'generate_post_tags_permissions_check' ],
-			]
-		);
-	}
-
-	/**
-	 * Handle request to generate tags for given post ID.
-	 *
-	 * @param WP_REST_Request $request The full request object.
-	 * @return array|bool|string|WP_Error
-	 */
-	public function generate_post_tags( WP_REST_Request $request ) {
-		$post_id    = $request->get_param( 'id' );
-		$link_terms = $request->get_param( 'linkTerms' );
-
-		if ( empty( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
-		}
-
-		$result = $this->rest_endpoint_callback(
-			$post_id,
-			'classify',
-			[
-				'link_terms' => $link_terms,
-			]
-		);
-
-		return rest_ensure_response(
-			array(
-				'terms'              => $result,
-				'feature_taxonomies' => $this->get_all_feature_taxonomies(),
-			)
-		);
-	}
-
-	/**
-	 * Get all feature taxonomies.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @return array|WP_Error
-	 */
-	public function get_all_feature_taxonomies() {
-		// Get all feature taxonomies.
-		$feature_taxonomies = [];
-		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
-			if ( get_feature_enabled( $feature ) ) {
-				$taxonomy   = get_feature_taxonomy( $feature );
-				$permission = check_term_permissions( $taxonomy );
-
-				if ( is_wp_error( $permission ) ) {
-					return $permission;
-				}
-
-				if ( 'post_tag' === $taxonomy ) {
-					$taxonomy = 'tags';
-				}
-				if ( 'category' === $taxonomy ) {
-					$taxonomy = 'categories';
-				}
-				$feature_taxonomies[] = $taxonomy;
-			}
-		}
-
-		return $feature_taxonomies;
-	}
-
-	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 * This is called by the Service.
 	 *
@@ -948,54 +843,6 @@ class NLU extends Provider {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'request_failed', $e->getMessage() );
 		}
-	}
-
-	/**
-	 * Check if a given request has access to generate tags
-	 *
-	 * @param WP_REST_Request $request Full data about the request.
-	 * @return WP_Error|bool
-	 */
-	public function generate_post_tags_permissions_check( WP_REST_Request $request ) {
-		$post_id = $request->get_param( 'id' );
-
-		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
-			return false;
-		}
-
-		$post_type     = get_post_type( $post_id );
-		$post_type_obj = get_post_type_object( $post_type );
-
-		// Ensure the post type is allowed in REST endpoints.
-		if ( ! $post_type || empty( $post_type_obj ) || empty( $post_type_obj->show_in_rest ) ) {
-			return false;
-		}
-
-		// For all enabled features, ensure the user has proper permissions to add/edit terms.
-		foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
-			if ( ! get_feature_enabled( $feature ) ) {
-				continue;
-			}
-
-			$taxonomy   = get_feature_taxonomy( $feature );
-			$permission = check_term_permissions( $taxonomy );
-
-			if ( is_wp_error( $permission ) ) {
-				return $permission;
-			}
-		}
-
-		$post_status   = get_post_status( $post_id );
-		$supported     = get_supported_post_types();
-		$post_statuses = get_supported_post_statuses();
-
-		// Check if processing allowed.
-		if ( ! in_array( $post_status, $post_statuses, true ) || ! in_array( $post_type, $supported, true ) || ! ( new Classification() )->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Language Processing not enabled for current post.', 'classifai' ) );
-		}
-
-		return true;
 	}
 
 	/**
