@@ -34,9 +34,9 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content.json' );
-			} else if ( 'This is a custom excerpt prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom excerpt prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-excerpt-prompt.json' );
-			} else if ( 'This is a custom title prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom title prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
 			} else if ( str_contains( $prompt, 'This is a custom shrink prompt' ) || str_contains( $prompt, 'This is a custom grow prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
