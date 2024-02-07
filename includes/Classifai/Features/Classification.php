@@ -123,18 +123,23 @@ class Classification extends Feature {
 		}
 
 		// For all enabled features, ensure the user has proper permissions to add/edit terms.
-		// foreach ( [ 'category', 'keyword', 'concept', 'entity' ] as $feature ) {
-		// 	if ( ! get_classification_feature_enabled( $feature ) ) {
-		// 		continue;
-		// 	}
+		$provider_instance = $this->get_feature_provider_instance();
+		if ( empty( $provider_instance->nlu_features ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Classification not configured correctly for the selected provider.', 'classifai' ) );
+		}
 
-		// 	$taxonomy   = get_classification_feature_taxonomy( $feature );
-		// 	$permission = check_term_permissions( $taxonomy );
+		foreach ( $provider_instance->nlu_features as $feature_name => $feature ) {
+			if ( ! get_classification_feature_enabled( $feature_name ) ) {
+				continue;
+			}
 
-		// 	if ( is_wp_error( $permission ) ) {
-		// 		return $permission;
-		// 	}
-		// }
+			$taxonomy   = get_classification_feature_taxonomy( $feature_name );
+			$permission = check_term_permissions( $taxonomy );
+
+			if ( is_wp_error( $permission ) ) {
+				return $permission;
+			}
+		}
 
 		$post_status   = get_post_status( $post_id );
 		$supported     = $this->get_supported_post_types();
@@ -511,6 +516,7 @@ class Classification extends Feature {
 			<?php $this->render_input( $threshold_args ); ?>
 		</p>
 
+		<?php if ( NLU::ID === $features['provider'] ) : ?>
 		<p>
 			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
 			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( self::ID ); ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
@@ -521,6 +527,7 @@ class Classification extends Feature {
 				<?php endforeach; ?>
 			</select>
 		</p>
+		<?php endif; ?>
 		<?php
 	}
 

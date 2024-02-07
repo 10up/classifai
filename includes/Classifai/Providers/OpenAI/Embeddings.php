@@ -11,6 +11,7 @@ use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
+use Classifai\Features\Feature;
 use WP_Error;
 
 use function Classifai\get_asset_info;
@@ -58,6 +59,21 @@ class Embeddings extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+
+		if (
+			$this->feature_instance &&
+			method_exists( $this->feature_instance, 'get_supported_taxonomies' )
+		) {
+			foreach ( $this->feature_instance->get_supported_taxonomies() as $tax => $label ) {
+				$this->nlu_features[ $tax ] = [
+					'feature'           => $label,
+					'threshold'         => __( 'Threshold (%)', 'classifai' ),
+					'threshold_default' => 75,
+					'taxonomy'          => __( 'Taxonomy', 'classifai' ),
+					'taxonomy_default'  => $tax,
+				];
+			}
+		}
 	}
 
 	/**
@@ -112,24 +128,8 @@ class Embeddings extends Provider {
 			]
 		);
 
-		add_settings_field(
-			static::ID . '_taxonomies',
-			esc_html__( 'Taxonomies', 'classifai' ),
-			[ $this, 'render_checkbox_group' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'   => static::ID,
-				'label_for'      => 'taxonomies',
-				'options'        => $this->get_taxonomies_for_settings(),
-				'default_values' => $settings['taxonomies'],
-				'description'    => __( 'Choose which taxonomies will be used for classification.', 'classifai' ),
-				'class'          => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
+		// add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 	}
 
 	/**
@@ -195,19 +195,36 @@ class Embeddings extends Provider {
 			'authenticated'   => false,
 		];
 
-		switch ( $this->feature_instance::ID ) {
-			case Classification::ID:
-				return array_merge(
-					$common_settings,
-					[
-						'taxonomies' => [
-							'category',
-						],
-					]
-				);
+		return $common_settings;
+	}
+
+	/**
+	 * Modify the default settings for the classification feature.
+	 *
+	 * @param array   $settings Current settings.
+	 * @param Feature $feature_instance The feature instance.
+	 * @return array
+	 */
+	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
+			return $settings;
 		}
 
-		return $common_settings;
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		$defaults = [];
+
+		foreach ( array_keys( $feature_instance->get_supported_taxonomies() ) as $tax ) {
+			$enabled = 'category' === $tax ? true : false;
+
+			$defaults[ $tax ]                = $enabled;
+			$defaults[ $tax . '_threshold' ] = 75;
+			$defaults[ $tax . '_taxonomy' ]  = $tax;
+		}
+
+		return array_merge( $settings, $defaults );
 	}
 
 	/**
@@ -216,22 +233,24 @@ class Embeddings extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		$feature = new Classification();
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
 
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		// $feature = new Classification();
 
-		if ( ! $feature->is_feature_enabled() || $feature->get_feature_provider_instance()::ID !== static::ID ) {
-			return;
-		}
+		// add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 
-		add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
-		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
-		add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
-		add_action( 'save_post', [ $this, 'save_metabox' ] );
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		// if ( ! $feature->is_feature_enabled() || $feature->get_feature_provider_instance()::ID !== static::ID ) {
+		// 	return;
+		// }
+
+		// add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
+		// add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
+		// add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+		// add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
+		// add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		// add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
+		// add_action( 'save_post', [ $this, 'save_metabox' ] );
+		// add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
 	/**
@@ -302,19 +321,6 @@ class Embeddings extends Provider {
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
-
-		if ( $this->feature_instance instanceof Classification ) {
-			// Sanitize the taxonomy checkboxes.
-			$taxonomies = $this->get_taxonomies_for_settings();
-			foreach ( $taxonomies as $taxonomy_key => $taxonomy_value ) {
-				if ( isset( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) && '0' !== $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ) {
-					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = sanitize_text_field( $new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] ?? $settings[ static::ID ]['taxonomies'][ $taxonomy_key ] );
-					$this->trigger_taxonomy_update( $taxonomy_key );
-				} else {
-					$new_settings[ static::ID ]['taxonomies'][ $taxonomy_key ] = '0';
-				}
-			}
-		}
 
 		return $new_settings;
 	}
@@ -947,94 +953,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Render a group of checkboxes.
-	 *
-	 * @param array $args The args passed to add_settings_field
-	 */
-	public function render_checkbox_group( array $args = array() ) {
-		$setting_index = $this->feature_instance->get_settings( static::ID );
-		$options       = $args['options'] ?? [];
-		$option_index  = $args['option_index'];
-
-		if ( ! is_array( $options ) ) {
-			return;
-		}
-
-		// Iterate through all of our options.
-		foreach ( $options as $option_value => $option_label ) {
-			$value                 = '';
-			$default_key           = array_search( $option_value, $args['default_values'], true );
-			$option_value_theshold = $option_value . '_threshold';
-
-			// Get saved value, if any.
-			if ( isset( $setting_index[ $args['label_for'] ] ) ) {
-				$value           = $setting_index[ $args['label_for'] ][ $option_value ] ?? '';
-				$threshold_value = $setting_index[ $args['label_for'] ][ $option_value_theshold ] ?? '';
-			}
-
-			// If no saved value, check if we have a default value.
-			if ( empty( $value ) && '0' !== $value && isset( $args['default_values'][ $default_key ] ) ) {
-				$value = $args['default_values'][ $default_key ];
-			}
-
-			// Render checkbox.
-			printf(
-				'<p>
-					<label for="%1$s_%2$s_%3$s_%4$s">
-						<input type="hidden" name="%1$s[%2$s][%3$s][%4$s]" value="0" />
-						<input type="checkbox" id="%1$s_%2$s_%3$s_%4$s" name="%1$s[%2$s][%3$s][%4$s]" value="%4$s" %5$s />
-						%6$s
-					</label>
-				</p>',
-				esc_attr( $this->feature_instance->get_option_name() ),
-				esc_attr( $option_index ),
-				esc_attr( $args['label_for'] ?? '' ),
-				esc_attr( $option_value ),
-				checked( $value, $option_value, false ),
-				esc_html( $option_label )
-			);
-
-			// Render Threshold field.
-			if ( 'taxonomies' === $args['label_for'] ) {
-				$this->render_threshold_field( $args, $option_value_theshold, $threshold_value );
-			}
-		}
-
-		// Render description, if any.
-		if ( ! empty( $args['description'] ) ) {
-			printf(
-				'<span class="description">%s</span>',
-				esc_html( $args['description'] )
-			);
-		}
-	}
-
-	/**
-	 * Render a threshold field.
-	 *
-	 * @since 2.5.0
-	 *
-	 * @param array  $args         The args passed to add_settings_field
-	 * @param string $option_value The option value.
-	 * @param string $value        The value.
-	 */
-	public function render_threshold_field( array $args, string $option_value, string $value ) {
-		printf(
-			'<p class="threshold_wrapper">
-				<label for="%1$s_%2$s_%3$s_%4$s">%5$s</label>
-				<br>
-				<input type="number" id="%1$s_%2$s_%3$s_%4$s" class="small-text" name="%1$s[%2$s][%3$s][%4$s]" value="%6$s" />
-			</p>',
-			esc_attr( $this->feature_instance->get_option_name() ),
-			esc_attr( $args['option_index'] ),
-			esc_attr( $args['label_for'] ?? '' ),
-			esc_attr( $option_value ),
-			esc_html__( 'Threshold (%)', 'classifai' ),
-			$value ? esc_attr( $value ) : 75
-		);
-	}
-
-	/**
 	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
@@ -1045,16 +963,13 @@ class Embeddings extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof Classification ) {
-			$debug_info[ __( 'Number of terms', 'classifai' ) ]                = $provider_settings['number_of_terms'] ?? 1;
-			$debug_info[ __( 'Taxonomy (category)', 'classifai' ) ]            = $provider_settings['taxonomies']['category'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
-			$debug_info[ __( 'Taxonomy (category threshold)', 'classifai' ) ]  = $provider_settings['taxonomies']['category_threshold'];
-			$debug_info[ __( 'Taxonomy (tag)', 'classifai' ) ]                 = $provider_settings['taxonomies']['post_tag'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
-			$debug_info[ __( 'Taxonomy (tag threshold)', 'classifai' ) ]       = $provider_settings['taxonomies']['post_tag_threshold'];
-			$debug_info[ __( 'Taxonomy (format)', 'classifai' ) ]              = $provider_settings['taxonomies']['post_format'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
-			$debug_info[ __( 'Taxonomy (format threshold)', 'classifai' ) ]    = $provider_settings['taxonomies']['post_format_threshold'];
-			$debug_info[ __( 'Taxonomy (image tag)', 'classifai' ) ]           = $provider_settings['taxonomies']['classifai-image-tags'] ? __( 'Enabled', 'classifai' ) : __( 'Disabled', 'classifai' );
-			$debug_info[ __( 'Taxonomy (image tag threshold)', 'classifai' ) ] = $provider_settings['taxonomies']['classifai-image-tags_threshold'];
-			$debug_info[ __( 'Latest response', 'classifai' ) ]                = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
+			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
+				$debug_info[ "Taxonomy ( $tax )" ]         = Feature::get_debug_value_text( $provider_settings[ $tax ], 1 );
+				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $provider_settings[ $tax . '_threshold' ], 1 );
+			}
+
+			$debug_info[ __( 'Number of terms', 'classifai' ) ] = $provider_settings['number_of_terms'] ?? 1;
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
 		}
 
 		return apply_filters(

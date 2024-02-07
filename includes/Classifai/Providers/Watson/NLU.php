@@ -41,6 +41,8 @@ class NLU extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance (Optional, only required in admin).
 	 */
 	public function __construct( $feature = null ) {
+		$this->feature_instance = $feature;
+
 		$this->nlu_features = [
 			'category' => [
 				'feature'           => __( 'Category', 'classifai' ),
@@ -71,8 +73,6 @@ class NLU extends Provider {
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
-
-		$this->feature_instance = $feature;
 	}
 
 	/**

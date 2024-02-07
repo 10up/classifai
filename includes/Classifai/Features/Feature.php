@@ -1005,7 +1005,7 @@ abstract class Feature {
 		$provider_instances = [];
 
 		foreach ( $services as $provider_class ) {
-			$provider_instances[] = new $provider_class( $this );
+			$provider_instances[] = new $provider_class();
 		}
 
 		return $provider_instances;
