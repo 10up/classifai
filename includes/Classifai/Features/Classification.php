@@ -199,6 +199,25 @@ class Classification extends Feature {
 	}
 
 	/**
+	 * Save the classification results.
+	 *
+	 * @param int   $post_id The post ID.
+	 * @param array $results Term results.
+	 */
+	public function save( int $post_id, array $results ) {
+		$provider_instance = $this->get_feature_provider_instance();
+
+		switch ( $provider_instance::ID ) {
+			case NLU::ID:
+				$results = $provider_instance->link( $post_id, $results );
+				break;
+			case Embeddings::ID:
+				$results = $provider_instance->set_terms( $post_id, $results );
+				break;
+		}
+	}
+
+	/**
 	 * Enqueue the admin scripts.
 	 */
 	public function enqueue_admin_assets() {
@@ -371,7 +390,7 @@ class Classification extends Feature {
 		} else {
 			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
 
-			$results = $this->run( $post_id, 'classify', [ 'link_terms' => true ] );
+			$results = $this->run( $post_id, 'classify' );
 
 			if ( is_wp_error( $results ) ) {
 				update_post_meta(
@@ -385,6 +404,7 @@ class Classification extends Feature {
 					)
 				);
 			} else {
+				$this->save( $post_id, $results );
 				delete_post_meta( $post_id, '_classifai_error' );
 			}
 		}
@@ -417,7 +437,7 @@ class Classification extends Feature {
 			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
 		}
 
-		$results = $this->run( $post_id, 'classify', [ 'link_terms' => true ] );
+		$results = $this->run( $post_id, 'classify' );
 
 		// Ensure the processing value is changed back to what it was.
 		if ( 'yes' !== $enabled ) {
@@ -427,7 +447,20 @@ class Classification extends Feature {
 		$classified = array();
 
 		if ( ! is_wp_error( $results ) ) {
+			$this->save( $post_id, $results );
 			$classified = array( 'classifai_classify' => 1 );
+			delete_post_meta( $post_id, '_classifai_error' );
+		} else {
+			update_post_meta(
+				$post_id,
+				'_classifai_error',
+				wp_json_encode(
+					[
+						'code'    => $results->get_error_code(),
+						'message' => $results->get_error_message(),
+					]
+				)
+			);
 		}
 
 		wp_safe_redirect( esc_url_raw( add_query_arg( $classified, get_edit_post_link( $post_id, 'edit' ) ) ) );

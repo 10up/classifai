@@ -350,7 +350,7 @@ class NLU extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'classify':
-				$return = $this->classify( $post_id, $args['link_terms'] ?? true );
+				$return = $this->classify( $post_id );
 				break;
 		}
 
@@ -400,11 +400,10 @@ class NLU extends Provider {
 	 * Classifies the post specified with the PostClassifier object.
 	 * Existing terms relationships are removed before classification.
 	 *
-	 * @param int  $post_id the post to classify & link
-	 * @param bool $link_terms Whether to link the terms to the post.
-	 * @return array|bool
+	 * @param int $post_id the post to classify & link
+	 * @return array|WP_Error
 	 */
-	public function classify( int $post_id, bool $link_terms = true ) {
+	public function classify( int $post_id ) {
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -419,48 +418,33 @@ class NLU extends Provider {
 		 *
 		 * @return {bool} Whether the post should be classified.
 		 */
-		$classifai_should_classify_post = apply_filters( 'classifai_should_classify_post', true, $post_id );
-		if ( ! $classifai_should_classify_post ) {
-			return false;
+		$should_classify = apply_filters( 'classifai_should_classify_post', true, $post_id );
+		if ( ! $should_classify ) {
+			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
 		$classifier = new PostClassifier();
 
-		if ( $link_terms ) {
-			if ( get_feature_enabled( 'category' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'category' ) );
-			}
+		$output = $classifier->classify( $post_id );
 
-			if ( get_feature_enabled( 'keyword' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'keyword' ) );
-			}
+		return $output;
+	}
 
-			if ( get_feature_enabled( 'concept' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'concept' ) );
-			}
-
-			if ( get_feature_enabled( 'entity' ) ) {
-				wp_delete_object_term_relationships( $post_id, get_feature_taxonomy( 'entity' ) );
-			}
+	/**
+	 * Links the Watson NLU response output to taxonomy terms.
+	 *
+	 * @param int   $post_id The post ID.
+	 * @param array $terms The classification results from Watson NLU.
+	 * @return array|WP_Error
+	 */
+	public function link( int $post_id, array $terms ) {
+		if ( empty( $terms ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'No terms to link.', 'classifai' ) );
 		}
 
-		$output = $classifier->classify_and_link( $post_id, [], $link_terms );
+		$classifier = new PostClassifier();
 
-		if ( is_wp_error( $output ) ) {
-			update_post_meta(
-				$post_id,
-				'_classifai_error',
-				wp_json_encode(
-					[
-						'code'    => $output->get_error_code(),
-						'message' => $output->get_error_message(),
-					]
-				)
-			);
-		} else {
-			// If there is no error, clear any existing error states.
-			delete_post_meta( $post_id, '_classifai_error' );
-		}
+		$output = $classifier->link( $post_id, $terms );
 
 		return $output;
 	}

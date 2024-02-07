@@ -249,11 +249,10 @@ class Embeddings extends Provider {
 	/**
 	 * Trigger embedding generation for content being saved.
 	 *
-	 * @param int  $post_id ID of post being saved.
-	 * @param bool $link_terms Whether to link the terms to the post.
+	 * @param int $post_id ID of post being saved.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( int $post_id, bool $link_terms = true ) {
+	public function generate_embeddings_for_post( int $post_id ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification will not work during an autosave.', 'classifai' ) );
@@ -275,13 +274,9 @@ class Embeddings extends Provider {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
-
-			if ( ! $link_terms ) {
-				return $this->get_terms( $embeddings );
-			} else {
-				return $this->set_terms( $post_id, $embeddings );
-			}
 		}
+
+		return $embeddings;
 	}
 
 	/**
@@ -291,7 +286,7 @@ class Embeddings extends Provider {
 	 * @param array $embedding Embedding data.
 	 * @return array|WP_Error
 	 */
-	private function set_terms( int $post_id = 0, array $embedding = [] ) {
+	public function set_terms( int $post_id = 0, array $embedding = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
@@ -320,7 +315,7 @@ class Embeddings extends Provider {
 	 * @param array $embedding Embedding data.
 	 * @return array|WP_Error
 	 */
-	private function get_terms( array $embedding = [] ) {
+	public function get_terms( array $embedding = [] ) {
 		if ( empty( $embedding ) ) {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
@@ -635,7 +630,7 @@ class Embeddings extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'classify':
-				$return = $this->generate_embeddings_for_post( $post_id, $args['link_terms'] ?? true );
+				$return = $this->generate_embeddings_for_post( $post_id );
 				break;
 		}
 
