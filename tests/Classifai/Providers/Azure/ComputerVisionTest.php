@@ -85,7 +85,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 					'endpoint_url' => '',
 					'api_key' => '',
 					'authenticated' => false,
-					'descriptive_confidence_threshold' => 75,
+					'descriptive_confidence_threshold' => 55,
 				],
 			]
 		);

@@ -64,11 +64,11 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		);
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/ocr.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.1/generateThumbnail' ) !== false ) {
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/generateThumbnail' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/pdf.json' );
