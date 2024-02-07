@@ -84,33 +84,6 @@ function get_classification_method(): string {
 }
 
 /**
- * Get Classification mode.
- *
- * @since 2.5.0
- *
- * @return string
- */
-function get_classification_mode(): string {
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-	$value    = $settings['classification_mode'] ?? '';
-
-	if ( $feature->is_feature_enabled() ) {
-		if ( empty( $value ) ) {
-			// existing users
-			// default: automatic_classification
-			return 'automatic_classification';
-		}
-	} else {
-		// new users
-		// default: manual_review
-		return 'manual_review';
-	}
-
-	return $value;
-}
-
-/**
  * Returns the feature threshold based on current configuration. Lookup
  * order is.
  *
@@ -124,7 +97,7 @@ function get_classification_mode(): string {
  */
 function get_feature_threshold( string $feature ): float {
 	$classification_feature = new Classification();
-	$settings               = $classification_feature->get_settings( NLU::ID );
+	$settings               = $classification_feature->get_settings();
 	$threshold              = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings[ $feature . '_threshold' ] ) ) {

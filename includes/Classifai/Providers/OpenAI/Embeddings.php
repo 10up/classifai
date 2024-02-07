@@ -193,25 +193,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * The list of supported post types.
-	 *
-	 * @return array
-	 */
-	public function supported_post_types(): array {
-		/**
-		 * Filter post types supported for embeddings.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_post_types
-		 *
-		 * @param {array} $post_types Array of post types to be classified.
-		 *
-		 * @return {array} Array of post types.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_post_types', $this->get_supported_post_types( new Classification() ) );
-	}
-
-	/**
 	 * Get the threshold for the similarity calculation.
 	 *
 	 * @since 2.5.0
@@ -224,7 +205,7 @@ class Embeddings extends Provider {
 		$threshold = 1;
 
 		if ( ! empty( $taxonomy ) ) {
-			$threshold = isset( $settings['taxonomies'][ $taxonomy . '_threshold' ] ) ? $settings['taxonomies'][ $taxonomy . '_threshold' ] : 75;
+			$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? $settings[ $taxonomy . '_threshold' ] : 75;
 		}
 
 		// Convert $threshold (%) to decimal.
@@ -242,44 +223,6 @@ class Embeddings extends Provider {
 		 * @return {float} The threshold to use.
 		 */
 		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
-	}
-
-	/**
-	 * The list of supported post statuses.
-	 *
-	 * @return array
-	 */
-	public function supported_post_statuses(): array {
-		/**
-		 * Filter post statuses supported for embeddings.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_post_statuses
-		 *
-		 * @param {array} $post_types Array of post statuses to be classified.
-		 *
-		 * @return {array} Array of post statuses.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_post_statuses', $this->get_supported_post_statuses( new Classification() ) );
-	}
-
-	/**
-	 * The list of supported taxonomies.
-	 *
-	 * @return array
-	 */
-	public function supported_taxonomies(): array {
-		/**
-		 * Filter taxonomies supported for embeddings.
-		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_taxonomies
-		 *
-		 * @param {array} $taxonomies Array of taxonomies to be classified.
-		 *
-		 * @return {array} Array of taxonomies.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_taxonomies', $this->get_supported_taxonomies( new Classification() ) );
 	}
 
 	/**
@@ -307,46 +250,35 @@ class Embeddings extends Provider {
 	 * Trigger embedding generation for content being saved.
 	 *
 	 * @param int  $post_id ID of post being saved.
-	 * @param bool $dryrun Whether to run the process or just return the data.
+	 * @param bool $link_terms Whether to link the terms to the post.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( int $post_id, bool $dryrun = false ) {
+	public function generate_embeddings_for_post( int $post_id, bool $link_terms = true ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'Classification will not work during an autosave.', 'classifai' ) );
 		}
 
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-			return;
-		}
-
-		$post = get_post( $post_id );
-
-		// Only run on supported post types and statuses.
-		if (
-			! $dryrun
-			&& (
-				! in_array( $post->post_type, $this->supported_post_types(), true ) ||
-				! in_array( $post->post_status, $this->supported_post_statuses(), true )
-			)
-		) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'User does not have permission to classify this item.', 'classifai' ) );
 		}
 
 		// Don't run if turned off for this particular post.
-		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) && ! $dryrun ) {
-			return;
+		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
-		$embeddings = $this->generate_embeddings( $post_id, 'post' );
+		// TODO: $embeddings = $this->generate_embeddings( $post_id, 'post' );
+		$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			if ( $dryrun ) {
+			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+
+			if ( ! $link_terms ) {
 				return $this->get_terms( $embeddings );
 			} else {
-				update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
 				return $this->set_terms( $post_id, $embeddings );
 			}
 		}
@@ -357,6 +289,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
+	 * @return array|WP_Error
 	 */
 	private function set_terms( int $post_id = 0, array $embedding = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -370,13 +303,15 @@ class Embeddings extends Provider {
 		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
 		// Set terms based on similarity.
 		foreach ( $embedding_similarity as $tax => $terms ) {
 			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
 		}
+
+		return $embedding_similarity;
 	}
 
 	/**
@@ -390,13 +325,13 @@ class Embeddings extends Provider {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
-		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
-		// Set terms based on similarity.
+		// Sort terms based on similarity.
 		$index  = 0;
 		$result = [];
 
@@ -437,12 +372,11 @@ class Embeddings extends Provider {
 	 * @since 2.5.0
 	 *
 	 * @param array $embedding Embedding data.
-	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
 	 */
-	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
+	private function get_embeddings_similarity( array $embedding ): array {
 		$embedding_similarity = [];
-		$taxonomies           = $this->supported_taxonomies();
+		$taxonomies           = $this->feature_instance->get_all_feature_taxonomies();
 		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
@@ -477,7 +411,7 @@ class Embeddings extends Provider {
 
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+					if ( false !== $similarity && $similarity <= $threshold ) {
 						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}
@@ -489,6 +423,8 @@ class Embeddings extends Provider {
 
 	/**
 	 * Generate embedding data for all terms within a taxonomy.
+	 *
+	 * TODO: this no longer seems to be called
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 */
@@ -531,7 +467,7 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		$taxonomies = $this->supported_taxonomies();
+		$taxonomies = $this->feature_instance->get_all_feature_taxonomies();
 
 		// Ensure this term is part of a taxonomy we support.
 		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {
@@ -681,6 +617,32 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id The Post Id we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to run classification.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'classify':
+				$return = $this->generate_embeddings_for_post( $post_id, $args['link_terms'] ?? true );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
@@ -692,7 +654,7 @@ class Embeddings extends Provider {
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
-				$debug_info[ "Taxonomy ( $tax )" ]         = Feature::get_debug_value_text( $provider_settings[ $tax ], 1 );
+				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $provider_settings[ $tax ], 1 );
 				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $provider_settings[ $tax . '_threshold' ], 1 );
 			}
 

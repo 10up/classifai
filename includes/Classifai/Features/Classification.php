@@ -15,6 +15,7 @@ use function Classifai\check_term_permissions;
 use function Classifai\get_classification_feature_enabled;
 use function Classifai\get_classification_feature_taxonomy;
 use function Classifai\get_asset_info;
+use function Classifai\get_classification_mode;
 
 /**
  * Class Classification
@@ -63,6 +64,11 @@ class Classification extends Feature {
 		add_action( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ], 10, 2 );
 		add_action( 'save_post', [ $this, 'save_metabox' ] );
+		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
+		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
+
+		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
+		add_filter( 'removable_query_args', [ $this, 'removable_query_args' ] );
 	}
 
 	/**
@@ -364,7 +370,163 @@ class Classification extends Feature {
 			update_post_meta( $post_id, '_classifai_process_content', 'no' );
 		} else {
 			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
+
+			$results = $this->run( $post_id, 'classify', [ 'link_terms' => true ] );
+
+			if ( is_wp_error( $results ) ) {
+				update_post_meta(
+					$post_id,
+					'_classifai_error',
+					wp_json_encode(
+						[
+							'code'    => $results->get_error_code(),
+							'message' => $results->get_error_message(),
+						]
+					)
+				);
+			} else {
+				delete_post_meta( $post_id, '_classifai_error' );
+			}
 		}
+	}
+
+	/**
+	 * Classify post manually.
+	 *
+	 * Fires when the Classify button is clicked
+	 * in the Classic Editor.
+	 */
+	public function classifai_classify_post() {
+		if (
+			empty( $_GET['classifai_classify_post_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['classifai_classify_post_nonce'] ) ), 'classifai_classify_post_action' )
+		) {
+			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
+		}
+
+		$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+
+		if ( ! $post_id ) {
+			exit();
+		}
+
+		// Check to see if processing is disabled and overwrite that.
+		// Since we are manually classifying, we want to force this.
+		$enabled = get_post_meta( $post_id, '_classifai_process_content', true );
+		if ( 'yes' !== $enabled ) {
+			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
+		}
+
+		$results = $this->run( $post_id, 'classify', [ 'link_terms' => true ] );
+
+		// Ensure the processing value is changed back to what it was.
+		if ( 'yes' !== $enabled ) {
+			update_post_meta( $post_id, '_classifai_process_content', 'no' );
+		}
+
+		$classified = array();
+
+		if ( ! is_wp_error( $results ) ) {
+			$classified = array( 'classifai_classify' => 1 );
+		}
+
+		wp_safe_redirect( esc_url_raw( add_query_arg( $classified, get_edit_post_link( $post_id, 'edit' ) ) ) );
+		exit();
+	}
+
+	/**
+	 * Outputs an admin notice with the error message if needed.
+	 */
+	public function show_error_if() {
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		$post_id = $post->ID;
+
+		if ( empty( $post_id ) ) {
+			return;
+		}
+
+		$error = get_post_meta( $post_id, '_classifai_error', true );
+
+		if ( ! empty( $error ) ) {
+			delete_post_meta( $post_id, '_classifai_error' );
+			$error   = (array) json_decode( $error );
+			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
+			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown API error';
+
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p>
+					<?php esc_html_e( 'Error: Failed to classify content.', 'classifai' ); ?>
+				</p>
+				<p>
+					<?php echo esc_html( $code ); ?>
+					-
+					<?php echo esc_html( $message ); ?>
+				</p>
+			</div>
+			<?php
+		}
+
+		// Display classify post success message for manually classified post.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$classified = isset( $_GET['classifai_classify'] ) ? intval( wp_unslash( $_GET['classifai_classify'] ) ) : 0;
+
+		if ( 1 === $classified ) {
+			$post_type       = get_post_type_object( get_post_type( $post ) );
+			$post_type_label = esc_html__( 'Post', 'classifai' );
+			if ( $post_type ) {
+				$post_type_label = $post_type->labels->singular_name;
+			}
+			?>
+
+			<div class="notice notice-success is-dismissible">
+				<p>
+					<?php
+					// translators: %s is post type label.
+					printf( esc_html__( '%s classified successfully.', 'classifai' ), esc_html( $post_type_label ) );
+					?>
+				</p>
+			</div>
+
+			<?php
+		}
+	}
+
+	/**
+	 * Sets the default value for the _classifai_process_content meta key.
+	 *
+	 * @param mixed  $value     The value get_metadata() should return - a single metadata value,
+	 *                          or an array of values.
+	 * @param int    $object_id Object ID.
+	 * @param string $meta_key  Meta key.
+	 * @return mixed
+	 */
+	public function default_post_metadata( $value, int $object_id, string $meta_key ) {
+		if ( '_classifai_process_content' === $meta_key ) {
+			if ( 'automatic_classification' === get_classification_mode() ) {
+				return 'yes';
+			} else {
+				return 'no';
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Add "classifai_classify" in list of query variable names to remove.
+	 *
+	 * @param array $removable_query_args An array of query variable names to remove from a URL.
+	 * @return array
+	 */
+	public function removable_query_args( array $removable_query_args ): array {
+		$removable_query_args[] = 'classifai_classify';
+		return $removable_query_args;
 	}
 
 	/**
@@ -591,7 +753,7 @@ class Classification extends Feature {
 	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
 	 * @return mixed
 	 */
-	public function run( ...$args ) {
+	public function runs( ...$args ) {
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'] ?? NLU::ID;
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
@@ -693,7 +855,7 @@ class Classification extends Feature {
 			return $feature_taxonomies;
 		}
 
-		foreach ( $provider_instance->nlu_features as $feature_name => $feature ) {
+		foreach ( array_keys( $this->get_supported_taxonomies() ) as $feature_name ) {
 			if ( ! get_classification_feature_enabled( $feature_name ) ) {
 				continue;
 			}
@@ -703,14 +865,6 @@ class Classification extends Feature {
 
 			if ( is_wp_error( $permission ) ) {
 				continue;
-			}
-
-			if ( 'post_tag' === $taxonomy ) {
-				$taxonomy = 'tags';
-			}
-
-			if ( 'category' === $taxonomy ) {
-				$taxonomy = 'categories';
 			}
 
 			$feature_taxonomies[] = $taxonomy;

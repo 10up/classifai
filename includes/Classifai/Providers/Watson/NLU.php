@@ -233,8 +233,8 @@ class NLU extends Provider {
 			$this->taxonomy_factory = new TaxonomyFactory();
 			$this->taxonomy_factory->build_all();
 
-	// 		$this->save_post_handler = new SavePostHandler();
-	// 		$this->save_post_handler->register();
+			// $this->save_post_handler = new SavePostHandler();
+			// $this->save_post_handler->register();
 
 	// 		new PreviewClassifierData();
 		}
@@ -332,38 +332,7 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Format the result of most recent request.
-	 *
-	 * @param array|WP_Error $data Response data to format.
-	 * @return string
-	 */
-	protected function get_formatted_latest_response( $data ): string {
-		if ( ! $data ) {
-			return __( 'N/A', 'classifai' );
-		}
-
-		if ( is_wp_error( $data ) ) {
-			return $data->get_error_message();
-		}
-
-		$formatted_data = array_intersect_key(
-			$data,
-			[
-				'usage'    => 1,
-				'language' => 1,
-			]
-		);
-
-		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
-			$formatted_data[ $key ] = count( $value );
-		}
-
-		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
-	}
-
-	/**
 	 * Common entry point for all REST endpoints for this provider.
-	 * This is called by the Service.
 	 *
 	 * @param int    $post_id The Post Id we're processing.
 	 * @param string $route_to_call The route we are processing.
@@ -371,18 +340,17 @@ class NLU extends Provider {
 	 * @return string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
-		$route_to_call = strtolower( $route_to_call );
-
 		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to run classification.', 'classifai' ) );
 		}
 
-		$return = '';
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'classify':
-				$return = ( new Classification() )->run( $post_id, $args['link_terms'] ?? true );
+				$return = $this->classify( $post_id, $args['link_terms'] ?? true );
 				break;
 		}
 
@@ -498,6 +466,36 @@ class NLU extends Provider {
 	}
 
 	/**
+	 * Format the result of most recent request.
+	 *
+	 * @param array|WP_Error $data Response data to format.
+	 * @return string
+	 */
+	protected function get_formatted_latest_response( $data ): string {
+		if ( ! $data ) {
+			return __( 'N/A', 'classifai' );
+		}
+
+		if ( is_wp_error( $data ) ) {
+			return $data->get_error_message();
+		}
+
+		$formatted_data = array_intersect_key(
+			$data,
+			[
+				'usage'    => 1,
+				'language' => 1,
+			]
+		);
+
+		foreach ( array_diff_key( $data, $formatted_data ) as $key => $value ) {
+			$formatted_data[ $key ] = count( $value );
+		}
+
+		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
+	}
+
+	/**
 	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
@@ -508,21 +506,11 @@ class NLU extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof Classification ) {
-			$debug_info[ __( 'Category (status)', 'classifai' ) ]    = Feature::get_debug_value_text( $provider_settings['category'], 1 );
-			$debug_info[ __( 'Category (threshold)', 'classifai' ) ] = Feature::get_debug_value_text( $provider_settings['category_threshold'], 1 );
-			$debug_info[ __( 'Category (taxonomy)', 'classifai' ) ]  = Feature::get_debug_value_text( $provider_settings['category_taxonomy'], 1 );
-
-			$debug_info[ __( 'Keyword (status)', 'classifai' ) ]    = Feature::get_debug_value_text( $provider_settings['keyword'], 1 );
-			$debug_info[ __( 'Keyword (threshold)', 'classifai' ) ] = Feature::get_debug_value_text( $provider_settings['keyword_threshold'], 1 );
-			$debug_info[ __( 'Keyword (taxonomy)', 'classifai' ) ]  = Feature::get_debug_value_text( $provider_settings['keyword_taxonomy'], 1 );
-
-			$debug_info[ __( 'Entity (status)', 'classifai' ) ]    = Feature::get_debug_value_text( $provider_settings['entity'], 1 );
-			$debug_info[ __( 'Entity (threshold)', 'classifai' ) ] = Feature::get_debug_value_text( $provider_settings['entity_threshold'], 1 );
-			$debug_info[ __( 'Entity (taxonomy)', 'classifai' ) ]  = Feature::get_debug_value_text( $provider_settings['entity_taxonomy'], 1 );
-
-			$debug_info[ __( 'Concept (status)', 'classifai' ) ]    = Feature::get_debug_value_text( $provider_settings['concept'], 1 );
-			$debug_info[ __( 'Concept (threshold)', 'classifai' ) ] = Feature::get_debug_value_text( $provider_settings['concept_threshold'], 1 );
-			$debug_info[ __( 'Concept (taxonomy)', 'classifai' ) ]  = Feature::get_debug_value_text( $provider_settings['concept_taxonomy'], 1 );
+			foreach ( $this->nlu_features as $slug => $feature ) {
+				$debug_info[ $feature['feature'] . ' (status)' ]    = Feature::get_debug_value_text( $provider_settings[ $slug ], 1 );
+				$debug_info[ $feature['feature'] . ' (threshold)' ] = Feature::get_debug_value_text( $provider_settings[ $slug . '_threshold' ], 1 );
+				$debug_info[ $feature['feature'] . ' (taxonomy)' ]  = Feature::get_debug_value_text( $provider_settings[ $slug . '_taxonomy' ], 1 );
+			}
 
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_watson_nlu_latest_response' ) );
 		}

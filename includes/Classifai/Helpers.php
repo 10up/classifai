@@ -6,6 +6,7 @@ use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
+use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -609,6 +610,10 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
 	}
 
+	if ( $settings['provider'] === Embeddings::ID ) {
+		$taxonomy = $classify_by;
+	}
+
 	if ( empty( $taxonomy ) ) {
 		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
 
@@ -629,4 +634,31 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 	 * @return {string} The filtered taxonomy slug.
 	 */
 	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
+}
+
+/**
+ * Get Classification mode.
+ *
+ * @since 2.5.0
+ *
+ * @return string
+ */
+function get_classification_mode(): string {
+	$feature  = new Classification();
+	$settings = $feature->get_settings( NLU::ID );
+	$value    = $settings['classification_mode'] ?? '';
+
+	if ( $feature->is_feature_enabled() ) {
+		if ( empty( $value ) ) {
+			// existing users
+			// default: automatic_classification
+			return 'automatic_classification';
+		}
+	} else {
+		// new users
+		// default: manual_review
+		return 'manual_review';
+	}
+
+	return $value;
 }
