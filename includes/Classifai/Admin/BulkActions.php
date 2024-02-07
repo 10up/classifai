@@ -82,7 +82,7 @@ class BulkActions {
 				continue;
 			}
 
-			foreach ( $settings['post_types'] as $key => $post_type ) {
+			foreach ( $settings['post_types'] as $post_type ) {
 				add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_language_processing_actions' ] );
 				add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'language_processing_actions_handler' ], 10, 3 );
 
@@ -153,7 +153,25 @@ class BulkActions {
 		foreach ( $post_ids as $post_id ) {
 			switch ( $doaction ) {
 				case Classification::ID:
-					( new Classification() )->run( $post_id );
+					// Check to see if processing is disabled and overwrite that.
+					// Since we are manually classifying, we want to force this.
+					$classification_enabled = get_post_meta( $post_id, '_classifai_process_content', true );
+					if ( 'yes' !== $classification_enabled ) {
+						update_post_meta( $post_id, '_classifai_process_content', 'yes' );
+					}
+
+					$classification   = new Classification();
+					$classify_results = $classification->run( $post_id, 'classify' );
+
+					// Ensure the processing value is changed back to what it was.
+					if ( 'yes' !== $classification_enabled ) {
+						update_post_meta( $post_id, '_classifai_process_content', 'no' );
+					}
+
+					if ( ! empty( $classify_results ) && ! is_wp_error( $classify_results ) ) {
+						$classification->save( $post_id, $classify_results );
+					}
+
 					$action = $doaction;
 					break;
 
