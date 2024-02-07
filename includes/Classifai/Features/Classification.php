@@ -816,66 +816,6 @@ class Classification extends Feature {
 	}
 
 	/**
-	 * The list of post types that support classification.
-	 *
-	 * @return array
-	 */
-	public function get_supported_post_types(): array {
-		$settings   = $this->get_settings();
-		$post_types = [];
-
-		foreach ( $settings['post_types'] as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
-		}
-
-		/**
-		 * Filter post types supported for classification.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_feature_classification_post_types
-		 *
-		 * @param {array} $post_types Array of post types to be classified.
-		 *
-		 * @return {array} Array of post types.
-		 */
-		$post_types = apply_filters( 'classifai_' . static::ID . '_post_types', $post_types );
-
-		return $post_types;
-	}
-
-	/**
-	 * The list of post statuses that support classification.
-	 *
-	 * @return array
-	 */
-	public function get_supported_post_statuses(): array {
-		$settings      = $this->get_settings();
-		$post_statuses = [];
-
-		foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_statuses[] = $post_status;
-			}
-		}
-
-		/**
-		 * Filter post statuses supported for classification.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_feature_classification_post_statuses
-		 *
-		 * @param {array} $post_types Array of post statuses to be classified.
-		 *
-		 * @return {array} Array of post statuses.
-		 */
-		$post_statuses = apply_filters( 'classifai_' . static::ID . '_post_statuses', $post_statuses );
-
-		return $post_statuses;
-	}
-
-	/**
 	 * Get all feature taxonomies.
 	 *
 	 * @return array

@@ -107,6 +107,10 @@ class BulkActions {
 				continue;
 			}
 
+			if ( ! in_array( get_post_type(), $feature->get_supported_post_types(), true ) ) {
+				continue;
+			}
+
 			$bulk_actions[ $feature::ID ] = $feature->get_label();
 
 			switch ( $feature::ID ) {
@@ -298,6 +302,14 @@ class BulkActions {
 	public function register_language_processing_row_action( array $actions, \WP_Post $post ): array {
 		foreach ( $this->language_processing_features as $feature ) {
 			if ( ! $feature->is_feature_enabled() ) {
+				continue;
+			}
+
+			if ( ! in_array( get_post_type(), $feature->get_supported_post_types(), true ) ) {
+				continue;
+			}
+
+			if ( ! in_array( get_post_status(), $feature->get_supported_post_statuses(), true ) ) {
 				continue;
 			}
 
