@@ -27,7 +27,7 @@ class RecommendedContent extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			PersonalizerProvider::ID => __( 'Microsoft AI Personalizer', 'classifai' ),
+			PersonalizerProvider::ID => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 		];
 	}
 
