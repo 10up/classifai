@@ -12,8 +12,6 @@ use Classifai\Features\Feature;
 use Classifai\Providers\Watson\PostClassifier;
 use WP_Error;
 
-use function Classifai\get_asset_info;
-
 class NLU extends Provider {
 
 	const ID = 'ibm_watson_nlu';
@@ -163,90 +161,6 @@ class NLU extends Provider {
 		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-		// add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
-	}
-
-	/**
-	 * Renders the previewer window for the feature.
-	 *
-	 * @param string $active_feature The active feature.
-	 */
-	public function render_previewer( string $active_feature ) {
-		$feature  = new Classification();
-		$provider = $feature->get_feature_provider_instance();
-
-		if (
-			self::ID !== $provider::ID ||
-			$feature::ID !== $active_feature ||
-			! $feature->is_feature_enabled()
-		) {
-			return;
-		}
-		?>
-
-		<div id="classifai-post-preview-app">
-			<?php
-			$supported_post_statuses = get_supported_post_statuses();
-			$supported_post_types    = get_supported_post_types();
-
-			$posts_to_preview = get_posts(
-				array(
-					'post_type'      => $supported_post_types,
-					'post_status'    => $supported_post_statuses,
-					'posts_per_page' => 10,
-				)
-			);
-
-			$features = array(
-				'category' => array(
-					'name'    => esc_html__( 'Category', 'classifai' ),
-					'enabled' => get_feature_enabled( 'category' ),
-					'plural'  => 'categories',
-				),
-				'keyword'  => array(
-					'name'    => esc_html__( 'Keyword', 'classifai' ),
-					'enabled' => get_feature_enabled( 'keyword' ),
-					'plural'  => 'keywords',
-				),
-				'entity'   => array(
-					'name'    => esc_html__( 'Entity', 'classifai' ),
-					'enabled' => get_feature_enabled( 'entity' ),
-					'plural'  => 'entities',
-				),
-				'concept'  => array(
-					'name'    => esc_html__( 'Concept', 'classifai' ),
-					'enabled' => get_feature_enabled( 'concept' ),
-					'plural'  => 'concepts',
-				),
-			);
-			?>
-
-			<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
-			<div id="classifai-post-preview-controls">
-				<select id="classifai-preview-post-selector">
-					<?php foreach ( $posts_to_preview as $post ) : ?>
-						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
-				<button type="button" class="button" id="get-classifier-preview-data-btn">
-					<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
-				</button>
-			</div>
-			<div id="classifai-post-preview-wrapper">
-				<?php
-				foreach ( $features as $feature_slug => $feature ) :
-					?>
-					<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-						<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
-					</div>
-					<?php
-				endforeach;
-				?>
-			</div>
-		</div>
-
-		<?php
 	}
 
 	/**
@@ -315,14 +229,6 @@ class NLU extends Provider {
 			$feature->is_feature_enabled() &&
 			$feature->get_feature_provider_instance()::ID === static::ID
 		) {
-	// 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-	// 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-
-	// 		// Add classifai meta box to classic editor.
-	// 		add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-	// 		add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
-
-	// 		add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
 
 			$this->taxonomy_factory = new TaxonomyFactory();
 			$this->taxonomy_factory->build_all();
@@ -332,65 +238,6 @@ class NLU extends Provider {
 
 	// 		new PreviewClassifierData();
 		}
-	}
-
-	/**
-	 * Enqueue the editor scripts.
-	 */
-	public function enqueue_editor_assets() {
-		global $post;
-		wp_enqueue_script(
-			'classifai-editor',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			get_asset_info( 'editor', 'dependencies' ),
-			get_asset_info( 'editor', 'version' ),
-			true
-		);
-
-		if ( empty( $post ) ) {
-			return;
-		}
-
-		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
-			true
-		);
-
-		wp_localize_script(
-			'classifai-gutenberg-plugin',
-			'classifaiPostData',
-			[
-				'NLUEnabled'           => ( new Classification() )->is_feature_enabled(),
-				'supportedPostTypes'   => get_supported_post_types(),
-				'supportedPostStatues' => get_supported_post_statuses(),
-				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-			]
-		);
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 */
-	public function enqueue_admin_assets() {
-		wp_enqueue_script(
-			'classifai-language-processing-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			get_asset_info( 'language-processing', 'dependencies' ),
-			get_asset_info( 'language-processing', 'version' ),
-			true
-		);
-
-		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-			array(),
-			get_asset_info( 'language-processing', 'version' ),
-			'all'
-		);
 	}
 
 	/**
@@ -512,140 +359,6 @@ class NLU extends Provider {
 		}
 
 		return preg_replace( '/,"/', ', "', wp_json_encode( $formatted_data ) );
-	}
-
-	/**
-	 * Add metabox to enable/disable language processing on post/post types.
-	 *
-	 * @since 1.8.0
-	 *
-	 * @param string   $post_type Post Type.
-	 * @param \WP_Post $post      WP_Post object.
-	 */
-	public function add_classifai_meta_box( string $post_type, \WP_Post $post ) {
-		$supported_post_types = get_supported_post_types();
-		$post_statuses        = get_supported_post_statuses();
-		$post_status          = get_post_status( $post );
-		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
-			add_meta_box(
-				'classifai_language_processing_metabox',
-				__( 'ClassifAI Language Processing', 'classifai' ),
-				[ $this, 'render_classifai_meta_box' ],
-				null,
-				'side',
-				'low',
-				array( '__back_compat_meta_box' => true )
-			);
-		}
-	}
-
-	/**
-	 * Render metabox content.
-	 *
-	 * @since 1.8.0
-	 *
-	 * @param \WP_Post $post WP_Post object.
-	 */
-	public function render_classifai_meta_box( \WP_Post $post ) {
-		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
-		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
-		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
-
-		$post_type       = get_post_type_object( get_post_type( $post ) );
-		$post_type_label = esc_html__( 'Post', 'classifai' );
-		if ( $post_type ) {
-			$post_type_label = $post_type->labels->singular_name;
-		}
-		?>
-		<p>
-			<label for="_classifai_process_content">
-				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
-				<?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?>
-			</label>
-		</p>
-		<div class="classifai-clasify-post-wrapper" style="display: none;">
-			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
-				<?php
-				/* translators: %s Post type label */
-				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
-				?>
-			</a>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Save language processing meta data on post/post types.
-	 *
-	 * @since 1.8.0
-	 *
-	 * @param int $post_id Post ID.
-	 */
-	public function classifai_save_post_metadata( int $post_id ) {
-		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
-			return;
-		}
-
-		if ( empty( $_POST['classifai_language_processing_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), 'classifai_language_processing_meta_action' ) ) {
-			return;
-		}
-
-		$supported_post_types = get_supported_post_types();
-		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
-			return;
-		}
-
-		if ( isset( $_POST['_classifai_process_content'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['_classifai_process_content'] ) ) ) {
-			$classifai_process_content = 'yes';
-		} else {
-			$classifai_process_content = 'no';
-		}
-
-		update_post_meta( $post_id, '_classifai_process_content', $classifai_process_content );
-	}
-
-	/**
-	 * Add `classifai_process_content` to rest API for view/edit.
-	 */
-	public function add_process_content_meta_to_rest_api() {
-		$supported_post_types = get_supported_post_types();
-		register_rest_field(
-			$supported_post_types,
-			'classifai_process_content',
-			array(
-				'get_callback'    => function ( $data ) {
-					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
-					return ( 'no' === $process_content ) ? 'no' : 'yes';
-				},
-				'update_callback' => function ( $value, $data ) {
-					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $data->ID, '_classifai_process_content', $value );
-				},
-				'schema'          => [
-					'type'    => 'string',
-					'context' => [ 'view', 'edit' ],
-				],
-			)
-		);
-	}
-
-	/**
-	 * Returns whether the provider is configured or not.
-	 *
-	 * For backwards compat, we've maintained the use of the
-	 * `classifai_configured` option. We default to looking for
-	 * the `authenticated` setting though.
-	 *
-	 * @return bool
-	 */
-	public function is_configured(): bool {
-		$is_configured = parent::is_configured();
-
-		if ( ! $is_configured ) {
-			$is_configured = (bool) get_option( 'classifai_configured', false );
-		}
-
-		return $is_configured;
 	}
 
 	/**

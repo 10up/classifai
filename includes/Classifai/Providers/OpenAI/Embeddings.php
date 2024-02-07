@@ -14,10 +14,6 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use WP_Error;
 
-use function Classifai\get_asset_info;
-use function Classifai\Providers\Watson\get_supported_post_statuses;
-use function Classifai\Providers\Watson\get_supported_post_types;
-
 class Embeddings extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
@@ -110,77 +106,7 @@ class Embeddings extends Provider {
 			]
 		);
 
-		add_settings_field(
-			static::ID . '_number_of_terms',
-			esc_html__( 'Number of terms', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'   => static::ID,
-				'label_for'      => 'number_of_terms',
-				'input_type'     => 'number',
-				'min'            => 1,
-				'step'           => 1,
-				'default_values' => $settings['number_of_terms'],
-				'description'    => esc_html__( 'Maximum number of terms that will get auto-assigned.', 'classifai' ),
-				'class'          => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-		// add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
-	}
-
-	/**
-	 * Renders the previewer window for the feature.
-	 *
-	 * @param string $active_feature The active feature.
-	 */
-	public function render_previewer( string $active_feature ) {
-		$feature  = new Classification();
-		$provider = $feature->get_feature_provider_instance();
-
-		if (
-			self::ID !== $provider::ID ||
-			$feature::ID !== $active_feature ||
-			! $feature->is_feature_enabled()
-		) {
-			return;
-		}
-		?>
-
-		<div id="classifai-post-preview-app">
-			<?php
-			$supported_post_statuses = get_supported_post_statuses();
-			$supported_post_types    = get_supported_post_types();
-
-			$posts_to_preview = get_posts(
-				array(
-					'post_type'      => $supported_post_types,
-					'post_status'    => $supported_post_statuses,
-					'posts_per_page' => 10,
-				)
-			);
-			?>
-
-			<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
-			<div id="classifai-post-preview-controls">
-				<select id="classifai-preview-post-selector">
-					<?php foreach ( $posts_to_preview as $post ) : ?>
-						<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-					<?php endforeach; ?>
-				</select>
-				<?php wp_nonce_field( 'classifai-previewer-action', 'classifai-previewer-nonce' ); ?>
-				<button type="button" class="button" id="get-classifier-preview-data-btn">
-					<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
-				</button>
-			</div>
-			<div id="classifai-post-preview-wrapper">
-			</div>
-		</div>
-
-		<?php
 	}
 
 	/**
@@ -190,12 +116,35 @@ class Embeddings extends Provider {
 	 */
 	public function get_default_provider_settings(): array {
 		$common_settings = [
-			'api_key'         => '',
-			'number_of_terms' => 1,
-			'authenticated'   => false,
+			'api_key'       => '',
+			'authenticated' => false,
 		];
 
 		return $common_settings;
+	}
+
+	/**
+	 * Register what we need for the plugin.
+	 *
+	 * This only fires if can_register returns true.
+	 */
+	public function register() {
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		$feature = new Classification();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
+		// add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+
+		// add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
 	/**
@@ -225,88 +174,6 @@ class Embeddings extends Provider {
 		}
 
 		return array_merge( $settings, $defaults );
-	}
-
-	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
-	 */
-	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
-
-		// $feature = new Classification();
-
-		// add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-
-		// if ( ! $feature->is_feature_enabled() || $feature->get_feature_provider_instance()::ID !== static::ID ) {
-		// 	return;
-		// }
-
-		// add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
-		// add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		// add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-		// add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ], 9 );
-		// add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
-		// add_action( 'add_meta_boxes', [ $this, 'add_metabox' ] );
-		// add_action( 'save_post', [ $this, 'save_metabox' ] );
-		// add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 */
-	public function enqueue_admin_assets() {
-		wp_enqueue_script(
-			'classifai-language-processing-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			get_asset_info( 'language-processing', 'dependencies' ),
-			get_asset_info( 'language-processing', 'version' ),
-			true
-		);
-
-		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-			array(),
-			get_asset_info( 'language-processing', 'version' ),
-			'all'
-		);
-	}
-
-	/**
-	 * Enqueue editor assets.
-	 */
-	public function enqueue_editor_assets() {
-		global $post;
-
-		if ( empty( $post ) ) {
-			return;
-		}
-
-		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
-			true
-		);
-
-		wp_add_inline_script(
-			'classifai-gutenberg-plugin',
-			sprintf(
-				'var classifaiEmbeddingData = %s;',
-				wp_json_encode(
-					[
-						'enabled'              => true,
-						'supportedPostTypes'   => $this->supported_post_types(),
-						'supportedPostStatues' => $this->supported_post_statuses(),
-						'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
-					]
-				)
-			),
-			'before'
-		);
 	}
 
 	/**
@@ -500,8 +367,6 @@ class Embeddings extends Provider {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
 		}
 
-		$settings             = ( new Classification() )->get_settings();
-		$number_to_add        = $settings['number_of_terms'] ?? 1;
 		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
 
 		if ( empty( $embedding_similarity ) ) {
@@ -510,14 +375,6 @@ class Embeddings extends Provider {
 
 		// Set terms based on similarity.
 		foreach ( $embedding_similarity as $tax => $terms ) {
-			// Sort embeddings from lowest to highest.
-			asort( $terms );
-
-			// Only add the number of terms specified in settings.
-			if ( count( $terms ) > $number_to_add ) {
-				$terms = array_slice( $terms, 0, $number_to_add, true );
-			}
-
 			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
 		}
 	}
@@ -533,8 +390,6 @@ class Embeddings extends Provider {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
-		$settings             = ( new Classification() )->get_settings();
-		$number_to_add        = $settings[ static::ID ]['number_of_terms'] ?? 1;
 		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
 
 		if ( empty( $embedding_similarity ) ) {
@@ -560,11 +415,6 @@ class Embeddings extends Provider {
 
 			$term_added = 0;
 			foreach ( $terms as $term_id => $similarity ) {
-				// Stop if we have added the number of terms specified in settings.
-				if ( $number_to_add <= $term_added ) {
-					break;
-				}
-
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $similarity ), 10 );
 
@@ -573,11 +423,6 @@ class Embeddings extends Provider {
 					'score' => $similarity,
 				];
 				++$term_added;
-			}
-
-			// Only add the number of terms specified in settings.
-			if ( count( $terms ) > $number_to_add ) {
-				$terms = array_slice( $terms, 0, $number_to_add, true );
 			}
 
 			++$index;
@@ -836,123 +681,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Add `classifai_process_content` to the REST API for view/edit.
-	 */
-	public function add_process_content_meta_to_rest_api() {
-		$supported_post_types = $this->supported_post_types( new Classification() );
-
-		register_rest_field(
-			$supported_post_types,
-			'classifai_process_content',
-			[
-				'get_callback'    => function ( $data ) {
-					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
-					return ( 'no' === $process_content ) ? 'no' : 'yes';
-				},
-				'update_callback' => function ( $value, $data ) {
-					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $data->ID, '_classifai_process_content', $value );
-				},
-				'schema'          => [
-					'type'    => 'string',
-					'context' => [ 'view', 'edit' ],
-				],
-			]
-		);
-	}
-
-	/**
-	 * Add metabox.
-	 *
-	 * @param string $post_type Post type name.
-	 */
-	public function add_metabox( string $post_type ) {
-		if ( ! in_array( $post_type, $this->get_supported_post_types( new Classification() ), true ) ) {
-			return;
-		}
-
-		\add_meta_box(
-			'classifai_language_processing_metabox',
-			__( 'ClassifAI Language Processing', 'classifai' ),
-			array( $this, 'render_metabox' ),
-			null,
-			'side',
-			'default',
-			[
-				'__back_compat_meta_box' => true,
-			]
-		);
-	}
-
-	/**
-	 * Render metabox.
-	 *
-	 * @param \WP_Post $post A WordPress post instance.
-	 */
-	public function render_metabox( \WP_Post $post ) {
-
-		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
-		$checked                   = 'no' === $classifai_process_content ? '' : 'checked="checked"';
-
-		// Add nonce.
-		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
-		wp_nonce_field( 'classifai_embeddings_save_posts', '_nonce' );
-		?>
-		<div class='classifai-metabox classifai-metabox-embeddings'>
-			<p>
-				<label for="classifai-process-content" class="classifai-preview-toggle">
-					<input type="checkbox" value="yes" name="_classifai_process_content" id="classifai-process-content" <?php echo esc_html( $checked ); ?> />
-					<strong><?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?></strong>
-				</label>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Handles saving the metabox.
-	 *
-	 * @param int $post_id Current post ID.
-	 */
-	public function save_metabox( int $post_id ) {
-
-		if ( empty( $_POST['classifai_language_processing_meta'] ) ) {
-			return;
-		}
-
-		// Add nonce for security and authentication.
-		$nonce_action = 'classifai_language_processing_meta_action';
-
-		// Check if nonce is valid.
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), $nonce_action ) ) {
-			return;
-		}
-
-		// Check if user has permissions to save data.
-		if ( ! current_user_can( 'edit_post', $post_id ) ) {
-			return;
-		}
-
-		// Check if not an autosave.
-		if ( wp_is_post_autosave( $post_id ) ) {
-			return;
-		}
-
-		// Check if not a revision.
-		if ( wp_is_post_revision( $post_id ) ) {
-			return;
-		}
-
-		$classifai_process_content = isset( $_POST['_classifai_process_content'] ) ? sanitize_key( wp_unslash( $_POST['_classifai_process_content'] ) ) : '';
-
-		if ( 'yes' !== $classifai_process_content ) {
-			update_post_meta( $post_id, '_classifai_process_content', 'no' );
-		} else {
-			update_post_meta( $post_id, '_classifai_process_content', 'yes' );
-		}
-	}
-
-	/**
 	 * Returns the debug information for the provider settings.
 	 *
 	 * @return array
@@ -968,7 +696,6 @@ class Embeddings extends Provider {
 				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $provider_settings[ $tax . '_threshold' ], 1 );
 			}
 
-			$debug_info[ __( 'Number of terms', 'classifai' ) ] = $provider_settings['number_of_terms'] ?? 1;
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
 		}
 
