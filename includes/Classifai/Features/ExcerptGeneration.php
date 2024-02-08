@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\ChatGPT;
 use WP_REST_Server;
@@ -40,7 +41,8 @@ class ExcerptGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
+			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
+			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 		];
 	}
 

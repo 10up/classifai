@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\GoogleAI;
 
+use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
@@ -190,6 +191,9 @@ class GeminiAPI extends Provider {
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
+			case 'excerpt':
+				$return = $this->generate_excerpt( $post_id, $args );
+				break;
 			case 'title':
 				$return = $this->generate_titles( $post_id, $args );
 				break;
@@ -199,7 +203,114 @@ class GeminiAPI extends Provider {
 	}
 
 	/**
-	 * Generate titles using ChatGPT.
+	 * Generate an excerpt using Google AI (Gemini API).
+	 *
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args    Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+		}
+
+		$feature  = new ExcerptGeneration();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+				'title'   => get_the_title( $post_id ),
+			]
+		);
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or Google AI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$excerpt_length = absint( $settings['length'] ?? 55 );
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+
+		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+
+		// Replace our variables in the prompt.
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
+
+		/**
+		 * Filter the prompt we will send to Gemini API.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_googleai_gemini_api_excerpt_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to Gemini API. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {int} $excerpt_length Length of final excerpt.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_googleai_gemini_api_excerpt_prompt', $prompt, $post_id, $excerpt_length );
+
+		/**
+		 * Filter the request body before sending to Gemini API.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_googleai_gemini_api_excerpt_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to Gemini API.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_googleai_gemini_api_excerpt_request_body',
+			[
+				'contents'         => [
+					[
+						'parts' => [
+							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . ' \n """' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
+						],
+					],
+				],
+				'generationConfig' => [
+					'temperature'     => 0.9,
+					'topK'            => 1,
+					'topP'            => 1,
+					'maxOutputTokens' => 2048,
+				],
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		set_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Extract out the text response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['candidates'] ) ) {
+			foreach ( $response['candidates'] as $candidate ) {
+				if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
+					$parts    = $candidate['content']['parts'];
+					$response = sanitize_text_field( trim( $parts[0]['text'], ' "\'' ) );
+				}
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Generate titles using Google AI (Gemini API).
 	 *
 	 * @param int   $post_id The Post Id we're processing
 	 * @param array $args Arguments passed in.
@@ -259,16 +370,9 @@ class GeminiAPI extends Provider {
 			'classifai_googleai_gemini_api_title_request_body',
 			[
 				'contents'         => [
-					// [
-					// 	'role'  => 'model',
-					// 	'parts' => [
-					// 		'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					// 	],
-					// ],
 					[
-						'role'  => 'user',
 						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
+							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
 						],
 					],
 				],
@@ -320,13 +424,12 @@ class GeminiAPI extends Provider {
 	 * The Gemini Pro model can process up to 30,720 input tokens, which is approximately equivalent to 18,000 - 24,000 words. (https://ai.google.dev/models/gemini#model_variations)
 	 * Given that the average blog post length ranges from 1,500 - 2,500 words, this limit is more than sufficient for our use case.
 	 *
-	 * @param int    $post_id       Post ID to get content from.
-	 * @param int    $return_length Word length of returned content.
-	 * @param bool   $use_title     Whether to use the title or not.
-	 * @param string $post_content  The post content.
+	 * @param int    $post_id      Post ID to get content from.
+	 * @param bool   $use_title    Whether to use the title or not.
+	 * @param string $post_content The post content.
 	 * @return string
 	 */
-	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ): string {
+	public function get_content( int $post_id = 0, bool $use_title = true, string $post_content = '' ): string {
 		$normalizer = new Normalizer();
 
 		if ( empty( $post_content ) ) {
@@ -371,6 +474,10 @@ class GeminiAPI extends Provider {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_titles'] ?? 1;
 			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_title_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response' ) );
 		}
 
 		return apply_filters(
