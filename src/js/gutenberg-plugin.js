@@ -288,7 +288,7 @@ const ClassificationButton = () => {
 		<div id="classify-post-component">
 			{ isOpen && (
 				<Modal
-					title={ __( 'Confirm Post Classification', 'classifai' ) }
+					title={ __( 'Confirm Classification', 'classifai' ) }
 					onRequestClose={ closeModal }
 					isFullScreen={ false }
 					className="classify-modal"

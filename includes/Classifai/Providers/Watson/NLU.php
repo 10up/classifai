@@ -379,9 +379,11 @@ class NLU extends Provider {
 
 		$classifier = new PostClassifier();
 
-		$output = $classifier->classify( $post_id );
+		return get_post_meta( $post_id, 'classifai_watson_nlu_results', true ); // TODO
+		// $output = $classifier->classify( $post_id );
 
-		return $output;
+		// update_post_meta( $post_id, 'classifai_watson_nlu_results', $output );
+		// return $output;
 	}
 
 	/**
@@ -389,16 +391,17 @@ class NLU extends Provider {
 	 *
 	 * @param int   $post_id The post ID.
 	 * @param array $terms The classification results from Watson NLU.
+	 * @param bool  $link Whether to link the terms or not.
 	 * @return array|WP_Error
 	 */
-	public function link( int $post_id, array $terms ) {
+	public function link( int $post_id, array $terms, bool $link = true ) {
 		if ( empty( $terms ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No terms to link.', 'classifai' ) );
 		}
 
 		$classifier = new PostClassifier();
 
-		$output = $classifier->link( $post_id, $terms );
+		$output = $classifier->link( $post_id, $terms, [], $link );
 
 		return $output;
 	}

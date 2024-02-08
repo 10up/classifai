@@ -195,8 +195,9 @@ class Classification extends Feature {
 				]
 			);
 
+			// Save results or return the results that need saved.
 			if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
-				$this->save( $request->get_param( 'id' ), $results );
+				$results = $this->save( $request->get_param( 'id' ), $results, $request->get_param( 'linkTerms' ) ?? true );
 			}
 
 			return rest_ensure_response(
@@ -214,19 +215,23 @@ class Classification extends Feature {
 	 * Save the classification results.
 	 *
 	 * @param int   $post_id The post ID.
-	 * @param array $results Term results.
+	 * @param array $results Term results
+	 * @param bool  $link Whether to link the terms or not.
+	 * @return array|WP_Error
 	 */
-	public function save( int $post_id, array $results ) {
+	public function save( int $post_id, array $results, bool $link = true ) {
 		$provider_instance = $this->get_feature_provider_instance();
 
 		switch ( $provider_instance::ID ) {
 			case NLU::ID:
-				$results = $provider_instance->link( $post_id, $results );
+				$results = $provider_instance->link( $post_id, $results, $link );
 				break;
 			case Embeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results );
 				break;
 		}
+
+		return $results;
 	}
 
 	/**
@@ -844,7 +849,7 @@ class Classification extends Feature {
 			return $feature_taxonomies;
 		}
 
-		foreach ( array_keys( $this->get_supported_taxonomies() ) as $feature_name ) {
+		foreach ( array_keys( $provider_instance->nlu_features ) as $feature_name ) {
 			if ( ! get_classification_feature_enabled( $feature_name ) ) {
 				continue;
 			}
