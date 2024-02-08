@@ -2,9 +2,10 @@
 
 namespace Classifai;
 
+use Classifai\Features\Classification;
+
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
-use function Classifai\Providers\Watson\get_supported_post_types;
 use function Classifai\Providers\Watson\get_feature_threshold;
 use function Classifai\get_classification_feature_taxonomy;
 
@@ -12,6 +13,15 @@ use function Classifai\get_classification_feature_taxonomy;
  * @group helpers
  */
 class HelpersTest extends \WP_UnitTestCase {
+
+	/**
+	 * Provides a Feature instance.
+	 *
+	 * @return Classification
+	 */
+	public function get_feature_class() : Classification {
+		return new Classification();
+	}
 
 	/**
 	 * Set up method.
@@ -43,7 +53,7 @@ class HelpersTest extends \WP_UnitTestCase {
 	}
 
 	function test_it_has_default_supported_post_types() {
-		$actual = get_supported_post_types();
+		$actual = $this->get_feature_class()->get_supported_post_types();
 		$this->assertEquals( ['post'], $actual );
 	}
 
@@ -51,16 +61,16 @@ class HelpersTest extends \WP_UnitTestCase {
 		$this->markTestSkipped();
 		update_option( 'classifai_settings', [ 'post_types' => [ 'post' => 1, 'page' => 1 ] ] );
 
-		$actual = get_supported_post_types();
+		$actual = $this->get_feature_class()->get_supported_post_types();
 		$this->assertEquals( [ 'post', 'page' ], $actual );
 	}
 
 	function test_it_can_override_supported_post_types_with_filter() {
-		add_filter( 'classifai_post_types', function() {
+		add_filter( 'classifai_feature_classification_post_types', function() {
 			return [ 'page' ];
 		} );
 
-		$actual = get_supported_post_types();
+		$actual = $this->get_feature_class()->get_supported_post_types();
 		$this->assertEquals( [ 'page' ], $actual );
 	}
 

@@ -546,15 +546,14 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$settings   = $this->feature_instance->get_settings();
+		$debug_info = [];
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( $this->nlu_features as $slug => $feature ) {
-				$debug_info[ $feature['feature'] . ' (status)' ]    = Feature::get_debug_value_text( $provider_settings[ $slug ], 1 );
-				$debug_info[ $feature['feature'] . ' (threshold)' ] = Feature::get_debug_value_text( $provider_settings[ $slug . '_threshold' ], 1 );
-				$debug_info[ $feature['feature'] . ' (taxonomy)' ]  = Feature::get_debug_value_text( $provider_settings[ $slug . '_taxonomy' ], 1 );
+				$debug_info[ $feature['feature'] . ' (status)' ]    = Feature::get_debug_value_text( $settings[ $slug ], 1 );
+				$debug_info[ $feature['feature'] . ' (threshold)' ] = Feature::get_debug_value_text( $settings[ $slug . '_threshold' ], 1 );
+				$debug_info[ $feature['feature'] . ' (taxonomy)' ]  = Feature::get_debug_value_text( $settings[ $slug . '_taxonomy' ], 1 );
 			}
 
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_watson_nlu_latest_response' ) );

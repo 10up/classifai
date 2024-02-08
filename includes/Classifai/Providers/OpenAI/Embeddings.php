@@ -702,14 +702,13 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$settings   = $this->feature_instance->get_settings();
+		$debug_info = [];
 
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
-				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $provider_settings[ $tax ], 1 );
-				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $provider_settings[ $tax . '_threshold' ], 1 );
+				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $settings[ $tax ], 1 );
+				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $settings[ $tax . '_threshold' ], 1 );
 			}
 
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
