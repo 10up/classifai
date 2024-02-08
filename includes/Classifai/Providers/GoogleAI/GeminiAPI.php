@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\GoogleAI;
 
+use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
@@ -196,6 +197,9 @@ class GeminiAPI extends Provider {
 				break;
 			case 'title':
 				$return = $this->generate_titles( $post_id, $args );
+				break;
+			case 'resize_content':
+				$return = $this->resize_content( $post_id, $args );
 				break;
 		}
 
@@ -417,6 +421,111 @@ class GeminiAPI extends Provider {
 	}
 
 	/**
+	 * Resizes content.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function resize_content( int $post_id, array $args = array() ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
+		}
+
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
+		$args = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num' => $settings['number_of_suggestions'] ?? 1,
+			]
+		);
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+
+		if ( 'shrink' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+		}
+
+		/**
+		 * Filter the resize prompt we will send to Gemini API.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_googleai_gemini_api_' . $args['resize_type'] . '_content_prompt
+		 *
+		 * @param {string} $prompt Resize prompt we are sending to Gemini API. Gets added as a system prompt.
+		 * @param {int} $post_id ID of post.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_googleai_gemini_api_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the resize request body before sending to Gemini API.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_googleai_gemini_api_resize_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to Gemini API.
+		 * @param {int}   $post_id ID of post.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_googleai_gemini_api_resize_content_request_body',
+			[
+				'contents'         => [
+					[
+						'parts' => [
+							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . esc_html( $args['content'] ) . '"""',
+						],
+					],
+				],
+				'generationConfig' => [
+					'temperature'     => 0.9,
+					'topK'            => 1,
+					'topP'            => 1,
+					'maxOutputTokens' => 2048,
+				],
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		set_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['candidates'] ) ) {
+			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from Google AI.', 'classifai' ) );
+		}
+
+		// Extract out the text response.
+		$return = [];
+		foreach ( $response['candidates'] as $candidate ) {
+			if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
+				$parts    = $candidate['content']['parts'];
+				$return[] = sanitize_text_field( trim( $parts[0]['text'], ' "\'' ) );
+			}
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Get our content, trimming if needed.
 	 *
 	 * ### Important Note:
@@ -478,6 +587,11 @@ class GeminiAPI extends Provider {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_excerpt_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_excerpt_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ContentResizing ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $provider_settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_content_resizing_latest_response' ) );
 		}
 
 		return apply_filters(
