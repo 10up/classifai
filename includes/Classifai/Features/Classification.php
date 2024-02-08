@@ -58,16 +58,24 @@ class Classification extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
+		$post_types = $this->get_supported_post_types();
+		if ( ! empty( $post_types ) ) {
+			foreach ( $post_types as $post_type ) {
+				add_action( 'rest_after_insert_' . $post_type, [ $this, 'rest_after_insert' ] );
+			}
+		}
+
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 		add_action( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
+
+		// Support the Classic Editor.
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ], 10, 2 );
-		add_action( 'save_post', [ $this, 'save_metabox' ] );
+		add_action( 'save_post', [ $this, 'save_meta_box' ] );
 		add_action( 'admin_post_classifai_classify_post', array( $this, 'classifai_classify_post' ) );
 		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
-
-		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
 		add_filter( 'removable_query_args', [ $this, 'removable_query_args' ] );
 	}
 
@@ -187,6 +195,10 @@ class Classification extends Feature {
 				]
 			);
 
+			if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+				$this->save( $request->get_param( 'id' ), $results );
+			}
+
 			return rest_ensure_response(
 				[
 					'terms'              => $results,
@@ -214,6 +226,47 @@ class Classification extends Feature {
 			case Embeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results );
 				break;
+		}
+	}
+
+	/**
+	 * Run classification after an item has been inserted via REST.
+	 *
+	 * @param \WP_Post $post Post object.
+	 */
+	public function rest_after_insert( \WP_Post $post ) {
+		$supported_post_types = $this->get_supported_post_types();
+		$post_statuses        = $this->get_supported_post_statuses();
+
+		// Ensure the post type and status is allowed.
+		if (
+			! in_array( $post->post_type, $supported_post_types, true ) ||
+			! in_array( $post->post_status, $post_statuses, true )
+		) {
+			return;
+		}
+
+		// Check if processing on save is disabled.
+		if ( 'no' === get_post_meta( $post->ID, '_classifai_process_content', true ) ) {
+			return;
+		}
+
+		$results = $this->run( $post->ID, 'classify' );
+
+		if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+			$this->save( $post->ID, $results );
+			delete_post_meta( $post->ID, '_classifai_error' );
+		} elseif ( is_wp_error( $results ) ) {
+			update_post_meta(
+				$post->ID,
+				'_classifai_error',
+				wp_json_encode(
+					[
+						'code'    => $results->get_error_code(),
+						'message' => $results->get_error_message(),
+					]
+				)
+			);
 		}
 	}
 
@@ -263,8 +316,6 @@ class Classification extends Feature {
 			get_asset_info( 'gutenberg-plugin', 'version' ),
 			true
 		);
-
-		// TODO: check JS var classifaiEmbeddingData
 
 		wp_add_inline_script(
 			'classifai-gutenberg-plugin',
@@ -367,7 +418,7 @@ class Classification extends Feature {
 	 *
 	 * @param int $post_id Current post ID.
 	 */
-	public function save_metabox( int $post_id ) {
+	public function save_meta_box( int $post_id ) {
 		if (
 			wp_is_post_autosave( $post_id ) ||
 			wp_is_post_revision( $post_id ) ||
@@ -392,7 +443,10 @@ class Classification extends Feature {
 
 			$results = $this->run( $post_id, 'classify' );
 
-			if ( is_wp_error( $results ) ) {
+			if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+				$this->save( $post_id, $results );
+				delete_post_meta( $post_id, '_classifai_error' );
+			} elseif ( is_wp_error( $results ) ) {
 				update_post_meta(
 					$post_id,
 					'_classifai_error',
@@ -403,9 +457,6 @@ class Classification extends Feature {
 						]
 					)
 				);
-			} else {
-				$this->save( $post_id, $results );
-				delete_post_meta( $post_id, '_classifai_error' );
 			}
 		}
 	}
@@ -446,11 +497,11 @@ class Classification extends Feature {
 
 		$classified = array();
 
-		if ( ! is_wp_error( $results ) ) {
+		if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
 			$this->save( $post_id, $results );
 			$classified = array( 'classifai_classify' => 1 );
 			delete_post_meta( $post_id, '_classifai_error' );
-		} else {
+		} elseif ( is_wp_error( $results ) ) {
 			update_post_meta(
 				$post_id,
 				'_classifai_error',
@@ -778,41 +829,6 @@ class Classification extends Feature {
 		}
 
 		return $new_settings;
-	}
-
-	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 * @return mixed
-	 */
-	public function runs( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? NLU::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( NLU::ID === $provider_instance::ID ) {
-			/** @var NLU $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'classify' ],
-				[ ...$args ]
-			);
-		} elseif ( Embeddings::ID === $provider_instance::ID ) {
-			/** @var Embeddings $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'generate_embeddings_for_post' ],
-				[ ...$args ]
-			);
-		}
-
-		return apply_filters(
-			'classifai_' . static::ID . '_run',
-			$result,
-			$provider_instance,
-			$args,
-			$this
-		);
 	}
 
 	/**

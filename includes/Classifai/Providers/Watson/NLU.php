@@ -22,11 +22,6 @@ class NLU extends Provider {
 	public $taxonomy_factory;
 
 	/**
-	 * @var $save_post_handler SavePostHandler Triggers a classification with Watson
-	 */
-	public $save_post_handler;
-
-	/**
 	 * NLU features that are supported by this provider
 	 *
 	 * @var array
@@ -233,9 +228,6 @@ class NLU extends Provider {
 			$this->taxonomy_factory = new TaxonomyFactory();
 			$this->taxonomy_factory->build_all();
 
-			// $this->save_post_handler = new SavePostHandler();
-			// $this->save_post_handler->register();
-
 	// 		new PreviewClassifierData();
 		}
 	}
@@ -358,47 +350,9 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Handle request to generate tags for given post ID.
-	 *
-	 * @param int $post_id The Post Id we're processing.
-	 * @return mixed
-	 */
-	public function classify_post( int $post_id ) {
-		try {
-			if ( empty( $post_id ) ) {
-				return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to classify post.', 'classifai' ) );
-			}
-
-			$taxonomy_terms = [];
-			$features       = [ 'category', 'keyword', 'concept', 'entity' ];
-
-			// Process post content.
-			$result = $this->classify( $post_id );
-
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
-
-			foreach ( $features as $feature ) {
-				$taxonomy = get_feature_taxonomy( $feature );
-				$terms    = wp_get_object_terms( $post_id, $taxonomy );
-				if ( ! is_wp_error( $terms ) ) {
-					foreach ( $terms as $term ) {
-						$taxonomy_terms[ $taxonomy ][] = $term->term_id;
-					}
-				}
-			}
-
-			// Return taxonomy terms.
-			return rest_ensure_response( [ 'terms' => $taxonomy_terms ] );
-		} catch ( \Exception $e ) {
-			return new WP_Error( 'request_failed', $e->getMessage() );
-		}
-	}
-
-	/**
 	 * Classifies the post specified with the PostClassifier object.
-	 * Existing terms relationships are removed before classification.
+	 *
+	 * Existing terms relationships are removed during classification.
 	 *
 	 * @param int $post_id the post to classify & link
 	 * @return array|WP_Error

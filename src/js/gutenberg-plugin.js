@@ -18,8 +18,7 @@ import TaxonomyControls from './taxonomy-controls';
 import PrePubClassifyPost from './gutenberg-plugins/pre-publish-classify-post';
 import { DisableFeatureButton } from './components';
 
-const { classifaiEmbeddingData, classifaiPostData, classifaiTTSEnabled } =
-	window;
+const { classifaiPostData, classifaiTTSEnabled } = window;
 
 /**
  * Create the ClassifAI icon
@@ -29,10 +28,11 @@ const ClassifAIIcon = () => (
 );
 
 /**
- * ClassifAIToggle Component.
+ * ClassificationToggle Component.
  *
+ * Used to toggle the classification process on or off.
  */
-const ClassifAIToggle = () => {
+const ClassificationToggle = () => {
 	// Use the datastore to retrieve all the meta for this post.
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
@@ -56,9 +56,11 @@ const ClassifAIToggle = () => {
 };
 
 /**
- *  Classify Post Button
+ * Classify button.
+ *
+ * Used to manually classify the content.
  */
-const ClassifAIGenerateTagsButton = () => {
+const ClassificationButton = () => {
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
 			'classifai_process_content'
@@ -585,30 +587,17 @@ const ClassifAIPlugin = () => {
 	const isNLULanguageProcessingEnabled =
 		classifaiPostData && classifaiPostData.NLUEnabled;
 
-	const isEmbeddingProcessingEnabled =
-		classifaiEmbeddingData && classifaiEmbeddingData.enabled;
-
 	// Ensure we are on a supported post type, checking settings from all features.
 	const isNLUPostTypeSupported =
 		classifaiPostData &&
 		classifaiPostData.supportedPostTypes &&
 		classifaiPostData.supportedPostTypes.includes( postType );
 
-	const isEmbeddingPostTypeSupported =
-		classifaiEmbeddingData &&
-		classifaiEmbeddingData.supportedPostTypes &&
-		classifaiEmbeddingData.supportedPostTypes.includes( postType );
-
 	// Ensure we are on a supported post status, checking settings from all features.
 	const isNLUPostStatusSupported =
 		classifaiPostData &&
 		classifaiPostData.supportedPostStatues &&
 		classifaiPostData.supportedPostStatues.includes( postStatus );
-
-	const isEmbeddingPostStatusSupported =
-		classifaiEmbeddingData &&
-		classifaiEmbeddingData.supportedPostStatues &&
-		classifaiEmbeddingData.supportedPostStatues.includes( postStatus );
 
 	// Ensure the user has permissions to use the feature.
 	const userHasNLUPermissions =
@@ -618,24 +607,11 @@ const ClassifAIPlugin = () => {
 			1 === parseInt( classifaiPostData.noPermissions )
 		);
 
-	const userHasEmbeddingPermissions =
-		classifaiEmbeddingData &&
-		! (
-			classifaiEmbeddingData.noPermissions &&
-			1 === parseInt( classifaiEmbeddingData.noPermissions )
-		);
-
 	const nluPermissionCheck =
 		userHasNLUPermissions &&
 		isNLULanguageProcessingEnabled &&
 		isNLUPostTypeSupported &&
 		isNLUPostStatusSupported;
-
-	const embeddingsPermissionCheck =
-		userHasEmbeddingPermissions &&
-		isEmbeddingProcessingEnabled &&
-		isEmbeddingPostTypeSupported &&
-		isEmbeddingPostStatusSupported;
 
 	return (
 		<PluginDocumentSettingPanel
@@ -644,12 +620,10 @@ const ClassifAIPlugin = () => {
 			className="classifai-panel"
 		>
 			<>
-				{ ( nluPermissionCheck || embeddingsPermissionCheck ) && (
+				{ nluPermissionCheck && (
 					<>
-						<ClassifAIToggle />
-						{ nluPermissionCheck && (
-							<ClassifAIGenerateTagsButton />
-						) }
+						<ClassificationToggle />
+						{ nluPermissionCheck && <ClassificationButton /> }
 					</>
 				) }
 				{ classifaiTTSEnabled && <ClassifAITTS /> }

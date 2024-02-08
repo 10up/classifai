@@ -1244,6 +1244,7 @@ abstract class Feature {
 	 * @return mixed
 	 */
 	public function run( ...$args ) {
+		error_log( 'running' ); // TODO: remove
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'];
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );

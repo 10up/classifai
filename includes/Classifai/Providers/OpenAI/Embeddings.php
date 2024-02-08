@@ -268,6 +268,25 @@ class Embeddings extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
+		/**
+		 * Filter whether ClassifAI should classify a post.
+		 *
+		 * Default is true, return false to skip classifying a post.
+		 *
+		 * @since 1.2.0
+		 * @hook classifai_should_classify_post
+		 *
+		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
+		 *                                classification for this post.
+		 * @param {int}  $post_id         The ID of the post to be considered for classification.
+		 *
+		 * @return {bool} Whether the post should be classified.
+		 */
+		$should_classify = apply_filters( 'classifai_should_classify_post', true, $post_id );
+		if ( ! $should_classify ) {
+			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
+		}
+
 		// TODO: $embeddings = $this->generate_embeddings( $post_id, 'post' );
 		$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
 
