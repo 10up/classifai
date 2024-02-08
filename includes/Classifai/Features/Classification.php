@@ -401,7 +401,7 @@ class Classification extends Feature {
 	 * @param string   $post_type Post type.
 	 * @param \WP_Post $post WP_Post object.
 	 */
-	public function add_meta_box( string $post_type, \WP_Post $post ) {
+	public function add_meta_box( string $post_type, $post ) {
 		$supported_post_types = $this->get_supported_post_types();
 		$post_statuses        = $this->get_supported_post_statuses();
 		$post_status          = get_post_status( $post );
