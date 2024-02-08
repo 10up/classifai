@@ -330,7 +330,7 @@ class GeminiAPI extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings['number_of_titles'] ?? 1,
+				'num'     => 1, // Gemini API only returns 1 title.
 				'content' => '',
 			]
 		);
@@ -580,7 +580,7 @@ class GeminiAPI extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
-			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_titles'] ?? 1;
+			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = 1;
 			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $provider_settings['generate_title_prompt'] ?? [] );
 			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_googleai_gemini_api_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {

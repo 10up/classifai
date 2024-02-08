@@ -13,6 +13,7 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
+use function Classifai\sanitize_number_of_responses_field;
 
 class ChatGPT extends Provider {
 
@@ -84,6 +85,24 @@ class ChatGPT extends Provider {
 			]
 		);
 
+		add_settings_field(
+			'number_of_titles',
+			esc_html__( 'Number of titles', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'number_of_titles',
+				'input_type'    => 'number',
+				'min'           => 1,
+				'step'          => 1,
+				'default_value' => $settings['number_of_titles'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => esc_html__( 'Number of titles that will be generated in one request.', 'classifai' ),
+			]
+		);
+
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -94,8 +113,9 @@ class ChatGPT extends Provider {
 	 */
 	public function get_default_provider_settings(): array {
 		$common_settings = [
-			'api_key'       => '',
-			'authenticated' => false,
+			'api_key'          => '',
+			'authenticated'    => false,
+			'number_of_titles' => 1,
 		];
 
 		return $common_settings;
@@ -111,8 +131,9 @@ class ChatGPT extends Provider {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
 
-		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
-		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['api_key']          = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated']    = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['number_of_titles'] = sanitize_number_of_responses_field( 'number_of_titles', $new_settings[ static::ID ], $settings[ static::ID ] );
 
 		return $new_settings;
 	}
@@ -283,7 +304,7 @@ class ChatGPT extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'     => $settings['number_of_titles'] ?? 1,
+				'num'     => $settings[ static::ID ]['number_of_titles'] ?? 1,
 				'content' => '',
 			]
 		);
