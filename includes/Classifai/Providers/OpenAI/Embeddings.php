@@ -142,8 +142,7 @@ class Embeddings extends Provider {
 
 		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-
-		// add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
 	/**
@@ -240,7 +239,13 @@ class Embeddings extends Provider {
 
 		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		$embeddings_terms = $this->generate_embeddings_for_post( $post_id, true );
+		$embeddings       = $this->generate_embeddings( $post_id, 'post' );
+		$embeddings_terms = [];
+
+		// Add terms to this item based on embedding data.
+		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
+			$embeddings_terms = $this->get_terms( $embeddings );
+		}
 
 		return wp_send_json_success( $embeddings_terms );
 	}
@@ -355,7 +360,7 @@ class Embeddings extends Provider {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
-		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
+		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
 
 		if ( empty( $embedding_similarity ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
@@ -402,11 +407,13 @@ class Embeddings extends Provider {
 	 * @since 2.5.0
 	 *
 	 * @param array $embedding Embedding data.
+	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
 	 */
-	private function get_embeddings_similarity( array $embedding ): array {
+	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
+		$feature              = new Classification();
 		$embedding_similarity = [];
-		$taxonomies           = $this->feature_instance->get_all_feature_taxonomies();
+		$taxonomies           = $feature->get_all_feature_taxonomies();
 		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
@@ -449,7 +456,7 @@ class Embeddings extends Provider {
 
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity && $similarity <= $threshold ) {
+					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
 					}
 				}

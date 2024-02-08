@@ -69,6 +69,7 @@ class Classification extends Feature {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 		add_action( 'classifai_after_feature_settings_form', [ $this, 'render_previewer' ] );
 		add_action( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
+		add_action( 'wp_ajax_classifai_get_post_search_results', array( $this, 'get_post_search_results' ) );
 		add_filter( 'default_post_metadata', [ $this, 'default_post_metadata' ], 10, 3 );
 
 		// Support the Classic Editor.
@@ -367,6 +368,31 @@ class Classification extends Feature {
 				],
 			]
 		);
+	}
+
+	/**
+	 * Searches and returns posts.
+	 */
+	public function get_post_search_results() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+
+		if ( ! ( $nonce && wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) ) {
+			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
+		}
+
+		$search_term   = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+		$post_types    = isset( $_POST['post_types'] ) ? explode( ',', sanitize_text_field( wp_unslash( $_POST['post_types'] ) ) ) : 'post';
+		$post_statuses = isset( $_POST['post_status'] ) ? explode( ',', sanitize_text_field( wp_unslash( $_POST['post_status'] ) ) ) : 'publish';
+
+		$posts = get_posts(
+			array(
+				'post_type'   => $post_types,
+				'post_status' => $post_statuses,
+				's'           => $search_term,
+			)
+		);
+
+		wp_send_json_success( $posts );
 	}
 
 	/**
