@@ -140,7 +140,6 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		// add_action( 'wp_insert_post', [ $this, 'generate_embeddings_for_post' ] );
 		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
 		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
 
@@ -263,11 +262,6 @@ class Embeddings extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have permission to classify this item.', 'classifai' ) );
 		}
 
-		// Don't run if turned off for this particular post.
-		if ( 'no' === get_post_meta( $post_id, '_classifai_process_content', true ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
-		}
-
 		/**
 		 * Filter whether ClassifAI should classify a post.
 		 *
@@ -287,8 +281,7 @@ class Embeddings extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
-		// TODO: $embeddings = $this->generate_embeddings( $post_id, 'post' );
-		$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+		$embeddings = $this->generate_embeddings( $post_id, 'post' );
 
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
@@ -303,9 +296,10 @@ class Embeddings extends Provider {
 	 *
 	 * @param int   $post_id ID of post to set terms on.
 	 * @param array $embedding Embedding data.
+	 * @param bool  $link Whether to link the terms or not.
 	 * @return array|WP_Error
 	 */
-	public function set_terms( int $post_id = 0, array $embedding = [] ) {
+	public function set_terms( int $post_id = 0, array $embedding = [], bool $link = true ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
@@ -320,12 +314,34 @@ class Embeddings extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
-		// Set terms based on similarity.
+		$return = [];
+
+		/**
+		 * If $link is true, immediately link all the terms
+		 * to the item.
+		 *
+		 * If it is false, build an array of term data that
+		 * can be used to display the terms in the UI.
+		 */
 		foreach ( $embedding_similarity as $tax => $terms ) {
-			wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+			if ( $link ) {
+				wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+			} else {
+				$terms_to_link = [];
+
+				foreach ( array_keys( $terms ) as $term_id ) {
+					$term = get_term( $term_id );
+
+					if ( $term && ! is_wp_error( $term ) ) {
+						$terms_to_link[ $term->name ] = $term_id;
+					}
+				}
+
+				$return[ $tax ] = $terms_to_link;
+			}
 		}
 
-		return $embedding_similarity;
+		return empty( $return ) ? $embedding_similarity : $return;
 	}
 
 	/**
@@ -394,6 +410,14 @@ class Embeddings extends Provider {
 		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
+			if ( 'tags' === $tax ) {
+				$tax = 'post_tag';
+			}
+
+			if ( 'categories' === $tax ) {
+				$tax = 'category';
+			}
+
 			if ( is_numeric( $tax ) ) {
 				continue;
 			}
@@ -481,7 +505,16 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		$taxonomies = $this->feature_instance->get_all_feature_taxonomies();
+		$feature    = new Classification();
+		$taxonomies = $feature->get_all_feature_taxonomies();
+
+		if ( in_array( 'tags', $taxonomies, true ) ) {
+			$taxonomies[] = 'post_tag';
+		}
+
+		if ( in_array( 'categories', $taxonomies, true ) ) {
+			$taxonomies[] = 'category';
+		}
 
 		// Ensure this term is part of a taxonomy we support.
 		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {

@@ -379,11 +379,9 @@ class NLU extends Provider {
 
 		$classifier = new PostClassifier();
 
-		return get_post_meta( $post_id, 'classifai_watson_nlu_results', true ); // TODO
-		// $output = $classifier->classify( $post_id );
+		$output = $classifier->classify( $post_id );
 
-		// update_post_meta( $post_id, 'classifai_watson_nlu_results', $output );
-		// return $output;
+		return $output;
 	}
 
 	/**

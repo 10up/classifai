@@ -196,7 +196,7 @@ class Classification extends Feature {
 			);
 
 			// Save results or return the results that need saved.
-			if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+			if ( ! is_wp_error( $results ) ) {
 				$results = $this->save( $request->get_param( 'id' ), $results, $request->get_param( 'linkTerms' ) ?? true );
 			}
 
@@ -212,7 +212,11 @@ class Classification extends Feature {
 	}
 
 	/**
-	 * Save the classification results.
+	 * Save or return the classification results.
+	 *
+	 * If $link is true, we link the terms to the item. If
+	 * it is false, we just return the terms that need linked
+	 * so they can show in the UI.
 	 *
 	 * @param int   $post_id The post ID.
 	 * @param array $results Term results
@@ -227,7 +231,7 @@ class Classification extends Feature {
 				$results = $provider_instance->link( $post_id, $results, $link );
 				break;
 			case Embeddings::ID:
-				$results = $provider_instance->set_terms( $post_id, $results );
+				$results = $provider_instance->set_terms( $post_id, $results, $link );
 				break;
 		}
 
@@ -859,6 +863,14 @@ class Classification extends Feature {
 
 			if ( is_wp_error( $permission ) ) {
 				continue;
+			}
+
+			if ( 'post_tag' === $taxonomy ) {
+				$taxonomy = 'tags';
+			}
+
+			if ( 'category' === $taxonomy ) {
+				$taxonomy = 'categories';
 			}
 
 			$feature_taxonomies[] = $taxonomy;
