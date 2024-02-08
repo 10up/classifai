@@ -237,22 +237,6 @@ class ContentResizing extends Feature {
 		$settings = $this->get_settings();
 
 		add_settings_field(
-			'number_of_suggestions',
-			esc_html__( 'Number of suggestions', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'number_of_suggestions',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $settings['number_of_suggestions'],
-				'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
 			'condense_text_prompt',
 			esc_html__( 'Condense text prompt', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
@@ -288,7 +272,6 @@ class ContentResizing extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'number_of_suggestions' => 1,
 			'condense_text_prompt'  => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
@@ -316,9 +299,8 @@ class ContentResizing extends Feature {
 	public function sanitize_default_feature_settings( array $new_settings ): array {
 		$settings = $this->get_settings();
 
-		$new_settings['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings, $settings );
-		$new_settings['condense_text_prompt']  = sanitize_prompts( 'condense_text_prompt', $new_settings );
-		$new_settings['expand_text_prompt']    = sanitize_prompts( 'expand_text_prompt', $new_settings );
+		$new_settings['condense_text_prompt'] = sanitize_prompts( 'condense_text_prompt', $new_settings );
+		$new_settings['expand_text_prompt']   = sanitize_prompts( 'expand_text_prompt', $new_settings );
 
 		return $new_settings;
 	}
