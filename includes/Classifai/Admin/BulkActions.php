@@ -446,7 +446,8 @@ class BulkActions {
 					break;
 
 				case PDFTextExtraction::ID:
-					if ( attachment_is_pdf( $attachment_id ) ) {
+					$attachment = get_post( $attachment_id );
+					if ( attachment_is_pdf( $attachment ) ) {
 						( new PDFTextExtraction() )->run( $attachment_id, 'read_pdf' );
 					}
 					break;
