@@ -84,6 +84,20 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			'success'     => 1,
 			'body'        => '',
 		);
+	} elseif ( strpos( $url, 'https://generativelanguage.googleapis.com/v1beta' ) !== false ) {
+		$response  = file_get_contents( __DIR__ . '/geminiapi.json' );
+		$body_json = $parsed_args['body'] ?? false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$contents = isset( $body['contents'] ) ? $body['contents'] : [];
+			$parts    = isset( $contents[0]['parts'] ) ? $contents[0]['parts'] : [];
+			$prompt   = $parts['text'] ?? '';
+
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+				$response = file_get_contents( __DIR__ . '/geminiapi-resize-content.json' );
+			}
+		}
 	}
 
 	if ( ! empty( $response ) ) {

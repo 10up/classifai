@@ -5,6 +5,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
 		cy.get( '#status' ).check();
+		cy.get( '#provider' ).select( 'openai_chatgpt' );
 		cy.get( '#api_key' ).type( 'abc123' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
