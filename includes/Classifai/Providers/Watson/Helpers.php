@@ -78,7 +78,7 @@ function get_password(): string {
  * @return string
  */
 function get_classification_method(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
+	$settings = ( new Classification() )->get_settings();
 
 	return $settings['classification_method'] ?? '';
 }

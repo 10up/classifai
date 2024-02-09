@@ -187,6 +187,15 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
+		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
+		if ( isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
+			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
+				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
+					$this->trigger_taxonomy_update( $feature_name );
+				}
+			}
+		}
+
 		return $new_settings;
 	}
 
@@ -435,7 +444,7 @@ class Embeddings extends Provider {
 					'hide_empty' => false,
 					'fields'     => 'ids',
 					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					// 'number'  => 500, TODO: see if we need a limit here.
+					'number'     => 500,
 				]
 			);
 
@@ -469,8 +478,6 @@ class Embeddings extends Provider {
 	/**
 	 * Generate embedding data for all terms within a taxonomy.
 	 *
-	 * TODO: this no longer seems to be called
-	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	private function trigger_taxonomy_update( string $taxonomy = '' ) {
@@ -481,7 +488,7 @@ class Embeddings extends Provider {
 				'fields'       => 'ids',
 				'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'NOT EXISTS',
-				// 'number'  => 500, TODO: see if we need a limit here.
+				'number'       => 500,
 			]
 		);
 

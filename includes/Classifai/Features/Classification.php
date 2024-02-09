@@ -758,6 +758,17 @@ class Classification extends Feature {
 			]
 		);
 
+		$method_options = array(
+			'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
+			'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
+		);
+
+		// Embeddings only supports existing terms.
+		if ( isset( $settings['provider'] ) && Embeddings::ID === $settings['provider'] ) {
+			unset( $method_options['recommended_terms'] );
+			$settings['classification_method'] = 'existing_terms';
+		}
+
 		add_settings_field(
 			'classification_method',
 			esc_html__( 'Classification method', 'classifai' ),
@@ -767,10 +778,7 @@ class Classification extends Feature {
 			[
 				'label_for'     => 'classification_method',
 				'default_value' => $settings['classification_method'],
-				'options'       => array(
-					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
-					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
-				),
+				'options'       => $method_options,
 			]
 		);
 
@@ -851,12 +859,17 @@ class Classification extends Feature {
 
 		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
+		// Embeddings only supports existing terms.
+		if ( isset( $new_settings['provider'] ) && Embeddings::ID === $new_settings['provider'] ) {
+			$new_settings['classification_method'] = 'existing_terms';
+		}
+
 		$new_settings['post_statuses'] = isset( $new_settings['post_statuses'] ) ? array_map( 'sanitize_text_field', $new_settings['post_statuses'] ) : $settings['post_statuses'];
 
 		$new_settings['post_types'] = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['post_types'];
 
 		if ( ! empty( $provider_instance->nlu_features ) ) {
-			foreach ( $provider_instance->nlu_features as $feature_name => $feature ) {
+			foreach ( array_keys( $provider_instance->nlu_features ) as $feature_name ) {
 				$new_settings[ $feature_name ]               = absint( $new_settings[ $feature_name ] ?? $settings[ $feature_name ] );
 				$new_settings[ "{$feature_name}_threshold" ] = absint( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
 				$new_settings[ "{$feature_name}_taxonomy" ]  = sanitize_text_field( $new_settings[ "{$feature_name}_taxonomy" ] ?? $settings[ "{$feature_name}_taxonomy" ] );
@@ -951,8 +964,10 @@ class Classification extends Feature {
 
 		<?php if ( NLU::ID === $features['provider'] ) : ?>
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
-			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( self::ID ); ?>][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
+			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>">
+				<?php echo esc_html( $labels['taxonomy'] ); ?>
+			</label><br/>
+			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>" name="<?php echo esc_attr( $this->get_option_name() ); ?>[<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
 				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
 					<option value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?>>
 						<?php echo esc_html( $singular_name ); ?>

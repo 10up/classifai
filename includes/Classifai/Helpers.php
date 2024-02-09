@@ -645,7 +645,7 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
  */
 function get_classification_mode(): string {
 	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
+	$settings = $feature->get_settings();
 	$value    = $settings['classification_mode'] ?? '';
 
 	if ( $feature->is_feature_enabled() ) {
