@@ -37,12 +37,6 @@ class DallE extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'OpenAI',
-			'DALL·E',
-			'openai_dalle'
-		);
-
 		$this->feature_instance = $feature_instance;
 	}
 
@@ -229,13 +223,6 @@ class DallE extends Provider {
 		}
 
 		return $new_settings;
-	}
-
-	/**
-	 * Resets settings for the provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
 
 	/**

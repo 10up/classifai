@@ -66,6 +66,10 @@ class TextToSpeech extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+
+		if ( $this->is_enabled() ) {
+			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
+		}
 	}
 
 	/**
@@ -81,10 +85,6 @@ class TextToSpeech extends Feature {
 
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
-
-		if ( $this->is_enabled() ) {
-			add_filter( 'the_content', [ $this, 'render_post_audio_controls' ] );
-		}
 	}
 
 	/**
@@ -621,7 +621,7 @@ class TextToSpeech extends Feature {
 		wp_enqueue_style(
 			'classifai-post-audio-player-css',
 			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.css',
-			array(),
+			array( 'dashicons' ),
 			get_asset_info( 'post-audio-controls', 'version' ),
 			'all'
 		);

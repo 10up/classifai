@@ -37,16 +37,6 @@ describe('Common Feature Fields', () => {
 				'name',
 				`classifai_${ feature }[status]`
 			);
-			cy.get( '#role_based_access' ).should(
-				'have.attr',
-				'name',
-				`classifai_${ feature }[role_based_access]`
-			);
-			cy.get( '#user_based_access' ).should(
-				'have.attr',
-				'name',
-				`classifai_${ feature }[user_based_access]`
-			);
 			cy.get( '#user_based_opt_out' ).should(
 				'have.attr',
 				'name',
@@ -57,7 +47,6 @@ describe('Common Feature Fields', () => {
 				'name',
 				`classifai_${ feature }[provider]`
 			);
-			cy.get( '#role_based_access' ).check();
 
 			for ( const role of allowedRoles ) {
 				if (
@@ -79,14 +68,8 @@ describe('Common Feature Fields', () => {
 				);
 			}
 
-			cy.get( '#role_based_access' ).uncheck();
-			cy.get( '.allowed_roles_row' ).should( 'not.be.visible' );
-
-			cy.get( '#user_based_access' ).check();
 			cy.get( '.allowed_users_row' ).should( 'be.visible' );
 
-			cy.get( '#user_based_access' ).uncheck();
-			cy.get( '.allowed_users_row' ).should( 'not.be.visible' );
 		} );
 	} );
 } );

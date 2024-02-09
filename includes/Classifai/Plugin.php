@@ -159,13 +159,8 @@ class Plugin {
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array( 'wp-components' ),
-			array(
-				get_asset_info( 'admin', 'version' ),
-				array(
-					'wp-jquery-ui-dialog',
-				),
-			),
+			array( 'wp-components', 'wp-jquery-ui-dialog' ),
+			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
 

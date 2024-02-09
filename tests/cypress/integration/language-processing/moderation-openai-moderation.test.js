@@ -23,7 +23,6 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.get(
 			'#classifai_feature_moderation_content_types_comments'
 		).check();
-		cy.get( '#role_based_access' ).check();
 		cy.get( '#classifai_feature_moderation_roles_administrator' ).check();
 		cy.get( '#submit' ).click();
 	} );

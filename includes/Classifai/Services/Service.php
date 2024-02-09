@@ -106,7 +106,9 @@ abstract class Service {
 	public function register_providers() {
 		if ( ! empty( $this->provider_classes ) ) {
 			foreach ( $this->provider_classes as $provider ) {
-				$provider->register();
+				if ( method_exists( $provider, 'register' ) ) {
+					$provider->register();
+				}
 			}
 		}
 	}
@@ -133,8 +135,6 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab     = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
-		$active_tab     = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$base_url       = add_query_arg(
 			array(
 				'page' => 'classifai',
@@ -149,6 +149,7 @@ abstract class Service {
 			<?php
 			include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
 			?>
+
 			<div class="classifai-wrap wrap wrap--nlu">
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
 
@@ -160,6 +161,18 @@ abstract class Service {
 				}
 				?>
 
+				<?php
+				/**
+				 * Fires before the feature tab navigation.
+				 *
+				 * @since 3.0.0
+				 * @hook classifai_before_feature_nav
+				 *
+				 * @param {string} $active_feature Current active feature.
+				 */
+				do_action( 'classifai_before_feature_nav', $active_feature );
+				?>
+
 				<h2 class="nav-tab-wrapper">
 					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
 						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_label() ); ?></a>
@@ -169,6 +182,18 @@ abstract class Service {
 				<?php settings_errors(); ?>
 
 				<div class="classifai-nlu-sections">
+					<?php
+					/**
+					 * Fires before the settings form for a feature.
+					 *
+					 * @since 3.0.0
+					 * @hook classifai_before_feature_settings_form
+					 *
+					 * @param {string} $active_feature Current active feature.
+					 */
+					do_action( 'classifai_before_feature_settings_form', $active_feature );
+					?>
+
 					<form method="post" action="options.php">
 					<?php
 						settings_fields( 'classifai_' . $active_feature );
@@ -184,7 +209,7 @@ abstract class Service {
 					 * @since 3.0.0
 					 * @hook classifai_after_feature_settings_form
 					 *
-					 * @param {array} $active_feature Array of active features.
+					 * @param {string} $active_feature Current active feature.
 					 */
 					do_action( 'classifai_after_feature_settings_form', $active_feature );
 					?>

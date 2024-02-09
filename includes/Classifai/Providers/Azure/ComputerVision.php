@@ -25,7 +25,7 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = 'vision/v3.0/analyze';
+	protected $analyze_url = 'vision/v3.2/analyze';
 
 	/**
 	 * ComputerVision constructor.
@@ -33,20 +33,7 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
-		parent::__construct(
-			'Microsoft Azure',
-			'AI Vision',
-			'computer_vision'
-		);
-
 		$this->feature_instance = $feature_instance;
-	}
-
-	/**
-	 * Resets settings for the ComputerVision provider.
-	 */
-	public function reset_settings() {
-		update_option( $this->get_option_name(), $this->get_default_settings() );
 	}
 
 	/**
@@ -126,7 +113,7 @@ class ComputerVision extends Provider {
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['descriptive_confidence_threshold'],
-				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 75.', 'classifai' ),
+				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 55.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
@@ -175,7 +162,7 @@ class ComputerVision extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'descriptive_confidence_threshold' => 75,
+						'descriptive_confidence_threshold' => 55,
 					]
 				);
 
@@ -630,8 +617,14 @@ class ComputerVision extends Provider {
 		if ( ! is_wp_error( $response ) ) {
 			$body = json_decode( wp_remote_retrieve_body( $response ) );
 
-			if ( 200 !== wp_remote_retrieve_response_code( $response ) && isset( $body->message ) ) {
-				$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
+			if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+				if ( isset( $body->error ) ) {
+					$rtn = new WP_Error( $body->error->code ?? 'error', $body->error->message ?? esc_html__( 'An error occurred.', 'classifai' ), $body );
+				} elseif ( isset( $body->message ) ) {
+					$rtn = new WP_Error( $body->code ?? 'error', $body->message, $body );
+				} else {
+					$rtn = new WP_Error( 'error', esc_html__( 'An error occurred.', 'classifai' ), $body );
+				}
 			} else {
 				$rtn = $body;
 			}
@@ -664,11 +657,6 @@ class ComputerVision extends Provider {
 
 		return $endpoint;
 	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {}
 
 	/**
 	 * Authenticates our credentials.

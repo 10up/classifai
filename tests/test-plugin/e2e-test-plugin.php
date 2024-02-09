@@ -25,7 +25,7 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
-		$body_json = isset( $parsed_args['body'] ) ? wp_unslash( $parsed_args['body'] ) : false;
+		$body_json = $parsed_args['body'] ?? false;
 
 		if ( $body_json ) {
 			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
@@ -34,11 +34,11 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content.json' );
-			} else if ( 'This is a custom excerpt prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom excerpt prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-excerpt-prompt.json' );
-			} else if ( 'This is a custom title prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom title prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
-			} else if ( 'This is a custom shrink prompt' === $prompt || 'This is a custom grow prompt' === $prompt ) {
+			} else if ( str_contains( $prompt, 'This is a custom shrink prompt' ) || str_contains( $prompt, 'This is a custom grow prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
 			}
 		}
@@ -64,11 +64,11 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		);
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.0/analyze' ) !== false ) {
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/ocr.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.1/generateThumbnail' ) !== false ) {
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/generateThumbnail' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/pdf.json' );
