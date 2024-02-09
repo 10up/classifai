@@ -17,6 +17,7 @@
 * [Register ClassifAI account](#register-classifai-account)
 * [Set Up IBM Watson NLU Language Processing](#set-up-language-processing-via-ibm-watson)
 * [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
+* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-via-google-ai-gemini-api)
 * [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
 * [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
@@ -36,9 +37,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 ## Features
 
-* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
-* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
-* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
@@ -173,7 +174,9 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > IBM Watson
+### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification
+
+- Select **IBM Watson NLU** in the provider dropdown.
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -214,8 +217,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI ChatGPT
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
 
+* Select **OpenAI ChatGPT** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Language Processing features
@@ -239,6 +243,39 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
 * In the modal that pops up, select one of the options.
 
+## Set Up Language Processing (via Google AI (Gemini API))
+
+### 1. Sign up for Google AI
+
+* [Sign up for an Googel account](https://www.google.com/) or sign into your existing one.
+* Go to Google AI Gemini website to [get API key](https://makersuite.google.com/app/apikey)
+* Log into your account and go to the [API key page](https://makersuite.google.com/app/apikey).
+* Click `Create API key` and copy the key that is shown.
+
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+
+* Select **Google AI (Gemini API)** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Language Processing features
+
+* Check the "Enable" checkbox in above screen.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content type to test enabled features
+
+* To test excerpt generation, edit (or create) an item that supports excerpts.
+* Ensure this item has content saved.
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
+* To test title generation, edit (or create) an item that supports titles.
+* Ensure this item has content saved.
+* Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content resizing, edit (or create) an item. Note: only the block editor is supported.
+* Add a paragraph block with some content.
+* With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
+* In the modal that pops up, select one of the options.
+
 ## Set Up Language Processing (via OpenAI Embeddings)
 
 ### 1. Sign up for OpenAI
@@ -248,8 +285,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Embeddings
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification
 
+* Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Language Processing features
@@ -277,8 +315,9 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Whisper
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation
 
+* Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific features
@@ -301,8 +340,9 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Location/Region` for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Microsoft Azure
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech
 
+* Select **Microsoft Azure AI Speech** in the provider dropdown.
 * In the `Endpoint URL` field, enter the following URL, replacing `LOCATION` with the `Location/Region` you found above: `https://LOCATION.tts.speech.microsoft.com/`.
 * In the `API Key` field, enter your `KEY 1` copied from above.
 * Click **Save Changes** (the page will reload).
@@ -354,8 +394,9 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > OpenAI
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
 
+* Select **OpenAI DALL-E** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Image Processing features
