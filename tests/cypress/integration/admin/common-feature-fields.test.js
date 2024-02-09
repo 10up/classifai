@@ -18,13 +18,7 @@ describe('Common Feature Fields', () => {
 		feature_pdf_to_text_generation: 'PDF Text Extraction',
 	};
 
-	const allowedRoles = [
-		'administrator',
-		'editor',
-		'author',
-		'contributor',
-		'subscriber',
-	];
+	const allowedRoles = [ 'administrator', 'editor', 'author', 'contributor' ];
 
 	Object.keys( features ).forEach( ( feature ) => {
 		it( `"${ features[ feature ] }" feature common fields`, () => {
@@ -51,7 +45,7 @@ describe('Common Feature Fields', () => {
 			for ( const role of allowedRoles ) {
 				if (
 					'feature_image_generation' === feature &&
-					( 'contributor' === role || 'subscriber' === role )
+					'contributor' === role
 				) {
 					continue;
 				}

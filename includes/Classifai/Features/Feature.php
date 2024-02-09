@@ -75,6 +75,9 @@ abstract class Feature {
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
 
+		// Remove subscriber from the list of roles.
+		unset( $this->roles['subscriber'] );
+
 		/**
 		 * Filter the allowed WordPress roles for a feature.
 		 *
