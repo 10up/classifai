@@ -137,7 +137,7 @@ class ImageGeneration extends Feature {
 			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
 			$number_of_images > 1 ? esc_html__( 'Generate Images', 'classifai' ) : esc_html__( 'Generate Image', 'classifai' ),
 			'upload_files',
-			esc_url( admin_url( 'upload.php?action=classifai-generate-image' ) ),
+			esc_url( admin_url( 'upload.php?action=classifai-generate-image&mode=grid' ) ),
 			''
 		);
 	}
