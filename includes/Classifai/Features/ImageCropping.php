@@ -377,4 +377,47 @@ class ImageCropping extends Feature {
 		 */
 		return apply_filters( 'classifai_smart_crop_wp_filesystem', $this->wp_filesystem );
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_computer_vision', array() );
+		$new_settings = array();
+
+		$new_settings['provider'] = 'ms_computer_vision';
+
+		if ( isset( $old_settings['enable_smart_cropping'] ) ) {
+			$new_settings['status'] = $old_settings['enable_smart_cropping'];
+		}
+
+		if ( isset( $old_settings['url'] ) ) {
+			$new_settings['ms_computer_vision']['endpoint_url'] = $old_settings['url'];
+		}
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['ms_computer_vision']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['ms_computer_vision']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['smart_cropping_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['smart_cropping_roles'];
+		}
+
+		if ( isset( $old_settings['smart_cropping_users'] ) ) {
+			$new_settings['users'] = $old_settings['smart_cropping_users'];
+		}
+
+		if ( isset( $old_settings['smart_cropping_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['smart_cropping_user_based_opt_out'];
+		}
+
+		return $new_settings;
+	}
 }
