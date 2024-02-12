@@ -373,4 +373,51 @@ class ExcerptGeneration extends Feature {
 
 		return $new_settings;
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
+		$new_settings = array();
+
+		if ( isset( $old_settings['enable_excerpt'] ) ) {
+			$new_settings['status'] = $old_settings['enable_excerpt'];
+		}
+
+		if ( isset( $old_settings['length'] ) ) {
+			$new_settings['length'] = $old_settings['length'];
+		}
+
+		$new_settings['provider'] = 'openai_chatgpt';
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['openai_chatgpt']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['openai_chatgpt']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['generate_excerpt_prompt'] ) ) {
+			$new_settings['generate_excerpt_prompt'] = $old_settings['generate_excerpt_prompt'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['excerpt_generation_roles'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_users'] ) ) {
+			$new_settings['users'] = $old_settings['excerpt_generation_users'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['excerpt_generation_user_based_opt_out'];
+		}
+
+		return $new_settings;
+	}
 }

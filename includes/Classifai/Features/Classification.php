@@ -154,4 +154,109 @@ class Classification extends Feature {
 			$this
 		);
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_watson_nlu', array() );
+		$new_settings = $this->get_settings();
+
+		if ( isset( $old_settings['authenticated'] ) && $old_settings['authenticated'] ) {
+			$new_settings['provider'] = 'ibm_watson_nlu';
+
+			// Status
+			if ( isset( $old_settings['enable_content_classification'] ) ) {
+				$new_settings['status'] = $old_settings['enable_content_classification'];
+			}
+
+			// Post types
+			if ( isset( $old_settings['post_types'] ) ) {
+				if ( is_array( $old_settings['post_types'] ) ) {
+					foreach ( $old_settings['post_types'] as $post_type => $value ) {
+						if ( 1 === $value ) {
+							$new_settings['post_types'][ $post_type ] = $post_type;
+							continue;
+						} elseif ( is_null( $value ) ) {
+							$new_settings['post_types'][ $post_type ] = '0';
+							continue;
+						}
+						$new_settings['post_types'][ $post_type ] = $value;
+					}
+				}
+
+				unset( $new_settings['post_types']['attachment'] );
+			}
+
+			// Post statuses
+			if ( isset( $old_settings['post_statuses'] ) ) {
+				if ( is_array( $old_settings['post_statuses'] ) ) {
+					foreach ( $old_settings['post_statuses'] as $post_status => $value ) {
+						if ( 1 === $value ) {
+							$new_settings['post_statuses'][ $post_status ] = $post_status;
+							continue;
+						} elseif ( is_null( $value ) ) {
+							$new_settings['post_statuses'][ $post_status ] = '0';
+							continue;
+						}
+						$new_settings['post_statuses'][ $post_status ] = $value;
+					}
+				}
+			}
+
+			// Roles
+			if ( isset( $old_settings['content_classification_roles'] ) ) {
+				$new_settings['roles'] = $old_settings['content_classification_roles'];
+			}
+
+			// Users
+			if ( isset( $old_settings['users'] ) ) {
+				$new_settings['users'] = $old_settings['users'];
+			}
+
+			// Provider.
+			if ( isset( $old_settings['credentials'] ) && isset( $old_settings['credentials']['watson_url'] ) ) {
+				$new_settings['ibm_watson_nlu']['endpoint_url'] = $old_settings['credentials']['watson_url'];
+			}
+
+			if ( isset( $old_settings['credentials'] ) && isset( $old_settings['credentials']['watson_username'] ) ) {
+				$new_settings['ibm_watson_nlu']['username'] = $old_settings['credentials']['watson_username'];
+			}
+
+			if ( isset( $old_settings['credentials'] ) && isset( $old_settings['credentials']['watson_password'] ) ) {
+				$new_settings['ibm_watson_nlu']['password'] = $old_settings['credentials']['watson_password'];
+			}
+
+			if ( isset( $old_settings['classification_mode'] ) ) {
+				$new_settings['ibm_watson_nlu']['classification_mode'] = $old_settings['classification_mode'];
+			}
+
+			if ( isset( $old_settings['classification_method'] ) ) {
+				$new_settings['ibm_watson_nlu']['classification_method'] = $old_settings['classification_method'];
+			}
+
+			if ( isset( $old_settings['features'] ) ) {
+				foreach ( $old_settings['features'] as $feature => $value ) {
+					$new_settings['ibm_watson_nlu'][ $feature ] = $value;
+				}
+			}
+
+			if ( isset( $old_settings['authenticated'] ) ) {
+				$new_settings['ibm_watson_nlu']['authenticated'] = $old_settings['authenticated'];
+			}
+
+			if ( isset( $old_settings['content_classification_user_based_opt_out'] ) ) {
+				$new_settings['user_based_opt_out'] = $old_settings['content_classification_user_based_opt_out'];
+			}
+
+			if ( isset( $old_settings['content_classification_users'] ) ) {
+				$new_settings['users'] = $old_settings['content_classification_users'];
+			}
+		}
+
+		return $new_settings;
+	}
 }

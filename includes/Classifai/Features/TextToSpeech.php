@@ -817,4 +817,59 @@ class TextToSpeech extends Feature {
 		 */
 		return apply_filters( 'classifai_audio_generation_subsequent_state', false, get_post( $post ) );
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_azure_text_to_speech', array() );
+		$new_settings = array();
+
+		if ( isset( $old_settings['enable_text_to_speech'] ) ) {
+			$new_settings['status'] = $old_settings['enable_text_to_speech'];
+		}
+
+		$new_settings['provider'] = 'ms_azure_text_to_speech';
+
+		if ( isset( $old_settings['credentials']['url'] ) ) {
+			$new_settings['ms_azure_text_to_speech']['endpoint_url'] = $old_settings['credentials']['url'];
+		}
+
+		if ( isset( $old_settings['credentials']['api_key'] ) ) {
+			$new_settings['ms_azure_text_to_speech']['api_key'] = $old_settings['credentials']['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['ms_azure_text_to_speech']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['voices'] ) ) {
+			$new_settings['ms_azure_text_to_speech']['voices'] = $old_settings['voices'];
+		}
+
+		if ( isset( $old_settings['voice'] ) ) {
+			$new_settings['ms_azure_text_to_speech']['voice'] = $old_settings['voice'];
+		}
+
+		if ( isset( $old_settings['text_to_speech_users'] ) ) {
+			$new_settings['users'] = $old_settings['text_to_speech_users'];
+		}
+
+		if ( isset( $old_settings['text_to_speech_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['text_to_speech_roles'];
+		}
+
+		if ( isset( $old_settings['text_to_speech_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['text_to_speech_user_based_opt_out'];
+		}
+
+		if ( isset( $old_settings['post_types'] ) ) {
+			$new_settings['post_types'] = $old_settings['post_types'];
+		}
+
+		return $new_settings;
+	}
 }
