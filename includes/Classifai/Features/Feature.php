@@ -1196,7 +1196,7 @@ abstract class Feature {
 		 * @hook classifai_{feature}_run
 		 *
 		 * @param {mixed} $result Result of running the feature.
-		 * @param {Classifai\Providers} $provider_instance Provider used.
+		 * @param {Providers} $provider_instance Provider used.
 		 * @param {mixed} $args Arguments used by the feature.
 		 * @param {Feature} $this Current feature class.
 		 *
