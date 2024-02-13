@@ -13,6 +13,7 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
+use function Classifai\sanitize_number_of_responses_field;
 
 class OpenAI extends Provider {
 
@@ -113,6 +114,29 @@ class OpenAI extends Provider {
 			]
 		);
 
+		switch ( $this->feature_instance::ID ) {
+			case ContentResizing::ID:
+			case TitleGeneration::ID:
+				add_settings_field(
+					static::ID . '_number_of_suggestions',
+					esc_html__( 'Number of suggestions', 'classifai' ),
+					[ $this->feature_instance, 'render_input' ],
+					$this->feature_instance->get_option_name(),
+					$this->feature_instance->get_option_name() . '_section',
+					[
+						'option_index'  => static::ID,
+						'label_for'     => 'number_of_suggestions',
+						'input_type'    => 'number',
+						'min'           => 1,
+						'step'          => 1,
+						'default_value' => $settings['number_of_suggestions'],
+						'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+						'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
+					]
+				);
+				break;
+		}
+
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -128,6 +152,16 @@ class OpenAI extends Provider {
 			'deployment'    => '',
 			'authenticated' => false,
 		];
+
+		/**
+		 * Default values for feature specific settings.
+		 */
+		switch ( $this->feature_instance::ID ) {
+			case ContentResizing::ID:
+			case TitleGeneration::ID:
+				$common_settings['number_of_suggestions'] = 1;
+				break;
+		}
 
 		return $common_settings;
 	}
@@ -184,6 +218,13 @@ class OpenAI extends Provider {
 			$new_settings[ static::ID ]['deployment']   = $settings[ static::ID ]['deployment'];
 		}
 
+		switch ( $this->feature_instance::ID ) {
+			case ContentResizing::ID:
+			case TitleGeneration::ID:
+				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
+				break;
+		}
+
 		return $new_settings;
 	}
 
@@ -202,7 +243,11 @@ class OpenAI extends Provider {
 			return '';
 		}
 
-		if ( $feature instanceof ExcerptGeneration && ! empty( $deployment ) ) {
+		if (
+			( $feature instanceof TitleGeneration ||
+			$feature instanceof ExcerptGeneration ) &&
+			! empty( $deployment )
+		) {
 			$endpoint = trailingslashit( $endpoint ) . $this->chat_completion_url;
 			$endpoint = str_replace( '{deployment-id}', $deployment, $endpoint );
 			$endpoint = add_query_arg( 'api-version', $this->chat_completion_api_version, $endpoint );
@@ -276,7 +321,7 @@ class OpenAI extends Provider {
 				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 			case 'title':
-				// $return = $this->generate_titles( $post_id, $args );
+				$return = $this->generate_titles( $post_id, $args );
 				break;
 			case 'resize_content':
 				// $return = $this->resize_content( $post_id, $args );
@@ -391,6 +436,115 @@ class OpenAI extends Provider {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Generate titles using Azure OpenAI.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_titles( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
+		}
+
+		$feature  = new TitleGeneration();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
+				'content' => '',
+			]
+		);
+
+		// These checks happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+
+		/**
+		 * Filter the prompt we will send to Azure OpenAI.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_azure_openai_title_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_azure_openai_title_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the request body before sending to Azure OpenAI.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_azure_openai_title_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_azure_openai_title_request_body',
+			[
+				'messages'    => [
+					[
+						'role'    => 'system',
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => '"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
+					],
+				],
+				'temperature' => 0.9,
+				'n'           => absint( $args['num'] ),
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = wp_remote_post(
+			$this->prep_api_url( $feature ),
+			[
+				'headers' => [
+					'api-key'      => $settings[ static::ID ]['api_key'],
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
+			]
+		);
+		$response = $this->get_result( $response );
+
+		set_transient( 'classifai_azure_openai_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['choices'] ) ) {
+			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from Azure OpenAI.', 'classifai' ) );
+		}
+
+		// Extract out the text response.
+		$return = [];
+		foreach ( $response['choices'] as $choice ) {
+			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+			}
+		}
+
+		return $return;
 	}
 
 	/**

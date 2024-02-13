@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\ChatGPT;
@@ -43,6 +44,7 @@ class TitleGeneration extends Feature {
 		$this->supported_providers = [
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
+			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 		];
 	}
 
