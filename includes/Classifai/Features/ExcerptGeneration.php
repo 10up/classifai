@@ -265,7 +265,7 @@ class ExcerptGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' );
+		return esc_html__( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' );
 	}
 
 	/**
@@ -322,7 +322,7 @@ class ExcerptGeneration extends Feature {
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
+				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.', 'classifai' ),
 			]
 		);
 	}

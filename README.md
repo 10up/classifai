@@ -247,7 +247,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 ### 1. Sign up for Google AI
 
-* [Sign up for an Googel account](https://www.google.com/) or sign into your existing one.
+* [Sign up for an Google account](https://www.google.com/) or sign into your existing one.
 * Go to Google AI Gemini website to [get API key](https://makersuite.google.com/app/apikey)
 * Log into your account and go to the [API key page](https://makersuite.google.com/app/apikey).
 * Click `Create API key` and copy the key that is shown.

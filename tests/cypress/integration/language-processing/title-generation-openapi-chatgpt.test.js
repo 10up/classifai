@@ -22,7 +22,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get(
 			'#classifai_feature_title_generation_roles_administrator'
 		).check();
-		cy.get( '#number_of_titles' ).type( 1 );
+		cy.get( '#number_of_suggestions' ).type( 1 );
 		cy.get( '#submit' ).click();
 	} );
 
