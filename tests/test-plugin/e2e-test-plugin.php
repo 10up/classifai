@@ -23,7 +23,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/models.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ||
+		strpos( $url, 'https://e2e-test-azure-openai.test/openai/deployments' ) !== false
+	) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
 		$body_json = $parsed_args['body'] ?? false;
 
