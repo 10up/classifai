@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\ChatGPT;
 use WP_REST_Server;
@@ -9,7 +10,6 @@ use WP_REST_Request;
 use WP_Error;
 
 use function Classifai\sanitize_prompts;
-use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_asset_info;
 
 /**
@@ -41,7 +41,8 @@ class TitleGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
+			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
+			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 		];
 	}
 
@@ -316,22 +317,6 @@ class TitleGeneration extends Feature {
 		$settings = $this->get_settings();
 
 		add_settings_field(
-			'number_of_titles',
-			esc_html__( 'Number of titles', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name() . '_section',
-			[
-				'label_for'     => 'number_of_titles',
-				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
-				'default_value' => $settings['number_of_titles'],
-				'description'   => esc_html__( 'Number of titles that will be generated in one request.', 'classifai' ),
-			]
-		);
-
-		add_settings_field(
 			'generate_title_prompt',
 			esc_html__( 'Prompt', 'classifai' ),
 			[ $this, 'render_prompt_repeater_field' ],
@@ -353,7 +338,6 @@ class TitleGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'number_of_titles'      => 1,
 			'generate_title_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
@@ -372,9 +356,6 @@ class TitleGeneration extends Feature {
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings = $this->get_settings();
-
-		$new_settings['number_of_titles']      = sanitize_number_of_responses_field( 'number_of_titles', $new_settings, $settings );
 		$new_settings['generate_title_prompt'] = sanitize_prompts( 'generate_title_prompt', $new_settings );
 
 		return $new_settings;

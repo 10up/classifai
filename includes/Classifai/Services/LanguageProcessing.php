@@ -43,6 +43,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\OpenAI\Moderation',
 				'Classifai\Providers\OpenAI\Whisper',
 				'Classifai\Providers\Watson\NLU',
+				'Classifai\Providers\GoogleAI\GeminiAPI',
 			]
 		);
 	}
