@@ -253,4 +253,248 @@ class OpenAI extends Provider {
 
 		return $rtn;
 	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id The Post ID we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate titles.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'excerpt':
+				$return = $this->generate_excerpt( $post_id, $args );
+				break;
+			case 'title':
+				// $return = $this->generate_titles( $post_id, $args );
+				break;
+			case 'resize_content':
+				// $return = $this->resize_content( $post_id, $args );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Generate an excerpt.
+	 *
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args    Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_excerpt( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+		}
+
+		$feature  = new ExcerptGeneration();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+				'title'   => get_the_title( $post_id ),
+			]
+		);
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$excerpt_length = absint( $settings['length'] ?? 55 );
+		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+
+		// Replace our variables in the prompt.
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
+
+		/**
+		 * Filter the prompt we will send to Azure OpenAI.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_azure_openai_excerpt_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {int} $excerpt_length Length of final excerpt.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_azure_openai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
+
+		/**
+		 * Filter the request body before sending to Azure OpenAI.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_azure_openai_excerpt_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_azure_openai_excerpt_request_body',
+			[
+				'messages'    => [
+					[
+						'role'    => 'system',
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => '"""' . $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '"""',
+					],
+				],
+				'temperature' => 0.9,
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = wp_remote_post(
+			$this->prep_api_url( $feature ),
+			[
+				'headers' => [
+					'api-key'      => $settings[ static::ID ]['api_key'],
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
+			]
+		);
+		$response = $this->get_result( $response );
+
+		set_transient( 'classifai_azure_openai_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		// Extract out the text response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
+			foreach ( $response['choices'] as $choice ) {
+				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+				}
+			}
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Get our content.
+	 *
+	 * We don't trim content here as we don't know for sure which model
+	 * someone is using.
+	 *
+	 * @param int    $post_id Post ID to get content from.
+	 * @param int    $return_length Word length of returned content.
+	 * @param bool   $use_title Whether to use the title or not.
+	 * @param string $post_content The post content.
+	 * @return string
+	 */
+	public function get_content( int $post_id = 0, int $return_length = 0, bool $use_title = true, string $post_content = '' ): string {
+		$normalizer = new Normalizer();
+
+		if ( empty( $post_content ) ) {
+			$post         = get_post( $post_id );
+			$post_content = apply_filters( 'the_content', $post->post_content );
+		}
+
+		$post_content = preg_replace( '#\[.+\](.+)\[/.+\]#', '$1', $post_content );
+
+		// Add the title to the content, if needed, and normalize things.
+		if ( $use_title ) {
+			$content = $normalizer->normalize( $post_id, $post_content );
+		} else {
+			$content = $normalizer->normalize_content( $post_content, '', $post_id );
+		}
+
+		/**
+		 * Filter content that will get sent to Azure OpenAI.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_azure_openai_content
+		 *
+		 * @param {string} $content Content that will be sent.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {string} Content.
+		 */
+		return apply_filters( 'classifai_azure_openai_content', $content, $post_id );
+	}
+
+	/**
+	 * Get results from the response.
+	 *
+	 * @param object $response The API response.
+	 * @return array|WP_Error
+	 */
+	public function get_result( $response ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$code = wp_remote_retrieve_response_code( $response );
+		$json = json_decode( $body, true );
+
+		if ( json_last_error() === JSON_ERROR_NONE ) {
+			if ( empty( $json['error'] ) ) {
+				return $json;
+			} else {
+				$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
+				return new WP_Error( $code, $message );
+			}
+		} elseif ( ! empty( wp_remote_retrieve_response_message( $response ) ) ) {
+			return new WP_Error( $code, wp_remote_retrieve_response_message( $response ) );
+		} else {
+			return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
+		}
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof TitleGeneration ) {
+			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_title_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
+			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_excerpt_generation_latest_response' ) );
+		} elseif ( $this->feature_instance instanceof ContentResizing ) {
+			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
+			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
+			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
+			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_content_resizing_latest_response' ) );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
+	}
 }
