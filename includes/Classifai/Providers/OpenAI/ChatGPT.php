@@ -118,8 +118,8 @@ class ChatGPT extends Provider {
 	 */
 	public function get_default_provider_settings(): array {
 		$common_settings = [
-			'api_key'          => '',
-			'authenticated'    => false,
+			'api_key'       => '',
+			'authenticated' => false,
 		];
 
 		/**
@@ -145,8 +145,8 @@ class ChatGPT extends Provider {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
 
-		$new_settings[ static::ID ]['api_key']          = $api_key_settings[ static::ID ]['api_key'];
-		$new_settings[ static::ID ]['authenticated']    = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
+		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:

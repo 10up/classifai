@@ -272,21 +272,21 @@ class ContentResizing extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'condense_text_prompt'  => [
+			'condense_text_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->condense_prompt,
 					'original' => 1,
 				],
 			],
-			'expand_text_prompt'    => [
+			'expand_text_prompt'   => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
 					'prompt'   => $this->expand_prompt,
 					'original' => 1,
 				],
 			],
-			'provider'              => ChatGPT::ID,
+			'provider'             => ChatGPT::ID,
 		];
 	}
 
