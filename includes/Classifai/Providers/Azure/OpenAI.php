@@ -247,10 +247,9 @@ class OpenAI extends Provider {
 			( $feature instanceof ContentResizing ||
 			$feature instanceof ExcerptGeneration ||
 			$feature instanceof TitleGeneration ) &&
-			! empty( $deployment )
+			$deployment
 		) {
-			$endpoint = trailingslashit( $endpoint ) . $this->chat_completion_url;
-			$endpoint = str_replace( '{deployment-id}', $deployment, $endpoint );
+			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
 			$endpoint = add_query_arg( 'api-version', $this->chat_completion_api_version, $endpoint );
 		}
 
@@ -268,8 +267,7 @@ class OpenAI extends Provider {
 	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
 		$rtn = false;
 
-		$endpoint = trailingslashit( $url ) . $this->completion_url;
-		$endpoint = str_replace( '{deployment-id}', $deployment, $endpoint );
+		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
 		$request = wp_remote_post(
