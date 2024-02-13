@@ -4,8 +4,8 @@ namespace Classifai\Features;
 
 use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\GoogleAI\GeminiAPI;
-use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Services\LanguageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;

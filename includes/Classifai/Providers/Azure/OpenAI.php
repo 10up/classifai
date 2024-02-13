@@ -244,8 +244,9 @@ class OpenAI extends Provider {
 		}
 
 		if (
-			( $feature instanceof TitleGeneration ||
-			$feature instanceof ExcerptGeneration ) &&
+			( $feature instanceof ContentResizing ||
+			$feature instanceof ExcerptGeneration ||
+			$feature instanceof TitleGeneration ) &&
 			! empty( $deployment )
 		) {
 			$endpoint = trailingslashit( $endpoint ) . $this->chat_completion_url;
@@ -324,7 +325,7 @@ class OpenAI extends Provider {
 				$return = $this->generate_titles( $post_id, $args );
 				break;
 			case 'resize_content':
-				// $return = $this->resize_content( $post_id, $args );
+				$return = $this->resize_content( $post_id, $args );
 				break;
 		}
 
@@ -526,6 +527,113 @@ class OpenAI extends Provider {
 		$response = $this->get_result( $response );
 
 		set_transient( 'classifai_azure_openai_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['choices'] ) ) {
+			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from Azure OpenAI.', 'classifai' ) );
+		}
+
+		// Extract out the text response.
+		$return = [];
+		foreach ( $response['choices'] as $choice ) {
+			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Resizes content.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function resize_content( int $post_id, array $args = array() ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
+		}
+
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
+		$args = wp_parse_args(
+			array_filter( $args ),
+			[
+				'num' => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
+			]
+		);
+
+		if ( 'shrink' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+		}
+
+		/**
+		 * Filter the resize prompt we will send to Azure OpenAI.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_azure_openai_' . $args['resize_type'] . '_content_prompt
+		 *
+		 * @param {string} $prompt Resize prompt we are sending. Gets added as a system prompt.
+		 * @param {int} $post_id ID of post.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_azure_openai_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the resize request body before sending to Azure OpenAI.
+		 *
+		 * @since 2.3.0
+		 * @hook classifai_azure_openai_resize_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 * @param {int}   $post_id ID of post.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_azure_openai_resize_content_request_body',
+			[
+				'messages'    => [
+					[
+						'role'    => 'system',
+						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => '"""' . esc_html( $args['content'] ) . '"""',
+					],
+				],
+				'temperature' => 0.9,
+				'n'           => absint( $args['num'] ),
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = wp_remote_post(
+			$this->prep_api_url( $feature ),
+			[
+				'headers' => [
+					'api-key'      => $settings[ static::ID ]['api_key'],
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
+			]
+		);
+		$response = $this->get_result( $response );
+
+		set_transient( 'classifai_azure_openai_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

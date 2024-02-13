@@ -2,6 +2,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Services\LanguageProcessing;
@@ -10,7 +11,6 @@ use WP_REST_Request;
 use WP_Error;
 
 use function Classifai\sanitize_prompts;
-use function Classifai\sanitize_number_of_responses_field;
 use function Classifai\get_asset_info;
 
 /**
@@ -51,6 +51,7 @@ class ContentResizing extends Feature {
 		$this->supported_providers = [
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
+			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 		];
 	}
 
