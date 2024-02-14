@@ -16,14 +16,15 @@
 * [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up IBM Watson NLU Language Processing](#set-up-language-processing-via-ibm-watson)
-* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
-* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-via-google-ai-gemini-api)
-* [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
-* [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
-* [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
-* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
-* [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
+* [Set Up IBM Watson NLU Language Processing](#set-up-classification-via-ibm-watson)
+* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-features-via-openai-chatgpt)
+* [Set Up Azure OpenAI Language Processing](#set-up-language-processing-features-via-azure-openai)
+* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-features-via-google-ai-gemini-api)
+* [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
+* [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
+* [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
+* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
+* [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
 * [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
 * [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
@@ -34,13 +35,13 @@
 
 ## Overview
 
-Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
+Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), [Google Gemini](https://ai.google.dev/) and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
 
 ## Features
 
-* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
-* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
-* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) and [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
@@ -74,11 +75,12 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 
 ## Pricing
 
-Note that there is no cost to using ClassifAI itself. Both IBM Watson and Microsoft Azure have free plans for their AI services, but above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage. OpenAI has a limited trial option that can be used for testing but will require a valid paid plan after that.
+Note that there is no cost to using ClassifAI itself. Both IBM Watson and Microsoft Azure have free plans for some of their AI services, but above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage. OpenAI has a limited trial option that can be used for testing but will require a valid paid plan after that.
 
 IBM Watson's Natural Language Understanding ("NLU"), which is one of the providers that powers the classification feature, has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
@@ -89,6 +91,8 @@ Microsoft Azure AI Vision, which is one of the providers that powers the descrip
 Microsoft Azure AI Speech, which is one of the providers that powers the text to speech feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
 
 Microsoft Azure AI Personalizer, which is one of the providers that powers the recommended content feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
+
+Microsoft Azure OpenAI, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a [pay per usage](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) plan.
 
 Google Gemini, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a ["free" pricing tier](https://ai.google.dev/pricing) that offers 60 queries per minute.
 
@@ -234,6 +238,43 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 ### 4. Edit a content type to test enabled features
 
 * To test excerpt generation, edit (or create) an item that supports excerpts. Note: only the block editor is supported.
+* Ensure this item has content saved.
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
+* To test title generation, edit (or create) an item that supports titles.
+* Ensure this item has content saved.
+* Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content resizing, edit (or create) an item. Note: only the block editor is supported.
+* Add a paragraph block with some content.
+* With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
+* In the modal that pops up, select one of the options.
+
+## Set Up Language Processing Features (via Azure OpenAI)
+
+### 1. Sign up for Azure services
+
+* [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+* [Request access](https://aka.ms/oai/access) to Azure OpenAI, if not already granted.
+* Log into your account and create a new [*Azure OpenAI resource*](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource) if you do not already have one.
+* Copy the name you chose for the deployment when deploying the resource in the previous step.
+* Click `Keys and Endpoint` in the left hand Resource Management menu to get the endpoint for this resource.
+* Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+
+* Select **Azure OpenAI** in the provider dropdown.
+* Enter your endpoint you copied from the above step into the `Endpoint URL` field.
+* Enter your API Key copied from the above step into the `API key` field.
+* Enter your deployment name copied from the above step into the `Deployment name` field.
+
+### 3. Enable specific Language Processing features
+
+* Check the "Enable" checkbox in above screen.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content type to test enabled features
+
+* To test excerpt generation, edit (or create) an item that supports excerpts.
 * Ensure this item has content saved.
 * Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
 * To test title generation, edit (or create) an item that supports titles.

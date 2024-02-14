@@ -267,6 +267,8 @@ class OpenAI extends Provider {
 	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
 		$rtn = false;
 
+		// This does basically the same thing that prep_api_url does but when running authentication,
+		// we don't have settings saved yet, which prep_api_url needs.
 		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
