@@ -33,7 +33,7 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			DallE::ID => __( 'OpenAI Dall-E', 'classifai' ),
+			DallE::ID => __( 'OpenAI DALL·E 3', 'classifai' ),
 		];
 	}
 
