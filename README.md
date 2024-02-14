@@ -397,7 +397,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
 
-* Select **OpenAI DALL-E 3** in the provider dropdown.
+* Select **OpenAI DALL·E 3** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Image Processing features
