@@ -1113,11 +1113,13 @@ abstract class Feature {
 			__( 'Provider', 'classifai' )               => $feature_settings['provider'],
 		];
 
-		if ( method_exists( $provider, 'get_debug_information' ) ) {
+		if ( $provider && method_exists( $provider, 'get_debug_information' ) ) {
 			$all_debug_info = array_merge(
 				$common_debug_info,
 				$provider->get_debug_information()
 			);
+		} else {
+			$all_debug_info = $common_debug_info;
 		}
 
 		/**
