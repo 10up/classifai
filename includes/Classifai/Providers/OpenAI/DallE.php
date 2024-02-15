@@ -205,9 +205,9 @@ class DallE extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'image_size',
 				'options'       => [
-					'1024x1024' => '1024x1024',
-					'1792x1024' => '1792x1024',
-					'1024x1792' => '1024x1792',
+					'1024x1024' => '1024x1024 (square)',
+					'1792x1024' => '1792x1024 (landscape)',
+					'1024x1792' => '1024x1792 (portrait)',
 				],
 				'default_value' => $settings['image_size'],
 				'description'   => __( 'Size of generated images. Larger sizes cost more.', 'classifai' ),
