@@ -309,7 +309,10 @@ class BulkActions {
 				continue;
 			}
 
-			if ( ! in_array( get_post_status(), $feature->get_supported_post_statuses(), true ) ) {
+			if (
+				Classification::ID === $feature::ID &&
+				! in_array( get_post_status(), $feature->get_supported_post_statuses(), true )
+			) {
 				continue;
 			}
 
