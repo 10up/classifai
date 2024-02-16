@@ -456,7 +456,7 @@ class Embeddings extends Provider {
 					'fields'     => 'ids',
 					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'number'     => 500,
-					'exclude'    => $exclude,
+					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
 			);
 

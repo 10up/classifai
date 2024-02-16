@@ -987,9 +987,6 @@ class Classification extends Feature {
 	 * @return array
 	 */
 	public function get_supported_taxonomies( array $post_types = [] ): array {
-		$taxonomy_args        = [
-			'show_ui' => true,
-		];
 		$supported_post_types = [];
 
 		if ( ! empty( $post_types ) ) {
@@ -998,17 +995,21 @@ class Classification extends Feature {
 					$supported_post_types[] = $post_type;
 				}
 			}
-
-			if ( ! empty( $supported_post_types ) ) {
-				$taxonomy_args['object_type'] = $supported_post_types;
-			}
 		}
 
-		$taxonomies = get_taxonomies( $taxonomy_args, 'objects' );
+		$taxonomies = get_taxonomies( [], 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
 		$supported  = [];
 
 		foreach ( $taxonomies as $taxonomy ) {
+			// Remove this taxonomy if it doesn't support at least one of our post types.
+			if (
+				! empty( $supported_post_types ) &&
+				empty( array_intersect( $supported_post_types, $taxonomy->object_type ) )
+			) {
+				continue;
+			}
+
 			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
 		}
 
