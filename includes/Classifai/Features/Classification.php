@@ -793,6 +793,7 @@ class Classification extends Feature {
 					'feature'       => $classify_by,
 					'labels'        => $labels,
 					'default_value' => $settings[ $classify_by ],
+					'post_types'    => $settings['post_types'],
 				]
 			);
 		}
@@ -927,7 +928,7 @@ class Classification extends Feature {
 		$feature = $args['feature'];
 		$labels  = $args['labels'];
 
-		$taxonomies = $this->get_supported_taxonomies();
+		$taxonomies = $this->get_supported_taxonomies( $args['post_types'] );
 		$features   = $this->get_settings();
 		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
 
@@ -982,10 +983,28 @@ class Classification extends Feature {
 	/**
 	 * Return the list of supported taxonomies
 	 *
+	 * @param array $post_types Array of supported post types.
 	 * @return array
 	 */
-	public function get_supported_taxonomies(): array {
-		$taxonomies = get_taxonomies( [], 'objects' );
+	public function get_supported_taxonomies( array $post_types = [] ): array {
+		$taxonomy_args        = [
+			'show_ui' => true,
+		];
+		$supported_post_types = [];
+
+		if ( ! empty( $post_types ) ) {
+			foreach ( $post_types as $post_type => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$supported_post_types[] = $post_type;
+				}
+			}
+
+			if ( ! empty( $supported_post_types ) ) {
+				$taxonomy_args['object_type'] = $supported_post_types;
+			}
+		}
+
+		$taxonomies = get_taxonomies( $taxonomy_args, 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
 		$supported  = [];
 

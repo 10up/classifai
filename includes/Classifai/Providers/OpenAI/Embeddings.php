@@ -60,7 +60,10 @@ class Embeddings extends Provider {
 			$this->feature_instance &&
 			method_exists( $this->feature_instance, 'get_supported_taxonomies' )
 		) {
-			foreach ( $this->feature_instance->get_supported_taxonomies() as $tax => $label ) {
+			$settings   = get_option( $this->feature_instance->get_option_name(), [] );
+			$post_types = isset( $settings['post_types'] ) ? $settings['post_types'] : [ 'post' => 1 ];
+
+			foreach ( $this->feature_instance->get_supported_taxonomies( $post_types ) as $tax => $label ) {
 				$this->nlu_features[ $tax ] = [
 					'feature'           => $label,
 					'threshold'         => __( 'Threshold (%)', 'classifai' ),
