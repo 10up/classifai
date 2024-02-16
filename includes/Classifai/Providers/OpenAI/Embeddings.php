@@ -429,16 +429,24 @@ class Embeddings extends Provider {
 		$calculations         = new EmbeddingCalculations();
 
 		foreach ( $taxonomies as $tax ) {
+			$exclude = [];
+
+			if ( is_numeric( $tax ) ) {
+				continue;
+			}
+
 			if ( 'tags' === $tax ) {
 				$tax = 'post_tag';
 			}
 
 			if ( 'categories' === $tax ) {
 				$tax = 'category';
-			}
 
-			if ( is_numeric( $tax ) ) {
-				continue;
+				// Exclude the uncategorized term.
+				$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
+				if ( $uncat_term ) {
+					$exclude = [ $uncat_term->term_id ];
+				}
 			}
 
 			$terms = get_terms(
@@ -448,6 +456,7 @@ class Embeddings extends Provider {
 					'fields'     => 'ids',
 					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'number'     => 500,
+					'exclude'    => $exclude,
 				]
 			);
 
