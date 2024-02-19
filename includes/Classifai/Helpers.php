@@ -279,10 +279,10 @@ function get_modified_image_source_url( int $post_id ) {
 /**
  * Check if attachment is PDF document.
  *
- * @param \WP_Post $post Post object for the attachment being viewed.
+ * @param int|\WP_Post $post Post object for the attachment being viewed.
  * @return bool
  */
-function attachment_is_pdf( \WP_Post $post ): bool {
+function attachment_is_pdf( $post ): bool {
 	$mime_type          = get_post_mime_type( $post );
 	$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 
