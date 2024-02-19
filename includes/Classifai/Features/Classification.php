@@ -1004,8 +1004,11 @@ class Classification extends Feature {
 		foreach ( $taxonomies as $taxonomy ) {
 			// Remove this taxonomy if it doesn't support at least one of our post types.
 			if (
-				! empty( $supported_post_types ) &&
-				empty( array_intersect( $supported_post_types, $taxonomy->object_type ) )
+				(
+					! empty( $supported_post_types ) &&
+					empty( array_intersect( $supported_post_types, $taxonomy->object_type ) )
+				) ||
+				'post_format' === $taxonomy->name
 			) {
 				continue;
 			}
