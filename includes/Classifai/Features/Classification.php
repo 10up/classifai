@@ -163,7 +163,7 @@ class Classification extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_watson_nlu', array() );
-		$new_settings = array();;
+		$new_settings = array();
 
 		if ( isset( $old_settings['authenticated'] ) && $old_settings['authenticated'] ) {
 			$new_settings['provider'] = 'ibm_watson_nlu';
