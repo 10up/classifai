@@ -399,6 +399,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		const ogText = migrateSettingsBtn.text();
 		skipMigrationBtn.hide();
 		migrateSettingsBtn.text( ClassifAI.migrating_progress );
+		migrateSettingsBtn.prop( 'disabled', true );
 
 		$.ajax(
 			ajaxurl,
@@ -413,6 +414,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		).done( function () {
 			migrateSettingsBtn.text( ogText );
 			noticeWrapper.html( `<p>${ClassifAI.migration_complete}</p>` );
+			window.location.reload();
 		} );
 	} );
 } )( jQuery );
