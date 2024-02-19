@@ -369,7 +369,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	} );
 } )( jQuery );
 
-
 /**
  * Feature-first migration routine:
  * @param {Object} $ jQuery object
@@ -379,41 +378,35 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	const migrateSettingsBtn = $( '#classifai-migrate-settings' );
 	const skipMigrationBtn = $( '#classifai-skip-migration-settings' );
 
-	skipMigrationBtn.on( 'click', function ( e ) {
-		$.ajax(
-			ajaxurl,
-			{
-				type: 'POST',
-				data: {
-					action: 'v3_migration_script',
-					routine: 'skip',
-					nonce: ClassifAI.ajax_nonce,
-				},
-			}
-		).done( function () {
+	skipMigrationBtn.on( 'click', function () {
+		$.ajax( ajaxurl, {
+			type: 'POST',
+			data: {
+				action: 'v3_migration_script',
+				routine: 'skip',
+				nonce: ClassifAI.ajax_nonce,
+			},
+		} ).done( function () {
 			noticeWrapper.slideUp();
 		} );
 	} );
 
-	migrateSettingsBtn.on( 'click', function ( e ) {
+	migrateSettingsBtn.on( 'click', function () {
 		const ogText = migrateSettingsBtn.text();
 		skipMigrationBtn.hide();
 		migrateSettingsBtn.text( ClassifAI.migrating_progress );
 		migrateSettingsBtn.prop( 'disabled', true );
 
-		$.ajax(
-			ajaxurl,
-			{
-				type: 'POST',
-				data: {
-					action: 'v3_migration_script',
-					routine: 'migrate',
-					nonce: ClassifAI.ajax_nonce,
-				},
-			}
-		).done( function () {
+		$.ajax( ajaxurl, {
+			type: 'POST',
+			data: {
+				action: 'v3_migration_script',
+				routine: 'migrate',
+				nonce: ClassifAI.ajax_nonce,
+			},
+		} ).done( function () {
 			migrateSettingsBtn.text( ogText );
-			noticeWrapper.html( `<p>${ClassifAI.migration_complete}</p>` );
+			noticeWrapper.html( `<p>${ ClassifAI.migration_complete }</p>` );
 			window.location.reload();
 		} );
 	} );
