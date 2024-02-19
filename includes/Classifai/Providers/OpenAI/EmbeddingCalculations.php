@@ -23,6 +23,15 @@ class EmbeddingCalculations {
 			return false;
 		}
 
+		// Ensure the arrays are the same length.
+		if ( count( $source_embedding ) !== count( $compare_embedding ) ) {
+			if ( count( $source_embedding ) > count( $compare_embedding ) ) {
+				$source_embedding = array_slice( $source_embedding, 0, count( $compare_embedding ), true );
+			} elseif ( count( $source_embedding ) < count( $compare_embedding ) ) {
+				$compare_embedding = array_slice( $compare_embedding, 0, count( $source_embedding ), true );
+			}
+		}
+
 		// Get the combined average between the two embeddings.
 		$combined_average = array_sum(
 			array_map(
@@ -32,7 +41,7 @@ class EmbeddingCalculations {
 				$source_embedding,
 				$compare_embedding
 			)
-		) / count( $source_embedding );
+		);
 
 		// Get the average of the source embedding.
 		$source_average = array_sum(
@@ -42,7 +51,7 @@ class EmbeddingCalculations {
 				},
 				$source_embedding
 			)
-		) / count( $source_embedding );
+		);
 
 		// Get the average of the compare embedding.
 		$compare_average = array_sum(
@@ -52,7 +61,7 @@ class EmbeddingCalculations {
 				},
 				$compare_embedding
 			)
-		) / count( $compare_embedding );
+		);
 
 		// Do the math.
 		$distance = 1.0 - ( $combined_average / sqrt( $source_average * $compare_average ) );
