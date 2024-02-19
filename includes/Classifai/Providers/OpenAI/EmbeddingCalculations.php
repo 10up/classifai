@@ -23,15 +23,6 @@ class EmbeddingCalculations {
 			return false;
 		}
 
-		// Ensure the arrays are the same length.
-		if ( count( $source_embedding ) !== count( $compare_embedding ) ) {
-			if ( count( $source_embedding ) > count( $compare_embedding ) ) {
-				$source_embedding = $this->normalize( array_slice( $source_embedding, 0, count( $compare_embedding ), true ) );
-			} elseif ( count( $source_embedding ) < count( $compare_embedding ) ) {
-				$compare_embedding = $this->normalize( array_slice( $compare_embedding, 0, count( $source_embedding ), true ) );
-			}
-		}
-
 		// Get the combined value between the two embeddings.
 		$combined_value = array_sum(
 			array_map(
@@ -68,35 +59,5 @@ class EmbeddingCalculations {
 
 		// Ensure we are within the range of 0 to 1.0.
 		return max( 0, min( abs( (float) $distance ), 1.0 ) );
-	}
-
-	/**
-	 * Normalize the embedding array.
-	 *
-	 * @param array $embedding The embedding data to normalize.
-	 * @return array
-	 */
-	public function normalize( array $embedding = [] ): array {
-		$norm = sqrt(
-			array_sum(
-				array_map(
-					function ( $val ) {
-						return $val * $val;
-					},
-					$embedding
-				)
-			)
-		);
-
-		if ( 0 === $norm ) {
-			return $embedding;
-		}
-
-		return array_map(
-			function ( $x ) use ( $norm ) {
-				return (float) $x / (float) $norm;
-			},
-			$embedding
-		);
 	}
 }
