@@ -32,7 +32,7 @@ class Embeddings extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $model = 'text-embedding-ada-002';
+	protected $model = 'text-embedding-3-small';
 
 	/**
 	 * Maximum number of tokens our model supports
@@ -605,8 +605,9 @@ class Embeddings extends Provider {
 		$body = apply_filters(
 			'classifai_openai_embeddings_request_body',
 			[
-				'model' => $this->model,
-				'input' => $this->get_content( $id, $type ),
+				'model'      => $this->model,
+				'input'      => $this->get_content( $id, $type ),
+				'dimensions' => 512,
 			],
 			$id,
 			$type
