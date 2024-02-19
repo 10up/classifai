@@ -2,7 +2,7 @@
 
 namespace Classifai\Taxonomy;
 
-use function Classifai\Providers\Watson\get_supported_post_types;
+use Classifai\Features\Classification;
 
 /**
  * TaxonomyFactory builds the Taxonomy taxonomy class instances. Instances
@@ -47,7 +47,7 @@ class TaxonomyFactory {
 	 * frontend and backend to get these taxonomies.
 	 */
 	public function build_all() {
-		$supported_post_types = get_supported_post_types();
+		$supported_post_types = ( new Classification() )->get_supported_post_types();
 
 		foreach ( $this->get_supported_taxonomies() as $taxonomy ) {
 			$this->build_if( $taxonomy, $supported_post_types );

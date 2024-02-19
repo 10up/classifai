@@ -26,43 +26,12 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get(
 			'#classifai_feature_classification_post_statuses_publish'
 		).check();
-		cy.get(
-			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
-		).check();
-		cy.get(
-			'#classifai_feature_classification_openai_embeddings_taxonomies_category_threshold'
-		)
-			.clear()
-			.type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
-		cy.get( '#number_of_terms' ).clear().type( 1 );
+		cy.get( '#category' ).check();
+		cy.get( '#category_threshold' ).clear().type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
 		cy.get( '#submit' ).click();
-	} );
-
-	it( 'Can see the preview on the settings page', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
-
-		cy.get( '#submit' ).click();
-
-		// Click the Preview button.
-		const closePanelSelector = '#get-classifier-preview-data-btn';
-		cy.get( closePanelSelector ).click();
-
-		// Check the term is received and visible.
-		cy.get( '.tax-row--Category' ).should( 'exist' );
 	} );
 
 	it( 'Can create category and post and category will get auto-assigned', () => {
-		// Remove custom taxonomies so those don't interfere with the test.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
-		);
-		cy.get(
-			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
-		).uncheck();
-		cy.get( '#submit' ).click();
-
 		// Create test term.
 		cy.deleteAllTerms( 'category' );
 		cy.createTerm( 'Test', 'category' );
@@ -107,6 +76,21 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 				.children()
 				.contains( 'Test' );
 		} );
+	} );
+
+	it( 'Can see the preview on the settings page', () => {
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
+		);
+
+		cy.get( '#submit' ).click();
+
+		// Click the Preview button.
+		const closePanelSelector = '#get-classifier-preview-data-btn';
+		cy.get( closePanelSelector ).click();
+
+		// Check the term is received and visible.
+		cy.get( '.tax-row--Category' ).should( 'exist' );
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
@@ -175,10 +159,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get(
 			'#classifai_feature_classification_post_statuses_publish'
 		).check();
-		cy.get(
-			'#classifai_feature_classification_openai_embeddings_taxonomies_category'
-		).check();
-		cy.get( '#number_of_terms' ).clear().type( 1 );
+		cy.get( '#category' ).check();
 		cy.get( '#submit' ).click();
 
 		cy.createClassicPost( {

@@ -718,24 +718,6 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
-	 * The list of post types that TTS supports.
-	 *
-	 * @return array Supported Post Types.
-	 */
-	public function get_supported_post_types(): array {
-		$selected   = $this->get_settings( 'post_types' );
-		$post_types = [];
-
-		foreach ( $selected as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
-		}
-
-		return $post_types;
-	}
-
-	/**
 	 * Returns the default settings for the feature.
 	 *
 	 * @return array

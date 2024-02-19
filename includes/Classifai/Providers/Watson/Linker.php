@@ -2,6 +2,8 @@
 
 namespace Classifai\Providers\Watson;
 
+use function Classifai\get_classification_feature_taxonomy;
+
 /**
  * Linker connects Watson classification results with Taxonomy Terms.
  *
@@ -92,7 +94,7 @@ class Linker {
 	 */
 	public function link_categories( int $post_id, array $categories, bool $link_categories = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = get_feature_taxonomy( 'category' );
+		$taxonomy                = get_classification_feature_taxonomy( 'category' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $categories as $category ) {
@@ -160,7 +162,7 @@ class Linker {
 	 */
 	public function link_keywords( int $post_id, array $keywords, bool $link_keywords = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = get_feature_taxonomy( 'keyword' );
+		$taxonomy                = get_classification_feature_taxonomy( 'keyword' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $keywords as $keyword ) {
@@ -219,7 +221,7 @@ class Linker {
 	 */
 	public function link_concepts( int $post_id, array $concepts, bool $link_concepts = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = get_feature_taxonomy( 'concept' );
+		$taxonomy                = get_classification_feature_taxonomy( 'concept' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $concepts as $concept ) {
@@ -285,7 +287,7 @@ class Linker {
 	 */
 	public function link_entities( int $post_id, array $entities, bool $link_entities = true ) {
 		$terms_to_link           = [];
-		$taxonomy                = get_feature_taxonomy( 'entity' );
+		$taxonomy                = get_classification_feature_taxonomy( 'entity' );
 		$classify_existing_terms = 'existing_terms' === get_classification_method();
 
 		foreach ( $entities as $entity ) {

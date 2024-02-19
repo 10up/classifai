@@ -195,6 +195,7 @@ abstract class Feature {
 		 * @hook classifai_{feature}_get_default_settings
 		 *
 		 * @param {array} $defaults Default feature settings.
+		 * @param {object} $this Feature instance.
 		 *
 		 * @return {array} Filtered default feature settings.
 		 */
@@ -204,7 +205,8 @@ abstract class Feature {
 				$shared_defaults,
 				$feature_settings,
 				$provider_settings
-			)
+			),
+			$this
 		);
 	}
 
@@ -995,6 +997,70 @@ abstract class Feature {
 	}
 
 	/**
+	 * The list of post types that are supported.
+	 *
+	 * @return array
+	 */
+	public function get_supported_post_types(): array {
+		$settings   = $this->get_settings();
+		$post_types = [];
+
+		if ( isset( $settings['post_types'] ) && is_array( $settings['post_types'] ) ) {
+			foreach ( $settings['post_types'] as $post_type => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_types[] = $post_type;
+				}
+			}
+		}
+
+		/**
+		 * Filter post types supported for a feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_post_types
+		 *
+		 * @param {array} $post_types Array of post types to be classified.
+		 *
+		 * @return {array} Array of post types.
+		 */
+		$post_types = apply_filters( 'classifai_' . static::ID . '_post_types', $post_types );
+
+		return $post_types;
+	}
+
+	/**
+	 * The list of post statuses that are supported.
+	 *
+	 * @return array
+	 */
+	public function get_supported_post_statuses(): array {
+		$settings      = $this->get_settings();
+		$post_statuses = [];
+
+		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
+			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
+				if ( ! empty( $enabled ) ) {
+					$post_statuses[] = $post_status;
+				}
+			}
+		}
+
+		/**
+		 * Filter post statuses supported for a feature.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_post_statuses
+		 *
+		 * @param {array} $post_types Array of post statuses to be classified.
+		 *
+		 * @return {array} Array of post statuses.
+		 */
+		$post_statuses = apply_filters( 'classifai_' . static::ID . '_post_statuses', $post_statuses );
+
+		return $post_statuses;
+	}
+
+	/**
 	 * Returns array of instances of provider classes registered for the service.
 	 *
 	 * @internal
@@ -1006,7 +1072,7 @@ abstract class Feature {
 		$provider_instances = [];
 
 		foreach ( $services as $provider_class ) {
-			$provider_instances[] = new $provider_class( $this );
+			$provider_instances[] = new $provider_class();
 		}
 
 		return $provider_instances;
