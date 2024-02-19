@@ -951,13 +951,13 @@ class Classification extends Feature {
 
 		<p>
 			<?php $this->render_input( $feature_args ); ?>
-			<label for="classifai-settings-<?php echo esc_attr( $feature ); ?>">
+			<label for="<?php echo esc_attr( $feature ); ?>">
 				<?php esc_html_e( 'Enable', 'classifai' ); ?>
 			</label>
 		</p>
 
 		<p>
-			<label for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>">
+			<label for="<?php echo esc_attr( "{$feature}_threshold" ); ?>">
 				<?php echo esc_html( $labels['threshold'] ); ?>
 			</label><br/>
 			<?php $this->render_input( $threshold_args ); ?>
