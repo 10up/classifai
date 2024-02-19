@@ -27,8 +27,10 @@ class Notifications {
 		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
 		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 		add_action( 'admin_notices', [ $this, 'thresholds_update_notice' ] );
+		add_action( 'admin_notices', [ $this, 'v3_migration_notice' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'add_dismiss_script' ] );
 		add_action( 'wp_ajax_classifai_dismiss_notice', [ $this, 'ajax_maybe_dismiss_notice' ] );
+		add_action( 'wp_ajax_v3_migration_script', [ $this, 'v3_migration_script' ] );
 	}
 
 	/**
@@ -211,5 +213,85 @@ EOD;
 
 			<?php
 		}
+	}
+
+	/**
+	 * Runs the feature-first migration routine.
+	 */
+	public function v3_migration_script() {
+		$routine = sanitize_text_field( wp_unslash( $_POST['routine'] ?? '' ) );
+		$nonce   = sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) );
+
+		if ( ! wp_verify_nonce( $nonce, 'classifai' ) ) {
+			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			wp_send_json_error( $error );
+		}
+
+		if ( empty( $routine ) ) {
+			wp_send_json_error( esc_html__( 'Migration routine empty.', 'classifai' ) );
+		}
+
+		if ( 'skip' === $routine ) {
+			update_option( 'classifai-v3-migration-status', true );
+			wp_send_json_success( esc_html__( 'V3 migration skipped.', 'classifai' ) );
+		}
+
+		if ( 'migrate' !== $routine ) {
+			wp_send_json_error( esc_html__( 'Migration routine unrecognized.', 'classifai' ) );
+		}
+
+		$features = array(
+			// Language processing features.
+			\Classifai\Features\Classification::class,
+			\Classifai\Features\TitleGeneration::class,
+			\Classifai\Features\ExcerptGeneration::class,
+			\Classifai\Features\ContentResizing::class,
+			\Classifai\Features\TextToSpeech::class,
+			\Classifai\Features\AudioTranscriptsGeneration::class,
+
+			// Image processing features.
+			\Classifai\Features\DescriptiveTextGenerator::class,
+			\Classifai\Features\ImageTagsGenerator::class,
+			\Classifai\Features\ImageCropping::class,
+			\Classifai\Features\ImageTextExtraction::class,
+			\Classifai\Features\ImageGeneration::class,
+			\Classifai\Features\PDFTextExtraction::class,
+		);
+
+		foreach ( $features as $feature ) {
+			$feature_instance = new $feature();
+			$feature_id       = $feature_instance->get_option_name();
+
+			if ( method_exists( $feature_instance, 'migrate_settings' ) ) {
+				$migrated_settings = $feature_instance->migrate_settings();
+				update_option( $feature_id, $migrated_settings );
+			}
+		}
+
+		update_option( 'classifai-v3-migration-status', true );
+		wp_send_json_success( esc_html__( 'V3 migration completed', 'classifai' ) );
+	}
+
+	/**
+	 * Displays the migration notice for feature-first refactor
+	 * of the settings.
+	 */
+	public function v3_migration_notice() {
+		$show_notice = get_option( 'classifai-v3-migration-status', false );
+
+		if ( ! $show_notice ) :
+			?>
+			<div class="classifai-migation-notice notice notice-info classifai-dismissible-notice">
+				<p>
+					<?php esc_html_e( 'Migrate settings from the older version?' ); ?>
+				</p>
+				<p>
+					<button type="button" class="button button-primary" id="classifai-migrate-settings"><?php esc_html_e( 'Migrate settings', 'classifai' ); ?></button>
+					&nbsp;
+					<a href="#" id="classifai-skip-migration-settings"><?php esc_html_e( 'Skip migration', 'classifai' ); ?></a>
+				</p>
+			</div>
+			<?php
+		endif;
 	}
 }

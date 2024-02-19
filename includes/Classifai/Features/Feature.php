@@ -1207,49 +1207,4 @@ abstract class Feature {
 			$this
 		);
 	}
-
-	/**
-	 * Migrates the settings from ClassifAI < 3.0.0 to higher versions of ClassifAI.
-	 */
-	public function migrate_settings_to_v3() {
-		$features = array(
-			// Language processing features.
-			Classification::class,
-			TitleGeneration::class,
-			ExcerptGeneration::class,
-			ContentResizing::class,
-			TextToSpeech::class,
-			AudioTranscriptsGeneration::class,
-
-			// Image processing features.
-			DescriptiveTextGenerator::class,
-			ImageTagsGenerator::class,
-			ImageCropping::class,
-			ImageTextExtraction::class,
-			ImageGeneration::class,
-			PDFTextExtraction::class,
-		);
-
-		$records = get_option( 'classifai_migration_records', array() );
-
-		foreach ( $features as $feature ) {
-			$feature_instance = new $feature();
-			$feature_id       = $feature_instance->get_option_name();
-
-			if ( isset( $records[ $feature_id ] ) && $records[ $feature_id ] ) {
-				continue;
-			}
-
-			if ( method_exists( $feature_instance, 'migrate_settings' ) ) {
-				$migrated_settings = $feature_instance->migrate_settings();
-				$has_updated       = update_option( $feature_id, $migrated_settings );
-
-				if ( $has_updated ) {
-					$records[ $feature_id ] = true;
-				}
-			}
-		}
-
-		update_option( 'classifai_migration_records', $records );
-	}
 }

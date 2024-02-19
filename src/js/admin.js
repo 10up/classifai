@@ -368,3 +368,51 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		providerSelectEl.trigger( 'change' );
 	} );
 } )( jQuery );
+
+
+/**
+ * Feature-first migration routine:
+ * @param {Object} $ jQuery object
+ */
+( function ( $ ) {
+	const noticeWrapper = $( '.classifai-migation-notice' );
+	const migrateSettingsBtn = $( '#classifai-migrate-settings' );
+	const skipMigrationBtn = $( '#classifai-skip-migration-settings' );
+
+	skipMigrationBtn.on( 'click', function ( e ) {
+		$.ajax(
+			ajaxurl,
+			{
+				type: 'POST',
+				data: {
+					action: 'v3_migration_script',
+					routine: 'skip',
+					nonce: ClassifAI.ajax_nonce,
+				},
+			}
+		).done( function () {
+			noticeWrapper.slideUp();
+		} );
+	} );
+
+	migrateSettingsBtn.on( 'click', function ( e ) {
+		const ogText = migrateSettingsBtn.text();
+		skipMigrationBtn.hide();
+		migrateSettingsBtn.text( ClassifAI.migrating_progress );
+
+		$.ajax(
+			ajaxurl,
+			{
+				type: 'POST',
+				data: {
+					action: 'v3_migration_script',
+					routine: 'migrate',
+					nonce: ClassifAI.ajax_nonce,
+				},
+			}
+		).done( function () {
+			migrateSettingsBtn.text( ogText );
+			noticeWrapper.html( `<p>${ClassifAI.migration_complete}</p>` );
+		} );
+	} );
+} )( jQuery );
