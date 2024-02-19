@@ -163,7 +163,7 @@ class Classification extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_watson_nlu', array() );
-		$new_settings = $this->get_settings();
+		$new_settings = array();;
 
 		if ( isset( $old_settings['authenticated'] ) && $old_settings['authenticated'] ) {
 			$new_settings['provider'] = 'ibm_watson_nlu';
@@ -254,6 +254,54 @@ class Classification extends Feature {
 
 			if ( isset( $old_settings['content_classification_users'] ) ) {
 				$new_settings['users'] = $old_settings['content_classification_users'];
+			}
+		} else {
+			$old_settings = get_option( 'classifai_openai_whisper', array() );
+
+			if ( isset( $old_settings['enable_classification'] ) ) {
+				$new_settings['status'] = $old_settings['enable_classification'];
+			}
+
+			$new_settings['provider'] = 'openai_embeddings';
+
+			if ( isset( $old_settings['api_key'] ) ) {
+				$new_settings['openai_embeddings']['api_key'] = $old_settings['api_key'];
+			}
+
+			if ( isset( $old_settings['number'] ) ) {
+				$new_settings['openai_embeddings']['number_of_terms'] = $old_settings['number'];
+			}
+
+			if ( isset( $old_settings['number'] ) ) {
+				$new_settings['openai_embeddings']['number_of_terms'] = $old_settings['number'];
+			}
+
+			if ( isset( $old_settings['taxonomies'] ) ) {
+				$new_settings['openai_embeddings']['taxonomies'] = $old_settings['taxonomies'];
+			}
+
+			if ( isset( $old_settings['authenticated'] ) ) {
+				$new_settings['openai_embeddings']['authenticated'] = $old_settings['authenticated'];
+			}
+
+			if ( isset( $old_settings['post_statuses'] ) ) {
+				$new_settings['post_statuses'] = $old_settings['post_statuses'];
+			}
+
+			if ( isset( $old_settings['post_types'] ) ) {
+				$new_settings['post_types'] = $old_settings['post_types'];
+			}
+
+			if ( isset( $old_settings['classification_roles'] ) ) {
+				$new_settings['roles'] = $old_settings['classification_roles'];
+			}
+
+			if ( isset( $old_settings['classification_users'] ) ) {
+				$new_settings['users'] = $old_settings['classification_users'];
+			}
+
+			if ( isset( $old_settings['classification_user_based_opt_out'] ) ) {
+				$new_settings['user_based_opt_out'] = $old_settings['classification_user_based_opt_out'];
 			}
 		}
 
