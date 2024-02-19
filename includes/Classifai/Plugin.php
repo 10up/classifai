@@ -185,8 +185,7 @@ class Plugin {
 			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
 			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
-			'migrating_progress'       => esc_html__( 'Migrating...', 'classifai' ),
-			'migration_complete'       => esc_html__( 'Migration complete.', 'classifai' ),
+			'migration_progress'       => esc_html__( 'Migrating...', 'classifai' ),
 		];
 
 		wp_localize_script(

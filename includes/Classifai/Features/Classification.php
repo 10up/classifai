@@ -256,7 +256,7 @@ class Classification extends Feature {
 				$new_settings['users'] = $old_settings['content_classification_users'];
 			}
 		} else {
-			$old_settings = get_option( 'classifai_openai_whisper', array() );
+			$old_settings = get_option( 'classifai_openai_embeddings', array() );
 
 			if ( isset( $old_settings['enable_classification'] ) ) {
 				$new_settings['status'] = $old_settings['enable_classification'];

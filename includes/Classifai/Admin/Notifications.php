@@ -231,6 +231,25 @@ EOD;
 			wp_send_json_error( esc_html__( 'Migration routine empty.', 'classifai' ) );
 		}
 
+		if ( 'delete_old' === $routine ) {
+			$old_settings = array(
+				'classifai_watson_nlu',
+				'classifai_openai_whisper',
+				'classifai_openai_chatgpt',
+				'classifai_openai_embeddings',
+				'classifai_azure_text_to_speech',
+				'classifai_openai_whisper',
+				'classifai_computer_vision',
+				'classifai_openai_dalle',
+			);
+
+			foreach ( $old_settings as $old_setting ) {
+				delete_option( $old_setting );
+			}
+
+			wp_send_json_success( esc_html__( 'Old settings deleted.', 'classifai' ) );
+		}
+
 		if ( 'skip' === $routine ) {
 			update_option( 'classifai-v3-migration-status', true );
 			wp_send_json_success( esc_html__( 'V3 migration skipped.', 'classifai' ) );
@@ -269,7 +288,7 @@ EOD;
 		}
 
 		update_option( 'classifai-v3-migration-status', true );
-		wp_send_json_success( esc_html__( 'V3 migration completed', 'classifai' ) );
+		wp_send_json_success( esc_html__( 'Migration completed', 'classifai' ) );
 	}
 
 	/**
@@ -282,11 +301,12 @@ EOD;
 		if ( ! $show_notice ) :
 			?>
 			<div class="classifai-migation-notice notice notice-info classifai-dismissible-notice">
-				<p>
-					<?php esc_html_e( 'Migrate settings from the older version?' ); ?>
+				<p id="classifai-migation-notice__interactive">
+					<?php esc_html_e( 'Migrate settings from the older version?', 'classifai' ); ?>
 				</p>
 				<p>
 					<button type="button" class="button button-primary" id="classifai-migrate-settings"><?php esc_html_e( 'Migrate settings', 'classifai' ); ?></button>
+					<button type="button" class="button button-primary" id="classifai-delete-pre-v3-settings" style="display: none;"><?php esc_html_e( 'Delete old settings', 'classifai' ); ?></button>
 					&nbsp;
 					<a href="#" id="classifai-skip-migration-settings"><?php esc_html_e( 'Skip migration', 'classifai' ); ?></a>
 				</p>

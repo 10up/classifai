@@ -376,6 +376,8 @@ document.addEventListener( 'DOMContentLoaded', function () {
 ( function ( $ ) {
 	const noticeWrapper = $( '.classifai-migation-notice' );
 	const migrateSettingsBtn = $( '#classifai-migrate-settings' );
+	const deleteOldSettings = $( '#classifai-delete-pre-v3-settings' );
+	const interactiveTxt = $( '#classifai-migation-notice__interactive' );
 	const skipMigrationBtn = $( '#classifai-skip-migration-settings' );
 
 	skipMigrationBtn.on( 'click', function () {
@@ -392,9 +394,8 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	} );
 
 	migrateSettingsBtn.on( 'click', function () {
-		const ogText = migrateSettingsBtn.text();
 		skipMigrationBtn.hide();
-		migrateSettingsBtn.text( ClassifAI.migrating_progress );
+		migrateSettingsBtn.text( ClassifAI.migration_progress );
 		migrateSettingsBtn.prop( 'disabled', true );
 
 		$.ajax( ajaxurl, {
@@ -404,10 +405,25 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				routine: 'migrate',
 				nonce: ClassifAI.ajax_nonce,
 			},
-		} ).done( function () {
-			migrateSettingsBtn.text( ogText );
-			noticeWrapper.html( `<p>${ ClassifAI.migration_complete }</p>` );
-			window.location.reload();
+		} ).done( function ( response ) {
+			migrateSettingsBtn.hide();
+			interactiveTxt.text( response.data );
+			deleteOldSettings.show();
+		} );
+	} );
+
+	deleteOldSettings.on( 'click', function () {
+		deleteOldSettings.prop( 'disabled', true );
+
+		$.ajax( ajaxurl, {
+			type: 'POST',
+			data: {
+				action: 'v3_migration_script',
+				routine: 'delete_old',
+				nonce: ClassifAI.ajax_nonce,
+			},
+		} ).done( function ( response ) {
+			noticeWrapper.html( `<p>${ response.data }</p>` );
 		} );
 	} );
 } )( jQuery );
