@@ -1088,8 +1088,8 @@ class Classification extends Feature {
 			}
 
 			// Users
-			if ( isset( $old_settings['users'] ) ) {
-				$new_settings['users'] = $old_settings['users'];
+			if ( isset( $old_settings['content_classification_users'] ) ) {
+				$new_settings['users'] = $old_settings['content_classification_users'];
 			}
 
 			// Provider.
@@ -1106,16 +1106,16 @@ class Classification extends Feature {
 			}
 
 			if ( isset( $old_settings['classification_mode'] ) ) {
-				$new_settings['ibm_watson_nlu']['classification_mode'] = $old_settings['classification_mode'];
+				$new_settings['classification_mode'] = $old_settings['classification_mode'];
 			}
 
 			if ( isset( $old_settings['classification_method'] ) ) {
-				$new_settings['ibm_watson_nlu']['classification_method'] = $old_settings['classification_method'];
+				$new_settings['classification_method'] = $old_settings['classification_method'];
 			}
 
 			if ( isset( $old_settings['features'] ) ) {
 				foreach ( $old_settings['features'] as $feature => $value ) {
-					$new_settings['ibm_watson_nlu'][ $feature ] = $value;
+					$new_settings[ $feature ] = $value;
 				}
 			}
 
@@ -1125,10 +1125,6 @@ class Classification extends Feature {
 
 			if ( isset( $old_settings['content_classification_user_based_opt_out'] ) ) {
 				$new_settings['user_based_opt_out'] = $old_settings['content_classification_user_based_opt_out'];
-			}
-
-			if ( isset( $old_settings['content_classification_users'] ) ) {
-				$new_settings['users'] = $old_settings['content_classification_users'];
 			}
 		} else {
 			$old_settings = get_option( 'classifai_openai_embeddings', array() );
