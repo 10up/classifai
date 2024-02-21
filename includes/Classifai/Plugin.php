@@ -37,6 +37,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
+		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
@@ -232,5 +233,81 @@ class Plugin {
 			),
 			$links
 		);
+	}
+
+	/**
+	 * Migrate the existing settings to v3 if necessary.
+	 *
+	 * @since 3.0.0
+	 */
+	public function maybe_migrate_to_v3() {
+		$is_migrated = get_option( 'classifai_v3_migration_completed', false );
+
+		if ( false !== $is_migrated ) {
+			// Already migrated.
+			return;
+		}
+
+		$features = array();
+
+		// Get the existing settings.
+		$nlu_settings        = get_option( 'classifai_watson_nlu', [] );
+		$embeddings_settings = get_option( 'classifai_openai_embeddings', [] );
+		$whisper_settings    = get_option( 'classifai_openai_whisper', [] );
+		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', [] );
+		$tts_settings        = get_option( 'classifai_azure_text_to_speech', [] );
+		$vision_settings     = get_option( 'classifai_computer_vision', [] );
+		$dalle_settings      = get_option( 'classifai_openai_dalle', [] );
+
+
+		// If settings are there, migrate them.
+		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
+			$features[] = \Classifai\Features\Classification::class;
+		}
+
+		if ( ! empty( $whisper_settings ) ) {
+			$features[] = \Classifai\Features\AudioTranscriptsGeneration::class;
+		}
+
+		if ( ! empty( $chatgpt_settings ) ) {
+			$features[] = \Classifai\Features\TitleGeneration::class;
+			$features[] = \Classifai\Features\ExcerptGeneration::class;
+			$features[] = \Classifai\Features\ContentResizing::class;
+		}
+
+		if ( ! empty( $tts_settings ) ) {
+			$features[] = \Classifai\Features\TextToSpeech::class;
+		}
+
+		if ( ! empty( $vision_settings ) ) {
+			$features[] = \Classifai\Features\DescriptiveTextGenerator::class;
+			$features[] = \Classifai\Features\ImageTagsGenerator::class;
+			$features[] = \Classifai\Features\ImageCropping::class;
+			$features[] = \Classifai\Features\ImageTextExtraction::class;
+			$features[] = \Classifai\Features\PDFTextExtraction::class;
+		}
+
+		if ( ! empty( $dalle_settings ) ) {
+			$features[] = \Classifai\Features\ImageGeneration::class;
+		}
+
+		// Migrate settings.
+		$migration_needed = ! empty( $features );
+		foreach ( $features as $feature ) {
+			$feature_instance = new $feature();
+			$feature_id       = $feature_instance->get_option_name();
+
+			if ( method_exists( $feature_instance, 'migrate_settings' ) ) {
+				$migrated_settings = $feature_instance->migrate_settings();
+				update_option( $feature_id, $migrated_settings );
+			}
+		}
+
+		// Mark the migration as completed.
+		update_option( 'classifai_v3_migration_completed', true );
+		if ( $migration_needed ) {
+			// Display a notice to the users to inform them about the migration and new features.
+			update_option( 'classifai_display_v3_migration_notice', true );
+		}
 	}
 }
