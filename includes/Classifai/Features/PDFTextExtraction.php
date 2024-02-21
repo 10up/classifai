@@ -281,7 +281,7 @@ class PDFTextExtraction extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_computer_vision', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		$new_settings['provider'] = 'ms_computer_vision';
 
@@ -309,8 +309,8 @@ class PDFTextExtraction extends Feature {
 			$new_settings['users'] = $old_settings['read_pdf_users'];
 		}
 
-		if ( isset( $old_settings['ocr_user_based_opt_out'] ) ) {
-			$new_settings['user_based_opt_out'] = $old_settings['ocr_user_based_opt_out'];
+		if ( isset( $old_settings['read_pdf_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['read_pdf_user_based_opt_out'];
 		}
 
 		return $new_settings;

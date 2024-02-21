@@ -314,7 +314,7 @@ class ContentResizing extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		if ( isset( $old_settings['enable_resize_content'] ) ) {
 			$new_settings['status'] = $old_settings['enable_resize_content'];
@@ -331,7 +331,7 @@ class ContentResizing extends Feature {
 		}
 
 		if ( isset( $old_settings['number_resize_content'] ) ) {
-			$new_settings['number_of_suggestions'] = $old_settings['number_resize_content'];
+			$new_settings['openai_chatgpt']['number_of_suggestions'] = $old_settings['number_resize_content'];
 		}
 
 		if ( isset( $old_settings['shrink_content_prompt'] ) ) {

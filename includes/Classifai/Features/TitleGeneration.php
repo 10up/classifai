@@ -371,7 +371,7 @@ class TitleGeneration extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		if ( isset( $old_settings['enable_titles'] ) ) {
 			$new_settings['status'] = $old_settings['enable_titles'];
@@ -388,7 +388,7 @@ class TitleGeneration extends Feature {
 		}
 
 		if ( isset( $old_settings['number_titles'] ) ) {
-			$new_settings['number_of_titles'] = $old_settings['number_titles'];
+			$new_settings['openai_chatgpt']['number_of_suggestions'] = $old_settings['number_titles'];
 		}
 
 		if ( isset( $old_settings['generate_title_prompt'] ) ) {

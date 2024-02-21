@@ -386,7 +386,7 @@ class ExcerptGeneration extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		if ( isset( $old_settings['enable_excerpt'] ) ) {
 			$new_settings['status'] = $old_settings['enable_excerpt'];

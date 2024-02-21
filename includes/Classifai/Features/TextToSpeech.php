@@ -808,7 +808,7 @@ class TextToSpeech extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_azure_text_to_speech', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		if ( isset( $old_settings['enable_text_to_speech'] ) ) {
 			$new_settings['status'] = $old_settings['enable_text_to_speech'];

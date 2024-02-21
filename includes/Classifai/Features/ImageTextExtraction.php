@@ -415,7 +415,7 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_computer_vision', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		$new_settings['provider'] = 'ms_computer_vision';
 

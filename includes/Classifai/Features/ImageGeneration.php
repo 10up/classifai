@@ -396,7 +396,7 @@ class ImageGeneration extends Feature {
 	 */
 	public function migrate_settings() {
 		$old_settings = get_option( 'classifai_openai_dalle', array() );
-		$new_settings = array();
+		$new_settings = $this->get_default_settings();
 
 		$new_settings['provider'] = 'openai_dalle';
 
