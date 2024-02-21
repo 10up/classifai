@@ -2,8 +2,8 @@
 
 namespace Classifai\Taxonomy;
 
-use function Classifai\Providers\Watson\get_feature_enabled;
-use function Classifai\Providers\Watson\get_feature_taxonomy;
+use function Classifai\get_classification_feature_enabled;
+use function Classifai\get_classification_feature_taxonomy;
 
 /**
  * The ClassifAI Keyword Taxonomy.
@@ -52,7 +52,7 @@ class KeywordTaxonomy extends AbstractTaxonomy {
 	 * @return bool
 	 */
 	public function get_visibility(): bool {
-		return get_feature_enabled( 'keyword' ) &&
-			get_feature_taxonomy( 'keyword' ) === $this->get_name();
+		return get_classification_feature_enabled( 'keyword' ) &&
+			get_classification_feature_taxonomy( 'keyword' ) === $this->get_name();
 	}
 }
