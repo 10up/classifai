@@ -259,7 +259,6 @@ class Plugin {
 		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
 		$personalizer_settings = get_option( 'classifai_personalizer', [] );
 
-
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
 			$features[] = \Classifai\Features\Classification::class;
