@@ -1139,16 +1139,10 @@ class Classification extends Feature {
 				$new_settings['openai_embeddings']['api_key'] = $old_settings['api_key'];
 			}
 
-			if ( isset( $old_settings['number'] ) ) {
-				$new_settings['openai_embeddings']['number_of_terms'] = $old_settings['number'];
-			}
-
-			if ( isset( $old_settings['number'] ) ) {
-				$new_settings['openai_embeddings']['number_of_terms'] = $old_settings['number'];
-			}
-
 			if ( isset( $old_settings['taxonomies'] ) ) {
-				$new_settings['openai_embeddings']['taxonomies'] = $old_settings['taxonomies'];
+				foreach ( $old_settings['taxonomies'] as $feature => $value ) {
+					$new_settings[ $feature ] = $value;
+				}
 			}
 
 			if ( isset( $old_settings['authenticated'] ) ) {
