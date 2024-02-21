@@ -8,7 +8,7 @@ namespace Classifai\Providers\OpenAI;
 class EmbeddingCalculations {
 
 	/**
-	 * Calculate the similarity between two embeddings.
+	 * Calculate the cosine similarity between two embeddings.
 	 *
 	 * This code is based on what OpenAI does in their Python SDK.
 	 * See https://github.com/openai/openai-python/blob/ede0882939656ce4289cb4f61142e7658bb2dec7/openai/embeddings_utils.py#L141
