@@ -42,7 +42,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E 3 API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech)
@@ -438,7 +438,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
 
-* Select **OpenAI DALL-E** in the provider dropdown.
+* Select **OpenAI DALL·E 3** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Image Processing features

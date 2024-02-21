@@ -5,6 +5,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
 		);
 		cy.get( '#status' ).check();
+		cy.get( '#provider' ).select( 'openai_dalle' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 	} );
@@ -19,13 +20,23 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		);
 
 		cy.get( '#api_key' ).clear().type( 'password' );
+		cy.get(
+			'select[name="classifai_feature_image_generation[openai_dalle][number_of_images]"]'
+		).select( '2' );
+		cy.get(
+			'select[name="classifai_feature_image_generation[openai_dalle][quality]"]'
+		).select( 'hd' );
+		cy.get(
+			'select[name="classifai_feature_image_generation[openai_dalle][image_size]"]'
+		).select( '1024x1792' );
+		cy.get(
+			'select[name="classifai_feature_image_generation[openai_dalle][style]"]'
+		).select( 'natural' );
 
-		cy.get( '#status' ).check();
 		cy.get(
 			'#classifai_feature_image_generation_roles_administrator'
 		).check();
-		cy.get( '#number_of_images' ).select( '2' );
-		cy.get( '#image_size' ).select( '512x512' );
+
 		cy.get( '#submit' ).click();
 	} );
 
