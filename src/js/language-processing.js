@@ -446,7 +446,7 @@ import '../scss/language-processing.scss';
 document.addEventListener( 'DOMContentLoaded', function () {
 	// Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
 	const classifaiNLUCheckbox = document.getElementById(
-		'_classifai_process_content'
+		'classifai-process-content'
 	);
 	if ( classifaiNLUCheckbox ) {
 		classifaiNLUCheckbox.addEventListener( 'change', function () {

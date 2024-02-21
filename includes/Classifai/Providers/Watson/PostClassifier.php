@@ -47,7 +47,7 @@ class PostClassifier {
 	 *
 	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
-	 * @return array|bool|\WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function classify( int $post_id, array $opts = [] ) {
 		$classifier = $this->get_classifier();
@@ -62,7 +62,7 @@ class PostClassifier {
 		if ( ! empty( $text_to_classify ) ) {
 			return $classifier->classify( $text_to_classify, $opts );
 		} else {
-			return false;
+			return new \WP_Error( 'invalid', esc_html__( 'No text found.', 'classifai' ) );
 		}
 	}
 
@@ -167,7 +167,7 @@ class PostClassifier {
 	 */
 	public function get_features(): array {
 		$classification = new Classification();
-		$settings       = $classification->get_settings( NLU::ID );
+		$settings       = $classification->get_settings();
 		$features       = [];
 
 		if ( $settings['category'] ) {

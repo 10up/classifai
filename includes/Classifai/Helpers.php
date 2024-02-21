@@ -6,6 +6,7 @@ use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
+use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -279,10 +280,10 @@ function get_modified_image_source_url( int $post_id ) {
 /**
  * Check if attachment is PDF document.
  *
- * @param \WP_Post $post Post object for the attachment being viewed.
+ * @param int|\WP_Post $post Post object for the attachment being viewed.
  * @return bool
  */
-function attachment_is_pdf( \WP_Post $post ): bool {
+function attachment_is_pdf( $post ): bool {
 	$mime_type          = get_post_mime_type( $post );
 	$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 
@@ -576,4 +577,88 @@ function get_default_prompt( array $prompts ): ?string {
  */
 function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
 	return absint( $new_settings[ $key ] ?? $settings[ $key ] ?? '' );
+}
+
+/**
+ * Returns a bool based on whether the specified classification feature is enabled.
+ *
+ * @param string $classify_by Feature to check.
+ * @return bool
+ */
+function get_classification_feature_enabled( string $classify_by ): bool {
+	$settings = ( new Classification() )->get_settings();
+
+	return filter_var(
+		$settings[ $classify_by ],
+		FILTER_VALIDATE_BOOLEAN
+	);
+}
+
+/**
+ * Returns the Taxonomy for the specified NLU feature.
+ *
+ * Returns defaults in config.php if options have not been configured.
+ *
+ * @param string $classify_by NLU feature name.
+ * @return string
+ */
+function get_classification_feature_taxonomy( string $classify_by = '' ): string {
+	$taxonomy = '';
+	$settings = ( new Classification() )->get_settings();
+
+	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
+		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
+	}
+
+	if ( Embeddings::ID === $settings['provider'] ) {
+		$taxonomy = $classify_by;
+	}
+
+	if ( empty( $taxonomy ) ) {
+		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
+
+		if ( defined( $constant ) ) {
+			$taxonomy = constant( $constant );
+		}
+	}
+
+	/**
+	 * Filter the Taxonomy for the specified NLU feature.
+	 *
+	 * @since 3.0.0
+	 * @hook classifai_feature_classification_taxonomy_for_feature
+	 *
+	 * @param {string} $taxonomy The slug of the taxonomy to use.
+	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 *
+	 * @return {string} The filtered taxonomy slug.
+	 */
+	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
+}
+
+/**
+ * Get Classification mode.
+ *
+ * @since 2.5.0
+ *
+ * @return string
+ */
+function get_classification_mode(): string {
+	$feature  = new Classification();
+	$settings = $feature->get_settings();
+	$value    = $settings['classification_mode'] ?? '';
+
+	if ( $feature->is_feature_enabled() ) {
+		if ( empty( $value ) ) {
+			// existing users
+			// default: automatic_classification
+			return 'automatic_classification';
+		}
+	} else {
+		// new users
+		// default: manual_review
+		return 'manual_review';
+	}
+
+	return $value;
 }

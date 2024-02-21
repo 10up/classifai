@@ -23,7 +23,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		$response = file_get_contents( __DIR__ . '/models.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ||
+		strpos( $url, 'https://e2e-test-azure-openai.test/openai/deployments' ) !== false
+	) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
 		$body_json = $parsed_args['body'] ?? false;
 
@@ -84,6 +87,20 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			'success'     => 1,
 			'body'        => '',
 		);
+	} elseif ( strpos( $url, 'https://generativelanguage.googleapis.com/v1beta' ) !== false ) {
+		$response  = file_get_contents( __DIR__ . '/geminiapi.json' );
+		$body_json = $parsed_args['body'] ?? false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$contents = isset( $body['contents'] ) ? $body['contents'] : [];
+			$parts    = isset( $contents[0]['parts'] ) ? $contents[0]['parts'] : [];
+			$prompt   = $parts['text'] ?? '';
+
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+				$response = file_get_contents( __DIR__ . '/geminiapi-resize-content.json' );
+			}
+		}
 	}
 
 	if ( ! empty( $response ) ) {

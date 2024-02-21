@@ -1,10 +1,11 @@
-describe( '[Language processing] Speech to Text Tests', () => {
+describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
 		cy.get( '#status' ).check();
+		cy.get( '#provider' ).select( 'openai_chatgpt' );
 		cy.get( '#api_key' ).type( 'abc123' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
