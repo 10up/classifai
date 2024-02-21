@@ -306,7 +306,7 @@ class Plugin {
 		// Mark the migration as completed.
 		update_option( 'classifai_v3_migration_completed', true );
 		if ( $migration_needed ) {
-			// Display a notice to the users to inform them about the migration and new features.
+			// This option will be used to display a notice only to users who have completed the migration process. This will help to avoid showing the notice to new users.
 			update_option( 'classifai_display_v3_migration_notice', true );
 		}
 	}
