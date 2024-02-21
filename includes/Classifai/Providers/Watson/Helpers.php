@@ -78,118 +78,9 @@ function get_password(): string {
  * @return string
  */
 function get_classification_method(): string {
-	$settings = ( new Classification() )->get_settings( NLU::ID );
+	$settings = ( new Classification() )->get_settings();
 
 	return $settings['classification_method'] ?? '';
-}
-
-/**
- * Get Classification mode.
- *
- * @since 2.5.0
- *
- * @return string
- */
-function get_classification_mode(): string {
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-	$value    = $settings['classification_mode'] ?? '';
-
-	if ( $feature->is_feature_enabled() ) {
-		if ( empty( $value ) ) {
-			// existing users
-			// default: automatic_classification
-			return 'automatic_classification';
-		}
-	} else {
-		// new users
-		// default: manual_review
-		return 'manual_review';
-	}
-
-	return $value;
-}
-
-/**
- * The list of post types that support classification.
- *
- * Defaults to 'post'.
- *
- * @return array
- */
-function get_supported_post_types(): array {
-	$feature    = new Classification();
-	$settings   = $feature->get_settings();
-	$post_types = [];
-
-	foreach ( $settings['post_types'] as $post_type => $enabled ) {
-		if ( ! empty( $enabled ) ) {
-			$post_types[] = $post_type;
-		}
-	}
-
-	/**
-	 * Filter post types supported for classification.
-	 *
-	 * @since 1.0.0
-	 * @hook classifai_post_types
-	 *
-	 * @param {array} $post_types Array of post types to be classified.
-	 *
-	 * @return {array} Array of post types.
-	 */
-	$post_types = apply_filters( 'classifai_post_types', $post_types );
-
-	return $post_types;
-}
-
-/**
- * The list of post statuses that support classification.
- *
- * Defaults to 'publish'.
- *
- * @return array
- */
-function get_supported_post_statuses(): array {
-	$feature       = new Classification();
-	$settings      = $feature->get_settings();
-	$post_statuses = [];
-
-	foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
-		if ( ! empty( $enabled ) ) {
-			$post_statuses[] = $post_status;
-		}
-	}
-
-	/**
-	 * Filter post statuses supported for classification.
-	 *
-	 * @since 1.7.1
-	 * @hook classifai_post_statuses
-	 *
-	 * @param {array} $post_types Array of post statuses to be classified.
-	 *
-	 * @return {array} Array of post statuses.
-	 */
-	$post_statuses = apply_filters( 'classifai_post_statuses', $post_statuses );
-
-	return $post_statuses;
-}
-
-/**
- * Returns a bool based on whether the specified feature is enabled
- *
- * @param string $classify_by category,keyword,entity,concept
- * @return bool
- */
-function get_feature_enabled( string $classify_by ): bool {
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-
-	return filter_var(
-		$settings[ $classify_by ],
-		FILTER_VALIDATE_BOOLEAN
-	);
 }
 
 /**
@@ -206,7 +97,7 @@ function get_feature_enabled( string $classify_by ): bool {
  */
 function get_feature_threshold( string $feature ): float {
 	$classification_feature = new Classification();
-	$settings               = $classification_feature->get_settings( NLU::ID );
+	$settings               = $classification_feature->get_settings();
 	$threshold              = 0;
 
 	if ( ! empty( $settings ) && ! empty( $settings[ $feature . '_threshold' ] ) ) {
@@ -239,44 +130,4 @@ function get_feature_threshold( string $feature ): float {
 	 * @return {float} The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
-}
-
-/**
- * Returns the Taxonomy for the specified NLU feature.
- *
- * Returns defaults in config.php if options have not been configured.
- *
- * @param string $classify_by NLU feature name
- * @return string Taxonomy mapped to the feature
- */
-function get_feature_taxonomy( string $classify_by = '' ): string {
-	$taxonomy = 0;
-
-	$feature  = new Classification();
-	$settings = $feature->get_settings( NLU::ID );
-
-	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
-		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
-	}
-
-	if ( empty( $taxonomy ) ) {
-		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
-
-		if ( defined( $constant ) ) {
-			$taxonomy = constant( $constant );
-		}
-	}
-
-	/**
-	 * Filter the Taxonomy for the specified NLU feature.
-	 *
-	 * @since 1.1.0
-	 * @hook classifai_taxonomy_for_feature
-	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $classify_by  The NLU feature this taxonomy is for.
-	 *
-	 * @return {string} The filtered taxonomy slug.
-	 */
-	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $classify_by );
 }

@@ -3,7 +3,9 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
+use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Azure\OpenAI;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -40,7 +42,9 @@ class ExcerptGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			ChatGPT::ID => __( 'OpenAI ChatGPT', 'classifai' ),
+			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
+			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
+			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 		];
 	}
 
@@ -263,7 +267,7 @@ class ExcerptGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' );
+		return esc_html__( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' );
 	}
 
 	/**
@@ -320,7 +324,7 @@ class ExcerptGeneration extends Feature {
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['length'],
-				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this. In testing, ChatGPT tended to exceed this number by 10-15 words.', 'classifai' ),
+				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.', 'classifai' ),
 			]
 		);
 	}

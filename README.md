@@ -9,19 +9,22 @@
 *You can learn more about ClassifAI's features at [ClassifAIPlugin.com](https://classifaiplugin.com/) and documentation at the [ClassifAI documentation site](https://10up.github.io/classifai/).*
 
 ## Table of Contents
+
 * [Overview](#overview)
 * [Features](#features)
 * [Requirements](#requirements)
 * [Pricing](#pricing)
 * [Installation](#installation)
 * [Register ClassifAI account](#register-classifai-account)
-* [Set Up IBM Watson NLU Language Processing](#set-up-language-processing-via-ibm-watson)
-* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-via-openai-chatgpt)
-* [Set Up OpenAI Embeddings Language Processing](#set-up-language-processing-via-openai-embeddings)
-* [Set Up OpenAI Whisper Language Processing](#set-up-language-processing-via-openai-whisper)
-* [Set Up Azure AI Language Processing](#set-up-language-processing-via-microsoft-azure)
-* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-via-microsoft-azure)
-* [Set Up OpenAI DALL·E Image Processing](#set-up-image-processing-via-openai)
+* [Set Up IBM Watson NLU Language Processing](#set-up-classification-via-ibm-watson)
+* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-features-via-openai-chatgpt)
+* [Set Up Azure OpenAI Language Processing](#set-up-language-processing-features-via-azure-openai)
+* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-features-via-google-ai-gemini-api)
+* [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
+* [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
+* [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
+* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
+* [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
 * [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
 * [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
 * [WP CLI Commands](#wp-cli-commands)
@@ -32,13 +35,13 @@
 
 ## Overview
 
-Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
+Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Microsoft Azure AI](https://azure.microsoft.com/en-us/overview/ai-platform/), [Google Gemini](https://ai.google.dev/) and [IBM Watson](https://www.ibm.com/watson) to augment your WordPress-powered websites.  Publish content faster while improving SEO performance and increasing audience engagement.  ClassifAI integrates Artificial Intelligence and Machine Learning technologies to lighten your workload and eliminate tedious tasks, giving you more time to create original content that matters.
 
 ## Features
 
-* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
-* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
-* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat)
+* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
@@ -68,24 +71,30 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 5.7+
+* [WordPress](http://wordpress.org) 6.1+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
+* To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
+* To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 
 ## Pricing
 
-Note that there is no cost to using ClassifAI itself. Both IBM Watson and Microsoft Azure have free plans for their AI services, but above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage. OpenAI has a limited trial option that can be used for testing but will require a valid paid plan after that.
+Note that there is no cost to using ClassifAI itself. Both IBM Watson and Microsoft Azure have free plans for some of their AI services, but above those free plans there are paid levels as well.  So if you expect to process a high volume of content, then you'll want to review the pricing plans for these services to understand if you'll incur any costs.  For the most part, both services' free plans are quite generous and should at least allow for testing ClassifAI to better understand its featureset and could at best allow for totally free usage. OpenAI has a limited trial option that can be used for testing but will require a valid paid plan after that.
 
-The service that powers ClassifAI's NLU Language Processing, IBM Watson's Natural Language Understanding ("NLU"), has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
+IBM Watson's Natural Language Understanding ("NLU"), which is one of the providers that powers the classification feature, has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
-The service that powers ClassifAI's ChatGPT, Embeddings and Whisper Language Processing and DALL·E Image Processing, OpenAI, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
+OpenAI, which is one of the providers that powers the classification, title generation, excerpt generation, content resizing, audio transcripts generation, moderation and image generation features, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
-The service that powers ClassifAI's Azure AI Vision Image Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
+Microsoft Azure AI Vision, which is one of the providers that powers the descriptive text generator, image tags generator, image cropping, image text extraction and PDF text extraction features, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
-The service that powers ClassifAI's Text to Speech Language Processing, Microsoft Azure, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
+Microsoft Azure AI Speech, which is one of the providers that powers the text to speech feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
 
-The service that powers ClassifAI's Recommended Content, Microsoft Azure AI Personalizer, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
+Microsoft Azure AI Personalizer, which is one of the providers that powers the recommended content feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
+
+Microsoft Azure OpenAI, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a [pay per usage](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) plan.
+
+Google Gemini, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a ["free" pricing tier](https://ai.google.dev/pricing) that offers 60 queries per minute.
 
 ## Installation
 
@@ -139,7 +148,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "2.0.0"
+    "10up/classifai": "3.0.0"
 }
 ```
 
@@ -164,7 +173,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 
 ![Screenshot of registration settings](assets/img/screenshot-6.png "Example of an empty ClassifAI Settings registration screen.")
 
-## Set Up Language Processing (via IBM Watson)
+## Set Up Classification (via IBM Watson)
 
 ### 1. Sign up for Watson services
 
@@ -173,7 +182,9 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > IBM Watson
+### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification
+
+- Select **IBM Watson NLU** in the provider dropdown.
 
 **The credentials screen will show either an API key or a username/password combination.**
 
@@ -198,14 +209,14 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 
 IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) can each be stored in existing WordPress taxonomies or a custom Watson taxonomy.
 
-### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > IBM Watson
+### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > Classification
 
 - Choose which public post types to classify when saved.
 - Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
 
 ### 4. Save a Post/Page/CPT or run WP CLI command to batch classify your content
 
-## Set Up Language Processing (via OpenAI ChatGPT)
+## Set Up Language Processing Features (via OpenAI ChatGPT)
 
 ### 1. Sign up for OpenAI
 
@@ -214,16 +225,14 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI ChatGPT
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
 
+* Select **OpenAI ChatGPT** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
-### 3. Enable specific Language Processing features
+### 3. Enable specific Language Processing feature settings
 
-* Choose to add the ability to generate excerpts.
-* Choose to add the ability to generate titles.
-* Choose to add the ability to resize content.
-* Set the other options as needed.
+* For each feature, set any options as needed.
 * Save changes and ensure a success message is shown. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
@@ -239,7 +248,77 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
 * In the modal that pops up, select one of the options.
 
-## Set Up Language Processing (via OpenAI Embeddings)
+## Set Up Language Processing Features (via Azure OpenAI)
+
+### 1. Sign up for Azure services
+
+* [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
+* [Request access](https://aka.ms/oai/access) to Azure OpenAI, if not already granted.
+* Log into your account and create a new [*Azure OpenAI resource*](https://learn.microsoft.com/en-us/azure/ai-services/openai/how-to/create-resource) if you do not already have one.
+* Copy the name you chose for the deployment when deploying the resource in the previous step.
+* Click `Keys and Endpoint` in the left hand Resource Management menu to get the endpoint for this resource.
+* Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+
+* Select **Azure OpenAI** in the provider dropdown.
+* Enter your endpoint you copied from the above step into the `Endpoint URL` field.
+* Enter your API Key copied from the above step into the `API key` field.
+* Enter your deployment name copied from the above step into the `Deployment name` field.
+
+### 3. Enable specific Language Processing features
+
+* Check the "Enable" checkbox in above screen.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content type to test enabled features
+
+* To test excerpt generation, edit (or create) an item that supports excerpts.
+* Ensure this item has content saved.
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
+* To test title generation, edit (or create) an item that supports titles.
+* Ensure this item has content saved.
+* Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content resizing, edit (or create) an item. Note: only the block editor is supported.
+* Add a paragraph block with some content.
+* With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
+* In the modal that pops up, select one of the options.
+
+## Set Up Language Processing Features (via Google AI (Gemini API))
+
+### 1. Sign up for Google AI
+
+* [Sign up for a Google account](https://www.google.com/) or sign into your existing one.
+* Go to [Google AI Gemini](https://ai.google.dev/) website and click on the Get API key button or go to the [API key page](https://makersuite.google.com/app/apikey) directly.
+* Note that if this page doesn't work, it's likely that Gemini is not enabled in your workspace. Contact your workspace administrator to get this enabled.
+* Click `Create API key` and copy the key that is shown.
+
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+
+* Select **Google AI (Gemini API)** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Language Processing features
+
+* Check the "Enable" checkbox in above screen.
+* Set the other options as needed.
+* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+
+### 4. Edit a content type to test enabled features
+
+* To test excerpt generation, edit (or create) an item that supports excerpts.
+* Ensure this item has content saved.
+* Open the Excerpt panel in the sidebar and click on `Generate Excerpt`.
+* To test title generation, edit (or create) an item that supports titles.
+* Ensure this item has content saved.
+* Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content resizing, edit (or create) an item. Note: only the block editor is supported.
+* Add a paragraph block with some content.
+* With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
+* In the modal that pops up, select one of the options.
+
+## Set Up Classification (via OpenAI Embeddings)
 
 ### 1. Sign up for OpenAI
 
@@ -248,8 +327,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Embeddings
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification
 
+* Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Language Processing features
@@ -264,7 +344,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Create a new piece of content that matches the post type and post status chosen in settings.
 * Open the taxonomy panel in the sidebar and see terms that were auto-applied.
 
-## Set Up Language Processing (via OpenAI Whisper)
+## Set Up Audio Transcripts Generation (via OpenAI Whisper)
 
 Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can create a transcript for audio files that meet the following requirements:
 * The file must be presented in mp3, mp4, mpeg, mpga, m4a, wav, or webm format
@@ -277,8 +357,9 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > OpenAI Whisper
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation
 
+* Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific features
@@ -292,7 +373,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Upload a new audio file.
 * Check to make sure the transcript was stored in the Description field.
 
-## Set Up Language Processing (via Microsoft Azure)
+## Set Up Text to Speech (via Microsoft Azure)
 
 ### 1. Sign up for Azure services
 
@@ -301,8 +382,9 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Location/Region` for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Microsoft Azure
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech
 
+* Select **Microsoft Azure AI Speech** in the provider dropdown.
 * In the `Endpoint URL` field, enter the following URL, replacing `LOCATION` with the `Location/Region` you found above: `https://LOCATION.tts.speech.microsoft.com/`.
 * In the `API Key` field, enter your `KEY 1` copied from above.
 * Click **Save Changes** (the page will reload).
@@ -317,7 +399,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Click the button to preview the generated speech audio for the post.
 * View the post on the front-end and see a read-to-me feature has been added
 
-## Set Up Image Processing (via Microsoft Azure)
+## Set Up Image Processing features (via Microsoft Azure)
 
 Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
 - The image must be presented in JPEG, PNG, GIF, or BMP format
@@ -332,20 +414,20 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing > Descriptive Text Generator, Image Tags Generator, Image Cropping, Image Text Extraction or PDF Text Extraction
 
+- Select **Microsoft Azure AI Vision** in the provider dropdown.
 - In the `Endpoint URL` field, enter your `API endpoint`.
 - In the `API Key` field, enter your `KEY 1`.
 
-### 3. Enable specific Image Processing features
+### 3. Configure specific Image Processing features
 
-- Choose to `Generate descriptive text`, `Tag images`, `Enable smart cropping`, and/or `Scan image or PDF for text`.
-- For features that have thresholds or taxonomy settings, set those as well.
+- For features that have thresholds or taxonomy settings, set those as needed.
 - Image tagging uses Azure's [Describe Image](https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fe)
 
 ### 4. Save Image or PDF file or run WP CLI command to batch classify your content
 
-## Set Up Image Processing (via OpenAI)
+## Set Up Image Generation (via OpenAI)
 
 ### 1. Sign up for OpenAI
 
@@ -354,8 +436,9 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > OpenAI
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
 
+* Select **OpenAI DALL-E** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Image Processing features
@@ -384,6 +467,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation
 
+* Select **OpenAI Moderation** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable Comment Moderation
@@ -414,7 +498,7 @@ For more information, see https://docs.microsoft.com/en-us/azure/cognitive-servi
 - In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
 - In the `API Key` field, enter your `KEY 1` from Step 1 above.
 
-### 3. Use "Recommended Content" block to display recommended content on your website.
+### 3. Use "Recommended Content" block to display recommended content on your website
 
 ## WP CLI Commands
 
@@ -430,9 +514,9 @@ ClassifAI connects your WordPress site directly to your account with specific se
 
 [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories) are five levels of hierarchies that IBM Watson can identify from your text.  [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords) are specific terms from your text that IBM Watson is able to identify.  [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) are high-level concepts that are not necessarily directly referenced in your text.  [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) are people, companies, locations, and classifications that are made by IBM Watson from your text.
 
-### How can I view the taxonomies that are generated from the NLU Language Processing?
+### How can I view the taxonomies that are generated from the NLU classification?
 
-Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the NLU Language Processing settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
+Whatever options you have selected in the Category, Keyword, Entity, and Concept taxonomy dropdowns in the NLU classification settings can be viewed within Classic Editor metaboxes and the Block Editor side panel.  They can also be viewed in the All Posts and All Pages table list views by utilizing the Screen Options to enable those columns if they're not already appearing in your table list view.
 
 ### Should I alert my site's users that AI tools are being used?
 

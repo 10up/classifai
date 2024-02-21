@@ -157,48 +157,6 @@ trait OpenAI {
 	}
 
 	/**
-	 * The list of supported post types.
-	 *
-	 * @param \Classifai\Features\Feature $feature Feature to check.
-	 * @return array
-	 */
-	public function get_supported_post_types( \Classifai\Features\Feature $feature ): array {
-		$settings   = $feature->get_settings();
-		$post_types = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
-			foreach ( $settings['post_types'] as $post_type => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_types[] = $post_type;
-				}
-			}
-		}
-
-		return $post_types;
-	}
-
-	/**
-	 * The list of supported post statuses.
-	 *
-	 * @param \Classifai\Features\Feature $feature Feature to check
-	 * @return array
-	 */
-	public function get_supported_post_statuses( \Classifai\Features\Feature $feature ): array {
-		$settings      = $feature->get_settings();
-		$post_statuses = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
-			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_statuses[] = $post_status;
-				}
-			}
-		}
-
-		return $post_statuses;
-	}
-
-	/**
 	 * The list of supported taxonomies.
 	 *
 	 * @param \Classifai\Features\Feature $feature Feature to check.

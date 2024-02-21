@@ -7,6 +7,7 @@ import * as ocrData from '../../test-plugin/ocr.json';
 import * as whisperData from '../../test-plugin/whisper.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
 import * as pdfData from '../../test-plugin/pdf.json';
+import * as geminiData from '../../test-plugin/geminiapi.json';
 
 /**
  * Get Taxonomy data from test NLU json file.
@@ -55,6 +56,20 @@ export const getChatGPTData = ( type = 'default' ) => {
 			text.push( el.message.content );
 		} );
 	}
+
+	return text.join( ' ' );
+};
+
+/**
+ * Get text data from test GeminiAPI json file.
+ *
+ * @return {string[]} GeminiAPI Data.
+ */
+export const getGeminiAPIData = () => {
+	const text = [];
+	geminiData.candidates.forEach( ( el ) => {
+		text.push( el.content.parts[ 0 ].text );
+	} );
 
 	return text.join( ' ' );
 };

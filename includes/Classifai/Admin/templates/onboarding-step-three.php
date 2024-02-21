@@ -38,7 +38,8 @@ require_once 'onboarding-header.php';
 		<?php
 		$feature_keys = array_keys( $enabled_features );
 		foreach ( $enabled_features as $key => $feature_class ) {
-			$is_configured = in_array( $key, $configured_features, true ) ? true : false;
+			$feature       = new $feature_class();
+			$is_configured = $feature->is_enabled();
 			$feature_url   = add_query_arg( 'tab', $key, $base_url );
 			$is_active     = ( $current_feature === $key ) ? 'active' : '';
 			$icon_class    = 'dashicons-clock';

@@ -16,12 +16,13 @@ describe( '[Language processing] Title Generation Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_title_generation'
 		);
 
+		cy.get( '#provider' ).select( 'openai_chatgpt' );
 		cy.get( '#api_key' ).clear().type( 'password' );
 		cy.get( '#status' ).check();
 		cy.get(
 			'#classifai_feature_title_generation_roles_administrator'
 		).check();
-		cy.get( '#number_of_titles' ).type( 1 );
+		cy.get( '#number_of_suggestions' ).type( 1 );
 		cy.get( '#submit' ).click();
 	} );
 

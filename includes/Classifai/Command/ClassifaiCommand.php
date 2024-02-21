@@ -61,11 +61,17 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$post_ids = $this->get_posts_to_classify( $opts );
 		}
 
-		$total      = count( $post_ids );
-		$classifier = new PostClassifier();
-		$limit      = $opts['limit'];
-		$link       = $opts['link'];
-		$link       = filter_var( $link, FILTER_VALIDATE_BOOLEAN );
+		$feature  = new Classification();
+		$provider = $feature->get_feature_provider_instance();
+
+		if ( Embeddings::ID !== $provider::ID ) {
+			\WP_CLI::error( 'This command is only available for the IBM Watson Provider' );
+		}
+
+		$total = count( $post_ids );
+		$limit = $opts['limit'];
+		$link  = $opts['link'];
+		$link  = filter_var( $link, FILTER_VALIDATE_BOOLEAN );
 
 		if ( ! empty( $total ) ) {
 			if ( ! empty( $limit ) ) {
@@ -83,15 +89,18 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				$progress_bar->tick();
 
-				if ( $link ) {
-					$output = $classifier->classify_and_link( $post_id, $opts );
+				$results = $feature->run( $post_id, 'classify' );
 
-					if ( is_wp_error( $output ) ) {
-						$errors[ $post_id ] = $output;
+				if ( is_wp_error( $results ) ) {
+					$errors[ $post_id ] = $results;
+				}
+
+				if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+					if ( $link ) {
+						$feature->save( $post_id, $results );
+					} else {
+						$this->print( $results, $post_id );
 					}
-				} else {
-					$output = $classifier->classify( $post_id, $opts );
-					$this->print( $output, $post_id );
 				}
 			}
 
@@ -963,8 +972,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$embeddings          = new Embeddings( false );
 		$opts                = wp_parse_args( $opts, $defaults );
 		$opts['per_page']    = (int) $opts['per_page'] > 0 ? $opts['per_page'] : 100;
-		$allowed_post_types  = $embeddings->supported_post_types();
-		$allowed_post_status = $embeddings->supported_post_statuses();
+		$allowed_post_types  = $feature->get_supported_post_types();
+		$allowed_post_status = $feature->get_supported_post_statuses();
 
 		$count  = 0;
 		$errors = 0;
@@ -1015,9 +1024,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				foreach ( $posts as $post_id ) {
 					if ( ! $dry_run ) {
-						$result = $feature->run( $post_id );
+						$results = $feature->run( $post_id, 'classify' );
 
-						if ( is_wp_error( $result ) ) {
+						if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+							$feature->save( $post_id, $results );
+						}
+
+						if ( is_wp_error( $results ) ) {
 							\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
 							++$errors;
 						}
@@ -1063,9 +1076,13 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				if ( ! $dry_run ) {
-					$result = $feature->run( $post_id );
+					$results = $feature->run( $post_id, 'classify' );
 
-					if ( is_wp_error( $result ) ) {
+					if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+						$feature->save( $post_id, $results );
+					}
+
+					if ( is_wp_error( $results ) ) {
 						\WP_CLI::error( sprintf( 'Error while processing item ID %s', $post_id ), false );
 						++$errors;
 					}
