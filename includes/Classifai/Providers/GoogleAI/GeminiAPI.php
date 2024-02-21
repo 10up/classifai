@@ -575,9 +575,8 @@ class GeminiAPI extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
+		$settings   = $this->feature_instance->get_settings();
+		$debug_info = [];
 
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = 1;

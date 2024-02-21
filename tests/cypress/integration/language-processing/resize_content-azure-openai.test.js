@@ -5,12 +5,22 @@ describe( '[Language processing] Resize Content Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
 		cy.get( '#status' ).check();
-		cy.get( '#provider' ).select( 'googleai_gemini_api' );
+		cy.get( '#provider' ).select( 'azure_openai' );
 		cy.get(
-			'input[name="classifai_feature_content_resizing[googleai_gemini_api][api_key]"]'
+			'input[name="classifai_feature_content_resizing[azure_openai][endpoint_url]"]'
 		)
 			.clear()
-			.type( 'abc123' );
+			.type( 'https://e2e-test-azure-openai.test/' );
+		cy.get(
+			'input[name="classifai_feature_content_resizing[azure_openai][api_key]"]'
+		)
+			.clear()
+			.type( 'password' );
+		cy.get(
+			'input[name="classifai_feature_content_resizing[azure_openai][deployment]"]'
+		)
+			.clear()
+			.type( 'test' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -40,10 +50,10 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.get( '.components-button' ).contains( 'Expand this text' ).click();
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
-		).should( 'contain.text', '+8 words' );
+		).should( 'contain.text', '+7 words' );
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__grow-stat'
-		).should( 'contain.text', '+49 characters' );
+		).should( 'contain.text', '+40 characters' );
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first button'
 		).click();
@@ -64,10 +74,10 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.get( '.components-button' ).contains( 'Condense this text' ).click();
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
-		).should( 'contain.text', '-5 words' );
+		).should( 'contain.text', '-6 words' );
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first .classifai-content-resize__shrink-stat'
-		).should( 'contain.text', '-27 characters' );
+		).should( 'contain.text', '-36 characters' );
 		cy.get(
 			'.classifai-content-resize__result-table tbody tr:first button'
 		).click();
