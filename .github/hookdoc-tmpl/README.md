@@ -8,6 +8,6 @@ To report an issue with ClassifAI or contribute back to the project, please visi
 
 ## Migrating to version 3.0
 
-Version 3.0 of ClassifAI contains breaking changes. Please review the <a href="./tutorial-migration-guide-v2-to-v3.html">migration guide</a> tutorial and follow any steps required.
+Version 3.0 of ClassifAI contains breaking changes. Please review the [migration guide](./tutorial-migration-guide-v2-to-v3.html) tutorial and follow any steps required.
 
 <a href="http://10up.com/contact/" class="banner"><img src="https://10updotcom-wpengine.s3.amazonaws.com/uploads/2016/10/10up-Github-Banner.png" width="850"></a>
