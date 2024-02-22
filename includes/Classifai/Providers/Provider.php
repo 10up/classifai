@@ -51,7 +51,7 @@ abstract class Provider {
 
 		add_settings_field(
 			$id,
-			$args['label'] ?? esc_html__( 'API Key', 'classifai' ),
+			$args['label'] ?? esc_html__( 'API key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
