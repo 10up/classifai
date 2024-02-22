@@ -74,6 +74,55 @@ class ImageGeneration extends Feature {
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
 					],
+					'n'       => [
+						'type'              => 'integer',
+						'minimum'           => 1,
+						'maximum'           => 10,
+						'sanitize_callback' => 'absint',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+					],
+					'quality' => [
+						'type'              => 'string',
+						'enum'              => [
+							'standard',
+							'hd',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Quality of generated image', 'classifai' ),
+					],
+					'size'    => [
+						'type'              => 'string',
+						'enum'              => [
+							'1024x1024',
+							'1792x1024',
+							'1024x1792',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
+					],
+					'style'   => [
+						'type'              => 'string',
+						'enum'              => [
+							'vivid',
+							'natural',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Style of generated image', 'classifai' ),
+					],
+					'format'  => [
+						'type'              => 'string',
+						'enum'              => [
+							'url',
+							'b64_json',
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+					],
 				],
 				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
 			]

@@ -19,9 +19,7 @@ class ImageProcessing extends Service {
 		parent::__construct(
 			__( 'Image Processing', 'classifai' ),
 			'image_processing',
-			[
-				'Classifai\Providers\Azure\ComputerVision',
-			]
+			self::get_service_providers()
 		);
 	}
 
