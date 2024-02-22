@@ -4,6 +4,13 @@ The migration process is streamlined with an **automated migration routine** tha
 
 This migration guide provides a detailed overview of the changes, including updates to the REST API endpoints and information regarding the removed hooks. Explore the details below to smoothly navigate and leverage the enhanced capabilities of ClassifAI 3.0.
 
+### Provider Class Changes
+In ClassifAI v2, provider classes (such as ChatGPT, ComputerVision, DaLLE, NLU, Whisper, etc.) handled various aspects related to both provider and feature functionalities. This included functionalities such as feature access control, registering feature settings fields, managing provider fields, registering REST API endpoints, connecting to provider services, and exposing in-context features.
+
+With the introduction of the "Feature first" approach in ClassifAI 3.0, the provider class has undergone a significant transformation. It is now divided into two distinct classes: Feature and Provider. Consequently, all feature-related functionalities, including feature access control, registering feature settings fields, registering REST API endpoints, and exposing in-context features, have been moved to specific Feature classes. Provider-related tasks remain within the provider classes.
+
+If you have extended any of the Provider classes in your codebase, it is essential to update your code accordingly to align with the changes introduced in ClassifAI 3.0.
+
 ### REST API Changes
 To standardize the REST API endpoints, we have renamed some of the REST endpoints in ClassifAI 3.0. There are no changes in the request body or parameters. You can find them below.
 
