@@ -14,6 +14,8 @@ If you have extended any of the Provider classes in your codebase, it is essenti
 
 For a detailed look at how new Providers can be added directly to ClassifAI, take a look at these PRs: [#700](https://github.com/10up/classifai/pull/700); [#716](https://github.com/10up/classifai/pull/716). For a detailed look at how a new Feature can be added directly to ClassifAI, take a look at this PR: [#531](https://github.com/10up/classifai/pull/531).
 
+To learn more about how to add new Features or Providers to ClassifAI as a third-party developer, please refer to the [Useful snippets](./tutorial-useful-snippets.html) guide that contains code examples for both.
+
 ### Filter Hook Changes
 
 To standardize the action/filter names, we have removed and updated some of the filter hooks in ClassifAI 3.0.0. If you've extended ClassifAI at all with the provided hooks, be sure to update those accordingly.
