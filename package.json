@@ -37,8 +37,8 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.2.0",
-    "@wordpress/env": "^9.3.0",
-    "@wordpress/scripts": "^27.2.0",
+    "@wordpress/env": "^9.4.0",
+    "@wordpress/scripts": "^27.3.0",
     "cypress": "^13.6.4",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^3.8.1",
@@ -52,7 +52,7 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
-    "@wordpress/icons": "^9.41.0",
+    "@wordpress/icons": "^9.43.0",
     "choices.js": "^10.2.0",
     "tippy.js": "^6.3.7"
   }
