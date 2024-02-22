@@ -16,3 +16,170 @@ function override_taxonomy_args( $args ) {
 	return $args;
 }
 ```
+
+## Add custom Provider to an existing Feature
+
+Starting in ClassifAI 3.0.0, it is now possible to add your own Provider to an existing Feature. Most of the implementation details are left to you but there are a few key steps that need to be followed:
+
+1. **Create a new Provider class**: This class should extend the base ClassifAI `Provider` class and setup all required methods.
+
+```php
+namespace MyPluginOrTheme;
+
+use Classifai\Providers\Provider;
+
+class MyProvider extends Provider {
+    /**
+     * The Provider ID.
+     *
+     * Required and should be unique.
+     */
+    const ID = 'my_provider';
+
+    /**
+     * MyProvider constructor.
+     *
+     * @param \Classifai\Features\Feature $feature_instance The feature instance.
+     */
+    public function __construct( $feature_instance = null ) {
+        $this->feature_instance = $feature_instance;
+    }
+
+    /**
+     * This method will be called by the feature to render the fields
+     * required by the provider, such as API key, endpoint URL, etc.
+     *
+     * This should also register settings that are required for the feature
+     * to work.
+     */
+    public function render_provider_fields() {
+        $settings = $this->feature_instance->get_settings( static::ID );
+
+        $this->add_api_key_field();
+    }
+
+    /**
+     * Returns the default settings for this provider.
+     *
+     * @return array
+     */
+    public function get_default_provider_settings(): array {
+        $common_settings = [
+            'api_key'       => '',
+            'authenticated' => false,
+        ];
+
+        return $common_settings;
+    }
+
+    /**
+     * Sanitize the settings for this provider.
+     *
+     * Can also be useful to verify the Provider API connection
+     * works as expected here, returning an error if needed.
+     *
+     * @param array $new_settings The settings array.
+     * @return array
+     */
+    public function sanitize_settings( array $new_settings ): array {
+        $settings = $this->feature_instance->get_settings();
+
+        // Ensure proper validation of credentials happens here.
+        $new_settings[ static::ID ]['api_key']       = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+        $new_settings[ static::ID ]['authenticated'] = true;
+
+        return $new_settings;
+    }
+
+    /**
+     * Common entry point for all REST endpoints for this provider.
+     *
+     * All Features will end up calling the rest_endpoint_callback method for their assigned Provider.
+     * This method should validate the route that is being called and then call the appropriate method
+     * for that route. This method typically will validate we have all the requried data and if so,
+     * make a request to the appropriate API endpoint.
+     *
+     * @param int    $post_id The Post ID we're processing.
+     * @param string $route_to_call The route we are processing.
+     * @param array  $args Optional arguments to pass to the route.
+     * @return string|WP_Error
+     */
+    public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+        if ( ! $post_id || ! get_post( $post_id ) ) {
+            return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'text-domain' ) );
+        }
+
+        $route_to_call = strtolower( $route_to_call );
+        $return        = '';
+
+        // Handle all of our routes.
+        switch ( $route_to_call ) {
+            case 'test':
+                // Ensure this method exists.
+                $return = $this->generate( $post_id, $args );
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Returns the debug information for the provider settings.
+     *
+     * This is used to display various settings in the Site Health screen.
+     * Not required but useful for debugging.
+     *
+     * @return array
+     */
+    public function get_debug_information(): array {
+        $settings   = $this->feature_instance->get_settings();
+        $debug_info = [];
+
+        return $debug_info;
+    }
+}
+```
+
+2. **Load class**: within your plugin or theme, ensure the Provider class is loaded. Ideally this is run on the `after_classifai_init` action.
+
+3. **Register the Provider with a Service**: Each Provider needs to be registered to one or more of the Services that ClassifAI supports. This can be done using the appropriate filter of the Service you're targeting.
+
+```php
+/**
+ * Register a new Provider for the Image Processing Service.
+ */
+add_filter(
+    'classifai_image_processing_service_providers',
+    function ( $providers ) {
+        $providers[] = MyPluginOrTheme\MyProvider::class;
+        return $providers;
+    }
+);
+
+/**
+ * Register a new Provider for the Language Processing Service.
+ */
+add_filter(
+    'classifai_language_processing_service_providers',
+    function ( $providers ) {
+        // Ensure the file that contains the Provider is included or this will throw an error.
+        $providers[] = MyPluginOrTheme\MyProvider::class;
+        return $providers;
+    }
+);
+```
+
+4. **Register the Provider with a Feature**: Each Provider needs to be registered to one or more of the Features that ClassifAI supports. This can be done using the appropriate filter of the Feature you're targeting.
+
+```php
+/**
+ * Register a new Provider for the Title Generation Feature.
+ */
+add_filter(
+    'classifai_feature_title_generation_providers',
+    function ( $providers ) {
+        $providers['my_provider'] = __( 'Custom Provider', 'text-domain' );
+        return $providers;
+    }
+);
+```
