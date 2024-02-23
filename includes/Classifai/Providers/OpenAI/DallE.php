@@ -385,10 +385,10 @@ class DallE extends Provider {
 	 *
 	 * @since 3.0.0
 	 *
-	 * @param array $args
+	 * @param array $args Existing REST arguments.
 	 * @return array
 	 */
-	public function register_rest_args( array $args ): array {
+	public function register_rest_args( array $args = [] ): array {
 		$provider_args = [
 			'n'       => [
 				'type'              => 'integer',

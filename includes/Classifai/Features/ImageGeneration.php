@@ -64,6 +64,7 @@ class ImageGeneration extends Feature {
 
 		/**
 		 * Filter the arguments for the REST route.
+		 *
 		 * This allows for adding or modifying the arguments for the route.
 		 * The filter name is dynamic and based on the route.
 		 * Example: classifai_feature_image_generation_rest_route_generate-image_args
@@ -87,7 +88,7 @@ class ImageGeneration extends Feature {
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
-					]
+					],
 				],
 				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
 			]
