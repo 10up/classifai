@@ -60,9 +60,24 @@ class ImageGeneration extends Feature {
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1',
-			'generate-image',
+		$route = 'generate-image';
+
+		/**
+		 * Filter the arguments for the REST route.
+		 *
+		 * This allows for adding or modifying the arguments for the route.
+		 * The filter name is dynamic and based on the route.
+		 * Example: classifai_feature_image_generation_rest_route_generate-image_args
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_rest_route_{route}_args
+		 *
+		 * @param {array} $args Array of arguments for the REST route.
+		 *
+		 * @return {array} Modified array of arguments.
+		 */
+		$args = apply_filters(
+			'classifai_' . static::ID . '_rest_route_' . $route . '_args',
 			[
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => [ $this, 'rest_endpoint_callback' ],
@@ -77,6 +92,12 @@ class ImageGeneration extends Feature {
 				],
 				'permission_callback' => [ $this, 'generate_image_permissions_check' ],
 			]
+		);
+
+		register_rest_route(
+			'classifai/v1',
+			$route,
+			$args
 		);
 	}
 
