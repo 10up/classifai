@@ -307,10 +307,10 @@ class Plugin {
 		}
 
 		// Mark the migration as completed.
-		update_option( 'classifai_v3_migration_completed', true );
+		update_option( 'classifai_v3_migration_completed', true, false );
 		if ( $migration_needed ) {
 			// This option will be used to display a notice only to users who have completed the migration process. This will help to avoid showing the notice to new users.
-			update_option( 'classifai_display_v3_migration_notice', true );
+			update_option( 'classifai_display_v3_migration_notice', true, false );
 		}
 	}
 }
