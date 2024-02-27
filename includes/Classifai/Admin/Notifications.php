@@ -241,7 +241,7 @@ EOD;
 				echo wp_kses_post(
 					sprintf(
 						// translators: %1$s: <a> tag starting; %2$s: <a> tag closing.
-						__( '%1$sClassifAI 3.0.0%2$s has changed how AI service providers are integrated with AI features which impacted how settings were handled.  Those settings have been migrated automatically, and you can %3$sview them here%4$s.', 'classifai' ),
+						__( '%1$sClassifAI 3.0.0%2$s has changed how AI providers are integrated with individual features. This changes how settings are stored and requires that existing settings be migrated. This migration has happened automatically and you can %3$sverify your settings here%4$s.', 'classifai' ),
 						'<strong>',
 						'</strong>',
 						'<a href="' . esc_url( admin_url( 'tools.php?page=classifai' ) ) . '">',
