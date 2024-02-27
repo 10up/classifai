@@ -96,33 +96,35 @@ class Notifications {
 
 		$script = <<<EOD
 jQuery( function() {
-    const dismissBtn = document.querySelector( '.classifai-dismissible-notice' );
+	const dismissBtns = document.querySelectorAll( '.classifai-dismissible-notice' );
 
-	if ( ! dismissBtn ) {
+	if ( ! dismissBtns.length ) {
 		return;
 	}
 
-    // Add an event listener to the dismiss button.
-    dismissBtn.addEventListener( 'click', function( event ) {
-		const id = dismissBtn.getAttribute( 'data-notice' );
+	// Add an event listener to the dismiss buttons.
+	dismissBtns.forEach( function( dismissBtn ) {
+		dismissBtn.addEventListener( 'click', function( event ) {
+			const id = dismissBtn.getAttribute( 'data-notice' );
 
-		if ( ! id ) {
-			return;
-		}
+			if ( ! id ) {
+				return;
+			}
 
-		const httpRequest = new XMLHttpRequest();
-    	let postData = '';
+			const httpRequest = new XMLHttpRequest();
+			let postData = '';
 
-    	// Build the data to send in our request.
-    	// Data has to be formatted as a string here.
-    	postData += 'notice_id=' + id;
-    	postData += '&action=classifai_dismiss_notice';
-    	postData += '&nonce=$nonce';
+			// Build the data to send in our request.
+			// Data has to be formatted as a string here.
+			postData += 'notice_id=' + id;
+			postData += '&action=classifai_dismiss_notice';
+			postData += '&nonce=$nonce';
 
-    	httpRequest.open( 'POST', '$admin_ajax_url' );
-    	httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
-    	httpRequest.send( postData );
-    });
+			httpRequest.open( 'POST', '$admin_ajax_url' );
+			httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
+			httpRequest.send( postData );
+		});
+	});
 });
 EOD;
 
