@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Role and user-based access control for all Features (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9) via [#635](https://github.com/10up/classifai/pull/635)).
 - Repo Automator GitHub Action to automate repo operations (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#681](https://github.com/10up/classifai/pull/681)).
 - Show error message if generating excerpts or titles fails in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#688](https://github.com/10up/classifai/pull/688)).
-- Tool to automatically migrate settings from the old settings structure to the new feature-first settings structure (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#711](https://github.com/10up/classifai/pull/711)).
+- Tool to automatically migrate settings from the old settings structure to the new feature-first settings structure (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@qasumitbagthariya](https://github.com/qasumitbagthariya),  [@dkotter](https://github.com/dkotter) via [#711](https://github.com/10up/classifai/pull/711)).
 - Migration guide for the feature-first refactoring (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#726](https://github.com/10up/classifai/pull/726)).
 
 ### Changed
