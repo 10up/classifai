@@ -40,6 +40,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 == Upgrade Notice ==
 
+= 3.0.0 =
+**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
+
 = 2.5.0 =
 **Note that this release bumps the WordPress minimum from 5.8 to 6.1.**
 
