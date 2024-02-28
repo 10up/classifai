@@ -5,37 +5,32 @@ All notable changes to this project will be documented in this file, per [the Ke
 ## [Unreleased] - TBD
 
 ## [3.0.0] - 2024-02-29
-
 **Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
 
 ### Added
-
 - New Moderation Feature that utilizes the OpenAI Moderation API to moderate comments (props [@kirtangajjar](https://github.com/kirtangajjar), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#531](https://github.com/10up/classifai/pull/531)).
 - Added the option to use Google's Gemini API as a Provider for the Title Generation, Excerpt Generation and Content Resizing Features (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#700](https://github.com/10up/classifai/pull/700)).
 - Added the option to use Azure OpenAI as a Provider for the Title Generation, Excerpt Generation and Content Resizing Features (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#716](https://github.com/10up/classifai/pull/716)).
-- Ability to preview which terms will be added before they get added when using the Embeddings provider (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#709](https://github.com/10up/classifai/pull/709)).
 - Role and user-based access control for all Features (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9) via [#635](https://github.com/10up/classifai/pull/635)).
-- Repo Automator GitHub Action to automate repo operations (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#681](https://github.com/10up/classifai/pull/681)).
+- Ability to preview which terms will be added before they get added when using the Embeddings provider (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#709](https://github.com/10up/classifai/pull/709)).
 - Show error message if generating excerpts or titles fails in the Classic Editor (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#688](https://github.com/10up/classifai/pull/688)).
 - Tool to automatically migrate settings from the old settings structure to the new feature-first settings structure (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@qasumitbagthariya](https://github.com/qasumitbagthariya),  [@dkotter](https://github.com/dkotter) via [#711](https://github.com/10up/classifai/pull/711)).
 - Migration guide for the feature-first refactoring (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#726](https://github.com/10up/classifai/pull/726)).
+- Repo Automator GitHub Action to automate repo operations (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#681](https://github.com/10up/classifai/pull/681)).
 
 ### Changed
-
 - Major refactoring of the plugin to a feature-first architecture (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#611](https://github.com/10up/classifai/pull/611)).
 - Update the Azure AI Vision Image Analyze API from v3.0 to v3.2 and the Azure AI Vision Smart Cropping API from v3.1 to v3.2. Note that we recommend lowering the threshold values for the Descriptive Text Generator Feature to 55% for best results (props [@kmgalanakis](https://github.com/kmgalanakis), [@dkotter](https://github.com/dkotter), [@sksaju](https://github.com/sksaju), [@iamdharmesh](https://github.com/iamdharmesh) via [#559](https://github.com/10up/classifai/pull/559)).
 - Update from using DALL·E 2 to using DALL·E 3 in our Image Generation Feature (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#717](https://github.com/10up/classifai/pull/717)).
 - Refactor ClassifAI onboarding to work with the new feature-first refactoring (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9) via [#642](https://github.com/10up/classifai/pull/642)).
-- Updated E2E tests to work with the new feature-first refactoring (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#653](https://github.com/10up/classifai/pull/653)).
-- If on a multisite install, when handling user access based on role, if a Super Admin does not have a specific role on a site, treat that user as an administrator (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@gsarig](https://github.com/gsarig), [@iamdharmesh](https://github.com/iamdharmesh) via [#653](https://github.com/10up/classifai/pull/653)).
-- Remove Subscriber from the list of allowed roles (props [@dkotter](https://github.com/dkotter), [@ankitguptaindia](https://github.com/ankitguptaindia), [@Sidsector9](https://github.com/Sidsector9) via [#690](https://github.com/10up/classifai/pull/690)).
-- Removed the "Enable role-based access" and "Enable user-based access" settings options and instead set those to be enabled by default (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#692](https://github.com/10up/classifai/pull/692)).
 - Ensure the Classification functionality works the same for all Providers (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#709](https://github.com/10up/classifai/pull/709)).
-- Update minimum node version to 20 (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#722](https://github.com/10up/classifai/pull/722)).
 - Introduce a filter to add new arguments to the Image Generation REST route, instead of registering that route twice (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#727](https://github.com/10up/classifai/pull/727)).
+- If on a multisite install, when handling user access based on role, if a Super Admin does not have a specific role on a site, treat that user as an administrator (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@gsarig](https://github.com/gsarig), [@iamdharmesh](https://github.com/iamdharmesh) via [#689](https://github.com/10up/classifai/pull/689)).
+- Remove the "Enable role-based access" and "Enable user-based access" settings options and instead set those to be enabled by default (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#692](https://github.com/10up/classifai/pull/692)).
+- Update minimum node version to 20 (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#722](https://github.com/10up/classifai/pull/722)).
+- Updated E2E tests to work with the new feature-first refactoring (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#653](https://github.com/10up/classifai/pull/653)).
 
 ### Fixed
-
 - Ensure the classification popup works after feature-first refactoring (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#634](https://github.com/10up/classifai/pull/634)).
 - Ensure we only run image updates once (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9), [@sksaju](https://github.com/sksaju) via [#677](https://github.com/10up/classifai/pull/677)).
 - Ensure the Classification preview works as expected after feature-first refactoring (props [@dkotter](https://github.com/dkotter), [@QAharshalkadu](https://github.com/QAharshalkadu), [@Sidsector9](https://github.com/Sidsector9) via [#679](https://github.com/10up/classifai/pull/679)).
@@ -51,17 +46,15 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Ensure the stand-alone Generate Image page works if the Media Library is loaded in list mode (props [@dkotter](https://github.com/dkotter), [@qasumitbagthariya](https://github.com/qasumitbagthariya), [@Sidsector9](https://github.com/Sidsector9) via [#712](https://github.com/10up/classifai/pull/712)).
 
 ### Removed
-
-- Removed the `AccessControl` class, as it is no longer in use after the feature-first refactoring (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#680](https://github.com/10up/classifai/pull/680)).
+- Subscriber from the list of allowed roles (props [@dkotter](https://github.com/dkotter), [@ankitguptaindia](https://github.com/ankitguptaindia), [@Sidsector9](https://github.com/Sidsector9) via [#690](https://github.com/10up/classifai/pull/690)).
+- `AccessControl` class as it is no longer in use after the feature-first refactoring (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#680](https://github.com/10up/classifai/pull/680)).
+- Type declaration from the `attachment_is_pdf` parameter (props [@iamdharmesh](https://github.com/iamdharmesh), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#719](https://github.com/10up/classifai/pull/719)).
 - Eliminate all dead code that is no longer needed after the feature-first refactoring (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#678](https://github.com/10up/classifai/pull/678)).
-- Type declaration from the `attachment_is_pdf` parameter (props [@iamdharmesh](https://github.com/iamdharmesh), [@peterwilsoncc](https://github.com/peterwilsoncc), [@dkotter](https://github.com/dkotter) via [#678](https://github.com/10up/classifai/pull/678)).
 
 ### Deprecated
-
 - Show deprecation notice for the Azure AI Personalizer provider, as this will be removed in a coming release (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#698](https://github.com/10up/classifai/pull/698)).
 
 ### Security
-
 - Protect against potential prompt injection when using OpenAI's ChatGPT (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#683](https://github.com/10up/classifai/pull/683)).
 - Bump `ip` from 1.1.8 to 1.1.9 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@iamdharmesh](https://github.com/iamdharmesh) via [#721](https://github.com/10up/classifai/pull/721)).
 
