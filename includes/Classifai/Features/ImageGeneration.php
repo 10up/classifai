@@ -408,4 +408,51 @@ class ImageGeneration extends Feature {
 			'provider' => DallE::ID,
 		];
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_openai_dalle', array() );
+		$new_settings = $this->get_default_settings();
+
+		$new_settings['provider'] = 'openai_dalle';
+
+		if ( isset( $old_settings['enable_image_gen'] ) ) {
+			$new_settings['status'] = $old_settings['enable_image_gen'];
+		}
+
+		if ( isset( $old_settings['number'] ) ) {
+			$new_settings['openai_dalle']['number_of_images'] = $old_settings['number'];
+		}
+
+		if ( isset( $old_settings['size'] ) ) {
+			$new_settings['openai_dalle']['image_size'] = $old_settings['size'];
+		}
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['openai_dalle']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['openai_dalle']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['image_generation_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['image_generation_roles'];
+		}
+
+		if ( isset( $old_settings['image_generation_users'] ) ) {
+			$new_settings['users'] = $old_settings['image_generation_users'];
+		}
+
+		if ( isset( $old_settings['image_generation_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['image_generation_user_based_opt_out'];
+		}
+
+		return $new_settings;
+	}
 }
