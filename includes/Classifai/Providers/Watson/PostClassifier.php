@@ -1,6 +1,10 @@
 <?php
 
-namespace Classifai;
+namespace Classifai\Providers\Watson;
+
+use Classifai\Features\Classification;
+use Classifai\Providers\Watson\NLU;
+use Classifai\Normalizer;
 
 /**
  * PostClassifier classifies and links WP posts to Taxonomy Terms based
@@ -11,28 +15,28 @@ class PostClassifier {
 	/**
 	 * API Request object that sends requests to Watson NLU.
 	 *
-	 * @var object $api_request The API request object.
+	 * @var APIRequest $api_request The API request object.
 	 */
 	public $api_request;
 
 	/**
 	 * Converts post content to plain text for classification.
 	 *
-	 * @var object $normalizer Normalizer object..
+	 * @var Normalizer $normalizer Normalizer object.
 	 */
 	public $normalizer;
 
 	/**
 	 * Classifier object that takes plain text.
 	 *
-	 * @var object $classifier Classifier object.
+	 * @var Classifier $classifier Classifier object.
 	 */
 	public $classifier;
 
 	/**
 	 * Links results from NLU API with Taxonomy Terms.
 	 *
-	 * @var object $linker Linker object.
+	 * @var Linker $linker Linker object.
 	 */
 	public $linker;
 
@@ -43,9 +47,9 @@ class PostClassifier {
 	 *
 	 * @param int   $post_id The post to classify
 	 * @param array $opts The classification options
-	 * @return array
+	 * @return array|\WP_Error
 	 */
-	public function classify( $post_id, $opts = [] ) {
+	public function classify( int $post_id, array $opts = [] ) {
 		$classifier = $this->get_classifier();
 		$normalizer = $this->get_normalizer();
 
@@ -58,7 +62,7 @@ class PostClassifier {
 		if ( ! empty( $text_to_classify ) ) {
 			return $classifier->classify( $text_to_classify, $opts );
 		} else {
-			return false;
+			return new \WP_Error( 'invalid', esc_html__( 'No text found.', 'classifai' ) );
 		}
 	}
 
@@ -66,13 +70,12 @@ class PostClassifier {
 	 * Classifies the specified post using Watson NLU and also links to
 	 * Taxonomy terms if output was valid.
 	 *
-	 * @param int   $post_id The post to classify
-	 * @param array $opts The classification options
+	 * @param int   $post_id    The post to classify
+	 * @param array $opts       The classification options
 	 * @param bool  $link_terms Whether to link the terms or not.
-	 *
-	 * @return array
+	 * @return object|bool
 	 */
-	public function classify_and_link( $post_id, $opts = [], $link_terms = true ) {
+	public function classify_and_link( int $post_id, array $opts = [], bool $link_terms = true ) {
 		$output = $this->classify( $post_id, $opts );
 
 		if ( is_wp_error( $output ) ) {
@@ -93,10 +96,9 @@ class PostClassifier {
 	 * @param array $output  The classification results from Watson NLU.
 	 * @param array $opts    Link options.
 	 * @param bool  $link_terms Whether to link the terms or not.
-	 *
 	 * @return array The linked output.
 	 */
-	public function link( $post_id, $output, $opts = [], $link_terms = true ) {
+	public function link( int $post_id, array $output, array $opts = [], bool $link_terms = true ): array {
 		$linker = $this->get_linker();
 
 		return $linker->link( $post_id, $output, $opts, $link_terms );
@@ -105,44 +107,52 @@ class PostClassifier {
 	/* helpers */
 
 	/**
-	 * Lazy init api request object
+	 * Lazy init api request object.
+	 *
+	 * @return APIRequest
 	 */
-	public function get_api_request() {
+	public function get_api_request(): APIRequest {
 		if ( is_null( $this->api_request ) ) {
-			$this->api_request = new Watson\APIRequest();
+			$this->api_request = new APIRequest();
 		}
 
 		return $this->api_request;
 	}
 
 	/**
-	 * Lazy init normalizer object
+	 * Lazy init normalizer object.
+	 *
+	 * @return Normalizer
 	 */
-	public function get_normalizer() {
+	public function get_normalizer(): Normalizer {
 		if ( is_null( $this->normalizer ) ) {
-			$this->normalizer = new Watson\Normalizer();
+			$this->normalizer = new Normalizer();
 		}
 
 		return $this->normalizer;
 	}
 
 	/**
-	 * Lazy init linker object
+	 * Lazy init linker object.
+	 *
+	 * @return Linker
 	 */
-	public function get_linker() {
+	public function get_linker(): Linker {
 		if ( is_null( $this->linker ) ) {
-			$this->linker = new Watson\Linker();
+			$this->linker = new Linker();
 		}
 
 		return $this->linker;
 	}
 
 	/**
-	 * Lazy init classifier object
+	 * Lazy init classifier object.
+	 *
+	 * @return Classifier
 	 */
-	public function get_classifier() {
+	public function get_classifier(): Classifier {
 		if ( is_null( $this->classifier ) ) {
-			$this->classifier          = new Watson\Classifier();
+			$this->classifier          = new Classifier();
 			$this->classifier->request = $this->get_api_request();
 		}
 
@@ -155,14 +165,16 @@ class PostClassifier {
 	 *
 	 * @return array
 	 */
-	public function get_features() {
-		$features = [];
+	public function get_features(): array {
+		$classification = new Classification();
+		$settings       = $classification->get_settings();
+		$features       = [];
 
-		if ( get_feature_enabled( 'category' ) ) {
+		if ( $settings['category'] ) {
 			$features['categories'] = (object) [];
 		}
 
-		if ( get_feature_enabled( 'keyword' ) ) {
+		if ( $settings['keyword'] ) {
 			$features['keywords'] = [
 				'emotion'   => false,
 				'sentiment' => false,
@@ -170,11 +182,11 @@ class PostClassifier {
 			];
 		}
 
-		if ( get_feature_enabled( 'concept' ) ) {
+		if ( $settings['concept'] ) {
 			$features['concepts'] = (object) [];
 		}
 
-		if ( get_feature_enabled( 'entity' ) ) {
+		if ( $settings['entity'] ) {
 			$features['entities'] = (object) [];
 		}
 

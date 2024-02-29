@@ -9,4 +9,5 @@ return array(
     '9b77ddcfb14408a32f5aaf74e0a11694' => $vendorDir . '/yahnis-elsts/plugin-update-checker/load-v5p1.php',
     'd5afeacfe11f422b161ec2bf0bc6940f' => $baseDir . '/includes/Classifai/Helpers.php',
     'dd5471419f4d492e4967fd310ef99d1b' => $baseDir . '/includes/Classifai/Blocks.php',
+    '7392f1c1286a9c92e3b46a9aafcd08cb' => $baseDir . '/includes/Classifai/Providers/Watson/Helpers.php',
 );

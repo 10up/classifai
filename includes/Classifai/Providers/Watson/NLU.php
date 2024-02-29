@@ -5,18 +5,18 @@
 
 namespace Classifai\Providers\Watson;
 
-use Classifai\Admin\SavePostHandler;
-use Classifai\Admin\PreviewClassifierData;
 use Classifai\Providers\Provider;
 use Classifai\Taxonomy\TaxonomyFactory;
+use Classifai\Features\Classification;
+use Classifai\Features\Feature;
+use Classifai\Providers\Watson\PostClassifier;
 use WP_Error;
-use function Classifai\get_plugin_settings;
-use function Classifai\get_post_types_for_language_settings;
-use function Classifai\get_post_statuses_for_language_settings;
-use function Classifai\get_asset_info;
-use function Classifai\get_classification_mode;
+
+use function Classifai\get_classification_feature_taxonomy;
 
 class NLU extends Provider {
+
+	const ID = 'ibm_watson_nlu';
 
 	/**
 	 * @var $taxonomy_factory TaxonomyFactory Watson taxonomy factory
@@ -24,32 +24,19 @@ class NLU extends Provider {
 	public $taxonomy_factory;
 
 	/**
-	 * @var $save_post_handler SavePostHandler Triggers a classification with Watson
+	 * NLU features that are supported by this provider
+	 *
+	 * @var array
 	 */
-	public $save_post_handler;
-
-	/**
-	 * @var $nlu_features array The list of NLU features
-	 */
-	protected $nlu_features = [];
+	public $nlu_features = [];
 
 	/**
 	 * Watson NLU constructor.
 	 *
-	 * @param string $service The service this class belongs to.
+	 * @param \Classifai\Features\Feature $feature Feature instance (Optional, only required in admin).
 	 */
-	public function __construct( $service ) {
-		parent::__construct(
-			'IBM Watson',
-			'Natural Language Understanding',
-			'watson_nlu',
-			$service
-		);
-
-		// Features provided by this provider.
-		$this->features = array(
-			'content_classification' => __( 'Classify content', 'classifai' ),
-		);
+	public function __construct( $feature = null ) {
+		$this->feature_instance = $feature;
 
 		$this->nlu_features = [
 			'category' => [
@@ -81,225 +68,60 @@ class NLU extends Provider {
 				'taxonomy_default'  => WATSON_CONCEPT_TAXONOMY,
 			],
 		];
-
-		// Set the onboarding options.
-		$this->onboarding_options = array(
-			'title'    => __( 'IBM Watson NLU', 'classifai' ),
-			'fields'   => array( 'url', 'username', 'password', 'toggle' ),
-			'features' => array(
-				'enable_content_classification' => __( 'Classify content', 'classifai' ),
-			),
-		);
 	}
 
 	/**
-	 * Resets the settings for the NLU provider.
+	 * Renders settings fields for this provider.
 	 */
-	public function reset_settings() {
-		$settings = $this->get_default_settings() ?? [];
-		update_option( $this->get_option_name(), $settings );
-	}
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
 
-	/**
-	 * Default settings for Watson NLU.
-	 *
-	 * @return array
-	 */
-	public function get_default_settings() {
-		$default_settings = parent::get_default_settings() ?? [];
-
-		return array_merge(
-			$default_settings,
+		add_settings_field(
+			static::ID . '_endpoint_url',
+			esc_html__( 'API URL', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
-				'enable_content_classification' => false,
-				'post_types'                    => [
-					'post' => 1,
-					'page' => null,
-				],
-				'post_statuses'                 => [
-					'publish' => 1,
-					'draft'   => null,
-				],
-				'features'                      => [
-					'category'           => true,
-					'category_threshold' => WATSON_CATEGORY_THRESHOLD,
-					'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
-
-					'keyword'            => true,
-					'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
-					'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
-
-					'concept'            => false,
-					'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
-					'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
-
-					'entity'             => false,
-					'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
-					'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
-				],
-				'classification_method'         => 'recommended_terms',
+				'option_index'  => static::ID,
+				'label_for'     => 'endpoint_url',
+				'default_value' => $settings['endpoint_url'],
+				'input_type'    => 'text',
+				'large'         => true,
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
-	}
 
-	/**
-	 * Register what we need for the plugin.
-	 */
-	public function register() {
-		if ( $this->is_feature_enabled( 'content_classification' ) ) {
-			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-			add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-
-			// Add classifai meta box to classic editor.
-			add_action( 'add_meta_boxes', [ $this, 'add_classifai_meta_box' ], 10, 2 );
-			add_action( 'save_post', [ $this, 'classifai_save_post_metadata' ], 5 );
-
-			add_filter( 'rest_api_init', [ $this, 'add_process_content_meta_to_rest_api' ] );
-
-			$this->taxonomy_factory = new TaxonomyFactory();
-			$this->taxonomy_factory->build_all();
-
-			$this->save_post_handler = new SavePostHandler();
-
-			if ( $this->save_post_handler->can_register() ) {
-				$this->save_post_handler->register();
-			}
-
-			new PreviewClassifierData();
-		}
-	}
-
-	/**
-	 * Helper to get the settings and allow for settings default values.
-	 *
-	 * Overridden from parent to polyfill older settings storage schema.
-	 *
-	 * @param string|bool|mixed $index Optional. Name of the settings option index.
-	 *
-	 * @return array
-	 */
-	public function get_settings( $index = false ) {
-		$defaults = $this->get_default_settings();
-		$settings = get_option( $this->get_option_name(), [] );
-
-		// If no settings have been saved, check for older storage to polyfill
-		// These are pre-1.3 settings
-		if ( empty( $settings ) ) {
-			$old_settings = get_option( 'classifai_settings' );
-
-			if ( isset( $old_settings['credentials'] ) ) {
-				$defaults['credentials'] = $old_settings['credentials'];
-			}
-
-			if ( isset( $old_settings['classification_mode'] ) ) {
-				$defaults['classification_mode'] = $old_settings['classification_mode'];
-			}
-
-			if ( isset( $old_settings['post_types'] ) ) {
-				$defaults['post_types'] = $old_settings['post_types'];
-			}
-
-			if ( isset( $old_settings['features'] ) ) {
-				$defaults['features'] = $old_settings['features'];
-			}
-		}
-
-		// Backward compatibility for enable classification setting.
-		if ( ! empty( $settings ) && ! isset( $settings['enable_content_classification'] ) ) {
-			$feature_enabled = 'no';
-			$features        = array(
-				'category',
-				'concept',
-				'entity',
-				'keyword',
-			);
-			foreach ( $features as $feature ) {
-				if ( ! empty( $settings['features'][ $feature ] ) ) {
-					$feature_enabled = '1';
-					break;
-				}
-			}
-			$settings['enable_content_classification'] = $feature_enabled;
-		}
-
-		$settings = wp_parse_args( $settings, $defaults );
-
-		if ( $index && isset( $settings[ $index ] ) ) {
-			return $settings[ $index ];
-		}
-
-		return $settings;
-	}
-
-	/**
-	 * Enqueue the editor scripts.
-	 */
-	public function enqueue_editor_assets() {
-		global $post;
-		wp_enqueue_script(
-			'classifai-editor',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			get_asset_info( 'editor', 'dependencies' ),
-			get_asset_info( 'editor', 'version' ),
-			true
-		);
-
-		if ( empty( $post ) ) {
-			return;
-		}
-
-		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'dependencies' ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
-			true
-		);
-
-		wp_localize_script(
-			'classifai-gutenberg-plugin',
-			'classifaiPostData',
+		add_settings_field(
+			static::ID . '_username',
+			esc_html__( 'API Username', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
 			[
-				'NLUEnabled'           => $this->is_feature_enabled( 'content_classification' ),
-				'supportedPostTypes'   => \Classifai\get_supported_post_types(),
-				'supportedPostStatues' => \Classifai\get_supported_post_statuses(),
-				'noPermissions'        => ! is_user_logged_in() || ! current_user_can( 'edit_post', $post->ID ),
+				'option_index'  => static::ID,
+				'label_for'     => 'username',
+				'default_value' => $settings['username'],
+				'input_type'    => 'text',
+				'large'         => true,
+				'class'         => 'classifai-provider-field ' . ( $this->use_username_password() ? 'hide-username' : '' ) . ' provider-scope-' . static::ID, // Important to add this.
 			]
 		);
-	}
 
-	/**
-	 * Enqueue the admin scripts.
-	 */
-	public function enqueue_admin_assets() {
-		wp_enqueue_script(
-			'classifai-language-processing-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			get_asset_info( 'language-processing', 'dependencies' ),
-			get_asset_info( 'language-processing', 'version' ),
-			true
-		);
-
-		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-			array(),
-			get_asset_info( 'language-processing', 'version' ),
-			'all'
-		);
-	}
-
-	/**
-	 * Setup fields
-	 */
-	public function setup_fields_sections() {
-		// Add the settings section.
-		add_settings_section(
-			$this->get_option_name(),
-			$this->provider_service_name,
-			function () {
-				printf(
+		add_settings_field(
+			static::ID . '_password',
+			esc_html__( 'API Key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'password',
+				'default_value' => $settings['password'],
+				'input_type'    => 'password',
+				'large'         => true,
+				'class'         => 'classifai-provider-field provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
 					wp_kses(
 						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
 						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
@@ -312,98 +134,208 @@ class NLU extends Provider {
 					),
 					esc_url( 'https://cloud.ibm.com/registration' ),
 					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
-				);
-
-				$credentials = $this->get_settings( 'credentials' );
-				$watson_url  = $credentials['watson_url'] ?? '';
-
-				if ( ! empty( $watson_url ) && strpos( $watson_url, 'watsonplatform.net' ) !== false ) {
-					echo '<div class="notice notice-error"><p><strong>';
-						printf(
-							wp_kses(
-								/* translators: %s is the link to the IBM Watson documentation */
-								__( 'The `watsonplatform.net` endpoint URLs were retired on 26 May 2021. Please update the endpoint url. Check <a title="Deprecated Endpoint: watsonplatform.net" href="%s">here</a> for details.', 'classifai' ),
-								[
-									'a' => [
-										'href'  => [],
-										'title' => [],
-									],
-								]
-							),
-							esc_url( 'https://cloud.ibm.com/docs/watson?topic=watson-endpoint-change' )
-						);
-					echo '</strong></p></div>';
-				}
-			},
-			$this->get_option_name()
+				),
+			]
 		);
 
-		// Create the Credentials Section.
-		$this->do_credentials_section();
+		add_settings_field(
+			static::ID . '_toggle',
+			'',
+			function ( $args = [] ) {
+				printf(
+					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
+					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						? esc_html__( 'Use a username/password instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				);
+			},
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+			]
+		);
 
-		// Create content tagging section
-		$this->do_nlu_features_sections();
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
 	/**
-	 * Helper method to create the credentials section
+	 * Modify the default settings for the classification feature.
+	 *
+	 * @param array   $settings Current settings.
+	 * @param Feature $feature_instance The feature instance.
+	 * @return array
 	 */
-	protected function do_credentials_section() {
-		add_settings_field(
-			'url',
-			esc_html__( 'API URL', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
+	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
+			return $settings;
+		}
+
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		return array_merge(
+			$settings,
 			[
-				'label_for'    => 'watson_url',
-				'option_index' => 'credentials',
-				'input_type'   => 'text',
-				'large'        => true,
+				'category'           => true,
+				'category_threshold' => WATSON_CATEGORY_THRESHOLD,
+				'category_taxonomy'  => WATSON_CATEGORY_TAXONOMY,
+
+				'keyword'            => true,
+				'keyword_threshold'  => WATSON_KEYWORD_THRESHOLD,
+				'keyword_taxonomy'   => WATSON_KEYWORD_TAXONOMY,
+
+				'concept'            => false,
+				'concept_threshold'  => WATSON_CONCEPT_THRESHOLD,
+				'concept_taxonomy'   => WATSON_CONCEPT_TAXONOMY,
+
+				'entity'             => false,
+				'entity_threshold'   => WATSON_ENTITY_THRESHOLD,
+				'entity_taxonomy'    => WATSON_ENTITY_TAXONOMY,
 			]
 		);
-		add_settings_field(
-			'username',
-			esc_html__( 'API Username', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'watson_username',
-				'option_index'  => 'credentials',
-				'input_type'    => 'text',
-				'default_value' => 'apikey',
-				'large'         => true,
-				'class'         => $this->use_username_password() ? 'hidden' : '',
-			]
-		);
-		add_settings_field(
-			'password',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'    => 'watson_password',
-				'option_index' => 'credentials',
-				'input_type'   => 'password',
-				'large'        => true,
-			]
-		);
-		add_settings_field(
-			'toggle',
-			'',
-			function () {
-				printf(
-					'<a id="classifai-waston-cred-toggle" href="#">%s</a>',
-					$this->use_username_password()
-						? esc_html__( 'Use a username/password instead?', 'classifai' )
-						: esc_html__( 'Use an API Key instead?', 'classifai' )
+	}
+
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'endpoint_url' => '',
+			'apikey'       => '',
+			'username'     => '',
+			'password'     => '',
+		];
+
+		return $common_settings;
+	}
+
+	/**
+	 * Register what we need for the plugin.
+	 */
+	public function register() {
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+		$feature = new Classification();
+
+		if (
+			$feature->is_feature_enabled() &&
+			$feature->get_feature_provider_instance()::ID === static::ID
+		) {
+
+			$this->taxonomy_factory = new TaxonomyFactory();
+			$this->taxonomy_factory->build_all();
+
+			add_action( 'wp_ajax_get_post_classifier_preview_data', array( $this, 'get_post_classifier_preview_data' ) );
+		}
+	}
+
+	/**
+	 * Returns classifier data for previewing.
+	 */
+	public function get_post_classifier_preview_data() {
+		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
+
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
+			wp_send_json_error( esc_html__( 'Failed nonce check.', 'classifai' ) );
+		}
+
+		$post_id    = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
+		$classifier = new Classifier();
+		$normalizer = new \Classifai\Normalizer();
+
+		$text_to_classify        = $normalizer->normalize( $post_id );
+		$body                    = $classifier->get_body( $text_to_classify );
+		$request_options['body'] = $body;
+		$request                 = $classifier->get_request();
+
+		$classified_data = $request->post( $classifier->get_endpoint(), $request_options );
+		$classified_data = $this->filter_classify_preview_data( $classified_data );
+
+		wp_send_json_success( $classified_data );
+	}
+
+	/**
+	 * Filter classifier preview based on the feature settings.
+	 *
+	 * @param array $classified_data The classified data.
+	 * @return array
+	 */
+	public function filter_classify_preview_data( array $classified_data ): array {
+		if ( is_wp_error( $classified_data ) ) {
+			return $classified_data;
+		}
+
+		$classify_existing_terms = 'existing_terms' === get_classification_method();
+		if ( ! $classify_existing_terms ) {
+			return $classified_data;
+		}
+
+		$features = [
+			'category' => 'categories',
+			'concept'  => 'concepts',
+			'entity'   => 'entities',
+			'keyword'  => 'keywords',
+		];
+		foreach ( $features as $key => $feature ) {
+			$taxonomy = get_classification_feature_taxonomy( $key );
+			if ( ! $taxonomy ) {
+				continue;
+			}
+
+			if ( ! isset( $classified_data[ $feature ] ) || empty( $classified_data[ $feature ] ) ) {
+				continue;
+			}
+
+			// Handle categories feature.
+			if ( 'categories' === $feature ) {
+				$classified_data[ $feature ] = array_filter(
+					$classified_data[ $feature ],
+					function ( $item ) use ( $taxonomy ) {
+						$keep  = false;
+						$parts = explode( '/', $item['label'] );
+						$parts = array_filter( $parts );
+						if ( ! empty( $parts ) ) {
+							foreach ( $parts as $part ) {
+								$term = get_term_by( 'name', $part, $taxonomy );
+								if ( ! empty( $term ) ) {
+									$keep = true;
+									break;
+								}
+							}
+						}
+						return $keep;
+					}
 				);
-			},
-			$this->get_option_name(),
-			$this->get_option_name()
-		);
+				// Reset array keys.
+				$classified_data[ $feature ] = array_values( $classified_data[ $feature ] );
+				continue;
+			}
+
+			$classified_data[ $feature ] = array_filter(
+				$classified_data[ $feature ],
+				function ( $item ) use ( $taxonomy, $key ) {
+					$name = $item['text'];
+					if ( 'keyword' === $key ) {
+						$name = preg_replace( '#^[a-z]+ ([A-Z].*)$#', '$1', $name );
+					} elseif ( 'entity' === $key ) {
+						if ( ! empty( $item['disambiguation'] ) && ! empty( $item['disambiguation']['name'] ) ) {
+							$name = $item['disambiguation']['name'];
+						}
+					}
+					$term = get_term_by( 'name', $name, $taxonomy );
+					return ! empty( $term );
+				}
+			);
+			// Reset array keys.
+			$classified_data[ $feature ] = array_values( $classified_data[ $feature ] );
+		}
+
+		return $classified_data;
 	}
 
 	/**
@@ -411,344 +343,36 @@ class NLU extends Provider {
 	 *
 	 * @return bool
 	 */
-	protected function use_username_password() {
-		$settings = $this->get_settings( 'credentials' );
+	protected function use_username_password(): bool {
+		$feature  = new Classification();
+		$settings = $feature->get_settings( static::ID );
 
-		if ( empty( $settings['watson_username'] ) ) {
+		if ( empty( $settings['username'] ) ) {
 			return false;
 		}
 
-		return 'apikey' === $settings['watson_username'];
-	}
-
-	/**
-	 * Helper method to create the watson features section
-	 */
-	protected function do_nlu_features_sections() {
-		$default_settings = $this->get_default_settings();
-
-		add_settings_field(
-			'enable_content_classification',
-			esc_html__( 'Classify content', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'enable_content_classification',
-				'input_type'    => 'checkbox',
-				'default_value' => $default_settings['enable_content_classification'],
-				'description'   => __( 'Enables the automatic content classification of posts.', 'classifai' ),
-			]
-		);
-
-		// Add user/role-based access settings for classify content.
-		$this->add_access_settings( 'content_classification' );
-		add_settings_field(
-			'classification-mode',
-			esc_html__( 'Classification mode', 'classifai' ),
-			[ $this, 'render_classification_mode_radios' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index' => 'classification_mode',
-				'input_type'   => 'radio',
-			]
-		);
-
-		add_settings_field(
-			'classification-method',
-			esc_html__( 'Classification method', 'classifai' ),
-			[ $this, 'render_radio_group' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'classification_method',
-				'default_value' => $default_settings['classification_method'],
-				'options'       => array(
-					'recommended_terms' => __( 'Recommend terms even if they do not exist on the site', 'classifai' ),
-					'existing_terms'    => __( 'Only recommend terms that already exist on the site', 'classifai' ),
-				),
-			]
-		);
-
-		add_settings_field(
-			'post-types',
-			esc_html__( 'Post Types to Classify', 'classifai' ),
-			[ $this, 'render_post_types_checkboxes' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index' => 'post_types',
-			]
-		);
-
-		add_settings_field(
-			'post-statuses',
-			esc_html__( 'Post Statuses to Classify', 'classifai' ),
-			[ $this, 'render_post_statuses_checkboxes' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'option_index' => 'post_statuses',
-			]
-		);
-
-		foreach ( $this->nlu_features as $feature => $labels ) {
-			add_settings_field(
-				$feature,
-				esc_html( $labels['feature'] ),
-				[ $this, 'render_nlu_feature_settings' ],
-				$this->get_option_name(),
-				$this->get_option_name(),
-				[
-					'option_index' => 'features',
-					'feature'      => $feature,
-					'labels'       => $labels,
-				]
-			);
-		}
-	}
-
-	/**
-	 * Generic text input field callback
-	 *
-	 * @param array $args The args passed to add_settings_field.
-	 */
-	public function render_input( $args ) {
-		$option_index  = isset( $args['option_index'] ) ? $args['option_index'] : false;
-		$setting_index = $this->get_settings( $option_index );
-		$type          = $args['input_type'] ?? 'text';
-		$value         = ( isset( $setting_index[ $args['label_for'] ] ) ) ? $setting_index[ $args['label_for'] ] : '';
-
-		// Check for a default value
-		$value = ( empty( $value ) && isset( $args['default_value'] ) ) ? $args['default_value'] : $value;
-		$attrs = '';
-		$class = '';
-
-		switch ( $type ) {
-			case 'text':
-			case 'password':
-				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = empty( $args['large'] ) ? 'regular-text' : 'large-text';
-				break;
-			case 'number':
-				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = 'small-text';
-				break;
-			case 'checkbox':
-				$attrs = ' value="1"' . checked( '1', $value, false );
-				break;
-			case 'radio':
-				if ( 'classification_mode' === $args['option_index'] ) {
-					// Detect the existing vs new users and serve default value accordingly.
-					$get_classification_mode = get_classification_mode();
-					if ( $value === $get_classification_mode ) {
-						$attrs = ' value="' . esc_attr( $value ) . '" checked="checked"';
-					}
-				}
-				$setting_index = ! is_array( $setting_index ) ? $setting_index : '';
-				$attrs         = empty( $attrs )
-						? ' value="' . esc_attr( $value ) . '"' . checked( $setting_index, $value, false )
-						: $attrs;
-				break;
-		}
-		?>
-		<input
-			type="<?php echo esc_attr( $type ); ?>"
-			id="classifai-settings-<?php echo esc_attr( $args['label_for'] ); ?>"
-			class="<?php echo esc_attr( $class ); ?>"
-			name="classifai_<?php echo esc_attr( $this->option_name ); ?><?php echo $option_index ? '[' . esc_attr( $option_index ) . ']' : ''; ?><?php echo 'radio' === $type ? '' : '[' . esc_attr( $args['label_for'] . ']' ); ?>"
-			<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> />
-		<?php
-		if ( ! empty( $args['description'] ) ) {
-			echo '<br /><span class="description">' . wp_kses_post( $args['description'] ) . '</span>';
-		}
-	}
-
-	/**
-	 * Render the classification modes.
-	 *
-	 * @param array $args Settings for the input
-	 */
-	public function render_classification_mode_radios( $args ) {
-		echo '<ul>';
-
-		$modes = [
-			'manual_review'            => [
-				'label'         => 'Manual review',
-				'default_value' => 'manual_review',
-			],
-			'automatic_classification' => [
-				'label'         => 'Automatic classification',
-				'default_value' => 'automatic_classification',
-			],
-		];
-
-		foreach ( $modes as $name => $data ) {
-			$args = array_merge(
-				$args,
-				$data,
-				[ 'label_for' => $name ]
-			);
-
-			echo '<li>';
-			$this->render_input( $args );
-			echo '<label for="classifai-settings-' . esc_attr( $name ) . '">' . esc_html( $data['label'] ) . '</label>';
-			echo '</li>';
-		}
-
-		echo '</ul>';
-	}
-
-	/**
-	 * Render the post types checkbox array.
-	 *
-	 * @param array $args Settings for the input
-	 *
-	 * @return void
-	 */
-	public function render_post_types_checkboxes( $args ) {
-		echo '<ul>';
-		$post_types = get_post_types_for_language_settings();
-		foreach ( $post_types as $post_type ) {
-			$args = [
-				'label_for'    => $post_type->name,
-				'option_index' => 'post_types',
-				'input_type'   => 'checkbox',
-			];
-
-			echo '<li>';
-			$this->render_input( $args );
-			echo '<label for="classifai-settings-' . esc_attr( $post_type->name ) . '">' . esc_html( $post_type->label ) . '</label>';
-			echo '</li>';
-		}
-
-		echo '</ul>';
-	}
-
-	/**
-	 * Render the post statuses checkbox array.
-	 *
-	 * @param array $args Settings for the input
-	 *
-	 * @return void
-	 */
-	public function render_post_statuses_checkboxes( $args ) {
-		echo '<ul>';
-		$post_statuses = get_post_statuses_for_language_settings();
-		foreach ( $post_statuses as $post_status_key => $post_status_label ) {
-			$args = [
-				'label_for'    => $post_status_key,
-				'option_index' => 'post_statuses',
-				'input_type'   => 'checkbox',
-			];
-
-			echo '<li>';
-			$this->render_input( $args );
-			echo '<label for="classifai-settings-' . esc_attr( $post_status_key ) . '">' . esc_html( $post_status_label ) . '</label>';
-			echo '</li>';
-		}
-
-		echo '</ul>';
-	}
-
-	/**
-	 * Render the NLU features settings.
-	 *
-	 * @param array $args Settings for the inputs
-	 *
-	 * @return void
-	 */
-	public function render_nlu_feature_settings( $args ) {
-		$feature = $args['feature'];
-		$labels  = $args['labels'];
-
-		$taxonomies = $this->get_supported_taxonomies();
-		$features   = $this->get_settings( 'features' );
-		$taxonomy   = isset( $features[ "{$feature}_taxonomy" ] ) ? $features[ "{$feature}_taxonomy" ] : $labels['taxonomy_default'];
-
-		// Enable classification type
-		$feature_args = [
-			'label_for'    => $feature,
-			'option_index' => 'features',
-			'input_type'   => 'checkbox',
-		];
-
-		$threshold_args = [
-			'label_for'     => "{$feature}_threshold",
-			'option_index'  => 'features',
-			'input_type'    => 'number',
-			'default_value' => $labels['threshold_default'],
-		];
-		?>
-
-		<fieldset>
-		<legend class="screen-reader-text"><?php esc_html_e( 'Watson Category Settings', 'classifai' ); ?></legend>
-
-		<p>
-			<?php $this->render_input( $feature_args ); ?>
-			<label
-				for="classifai-settings-<?php echo esc_attr( $feature ); ?>"><?php esc_html_e( 'Enable', 'classifai' ); ?></label>
-		</p>
-
-		<p>
-			<label
-				for="classifai-settings-<?php echo esc_attr( "{$feature}_threshold" ); ?>"><?php echo esc_html( $labels['threshold'] ); ?></label><br/>
-			<?php $this->render_input( $threshold_args ); ?>
-		</p>
-
-		<p>
-			<label
-				for="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"><?php echo esc_html( $labels['taxonomy'] ); ?></label><br/>
-			<select id="classifai-settings-<?php echo esc_attr( "{$feature}_taxonomy" ); ?>"
-				name="classifai_<?php echo esc_attr( $this->option_name ); ?>[features][<?php echo esc_attr( "{$feature}_taxonomy" ); ?>]">
-				<?php foreach ( $taxonomies as $name => $singular_name ) : ?>
-					<option
-						value="<?php echo esc_attr( $name ); ?>" <?php selected( $taxonomy, esc_attr( $name ) ); ?> ><?php echo esc_html( $singular_name ); ?></option>
-				<?php endforeach; ?>
-			</select>
-		</p>
-		<?php
-	}
-
-	/**
-	 * Return the list of supported taxonomies
-	 *
-	 * @return array
-	 */
-	public function get_supported_taxonomies() {
-		$taxonomies = \get_taxonomies( [], 'objects' );
-		$supported  = [];
-
-		foreach ( $taxonomies as $taxonomy ) {
-			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
-		}
-
-		return $supported;
+		return 'apikey' === $settings['username'];
 	}
 
 	/**
 	 * Helper to ensure the authentication works.
 	 *
 	 * @param array $settings The list of settings to be saved
-	 *
 	 * @return bool|WP_Error
 	 */
-	protected function nlu_authentication_check( $settings ) {
-
+	protected function nlu_authentication_check( array $settings ) {
 		// Check that we have credentials before hitting the API.
-		if ( ! isset( $settings['credentials'] )
-			|| empty( $settings['credentials']['watson_username'] )
-			|| empty( $settings['credentials']['watson_password'] )
-			|| empty( $settings['credentials']['watson_url'] )
+		if ( empty( $settings[ static::ID ]['username'] )
+			|| empty( $settings[ static::ID ]['password'] )
+			|| empty( $settings[ static::ID ]['endpoint_url'] )
 		) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your credentials.', 'classifai' ) );
 		}
 
-		$request           = new \Classifai\Watson\APIRequest();
-		$request->username = $settings['credentials']['watson_username'];
-		$request->password = $settings['credentials']['watson_password'];
-		$base_url          = trailingslashit( $settings['credentials']['watson_url'] ) . 'v1/analyze';
+		$request           = new APIRequest();
+		$request->username = $settings[ static::ID ]['username'];
+		$request->password = $settings[ static::ID ]['password'];
+		$base_url          = trailingslashit( $settings[ static::ID ]['endpoint_url'] ) . 'v1/analyze';
 		$url               = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		$options           = [
 			'body' => wp_json_encode(
@@ -764,7 +388,8 @@ class NLU extends Provider {
 				]
 			),
 		];
-		$response          = $request->post( $url, $options );
+
+		$response = $request->post( $url, $options );
 
 		if ( ! is_wp_error( $response ) ) {
 			update_option( 'classifai_configured', true );
@@ -778,156 +403,120 @@ class NLU extends Provider {
 	/**
 	 * Sanitization for the options being saved.
 	 *
-	 * @param array $settings Array of settings about to be saved.
-	 *
+	 * @param array $new_settings Array of settings about to be saved.
 	 * @return array The sanitized settings to be saved.
 	 */
-	public function sanitize_settings( $settings ) {
-		$new_settings  = $this->get_settings();
-		$new_settings  = array_merge( $new_settings, $this->sanitize_access_settings( $settings, 'content_classification' ) );
-		$authenticated = $this->nlu_authentication_check( $settings );
+	public function sanitize_settings( array $new_settings ): array {
+		$settings      = $this->feature_instance->get_settings();
+		$authenticated = $this->nlu_authentication_check( $new_settings );
 
 		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
+			$new_settings[ static::ID ]['authenticated'] = false;
 			add_settings_error(
-				'credentials',
+				'classifai-credentials',
 				'classifai-auth',
 				$authenticated->get_error_message(),
 				'error'
 			);
 		} else {
-			$new_settings['authenticated'] = true;
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		if ( isset( $settings['credentials']['watson_url'] ) ) {
-			$new_settings['credentials']['watson_url'] = esc_url_raw( $settings['credentials']['watson_url'] );
-		}
-
-		if ( isset( $settings['credentials']['watson_username'] ) ) {
-			$new_settings['credentials']['watson_username'] = sanitize_text_field( $settings['credentials']['watson_username'] );
-		}
-
-		if ( isset( $settings['credentials']['watson_password'] ) ) {
-			$new_settings['credentials']['watson_password'] = sanitize_text_field( $settings['credentials']['watson_password'] );
-		}
-
-		if ( empty( $settings['enable_content_classification'] ) || 1 !== (int) $settings['enable_content_classification'] ) {
-			$new_settings['enable_content_classification'] = 'no';
-		} else {
-			$new_settings['enable_content_classification'] = '1';
-		}
-
-		if ( isset( $settings['classification_mode'] ) ) {
-			$new_settings['classification_mode'] = sanitize_text_field( $settings['classification_mode'] );
-		}
-
-		if ( isset( $settings['classification_method'] ) ) {
-			$new_settings['classification_method'] = sanitize_text_field( $settings['classification_method'] );
-		}
-
-		// Sanitize the post type checkboxes
-		$post_types = get_post_types( [ 'public' => true ], 'objects' );
-		foreach ( $post_types as $post_type ) {
-			if ( isset( $settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = absint( $settings['post_types'][ $post_type->name ] );
-			} else {
-				$new_settings['post_types'][ $post_type->name ] = null;
-			}
-		}
-
-		// Sanitize the post statuses checkboxes
-		$post_statuses = get_post_statuses_for_language_settings();
-		foreach ( $post_statuses as $post_status_key => $post_status_value ) {
-			if ( isset( $settings['post_statuses'][ $post_status_key ] ) ) {
-				$new_settings['post_statuses'][ $post_status_key ] = absint( $settings['post_statuses'][ $post_status_key ] );
-			} else {
-				$new_settings['post_statuses'][ $post_status_key ] = null;
-			}
-		}
-
-		$feature_enabled = false;
-
-		foreach ( $this->nlu_features as $feature => $labels ) {
-			// Set the enabled flag.
-			if ( isset( $settings['features'][ $feature ] ) ) {
-				$new_settings['features'][ $feature ] = absint( $settings['features'][ $feature ] );
-				$feature_enabled                      = true;
-			} else {
-				$new_settings['features'][ $feature ] = null;
-			}
-
-			// Set the threshold
-			if ( isset( $settings['features'][ "{$feature}_threshold" ] ) ) {
-				$new_settings['features'][ "{$feature}_threshold" ] = min( absint( $settings['features'][ "{$feature}_threshold" ] ), 100 );
-			}
-
-			if ( isset( $settings['features'][ "{$feature}_taxonomy" ] ) ) {
-				$new_settings['features'][ "{$feature}_taxonomy" ] = sanitize_text_field( $settings['features'][ "{$feature}_taxonomy" ] );
-			}
-		}
-
-		// Show a warning if the NLU feature and Embeddings feature are both enabled.
-		if ( $feature_enabled && '1' === $new_settings['enable_content_classification'] ) {
-			$embeddings_settings = get_plugin_settings( 'language_processing', 'Embeddings' );
-
-			if ( isset( $embeddings_settings['enable_classification'] ) && 1 === (int) $embeddings_settings['enable_classification'] ) {
-				add_settings_error(
-					'features',
-					'conflict',
-					esc_html__( 'OpenAI Embeddings classification is turned on. This may conflict with the NLU classification feature. It is possible to run both features but if they use the same taxonomies, one will overwrite the other.', 'classifai' ),
-					'warning'
-				);
-			}
-		}
+		$new_settings[ static::ID ]['endpoint_url'] = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
+		$new_settings[ static::ID ]['username']     = sanitize_text_field( $new_settings[ static::ID ]['username'] ?? $settings[ static::ID ]['username'] );
+		$new_settings[ static::ID ]['password']     = sanitize_text_field( $new_settings[ static::ID ]['password'] ?? $settings[ static::ID ]['password'] );
 
 		return $new_settings;
 	}
 
 	/**
-	 * Provides debug information related to the provider.
+	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * @param array|null $settings Settings array. If empty, settings will be retrieved.
-	 * @param boolean    $configured Whether the provider is correctly configured. If null, the option will be retrieved.
-	 * @return string|array
-	 * @since 1.4.0
+	 * @param int    $post_id The Post Id we're processing.
+	 * @param string $route_to_call The route we are processing.
+	 * @param array  $args Optional arguments to pass to the route.
+	 * @return string|WP_Error
 	 */
-	public function get_provider_debug_information( $settings = null, $configured = null ) {
-		if ( is_null( $settings ) ) {
-			$settings = $this->sanitize_settings( $this->get_settings() );
+	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to run classification.', 'classifai' ) );
 		}
 
-		if ( is_null( $configured ) ) {
-			$configured = get_option( 'classifai_configured' );
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'classify':
+				$return = $this->classify( $post_id );
+				break;
 		}
 
-		$settings_post_types = $settings['post_types'] ?? [];
-		$post_types          = array_filter(
-			array_keys( $settings_post_types ),
-			function ( $post_type ) use ( $settings_post_types ) {
-				return 1 === intval( $settings_post_types[ $post_type ] );
-			}
-		);
+		return $return;
+	}
 
-		$credentials = $settings['credentials'] ?? [];
+	/**
+	 * Classifies the post specified with the PostClassifier object.
+	 *
+	 * Existing terms relationships are removed during classification.
+	 *
+	 * @param int $post_id the post to classify & link
+	 * @return array|WP_Error
+	 */
+	public function classify( int $post_id ) {
+		/**
+		 * Filter whether ClassifAI should classify a post.
+		 *
+		 * Default is true, return false to skip classifying a post.
+		 *
+		 * @since 1.2.0
+		 * @hook classifai_should_classify_post
+		 *
+		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
+		 *                                classification for this post.
+		 * @param {int}  $post_id         The ID of the post to be considered for classification.
+		 *
+		 * @return {bool} Whether the post should be classified.
+		 */
+		$should_classify = apply_filters( 'classifai_should_classify_post', true, $post_id );
+		if ( ! $should_classify ) {
+			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
+		}
 
-		return [
-			__( 'Configured', 'classifai' )      => $configured ? __( 'yes', 'classifai' ) : __( 'no', 'classifai' ),
-			__( 'API URL', 'classifai' )         => $credentials['watson_url'] ?? '',
-			__( 'API username', 'classifai' )    => $credentials['watson_username'] ?? '',
-			__( 'Post types', 'classifai' )      => implode( ', ', $post_types ),
-			__( 'Features', 'classifai' )        => preg_replace( '/,"/', ', "', wp_json_encode( $settings['features'] ?? '' ) ),
-			__( 'Latest response', 'classifai' ) => $this->get_formatted_latest_response( get_transient( 'classifai_watson_nlu_latest_response' ) ),
-		];
+		$classifier = new PostClassifier();
+
+		$output = $classifier->classify( $post_id );
+
+		return $output;
+	}
+
+	/**
+	 * Links the Watson NLU response output to taxonomy terms.
+	 *
+	 * @param int   $post_id The post ID.
+	 * @param array $terms The classification results from Watson NLU.
+	 * @param bool  $link Whether to link the terms or not.
+	 * @return array|WP_Error
+	 */
+	public function link( int $post_id, array $terms, bool $link = true ) {
+		if ( empty( $terms ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'No terms to link.', 'classifai' ) );
+		}
+
+		$classifier = new PostClassifier();
+
+		$output = $classifier->link( $post_id, $terms, [], $link );
+
+		return $output;
 	}
 
 	/**
 	 * Format the result of most recent request.
 	 *
 	 * @param array|WP_Error $data Response data to format.
-	 *
 	 * @return string
 	 */
-	protected function get_formatted_latest_response( $data ) {
+	protected function get_formatted_latest_response( $data ): string {
 		if ( ! $data ) {
 			return __( 'N/A', 'classifai' );
 		}
@@ -952,153 +541,29 @@ class NLU extends Provider {
 	}
 
 	/**
-	 * Add metabox to enable/disable language processing on post/post types.
+	 * Returns the debug information for the provider settings.
 	 *
-	 * @param string  $post_type Post Type.
-	 * @param WP_Post $post      WP_Post object.
-	 *
-	 * @since 1.8.0
+	 * @return array
 	 */
-	public function add_classifai_meta_box( $post_type, $post ) {
-		$supported_post_types = \Classifai\get_supported_post_types();
-		$post_statuses        = \Classifai\get_supported_post_statuses();
-		$post_status          = get_post_status( $post );
-		if ( in_array( $post_type, $supported_post_types, true ) && in_array( $post_status, $post_statuses, true ) ) {
-			add_meta_box(
-				'classifai_language_processing_metabox',
-				__( 'ClassifAI Language Processing', 'classifai' ),
-				[ $this, 'render_classifai_meta_box' ],
-				null,
-				'side',
-				'low',
-				array( '__back_compat_meta_box' => true )
-			);
-		}
-	}
+	public function get_debug_information(): array {
+		$settings   = $this->feature_instance->get_settings();
+		$debug_info = [];
 
-	/**
-	 * Render metabox content.
-	 *
-	 * @param WP_Post $post WP_Post object.
-	 *
-	 * @since 1.8.0
-	 */
-	public function render_classifai_meta_box( $post ) {
-		wp_nonce_field( 'classifai_language_processing_meta_action', 'classifai_language_processing_meta' );
-		$classifai_process_content = get_post_meta( $post->ID, '_classifai_process_content', true );
-		$classifai_process_content = ( 'no' === $classifai_process_content ) ? 'no' : 'yes';
+		if ( $this->feature_instance instanceof Classification ) {
+			foreach ( $this->nlu_features as $slug => $feature ) {
+				$debug_info[ $feature['feature'] . ' (status)' ]    = Feature::get_debug_value_text( $settings[ $slug ], 1 );
+				$debug_info[ $feature['feature'] . ' (threshold)' ] = Feature::get_debug_value_text( $settings[ $slug . '_threshold' ], 1 );
+				$debug_info[ $feature['feature'] . ' (taxonomy)' ]  = Feature::get_debug_value_text( $settings[ $slug . '_taxonomy' ], 1 );
+			}
 
-		$post_type       = get_post_type_object( get_post_type( $post ) );
-		$post_type_label = esc_html__( 'Post', 'classifai' );
-		if ( $post_type ) {
-			$post_type_label = $post_type->labels->singular_name;
-		}
-		?>
-		<p>
-			<label for="_classifai_process_content">
-				<input type="checkbox" value="yes" id="_classifai_process_content" name="_classifai_process_content" <?php checked( $classifai_process_content, 'yes' ); ?> />
-				<?php esc_html_e( 'Automatically tag content on update', 'classifai' ); ?>
-			</label>
-		</p>
-		<div class="classifai-clasify-post-wrapper" style="display: none;">
-			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
-				<?php
-				/* translators: %s Post type label */
-				printf( esc_html__( 'Classify %s', 'classifai' ), esc_html( $post_type_label ) );
-				?>
-			</a>
-		</div>
-		<?php
-	}
-
-	/**
-	 * Save language processing meta data on post/post types.
-	 *
-	 * @param int $post_id Post ID.
-	 *
-	 * @since 1.8.0
-	 */
-	public function classifai_save_post_metadata( $post_id ) {
-		if ( ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) || ! current_user_can( 'edit_post', $post_id ) || 'revision' === get_post_type( $post_id ) ) {
-			return;
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_watson_nlu_latest_response' ) );
 		}
 
-		if ( empty( $_POST['classifai_language_processing_meta'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_language_processing_meta'] ) ), 'classifai_language_processing_meta_action' ) ) {
-			return;
-		}
-
-		$supported_post_types = \Classifai\get_supported_post_types();
-		if ( ! in_array( get_post_type( $post_id ), $supported_post_types, true ) ) {
-			return;
-		}
-
-		if ( isset( $_POST['_classifai_process_content'] ) && 'yes' === sanitize_text_field( wp_unslash( $_POST['_classifai_process_content'] ) ) ) {
-			$classifai_process_content = 'yes';
-		} else {
-			$classifai_process_content = 'no';
-		}
-
-		update_post_meta( $post_id, '_classifai_process_content', $classifai_process_content );
-	}
-
-	/**
-	 * Add `classifai_process_content` to rest API for view/edit.
-	 */
-	public function add_process_content_meta_to_rest_api() {
-		$supported_post_types = \Classifai\get_supported_post_types();
-		register_rest_field(
-			$supported_post_types,
-			'classifai_process_content',
-			array(
-				'get_callback'    => function ( $data ) {
-					$process_content = get_post_meta( $data['id'], '_classifai_process_content', true );
-					return ( 'no' === $process_content ) ? 'no' : 'yes';
-				},
-				'update_callback' => function ( $value, $data ) {
-					$value = ( 'no' === $value ) ? 'no' : 'yes';
-					return update_post_meta( $data->ID, '_classifai_process_content', $value );
-				},
-				'schema'          => [
-					'type'    => 'string',
-					'context' => [ 'view', 'edit' ],
-				],
-			)
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
 		);
-	}
-
-	/**
-	 * Returns whether the provider is configured or not.
-	 *
-	 * For backwards compat, we've maintained the use of the
-	 * `classifai_configured` option. We default to looking for
-	 * the `authenticated` setting though.
-	 *
-	 * @return bool
-	 */
-	public function is_configured() {
-		$is_configured = parent::is_configured();
-
-		if ( ! $is_configured ) {
-			$is_configured = (bool) get_option( 'classifai_configured', false );
-		}
-
-		return $is_configured;
-	}
-
-	/**
-	 * Determine if the feature is turned on.
-	 * Note: This function does not check if the user has access to the feature.
-	 *
-	 * @param string $feature Feature to check.
-	 * @return bool
-	 */
-	public function is_enabled( string $feature ) {
-		$settings   = $this->get_settings();
-		$enable_key = 'enable_' . $feature;
-
-		$is_enabled = ( isset( $settings[ $enable_key ] ) && 1 === (int) $settings[ $enable_key ] && \Classifai\language_processing_features_enabled() );
-
-		/** This filter is documented in includes/Classifai/Providers/Provider.php */
-		return apply_filters( "classifai_is_{$feature}_enabled", $is_enabled, $settings );
 	}
 }

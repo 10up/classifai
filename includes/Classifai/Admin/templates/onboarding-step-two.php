@@ -5,7 +5,8 @@
  * @package ClassifAI
  */
 
-$args = array(
+$onboarding = new Classifai\Admin\Onboarding();
+$args       = array(
 	'step'       => 2,
 	'title'      => __( 'Register ClassifAI', 'classifai' ),
 	'left_link'  => array(
@@ -24,7 +25,7 @@ require_once 'onboarding-header.php';
 
 <div class="classifai-setup-form">
 	<?php
-	Classifai\Admin\Onboarding::render_classifai_setup_settings( 'classifai_settings', array( 'email', 'registration-key' ) );
+	$onboarding->render_classifai_setup_settings( 'classifai_settings', array( 'email', 'registration-key' ) );
 	?>
 </div>
 

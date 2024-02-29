@@ -3,7 +3,7 @@
         'name' => '10up/classifai',
         'pretty_version' => 'dev-trunk',
         'version' => 'dev-trunk',
-        'reference' => '0f6b46e0426602a2baeab42cffb31be74c59d8a6',
+        'reference' => 'd4cafe9511856d7dc041829e6b82cb2a7cb06dc3',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '10up/classifai' => array(
             'pretty_version' => 'dev-trunk',
             'version' => 'dev-trunk',
-            'reference' => '0f6b46e0426602a2baeab42cffb31be74c59d8a6',
+            'reference' => 'd4cafe9511856d7dc041829e6b82cb2a7cb06dc3',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -22,7 +22,7 @@
         'composer/ca-bundle' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '90d087e988ff194065333d16bc5cf649872d9cdb',
+            'reference' => 'b66d11b7479109ab547f9405b97205640b17d385',
             'type' => 'library',
             'install_path' => __DIR__ . '/./ca-bundle',
             'aliases' => array(

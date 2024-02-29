@@ -5,9 +5,6 @@
 
 namespace Classifai\Services;
 
-use WP_Error;
-use function Classifai\find_provider_class;
-
 abstract class Service {
 
 	/**
@@ -26,9 +23,19 @@ abstract class Service {
 	protected $providers;
 
 	/**
-	 * @var array Array of class instances.
+	 * @var array Array of provider instances.
 	 */
 	public $provider_classes;
+
+	/**
+	 * @var string[] array Array of feature classes for this service
+	 */
+	public $features = [];
+
+	/**
+	 * @var \Classifai\Features\Feature[] Array of feature instances.
+	 */
+	public $feature_classes = [];
 
 	/**
 	 * Service constructor.
@@ -37,7 +44,7 @@ abstract class Service {
 	 * @param string $menu_slug    Slug for the settings page.
 	 * @param array  $providers    Array of provider classes for this service
 	 */
-	public function __construct( $display_name, $menu_slug, $providers ) {
+	public function __construct( string $display_name, string $menu_slug, array $providers ) {
 		$this->menu_slug    = $menu_slug;
 		$this->display_name = $display_name;
 		$this->providers    = $providers;
@@ -62,10 +69,32 @@ abstract class Service {
 		if ( ! empty( $this->providers ) && is_array( $this->providers ) ) {
 			foreach ( $this->providers as $provider ) {
 				if ( class_exists( $provider ) ) {
-					$this->provider_classes[] = new $provider( $this->menu_slug );
+					$this->provider_classes[] = new $provider();
 				}
 			}
 			$this->register_providers();
+		}
+
+		/**
+		 * Filter the list of features for the service.
+		 *
+		 * @since 3.0.0
+		 * @hook {$this->menu_slug}_features
+		 *
+		 * @param {array} $this->features Array of available features for the service.
+		 *
+		 * @return {array} The filtered available features.
+		 */
+		$this->features = apply_filters( "{$this->menu_slug}_features", $this->features );
+
+		if ( ! empty( $this->features ) && is_array( $this->features ) ) {
+			foreach ( $this->features as $feature ) {
+				if ( class_exists( $feature ) ) {
+					$feature_instance        = new $feature();
+					$this->feature_classes[] = $feature_instance;
+					$feature_instance->setup();
+				}
+			}
 		}
 
 		add_filter( 'classifai_debug_information', [ $this, 'add_service_debug_information' ] );
@@ -77,8 +106,7 @@ abstract class Service {
 	public function register_providers() {
 		if ( ! empty( $this->provider_classes ) ) {
 			foreach ( $this->provider_classes as $provider ) {
-				$provider->register_admin();
-				if ( $provider->can_register() ) {
+				if ( method_exists( $provider, 'register' ) ) {
 					$provider->register();
 				}
 			}
@@ -90,7 +118,7 @@ abstract class Service {
 	 *
 	 * @return string
 	 */
-	public function get_menu_slug() {
+	public function get_menu_slug(): string {
 		return $this->menu_slug;
 	}
 
@@ -99,7 +127,7 @@ abstract class Service {
 	 *
 	 * @return string
 	 */
-	public function get_display_name() {
+	public function get_display_name(): string {
 		return $this->display_name;
 	}
 
@@ -107,128 +135,84 @@ abstract class Service {
 	 * Render the start of a settings page. The rest is added by the providers
 	 */
 	public function render_settings_page() {
-		$active_tab = $this->provider_classes ? $this->provider_classes[0]->get_settings_section() : '';
-		$active_tab = isset( $_GET['provider'] ) ? sanitize_text_field( wp_unslash( $_GET['provider'] ) ) : $active_tab; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$base_url   = add_query_arg(
+		$base_url       = add_query_arg(
 			array(
 				'page' => 'classifai',
 				'tab'  => $this->get_menu_slug(),
 			),
 			admin_url( 'tools.php' )
 		);
+		$active_feature = $this->feature_classes ? $this->feature_classes[0]::ID : '';
+		$active_feature = isset( $_GET['feature'] ) ? sanitize_text_field( wp_unslash( $_GET['feature'] ) ) : $active_feature; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		?>
 		<div class="classifai-content">
 			<?php
 			include_once CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Admin/templates/classifai-header.php';
 			?>
+
 			<div class="classifai-wrap wrap wrap--nlu">
 				<h2><?php echo esc_html( $this->display_name ); ?></h2>
 
 				<?php
-				if ( empty( $this->provider_classes ) ) {
-					echo '<p>' . esc_html__( 'No providers available for this service.', 'classifai' ) . '</p>';
+				if ( empty( $this->feature_classes ) ) {
+					echo '<p>' . esc_html__( 'No features available for this service.', 'classifai' ) . '</p>';
 					echo '</div></div>';
 					return;
 				}
 				?>
 
+				<?php
+				/**
+				 * Fires before the feature tab navigation.
+				 *
+				 * @since 3.0.0
+				 * @hook classifai_before_feature_nav
+				 *
+				 * @param {string} $active_feature Current active feature.
+				 */
+				do_action( 'classifai_before_feature_nav', $active_feature );
+				?>
+
 				<h2 class="nav-tab-wrapper">
-					<?php foreach ( $this->provider_classes as $provider_class ) : ?>
-						<a href="<?php echo esc_url( add_query_arg( 'provider', $provider_class->get_settings_section(), $base_url ) ); ?>" class="nav-tab <?php echo $provider_class->get_settings_section() === $active_tab ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $provider_class->provider_name ); ?></a>
+					<?php foreach ( $this->feature_classes as $feature_class ) : ?>
+						<a href="<?php echo esc_url( add_query_arg( 'feature', $feature_class::ID, $base_url ) ); ?>" class="nav-tab <?php echo $feature_class::ID === $active_feature ? 'nav-tab-active' : ''; ?>"><?php echo esc_html( $feature_class->get_label() ); ?></a>
 					<?php endforeach; ?>
 				</h2>
 
 				<?php settings_errors(); ?>
 
 				<div class="classifai-nlu-sections">
+					<?php
+					/**
+					 * Fires before the settings form for a feature.
+					 *
+					 * @since 3.0.0
+					 * @hook classifai_before_feature_settings_form
+					 *
+					 * @param {string} $active_feature Current active feature.
+					 */
+					do_action( 'classifai_before_feature_settings_form', $active_feature );
+					?>
+
 					<form method="post" action="options.php">
 					<?php
-						settings_fields( 'classifai_' . $active_tab );
-						do_settings_sections( 'classifai_' . $active_tab );
+						settings_fields( 'classifai_' . $active_feature );
+						do_settings_sections( 'classifai_' . $active_feature );
 						submit_button();
 					?>
 					</form>
+
 					<?php
-					// Find the right provider class.
-					$provider = find_provider_class( $this->provider_classes ?? [], 'Natural Language Understanding' );
-					if ( 'openai_embeddings' === $active_tab ) {
-						$provider = find_provider_class( $this->provider_classes ?? [], 'Embeddings' );
-					}
-
-					if (
-						! is_wp_error( $provider )
-						&& ! empty(
-							$provider->can_register()
-							&& ( $provider->is_feature_enabled( 'content_classification' ) || $provider->is_feature_enabled( 'classification' ) )
-						)
-					) :
-						?>
-					<div id="classifai-post-preview-app">
-						<?php
-							$supported_post_statuses = \Classifai\get_supported_post_statuses();
-							$supported_post_types    = \Classifai\get_supported_post_types();
-
-							$posts_to_preview = get_posts(
-								array(
-									'post_type'      => $supported_post_types,
-									'post_status'    => $supported_post_statuses,
-									'posts_per_page' => 10,
-								)
-							);
-
-							$features = array(
-								'category' => array(
-									'name'    => esc_html__( 'Category', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'category' ),
-									'plural'  => 'categories',
-								),
-								'keyword'  => array(
-									'name'    => esc_html__( 'Keyword', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'keyword' ),
-									'plural'  => 'keywords',
-								),
-								'entity'   => array(
-									'name'    => esc_html__( 'Entity', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'entity' ),
-									'plural'  => 'entities',
-								),
-								'concept'  => array(
-									'name'    => esc_html__( 'Concept', 'classifai' ),
-									'enabled' => \Classifai\get_feature_enabled( 'concept' ),
-									'plural'  => 'concepts',
-								),
-							);
-							?>
-
-						<?php if ( 'watson_nlu' === $active_tab || 'openai_embeddings' === $active_tab ) : ?>
-						<h2><?php esc_html_e( 'Preview Language Processing', 'classifai' ); ?></h2>
-						<div id="classifai-post-preview-controls">
-							<select id="classifai-preview-post-selector">
-								<?php foreach ( $posts_to_preview as $post ) : ?>
-									<option value="<?php echo esc_attr( $post->ID ); ?>"><?php echo esc_html( $post->post_title ); ?></option>
-								<?php endforeach; ?>
-							</select>
-							<?php wp_nonce_field( "classifai-previewer-$active_tab-action", "classifai-previewer-$active_tab-nonce" ); ?>
-							<button type="button" class="button" id="get-classifier-preview-data-btn">
-								<span><?php esc_html_e( 'Preview', 'classifai' ); ?></span>
-							</button>
-						</div>
-						<div id="classifai-post-preview-wrapper">
-							<?php
-							if ( 'watson_nlu' === $active_tab ) :
-								foreach ( $features as $feature_slug => $feature ) :
-									?>
-									<div class="tax-row tax-row--<?php echo esc_attr( $feature['plural'] ); ?> <?php echo esc_attr( $feature['enabled'] ) ? '' : 'tax-row--hide'; ?>">
-										<div class="tax-type"><?php echo esc_html( $feature['name'] ); ?></div>
-									</div>
-									<?php
-								endforeach;
-							endif;
-							?>
-					</div>
-						<?php endif; ?>
-					</div>
-					<?php endif; ?>
+					/**
+					 * Fires after the settings form for a feature.
+					 *
+					 * @since 3.0.0
+					 * @hook classifai_after_feature_settings_form
+					 *
+					 * @param {string} $active_feature Current active feature.
+					 */
+					do_action( 'classifai_after_feature_settings_form', $active_feature );
+					?>
 				</div>
 			</div>
 		</div>
@@ -238,50 +222,30 @@ abstract class Service {
 	/**
 	 * Adds plugin debug information to be printed on the Site Health screen.
 	 *
+	 * @since 1.4.0
+	 *
 	 * @param array $debug_information Array of associative arrays corresponding to lines of debug information.
 	 * @return array Array with lines added.
-	 * @since 1.4.0
 	 */
-	public function add_service_debug_information( $debug_information ) {
+	public function add_service_debug_information( array $debug_information ): array {
 		return array_merge( $debug_information, $this->get_service_debug_information() );
 	}
 
 	/**
 	 * Provides debug information for the service.
 	 *
-	 * @return array Array of associative arrays representing lines of debug information.
 	 * @since 1.4.0
+	 *
+	 * @return array Array of associative arrays representing lines of debug information.
 	 */
-	public function get_service_debug_information() {
-		$make_line = function ( $provider ) {
+	public function get_service_debug_information(): array {
+		$make_line = function ( $feature ) {
 			return [
-				'label' => sprintf( '%s: %s', $this->get_display_name(), $provider->get_provider_name() ),
-				'value' => $provider->get_provider_debug_information(),
+				'label' => sprintf( '%s', $feature->get_label() ),
+				'value' => $feature->get_debug_information(),
 			];
 		};
 
-		return array_map( $make_line, $this->provider_classes );
-	}
-
-	/**
-	 * Check if the current user has permission to create and assign terms.
-	 *
-	 * @param string $tax Taxonomy name.
-	 * @return bool|WP_Error
-	 */
-	public function check_term_permissions( string $tax = '' ) {
-		$taxonomy = get_taxonomy( $tax );
-
-		if ( empty( $taxonomy ) || empty( $taxonomy->show_in_rest ) ) {
-			return new WP_Error( 'invalid_taxonomy', esc_html__( 'Taxonomy not found. Double check your settings.', 'classifai' ) );
-		}
-
-		$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
-
-		if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
-			return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
-		}
-
-		return true;
+		return array_map( $make_line, $this->feature_classes );
 	}
 }

@@ -37,6 +37,7 @@ class Plugin {
 		add_action( 'init', [ $this, 'i18n' ] );
 		add_action( 'admin_init', [ $this, 'init_admin_helpers' ] );
 		add_action( 'admin_init', [ $this, 'add_privacy_policy_content' ] );
+		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
 	}
@@ -53,27 +54,14 @@ class Plugin {
 		 */
 		do_action( 'before_classifai_init' );
 
-		// Initialize the services, each services handles the providers
+		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		$post_types = get_supported_post_types();
-		foreach ( $post_types as $post_type ) {
-			register_meta(
-				$post_type,
-				'_classifai_error',
-				[
-					'show_in_rest'  => true,
-					'single'        => true,
-					'auth_callback' => '__return_true',
-				]
-			);
-		}
-
-		// Initialize the classifAI Onboarding.
+		// Initialize the ClassifAI Onboarding.
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
 
-		// Initialize the classifAI User Profile.
+		// Initialize the ClassifAI User Profile.
 		$user_profile = new Admin\UserProfile();
 		$user_profile->init();
 
@@ -126,7 +114,7 @@ class Plugin {
 	}
 
 	/**
-	 * Initiates classes providing admin feature sfor the plugin.
+	 * Initiates classes providing admin features.
 	 *
 	 * @since 1.4.0
 	 */
@@ -172,7 +160,7 @@ class Plugin {
 		wp_enqueue_style(
 			'classifai-admin-style',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.css',
-			array( 'wp-components' ),
+			array( 'wp-components', 'wp-jquery-ui-dialog' ),
 			get_asset_info( 'admin', 'version' ),
 			'all'
 		);
@@ -180,7 +168,12 @@ class Plugin {
 		wp_enqueue_script(
 			'classifai-admin-script',
 			CLASSIFAI_PLUGIN_URL . 'dist/admin.js',
-			get_asset_info( 'admin', 'dependencies' ),
+			array_merge(
+				get_asset_info( 'admin', 'dependencies' ),
+				array(
+					'jquery-ui-dialog',
+				)
+			),
 			get_asset_info( 'admin', 'version' ),
 			true
 		);
@@ -216,10 +209,9 @@ class Plugin {
 	 * Add the action links to the plugin page.
 	 *
 	 * @param array $links The Action links for the plugin.
-	 *
 	 * @return array
 	 */
-	public function filter_plugin_action_links( $links ) {
+	public function filter_plugin_action_links( $links ): array {
 
 		if ( ! is_array( $links ) ) {
 			return $links;
@@ -240,5 +232,85 @@ class Plugin {
 			),
 			$links
 		);
+	}
+
+	/**
+	 * Migrate the existing settings to v3 if necessary.
+	 *
+	 * @since 3.0.0
+	 */
+	public function maybe_migrate_to_v3() {
+		$is_migrated = get_option( 'classifai_v3_migration_completed', false );
+
+		if ( false !== $is_migrated ) {
+			// Already migrated.
+			return;
+		}
+
+		$features = array();
+
+		// Get the existing settings.
+		$nlu_settings          = get_option( 'classifai_watson_nlu', [] );
+		$embeddings_settings   = get_option( 'classifai_openai_embeddings', [] );
+		$whisper_settings      = get_option( 'classifai_openai_whisper', [] );
+		$chatgpt_settings      = get_option( 'classifai_openai_chatgpt', [] );
+		$tts_settings          = get_option( 'classifai_azure_text_to_speech', [] );
+		$vision_settings       = get_option( 'classifai_computer_vision', [] );
+		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
+		$personalizer_settings = get_option( 'classifai_personalizer', [] );
+
+		// If settings are there, migrate them.
+		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
+			$features[] = \Classifai\Features\Classification::class;
+		}
+
+		if ( ! empty( $whisper_settings ) ) {
+			$features[] = \Classifai\Features\AudioTranscriptsGeneration::class;
+		}
+
+		if ( ! empty( $chatgpt_settings ) ) {
+			$features[] = \Classifai\Features\TitleGeneration::class;
+			$features[] = \Classifai\Features\ExcerptGeneration::class;
+			$features[] = \Classifai\Features\ContentResizing::class;
+		}
+
+		if ( ! empty( $tts_settings ) ) {
+			$features[] = \Classifai\Features\TextToSpeech::class;
+		}
+
+		if ( ! empty( $vision_settings ) ) {
+			$features[] = \Classifai\Features\DescriptiveTextGenerator::class;
+			$features[] = \Classifai\Features\ImageTagsGenerator::class;
+			$features[] = \Classifai\Features\ImageCropping::class;
+			$features[] = \Classifai\Features\ImageTextExtraction::class;
+			$features[] = \Classifai\Features\PDFTextExtraction::class;
+		}
+
+		if ( ! empty( $dalle_settings ) ) {
+			$features[] = \Classifai\Features\ImageGeneration::class;
+		}
+
+		if ( ! empty( $personalizer_settings ) ) {
+			$features[] = \Classifai\Features\RecommendedContent::class;
+		}
+
+		// Migrate settings.
+		$migration_needed = ! empty( $features );
+		foreach ( $features as $feature ) {
+			$feature_instance = new $feature();
+			$feature_id       = $feature_instance->get_option_name();
+
+			if ( method_exists( $feature_instance, 'migrate_settings' ) ) {
+				$migrated_settings = $feature_instance->migrate_settings();
+				update_option( $feature_id, $migrated_settings );
+			}
+		}
+
+		// Mark the migration as completed.
+		update_option( 'classifai_v3_migration_completed', true, false );
+		if ( $migration_needed ) {
+			// This option will be used to display a notice only to users who have completed the migration process. This will help to avoid showing the notice to new users.
+			update_option( 'classifai_display_v3_migration_notice', true, false );
+		}
 	}
 }

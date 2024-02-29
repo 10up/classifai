@@ -20,92 +20,25 @@ trait OpenAI {
 	protected $model_url = 'https://api.openai.com/v1/models';
 
 	/**
-	 * Add our OpenAI API settings field.
-	 *
-	 * @param string $default_api_key Default API key.
-	 */
-	protected function setup_api_fields( string $default_api_key = '' ) {
-		$existing_settings = $this->get_settings();
-		$description       = '';
-
-		// Add the settings section.
-		add_settings_section(
-			$this->get_option_name(),
-			$this->provider_service_name,
-			function () {
-				printf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
-					),
-					esc_url( 'https://platform.openai.com/signup' )
-				);
-			},
-			$this->get_option_name()
-		);
-
-		// Determine which other OpenAI provider to look for an API key in.
-		if ( 'ChatGPT' === $this->provider_service_name ) {
-			$settings              = \Classifai\get_plugin_settings( 'image_processing', 'DALL·E' );
-			$provider_service_name = 'DALL·E';
-		} elseif ( 'DALL·E' === $this->provider_service_name ) {
-			$settings              = \Classifai\get_plugin_settings( 'language_processing', 'ChatGPT' );
-			$provider_service_name = 'ChatGPT';
-		} else {
-			$settings              = [];
-			$provider_service_name = '';
-		}
-
-		// If we already have a valid API key from OpenAI, use that as our default.
-		if ( ! empty( $settings ) && ( isset( $settings['authenticated'] ) && isset( $settings['api_key'] ) && true === $settings['authenticated'] ) ) {
-			$default_api_key = $settings['api_key'];
-
-			if ( empty( $existing_settings ) || empty( $existing_settings['api_key'] ) ) {
-				/* translators: %1$s: the provider service name */
-				$description = sprintf( __( 'API key has been prefilled from your %1$s settings.', 'classifai' ), $provider_service_name );
-			}
-		}
-
-		// Add our API Key setting.
-		add_settings_field(
-			'api-key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->get_option_name(),
-			$this->get_option_name(),
-			[
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $default_api_key,
-				'description'   => $description,
-			]
-		);
-	}
-
-	/**
 	 * Sanitize the API key, showing an error message if needed.
 	 *
-	 * @param array $new_settings New settings being saved.
-	 * @param array $old_settings Existing settings, if any.
+	 * @param array $new_settings Incoming settings, if any.
+	 * @param array $settings     Current settings, if any.
 	 * @return array
 	 */
-	protected function sanitize_api_key_settings( array $new_settings = [], array $old_settings = [] ) {
-		$authenticated = $this->authenticate_credentials( $old_settings['api_key'] ?? '' );
+	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
+		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
+
+		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
 		if ( is_wp_error( $authenticated ) ) {
-			$new_settings['authenticated'] = false;
-			$error_message                 = $authenticated->get_error_message();
+			$new_settings[ static::ID ]['authenticated'] = false;
+			$error_message                               = $authenticated->get_error_message();
 
 			// For response code 429, credentials are valid but rate limit is reached.
 			if ( 429 === (int) $authenticated->get_error_code() ) {
-				$new_settings['authenticated'] = true;
-				$error_message                 = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
+				$new_settings[ static::ID ]['authenticated'] = true;
+				$error_message                               = str_replace( 'plan and billing details', '<a href="https://platform.openai.com/account/billing/overview" target="_blank" rel="noopener">plan and billing details</a>', $error_message );
 			} else {
 				$error_message = str_replace( 'https://platform.openai.com/account/api-keys', '<a href="https://platform.openai.com/account/api-keys" target="_blank" rel="noopener">https://platform.openai.com/account/api-keys</a>', $error_message );
 			}
@@ -117,10 +50,10 @@ trait OpenAI {
 				'error'
 			);
 		} else {
-			$new_settings['authenticated'] = true;
+			$new_settings[ static::ID ]['authenticated'] = true;
 		}
 
-		$new_settings['api_key'] = sanitize_text_field( $old_settings['api_key'] ?? '' );
+		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
 
 		return $new_settings;
 	}
@@ -149,7 +82,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_post_types_for_settings() {
+	public function get_post_types_for_settings(): array {
 		$post_types     = [];
 		$post_type_objs = get_post_types( [], 'objects' );
 		$post_type_objs = array_filter( $post_type_objs, 'is_post_type_viewable' );
@@ -178,7 +111,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_post_statuses_for_settings() {
+	public function get_post_statuses_for_settings(): array {
 		$post_statuses = get_all_post_statuses();
 
 		/**
@@ -200,7 +133,7 @@ trait OpenAI {
 	 *
 	 * @return array
 	 */
-	public function get_taxonomies_for_settings() {
+	public function get_taxonomies_for_settings(): array {
 		$taxonomies = get_taxonomies( [], 'objects' );
 		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
 		$supported  = [];
@@ -224,52 +157,14 @@ trait OpenAI {
 	}
 
 	/**
-	 * The list of supported post types.
-	 *
-	 * return array
-	 */
-	public function get_supported_post_types() {
-		$settings   = $this->get_settings();
-		$post_types = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_types'] ) ) {
-			foreach ( $settings['post_types'] as $post_type => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_types[] = $post_type;
-				}
-			}
-		}
-
-		return $post_types;
-	}
-
-	/**
-	 * The list of supported post statuses.
-	 *
-	 * @return array
-	 */
-	public function get_supported_post_statuses() {
-		$settings      = $this->get_settings();
-		$post_statuses = [];
-
-		if ( ! empty( $settings ) && isset( $settings['post_statuses'] ) ) {
-			foreach ( $settings['post_statuses'] as $post_status => $enabled ) {
-				if ( ! empty( $enabled ) ) {
-					$post_statuses[] = $post_status;
-				}
-			}
-		}
-
-		return $post_statuses;
-	}
-
-	/**
 	 * The list of supported taxonomies.
 	 *
+	 * @param \Classifai\Features\Feature $feature Feature to check.
 	 * @return array
 	 */
-	public function get_supported_taxonomies() {
-		$settings   = $this->get_settings();
+	public function get_supported_taxonomies( \Classifai\Features\Feature $feature ): array {
+		$provider   = $feature->get_feature_provider_instance();
+		$settings   = $feature->get_settings( $provider::ID );
 		$taxonomies = [];
 
 		if ( ! empty( $settings ) && isset( $settings['taxonomies'] ) ) {
