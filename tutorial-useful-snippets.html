@@ -46,6 +46,359 @@ function override_taxonomy_args( $args ) {
 	return $args;
 }
 </code></pre>
+<h2>Add custom Provider to an existing Feature</h2>
+<p>Starting in ClassifAI 3.0.0, it is now possible to add your own Provider to an existing Feature. Most of the implementation details are left to you but there are a few key steps that need to be followed:</p>
+<ol>
+<li><strong>Create a new Provider class</strong>: This class should extend the base ClassifAI <code>Provider</code> class and setup all required methods.</li>
+</ol>
+<pre class="prettyprint source lang-php"><code>namespace MyPluginOrTheme;
+
+use Classifai\Providers\Provider;
+
+class MyProvider extends Provider {
+    /**
+     * The Provider ID.
+     *
+     * Required and should be unique.
+     */
+    const ID = 'my_provider';
+
+    /**
+     * MyProvider constructor.
+     *
+     * @param \Classifai\Features\Feature $feature_instance The feature instance.
+     */
+    public function __construct( $feature_instance = null ) {
+        $this->feature_instance = $feature_instance;
+    }
+
+    /**
+     * This method will be called by the feature to render the fields
+     * required by the provider, such as API key, endpoint URL, etc.
+     *
+     * This should also register settings that are required for the feature
+     * to work.
+     */
+    public function render_provider_fields() {
+        $settings = $this->feature_instance->get_settings( static::ID );
+
+        $this->add_api_key_field();
+    }
+
+    /**
+     * Returns the default settings for this provider.
+     *
+     * @return array
+     */
+    public function get_default_provider_settings(): array {
+        $common_settings = [
+            'api_key'       => '',
+            'authenticated' => false,
+        ];
+
+        return $common_settings;
+    }
+
+    /**
+     * Sanitize the settings for this provider.
+     *
+     * Can also be useful to verify the Provider API connection
+     * works as expected here, returning an error if needed.
+     *
+     * @param array $new_settings The settings array.
+     * @return array
+     */
+    public function sanitize_settings( array $new_settings ): array {
+        $settings = $this->feature_instance->get_settings();
+
+        // Ensure proper validation of credentials happens here.
+        $new_settings[ static::ID ]['api_key']       = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
+        $new_settings[ static::ID ]['authenticated'] = true;
+
+        return $new_settings;
+    }
+
+    /**
+     * Common entry point for all REST endpoints for this provider.
+     *
+     * All Features will end up calling the rest_endpoint_callback method for their assigned Provider.
+     * This method should validate the route that is being called and then call the appropriate method
+     * for that route. This method typically will validate we have all the requried data and if so,
+     * make a request to the appropriate API endpoint.
+     *
+     * @param int    $post_id The Post ID we're processing.
+     * @param string $route_to_call The route we are processing.
+     * @param array  $args Optional arguments to pass to the route.
+     * @return string|WP_Error
+     */
+    public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
+        if ( ! $post_id || ! get_post( $post_id ) ) {
+            return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'text-domain' ) );
+        }
+
+        $route_to_call = strtolower( $route_to_call );
+        $return        = '';
+
+        // Handle all of our routes.
+        switch ( $route_to_call ) {
+            case 'test':
+                // Ensure this method exists.
+                $return = $this->generate( $post_id, $args );
+                break;
+        }
+
+        return $return;
+    }
+
+    /**
+     * Returns the debug information for the provider settings.
+     *
+     * This is used to display various settings in the Site Health screen.
+     * Not required but useful for debugging.
+     *
+     * @return array
+     */
+    public function get_debug_information(): array {
+        $settings   = $this->feature_instance->get_settings();
+        $debug_info = [];
+
+        return $debug_info;
+    }
+}
+</code></pre>
+<ol start="2">
+<li>
+<p><strong>Load class</strong>: within your plugin or theme, ensure the Provider class is loaded. Ideally this is run on the <code>after_classifai_init</code> action.</p>
+</li>
+<li>
+<p><strong>Register the Provider with a Service</strong>: Each Provider needs to be registered to one or more of the Services that ClassifAI supports. This can be done using the appropriate filter of the Service you're targeting.</p>
+</li>
+</ol>
+<pre class="prettyprint source lang-php"><code>/**
+ * Register a new Provider for the Image Processing Service.
+ */
+add_filter(
+    'classifai_image_processing_service_providers',
+    function ( $providers ) {
+        // Ensure the file that contains the Provider is included or this will throw an error.
+        $providers[] = MyPluginOrTheme\MyProvider::class;
+        return $providers;
+    }
+);
+
+/**
+ * Register a new Provider for the Language Processing Service.
+ */
+add_filter(
+    'classifai_language_processing_service_providers',
+    function ( $providers ) {
+        // Ensure the file that contains the Provider is included or this will throw an error.
+        $providers[] = MyPluginOrTheme\MyProvider::class;
+        return $providers;
+    }
+);
+</code></pre>
+<ol start="4">
+<li><strong>Register the Provider with a Feature</strong>: Each Provider needs to be registered to one or more of the Features that ClassifAI supports. This can be done using the appropriate filter of the Feature you're targeting.</li>
+</ol>
+<pre class="prettyprint source lang-php"><code>/**
+ * Register a new Provider for the Title Generation Feature.
+ */
+add_filter(
+    'classifai_feature_title_generation_providers',
+    function ( $providers ) {
+        $providers['my_provider'] = __( 'Custom Provider', 'text-domain' );
+        return $providers;
+    }
+);
+</code></pre>
+<h2>Add a new Feature</h2>
+<p>Starting in ClassifAI 3.0.0, it is easier to add your own Features. Most of the implementation details are left to you but there are a few key steps that need to be followed:</p>
+<ol>
+<li><strong>Create a new Feature class</strong>: This class should extend the base ClassifAI <code>Feature</code> class and setup all required methods.</li>
+</ol>
+<pre class="prettyprint source lang-php"><code>namespace MyPluginOrTheme;
+
+use Classifai\Features\Feature;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Services\LanguageProcessing;
+
+class MyFeature extends Feature {
+    /**
+     * ID of the current feature.
+     *
+     * @var string
+     */
+    const ID = 'feature_custom';
+
+    /**
+     * Constructor.
+     */
+    public function __construct() {
+        $this->label = __( 'Feature label', 'text-domain' );
+
+        // Contains all providers that are registered to the service.
+        $this->provider_instances = $this->get_provider_instances( LanguageProcessing::get_service_providers() );
+
+        // Contains just the providers this feature supports.
+        $this->supported_providers = [
+            ChatGPT::ID => __( 'OpenAI ChatGPT', 'text-domain' ),
+        ];
+    }
+
+    /**
+     * Set up necessary hooks.
+     *
+     * This will always fire even if the Feature is not enabled.
+     */
+    public function setup() {
+        parent::setup();
+        add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+    }
+
+    /**
+     * Set up necessary hooks.
+     *
+     * This will only fire if the Feature is enabled.
+     */
+    public function feature_setup() {
+        add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+    }
+
+    /**
+     * Register any needed endpoints.
+     */
+    public function register_endpoints() {
+        register_rest_route(
+            'my-namespace/v1',
+            'custom-feature(?:/(?P&lt;id>\d+))?',
+        );
+    }
+
+    /**
+     * Generic request handler for all our custom routes.
+     *
+     * @param \WP_REST_Request $request The full request object.
+     * @return \WP_REST_Response
+     */
+    public function rest_endpoint_callback( \WP_REST_Request $request ) {
+        $route = $request->get_route();
+
+        if ( strpos( $route, '/custom-feature' ) === 0 ) {
+            return rest_ensure_response(
+                $this->run(
+                    $request->get_param( 'id' ),
+                    'custom-route',
+                    []
+                )
+            );
+        }
+
+        return parent::rest_endpoint_callback( $request );
+    }
+
+    /**
+     * Enqueue the editor scripts.
+     */
+    public function enqueue_editor_assets() {
+    }
+
+    /**
+     * Enqueue the admin scripts.
+     *
+     * @param string $hook_suffix The current admin page.
+     */
+    public function enqueue_admin_assets( string $hook_suffix ) {
+    }
+
+    /**
+     * Get the description for the enable field.
+     *
+     * @return string
+     */
+    public function get_enable_description(): string {
+        return esc_html__( 'Enable this feature', 'text-domain' );
+    }
+
+    /**
+     * Add any needed custom fields.
+     */
+    public function add_custom_settings_fields() {
+        $settings = $this->get_settings();
+
+        add_settings_field(
+            'custom_setting',
+            esc_html__( 'Custom setting', 'classifai' ),
+            [ $this, 'render_input' ],
+            $this->get_option_name(),
+            $this->get_option_name() . '_section',
+            [
+                'label_for'     => 'custom_setting',
+                'placeholder'   => esc_html__( 'Custom setting', 'text-domain' ),
+                'default_value' => $settings['custom_setting'],
+                'description'   => esc_html__( 'Add a custom setting.', 'text-domain' ),
+            ]
+        );
+    }
+
+    /**
+     * Returns the default settings for the feature.
+     *
+     * @return array
+     */
+    public function get_feature_default_settings(): array {
+        return [
+            'custom_setting' => '',
+            'provider'       => ChatGPT::ID,
+        ];
+    }
+
+    /**
+     * Sanitizes the default feature settings.
+     *
+     * @param array $new_settings Settings being saved.
+     * @return array
+     */
+    public function sanitize_default_feature_settings( array $new_settings ): array {
+        $new_settings['custom_setting'] = sanitize_text_field( $new_settings['custom_setting'] ?? '' );
+
+        return $new_settings;
+    }
+}
+</code></pre>
+<ol start="2">
+<li>
+<p><strong>Load class</strong>: within your plugin or theme, ensure the Feature class is loaded. Ideally this is run on the <code>after_classifai_init</code> action.</p>
+</li>
+<li>
+<p><strong>Register the Feature with a Service</strong>: Each Feature needs to be registered to one or more of the Services that ClassifAI supports. This can be done using the appropriate filter of the Service you're targeting.</p>
+</li>
+</ol>
+<pre class="prettyprint source lang-php"><code>/**
+ * Register a new Feature for the Image Processing Service.
+ */
+add_filter(
+    'image_processing_features',
+    function ( $features ) {
+        // Ensure the file that contains the Feature is included or this won't work.
+        $features[] = MyPluginOrTheme\MyFeature::class;
+        return $features;
+    }
+);
+
+/**
+ * Register a new Feature for the Language Processing Service.
+ */
+add_filter(
+    'language_processing_features',
+    function ( $features ) {
+        // Ensure the file that contains the Feature is included or this won't work.
+        $features[] = MyPluginOrTheme\MyFeature::class;
+        return $features;
+    }
+);
+</code></pre>
 </article>
 
 </section>
@@ -61,7 +414,7 @@ function override_taxonomy_args( $args ) {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_allowed_roles.html">classifai_allowed_roles</a></li><li><a href="classifai_audio_generation_initial_state.html">classifai_audio_generation_initial_state</a></li><li><a href="classifai_audio_generation_subsequent_state.html">classifai_audio_generation_subsequent_state</a></li><li><a href="classifai_azure_read_request_args.html">classifai_azure_read_request_args</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_allowed_roles.html">classifai_chatgpt_allowed_roles</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_resize_content_request_body.html">classifai_chatgpt_resize_content_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_has_access.html">classifai_has_access</a></li><li><a href="classifai_is_%257B$feature%257D_enabled.html">classifai_is_{$feature}_enabled</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_api_request_get_options.html">classifai_openai_api_request_get_options</a></li><li><a href="classifai_openai_api_request_get_url.html">classifai_openai_api_request_get_url</a></li><li><a href="classifai_openai_api_request_post_form_options.html">classifai_openai_api_request_post_form_options</a></li><li><a href="classifai_openai_api_request_post_form_url.html">classifai_openai_api_request_post_form_url</a></li><li><a href="classifai_openai_api_request_post_options.html">classifai_openai_api_request_post_options</a></li><li><a href="classifai_openai_api_request_post_url.html">classifai_openai_api_request_post_url</a></li><li><a href="classifai_openai_api_response_get.html">classifai_openai_api_response_get</a></li><li><a href="classifai_openai_api_response_post.html">classifai_openai_api_response_post</a></li><li><a href="classifai_openai_api_response_post_form.html">classifai_openai_api_response_post_form</a></li><li><a href="classifai_openai_characters_in_token.html">classifai_openai_characters_in_token</a></li><li><a href="classifai_openai_dalle_allowed_image_roles.html">classifai_openai_dalle_allowed_image_roles</a></li><li><a href="classifai_openai_dalle_enable_image_gen.html">classifai_openai_dalle_enable_image_gen</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_post_statuses.html">classifai_openai_embeddings_post_statuses</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_embeddings_taxonomies.html">classifai_openai_embeddings_taxonomies</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_openai_tokens_per_word.html">classifai_openai_tokens_per_word</a></li><li><a href="classifai_post_statuses.html">classifai_post_statuses</a></li><li><a href="classifai_post_statuses_for_post_type_or_id.html">classifai_post_statuses_for_post_type_or_id</a></li><li><a href="classifai_post_types.html">classifai_post_types</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_rest_bases.html">classifai_rest_bases</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_register_save_post_handler.html">classifai_should_register_save_post_handler</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_taxonomy_for_feature.html">classifai_taxonomy_for_feature</a></li><li><a href="classifai_threshold.html">classifai_threshold</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="classifai_%257B$this-_option_name%257D_enable_%257B$feature%257D.html">classifai_{$this->option_name}_enable_{$feature}</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-useful-snippets.html">Useful snippets</a></li><li><a href="tutorial-wp-cli.html">WP-CLI Commands</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_after_feature_settings_form.html">classifai_after_feature_settings_form</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_before_feature_nav.html">classifai_before_feature_nav</a></li><li><a href="classifai_before_feature_settings_form.html">classifai_before_feature_settings_form</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ms_computer_vision_render_provider_fields.html">classifai_ms_computer_vision_render_provider_fields</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_render_attachment_metabox.html">classifai_render_attachment_metabox</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_audio_generation_initial_state.html">classifai_audio_generation_initial_state</a></li><li><a href="classifai_audio_generation_subsequent_state.html">classifai_audio_generation_subsequent_state</a></li><li><a href="classifai_azure_openai_content.html">classifai_azure_openai_content</a></li><li><a href="classifai_azure_openai_excerpt_prompt.html">classifai_azure_openai_excerpt_prompt</a></li><li><a href="classifai_azure_openai_excerpt_request_body.html">classifai_azure_openai_excerpt_request_body</a></li><li><a href="classifai_azure_openai_resize_content_request_body.html">classifai_azure_openai_resize_content_request_body</a></li><li><a href="classifai_azure_openai_title_prompt.html">classifai_azure_openai_title_prompt</a></li><li><a href="classifai_azure_openai_title_request_body.html">classifai_azure_openai_title_request_body</a></li><li><a href="classifai_azure_read_request_args.html">classifai_azure_read_request_args</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_resize_content_request_body.html">classifai_chatgpt_resize_content_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_classification_setting_taxonomies.html">classifai_feature_classification_setting_taxonomies</a></li><li><a href="classifai_feature_classification_taxonomy_for_feature.html">classifai_feature_classification_taxonomy_for_feature</a></li><li><a href="classifai_feature_image_generation_roles.html">classifai_feature_image_generation_roles</a></li><li><a href="classifai_feature_pdf_to_text_generation_read_status.html">classifai_feature_pdf_to_text_generation_read_status</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_googleai_api_request_get_options.html">classifai_googleai_api_request_get_options</a></li><li><a href="classifai_googleai_api_request_get_url.html">classifai_googleai_api_request_get_url</a></li><li><a href="classifai_googleai_api_request_post_options.html">classifai_googleai_api_request_post_options</a></li><li><a href="classifai_googleai_api_request_post_url.html">classifai_googleai_api_request_post_url</a></li><li><a href="classifai_googleai_api_response_get.html">classifai_googleai_api_response_get</a></li><li><a href="classifai_googleai_api_response_post.html">classifai_googleai_api_response_post</a></li><li><a href="classifai_googleai_content.html">classifai_googleai_content</a></li><li><a href="classifai_googleai_gemini_api_excerpt_prompt.html">classifai_googleai_gemini_api_excerpt_prompt</a></li><li><a href="classifai_googleai_gemini_api_excerpt_request_body.html">classifai_googleai_gemini_api_excerpt_request_body</a></li><li><a href="classifai_googleai_gemini_api_resize_content_request_body.html">classifai_googleai_gemini_api_resize_content_request_body</a></li><li><a href="classifai_googleai_gemini_api_title_prompt.html">classifai_googleai_gemini_api_title_prompt</a></li><li><a href="classifai_googleai_gemini_api_title_request_body.html">classifai_googleai_gemini_api_title_request_body</a></li><li><a href="classifai_image_processing_service_providers.html">classifai_image_processing_service_providers</a></li><li><a href="classifai_language_processing_service_providers.html">classifai_language_processing_service_providers</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_api_request_get_options.html">classifai_openai_api_request_get_options</a></li><li><a href="classifai_openai_api_request_get_url.html">classifai_openai_api_request_get_url</a></li><li><a href="classifai_openai_api_request_post_form_options.html">classifai_openai_api_request_post_form_options</a></li><li><a href="classifai_openai_api_request_post_form_url.html">classifai_openai_api_request_post_form_url</a></li><li><a href="classifai_openai_api_request_post_options.html">classifai_openai_api_request_post_options</a></li><li><a href="classifai_openai_api_request_post_url.html">classifai_openai_api_request_post_url</a></li><li><a href="classifai_openai_api_response_get.html">classifai_openai_api_response_get</a></li><li><a href="classifai_openai_api_response_post.html">classifai_openai_api_response_post</a></li><li><a href="classifai_openai_api_response_post_form.html">classifai_openai_api_response_post_form</a></li><li><a href="classifai_openai_characters_in_token.html">classifai_openai_characters_in_token</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_moderation_request_body.html">classifai_openai_moderation_request_body</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_openai_tokens_per_word.html">classifai_openai_tokens_per_word</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommendation_service_providers.html">classifai_recommendation_service_providers</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_threshold.html">classifai_threshold</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="classifai_%257B$feature%257D_has_access.html">classifai_{$feature}_has_access</a></li><li><a href="classifai_%257B$feature%257D_is_enabled.html">classifai_{$feature}_is_enabled</a></li><li><a href="classifai_%257B$feature%257D_is_feature_enabled.html">classifai_{$feature}_is_feature_enabled</a></li><li><a href="classifai_%257B$feature%257D_sanitize_settings.html">classifai_{$feature}_sanitize_settings</a></li><li><a href="classifai_%257Bfeature%257D_debug_information.html">classifai_{feature}_debug_information</a></li><li><a href="classifai_%257Bfeature%257D_get_default_settings.html">classifai_{feature}_get_default_settings</a></li><li><a href="classifai_%257Bfeature%257D_label.html">classifai_{feature}_label</a></li><li><a href="classifai_%257Bfeature%257D_post_statuses.html">classifai_{feature}_post_statuses</a></li><li><a href="classifai_%257Bfeature%257D_post_types.html">classifai_{feature}_post_types</a></li><li><a href="classifai_%257Bfeature%257D_providers.html">classifai_{feature}_providers</a></li><li><a href="classifai_%257Bfeature%257D_rest_route_%257Broute%257D_args.html">classifai_{feature}_rest_route_{route}_args</a></li><li><a href="classifai_%257Bfeature%257D_roles.html">classifai_{feature}_roles</a></li><li><a href="classifai_%257Bfeature%257D_run.html">classifai_{feature}_run</a></li><li><a href="%257B$this-_menu_slug%257D_features.html">{$this->menu_slug}_features</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-migration-guide-v2-to-v3.html">Migration guide (version 2 to version 3)</a></li><li><a href="tutorial-useful-snippets.html">Useful snippets</a></li><li><a href="tutorial-wp-cli.html">WP-CLI commands</a></li></ul>
 </nav>
 
 <br class="clear">
