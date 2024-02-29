@@ -7,6 +7,7 @@
 
 namespace Classifai\Blocks\RecommendedContentBlock;
 
+use Classifai\Features\RecommendedContent;
 use Classifai\Providers\Azure\Personalizer;
 use function Classifai\get_asset_info;
 
@@ -18,7 +19,6 @@ function register() {
 		return __NAMESPACE__ . "\\$function_name";
 	};
 
-	$personalizer = new Personalizer( false );
 	wp_register_script(
 		'recommended-content-block-editor-script',
 		CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block.js',
@@ -31,7 +31,7 @@ function register() {
 		'recommended-content-block-editor-script',
 		sprintf(
 			'var hasRecommendedContentAccess = %d;',
-			$personalizer->is_feature_enabled( 'recommended_content' )
+			( new RecommendedContent() )->is_feature_enabled()
 		),
 		'before'
 	);
@@ -49,10 +49,9 @@ function register() {
  * Render callback method for the block
  *
  * @param array $attributes The blocks attributes.
- *
  * @return string The rendered block markup.
  */
-function render_block_callback( $attributes ) {
+function render_block_callback( array $attributes ): string {
 	// Render block in Gutenberg Editor.
 	if ( defined( 'REST_REQUEST' ) && \REST_REQUEST ) {
 		$personalizer = new Personalizer( false );

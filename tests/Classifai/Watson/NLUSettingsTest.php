@@ -6,7 +6,7 @@ namespace Classifai\Tests\Watson;
 
 use \WP_UnitTestCase;
 use \Classifai\Providers\Watson\NLU;
-
+use Classifai\Features\Classification;
 
 /**
  * Class NLUSettingsTest
@@ -33,51 +33,49 @@ class NLUSettingsTest extends WP_UnitTestCase {
 		// Add the settings
 		update_option( 'classifai_watson_nlu', $this->settings );
 
-		$this->provider = new NLU( 'service_name' );
-	}
-
-	/**
-	 * Test the option name.
-	 */
-	public function test_option_name() {
-		$this->assertSame( 'classifai_watson_nlu', $this->provider->get_option_name() );
-	}
-
-	/**
-	 * Retrieving the options.
-	 */
-	public function test_retrieving_options() {
-		$options = get_option( $this->provider->get_option_name() );
-
-		$this->assertEquals( $this->settings, $options );
+		$this->provider = new NLU( new Classification() );
 	}
 
 	/**
 	 * Tests the function providing debug information.
 	 */
-	public function test_get_provider_debug_information() {
+	public function test_get_debug_information() {
 		$this->assertEquals(
 			[
-				'Configured',
-				'API URL',
-				'API username',
-				'Post types',
-				'Features',
+				'Category (status)',
+				'Category (threshold)',
+				'Category (taxonomy)',
+				'Keyword (status)',
+				'Keyword (threshold)',
+				'Keyword (taxonomy)',
+				'Entity (status)',
+				'Entity (threshold)',
+				'Entity (taxonomy)',
+				'Concept (status)',
+				'Concept (threshold)',
+				'Concept (taxonomy)',
 				'Latest response',
 			],
-			array_keys( $this->provider->get_provider_debug_information() )
+			array_keys( $this->provider->get_debug_information() )
 		);
 
 		$this->assertEquals(
 			[
-				'Configured'      => 'yes',
-				'API URL'         => 'my-watson-url.com',
-				'API username'    => 'my-watson-username',
-				'Post types'      => 'post, attachment, event',
-				'Features'        => '{"feature":true}',
+				'Category (status)' => 'Enabled',
+				'Category (threshold)' => 'Enabled',
+				'Category (taxonomy)' => 'Enabled',
+				'Keyword (status)' => 'Enabled',
+				'Keyword (threshold)' => 'Enabled',
+				'Keyword (taxonomy)' => 'Enabled',
+				'Entity (status)' => 'Disabled',
+				'Entity (threshold)' => 'Enabled',
+				'Entity (taxonomy)' => 'Enabled',
+				'Concept (status)' => 'Disabled',
+				'Concept (threshold)' => 'Enabled',
+				'Concept (taxonomy)' => 'Enabled',
 				'Latest response' => 'N/A',
 			],
-			$this->provider->get_provider_debug_information(
+			$this->provider->get_debug_information(
 				[
 					'credentials' => [
 						'watson_url'      => 'my-watson-url.com',

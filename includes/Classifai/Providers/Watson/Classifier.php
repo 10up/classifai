@@ -1,6 +1,6 @@
 <?php
 
-namespace Classifai\Watson;
+namespace Classifai\Providers\Watson;
 
 /**
  * The Classifier object uses the IBM Watson NLU API to classify plain
@@ -15,27 +15,27 @@ namespace Classifai\Watson;
 class Classifier {
 
 	/**
-	 * @var $request
-	 * The request object to make Watson api requests
+	 * The request object to make Watson API requests.
+	 *
+	 * @var APIRequest $request
 	 */
 	public $request;
 
 	/**
-	 * @var $endpoint
+	 * The NLU API endpoint.
 	 *
-	 * The NLU API endpoint
+	 * @var string $endpoint
 	 */
 	public $endpoint;
-
 
 	/**
 	 * Generate the API Url
 	 *
 	 * @return string
 	 */
-	public function get_endpoint() {
+	public function get_endpoint(): string {
 		if ( empty( $this->endpoint ) ) {
-			$base_url       = trailingslashit( \Classifai\get_watson_api_url() ) . 'v1/analyze';
+			$base_url       = trailingslashit( get_api_url() ) . 'v1/analyze';
 			$this->endpoint = esc_url( add_query_arg( [ 'version' => WATSON_NLU_VERSION ], $base_url ) );
 		}
 		return $this->endpoint;
@@ -49,10 +49,9 @@ class Classifier {
 	 * @param string $text The plain text to classify
 	 * @param array  $options NLU classification options
 	 * @param array  $request_options Extra options to pass to the underlying HTTP request
-	 *
 	 * @return array|WP_Error
 	 */
-	public function classify( $text, $options = [], $request_options = [] ) {
+	public function classify( string $text, array $options = [], array $request_options = [] ) {
 		$body = $this->get_body( $text, $options );
 
 		$request_options['body'] = $body;
@@ -66,6 +65,7 @@ class Classifier {
 
 		$classified_data = $request->post( $this->get_endpoint(), $request_options );
 		set_transient( 'classifai_watson_nlu_latest_response', $classified_data, DAY_IN_SECONDS * 30 );
+
 		/**
 		 * Filter the classified data returned from the API call.
 		 *
@@ -82,12 +82,11 @@ class Classifier {
 	/* helpers */
 
 	/**
-	 * Initializes or returns the api request object to use for making
-	 * NLU api calls.
+	 * Initializes or returns the API request object.
 	 *
-	 * @return \Classifai\Watson\APIRequest
+	 * @return APIRequest
 	 */
-	public function get_request() {
+	public function get_request(): APIRequest {
 		if ( empty( $this->request ) ) {
 			$this->request = new APIRequest();
 		}
@@ -100,9 +99,9 @@ class Classifier {
 	 *
 	 * @param string $text The plain text to classify
 	 * @param array  $options The NLU classification options
-	 * @return array
+	 * @return string|bool
 	 */
-	public function get_body( $text, $options = [] ) {
+	public function get_body( string $text, array $options = [] ) {
 		$options['text'] = $text;
 
 		if ( empty( $options['language'] ) ) {

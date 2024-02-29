@@ -4,20 +4,17 @@ import '../scss/language-processing.scss';
 ( () => {
 	let featureStatuses = {};
 
-	const nonceElementNLU = document.getElementById(
-		'classifai-previewer-watson_nlu-nonce'
-	);
+	const nonceEl = document.getElementById( 'classifai-previewer-nonce' );
 
-	const nonceElementEmbeddings = document.getElementById(
-		'classifai-previewer-openai_embeddings-nonce'
-	);
-
-	if ( ! nonceElementNLU && ! nonceElementEmbeddings ) {
+	if ( ! nonceEl ) {
 		return;
 	}
 
+	const providerSelect = document.getElementById( 'provider' );
+	const provider = providerSelect.value;
+
 	const previewWatson = () => {
-		if ( ! nonceElementNLU ) {
+		if ( 'ibm_watson_nlu' !== provider ) {
 			return;
 		}
 
@@ -27,22 +24,14 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewWatson );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElementNLU.value;
+		const previewerNonce = nonceEl.value;
 
 		/** Feature statuses. */
 		featureStatuses = {
-			categoriesStatus: document.getElementById(
-				'classifai-settings-category'
-			).checked,
-			keywordsStatus: document.getElementById(
-				'classifai-settings-keyword'
-			).checked,
-			entitiesStatus: document.getElementById(
-				'classifai-settings-entity'
-			).checked,
-			conceptsStatus: document.getElementById(
-				'classifai-settings-concept'
-			).checked,
+			categoriesStatus: document.getElementById( 'category' ).checked,
+			keywordsStatus: document.getElementById( 'keyword' ).checked,
+			entitiesStatus: document.getElementById( 'entity' ).checked,
+			conceptsStatus: document.getElementById( 'concept' ).checked,
 		};
 
 		const plurals = {
@@ -53,24 +42,22 @@ import '../scss/language-processing.scss';
 		};
 
 		document
-			.querySelectorAll(
-				'#classifai-settings-category, #classifai-settings-keyword, #classifai-settings-entity, #classifai-settings-concept'
-			)
+			.querySelectorAll( '#category, #keyword, #entity, #concept' )
 			.forEach( ( item ) => {
 				item.addEventListener( 'change', ( e ) => {
-					if ( 'classifai-settings-category' === e.target.id ) {
+					if ( 'category' === e.target.id ) {
 						featureStatuses.categoriesStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-keyword' === e.target.id ) {
+					if ( 'keyword' === e.target.id ) {
 						featureStatuses.keywordsStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-entity' === e.target.id ) {
+					if ( 'entity' === e.target.id ) {
 						featureStatuses.entitiesStatus = e.target.checked;
 					}
 
-					if ( 'classifai-settings-concept' === e.target.id ) {
+					if ( 'concept' === e.target.id ) {
 						featureStatuses.conceptsStatus = e.target.checked;
 					}
 
@@ -100,23 +87,16 @@ import '../scss/language-processing.scss';
 		function showPreviewWatson( e ) {
 			/** Category thresholds. */
 			const categoryThreshold = Number(
-				document.querySelector(
-					'#classifai-settings-category_threshold'
-				).value
+				document.querySelector( '#category_threshold' ).value
 			);
 			const keywordThreshold = Number(
-				document.querySelector(
-					'#classifai-settings-keyword_threshold'
-				).value
+				document.querySelector( '#keyword_threshold' ).value
 			);
 			const entityThreshold = Number(
-				document.querySelector( '#classifai-settings-entity_threshold' )
-					.value
+				document.querySelector( '#entity_threshold' ).value
 			);
 			const conceptThreshold = Number(
-				document.querySelector(
-					'#classifai-settings-concept_threshold'
-				).value
+				document.querySelector( '#concept_threshold' ).value
 			);
 
 			const postId = document.getElementById(
@@ -222,7 +202,7 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		if ( ! nonceElementEmbeddings ) {
+		if ( 'openai_embeddings' !== provider ) {
 			return;
 		}
 
@@ -232,7 +212,7 @@ import '../scss/language-processing.scss';
 		getClassifierDataBtn.addEventListener( 'click', showPreviewEmeddings );
 
 		/** Previewer nonce. */
-		const previewerNonce = nonceElementEmbeddings.value;
+		const previewerNonce = nonceEl.value;
 
 		/**
 		 * Live preview features.
@@ -364,6 +344,7 @@ import '../scss/language-processing.scss';
 	);
 	const selectElChoices = new Choices( selectEl, {
 		noResultsText: '',
+		allowHTML: true,
 	} );
 
 	/**
@@ -372,15 +353,8 @@ import '../scss/language-processing.scss';
 	 * @param {Object} event Choices.js's 'search' event object.
 	 */
 	function searchPosts( event ) {
-		const nonceElement = nonceElementEmbeddings
-			? nonceElementEmbeddings
-			: nonceElementNLU;
-		if ( ! nonceElement ) {
-			return;
-		}
-
 		/** Previewer nonce. */
-		const previewerNonce = nonceElement.value;
+		const previewerNonce = nonceEl.value;
 
 		/*
 		 * Post types.
@@ -472,7 +446,7 @@ import '../scss/language-processing.scss';
 document.addEventListener( 'DOMContentLoaded', function () {
 	// Display "Classify Post" button only when "Process content on update" is unchecked (Classic Editor).
 	const classifaiNLUCheckbox = document.getElementById(
-		'_classifai_process_content'
+		'classifai-process-content'
 	);
 	if ( classifaiNLUCheckbox ) {
 		classifaiNLUCheckbox.addEventListener( 'change', function () {

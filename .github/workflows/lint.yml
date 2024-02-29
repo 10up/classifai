@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup node v16 and npm cache
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
         cache: npm
@@ -32,7 +32,7 @@ jobs:
 
     - name: Get updated JS files
       id: changed-files
-      uses: tj-actions/changed-files@v41
+      uses: tj-actions/changed-files@v42
       with:
         files: |
           **/*.js
@@ -52,14 +52,14 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Set standard 10up cache directories
       run: |
         composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
 
     - name: Prepare composer cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{ env.COMPOSER_CACHE }}
         key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
@@ -78,7 +78,7 @@ jobs:
 
     - name: Get updated PHP files
       id: changed-files
-      uses: tj-actions/changed-files@v41
+      uses: tj-actions/changed-files@v42
       with:
         files: |
           **/*.php
@@ -97,7 +97,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: VIPCS check
       uses: 10up/wpcs-action@stable

@@ -1,6 +1,8 @@
 const { defineConfig } = require( 'cypress' );
 
 module.exports = defineConfig( {
+	viewportWidth: 1280,
+	viewportHeight: 1280,
 	chromeWebSecurity: false,
 	fixturesFolder: __dirname + '/fixtures',
 	screenshotsFolder: __dirname + '/screenshots',

@@ -1,10 +1,12 @@
-describe( '[Language processing] Speech to Text Tests', () => {
+describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
-		cy.get( '#enable_resize_content' ).check();
+		cy.get( '#status' ).check();
+		cy.get( '#provider' ).select( 'openai_chatgpt' );
+		cy.get( '#api_key' ).type( 'abc123' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -16,11 +18,13 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Resize content feature can grow and shrink content', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
 
-		cy.get( '#enable_resize_content' ).check();
-		cy.get( '#openai_chatgpt_resize_content_roles_administrator' ).check();
+		cy.get( '#status' ).check();
+		cy.get(
+			'#classifai_feature_content_resizing_roles_administrator'
+		).check();
 		cy.get( '#submit' ).click();
 
 		cy.createPost( {
@@ -73,12 +77,12 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can set multiple custom resize generation prompts, select one as the default and delete one.', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
 
 		// Add three custom shrink prompts.
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset' )
@@ -86,7 +90,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -94,7 +98,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Add three custom grow prompts.
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( 'button.js-classifai-add-prompt-fieldset:first' )
@@ -102,7 +106,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -110,77 +114,77 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Set the data for each prompt.
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][1][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][1][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom shrink prompt' );
 
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][3][title]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][3][prompt]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom shrink prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][1][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][1][title]"]'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][1][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][1][prompt]"]'
 		)
 			.clear()
 			.type( 'This is our first custom grow prompt' );
 
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][2][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][title]"]'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][2][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][prompt]"]'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][3][title]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][title]"]'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][3][prompt]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][prompt]"]'
 		)
 			.clear()
 			.type( 'This is a custom grow prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][3][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
 			.click( { force: true } );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][3][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][3][default]"]'
 		)
 			.parent()
 			.find( 'a.action__set_default' )
@@ -188,7 +192,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][2][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
@@ -197,22 +201,23 @@ describe( '[Language processing] Speech to Text Tests', () => {
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_openai_chatgpt[shrink_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
 			.should( 'have.length', 3 );
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][2][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][2][default]"]'
 		)
 			.parent()
 			.find( 'a.action__remove_prompt' )
 			.click( { force: true } );
 		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
+			.first()
 			.find( '.button-primary' )
 			.click();
 		cy.get(
-			'[name="classifai_openai_chatgpt[grow_content_prompt][0][default]"]'
+			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
 		)
 			.parents( 'td:first' )
 			.find( '.classifai-field-type-prompt-setting' )
@@ -271,9 +276,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	it( 'Can enable/disable resize content feature', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
-		cy.get( '#enable_resize_content' ).uncheck();
+		cy.get( '#status' ).uncheck();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is not available.
@@ -281,9 +286,9 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&provider=openai_chatgpt'
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
 		);
-		cy.get( '#enable_resize_content' ).check();
+		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
 		// Verify that the feature is available.
@@ -292,21 +297,17 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable resize content feature by role', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'resize_content',
-			[ 'administrator' ],
-			'openai_chatgpt'
-		);
+		cy.disableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable admin role.
-		cy.enableFeatureForRoles(
-			'resize_content',
-			[ 'administrator' ],
-			'openai_chatgpt'
-		);
+		cy.enableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );
@@ -314,21 +315,15 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable resize content feature by user', () => {
 		// Disable admin role.
-		cy.disableFeatureForRoles(
-			'resize_content',
-			[ 'administrator' ],
-			'openai_chatgpt'
-		);
+		cy.disableFeatureForRoles( 'feature_content_resizing', [
+			'administrator',
+		] );
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable feature for admin user.
-		cy.enableFeatureForUsers(
-			'resize_content',
-			[ 'admin' ],
-			'openai_chatgpt'
-		);
+		cy.enableFeatureForUsers( 'feature_content_resizing', [ 'admin' ] );
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );
@@ -336,16 +331,16 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'User can opt-out resize content feature', () => {
 		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'resize_content', 'openai_chatgpt' );
+		cy.enableFeatureOptOut( 'feature_content_resizing' );
 
 		// opt-out
-		cy.optOutFeature( 'resize_content' );
+		cy.optOutFeature( 'feature_content_resizing' );
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// opt-in
-		cy.optInFeature( 'resize_content' );
+		cy.optInFeature( 'feature_content_resizing' );
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );

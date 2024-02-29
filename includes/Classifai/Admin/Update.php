@@ -2,7 +2,7 @@
 /**
  * ClassifAI Auto Update Integration
  *
- * @package 10up/classifai
+ * @package classifai
  */
 
 namespace Classifai\Admin;
@@ -33,7 +33,7 @@ class Update {
 	 *
 	 * @return bool
 	 */
-	public function can_register() {
+	public function can_register(): bool {
 		return class_exists( '\YahnisElsts\PluginUpdateChecker\v5\PucFactory' ) && self::license_check();
 	}
 

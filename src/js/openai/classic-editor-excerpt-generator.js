@@ -40,10 +40,16 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			)
 			.insertAfter( excerptContainer );
 
+		$( '<p>', {
+			class: 'classifai-openai__excerpt-generate-error',
+		} ).insertAfter(
+			document.getElementById( 'classifai-openai__excerpt-generate-btn' )
+		);
+
 		// Append disable feature link.
 		if (
 			ClassifAI?.opt_out_enabled_features?.includes(
-				'excerpt_generation'
+				'feature_excerpt_generation'
 			)
 		) {
 			$( '<a>', {
@@ -79,25 +85,34 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			const spinnerEl = $(
 				'.classifai-openai__excerpt-generate-btn--spinner'
 			);
+			const errorEl = $( '.classifai-openai__excerpt-generate-error' );
 
 			generateTextEl.css( 'opacity', '0' );
 			spinnerEl.show();
+			errorEl.text( '' ).hide();
 			isProcessing = true;
 
 			const path = classifaiExcerptData?.path + postId;
 
 			apiFetch( {
 				path,
-			} ).then( ( result ) => {
-				generateTextEl.css( 'opacity', '1' );
-				spinnerEl.hide();
-				isProcessing = false;
+			} )
+				.then( ( result ) => {
+					generateTextEl.css( 'opacity', '1' );
+					spinnerEl.hide();
+					isProcessing = false;
 
-				$( excerptContainer ).val( result ).trigger( 'input' );
-				generateTextEl.text(
-					classifaiExcerptData?.regenerateText ?? ''
-				);
-			} );
+					$( excerptContainer ).val( result ).trigger( 'input' );
+					generateTextEl.text(
+						classifaiExcerptData?.regenerateText ?? ''
+					);
+				} )
+				.catch( ( error ) => {
+					generateTextEl.css( 'opacity', '1' );
+					spinnerEl.hide();
+					isProcessing = false;
+					errorEl.text( error?.message ).show();
+				} );
 		};
 
 		// Event handler registration to generate the excerpt.

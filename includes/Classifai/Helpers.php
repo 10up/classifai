@@ -2,10 +2,11 @@
 
 namespace Classifai;
 
-use Classifai\Admin\UserProfile;
+use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
-use Classifai\Providers\Azure;
+use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
+use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -25,52 +26,6 @@ function get_plugin() {
 }
 
 /**
- * Returns the ClassifAI plugin's stored settings in the WP options.
- *
- * @param string $service The service to get settings from, defaults to the ServiceManager class.
- * @param string $provider The provider service name to get settings from, defaults to the first one found.
- * @return array The array of ClassifAi settings.
- */
-function get_plugin_settings( $service = '', $provider = '' ) {
-	$services = Plugin::$instance->services;
-	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
-		return [];
-	}
-
-	/** @var ServicesManager $service_manager Instance of the services manager class. */
-	$service_manager = $services['service_manager'];
-	if ( empty( $service ) ) {
-		return $service_manager->get_settings();
-	}
-
-	if ( ! isset( $service_manager->service_classes[ $service ] ) || ! $service_manager->service_classes[ $service ] instanceof Service ) {
-		return [];
-	}
-
-	// Ensure we have at least one provider.
-	$providers = $service_manager->service_classes[ $service ]->provider_classes;
-
-	if ( empty( $providers ) ) {
-		return [];
-	}
-
-	// If we want settings for a specific provider, find the proper provider service.
-	if ( ! empty( $provider ) ) {
-		foreach ( $providers as $provider_class ) {
-			if ( $provider_class->provider_service_name === $provider ) {
-				return $provider_class->get_settings();
-			}
-		}
-
-		return [];
-	}
-
-	/** @var Provider $provider An instance or extension of the provider abstract class. */
-	$provider = $providers[0];
-	return $provider->get_settings();
-}
-
-/**
  * Overwrites the ClassifAI plugin's stored settings. Expected format is,
  *
  * [
@@ -87,7 +42,7 @@ function get_plugin_settings( $service = '', $provider = '' ) {
  *
  * @param array $settings The settings we're saving.
  */
-function set_plugin_settings( $settings ) {
+function set_plugin_settings( array $settings ) {
 	update_option( 'classifai_settings', $settings );
 }
 
@@ -129,119 +84,13 @@ function reset_plugin_settings() {
 }
 
 /**
- * Returns the currently configured Watson API URL. Lookup order is,
- *
- * - Options
- * - Constant
- *
- * @return string
- */
-function get_watson_api_url() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
-
-	if ( ! empty( $creds['watson_url'] ) ) {
-		return $creds['watson_url'];
-	} elseif ( defined( 'WATSON_URL' ) ) {
-		return WATSON_URL;
-	} else {
-		return '';
-	}
-}
-
-
-/**
- * Returns the currently configured Watson username. Lookup order is,
- *
- * - Options
- * - Constant
- *
- * @return string
- */
-function get_watson_username() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
-
-	if ( ! empty( $creds['watson_username'] ) ) {
-		return $creds['watson_username'];
-	} elseif ( defined( 'WATSON_USERNAME' ) ) {
-		return WATSON_USERNAME;
-	} else {
-		return '';
-	}
-}
-
-/**
- * Get Classification mode.
- *
- * @since 2.5.0
- *
- * @return string
- */
-function get_classification_mode() {
-	$provider = new NLU( 'Natural Language Understanding' );
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$value    = isset( $settings['classification_mode'] ) ? $settings['classification_mode'] : '';
-
-	if ( $provider->is_configured() ) {
-		if ( empty( $value ) ) {
-			// existing users
-			// default: automatic_classification
-			return 'automatic_classification';
-		}
-	} else {
-		// new users
-		// default: manual_review
-		return 'manual_review';
-	}
-
-	return $value;
-}
-
-/**
- * Get IBM Watson Content Classification method.
- *
- * @since 2.6.0
- *
- * @return string
- */
-function get_classification_method() {
-	$provider = new NLU( 'language_processing' );
-	$settings = $provider->get_settings();
-	$value    = $settings['classification_method'] ?? '';
-
-	return $value;
-}
-
-/**
- * Returns the currently configured Watson username. Lookup order is,
- *
- * - Options
- * - Constant
- *
- * @return string
- */
-function get_watson_password() {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$creds    = ! empty( $settings['credentials'] ) ? $settings['credentials'] : [];
-
-	if ( ! empty( $creds['watson_password'] ) ) {
-		return $creds['watson_password'];
-	} elseif ( defined( 'WATSON_PASSWORD' ) ) {
-		return WATSON_PASSWORD;
-	} else {
-		return '';
-	}
-}
-
-/**
  * Get post types we want to show in the language processing settings
  *
  * @since 1.6.0
  *
  * @return array
  */
-function get_post_types_for_language_settings() {
+function get_post_types_for_language_settings(): array {
 	$post_types = get_post_types( [ 'public' => true ], 'objects' );
 	$post_types = array_filter( $post_types, 'is_post_type_viewable' );
 
@@ -268,7 +117,7 @@ function get_post_types_for_language_settings() {
  *
  * @return array
  */
-function get_post_statuses_for_language_settings() {
+function get_post_statuses_for_language_settings(): array {
 	$post_statuses = get_all_post_statuses();
 
 	/**
@@ -285,238 +134,13 @@ function get_post_statuses_for_language_settings() {
 }
 
 /**
- * The list of post types that get the ClassifAI taxonomies. Defaults
- * to 'post'.
- *
- * return array
- */
-function get_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-
-	if ( empty( $classifai_settings ) ) {
-		$post_types = [];
-	} else {
-		$post_types = [];
-		foreach ( $classifai_settings['post_types'] as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
-		}
-	}
-
-	/**
-	 * Filter post types supported for language processing.
-	 *
-	 * @since 1.0.0
-	 * @hook classifai_post_types
-	 *
-	 * @param {array} $post_types Array of post types to be classified with language processing.
-	 *
-	 * @return {array} Array of post types.
-	 */
-	$post_types = apply_filters( 'classifai_post_types', $post_types );
-
-	return $post_types;
-}
-
-/**
- * The list of post types that TTS supports.
- *
- * @return array Supported Post Types.
- */
-function get_tts_supported_post_types() {
-	$classifai_settings = get_plugin_settings( 'language_processing', Azure\TextToSpeech::FEATURE_NAME );
-
-	if ( empty( $classifai_settings ) ) {
-		$post_types = [];
-	} else {
-		$post_types = [];
-		foreach ( $classifai_settings['post_types'] as $post_type => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_types[] = $post_type;
-			}
-		}
-	}
-
-	return $post_types;
-}
-
-/**
- * The list of post statuses that get the ClassifAI taxonomies. Defaults
- * to 'publish'.
- *
- * @return array
- */
-function get_supported_post_statuses() {
-	$classifai_settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-
-	if ( empty( $classifai_settings ) ) {
-		$post_statuses = [ 'publish' ];
-	} else {
-		$post_statuses = [];
-		foreach ( $classifai_settings['post_statuses'] as $post_status => $enabled ) {
-			if ( ! empty( $enabled ) ) {
-				$post_statuses[] = $post_status;
-			}
-		}
-	}
-
-	/**
-	 * Filter post statuses supported for language processing.
-	 *
-	 * @since 1.7.1
-	 * @hook classifai_post_statuses
-	 *
-	 * @param {array} $post_types Array of post statuses to be classified with language processing.
-	 *
-	 * @return {array} Array of post statuses.
-	 */
-	$post_statuses = apply_filters( 'classifai_post_statuses', $post_statuses );
-
-	return $post_statuses;
-}
-
-/**
- * Returns a bool based on whether the specified feature is enabled
- *
- * @param string $feature category,keyword,entity,concept
- * @return bool
- */
-function get_feature_enabled( $feature ) {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature ] ) ) {
-			return filter_var(
-				$settings['features'][ $feature ],
-				FILTER_VALIDATE_BOOLEAN
-			);
-		}
-	}
-
-	return false;
-}
-
-/**
- * Check if any language processing features are enabled
- *
- * @since 1.6.0
- *
- * @return true
- */
-function language_processing_features_enabled() {
-	$features = [
-		'category',
-		'concept',
-		'entity',
-		'keyword',
-	];
-
-	foreach ( $features as $feature ) {
-		if ( get_feature_enabled( $feature ) ) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-/**
- * Returns the feature threshold based on current configuration. Lookup
- * order is.
- *
- * - Option
- * - Constant
- *
- * Any results below the threshold will be ignored.
- *
- * @param string $feature The feature whose threshold to lookup
- * @return int
- */
-function get_feature_threshold( $feature ) {
-	$settings  = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$threshold = 0;
-
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature . '_threshold' ] ) ) {
-			$threshold = filter_var(
-				$settings['features'][ $feature . '_threshold' ],
-				FILTER_VALIDATE_INT
-			);
-		}
-	}
-
-	if ( empty( $threshold ) ) {
-		$constant = 'WATSON_' . strtoupper( $feature ) . '_THRESHOLD';
-
-		if ( defined( $constant ) ) {
-			$threshold = intval( constant( $constant ) );
-		}
-	}
-
-	$threshold = empty( $threshold ) ? 0.7 : $threshold / 100;
-	/**
-	 * Filter the threshold for a specific feature. Any results below the
-	 * threshold will be ignored.
-	 *
-	 * @since 1.0.0
-	 * @hook classifai_feature_threshold
-	 *
-	 * @param {string} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
-	 * @param {string} $feature   The feature in question.
-	 *
-	 * @return {string} The filtered threshold.
-	 */
-	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
-}
-
-/**
- * Returns the Taxonomy for the specified NLU feature. Returns defaults
- * in config.php if options have not been configured.
- *
- * @param string $feature NLU feature name
- * @return string Taxonomy mapped to the feature
- */
-function get_feature_taxonomy( $feature ) {
-	$settings = get_plugin_settings( 'language_processing', 'Natural Language Understanding' );
-	$taxonomy = 0;
-
-	if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-		if ( ! empty( $settings['features'][ $feature . '_taxonomy' ] ) ) {
-			$taxonomy = $settings['features'][ $feature . '_taxonomy' ];
-		}
-	}
-
-	if ( empty( $taxonomy ) ) {
-		$constant = 'WATSON_' . strtoupper( $feature ) . '_TAXONOMY';
-
-		if ( defined( $constant ) ) {
-			$taxonomy = constant( $constant );
-		}
-	}
-
-	/**
-	 * Filter the Taxonomy for the specified NLU feature.
-	 *
-	 * @since 1.1.0
-	 * @hook classifai_taxonomy_for_feature
-	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $feature  The NLU feature this taxonomy is for.
-	 *
-	 * @return {string} The filtered taxonomy slug.
-	 */
-	return apply_filters( 'classifai_taxonomy_for_feature', $taxonomy, $feature );
-}
-
-/**
  * Provides the max filesize for the Computer Vision service.
  *
  * @since 1.4.0
  *
  * @return int
  */
-function computer_vision_max_filesize() {
+function computer_vision_max_filesize(): int {
 	/**
 	 * Filters the Computer Vision maximum allowed filesize.
 	 *
@@ -539,7 +163,7 @@ function computer_vision_max_filesize() {
  * @param array $size_2 Associative array containing width and height values.
  * @return int Returns -1 if $size_1 is larger, 1 if $size_2 is larger, and 0 if they are equal.
  */
-function sort_images_by_size_cb( $size_1, $size_2 ) {
+function sort_images_by_size_cb( array $size_1, array $size_2 ): int {
 	$size_1_total = $size_1['width'] + $size_1['height'];
 	$size_2_total = $size_2['width'] + $size_2['height'];
 
@@ -561,7 +185,7 @@ function sort_images_by_size_cb( $size_1, $size_2 ) {
  * @param int    $max        The maximum acceptable size.
  * @return string|null The image URL, or null if no acceptable image found.
  */
-function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max = MB_IN_BYTES ) {
+function get_largest_acceptable_image_url( string $full_image, string $full_url, array $sizes, int $max = MB_IN_BYTES ) {
 	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if ( $file_size && $max >= $file_size ) {
 		return $full_url;
@@ -596,7 +220,7 @@ function get_largest_acceptable_image_url( $full_image, $full_url, $sizes, $max 
  * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
  * @return string|null The image URL, or null if no acceptable image found.
  */
-function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $metadata, $width = [ 0, 4200 ], $height = [ 0, 4200 ], $max_size = MB_IN_BYTES ) {
+function get_largest_size_and_dimensions_image_url( string $full_image, string $full_url, array $metadata, array $width = [ 0, 4200 ], array $height = [ 0, 4200 ], int $max_size = MB_IN_BYTES ) {
 	// Check if the full size image meets our filesize and dimension requirements
 	$file_size = @filesize( $full_image ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 	if (
@@ -632,10 +256,9 @@ function get_largest_size_and_dimensions_image_url( $full_image, $full_url, $met
  * Allows returning modified image URL for a given attachment.
  *
  * @param int $post_id Post ID.
- *
  * @return mixed
  */
-function get_modified_image_source_url( $post_id ) {
+function get_modified_image_source_url( int $post_id ) {
 	/**
 	 * Filter to modify image source URL in order to allow scanning images,
 	 * stored on third party storages that cannot be used by
@@ -657,9 +280,10 @@ function get_modified_image_source_url( $post_id ) {
 /**
  * Check if attachment is PDF document.
  *
- * @param \WP_post $post Post object for the attachment being viewed.
+ * @param int|\WP_Post $post Post object for the attachment being viewed.
+ * @return bool
  */
-function attachment_is_pdf( $post ) {
+function attachment_is_pdf( $post ): bool {
 	$mime_type          = get_post_mime_type( $post );
 	$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
 
@@ -677,7 +301,7 @@ function attachment_is_pdf( $post ) {
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
  * @return string|array
  */
-function get_asset_info( $slug, $attribute = null ) {
+function get_asset_info( string $slug, string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
 		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
@@ -696,7 +320,7 @@ function get_asset_info( $slug, $attribute = null ) {
  *
  * @return array Array of services.
  */
-function get_services_menu() {
+function get_services_menu(): array {
 	$services = Plugin::$instance->services;
 	if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 		return [];
@@ -718,7 +342,6 @@ function get_services_menu() {
  * @param string  $key               $_GET or $_POST array key.
  * @param boolean $is_get            If the request is $_GET. Defaults to false.
  * @param string  $sanitize_callback Sanitize callback. Defaults to `sanitize_text_field`
- *
  * @return string|boolean Sanitized string or `false` as fallback.
  */
 function clean_input( string $key = '', bool $is_get = false, string $sanitize_callback = 'sanitize_text_field' ) {
@@ -741,14 +364,14 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
  * Find the provider class that a service belongs to.
  *
  * @param array  $provider_classes Provider classes to look in.
- * @param string $service_name Service name to look for.
+ * @param string $provider_id      ID of the provider.
  * @return Provider|WP_Error
  */
-function find_provider_class( array $provider_classes = [], string $service_name = '' ) {
+function find_provider_class( array $provider_classes = [], string $provider_id = '' ) {
 	$provider = '';
 
 	foreach ( $provider_classes as $provider_class ) {
-		if ( $service_name === $provider_class->provider_service_name ) {
+		if ( $provider_id === $provider_class::ID ) {
 			$provider = $provider_class;
 		}
 	}
@@ -765,7 +388,7 @@ function find_provider_class( array $provider_classes = [], string $service_name
  *
  * @return array
  */
-function get_all_post_statuses() {
+function get_all_post_statuses(): array {
 	$all_statuses = wp_list_pluck(
 		get_post_stati(
 			[],
@@ -817,26 +440,25 @@ function get_all_post_statuses() {
 }
 
 /**
- * Get the default settings for a feature.
+ * Check if the current user has permission to create and assign terms.
  *
- * @since 2.4.0
- *
- * @param string $feature Feature key.
- * @return array
+ * @param string $tax Taxonomy name.
+ * @return bool|WP_Error
  */
-function get_feature_default_settings( string $feature ) {
-	if ( ! function_exists( 'get_editable_roles' ) ) {
-		require_once ABSPATH . 'wp-admin/includes/user.php';
-	}
-	$editable_roles = get_editable_roles() ?? [];
+function check_term_permissions( string $tax = '' ) {
+	$taxonomy = get_taxonomy( $tax );
 
-	return array(
-		$feature . '_role_based_access'  => 1,
-		$feature . '_roles'              => array_keys( $editable_roles ),
-		$feature . '_user_based_access'  => 'no',
-		$feature . '_user_based_opt_out' => 'no',
-		$feature . '_users'              => array(),
-	);
+	if ( empty( $taxonomy ) || empty( $taxonomy->show_in_rest ) ) {
+		return new WP_Error( 'invalid_taxonomy', esc_html__( 'Taxonomy not found. Double check your settings.', 'classifai' ) );
+	}
+
+	$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
+
+	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
+	}
+
+	return true;
 }
 
 /**
@@ -850,6 +472,7 @@ function render_disable_feature_link( string $feature ) {
 	$user_profile     = new UserProfile();
 	$allowed_features = $user_profile->get_allowed_features( get_current_user_id() );
 	$profile_url      = get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section';
+
 	if ( ! empty( $allowed_features ) && isset( $allowed_features[ $feature ] ) ) {
 		?>
 		<a href="<?php echo esc_url( $profile_url ); ?>" target="_blank" rel="noopener noreferrer" class="classifai-disable-feature-link" aria-label="<?php esc_attr_e( 'Opt out of using this ClassifAI feature', 'classifai' ); ?>">
@@ -857,4 +480,185 @@ function render_disable_feature_link( string $feature ) {
 		</a>
 		<?php
 	}
+}
+
+/**
+ * Sanitize the prompt data.
+ * This is used for the repeater field.
+ *
+ * @since 2.4.0
+ *
+ * @param array $prompt_key Prompt key.
+ * @param array $new_settings   Settings data.
+ * @return array Sanitized prompt data.
+ */
+function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {
+	if ( isset( $new_settings[ $prompt_key ] ) && is_array( $new_settings[ $prompt_key ] ) ) {
+
+		$prompts = $new_settings[ $prompt_key ];
+
+		// Remove any prompts that don't have a title and prompt.
+		$prompts = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return ! empty( $prompt['title'] ) && ! empty( $prompt['prompt'] );
+			}
+		);
+
+		// Sanitize the prompts and make sure only one prompt is marked as default.
+		$has_default = false;
+
+		$prompts = array_map(
+			function ( $prompt ) use ( &$has_default ) {
+				$default = isset( $prompt['default'] ) && $prompt['default'] && ! $has_default;
+
+				if ( $default ) {
+					$has_default = true;
+				}
+
+				return array(
+					'title'    => sanitize_text_field( $prompt['title'] ),
+					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'default'  => absint( $default ),
+					'original' => absint( $prompt['original'] ),
+				);
+			},
+			$prompts
+		);
+
+		// If there is no default, use the first prompt.
+		if ( false === $has_default && ! empty( $prompts ) ) {
+			$prompts[0]['default'] = 1;
+		}
+
+		return $prompts;
+	}
+
+	return array();
+}
+
+/**
+ * Get the default prompt for use.
+ *
+ * @since 2.4.0
+ *
+ * @param array $prompts Prompt data.
+ * @return string|null Default prompt.
+ */
+function get_default_prompt( array $prompts ): ?string {
+	$default_prompt = null;
+
+	if ( ! empty( $prompts ) ) {
+		$prompt_data = array_filter(
+			$prompts,
+			function ( $prompt ) {
+				return isset( $prompt['default'] ) && $prompt['default'] && ! $prompt['original'];
+			}
+		);
+
+		if ( ! empty( $prompt_data ) ) {
+			$default_prompt = current( $prompt_data )['prompt'];
+		} elseif ( ! empty( $prompts[0]['prompt'] ) && ! $prompts[0]['original'] ) {
+			// If there is no default, use the first prompt, unless it's the original prompt.
+			$default_prompt = $prompts[0]['prompt'];
+		}
+	}
+
+	return $default_prompt;
+}
+
+/**
+ * Sanitisation callback for number of responses.
+ *
+ * @param string $key The key of the value we are sanitizing.
+ * @param array  $new_settings The settings array.
+ * @param array  $settings     Current array.
+ * @return int
+ */
+function sanitize_number_of_responses_field( string $key, array $new_settings, array $settings ): int {
+	return absint( $new_settings[ $key ] ?? $settings[ $key ] ?? '' );
+}
+
+/**
+ * Returns a bool based on whether the specified classification feature is enabled.
+ *
+ * @param string $classify_by Feature to check.
+ * @return bool
+ */
+function get_classification_feature_enabled( string $classify_by ): bool {
+	$settings = ( new Classification() )->get_settings();
+
+	return filter_var(
+		$settings[ $classify_by ],
+		FILTER_VALIDATE_BOOLEAN
+	);
+}
+
+/**
+ * Returns the Taxonomy for the specified NLU feature.
+ *
+ * Returns defaults in config.php if options have not been configured.
+ *
+ * @param string $classify_by NLU feature name.
+ * @return string
+ */
+function get_classification_feature_taxonomy( string $classify_by = '' ): string {
+	$taxonomy = '';
+	$settings = ( new Classification() )->get_settings();
+
+	if ( ! empty( $settings[ $classify_by . '_taxonomy' ] ) ) {
+		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
+	}
+
+	if ( Embeddings::ID === $settings['provider'] ) {
+		$taxonomy = $classify_by;
+	}
+
+	if ( empty( $taxonomy ) ) {
+		$constant = 'WATSON_' . strtoupper( $classify_by ) . '_TAXONOMY';
+
+		if ( defined( $constant ) ) {
+			$taxonomy = constant( $constant );
+		}
+	}
+
+	/**
+	 * Filter the Taxonomy for the specified NLU feature.
+	 *
+	 * @since 3.0.0
+	 * @hook classifai_feature_classification_taxonomy_for_feature
+	 *
+	 * @param {string} $taxonomy The slug of the taxonomy to use.
+	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 *
+	 * @return {string} The filtered taxonomy slug.
+	 */
+	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
+}
+
+/**
+ * Get Classification mode.
+ *
+ * @since 2.5.0
+ *
+ * @return string
+ */
+function get_classification_mode(): string {
+	$feature  = new Classification();
+	$settings = $feature->get_settings();
+	$value    = $settings['classification_mode'] ?? '';
+
+	if ( $feature->is_feature_enabled() ) {
+		if ( empty( $value ) ) {
+			// existing users
+			// default: automatic_classification
+			return 'automatic_classification';
+		}
+	} else {
+		// new users
+		// default: manual_review
+		return 'manual_review';
+	}
+
+	return $value;
 }

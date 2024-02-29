@@ -32,9 +32,10 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 ( () => {
 	const $toggler = document.getElementById( 'classifai-waston-cred-toggle' );
-	const $userField = document.getElementById(
-		'classifai-settings-watson_username'
-	);
+	const $userField = document.getElementById( 'username' );
+	const isSetupPage = document.querySelector( '.classifai-setup-form' )
+		? true
+		: false;
 
 	if ( $toggler === null || $userField === null ) {
 		return;
@@ -44,35 +45,39 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	let $passwordFieldTitle = null;
 	if ( $userField.closest( 'tr' ) ) {
 		$userFieldWrapper = $userField.closest( 'tr' );
-	} else if ( $userField.closest( '.classifai-setup-form-field' ) ) {
-		$userFieldWrapper = $userField.closest( '.classifai-setup-form-field' );
+		if ( isSetupPage ) {
+			$userFieldWrapper = $userField.closest( 'td' );
+		}
 	}
 
-	if (
-		document
-			.getElementById( 'classifai-settings-watson_password' )
-			.closest( 'tr' )
-	) {
+	if ( document.getElementById( 'password' ).closest( 'tr' ) ) {
 		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
+			.getElementById( 'password' )
 			.closest( 'tr' )
 			.getElementsByTagName( 'label' );
-	} else if (
-		document
-			.getElementById( 'classifai-settings-watson_password' )
-			.closest( '.classifai-setup-form-field' )
-	) {
-		[ $passwordFieldTitle ] = document
-			.getElementById( 'classifai-settings-watson_password' )
-			.closest( '.classifai-setup-form-field' )
-			.getElementsByTagName( 'label' );
+
+		if ( isSetupPage ) {
+			$passwordFieldTitle = document.querySelector(
+				'label[for="password"]'
+			);
+		}
 	}
 
 	$toggler.addEventListener( 'click', ( e ) => {
 		e.preventDefault();
-		$userFieldWrapper.classList.toggle( 'hidden' );
+		$userFieldWrapper.classList.toggle( 'hide-username' );
 
-		if ( $userFieldWrapper.classList.contains( 'hidden' ) ) {
+		if (
+			isSetupPage &&
+			document.querySelector( 'label[for="username"]' )
+		) {
+			document
+				.querySelector( 'label[for="username"]' )
+				.closest( 'th' )
+				.classList.toggle( 'hide-username' );
+		}
+
+		if ( $userFieldWrapper.classList.contains( 'hide-username' ) ) {
 			$toggler.innerText = ClassifAI.use_password;
 			$passwordFieldTitle.innerText = ClassifAI.api_key;
 			$userField.value = 'apikey';
@@ -83,60 +88,6 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		$passwordFieldTitle.innerText = ClassifAI.api_password;
 	} );
 } )();
-
-// Role and user based access.
-document.addEventListener( 'DOMContentLoaded', function () {
-	function toogleAllowedRolesRow( e ) {
-		const checkbox = e.target;
-		const parentTr = checkbox.closest( 'tr.classifai-role-based-access' );
-		const allowedRoles = parentTr.nextElementSibling.classList.contains(
-			'allowed_roles_row'
-		)
-			? parentTr.nextElementSibling
-			: null;
-		if ( checkbox.checked ) {
-			allowedRoles.classList.remove( 'hidden' );
-		} else {
-			allowedRoles.classList.add( 'hidden' );
-		}
-	}
-
-	function toogleAllowedUsersRow( e ) {
-		const checkbox = e.target;
-		const parentTr = checkbox.closest( 'tr.classifai-user-based-access' );
-		const allowedUsers = parentTr.nextElementSibling.classList.contains(
-			'allowed_users_row'
-		)
-			? parentTr.nextElementSibling
-			: null;
-		if ( checkbox.checked ) {
-			allowedUsers.classList.remove( 'hidden' );
-		} else {
-			allowedUsers.classList.add( 'hidden' );
-		}
-	}
-
-	const roleBasedAccessCheckBoxes = document.querySelectorAll(
-		'tr.classifai-role-based-access input[type="checkbox"]'
-	);
-	const userBasedAccessCheckBoxes = document.querySelectorAll(
-		'tr.classifai-user-based-access input[type="checkbox"]'
-	);
-
-	if ( roleBasedAccessCheckBoxes ) {
-		roleBasedAccessCheckBoxes.forEach( function ( e ) {
-			e.addEventListener( 'change', toogleAllowedRolesRow );
-			e.dispatchEvent( new Event( 'change' ) );
-		} );
-	}
-
-	if ( userBasedAccessCheckBoxes ) {
-		userBasedAccessCheckBoxes.forEach( function ( e ) {
-			e.addEventListener( 'change', toogleAllowedUsersRow );
-			e.dispatchEvent( new Event( 'change' ) );
-		} );
-	}
-} );
 
 // User Selector.
 ( () => {
@@ -392,3 +343,28 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		return $newPromptFieldset;
 	}
 } )();
+
+/**
+ * Feature-first refactor settings field:
+ * @param {Object} $ jQuery object
+ */
+( function ( $ ) {
+	$( function () {
+		const providerSelectEl = $( 'select#provider' );
+
+		providerSelectEl.on( 'change', function () {
+			const providerId = $( this ).val();
+			const providerRows = $( '.classifai-provider-field' );
+			const providerClass = `.provider-scope-${ providerId }`;
+
+			providerRows.addClass( 'hidden' );
+			providerRows.find( ':input' ).prop( 'disabled', true );
+
+			$( providerClass ).removeClass( 'hidden' );
+			$( providerClass ).find( ':input' ).prop( 'disabled', false );
+		} );
+
+		// Trigger 'change' on page load.
+		providerSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );
