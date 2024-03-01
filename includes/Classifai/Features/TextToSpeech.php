@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
+use Classifai\Providers\AWS\AmazonPolly;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -54,7 +55,8 @@ class TextToSpeech extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			Speech::ID      => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			AmazonPolly::ID => __( 'Amazon Polly', 'classifai' ),
 		];
 	}
 
