@@ -311,12 +311,12 @@ abstract class Feature {
 	 * Returns the settings for the feature.
 	 *
 	 * @param string $index The index of the setting to return.
-	 * @return array|string
+	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
-		$settings = $this->merge_settings( $settings, $defaults );
+		$settings = $this->merge_settings( (array) $settings, (array) $defaults );
 
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
@@ -395,7 +395,7 @@ abstract class Feature {
 		foreach ( $defaults as $key => $value ) {
 			if ( ! isset( $settings[ $key ] ) ) {
 				$settings[ $key ] = $defaults[ $key ];
-			} elseif ( is_array( $value ) ) {
+			} elseif ( is_array( $settings[ $key ] ) && is_array( $value ) ) {
 				$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
 			}
 		}
