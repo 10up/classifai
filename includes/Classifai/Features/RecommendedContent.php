@@ -71,4 +71,47 @@ class RecommendedContent extends Feature {
 			);
 		}
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_personalizer', array() );
+		$new_settings = $this->get_default_settings();
+
+		if ( isset( $old_settings['enable_recommended_content'] ) ) {
+			$new_settings['status'] = $old_settings['enable_recommended_content'];
+		}
+
+		$new_settings['provider'] = PersonalizerProvider::ID;
+
+		if ( isset( $old_settings['url'] ) ) {
+			$new_settings[ PersonalizerProvider::ID ]['endpoint_url'] = $old_settings['url'];
+		}
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings[ PersonalizerProvider::ID ]['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings[ PersonalizerProvider::ID ]['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['recommended_content_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['recommended_content_roles'];
+		}
+
+		if ( isset( $old_settings['recommended_content_users'] ) ) {
+			$new_settings['users'] = $old_settings['recommended_content_users'];
+		}
+
+		if ( isset( $old_settings['recommended_content_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['recommended_content_user_based_opt_out'];
+		}
+
+		return $new_settings;
+	}
 }

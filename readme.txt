@@ -4,7 +4,7 @@ Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft 
 Requires at least: 6.1
 Tested up to:      6.4
 Requires PHP:      7.4
-Stable tag:        2.5.1
+Stable tag:        3.0.0
 License:           GPLv2 or later
 License URI:       http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,6 +39,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+**Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
 
 = 2.5.0 =
 **Note that this release bumps the WordPress minimum from 5.8 to 6.1.**

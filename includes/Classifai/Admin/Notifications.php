@@ -27,6 +27,7 @@ class Notifications {
 		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
 		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 		add_action( 'admin_notices', [ $this, 'thresholds_update_notice' ] );
+		add_action( 'admin_notices', [ $this, 'v3_migration_completed_notice' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'add_dismiss_script' ] );
 		add_action( 'wp_ajax_classifai_dismiss_notice', [ $this, 'ajax_maybe_dismiss_notice' ] );
 	}
@@ -95,33 +96,35 @@ class Notifications {
 
 		$script = <<<EOD
 jQuery( function() {
-    const dismissBtn = document.querySelector( '.classifai-dismissible-notice' );
+	const dismissBtns = document.querySelectorAll( '.classifai-dismissible-notice' );
 
-	if ( ! dismissBtn ) {
+	if ( ! dismissBtns.length ) {
 		return;
 	}
 
-    // Add an event listener to the dismiss button.
-    dismissBtn.addEventListener( 'click', function( event ) {
-		const id = dismissBtn.getAttribute( 'data-notice' );
+	// Add an event listener to the dismiss buttons.
+	dismissBtns.forEach( function( dismissBtn ) {
+		dismissBtn.addEventListener( 'click', function( event ) {
+			const id = dismissBtn.getAttribute( 'data-notice' );
 
-		if ( ! id ) {
-			return;
-		}
+			if ( ! id ) {
+				return;
+			}
 
-		const httpRequest = new XMLHttpRequest();
-    	let postData = '';
+			const httpRequest = new XMLHttpRequest();
+			let postData = '';
 
-    	// Build the data to send in our request.
-    	// Data has to be formatted as a string here.
-    	postData += 'notice_id=' + id;
-    	postData += '&action=classifai_dismiss_notice';
-    	postData += '&nonce=$nonce';
+			// Build the data to send in our request.
+			// Data has to be formatted as a string here.
+			postData += 'notice_id=' + id;
+			postData += '&action=classifai_dismiss_notice';
+			postData += '&nonce=$nonce';
 
-    	httpRequest.open( 'POST', '$admin_ajax_url' );
-    	httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
-    	httpRequest.send( postData );
-    });
+			httpRequest.open( 'POST', '$admin_ajax_url' );
+			httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
+			httpRequest.send( postData );
+		});
+	});
 });
 EOD;
 
@@ -211,5 +214,43 @@ EOD;
 
 			<?php
 		}
+	}
+
+	/**
+	 * Displays the migration completed notice for feature-first refactor
+	 * of the settings.
+	 *
+	 * @since 3.0.0
+	 */
+	public function v3_migration_completed_notice() {
+		// Bail if no need to show the notice.
+		$display_notice = get_option( 'classifai_display_v3_migration_notice', false );
+		if ( ! $display_notice ) {
+			return;
+		}
+
+		// Don't show the notice if the user has already dismissed it.
+		$key = 'v3_migration_completed';
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+		?>
+		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migation-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php
+				echo wp_kses_post(
+					sprintf(
+						// translators: %1$s: <a> tag starting; %2$s: <a> tag closing.
+						__( '%1$sClassifAI 3.0.0%2$s has changed how AI providers are integrated with individual features. This changes how settings are stored and requires that existing settings be migrated. This migration has happened automatically and you can %3$sverify your settings here%4$s.', 'classifai' ),
+						'<strong>',
+						'</strong>',
+						'<a href="' . esc_url( admin_url( 'tools.php?page=classifai' ) ) . '">',
+						'</a>'
+					)
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 }
