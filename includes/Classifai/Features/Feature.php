@@ -395,8 +395,12 @@ abstract class Feature {
 		foreach ( $defaults as $key => $value ) {
 			if ( ! isset( $settings[ $key ] ) ) {
 				$settings[ $key ] = $defaults[ $key ];
-			} elseif ( is_array( $settings[ $key ] ) && is_array( $value ) ) {
-				$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
+			} elseif ( is_array( $value ) ) {
+				if ( is_array( $settings[ $key ] ) ) {
+					$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
+				} else {
+					$settings[ $key ] = $defaults[ $key ];
+				}
 			}
 		}
 
