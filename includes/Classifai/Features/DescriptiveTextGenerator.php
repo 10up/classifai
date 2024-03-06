@@ -307,13 +307,12 @@ class DescriptiveTextGenerator extends Feature {
 		$settings       = $this->get_settings();
 		$enabled_fields = array();
 
-		if ( ! isset( $settings['descriptive_text_fields'] ) ) {
-			return array();
-		}
-
-		if ( ! is_array( $settings['descriptive_text_fields'] ) ) {
+		if (
+			! isset( $settings['descriptive_text_fields'] ) ||
+			! is_array( $settings['descriptive_text_fields'] )
+		) {
 			return array(
-				'alt'         => 'no' === $settings['descriptive_text_fields']['caption'] ? 0 : 'alt',
+				'alt'         => 0,
 				'caption'     => 0,
 				'description' => 0,
 			);
@@ -357,7 +356,7 @@ class DescriptiveTextGenerator extends Feature {
 			[
 				'label_for'      => 'descriptive_text_fields',
 				'options'        => $checkbox_options,
-				'default_values' => $settings['descriptive_text_fields'],
+				'default_values' => is_array( $settings['descriptive_text_fields'] ) ? $settings['descriptive_text_fields'] : [],
 				'description'    => __( 'Choose image fields where the generated text should be applied.', 'classifai' ),
 			]
 		);
