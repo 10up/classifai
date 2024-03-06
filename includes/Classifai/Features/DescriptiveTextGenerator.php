@@ -307,12 +307,13 @@ class DescriptiveTextGenerator extends Feature {
 		$settings       = $this->get_settings();
 		$enabled_fields = array();
 
-		if (
-			! isset( $settings['descriptive_text_fields'] ) ||
-			! is_array( $settings['descriptive_text_fields'] )
-		) {
+		if ( ! isset( $settings['descriptive_text_fields'] ) ) {
+			return array();
+		}
+
+		if ( ! is_array( $settings['descriptive_text_fields'] ) ) {
 			return array(
-				'alt'         => 0,
+				'alt'         => 'no' === $settings['descriptive_text_fields'] ? 0 : 'alt',
 				'caption'     => 0,
 				'description' => 0,
 			);
