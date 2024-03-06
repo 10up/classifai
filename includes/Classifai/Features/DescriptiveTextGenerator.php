@@ -357,7 +357,7 @@ class DescriptiveTextGenerator extends Feature {
 			[
 				'label_for'      => 'descriptive_text_fields',
 				'options'        => $checkbox_options,
-				'default_values' => is_array( $settings['descriptive_text_fields'] ) ? $settings['descriptive_text_fields'] : [],
+				'default_values' => $settings['descriptive_text_fields'],
 				'description'    => __( 'Choose image fields where the generated text should be applied.', 'classifai' ),
 			]
 		);
