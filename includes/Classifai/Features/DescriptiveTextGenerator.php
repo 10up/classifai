@@ -313,7 +313,7 @@ class DescriptiveTextGenerator extends Feature {
 
 		if ( ! is_array( $settings['descriptive_text_fields'] ) ) {
 			return array(
-				'alt'         => 'no' === $settings['descriptive_text_fields']['caption'] ? 0 : 'alt',
+				'alt'         => 'no' === $settings['descriptive_text_fields'] ? 0 : 'alt',
 				'caption'     => 0,
 				'description' => 0,
 			);
