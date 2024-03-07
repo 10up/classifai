@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.0.1] - 2024-03-07
+### Fixed
+- Ensure we only pass in array data to our `merge_settings` method (props [@dkotter](https://github.com/dkotter), [@ajaxthemestudios](https://github.com/ajaxthemestudios), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#733](https://github.com/10up/classifai/pull/733)).
+- Handle scenario where non-array data is passed into our descriptive text generator feature (props [@dkotter](https://github.com/dkotter), [@ajaxthemestudios](https://github.com/ajaxthemestudios), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#733](https://github.com/10up/classifai/pull/733)).
+- Address a fatal error that occurs if `composer install` hasn't been run (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#740](https://github.com/10up/classifai/pull/740)).
+- Ensure we properly account for `null` values when merging our saved settings with our default settings (props [@dkotter](https://github.com/dkotter), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#741](https://github.com/10up/classifai/pull/741)).
+
 ## [3.0.0] - 2024-02-29
 **Note that this is a major release of ClassifAI that restructures most of the codebase and will have some breaking changes. If you're extending ClassifAI in any way, please ensure you fully test those integrations prior to running this update on production. For more details on what is changing, see the [migration guide](https://10up.github.io/classifai/tutorial-migration-guide-v2-to-v3.html).**
 
@@ -544,6 +551,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.0.1]: https://github.com/10up/classifai/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/10up/classifai/compare/2.5.1...3.0.0
 [2.5.1]: https://github.com/10up/classifai/compare/2.5.0...2.5.1
 [2.5.0]: https://github.com/10up/classifai/compare/2.4.0...2.5.0
