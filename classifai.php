@@ -88,7 +88,7 @@ function classifai_autoload() {
 		return true;
 	} else {
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			sprintf( 'Fatal Error: Composer not setup in %s', CLASSIFAI_PLUGIN_DIR )
+			sprintf( 'Warning: Composer not setup in %s', CLASSIFAI_PLUGIN_DIR )
 		);
 
 		return false;
