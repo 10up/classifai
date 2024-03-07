@@ -393,7 +393,7 @@ abstract class Feature {
 	 */
 	protected function merge_settings( array $settings = [], array $defaults = [] ): array {
 		foreach ( $defaults as $key => $value ) {
-			if ( ! isset( $settings[ $key ] ) ) {
+			if ( ! array_key_exists( $key, $settings ) ) {
 				$settings[ $key ] = $defaults[ $key ];
 			} elseif ( is_array( $value ) ) {
 				if ( is_array( $settings[ $key ] ) ) {
