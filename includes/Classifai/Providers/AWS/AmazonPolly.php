@@ -385,7 +385,7 @@ class AmazonPolly extends Provider {
 					'OutputFormat' => 'mp3',
 					'Text'         => $post_content,
 					'TextType'     => 'text',
-					'Engine'       => $settings[ static::ID ]['voice_engine'] ?? 'standard', // 'standard', 'neural', 'long-form'
+					'Engine'       => $settings[ static::ID ]['voice_engine'] ?? 'standard',
 					'VoiceId'      => $voice,
 				),
 				$post_id,
