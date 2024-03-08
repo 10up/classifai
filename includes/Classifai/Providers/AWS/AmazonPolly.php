@@ -318,6 +318,9 @@ class AmazonPolly extends Provider {
 			);
 		}
 
+		// Sort the options.
+		asort( $options );
+
 		return $options;
 	}
 
