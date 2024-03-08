@@ -34,6 +34,7 @@ class AmazonPolly extends Provider {
 		$this->feature_instance = $feature_instance;
 
 		do_action( 'classifai_' . static::ID . '_init', $this );
+		add_action( 'wp_ajax_classifai_get_voice_dropdown', [ $this, 'get_voice_dropdown' ] );
 	}
 
 	/**
@@ -107,7 +108,41 @@ class AmazonPolly extends Provider {
 			]
 		);
 
-		$voices_options = $this->get_voices_select_options();
+		add_settings_field(
+			'voice_engine',
+			esc_html__( 'Engine', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'voice_engine',
+				'options'       => array(
+					'standard'  => esc_html__( 'Standard', 'classifai' ),
+					'neural'    => esc_html__( 'Neural', 'classifai' ),
+					'long-form' => esc_html__( 'Long Form', 'classifai' ),
+				),
+				'default_value' => $settings['voice_engine'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => sprintf(
+					wp_kses(
+						/* translators: %1$s is replaced with the OpenAI sign up URL */
+						__( 'Amazon Polly offers <a href="%1$s">Long-Form</a>, <a href="%2$s">Neural</a> and Standard text-to-speech voices. Please check the <a title="Pricing" href="%3$s">documentation</a> to review pricing for Long-Form, Neural and Standard usage.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						]
+					),
+					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
+					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
+					esc_url( 'https://aws.amazon.com/polly/pricing/' )
+				)
+			]
+		);
+
+		$voices_options = $this->get_voices_select_options(  $settings['voice_engine'] ?? '' );
 		if ( ! empty( $voices_options ) ) {
 			add_settings_field(
 				'voice',
@@ -120,7 +155,7 @@ class AmazonPolly extends Provider {
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
-					'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+					'class'         => 'classifai-aws-polly-voices classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				]
 			);
 		}
@@ -253,7 +288,7 @@ class AmazonPolly extends Provider {
 	 *
 	 * @return array
 	 */
-	public function get_voices_select_options(): array {
+	public function get_voices_select_options( string $engine = "" ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 		$voices   = $settings['voices'];
 		$options  = array();
@@ -263,7 +298,14 @@ class AmazonPolly extends Provider {
 		}
 
 		foreach ( $voices as $voice ) {
-			if ( ! is_array( $voice ) || empty( $voice ) ) {
+			if (
+				! is_array( $voice ) ||
+				empty( $voice ) ||
+				(
+					! empty( $engine ) &&
+					! in_array( $engine, $voice['SupportedEngines'], true )
+				)
+			) {
 				continue;
 			}
 
@@ -322,15 +364,35 @@ class AmazonPolly extends Provider {
 		$voice = $settings[ static::ID ]['voice'] ?? '';
 
 		try {
-			$polly_client = $this->get_polly_client();
-			$result = $polly_client->synthesizeSpeech(
+			$polly_client    = $this->get_polly_client();
+
+			/**
+			 * Filter Synthesize speech args.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_synthesize_speech_args
+			 *
+			 * @param {array} Associative array of synthesize speech args.
+			 * @param {int}   $post_id Post ID.
+			 * @param {object} $provider_instance Provider instance.
+			 * @param {object} $feature_instance Feature instance.
+			 *
+			 * @return {array} The filtered array of synthesize speech args.
+			 */
+			$synthesize_data = apply_filters(
+				'classifai_' . self::ID . '_synthesize_speech_args',
 				array(
 					'OutputFormat' => 'mp3',
 					'Text'         => $post_content,
 					'TextType'     => 'text',
+					'Engine'       => $settings[ static::ID ]['voice_engine'] ?? 'standard', // 'standard', 'neural', 'long-form'
 					'VoiceId'      => $voice,
-				)
+				),
+				$post_id,
+				$this,
+				$this->feature_instance
 			);
+			$result = $polly_client->synthesizeSpeech( $synthesize_data );
 
 			update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
 			$contents = $result['AudioStream']->getContents();
@@ -410,9 +472,9 @@ class AmazonPolly extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
-			'access_key_id'     => isset( $settings[ static::ID ]['access_key_id'] ) ? $settings[ static::ID ]['access_key_id'] : '',
-			'secret_access_key' => isset( $settings[ static::ID ]['secret_access_key'] ) ? $settings[ static::ID ]['secret_access_key'] : '',
-			'aws_region'        => isset( $settings[ static::ID ]['aws_region'] ) ? $settings[ static::ID ]['aws_region'] : 'us-east-1',
+			'access_key_id'     => isset( $settings['access_key_id'] ) ? $settings['access_key_id'] : '',
+			'secret_access_key' => isset( $settings['secret_access_key'] ) ? $settings['secret_access_key'] : '',
+			'aws_region'        => isset( $settings['aws_region'] ) ? $settings['aws_region'] : 'us-east-1',
 		);
 
 		$default = wp_parse_args( $aws_config, $default );
@@ -435,5 +497,45 @@ class AmazonPolly extends Provider {
 
 		$sdk = new \Aws\Sdk($aws_sdk_config);
 		return $sdk->createPolly();
+	}
+
+	/**
+	 * Returns the voice dropdown for the selected engine.
+	 */
+	public function get_voice_dropdown() {
+		if ( ! wp_doing_ajax() ) {
+			return;
+		}
+
+		// Nonce check.
+		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
+			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// Set the feature instance if it's not already set.
+		if ( ! $this->feature_instance instanceof TextToSpeech ) {
+			$this->feature_instance = new TextToSpeech();
+		}
+
+		// Attachment ID check.
+		$engine         = isset( $_POST['engine'] ) ? sanitize_text_field( wp_unslash( $_POST['engine'] ) ) : 'standard';
+		$settings       = $this->feature_instance->get_settings( static::ID );
+		$voices_options = $this->get_voices_select_options( $engine );
+
+		ob_start();
+		$this->feature_instance->render_select(
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'voice',
+				'options'       => $voices_options,
+				'default_value' => $settings['voice'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+			]
+		);
+		$voice_dropdown = ob_get_clean();
+
+		wp_send_json_success( $voice_dropdown );
 	}
 }
