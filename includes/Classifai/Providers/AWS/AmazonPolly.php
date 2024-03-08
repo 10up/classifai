@@ -67,7 +67,7 @@ class AmazonPolly extends Provider {
 						]
 					),
 					esc_url( 'https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey' )
-				)
+				),
 			]
 		);
 
@@ -138,11 +138,11 @@ class AmazonPolly extends Provider {
 					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
 					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
 					esc_url( 'https://aws.amazon.com/polly/pricing/' )
-				)
+				),
 			]
 		);
 
-		$voices_options = $this->get_voices_select_options(  $settings['voice_engine'] ?? '' );
+		$voices_options = $this->get_voices_select_options( $settings['voice_engine'] ?? '' );
 		if ( ! empty( $voices_options ) ) {
 			add_settings_field(
 				'voice',
@@ -213,7 +213,7 @@ class AmazonPolly extends Provider {
 				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
 				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
 				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
-				$new_settings[ static::ID ]['voices']       = $this->connect_to_service(
+				$new_settings[ static::ID ]['voices']            = $this->connect_to_service(
 					array(
 						'access_key_id'     => $new_access_key_id,
 						'secret_access_key' => $new_secret_access_key,
@@ -271,7 +271,7 @@ class AmazonPolly extends Provider {
 		try {
 			$polly_client = $this->get_polly_client( $args );
 			$polly_voices = $polly_client->describeVoices();
-			return $polly_voices->get('Voices');
+			return $polly_voices->get( 'Voices' );
 		} catch ( \Exception $e ) {
 			add_settings_error(
 				$this->feature_instance->get_option_name(),
@@ -286,9 +286,10 @@ class AmazonPolly extends Provider {
 	/**
 	 * Returns HTML select dropdown options for voices.
 	 *
+	 * @param string $engine Engine type.
 	 * @return array
 	 */
-	public function get_voices_select_options( string $engine = "" ): array {
+	public function get_voices_select_options( string $engine = '' ): array {
 		$settings = $this->feature_instance->get_settings( static::ID );
 		$voices   = $settings['voices'];
 		$options  = array();
@@ -364,7 +365,7 @@ class AmazonPolly extends Provider {
 		$voice = $settings[ static::ID ]['voice'] ?? '';
 
 		try {
-			$polly_client    = $this->get_polly_client();
+			$polly_client = $this->get_polly_client();
 
 			/**
 			 * Filter Synthesize speech args.
@@ -392,6 +393,7 @@ class AmazonPolly extends Provider {
 				$this,
 				$this->feature_instance
 			);
+
 			$result = $polly_client->synthesizeSpeech( $synthesize_data );
 
 			update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
@@ -485,17 +487,17 @@ class AmazonPolly extends Provider {
 		}
 
 		// Set the AWS SDK configuration.
-		$aws_sdk_config =  [
-			'region'    => $default['aws_region'] ?? 'us-east-1',
-			'version'   => 'latest',
-			'ua_append' => ['request-source/classifai'],
+		$aws_sdk_config = [
+			'region'      => $default['aws_region'] ?? 'us-east-1',
+			'version'     => 'latest',
+			'ua_append'   => [ 'request-source/classifai' ],
 			'credentials' => [
 				'key'    => $default['access_key_id'],
 				'secret' => $default['secret_access_key'],
 			],
 		];
 
-		$sdk = new \Aws\Sdk($aws_sdk_config);
+		$sdk = new \Aws\Sdk( $aws_sdk_config );
 		return $sdk->createPolly();
 	}
 
