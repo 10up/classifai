@@ -45,7 +45,7 @@ class AmazonPolly extends Provider {
 
 		add_settings_field(
 			'access_key_id',
-			esc_html__( 'AWS access key ID', 'classifai' ),
+			esc_html__( 'AWS access key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -58,7 +58,7 @@ class AmazonPolly extends Provider {
 				'description'   => sprintf(
 					wp_kses(
 						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Enter the AWS access key ID. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
+						__( 'Enter the AWS access key. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
 						[
 							'a' => [
 								'href'  => [],
