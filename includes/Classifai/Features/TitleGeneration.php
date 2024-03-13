@@ -362,4 +362,51 @@ class TitleGeneration extends Feature {
 
 		return $new_settings;
 	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
+		$new_settings = $this->get_default_settings();
+
+		if ( isset( $old_settings['enable_titles'] ) ) {
+			$new_settings['status'] = $old_settings['enable_titles'];
+		}
+
+		$new_settings['provider'] = 'openai_chatgpt';
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['openai_chatgpt']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['openai_chatgpt']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['number_titles'] ) ) {
+			$new_settings['openai_chatgpt']['number_of_suggestions'] = $old_settings['number_titles'];
+		}
+
+		if ( isset( $old_settings['generate_title_prompt'] ) ) {
+			$new_settings['generate_title_prompt'] = $old_settings['generate_title_prompt'];
+		}
+
+		if ( isset( $old_settings['title_generation_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['title_generation_roles'];
+		}
+
+		if ( isset( $old_settings['title_generation_users'] ) ) {
+			$new_settings['users'] = $old_settings['title_generation_users'];
+		}
+
+		if ( isset( $old_settings['title_generation_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['title_generation_user_based_opt_out'];
+		}
+
+		return $new_settings;
+	}
 }

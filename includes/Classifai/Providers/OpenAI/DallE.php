@@ -18,18 +18,18 @@ class DallE extends Provider {
 	const ID = 'openai_dalle';
 
 	/**
-	 * OpenAI DALL·E URL
+	 * OpenAI DALL·E URL.
 	 *
 	 * @var string
 	 */
 	protected $dalle_url = 'https://api.openai.com/v1/images/generations';
 
 	/**
-	 * Maximum number of characters a prompt can have
+	 * Maximum number of characters a prompt can have.
 	 *
 	 * @var int
 	 */
-	public $max_prompt_chars = 1000;
+	public $max_prompt_chars = 4000;
 
 	/**
 	 * OpenAI DALL·E constructor.
@@ -46,64 +46,7 @@ class DallE extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-	}
-
-	/**
-	 * Register any needed endpoints.
-	 *
-	 * This endpoint is registered in the feature class
-	 * but we need to add additional arguments to it
-	 * that this provider supports.
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1',
-			'generate-image',
-			[
-				'methods'             => WP_REST_Server::READABLE,
-				'callback'            => [ $this->feature_instance, 'rest_endpoint_callback' ],
-				'args'                => [
-					'prompt' => [
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Prompt used to generate an image', 'classifai' ),
-					],
-					'n'      => [
-						'type'              => 'integer',
-						'minimum'           => 1,
-						'maximum'           => 10,
-						'sanitize_callback' => 'absint',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
-					],
-					'size'   => [
-						'type'              => 'string',
-						'enum'              => [
-							'256x256',
-							'512x512',
-							'1024x1024',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Size of generated image', 'classifai' ),
-					],
-					'format' => [
-						'type'              => 'string',
-						'enum'              => [
-							'url',
-							'b64_json',
-						],
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Format of generated image', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this->feature_instance, 'generate_image_permissions_check' ],
-			]
-		);
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 	}
 
 	/**
@@ -123,7 +66,7 @@ class DallE extends Provider {
 				'label_for'     => 'api_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => sprintf(
 					wp_kses(
 						/* translators: %1$s is replaced with the OpenAI sign up URL */
@@ -141,7 +84,7 @@ class DallE extends Provider {
 		);
 
 		add_settings_field(
-			static::ID . 'number_of_images',
+			static::ID . '_number_of_images',
 			esc_html__( 'Number of images', 'classifai' ),
 			[ $this->feature_instance, 'render_select' ],
 			$this->feature_instance->get_option_name(),
@@ -152,12 +95,31 @@ class DallE extends Provider {
 				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
 				'default_value' => $settings['number_of_images'],
 				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
 
 		add_settings_field(
-			static::ID . 'image_size',
+			static::ID . '_quality',
+			esc_html__( 'Image quality', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'quality',
+				'options'       => [
+					'standard' => __( 'Standard', 'classifai' ),
+					'hd'       => __( 'High Definition', 'classifai' ),
+				],
+				'default_value' => $settings['quality'],
+				'description'   => __( 'The quality of the image that will be generated. High Definition creates images with finer details and greater consistency across the image but costs more.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+			]
+		);
+
+		add_settings_field(
+			static::ID . '_image_size',
 			esc_html__( 'Image size', 'classifai' ),
 			[ $this->feature_instance, 'render_select' ],
 			$this->feature_instance->get_option_name(),
@@ -166,13 +128,32 @@ class DallE extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'image_size',
 				'options'       => [
-					'256x256'   => '256x256',
-					'512x512'   => '512x512',
-					'1024x1024' => '1024x1024',
+					'1024x1024' => '1024x1024 (square)',
+					'1792x1024' => '1792x1024 (landscape)',
+					'1024x1792' => '1024x1792 (portrait)',
 				],
 				'default_value' => $settings['image_size'],
-				'description'   => __( 'Size of generated images.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'description'   => __( 'Size of generated images. Larger sizes cost more.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+			]
+		);
+
+		add_settings_field(
+			static::ID . '_style',
+			esc_html__( 'Image style', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'style',
+				'options'       => [
+					'vivid'   => __( 'Vivid', 'classifai' ),
+					'natural' => __( 'Natural', 'classifai' ),
+				],
+				'default_value' => $settings['style'],
+				'description'   => __( 'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.', 'classifai' ),
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
 	}
@@ -194,7 +175,9 @@ class DallE extends Provider {
 					$common_settings,
 					[
 						'number_of_images' => 1,
-						'image_size'       => '256x256',
+						'quality'          => 'standard',
+						'image_size'       => '1024x1024',
+						'style'            => 'vivid',
 					]
 				);
 		}
@@ -217,8 +200,22 @@ class DallE extends Provider {
 		if ( $this->feature_instance instanceof ImageGeneration ) {
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
-			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '256x256', '512x512', '1024x1024' ], true ) ) {
-				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] ?? $settings[ static::ID ]['image_size'] );
+			if ( in_array( $new_settings[ static::ID ]['quality'], [ 'standard', 'hd' ], true ) ) {
+				$new_settings[ static::ID ]['quality'] = sanitize_text_field( $new_settings[ static::ID ]['quality'] );
+			} else {
+				$new_settings[ static::ID ]['quality'] = $settings[ static::ID ]['quality'];
+			}
+
+			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '1024x1024', '1792x1024', '1024x1792' ], true ) ) {
+				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] );
+			} else {
+				$new_settings[ static::ID ]['image_size'] = $settings[ static::ID ]['image_size'];
+			}
+
+			if ( in_array( $new_settings[ static::ID ]['style'], [ 'vivid', 'natural' ], true ) ) {
+				$new_settings[ static::ID ]['style'] = sanitize_text_field( $new_settings[ static::ID ]['style'] );
+			} else {
+				$new_settings[ static::ID ]['style'] = $settings[ static::ID ]['style'];
 			}
 		}
 
@@ -264,11 +261,18 @@ class DallE extends Provider {
 		$args             = wp_parse_args(
 			array_filter( $args ),
 			[
-				'num'    => $settings['number_of_images'] ?? 1,
-				'size'   => $settings['image_size'] ?? '1024x1024',
-				'format' => 'url',
+				'num'     => $settings['number_of_images'] ?? 1,
+				'quality' => $settings['quality'] ?? 'standard',
+				'size'    => $settings['image_size'] ?? '1024x1024',
+				'style'   => $settings['style'] ?? 'vivid',
+				'format'  => 'url',
 			]
 		);
+
+		// Force proper image size for those that had been using DALL·E 2 and haven't updated settings.
+		if ( ! in_array( $args['size'], [ '1024x1024', '1792x1024', '1024x1792' ], true ) ) {
+			$args['size'] = '1024x1024';
+		}
 
 		if ( ! $image_generation->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
@@ -307,40 +311,47 @@ class DallE extends Provider {
 			'classifai_dalle_request_body',
 			[
 				'prompt'          => sanitize_text_field( $prompt ),
-				'n'               => absint( $args['num'] ),
-				'size'            => sanitize_text_field( $args['size'] ),
+				'model'           => 'dall-e-3',
+				'n'               => 1,
+				'quality'         => sanitize_text_field( $args['quality'] ),
 				'response_format' => sanitize_text_field( $args['format'] ),
+				'size'            => sanitize_text_field( $args['size'] ),
+				'style'           => sanitize_text_field( $args['style'] ),
 			]
 		);
 
-		// Make our API request.
-		$response = $request->post(
-			$this->dalle_url,
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		$responses = [];
 
-		set_transient( 'classifai_openai_dalle_latest_response', $response, DAY_IN_SECONDS * 30 );
+		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
+		for ( $i = 0; $i < $args['num']; $i++ ) {
+			$responses[] = $request->post(
+				$this->dalle_url,
+				[
+					'body' => wp_json_encode( $body ),
+				]
+			);
+		}
 
-		// Extract out the image response, if it exists.
-		if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
-			$cleaned_response = [];
+		set_transient( 'classifai_openai_dalle_latest_response', $responses[ array_key_last( $responses ) ], DAY_IN_SECONDS * 30 );
 
-			foreach ( $response['data'] as $data ) {
-				if ( ! empty( $data[ $args['format'] ] ) ) {
-					if ( 'url' === $args['format'] ) {
-						$cleaned_response[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
-					} else {
-						$cleaned_response[] = [ 'url' => $data[ $args['format'] ] ];
+		$cleaned_responses = [];
+
+		foreach ( $responses as $response ) {
+			// Extract out the image response, if it exists.
+			if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
+				foreach ( $response['data'] as $data ) {
+					if ( ! empty( $data[ $args['format'] ] ) ) {
+						if ( 'url' === $args['format'] ) {
+							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
+						} else {
+							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
+						}
 					}
 				}
 			}
-
-			$response = $cleaned_response;
 		}
 
-		return $response;
+		return $cleaned_responses;
 	}
 
 	/**
@@ -354,7 +365,10 @@ class DallE extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof ImageGeneration ) {
-			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'];
+			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'] ?? 1;
+			$debug_info[ __( 'Quality', 'classifai' ) ]          = $provider_settings['quality'] ?? 'standard';
+			$debug_info[ __( 'Size', 'classifai' ) ]             = $provider_settings['image_size'] ?? '1024x1024';
+			$debug_info[ __( 'Style', 'classifai' ) ]            = $provider_settings['style'] ?? 'vivid';
 			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) );
 		}
 
@@ -364,5 +378,72 @@ class DallE extends Provider {
 			$settings,
 			$this->feature_instance
 		);
+	}
+
+	/**
+	 * Register additional REST arguments for the provider.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param array $args Existing REST arguments.
+	 * @return array
+	 */
+	public function register_rest_args( array $args = [] ): array {
+		$provider_args = [
+			'n'       => [
+				'type'              => 'integer',
+				'minimum'           => 1,
+				'maximum'           => 10,
+				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+			],
+			'quality' => [
+				'type'              => 'string',
+				'enum'              => [
+					'standard',
+					'hd',
+				],
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Quality of generated image', 'classifai' ),
+			],
+			'size'    => [
+				'type'              => 'string',
+				'enum'              => [
+					'1024x1024',
+					'1792x1024',
+					'1024x1792',
+				],
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
+			],
+			'style'   => [
+				'type'              => 'string',
+				'enum'              => [
+					'vivid',
+					'natural',
+				],
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Style of generated image', 'classifai' ),
+			],
+			'format'  => [
+				'type'              => 'string',
+				'enum'              => [
+					'url',
+					'b64_json',
+				],
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Format of generated image', 'classifai' ),
+			],
+		];
+
+		// Merge the provider args with the existing args.
+		$args['args'] = array_merge( $args['args'], $provider_args );
+
+		return $args;
 	}
 }

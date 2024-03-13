@@ -63,9 +63,12 @@ class ServicesManager {
 
 	/**
 	 * Registers features under the Language Processing Service.
+	 *
+	 * @param array $features The list of features to be registered.
+	 * @return array
 	 */
-	public function register_language_processing_features(): array {
-		return [
+	public function register_language_processing_features( array $features ): array {
+		$core_features = [
 			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
@@ -74,13 +77,22 @@ class ServicesManager {
 			'\Classifai\Features\AudioTranscriptsGeneration',
 			'\Classifai\Features\Moderation',
 		];
+
+		foreach ( $core_features as $feature ) {
+			$features[] = $feature;
+		}
+
+		return $features;
 	}
 
 	/**
 	 * Registers features under the Image Processing Service.
+	 *
+	 * @param array $features The list of features to be registered.
+	 * @return array
 	 */
-	public function register_image_processing_features(): array {
-		return [
+	public function register_image_processing_features( array $features ): array {
+		$core_features = [
 			'\Classifai\Features\DescriptiveTextGenerator',
 			'\Classifai\Features\ImageTagsGenerator',
 			'\Classifai\Features\ImageCropping',
@@ -88,15 +100,30 @@ class ServicesManager {
 			'\Classifai\Features\ImageGeneration',
 			'\Classifai\Features\PDFTextExtraction',
 		];
+
+		foreach ( $core_features as $feature ) {
+			$features[] = $feature;
+		}
+
+		return $features;
 	}
 
 	/**
 	 * Registers features under the Recommendation Service.
+	 *
+	 * @param array $features The list of features to be registered.
+	 * @return array
 	 */
-	public function register_recommendation_service_features(): array {
-		return [
+	public function register_recommendation_service_features( array $features ): array {
+		$core_features = [
 			'\Classifai\Features\RecommendedContent',
 		];
+
+		foreach ( $core_features as $feature ) {
+			$features[] = $feature;
+		}
+
+		return $features;
 	}
 
 	/**
