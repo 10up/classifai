@@ -7,11 +7,12 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Features\TextToSpeech as FeatureTextToSpeech;
+use WP_Error;
 
 class TextToSpeech extends Provider {
 	use OpenAI;
 
-	const ID = 'openai_text-to-speech';
+	const ID = 'openai_text_to_speech';
 
 	/**
 	 * OpenAI Text to Speech URL.
@@ -208,5 +209,113 @@ class TextToSpeech extends Provider {
 		}
 
 		return $new_settings;
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id       The post ID we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 * @return array|string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'synthesize':
+				$return = $this->synthesize_speech( $post_id, $args );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Synthesizes speech from a post item.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string|WP_Error
+	 */
+	public function synthesize_speech( int $post_id ) {
+		if ( empty( $post_id ) ) {
+			return new WP_Error(
+				'openai_text_to_speech_post_id_missing',
+				esc_html__( 'Post ID missing.', 'classifai' )
+			);
+		}
+
+		// We skip the user cap check if running under WP-CLI.
+		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+			return new WP_Error(
+				'openai_text_to_speech_user_not_authorized',
+				esc_html__( 'Unauthorized user.', 'classifai' )
+			);
+		}
+
+		$feature             = new FeatureTextToSpeech();
+		$settings            = $feature->get_settings();
+		$post_content        = $feature->normalize_post_content( $post_id );
+		$content_hash        = get_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url && ! empty( $content_hash ) && ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
+		}
+
+		// Create the request body to synthesize speech from text.
+		$request_body = array(
+			'model' => $settings[ static::ID ]['tts_model'],
+			'voice' => $settings[ static::ID ]['voice'],
+			'input' => $post_content,
+		);
+
+		// Request parameters.
+		$request_params = array(
+			'method'  => 'POST',
+			'body'    => wp_json_encode( $request_body ),
+			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			'headers' => array(
+				'Authorization' => 'Bearer ' . $settings[ static::ID ]['api_key'],
+				'Content-Type'  => 'application/json',
+			),
+		);
+
+		$response = wp_remote_post( $this->api_url, $request_params );
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error(
+				'openai_text_to_speech_http_error',
+				esc_html( $response->get_error_message() )
+			);
+		}
+
+		$code          = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+
+		// return error if HTTP status code is not 200.
+		if ( \WP_Http::OK !== $code ) {
+			return new WP_Error(
+				'openai_text_to_speech_unsuccessful_request',
+				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
+			);
+		}
+
+		update_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
+
+		return $response_body;
 	}
 }
