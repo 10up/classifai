@@ -4,11 +4,12 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
 		);
+		cy.get( '#provider' ).select( 'ms_azure_text_to_speech' );
 		cy.get(
 			'#classifai_feature_text_to_speech_generation_post_types_post'
 		).check( 'post' );
 		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).clear();
-		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).type( 'https://service.com' );
+		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][endpoint_url]"]' ).type( 'https://service.com' );
 		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).type( 'password' );
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
