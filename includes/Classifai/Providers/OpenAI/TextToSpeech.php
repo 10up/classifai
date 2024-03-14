@@ -278,9 +278,11 @@ class TextToSpeech extends Provider {
 
 		// Create the request body to synthesize speech from text.
 		$request_body = array(
-			'model' => $settings[ static::ID ]['tts_model'],
-			'voice' => $settings[ static::ID ]['voice'],
-			'input' => $post_content,
+			'model'           => $settings[ static::ID ]['tts_model'],
+			'voice'           => $settings[ static::ID ]['voice'],
+			'response_format' => $settings[ static::ID ]['format'],
+			'speed'           => (float) $settings[ static::ID ]['speed'],
+			'input'           => $post_content,
 		);
 
 		// Request parameters.
