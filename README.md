@@ -408,13 +408,13 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * [Register for a AWS account](https://aws.amazon.com/free/) or sign into your existing one.
 * Sign in to the AWS Management Console and open the IAM console at [https://console.aws.amazon.com/iam/](https://console.aws.amazon.com/iam/)
 * Create IAM User (If you don't have any IAM user)
-	* In the navigation pane, choose **Users** and then click **Create user**
-	* On the **Specify user details** page, under User details, in User name, enter the name for the new user.
-	* Click **Next**
-	* On the **Set permissions** page, under Permissions options, select **Attach policies directly**
-	* Under **Permissions policies**, search for the policy **polly** and select **AmazonPollyFullAccess** Policy
-	* Click **Next**
-	* On the **Review and create** page, Review all of the choices you made up to this point. When you are ready to proceed, Click **Create user**.
+  * In the navigation pane, choose **Users** and then click **Create user**
+  * On the **Specify user details** page, under User details, in User name, enter the name for the new user.
+  * Click **Next**
+  * On the **Set permissions** page, under Permissions options, select **Attach policies directly**
+  * Under **Permissions policies**, search for the policy **polly** and select **AmazonPollyFullAccess** Policy
+  * Click **Next**
+  * On the **Review and create** page, Review all of the choices you made up to this point. When you are ready to proceed, Click **Create user**.
 * In the navigation pane, choose **Users**
 * Choose the name of the user for which you want to create access keys, and then choose the **Security credentials** tab.
 * In the **Access keys** section, click **Create access key**.

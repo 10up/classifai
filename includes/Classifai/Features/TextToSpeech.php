@@ -673,7 +673,7 @@ class TextToSpeech extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' );
+		return esc_html__( 'Enables speech generation for post content.', 'classifai' );
 	}
 
 	/**

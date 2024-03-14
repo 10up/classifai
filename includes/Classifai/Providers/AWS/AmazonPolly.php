@@ -12,6 +12,7 @@ use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use Classifai\Features\TextToSpeech;
 use WP_Error;
+use Aws\Sdk;
 
 class AmazonPolly extends Provider {
 
@@ -45,7 +46,7 @@ class AmazonPolly extends Provider {
 
 		add_settings_field(
 			'access_key_id',
-			esc_html__( 'AWS access key', 'classifai' ),
+			esc_html__( 'Access key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -54,7 +55,7 @@ class AmazonPolly extends Provider {
 				'label_for'     => 'access_key_id',
 				'input_type'    => 'text',
 				'default_value' => $settings['access_key_id'],
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => sprintf(
 					wp_kses(
 						/* translators: %1$s is replaced with the OpenAI sign up URL */
@@ -73,7 +74,7 @@ class AmazonPolly extends Provider {
 
 		add_settings_field(
 			'secret_access_key',
-			esc_html__( 'AWS secret access key', 'classifai' ),
+			esc_html__( 'Secret access key', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -82,14 +83,14 @@ class AmazonPolly extends Provider {
 				'label_for'     => 'secret_access_key',
 				'input_type'    => 'password',
 				'default_value' => $settings['secret_access_key'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => esc_html__( 'Enter the AWS secret access key.', 'classifai' ),
 			]
 		);
 
 		add_settings_field(
 			'aws_region',
-			esc_html__( 'AWS Region', 'classifai' ),
+			esc_html__( 'Region', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
@@ -98,7 +99,7 @@ class AmazonPolly extends Provider {
 				'label_for'     => 'aws_region',
 				'input_type'    => 'text',
 				'default_value' => $settings['aws_region'],
-				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => wp_kses(
 					__( 'Enter the AWS Region. eg: <code>us-east-1</code>', 'classifai' ),
 					[
@@ -123,7 +124,7 @@ class AmazonPolly extends Provider {
 					'long-form' => esc_html__( 'Long Form', 'classifai' ),
 				),
 				'default_value' => $settings['voice_engine'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => sprintf(
 					wp_kses(
 						/* translators: %1$s is replaced with the OpenAI sign up URL */
@@ -155,7 +156,7 @@ class AmazonPolly extends Provider {
 					'label_for'     => 'voice',
 					'options'       => $voices_options,
 					'default_value' => $settings['voice'],
-					'class'         => 'classifai-aws-polly-voices classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+					'class'         => 'classifai-aws-polly-voices classifai-provider-field hidden provider-scope-' . static::ID,
 				]
 			);
 		}
@@ -200,12 +201,20 @@ class AmazonPolly extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
 
-		if ( ! empty( $new_settings[ static::ID ]['access_key_id'] ) && ! empty( $new_settings[ static::ID ]['secret_access_key'] ) && ! empty( $new_settings[ static::ID ]['aws_region'] ) ) {
+		if (
+			! empty( $new_settings[ static::ID ]['access_key_id'] ) &&
+			! empty( $new_settings[ static::ID ]['secret_access_key'] ) &&
+			! empty( $new_settings[ static::ID ]['aws_region'] )
+		) {
 			$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] );
 			$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] );
 			$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] );
 
-			if ( $new_access_key_id !== $settings[ static::ID ]['access_key_id'] || $new_secret_access_key !== $settings[ static::ID ]['secret_access_key'] || $new_aws_region !== $settings[ static::ID ]['aws_region'] ) {
+			if (
+				$new_access_key_id !== $settings[ static::ID ]['access_key_id'] ||
+				$new_secret_access_key !== $settings[ static::ID ]['secret_access_key'] ||
+				$new_aws_region !== $settings[ static::ID ]['aws_region']
+			) {
 				$is_credentials_changed = true;
 			}
 
@@ -247,7 +256,7 @@ class AmazonPolly extends Provider {
 	}
 
 	/**
-	 * Connects to Azure's Text to Speech service.
+	 * Connects to the Amazon Polly service.
 	 *
 	 * @param array $args Overridable args.
 	 * @return array
@@ -256,9 +265,9 @@ class AmazonPolly extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
-			'access_key_id'     => isset( $settings[ static::ID ]['access_key_id'] ) ? $settings[ static::ID ]['access_key_id'] : '',
-			'secret_access_key' => isset( $settings[ static::ID ]['secret_access_key'] ) ? $settings[ static::ID ]['secret_access_key'] : '',
-			'aws_region'        => isset( $settings[ static::ID ]['aws_region'] ) ? $settings[ static::ID ]['aws_region'] : 'us-east-1',
+			'access_key_id'     => $settings[ static::ID ]['access_key_id'] ?? '',
+			'secret_access_key' => $settings[ static::ID ]['secret_access_key'] ?? '',
+			'aws_region'        => $settings[ static::ID ]['aws_region'] ?? 'us-east-1',
 		);
 
 		$default = wp_parse_args( $args, $default );
@@ -477,9 +486,9 @@ class AmazonPolly extends Provider {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = array(
-			'access_key_id'     => isset( $settings['access_key_id'] ) ? $settings['access_key_id'] : '',
-			'secret_access_key' => isset( $settings['secret_access_key'] ) ? $settings['secret_access_key'] : '',
-			'aws_region'        => isset( $settings['aws_region'] ) ? $settings['aws_region'] : 'us-east-1',
+			'access_key_id'     => $settings['access_key_id'] ?? '',
+			'secret_access_key' => $settings['secret_access_key'] ?? '',
+			'aws_region'        => $settings['aws_region'] ?? 'us-east-1',
 		);
 
 		$default = wp_parse_args( $aws_config, $default );
@@ -500,7 +509,7 @@ class AmazonPolly extends Provider {
 			],
 		];
 
-		$sdk = new \Aws\Sdk( $aws_sdk_config );
+		$sdk = new Sdk( $aws_sdk_config );
 		return $sdk->createPolly();
 	}
 
@@ -514,7 +523,7 @@ class AmazonPolly extends Provider {
 
 		// Nonce check.
 		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
-			$error = new \WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			$error = new WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
 			wp_send_json_error( $error );
 			exit();
 		}
@@ -536,7 +545,7 @@ class AmazonPolly extends Provider {
 				'label_for'     => 'voice',
 				'options'       => $voices_options,
 				'default_value' => $settings['voice'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
 		$voice_dropdown = ob_get_clean();
