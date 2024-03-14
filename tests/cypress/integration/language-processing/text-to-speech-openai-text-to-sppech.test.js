@@ -1,4 +1,4 @@
-describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => {
+describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
@@ -7,13 +7,13 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get(
 			'#classifai_feature_text_to_speech_generation_post_types_post'
 		).check( 'post' );
-		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).clear();
-		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).type( 'https://service.com' );
-		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][api_key]"]' ).type( 'password' );
+		cy.get( '#provider' ).select( 'openai_text_to_speech' );
+		cy.get( '#tts_model' ).select( 'tts-1' );
+		cy.get( '[name="classifai_feature_text_to_speech_generation[openai_text_to_speech][api_key]"]' ).type( 'password' );
 		cy.get( '#status' ).check();
 		cy.get( '#submit' ).click();
 
-		cy.get( '[name="classifai_feature_text_to_speech_generation[ms_azure_text_to_speech][voice]"]' ).select( 'en-AU-AnnetteNeural|Female' );
+		cy.get( '[name="classifai_feature_text_to_speech_generation[openai_text_to_speech][voice]"]' ).select( 'alloy' );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -27,7 +27,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.createPost( {
 			title: 'Text to Speech test',
 			content:
-				"This feature uses Microsoft's Text to Speech capabilities.",
+				"This feature uses OpenAI's Text to Speech capabilities.",
 		} );
 
 		cy.get( 'button[aria-label="Close panel"]' ).click();
@@ -96,7 +96,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.createClassicPost( {
 			title: 'Text to Speech test classic',
 			content:
-				"This feature uses Microsoft's Text to Speech capabilities.",
+				"This feature uses OpenAI's Text to Speech capabilities.",
 			postType: 'post',
 		} );
 
