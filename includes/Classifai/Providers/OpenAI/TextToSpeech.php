@@ -78,7 +78,7 @@ class TextToSpeech extends Provider {
 					'tts-1-hd' => __( 'Text-to-speech 1 HD (Optimized for quality)', 'classifai' ),
 				],
 				'default_value' => $settings['tts_model'],
-				'description'   => __( 'Select a model depending on your requirement.', 'classifai' ),
+				'description'   => __( 'Select a model depending on your requirements.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -101,7 +101,7 @@ class TextToSpeech extends Provider {
 					'shimmer' => __( 'Shimmer (female)', 'classifai' ),
 				],
 				'default_value' => $settings['voice'],
-				'description'   => __( 'Select the speech voice.', 'classifai' ),
+				'description'   => __( 'Select the desired speech voice.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -124,7 +124,7 @@ class TextToSpeech extends Provider {
 					'pcm'  => __( '.pcm', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
-				'description'   => __( 'Select the audio format.', 'classifai' ),
+				'description'   => __( 'Select the desired audio format.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -143,7 +143,7 @@ class TextToSpeech extends Provider {
 				'max'           => 4,
 				'step'          => 0.25,
 				'default_value' => $settings['speed'],
-				'description'   => __( 'Select the speed of the generated audio.', 'classifai' ),
+				'description'   => __( 'Select the desired speed of the generated audio.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);

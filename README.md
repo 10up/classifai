@@ -23,6 +23,7 @@
 * [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
 * [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
 * [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
+* [Set Up OpenAI Text to Speech Processing](#set-up-text-to-speech-via-openai)
 * [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
 * [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
@@ -73,7 +74,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * PHP 7.4+
 * [WordPress](http://wordpress.org) 6.1+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT, Embeddings, or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ChatGPT, Embeddings, Text to Speech or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
@@ -84,7 +85,7 @@ Note that there is no cost to using ClassifAI itself. Both IBM Watson and Micros
 
 IBM Watson's Natural Language Understanding ("NLU"), which is one of the providers that powers the classification feature, has a ["lite" pricing tier](https://www.ibm.com/cloud/watson-natural-language-understanding/pricing) that offers 30,000 free NLU items per month.
 
-OpenAI, which is one of the providers that powers the classification, title generation, excerpt generation, content resizing, audio transcripts generation, moderation and image generation features, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
+OpenAI, which is one of the providers that powers the classification, title generation, excerpt generation, content resizing, audio transcripts generation, text to speech, moderation and image generation features, has a limited free trial and then requires a [pay per usage](https://openai.com/pricing) plan.
 
 Microsoft Azure AI Vision, which is one of the providers that powers the descriptive text generator, image tags generator, image cropping, image text extraction and PDF text extraction features, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
@@ -347,6 +348,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 ## Set Up Audio Transcripts Generation (via OpenAI Whisper)
 
 Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can create a transcript for audio files that meet the following requirements:
+
 * The file must be presented in mp3, mp4, mpeg, mpga, m4a, wav, or webm format
 * The file size must be less than 25 megabytes (MB)
 
@@ -391,6 +393,27 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice as per your choice.
 * Select a post type that should use this service.
+
+### 3. Using the Text to Speech service
+
+* Assuming the post type selected is "post", create a new post and publish it.
+* After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+* Click the button to preview the generated speech audio for the post.
+* View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up Text to Speech (via OpenAI)
+
+### 1. Sign up for OpenAI
+
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
+
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Text to Speech
+
+* Select **OpenAI Text to Speech** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Using the Text to Speech service
 
