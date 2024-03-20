@@ -278,6 +278,23 @@ class AmazonPolly extends Provider {
 		}
 
 		try {
+			/**
+			 * Filters the return value of the connect to services function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit the describe voices request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param false|mixed $response        A return value of connect to service. Default false.
+			 * @param array       $synthesize_data HTTP request arguments.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
 			$polly_client = $this->get_polly_client( $args );
 			$polly_voices = $polly_client->describeVoices();
 			return $polly_voices->get( 'Voices' );
@@ -377,8 +394,6 @@ class AmazonPolly extends Provider {
 		$voice = $settings[ static::ID ]['voice'] ?? '';
 
 		try {
-			$polly_client = $this->get_polly_client();
-
 			/**
 			 * Filter Synthesize speech args.
 			 *
@@ -406,7 +421,26 @@ class AmazonPolly extends Provider {
 				$this->feature_instance
 			);
 
-			$result = $polly_client->synthesizeSpeech( $synthesize_data );
+
+			/**
+			 * Filters the return value of the synthesize speech function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit the synthesize speech request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param false|mixed $response        A return value of synthesize speech. Default false.
+			 * @param array       $synthesize_data HTTP request arguments.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_synthesize_speech', false, $synthesize_data );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
+			$polly_client = $this->get_polly_client();
+			$result       = $polly_client->synthesizeSpeech( $synthesize_data );
 
 			update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
 			$contents = $result['AudioStream']->getContents();
