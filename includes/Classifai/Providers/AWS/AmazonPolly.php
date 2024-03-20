@@ -421,7 +421,6 @@ class AmazonPolly extends Provider {
 				$this->feature_instance
 			);
 
-
 			/**
 			 * Filters the return value of the synthesize speech function.
 			 *
