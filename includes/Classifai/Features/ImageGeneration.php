@@ -209,6 +209,14 @@ class ImageGeneration extends Feature {
 			true
 		);
 
+		wp_enqueue_script(
+			'classifai-extend-image-blocks',
+			CLASSIFAI_PLUGIN_URL . 'dist/extend-image-blocks.js',
+			get_asset_info( 'extend-image-blocks', 'dependencies' ),
+			get_asset_info( 'extend-image-blocks', 'version' ),
+			true
+		);
+
 		/**
 		 * Filter the default attribution added to generated images.
 		 *

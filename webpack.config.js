@@ -42,6 +42,7 @@ module.exports = {
 		'generate-image-media-upload': [
 			'./src/js/media-modal/views/generate-image-media-upload.js',
 		],
+		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
 	},
 	module: {
 		rules: [
