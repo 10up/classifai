@@ -49,7 +49,7 @@
     "mochawesome-json-to-md": "^0.7.2",
     "node-wp-i18n": "^1.2.7",
     "svg-react-loader": "^0.4.6",
-    "taffydb": "2.6.2",
+    "taffydb": "2.7.3",
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
