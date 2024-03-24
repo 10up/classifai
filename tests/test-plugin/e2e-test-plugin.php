@@ -58,7 +58,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			),
 			'body' => file_get_contents( __DIR__ . '/text-to-speech-voices.json' ),
 		);
-	} elseif ( strpos( $url, 'https://service.com/cognitiveservices/v1' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://service.com/cognitiveservices/v1' ) !== false
+		|| strpos( $url, 'https://api.openai.com/v1/audio/speech' ) !== false
+	) {
 		return array(
 			'response'    => array(
 				'code' => 200,

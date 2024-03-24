@@ -4,6 +4,8 @@ namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
+use Classifai\Providers\OpenAI\TextToSpeech as OpenAITTS;
+use Classifai\Normalizer;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -44,6 +46,14 @@ class TextToSpeech extends Feature {
 	const DISPLAY_GENERATED_AUDIO = '_classifai_display_generated_audio';
 
 	/**
+	 * Meta key to get/set the audio hash that helps to indicate if there is any need
+	 * for the audio file to be regenerated or not.
+	 *
+	 * @var string
+	 */
+	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -54,7 +64,8 @@ class TextToSpeech extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			Speech::ID    => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			OpenAITTS::ID => __( 'OpenAI Text to Speech', 'classifai' ),
 		];
 	}
 
@@ -798,6 +809,21 @@ class TextToSpeech extends Feature {
 		 * @return {bool}           Subsequent state the audio generation toggle should be set to when audio exists.
 		 */
 		return apply_filters( 'classifai_audio_generation_subsequent_state', false, get_post( $post ) );
+	}
+
+	/**
+	 * Normalizes the post content for text to speech generation.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string The normalized post content.
+	 */
+	public function normalize_post_content( int $post_id ): string {
+		$normalizer   = new Normalizer();
+		$post         = get_post( $post_id );
+		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+
+		return $post_content;
 	}
 
 	/**
