@@ -7,6 +7,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.get(
 			'#classifai_feature_text_to_speech_generation_post_types_post'
 		).check( 'post' );
+		cy.get( '#provider' ).select( 'ms_azure_text_to_speech' );
 		cy.get( '#endpoint_url' ).clear();
 		cy.get( '#endpoint_url' ).type( 'https://service.com' );
 		cy.get( '#api_key' ).type( 'password' );

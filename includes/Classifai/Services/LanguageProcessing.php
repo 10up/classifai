@@ -45,6 +45,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\GoogleAI\GeminiAPI',
 				'Classifai\Providers\Azure\OpenAI',
+				'Classifai\Providers\AWS\AmazonPolly',
 			]
 		);
 	}

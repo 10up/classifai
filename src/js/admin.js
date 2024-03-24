@@ -368,3 +368,50 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		providerSelectEl.trigger( 'change' );
 	} );
 } )( jQuery );
+
+( function ( $ ) {
+	$( function () {
+		const engineSelectEl = $( 'select#voice_engine' );
+		if ( ! engineSelectEl.length ) {
+			return;
+		}
+
+		engineSelectEl.on( 'change', function () {
+			const engine = $( this ).val();
+			$( 'select#voice' ).prop( 'disabled', true );
+			$.ajax( {
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'classifai_get_voice_dropdown',
+					nonce: ClassifAI.ajax_nonce,
+					engine,
+				},
+				success( response ) {
+					if ( response.success && response.data ) {
+						jQuery( '.classifai-aws-polly-voices td' ).html(
+							response.data
+						);
+					} else {
+						// eslint-disable-next-line no-console
+						console.error( response.data );
+					}
+					$( 'select#voice' ).prop( 'disabled', false );
+				},
+				error( jqXHR, textStatus, errorThrown ) {
+					// eslint-disable-next-line no-console
+					console.error(
+						'Error: ',
+						textStatus,
+						', Details: ',
+						errorThrown
+					);
+					$( 'select#voice' ).prop( 'disabled', false );
+				},
+			} );
+		} );
+
+		// Trigger 'change' on page load.
+		engineSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );

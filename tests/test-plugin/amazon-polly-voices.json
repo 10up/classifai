@@ -1,0 +1,28 @@
+[
+  {
+    "AdditionalLanguageCodes": [
+      "hi-IN"
+    ],
+    "Gender": "Female",
+    "Id": "Aditi",
+    "LanguageCode": "en-IN",
+    "LanguageName": "Indian English",
+    "Name": "Aditi",
+    "SupportedEngines": [
+      "standard",
+      "neural"
+    ]
+  },
+  {
+    "AdditionalLanguageCodes": [],
+    "Gender": "Female",
+    "Id": "Danielle",
+    "LanguageCode": "en-US",
+    "LanguageName": "US English",
+    "Name": "Danielle",
+    "SupportedEngines": [
+      "long-form",
+      "neural"
+    ]
+  }
+]
