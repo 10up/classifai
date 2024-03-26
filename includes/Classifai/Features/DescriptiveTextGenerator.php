@@ -313,7 +313,7 @@ class DescriptiveTextGenerator extends Feature {
 
 		if ( ! is_array( $settings['descriptive_text_fields'] ) ) {
 			return array(
-				'alt'         => 'no' === $settings['descriptive_text_fields']['caption'] ? 0 : 'alt',
+				'alt'         => 'no' === $settings['descriptive_text_fields'] ? 0 : 'alt',
 				'caption'     => 0,
 				'description' => 0,
 			);
@@ -389,6 +389,60 @@ class DescriptiveTextGenerator extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['descriptive_text_fields'] = array_map( 'sanitize_text_field', $new_settings['descriptive_text_fields'] ?? $settings['descriptive_text_fields'] );
+
+		return $new_settings;
+	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_computer_vision', array() );
+		$new_settings = $this->get_default_settings();
+
+		$new_settings['provider'] = 'ms_computer_vision';
+
+		if ( isset( $old_settings['url'] ) ) {
+			$new_settings['ms_computer_vision']['endpoint_url'] = $old_settings['url'];
+		}
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['ms_computer_vision']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['caption_threshold'] ) ) {
+			$new_settings['ms_computer_vision']['descriptive_confidence_threshold'] = $old_settings['caption_threshold'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['ms_computer_vision']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['enable_image_captions'] ) ) {
+			$new_settings['descriptive_text_fields'] = $old_settings['enable_image_captions'];
+
+			foreach ( $new_settings['descriptive_text_fields'] as $key => $value ) {
+				if ( '0' !== $value ) {
+					$new_settings['status'] = '1';
+					break;
+				}
+			}
+		}
+
+		if ( isset( $old_settings['image_captions_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['image_captions_roles'];
+		}
+
+		if ( isset( $old_settings['image_captions_users'] ) ) {
+			$new_settings['users'] = $old_settings['image_captions_users'];
+		}
+
+		if ( isset( $old_settings['image_captions_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['image_captions_user_based_opt_out'];
+		}
 
 		return $new_settings;
 	}

@@ -1,4 +1,4 @@
-describe( '[Language processing] Speech to Text Tests', () => {
+describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(

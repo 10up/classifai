@@ -2,9 +2,10 @@
 
 namespace Classifai\Features;
 
-use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Services\LanguageProcessing;
+use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Azure\OpenAI;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -43,6 +44,7 @@ class ExcerptGeneration extends Feature {
 		$this->supported_providers = [
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
+			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
 		];
 	}
 
@@ -371,6 +373,53 @@ class ExcerptGeneration extends Feature {
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}
+		}
+
+		return $new_settings;
+	}
+
+	/**
+	 * Generates feature setting data required for migration from
+	 * ClassifAI < 3.0.0 to 3.0.0
+	 *
+	 * @return array
+	 */
+	public function migrate_settings() {
+		$old_settings = get_option( 'classifai_openai_chatgpt', array() );
+		$new_settings = $this->get_default_settings();
+
+		if ( isset( $old_settings['enable_excerpt'] ) ) {
+			$new_settings['status'] = $old_settings['enable_excerpt'];
+		}
+
+		if ( isset( $old_settings['length'] ) ) {
+			$new_settings['length'] = $old_settings['length'];
+		}
+
+		$new_settings['provider'] = 'openai_chatgpt';
+
+		if ( isset( $old_settings['api_key'] ) ) {
+			$new_settings['openai_chatgpt']['api_key'] = $old_settings['api_key'];
+		}
+
+		if ( isset( $old_settings['authenticated'] ) ) {
+			$new_settings['openai_chatgpt']['authenticated'] = $old_settings['authenticated'];
+		}
+
+		if ( isset( $old_settings['generate_excerpt_prompt'] ) ) {
+			$new_settings['generate_excerpt_prompt'] = $old_settings['generate_excerpt_prompt'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_roles'] ) ) {
+			$new_settings['roles'] = $old_settings['excerpt_generation_roles'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_users'] ) ) {
+			$new_settings['users'] = $old_settings['excerpt_generation_users'];
+		}
+
+		if ( isset( $old_settings['excerpt_generation_user_based_opt_out'] ) ) {
+			$new_settings['user_based_opt_out'] = $old_settings['excerpt_generation_user_based_opt_out'];
 		}
 
 		return $new_settings;

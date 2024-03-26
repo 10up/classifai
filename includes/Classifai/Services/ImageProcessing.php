@@ -19,9 +19,7 @@ class ImageProcessing extends Service {
 		parent::__construct(
 			__( 'Image Processing', 'classifai' ),
 			'image_processing',
-			[
-				'Classifai\Providers\Azure\ComputerVision',
-			]
+			self::get_service_providers()
 		);
 	}
 
@@ -38,7 +36,7 @@ class ImageProcessing extends Service {
 	}
 
 	/**
-	 * Get service providers for Language Processing.
+	 * Get service providers for Image Processing.
 	 *
 	 * @return array
 	 */
@@ -47,14 +45,14 @@ class ImageProcessing extends Service {
 		 * Filter the service providers for Image Processing service.
 		 *
 		 * @since 3.0.0
-		 * @hook classifai_language_processing_service_providers
+		 * @hook classifai_image_processing_service_providers
 		 *
 		 * @param {array} $providers Array of available providers for the service.
 		 *
 		 * @return {array} The filtered available providers.
 		 */
 		return apply_filters(
-			'classifai_language_processing_service_providers',
+			'classifai_image_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\ComputerVision',
 				'Classifai\Providers\OpenAI\DallE',

@@ -311,12 +311,12 @@ abstract class Feature {
 	 * Returns the settings for the feature.
 	 *
 	 * @param string $index The index of the setting to return.
-	 * @return array|string
+	 * @return array|mixed
 	 */
 	public function get_settings( $index = false ) {
 		$defaults = $this->get_default_settings();
 		$settings = get_option( $this->get_option_name(), [] );
-		$settings = $this->merge_settings( $settings, $defaults );
+		$settings = $this->merge_settings( (array) $settings, (array) $defaults );
 
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
@@ -393,10 +393,14 @@ abstract class Feature {
 	 */
 	protected function merge_settings( array $settings = [], array $defaults = [] ): array {
 		foreach ( $defaults as $key => $value ) {
-			if ( ! isset( $settings[ $key ] ) ) {
+			if ( ! array_key_exists( $key, $settings ) ) {
 				$settings[ $key ] = $defaults[ $key ];
 			} elseif ( is_array( $value ) ) {
-				$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
+				if ( is_array( $settings[ $key ] ) ) {
+					$settings[ $key ] = $this->merge_settings( $settings[ $key ], $defaults[ $key ] );
+				} else {
+					$settings[ $key ] = $defaults[ $key ];
+				}
 			}
 		}
 
@@ -1179,11 +1183,13 @@ abstract class Feature {
 			__( 'Provider', 'classifai' )               => $feature_settings['provider'],
 		];
 
-		if ( method_exists( $provider, 'get_debug_information' ) ) {
+		if ( $provider && method_exists( $provider, 'get_debug_information' ) ) {
 			$all_debug_info = array_merge(
 				$common_debug_info,
 				$provider->get_debug_information()
 			);
+		} else {
+			$all_debug_info = $common_debug_info;
 		}
 
 		/**

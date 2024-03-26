@@ -4,7 +4,7 @@
  * Plugin URI:        https://github.com/10up/classifai
  * Update URI:        https://classifaiplugin.com
  * Description:       Enhance your WordPress content with Artificial Intelligence and Machine Learning services.
- * Version:           2.6.0-dev
+ * Version:           3.1.0-dev
  * Requires at least: 6.1
  * Requires PHP:      7.4
  * Author:            10up
@@ -88,7 +88,7 @@ function classifai_autoload() {
 		return true;
 	} else {
 		error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			sprintf( esc_html__( 'Fatal Error: Composer not setup in %', 'classifai' ), CLASSIFAI_PLUGIN_DIR )
+			sprintf( 'Warning: Composer not setup in %s', CLASSIFAI_PLUGIN_DIR )
 		);
 
 		return false;
