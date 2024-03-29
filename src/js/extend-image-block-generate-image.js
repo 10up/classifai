@@ -2,6 +2,13 @@ import { Button } from '@wordpress/components';
 import { _nx } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
 
+const allowedCoreBlocks = [
+	'core/image',
+	'core/gallery',
+	'core/media-text',
+	'core/cover',
+];
+
 /**
  * Adds a `Generate image` button to the media-related blocks.
  * @see {@link https://github.com/10up/classifai/issues/724}
@@ -11,7 +18,7 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 function addImageGenerationLink( Component ) {
 	return function ( props ) {
-		const { render, mode, ...rest } = props;
+		const { render, ...rest } = props;
 		let blockProps;
 
 		try {
@@ -21,6 +28,10 @@ function addImageGenerationLink( Component ) {
 		}
 
 		const { 'data-type': blockName } = blockProps;
+
+		if ( ! allowedCoreBlocks.includes( blockName ) ) {
+			return <Component { ...props } />;
+		}
 
 		let isSingle = 1;
 
