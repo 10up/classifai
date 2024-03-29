@@ -78,7 +78,18 @@ class TextToSpeech extends Provider {
 					'tts-1-hd' => __( 'Text-to-speech 1 HD (Optimized for quality)', 'classifai' ),
 				],
 				'default_value' => $settings['tts_model'],
-				'description'   => __( 'Select a model depending on your requirement.', 'classifai' ),
+				'description'   => sprintf(
+					wp_kses(
+						__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						],
+					),
+					esc_url( 'https://platform.openai.com/docs/models/tts' )
+				),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -102,6 +113,18 @@ class TextToSpeech extends Provider {
 				],
 				'default_value' => $settings['voice'],
 				'description'   => __( 'Select the speech voice.', 'classifai' ),
+				'description'   => sprintf(
+					wp_kses(
+						__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
+						[
+							'a' => [
+								'href'  => [],
+								'title' => [],
+							],
+						],
+					),
+					esc_url( 'https://platform.openai.com/docs/guides/text-to-speech/voice-options' )
+				),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -117,11 +140,7 @@ class TextToSpeech extends Provider {
 				'label_for'     => 'format',
 				'options'       => [
 					'mp3'  => __( '.mp3', 'classifai' ),
-					'opus' => __( '.opus', 'classifai' ),
-					'aac'  => __( '.aac', 'classifai' ),
-					'flac' => __( '.flac', 'classifai' ),
 					'wav'  => __( '.wav', 'classifai' ),
-					'pcm'  => __( '.pcm', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
 				'description'   => __( 'Select the audio format.', 'classifai' ),
