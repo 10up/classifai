@@ -44,11 +44,12 @@
     "cypress-mochawesome-reporter": "^3.8.1",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^8.0.3",
-    "jsdoc": "^3.6.11",
+    "jsdoc": "^4.0.2",
     "lint-staged": "^15.2.0",
     "mochawesome-json-to-md": "^0.7.2",
     "node-wp-i18n": "^1.2.7",
     "svg-react-loader": "^0.4.6",
+    "taffydb": "2.7.3",
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
