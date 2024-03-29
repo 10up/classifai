@@ -112,7 +112,6 @@ class TextToSpeech extends Provider {
 					'shimmer' => __( 'Shimmer (female)', 'classifai' ),
 				],
 				'default_value' => $settings['voice'],
-				'description'   => __( 'Select the speech voice.', 'classifai' ),
 				'description'   => sprintf(
 					wp_kses(
 						__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
@@ -143,7 +142,7 @@ class TextToSpeech extends Provider {
 					'wav'  => __( '.wav', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
-				'description'   => __( 'Select the audio format.', 'classifai' ),
+				'description'   => __( 'Select the desired audio format.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -162,7 +161,7 @@ class TextToSpeech extends Provider {
 				'max'           => 4,
 				'step'          => 0.25,
 				'default_value' => $settings['speed'],
-				'description'   => __( 'Select the speed of the generated audio.', 'classifai' ),
+				'description'   => __( 'Select the desired speed of the generated audio.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
