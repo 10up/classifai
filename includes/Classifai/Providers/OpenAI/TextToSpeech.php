@@ -304,17 +304,6 @@ class TextToSpeech extends Provider {
 			'input'           => $post_content,
 		);
 
-		// Request parameters.
-		$request_params = array(
-			'method'  => 'POST',
-			'body'    => wp_json_encode( $request_body ),
-			'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			'headers' => array(
-				'Authorization' => 'Bearer ' . $settings[ static::ID ]['api_key'],
-				'Content-Type'  => 'application/json',
-			),
-		);
-
 		$response = $request->post(
 			$this->api_url,
 			[
@@ -334,5 +323,31 @@ class TextToSpeech extends Provider {
 		update_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
 
 		return $response_body;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
+			$debug_info[ __( 'Model', 'classifai' ) ]          = $provider_settings['tts_model'] ?? '';
+			$debug_info[ __( 'Voice', 'classifai' ) ]          = $provider_settings['voice'] ?? '';
+			$debug_info[ __( 'Audio format', 'classifai' ) ]   = $provider_settings['format'] ?? '';
+
+			// We don't save the response transient because WP does not support serialized binary data to be inserted to the options.
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }
