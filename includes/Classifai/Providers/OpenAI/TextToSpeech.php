@@ -284,6 +284,13 @@ class TextToSpeech extends Provider {
 		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
 		$request             = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
+		if ( mb_strlen( $post_content ) > 4096 ) {
+			return new WP_Error(
+				'openai_text_to_speech_content_too_long',
+				esc_html__( 'Character length should not exceed beyond 4096 characters.', 'classifai' )
+			);
+		}
+
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
 		if ( $saved_attachment_id ) {
 
