@@ -282,6 +282,7 @@ class TextToSpeech extends Provider {
 		$post_content        = $feature->normalize_post_content( $post_id );
 		$content_hash        = get_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, true );
 		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
+		$request             = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
 		if ( $saved_attachment_id ) {
@@ -314,7 +315,12 @@ class TextToSpeech extends Provider {
 			),
 		);
 
-		$response = wp_remote_post( $this->api_url, $request_params );
+		$response = $request->post(
+			$this->api_url,
+			[
+				'body' => wp_json_encode( $request_body ),
+			]
+		);
 
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
@@ -323,16 +329,7 @@ class TextToSpeech extends Provider {
 			);
 		}
 
-		$code          = wp_remote_retrieve_response_code( $response );
 		$response_body = wp_remote_retrieve_body( $response );
-
-		// return error if HTTP status code is not 200.
-		if ( \WP_Http::OK !== $code ) {
-			return new WP_Error(
-				'openai_text_to_speech_unsuccessful_request',
-				esc_html__( 'HTTP request unsuccessful.', 'classifai' )
-			);
-		}
 
 		update_post_meta( $post_id, FeatureTextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
 
