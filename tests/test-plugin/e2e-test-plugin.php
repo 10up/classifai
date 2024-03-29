@@ -63,10 +63,13 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		|| strpos( $url, 'https://api.openai.com/v1/audio/speech' ) !== false
 	) {
 		return array(
-			'response'    => array(
+			'response' => array(
 				'code' => 200,
 			),
-			'body' => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
+			'headers'  => array(
+				'content-type' => 'audio/mpeg',
+			),
+			'body'     => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
 		);
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );

@@ -280,7 +280,7 @@ class APIRequest {
 			$body = wp_remote_retrieve_body( $response );
 			$code = wp_remote_retrieve_response_code( $response );
 
-			if ( $content_type && false !== strpos( $content_type, 'application/json' ) ) {
+			if ( false === $content_type || false !== strpos( $content_type, 'application/json' ) ) {
 				$json = json_decode( $body, true );
 
 				if ( json_last_error() === JSON_ERROR_NONE ) {
