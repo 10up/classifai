@@ -391,6 +391,13 @@ class AmazonPolly extends Provider {
 			}
 		}
 
+		if ( mb_strlen( $post_content ) > 3000 ) {
+			return new WP_Error(
+				'aws_polly_length_error',
+				esc_html__( 'Maximum text length has been exceeded.', 'classifai' )
+			);
+		}
+
 		$voice = $settings[ static::ID ]['voice'] ?? '';
 
 		try {
