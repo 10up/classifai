@@ -285,9 +285,11 @@ class AmazonPolly extends Provider {
 			 * This filter is useful for E2E tests.
 			 *
 			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_connect_to_service
 			 *
-			 * @param false|mixed $response        A return value of connect to service. Default false.
-			 * @param array       $synthesize_data HTTP request arguments.
+			 * @param {bool} $pre The value of pre connect to service. Default false. non-false value will short-circuit the describe voices request.
+			 *
+			 * @return {bool|mixed} The filtered value of connect to service.
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
 
@@ -435,9 +437,12 @@ class AmazonPolly extends Provider {
 			 * This filter is useful for E2E tests.
 			 *
 			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_synthesize_speech
 			 *
-			 * @param false|mixed $response        A return value of synthesize speech. Default false.
-			 * @param array       $synthesize_data HTTP request arguments.
+			 * @param {bool}   $pre A value of pre synthesize speech. Default false.
+			 * @param {array}  $synthesize_data HTTP request arguments.
+			 *
+			 * @return {bool|mixed} The filtered value of pre synthesize speech.
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_synthesize_speech', false, $synthesize_data );
 
