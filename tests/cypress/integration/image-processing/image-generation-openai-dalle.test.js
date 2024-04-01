@@ -38,6 +38,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		).check();
 
 		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 	} );
 
 	it( 'Can generate images in the media modal', () => {
