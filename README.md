@@ -24,6 +24,7 @@
 * [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
 * [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
 * [Set Up OpenAI Text to Speech Processing](#set-up-text-to-speech-via-openai)
+* [Set Up AWS Language Processing](#set-up-text-to-speech-via-amazon-polly)
 * [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
 * [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
 * [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
@@ -46,7 +47,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E 3 API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
-* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
+* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/) and [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
 * Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -78,6 +79,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
+* To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
 
 ## Pricing
 
@@ -414,6 +416,47 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 * Select **OpenAI Text to Speech** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Using the Text to Speech service
+
+* Assuming the post type selected is "post", create a new post and publish it.
+* After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+* Click the button to preview the generated speech audio for the post.
+* View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up Text to Speech (via Amazon Polly)
+
+### 1. Sign up for AWS (Amazon Web Services)
+
+* [Register for a AWS account](https://aws.amazon.com/free/) or sign into your existing one.
+* Sign in to the AWS Management Console and open the IAM console at [https://console.aws.amazon.com/iam/](https://console.aws.amazon.com/iam/)
+* Create IAM User (If you don't have any IAM user)
+  * In the navigation pane, choose **Users** and then click **Create user**
+  * On the **Specify user details** page, under User details, in User name, enter the name for the new user.
+  * Click **Next**
+  * On the **Set permissions** page, under Permissions options, select **Attach policies directly**
+  * Under **Permissions policies**, search for the policy **polly** and select **AmazonPollyFullAccess** Policy
+  * Click **Next**
+  * On the **Review and create** page, Review all of the choices you made up to this point. When you are ready to proceed, Click **Create user**.
+* In the navigation pane, choose **Users**
+* Choose the name of the user for which you want to create access keys, and then choose the **Security credentials** tab.
+* In the **Access keys** section, click **Create access key**.
+* On the **Access key best practices & alternatives** page, select **Application running outside AWS**
+* Click **Next**
+* On the **Retrieve access key** page, choose **Show** to reveal the value of your user's secret access key.
+* Copy and save the credentials in a secure location on your computer or click "Download .csv file" to save the access key ID and secret access key to a `.csv` file.
+
+### 2. Configure AWS credentials under Tools > ClassifAI > Language Processing > Text to Speech
+
+* Select **Amazon Polly** in the provider dropdown.
+* In the `AWS access key` field, enter the `Access key
+` copied from above.
+* In the `AWS secret access key` field, enter your `Secret access key` copied from above.
+* In the `AWS Region` field, enter your AWS region value eg: `us-east-1`
+* Click **Save Changes** (the page will reload).
+* If connected successfully, a new dropdown with the label "Voices" will be displayed.
+* Select a voice and voice engine as per your choice.
+* Select a post type that should use this service.
 
 ### 3. Using the Text to Speech service
 
