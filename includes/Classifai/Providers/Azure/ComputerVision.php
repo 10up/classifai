@@ -610,6 +610,22 @@ class ComputerVision extends Provider {
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 					'Content-Type'              => 'application/json',
 				],
+				/**
+				 * Filters the timeout for the image scan request.
+				 *
+				 * Default: 60 seconds.
+				 *
+				 * @since 3.1.0
+				 * @hook classifai_ms_computer_vision_scan_image_timeout
+				 *
+				 * @param {int} $timeout Timeout in seconds.
+				 *
+				 * @return {int} Timeout in seconds.
+				 */
+				'timeout' => apply_filters(
+					'classifai_' . self::ID . '_scan_image_timeout',
+					60
+				),
 				'body'    => '{"url":"' . $image_url . '"}',
 			]
 		);
