@@ -612,9 +612,15 @@ class ComputerVision extends Provider {
 				],
 				/**
 				 * Filters the timeout for the image scan request.
+				 *
 				 * Default: 60 seconds.
 				 *
-				 * @param int $timeout Timeout in seconds.
+				 * @since 3.1.0
+				 * @hook classifai_ms_computer_vision_scan_image_timeout
+				 *
+				 * @param {int} $timeout Timeout in seconds.
+				 *
+				 * @return {int} Timeout in seconds.
 				 */
 				'timeout' => apply_filters(
 					'classifai_' . self::ID . '_scan_image_timeout',
