@@ -51,7 +51,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
+		cy.openDocumentSettingsSidebarCustom();
 
 		// Find and open the category panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
@@ -119,7 +119,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
+		cy.openDocumentSettingsSidebarCustom();
 
 		// Find and open the category panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;

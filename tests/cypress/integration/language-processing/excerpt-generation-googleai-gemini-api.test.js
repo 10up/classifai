@@ -59,7 +59,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
+		cy.openDocumentSettingsSidebarCustom();
 
 		// Find and open the excerpt panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;

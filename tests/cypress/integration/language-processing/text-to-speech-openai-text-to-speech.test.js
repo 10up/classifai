@@ -26,12 +26,11 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 	it( 'Generates audio from text', () => {
 		cy.createPost( {
 			title: 'Text to Speech test',
-			content:
-				"This feature uses OpenAI's Text to Speech capabilities.",
+			content: "This feature uses OpenAI's Text to Speech capabilities.",
 		} );
 
 		cy.get( 'button[aria-label="Close panel"]' ).click();
-		cy.get( 'button[data-label="Post"]' ).click();
+		cy.openDocumentSettingsSidebarCustom();
 		cy.get( '.classifai-panel' ).click();
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' );
 	} );
@@ -95,8 +94,7 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 
 		cy.createClassicPost( {
 			title: 'Text to Speech test classic',
-			content:
-				"This feature uses OpenAI's Text to Speech capabilities.",
+			content: "This feature uses OpenAI's Text to Speech capabilities.",
 			postType: 'post',
 		} );
 
