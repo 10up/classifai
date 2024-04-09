@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
 import { handleClick } from './helpers';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, subscribe } from '@wordpress/data';
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import {
 	Button,
@@ -631,5 +631,35 @@ const ClassifAIPlugin = () => {
 		</PluginDocumentSettingPanel>
 	);
 };
+
+let saveHappened = false;
+let showingNotice = false;
+
+subscribe( () => {
+	if ( saveHappened === false ) {
+		saveHappened = wp.data.select( 'core/editor' ).isSavingPost() === true;
+	}
+
+	if (
+		saveHappened &&
+		wp.data.select( 'core/editor' ).isSavingPost() === false &&
+		showingNotice === false
+	) {
+		const meta = wp.data
+			.select( 'core/editor' )
+			.getCurrentPostAttribute( 'meta' );
+		if ( meta && meta._classifai_text_to_speech_error ) {
+			showingNotice = true;
+			const error = JSON.parse( meta._classifai_text_to_speech_error );
+			wp.data
+				.dispatch( 'core/notices' )
+				.createErrorNotice(
+					`Audio generation failed. Error: ${ error.code } - ${ error.message }`
+				);
+			saveHappened = false;
+			showingNotice = false;
+		}
+	}
+} );
 
 registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );

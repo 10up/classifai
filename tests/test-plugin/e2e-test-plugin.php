@@ -6,6 +6,10 @@
 // Mock the ClassifAI HTTP request calls and provide known response.
 add_filter( 'pre_http_request', 'classifai_test_mock_http_requests', 10, 3 );
 
+// Mock the AWS Polly API request calls and provide known response.
+add_filter( 'classifai_aws_polly_pre_connect_to_service', 'classifai_mock_aws_polly_connect_to_service' );
+add_filter( 'classifai_aws_polly_pre_synthesize_speech', 'classifai_mock_aws_polly_pre_synthesize_speech' );
+
 /**
  * Mock ClassifAI's HTTP requests.
  *
@@ -58,12 +62,18 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			),
 			'body' => file_get_contents( __DIR__ . '/text-to-speech-voices.json' ),
 		);
-	} elseif ( strpos( $url, 'https://service.com/cognitiveservices/v1' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://service.com/cognitiveservices/v1' ) !== false
+		|| strpos( $url, 'https://api.openai.com/v1/audio/speech' ) !== false
+	) {
 		return array(
-			'response'    => array(
+			'response' => array(
 				'code' => 200,
 			),
-			'body' => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
+			'headers'  => array(
+				'content-type' => 'audio/mpeg',
+			),
+			'body'     => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
 		);
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
@@ -165,3 +175,14 @@ add_action(
 		);
 	}
 );
+
+// AWS Polly API mock for connect to service.
+function classifai_mock_aws_polly_connect_to_service() {
+	$voices = file_get_contents( __DIR__ . '/amazon-polly-voices.json' );
+	return json_decode( $voices, true );
+}
+
+// AWS Polly API mock for synthesize speech.
+function classifai_mock_aws_polly_pre_synthesize_speech() {
+	return file_get_contents( __DIR__ . '/text-to-speech.txt' );
+}

@@ -38,6 +38,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		).check();
 
 		cy.get( '#submit' ).click();
+		cy.get( '.notice' ).contains( 'Settings saved.' );
 	} );
 
 	it( 'Can generate images in the media modal', () => {
@@ -56,7 +57,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
+		cy.openDocumentSettingsSidebarCustom();
 
 		// Find and open the Featured image panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
