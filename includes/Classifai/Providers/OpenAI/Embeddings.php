@@ -76,6 +76,70 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Get the API URL.
+	 *
+	 * @return string
+	 */
+	public function get_api_url(): string {
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_api_url', $this->api_url );
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to use a different model, like
+		 * text-embedding-3-large.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_model
+		 *
+		 * @param {string} $model The default model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_model', $this->model );
+	}
+
+	/**
+	 * Get the maximum number of tokens.
+	 *
+	 * @return int
+	 */
+	public function get_max_tokens(): int {
+		/**
+		 * Filter the max number of tokens.
+		 *
+		 * Useful if you want to change to a different model
+		 * that uses a different number of tokens, or be more
+		 * strict on the amount of tokens that can be used.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_max_tokens
+		 *
+		 * @param {int} $model The default maximum tokens.
+		 *
+		 * @return {int} The maximum tokens.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_max_tokens', $this->max_tokens );
+	}
+
+	/**
 	 * Render the provider fields.
 	 */
 	public function render_provider_fields() {
@@ -605,7 +669,7 @@ class Embeddings extends Provider {
 		$body = apply_filters(
 			'classifai_openai_embeddings_request_body',
 			[
-				'model'      => $this->model,
+				'model'      => $this->get_model(),
 				'input'      => $this->get_content( $id, $type ),
 				'dimensions' => 512,
 			],
@@ -615,7 +679,7 @@ class Embeddings extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->api_url,
+			$this->get_api_url(),
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -653,7 +717,7 @@ class Embeddings extends Provider {
 	 * @return string
 	 */
 	public function get_content( int $id = 0, string $type = 'post' ): string {
-		$tokenizer  = new Tokenizer( $this->max_tokens );
+		$tokenizer  = new Tokenizer( $this->get_max_tokens() );
 		$normalizer = new Normalizer();
 
 		// Get the content depending on the type.
@@ -673,7 +737,7 @@ class Embeddings extends Provider {
 		}
 
 		// Trim our content, if needed, to stay under the token limit.
-		$content = $tokenizer->trim_content( $content, $this->max_tokens );
+		$content = $tokenizer->trim_content( $content, $this->get_max_tokens() );
 
 		/**
 		 * Filter content that will get sent to OpenAI.
