@@ -21,25 +21,32 @@ class Embeddings extends Provider {
 	const ID = 'openai_embeddings';
 
 	/**
-	 * OpenAI Embeddings URL
+	 * OpenAI Embeddings URL.
 	 *
 	 * @var string
 	 */
 	protected $api_url = 'https://api.openai.com/v1/embeddings';
 
 	/**
-	 * OpenAI Embeddings model
+	 * OpenAI Embeddings model.
 	 *
 	 * @var string
 	 */
 	protected $model = 'text-embedding-3-small';
 
 	/**
-	 * Maximum number of tokens our model supports
+	 * Maximum number of tokens our model supports.
 	 *
 	 * @var int
 	 */
 	protected $max_tokens = 8191;
+
+	/**
+	 * Number of dimensions for the embeddings.
+	 *
+	 * @var int
+	 */
+	protected $dimensions = 512;
 
 	/**
 	 * NLU features that are supported by this provider.
@@ -114,6 +121,28 @@ class Embeddings extends Provider {
 		 * @return {string} The model to use.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_model', $this->model );
+	}
+
+	/**
+	 * Get the number of dimensions for the embeddings.
+	 *
+	 * @return int
+	 */
+	public function get_dimensions(): int {
+		/**
+		 * Filter the dimensions we want for each embedding.
+		 *
+		 * Useful if you want to increase or decrease the length
+		 * of each embedding.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_dimensions
+		 *
+		 * @param {int} $dimensions The default dimensions.
+		 *
+		 * @return {int} The dimensions.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_dimensions', $this->dimensions );
 	}
 
 	/**
@@ -671,7 +700,7 @@ class Embeddings extends Provider {
 			[
 				'model'      => $this->get_model(),
 				'input'      => $this->get_content( $id, $type ),
-				'dimensions' => 512,
+				'dimensions' => $this->get_dimensions(),
 			],
 			$id,
 			$type
