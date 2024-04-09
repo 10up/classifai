@@ -7,7 +7,6 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
-use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
@@ -284,6 +283,7 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
+		// TODO: fix this.
 		if ( isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
 			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
@@ -344,7 +344,7 @@ class Embeddings extends Provider {
 
 		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		$embeddings       = $this->generate_embeddings( $post_id, 'post' );
+		$embeddings       = $this->generate_embeddings_for_post( $post_id );
 		$embeddings_terms = [];
 
 		// Add terms to this item based on embedding data.
@@ -358,10 +358,11 @@ class Embeddings extends Provider {
 	/**
 	 * Trigger embedding generation for content being saved.
 	 *
-	 * @param int $post_id ID of post being saved.
+	 * @param int  $post_id ID of post being saved.
+	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_post( int $post_id ) {
+	public function generate_embeddings_for_post( int $post_id, bool $force = false ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification will not work during an autosave.', 'classifai' ) );
@@ -373,29 +374,51 @@ class Embeddings extends Provider {
 		}
 
 		/**
-		 * Filter whether ClassifAI should classify a post.
+		 * Filter whether ClassifAI should classify an item.
 		 *
-		 * Default is true, return false to skip classifying a post.
+		 * Default is true, return false to skip classifying.
 		 *
-		 * @since 1.2.0
-		 * @hook classifai_should_classify_post
+		 * @since 2.2.0
+		 * @hook classifai_openai_embeddings_should_classify
 		 *
-		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
-		 *                                classification for this post.
-		 * @param {int}  $post_id         The ID of the post to be considered for classification.
+		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
+		 * @param {int}    $id   The ID of the item to be considered for classification.
+		 * @param {string} $type The type of item to be considered for classification.
 		 *
-		 * @return {bool} Whether the post should be classified.
+		 * @return {bool} Whether the item should be classified.
 		 */
-		$should_classify = apply_filters( 'classifai_should_classify_post', true, $post_id );
-		if ( ! $should_classify ) {
+		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
-		$embeddings = $this->generate_embeddings( $post_id, 'post' );
+		// Try to use the stored embeddings first.
+		if ( ! $force ) {
+			$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
 
-		// Add terms to this item based on embedding data.
-		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
+			if ( ! empty( $embeddings ) ) {
+				return $embeddings;
+			}
+		}
+
+		// Chunk the post content down.
+		$embeddings     = [];
+		$content        = $this->get_content( $post_id, 'post' );
+		$content_chunks = $this->chunk_content( $content );
+
+		// Get the embeddings for each chunk.
+		if ( ! empty( $content_chunks ) ) {
+			foreach ( $content_chunks as $chunk ) {
+				$embedding = $this->generate_embedding( $chunk );
+
+				if ( $embedding && ! is_wp_error( $embedding ) ) {
+					$embeddings[] = array_map( 'floatval', $embedding );
+				}
+			}
+		}
+
+		// Store the embeddings for future use.
+		if ( ! empty( $embeddings ) ) {
+			update_post_meta( $post_id, 'classifai_openai_embeddings', $embeddings );
 		}
 
 		return $embeddings;
@@ -455,55 +478,75 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get the terms of a post based on embeddings.
+	 * Determine which terms best match a post based on embeddings.
 	 *
-	 * @param array $embedding Embedding data.
+	 * @param array $embeddings An array of embeddings data.
 	 * @return array|WP_Error
 	 */
-	public function get_terms( array $embedding = [] ) {
-		if ( empty( $embedding ) ) {
+	public function get_terms( array $embeddings = [] ) {
+		if ( empty( $embeddings ) ) {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to get terms.', 'classifai' ) );
 		}
 
-		$embedding_similarity = $this->get_embeddings_similarity( $embedding, false );
+		$embeddings_similarity = [];
 
-		if ( empty( $embedding_similarity ) ) {
+		// Iterate through all of our embedding chunks and run our similarity calculations.
+		foreach ( $embeddings as $embedding ) {
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding, false ) );
+		}
+
+		if ( empty( $embeddings_similarity ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
-		// Sort terms based on similarity.
-		$index  = 0;
-		$result = [];
+		// Sort the results by similarity.
+		usort(
+			$embeddings_similarity,
+			function ( $a, $b ) {
+				return $a['similarity'] <=> $b['similarity'];
+			}
+		);
 
-		foreach ( $embedding_similarity as $tax => $terms ) {
+		// Remove duplicates based on the term_id field.
+		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
+		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
+
+		$sorted_results = [];
+
+		// Sort the results into taxonomy buckets.
+		foreach ( $embeddings_similarity as $item ) {
+			$sorted_results[ $item['taxonomy'] ][] = $item;
+		}
+
+		// Prepare the results.
+		$index   = 0;
+		$results = [];
+
+		foreach ( $sorted_results as $tax => $terms ) {
 			// Get the taxonomy name.
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Sort embeddings from lowest to highest.
-			asort( $terms );
+			// Setup our taxonomy object.
+			$results[] = new \stdClass();
 
-			// Return the terms.
-			$result[ $index ] = new \stdClass();
+			$results[ $index ]->{$tax_name} = [];
 
-			$result[ $index ]->{$tax_name} = [];
-
-			$term_added = 0;
-			foreach ( $terms as $term_id => $similarity ) {
+			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
-				$similarity = round( ( 1 - $similarity ), 10 );
+				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
-				$result[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
-					'label' => get_term( $term_id )->name,
+				// Store the results.
+				$results[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
-				++$term_added;
 			}
 
 			++$index;
 		}
 
-		return $result;
+		return $results;
 	}
 
 	/**
@@ -571,7 +614,11 @@ class Embeddings extends Provider {
 				if ( $term_embedding ) {
 					$similarity = $calculations->similarity( $embedding, $term_embedding );
 					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-						$embedding_similarity[ $tax ][ $term_id ] = $similarity;
+						$embedding_similarity[] = [
+							'taxonomy'   => $tax,
+							'term_id'    => $term_id,
+							'similarity' => $similarity,
+						];
 					}
 				}
 			}
@@ -611,17 +658,18 @@ class Embeddings extends Provider {
 	 * Trigger embedding generation for term being saved.
 	 *
 	 * @param int $term_id ID of term being saved.
+	 * @return array|WP_Error
 	 */
 	public function generate_embeddings_for_term( int $term_id ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
 		}
 
 		$term = get_term( $term_id );
 
 		if ( ! is_a( $term, '\WP_Term' ) ) {
-			return;
+			return new WP_Error( 'invalid', esc_html__( 'This is not a valid term.', 'classifai' ) );
 		}
 
 		$feature    = new Classification();
@@ -637,30 +685,7 @@ class Embeddings extends Provider {
 
 		// Ensure this term is part of a taxonomy we support.
 		if ( ! in_array( $term->taxonomy, $taxonomies, true ) ) {
-			return;
-		}
-
-		$embeddings = $this->generate_embeddings( $term_id, 'term' );
-
-		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_openai_embeddings', array_map( 'sanitize_text_field', $embeddings ) );
-		}
-	}
-
-	/**
-	 * Generate embeddings for a particular item.
-	 *
-	 * @param int    $id ID of object to generate embeddings for.
-	 * @param string $type Type of object. Default 'post'.
-	 * @return array|boolean|WP_Error
-	 */
-	public function generate_embeddings( int $id = 0, $type = 'post' ) {
-		$feature  = new Classification();
-		$settings = $feature->get_settings();
-
-		// Ensure the feature is enabled.
-		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'invalid', esc_html__( 'This taxonomy is not supported.', 'classifai' ) );
 		}
 
 		/**
@@ -672,13 +697,59 @@ class Embeddings extends Provider {
 		 * @hook classifai_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
-		 * @param {int}    $id         The ID of the item to be considered for classification.
-		 * @param {string} $type    The type of item to be considered for classification.
+		 * @param {int}    $id   The ID of the item to be considered for classification.
+		 * @param {string} $type The type of item to be considered for classification.
 		 *
-		 * @return {bool} Whether the post should be classified.
+		 * @return {bool} Whether the item should be classified.
 		 */
-		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $id, $type ) ) {
-			return false;
+		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $term_id, 'term' ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
+		}
+
+		// Try to use the stored embeddings first.
+		$embeddings = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+
+		if ( ! empty( $embeddings ) ) {
+			return $embeddings;
+		}
+
+		// Chunk the term content down.
+		$embeddings     = [];
+		$content        = $this->get_content( $term_id, 'term' );
+		$content_chunks = $this->chunk_content( $content );
+
+		// Get the embeddings for each chunk.
+		if ( ! empty( $content_chunks ) ) {
+			foreach ( $content_chunks as $chunk ) {
+				$embedding = $this->generate_embedding( $chunk );
+
+				if ( $embedding && ! is_wp_error( $embedding ) ) {
+					$embeddings[] = array_map( 'floatval', $embedding );
+				}
+			}
+		}
+
+		// Store the embeddings for future use.
+		if ( ! empty( $embeddings ) ) {
+			update_term_meta( $term_id, 'classifai_openai_embeddings', $embeddings );
+		}
+
+		return $embeddings;
+	}
+
+	/**
+	 * Generate an embedding for a particular piece of text.
+	 *
+	 * @param string $text Text to generate the embedding for.
+	 * @return array|boolean|WP_Error
+	 */
+	public function generate_embedding( string $text = '' ) {
+		$feature  = new Classification();
+		$settings = $feature->get_settings();
+
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
@@ -690,8 +761,7 @@ class Embeddings extends Provider {
 		 * @hook classifai_openai_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {int} $id ID of item we are getting embeddings for.
-		 * @param {string} $type Type of item we are getting embeddings for.
+		 * @param {string} $text Text we are getting embeddings for.
 		 *
 		 * @return {array} Request body.
 		 */
@@ -699,11 +769,10 @@ class Embeddings extends Provider {
 			'classifai_openai_embeddings_request_body',
 			[
 				'model'      => $this->get_model(),
-				'input'      => $this->get_content( $id, $type ),
+				'input'      => $text,
 				'dimensions' => $this->get_dimensions(),
 			],
-			$id,
-			$type
+			$text
 		);
 
 		// Make our API request.
@@ -724,34 +793,72 @@ class Embeddings extends Provider {
 			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
 		}
 
-		// Save the embeddings response.
+		$return = [];
+
+		// Parse out the embeddings response.
 		foreach ( $response['data'] as $data ) {
 			if ( ! isset( $data['embedding'] ) || ! is_array( $data['embedding'] ) ) {
 				continue;
 			}
 
-			$response = $data['embedding'];
+			$return = $data['embedding'];
 
 			break;
 		}
 
-		return $response;
+		return $return;
 	}
 
 	/**
-	 * Get our content, trimming if needed.
+	 * Chunk content into smaller pieces with an overlap.
+	 *
+	 * @param string $content Content to chunk.
+	 * @param int    $chunk_size Size of each chunk, in words.
+	 * @param int    $overlap_size Overlap size for each chunk, in words.
+	 * @return array
+	 */
+	public function chunk_content( string $content = '', int $chunk_size = 150, $overlap_size = 25 ): array {
+		// Remove multiple whitespaces.
+		$content = preg_replace( '/\s+/', ' ', $content );
+
+		// Split text by single whitespace.
+		$words = explode( ' ', $content );
+
+		$chunks     = [];
+		$text_count = count( $words );
+
+		// Iterate through and chunk data with an overlap.
+		for ( $i = 0; $i < $text_count; $i += $chunk_size ) {
+			// Join a set of words into a string.
+			$chunk = implode(
+				' ',
+				array_slice(
+					$words,
+					max( $i - $overlap_size, 0 ),
+					$i + $chunk_size
+				)
+			);
+
+			array_push( $chunks, $chunk );
+		}
+
+		return $chunks;
+	}
+
+	/**
+	 * Get our content, ensuring it is normalized.
 	 *
 	 * @param int    $id ID of item to get content from.
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
 	public function get_content( int $id = 0, string $type = 'post' ): string {
-		$tokenizer  = new Tokenizer( $this->get_max_tokens() );
 		$normalizer = new Normalizer();
 
 		// Get the content depending on the type.
 		switch ( $type ) {
 			case 'post':
+				// This will include the post_title and post_content.
 				$content = $normalizer->normalize( $id );
 				break;
 			case 'term':
@@ -759,14 +866,11 @@ class Embeddings extends Provider {
 				$term    = get_term( $id );
 
 				if ( is_a( $term, '\WP_Term' ) ) {
-					$content = $term->name . ' ' . $term->description;
+					$content = $term->name . ' ' . $term->slug . ' ' . $term->description;
 				}
 
 				break;
 		}
-
-		// Trim our content, if needed, to stay under the token limit.
-		$content = $tokenizer->trim_content( $content, $this->get_max_tokens() );
 
 		/**
 		 * Filter content that will get sent to OpenAI.
@@ -802,7 +906,7 @@ class Embeddings extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'classify':
-				$return = $this->generate_embeddings_for_post( $post_id );
+				$return = $this->generate_embeddings_for_post( $post_id, true );
 				break;
 		}
 
