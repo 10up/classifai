@@ -5,7 +5,6 @@ namespace Classifai;
 use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
-use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
