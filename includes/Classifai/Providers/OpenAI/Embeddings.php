@@ -231,6 +231,16 @@ class Embeddings extends Provider {
 			]
 		);
 
+		// If embeddings regeneration is being requested, run that.
+		if (
+			isset( $_GET['feature'] ) &&
+			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) ) &&
+			isset( $_GET['embeddings_nonce'] ) &&
+			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
+		) {
+			$this->regenerate_embeddings();
+		}
+
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -313,7 +323,7 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
-		// TODO: fix this.
+		// TODO: Two issues here we need to address: 1 - for sites with lots of terms, this is likely to lead to timeouts or rate limit issues. Should move this to some sort of queue/cron handler; 2 - this only works on the second save due to checking the value of get_all_feature_taxonomies() which is not updated until the settings are saved.
 		if ( isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
 			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
@@ -359,6 +369,52 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Regenerate embeddings.
+	 *
+	 * This will regenerate embeddings for all terms
+	 * and delete existing post embeddings.
+	 */
+	public function regenerate_embeddings() {
+		$feature  = new Classification();
+		$settings = $feature->get_settings();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
+		// Regenerate embeddings for all terms.
+		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
+			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
+				$this->trigger_taxonomy_update( $feature_name, true );
+			}
+		}
+
+		// Delete all post embeddings.
+		$embedding_posts = get_posts(
+			[
+				'post_type'      => 'any',
+				'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
+				'fields'         => 'ids',
+				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare'   => 'EXISTS',
+			]
+		);
+
+		foreach ( $embedding_posts as $post_id ) {
+			delete_post_meta( $post_id, 'classifai_openai_embeddings' );
+		}
+
+		// Hide the admin notice.
+		update_option( 'classifai_hide_embeddings_notice', true, false );
+
+		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ) );
+		exit;
+	}
+
+	/**
 	 * Get the data to preview terms.
 	 *
 	 * @since 2.5.0
@@ -374,7 +430,7 @@ class Embeddings extends Provider {
 
 		$post_id = filter_input( INPUT_POST, 'post_id', FILTER_SANITIZE_NUMBER_INT );
 
-		$embeddings       = $this->generate_embeddings_for_post( $post_id );
+		$embeddings       = $this->generate_embeddings_for_post( $post_id, true );
 		$embeddings_terms = [];
 
 		// Add terms to this item based on embedding data.
@@ -693,8 +749,9 @@ class Embeddings extends Provider {
 	 * Generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
+	 * @param bool   $all Whether to generate embeddings for all terms or just those without embeddings.
 	 */
-	private function trigger_taxonomy_update( string $taxonomy = '' ) {
+	private function trigger_taxonomy_update( string $taxonomy = '', bool $all = false ) {
 		$exclude = [];
 
 		// Exclude the uncategorized term.
@@ -705,19 +762,24 @@ class Embeddings extends Provider {
 			}
 		}
 
-		$terms = get_terms(
-			[
-				'taxonomy'     => $taxonomy,
-				'orderby'      => 'count',
-				'order'        => 'DESC',
-				'hide_empty'   => false,
-				'fields'       => 'ids',
-				'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare' => 'NOT EXISTS',
-				'number'       => $this->get_max_terms(),
-				'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
-			]
-		);
+		$args = [
+			'taxonomy'     => $taxonomy,
+			'orderby'      => 'count',
+			'order'        => 'DESC',
+			'hide_empty'   => false,
+			'fields'       => 'ids',
+			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_compare' => 'NOT EXISTS',
+			'number'       => $this->get_max_terms(),
+			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+		];
+
+		// If we want all terms, remove our meta query.
+		if ( $all ) {
+			unset( $args['meta_key'], $args['meta_compare'] );
+		}
+
+		$terms = get_terms( $args );
 
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return;
@@ -726,17 +788,18 @@ class Embeddings extends Provider {
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
 			/** @var int $term_id */
-			$this->generate_embeddings_for_term( $term_id );
+			$this->generate_embeddings_for_term( $term_id, $all );
 		}
 	}
 
 	/**
 	 * Trigger embedding generation for term being saved.
 	 *
-	 * @param int $term_id ID of term being saved.
+	 * @param int  $term_id ID of term being saved.
+	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_term( int $term_id ) {
+	public function generate_embeddings_for_term( int $term_id, bool $force = false ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
@@ -785,7 +848,7 @@ class Embeddings extends Provider {
 		// Try to use the stored embeddings first.
 		$embeddings = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
-		if ( ! empty( $embeddings ) ) {
+		if ( ! empty( $embeddings ) && ! $force ) {
 			return $embeddings;
 		}
 

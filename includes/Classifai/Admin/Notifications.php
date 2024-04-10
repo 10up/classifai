@@ -3,6 +3,7 @@
 namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
+use Classifai\Features\Classification;
 
 class Notifications {
 
@@ -33,10 +34,16 @@ class Notifications {
 	 * Render any needed admin notices.
 	 */
 	public function maybe_render_notices() {
+		// Only show these notices to admins.
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
 		$this->render_registration_notice();
 		$this->render_activation_notice();
 		$this->thresholds_update_notice();
 		$this->v3_migration_completed_notice();
+		$this->render_embeddings_notice();
 	}
 
 	/**
@@ -204,6 +211,59 @@ class Notifications {
 	}
 
 	/**
+	 * Render a notice about needing to regenerate embeddings.
+	 */
+	public function render_embeddings_notice() {
+		// Bail if no need to show the notice.
+		if ( get_option( 'classifai_hide_embeddings_notice', false ) ) {
+			return;
+		}
+
+		// Ensure the feature exists.
+		if ( ! class_exists( 'Classifai\Features\Classification' ) ) {
+			return;
+		}
+
+		$feature_instance = new Classification();
+
+		// Don't show the notice if the feature is not enabled.
+		if ( ! $feature_instance->is_feature_enabled() ) {
+			return;
+		}
+
+		// Don't show the notice if the provider is not OpenAI Embeddings.
+		$provider = $feature_instance->get_settings( 'provider' );
+		if ( 'openai_embeddings' !== $provider ) {
+			return;
+		}
+
+		$key     = 'embedding_regen_completed';
+		$message = '';
+
+		// Don't show the notice if the user has already dismissed it.
+		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
+			return;
+		}
+		?>
+
+		<div class="notice notice-warning is-dismissible classifai-dismissible-notice" data-notice="<?php echo esc_attr( $key ); ?>">
+			<p>
+				<?php
+				echo wp_kses_post(
+					sprintf(
+						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
+						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make API requests to OpenAI and thus cost money.', 'classifai' ),
+						wp_nonce_url( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ), 'regen_embeddings', 'embeddings_nonce' )
+					)
+				);
+				?>
+			</p>
+		</div>
+
+		<?php
+	}
+
+	/**
 	 * Print out a script to dismiss a notice.
 	 *
 	 * This allows us to save that a user has dismissed a notice.
@@ -216,16 +276,17 @@ class Notifications {
 
 		$script = <<<EOD
 jQuery( function() {
-	const dismissBtns = document.querySelectorAll( '.classifai-dismissible-notice' );
+	const dismissNotices = document.querySelectorAll( '.classifai-dismissible-notice' );
 
-	if ( ! dismissBtns.length ) {
+	if ( ! dismissNotices.length ) {
 		return;
 	}
 
 	// Add an event listener to the dismiss buttons.
-	dismissBtns.forEach( function( dismissBtn ) {
+	dismissNotices.forEach( function( dismissNotice ) {
+		let dismissBtn = dismissNotice.querySelector( '.notice-dismiss' );
 		dismissBtn.addEventListener( 'click', function( event ) {
-			const id = dismissBtn.getAttribute( 'data-notice' );
+			const id = dismissNotice.getAttribute( 'data-notice' );
 
 			if ( ! id ) {
 				return;
