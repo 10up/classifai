@@ -48,6 +48,13 @@ class Embeddings extends Provider {
 	protected $dimensions = 512;
 
 	/**
+	 * Maximum number of terms we process.
+	 *
+	 * @var int
+	 */
+	protected $max_terms = 5000;
+
+	/**
 	 * NLU features that are supported by this provider.
 	 *
 	 * @var array
@@ -165,6 +172,29 @@ class Embeddings extends Provider {
 		 * @return {int} The maximum tokens.
 		 */
 		return apply_filters( 'classifai_openai_embeddings_max_tokens', $this->max_tokens );
+	}
+
+	/**
+	 * Get the maximum number of terms we process.
+	 *
+	 * @return int
+	 */
+	public function get_max_terms(): int {
+		/**
+		 * Filter the max number of terms.
+		 *
+		 * Default for this is 5000 but this filter can be used to change
+		 * this, either decreasing to help with performance or increasing
+		 * to ensure we consider more terms.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_max_terms
+		 *
+		 * @param {int} $terms The default maximum terms.
+		 *
+		 * @return {int} The maximum terms.
+		 */
+		return apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
 	}
 
 	/**
@@ -495,6 +525,7 @@ class Embeddings extends Provider {
 			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding, false ) );
 		}
 
+		// Ensure we have some results.
 		if ( empty( $embeddings_similarity ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
@@ -537,7 +568,7 @@ class Embeddings extends Provider {
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [// phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
@@ -588,10 +619,12 @@ class Embeddings extends Provider {
 			$terms = get_terms(
 				[
 					'taxonomy'   => $tax,
+					'orderby'    => 'count',
+					'order'      => 'DESC',
 					'hide_empty' => false,
 					'fields'     => 'ids',
 					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-					'number'     => 500,
+					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
 			);
@@ -633,14 +666,27 @@ class Embeddings extends Provider {
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	private function trigger_taxonomy_update( string $taxonomy = '' ) {
+		$exclude = [];
+
+		// Exclude the uncategorized term.
+		if ( 'category' === $taxonomy ) {
+			$uncat_term = get_term_by( 'name', 'Uncategorized', 'category' );
+			if ( $uncat_term ) {
+				$exclude = [ $uncat_term->term_id ];
+			}
+		}
+
 		$terms = get_terms(
 			[
 				'taxonomy'     => $taxonomy,
+				'orderby'      => 'count',
+				'order'        => 'DESC',
 				'hide_empty'   => false,
 				'fields'       => 'ids',
 				'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_compare' => 'NOT EXISTS',
-				'number'       => 500,
+				'number'       => $this->get_max_terms(),
+				'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 			]
 		);
 
@@ -650,6 +696,7 @@ class Embeddings extends Provider {
 
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
+			/** @var int $term_id */
 			$this->generate_embeddings_for_term( $term_id );
 		}
 	}
