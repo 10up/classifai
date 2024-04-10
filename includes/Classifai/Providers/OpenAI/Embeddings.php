@@ -458,23 +458,48 @@ class Embeddings extends Provider {
 	 * Add terms to a post based on embeddings.
 	 *
 	 * @param int   $post_id ID of post to set terms on.
-	 * @param array $embedding Embedding data.
+	 * @param array $embeddings Embeddings data.
 	 * @param bool  $link Whether to link the terms or not.
 	 * @return array|WP_Error
 	 */
-	public function set_terms( int $post_id = 0, array $embedding = [], bool $link = true ) {
+	public function set_terms( int $post_id = 0, array $embeddings = [], bool $link = true ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to set terms.', 'classifai' ) );
 		}
 
-		if ( empty( $embedding ) ) {
+		if ( empty( $embeddings ) ) {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required to set terms.', 'classifai' ) );
 		}
 
-		$embedding_similarity = $this->get_embeddings_similarity( $embedding );
+		$embeddings_similarity = [];
 
-		if ( empty( $embedding_similarity ) ) {
+		// Iterate through all of our embedding chunks and run our similarity calculations.
+		foreach ( $embeddings as $embedding ) {
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding ) );
+		}
+
+		// Ensure we have some results.
+		if ( empty( $embeddings_similarity ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
+		}
+
+		// Sort the results by similarity.
+		usort(
+			$embeddings_similarity,
+			function ( $a, $b ) {
+				return $a['similarity'] <=> $b['similarity'];
+			}
+		);
+
+		// Remove duplicates based on the term_id field.
+		$uniques               = array_unique( array_column( $embeddings_similarity, 'term_id' ) );
+		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
+
+		$sorted_results = [];
+
+		// Sort the results into taxonomy buckets.
+		foreach ( $embeddings_similarity as $item ) {
+			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
 
 		$return = [];
@@ -486,17 +511,17 @@ class Embeddings extends Provider {
 		 * If it is false, build an array of term data that
 		 * can be used to display the terms in the UI.
 		 */
-		foreach ( $embedding_similarity as $tax => $terms ) {
+		foreach ( $sorted_results as $tax => $terms ) {
 			if ( $link ) {
-				wp_set_object_terms( $post_id, array_map( 'absint', array_keys( $terms ) ), $tax, false );
+				wp_set_object_terms( $post_id, array_map( 'absint', array_column( $terms, 'term_id' ) ), $tax, false );
 			} else {
 				$terms_to_link = [];
 
-				foreach ( array_keys( $terms ) as $term_id ) {
-					$term = get_term( $term_id );
+				foreach ( $terms as $term ) {
+					$found_term = get_term( $term['term_id'] );
 
-					if ( $term && ! is_wp_error( $term ) ) {
-						$terms_to_link[ $term->name ] = $term_id;
+					if ( $found_term && ! is_wp_error( $found_term ) ) {
+						$terms_to_link[ $found_term->name ] = $term['term_id'];
 					}
 				}
 
@@ -504,7 +529,7 @@ class Embeddings extends Provider {
 			}
 		}
 
-		return empty( $return ) ? $embedding_similarity : $return;
+		return empty( $return ) ? $embeddings_similarity : $return;
 	}
 
 	/**
@@ -647,7 +672,7 @@ class Embeddings extends Provider {
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
 					foreach ( $term_embedding as $chunk ) {
-						$similarity = $calculations->similarity( $embedding, $chunk );
+						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
 
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
