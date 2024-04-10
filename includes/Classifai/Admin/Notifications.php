@@ -25,19 +25,26 @@ class Notifications {
 	 */
 	public function register() {
 		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
-		add_action( 'admin_notices', [ $this, 'thresholds_update_notice' ] );
-		add_action( 'admin_notices', [ $this, 'v3_migration_completed_notice' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'add_dismiss_script' ] );
 		add_action( 'wp_ajax_classifai_dismiss_notice', [ $this, 'ajax_maybe_dismiss_notice' ] );
 	}
 
 	/**
-	 * Respond to the activation hook.
+	 * Render any needed admin notices.
 	 */
 	public function maybe_render_notices() {
+		$this->render_registration_notice();
+		$this->render_activation_notice();
+		$this->thresholds_update_notice();
+		$this->v3_migration_completed_notice();
+	}
+
+	/**
+	 * Render a registration notice, if needed.
+	 */
+	public function render_registration_notice() {
 		$registration_settings = get_option( 'classifai_settings' );
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		$page                  = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if (
 			'classifai' === $page &&
@@ -52,103 +59,44 @@ class Notifications {
 			</div>
 			<?php
 		}
+	}
 
+	/**
+	 * Render an activation notice, if needed.
+	 */
+	public function render_activation_notice() {
 		$needs_setup = get_transient( 'classifai_activation_notice' );
-		if ( $needs_setup ) {
-			$onboarding = new Onboarding();
-			if ( $onboarding->is_onboarding_completed() ) {
-				delete_transient( 'classifai_activation_notice' );
-				return;
-			}
 
-			// Prevent showing the default WordPress "Plugin Activated" notice.
-			unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
-			?>
-			<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
-				<div id="classifai-activation-notice">
-					<div class="classifai-logo">
-						<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
-					</div>
-					<h3 class="classifai-activation-message">
-						<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
-					</h3>
-					<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
-						<?php esc_html_e( 'Start setup', 'classifai' ); ?>
-					</a>
-				</div>
-			</div>
-			<?php
+		if ( ! $needs_setup ) {
+			return;
+		}
+
+		$onboarding = new Onboarding();
+		if ( $onboarding->is_onboarding_completed() ) {
 			delete_transient( 'classifai_activation_notice' );
-		}
-	}
-
-	/**
-	 * Print out a script to dismiss a notice.
-	 *
-	 * This allows us to save that a user has dismissed a notice.
-	 *
-	 * Influenced by https://github.com/WPTT/admin-notices/blob/af52f563398b42cff82d38eefa55c8121d698ebe/src/Dismiss.php#L77
-	 */
-	public function add_dismiss_script() {
-		$nonce          = wp_create_nonce( 'classifai_dismissible_notice' );
-		$admin_ajax_url = esc_url( admin_url( 'admin-ajax.php' ) );
-
-		$script = <<<EOD
-jQuery( function() {
-	const dismissBtns = document.querySelectorAll( '.classifai-dismissible-notice' );
-
-	if ( ! dismissBtns.length ) {
-		return;
-	}
-
-	// Add an event listener to the dismiss buttons.
-	dismissBtns.forEach( function( dismissBtn ) {
-		dismissBtn.addEventListener( 'click', function( event ) {
-			const id = dismissBtn.getAttribute( 'data-notice' );
-
-			if ( ! id ) {
-				return;
-			}
-
-			const httpRequest = new XMLHttpRequest();
-			let postData = '';
-
-			// Build the data to send in our request.
-			// Data has to be formatted as a string here.
-			postData += 'notice_id=' + id;
-			postData += '&action=classifai_dismiss_notice';
-			postData += '&nonce=$nonce';
-
-			httpRequest.open( 'POST', '$admin_ajax_url' );
-			httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
-			httpRequest.send( postData );
-		});
-	});
-});
-EOD;
-
-		wp_add_inline_script( 'common', $script, 'after' );
-	}
-
-	/**
-	 * Verify ajax request and dismiss the notice.
-	 *
-	 * Influenced by https://github.com/WPTT/admin-notices/blob/af52f563398b42cff82d38eefa55c8121d698ebe/src/Dismiss.php#L133
-	 */
-	public function ajax_maybe_dismiss_notice() {
-		if ( ! isset( $_POST['action'] ) || 'classifai_dismiss_notice' !== $_POST['action'] ) {
 			return;
 		}
 
-		if ( ! isset( $_POST['notice_id'] ) ) {
-			return;
-		}
+		// Prevent showing the default WordPress "Plugin Activated" notice.
+		unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
+		?>
 
-		check_ajax_referer( 'classifai_dismissible_notice', 'nonce' );
+		<div data-notice="plugin-activation" class="notice notice-success is-dismissible">
+			<div id="classifai-activation-notice">
+				<div class="classifai-logo">
+					<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
+				</div>
+				<h3 class="classifai-activation-message">
+					<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
+				</h3>
+				<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
+					<?php esc_html_e( 'Start setup', 'classifai' ); ?>
+				</a>
+			</div>
+		</div>
 
-		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
-
-		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+		<?php
+		delete_transient( 'classifai_activation_notice' );
 	}
 
 	/**
@@ -234,6 +182,7 @@ EOD;
 			return;
 		}
 		?>
+
 		<div class="notice notice-info is-dismissible classifai-dismissible-notice classifai-migation-notice" data-notice="<?php echo esc_attr( $key ); ?>">
 			<p>
 				<?php
@@ -250,6 +199,76 @@ EOD;
 				?>
 			</p>
 		</div>
+
 		<?php
+	}
+
+	/**
+	 * Print out a script to dismiss a notice.
+	 *
+	 * This allows us to save that a user has dismissed a notice.
+	 *
+	 * Influenced by https://github.com/WPTT/admin-notices/blob/af52f563398b42cff82d38eefa55c8121d698ebe/src/Dismiss.php#L77
+	 */
+	public function add_dismiss_script() {
+		$nonce          = wp_create_nonce( 'classifai_dismissible_notice' );
+		$admin_ajax_url = esc_url( admin_url( 'admin-ajax.php' ) );
+
+		$script = <<<EOD
+jQuery( function() {
+	const dismissBtns = document.querySelectorAll( '.classifai-dismissible-notice' );
+
+	if ( ! dismissBtns.length ) {
+		return;
+	}
+
+	// Add an event listener to the dismiss buttons.
+	dismissBtns.forEach( function( dismissBtn ) {
+		dismissBtn.addEventListener( 'click', function( event ) {
+			const id = dismissBtn.getAttribute( 'data-notice' );
+
+			if ( ! id ) {
+				return;
+			}
+
+			const httpRequest = new XMLHttpRequest();
+			let postData = '';
+
+			// Build the data to send in our request.
+			// Data has to be formatted as a string here.
+			postData += 'notice_id=' + id;
+			postData += '&action=classifai_dismiss_notice';
+			postData += '&nonce=$nonce';
+
+			httpRequest.open( 'POST', '$admin_ajax_url' );
+			httpRequest.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded' )
+			httpRequest.send( postData );
+		});
+	});
+});
+EOD;
+
+		wp_add_inline_script( 'common', $script, 'after' );
+	}
+
+	/**
+	 * Verify ajax request and dismiss the notice.
+	 *
+	 * Influenced by https://github.com/WPTT/admin-notices/blob/af52f563398b42cff82d38eefa55c8121d698ebe/src/Dismiss.php#L133
+	 */
+	public function ajax_maybe_dismiss_notice() {
+		if ( ! isset( $_POST['action'] ) || 'classifai_dismiss_notice' !== $_POST['action'] ) {
+			return;
+		}
+
+		if ( ! isset( $_POST['notice_id'] ) ) {
+			return;
+		}
+
+		check_ajax_referer( 'classifai_dismissible_notice', 'nonce' );
+
+		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
+
+		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
 	}
 }
