@@ -588,7 +588,7 @@ function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
 	return filter_var(
-		$settings[ $classify_by ],
+		isset( $settings[ $classify_by ] ) ?? false,
 		FILTER_VALIDATE_BOOLEAN
 	);
 }

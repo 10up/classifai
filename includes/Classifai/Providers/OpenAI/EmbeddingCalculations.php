@@ -18,7 +18,7 @@ class EmbeddingCalculations {
 	 *
 	 * @return bool|float
 	 */
-	public function similarity( array $source_embedding = [], array $compare_embedding = [] ) {
+	public function cosine_similarity( array $source_embedding = [], array $compare_embedding = [] ) {
 		if ( empty( $source_embedding ) || empty( $compare_embedding ) ) {
 			return false;
 		}
