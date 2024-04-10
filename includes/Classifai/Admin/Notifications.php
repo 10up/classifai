@@ -24,7 +24,6 @@ class Notifications {
 	 * Register the actions needed.
 	 */
 	public function register() {
-		add_action( 'classifai_activation_hook', [ $this, 'add_activation_notice' ] );
 		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 		add_action( 'admin_notices', [ $this, 'thresholds_update_notice' ] );
 		add_action( 'admin_notices', [ $this, 'v3_migration_completed_notice' ] );
