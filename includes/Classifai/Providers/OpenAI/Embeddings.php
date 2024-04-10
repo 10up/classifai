@@ -644,14 +644,18 @@ class Embeddings extends Provider {
 
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
-				if ( $term_embedding ) {
-					$similarity = $calculations->similarity( $embedding, $term_embedding );
-					if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
-						$embedding_similarity[] = [
-							'taxonomy'   => $tax,
-							'term_id'    => $term_id,
-							'similarity' => $similarity,
-						];
+				if ( ! empty( $term_embedding ) ) {
+					// Loop through the chunks and run a similarity calculation on each.
+					foreach ( $term_embedding as $chunk ) {
+						$similarity = $calculations->similarity( $embedding, $chunk );
+
+						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+							$embedding_similarity[] = [
+								'taxonomy'   => $tax,
+								'term_id'    => $term_id,
+								'similarity' => $similarity,
+							];
+						}
 					}
 				}
 			}
