@@ -237,8 +237,7 @@ class Notifications {
 			return;
 		}
 
-		$key     = 'embedding_regen_completed';
-		$message = '';
+		$key = 'embedding_regen_completed';
 
 		// Don't show the notice if the user has already dismissed it.
 		if ( get_user_meta( get_current_user_id(), "classifai_dismissed_{$key}", true ) ) {
@@ -252,7 +251,7 @@ class Notifications {
 				echo wp_kses_post(
 					sprintf(
 						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
-						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make API requests to OpenAI and thus cost money.', 'classifai' ),
+						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make multiple API requests to OpenAI.', 'classifai' ),
 						wp_nonce_url( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ), 'regen_embeddings', 'embeddings_nonce' )
 					)
 				);

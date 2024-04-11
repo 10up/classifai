@@ -234,11 +234,27 @@ class Embeddings extends Provider {
 		// If embeddings regeneration is being requested, run that.
 		if (
 			isset( $_GET['feature'] ) &&
-			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) ) &&
-			isset( $_GET['embeddings_nonce'] ) &&
-			wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
+			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) )
 		) {
-			$this->regenerate_embeddings();
+			if ( isset( $_GET['embedding_regen_completed'] ) ) {
+				add_action(
+					'admin_notices',
+					function () {
+						?>
+						<div class="notice notice-success is-dismissible">
+							<p><?php esc_html_e( 'Embeddings have been regenerated.', 'classifai' ); ?></p>
+						</div>
+						<?php
+					}
+				);
+			}
+
+			if (
+				isset( $_GET['embeddings_nonce'] ) &&
+				wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
+			) {
+				$this->regenerate_embeddings();
+			}
 		}
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
@@ -372,7 +388,8 @@ class Embeddings extends Provider {
 	 * Regenerate embeddings.
 	 *
 	 * This will regenerate embeddings for all terms
-	 * and delete existing post embeddings.
+	 * and delete existing post embeddings. Useful to run
+	 * anytime the model or dimensions are changed.
 	 */
 	public function regenerate_embeddings() {
 		$feature  = new Classification();
@@ -388,7 +405,8 @@ class Embeddings extends Provider {
 		// Regenerate embeddings for all terms.
 		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
-				$this->trigger_taxonomy_update( $feature_name, true );
+				// TODO: this also needs fixed for the same reasons as the other trigger_taxonomy_update call.
+				$this->trigger_taxonomy_update( $feature_name, false );
 			}
 		}
 
@@ -410,7 +428,8 @@ class Embeddings extends Provider {
 		// Hide the admin notice.
 		update_option( 'classifai_hide_embeddings_notice', true, false );
 
-		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ) );
+		// Redirect to the same page but remove the nonce so we don't run this again.
+		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification&embedding_regen_completed' ) );
 		exit;
 	}
 
