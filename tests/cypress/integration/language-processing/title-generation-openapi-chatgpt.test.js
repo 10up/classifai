@@ -44,7 +44,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the summary panel.
 		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
@@ -215,7 +215,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the summary panel.
 		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
