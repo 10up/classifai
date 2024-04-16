@@ -125,7 +125,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Open Panel
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("ClassifAI")`;
@@ -214,7 +214,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Open Panel
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("ClassifAI")`;
@@ -253,7 +253,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies.
 		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
@@ -292,7 +292,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies.
 		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
@@ -340,7 +340,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies with threshold 75.
 		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
@@ -381,7 +381,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies with threshold 75 as we have already created terms with threshold 75. So, those are existing terms.
 		[ 'categories', 'keywords', 'concepts', 'entities' ].forEach(
@@ -435,7 +435,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		} );
 
 		// Open post settings sidebar
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Verify Each Created taxonomies.
 		cy.verifyPostTaxonomyTerms( 'tags', threshold / 100 );

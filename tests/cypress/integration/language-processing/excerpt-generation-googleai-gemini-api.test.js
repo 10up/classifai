@@ -59,7 +59,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the excerpt panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
@@ -95,7 +95,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		const data = getGeminiAPIData();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Excerpt test classic',
 			content: 'Test GPT content.',
 			postType: 'post',

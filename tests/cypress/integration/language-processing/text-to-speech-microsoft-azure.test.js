@@ -35,7 +35,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		} );
 
 		cy.get( 'button[aria-label="Close panel"]' ).click();
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 		cy.get( '.classifai-panel' ).click();
 		cy.get( '#classifai-audio-controls__preview-btn' ).should( 'exist' );
 	} );
@@ -97,7 +97,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Text to Speech test classic',
 			content:
 				"This feature uses Microsoft's Text to Speech capabilities.",
