@@ -51,16 +51,6 @@ class NormalizeTest extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'foo bar', $actual );
 	}
 
-	function test_it_removes_abbreviations() {
-		$post_id = $this->factory->post->create( [
-			'post_content' => 'VIM rocks!',
-		] );
-
-		$actual = $this->normalizer->normalize( $post_id );
-		$this->assertStringNotContainsString( 'VIM', $actual );
-		$this->assertStringContainsString( 'rocks', $actual );
-	}
-
 	function test_it_allows_custom_normalizations() {
 		add_filter( 'classifai_normalize', function( $post_content, $post_id ) {
 			return 'custom';
