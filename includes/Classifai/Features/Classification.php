@@ -227,6 +227,21 @@ class Classification extends Feature {
 	public function save( int $post_id, array $results, bool $link = true ) {
 		$provider_instance = $this->get_feature_provider_instance();
 
+		/**
+		 * Filter results to be saved.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_feature_classification_pre_save_results
+		 *
+		 * @param {array} $supported Term results.
+		 * @param {int} $post_id Post ID.
+		 * @param {bool} $link Whether to link the terms or not.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Term results.
+		 */
+		$results = apply_filters( 'classifai_' . static::ID . '_pre_save_results', $results, $post_id, $link, $this );
+
 		switch ( $provider_instance::ID ) {
 			case NLU::ID:
 				$results = $provider_instance->link( $post_id, $results, $link );
