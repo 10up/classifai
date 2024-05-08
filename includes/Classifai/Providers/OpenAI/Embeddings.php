@@ -406,7 +406,7 @@ class Embeddings extends Provider {
 		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
 				// TODO: this also needs fixed for the same reasons as the other trigger_taxonomy_update call.
-				$this->trigger_taxonomy_update( $feature_name, false );
+				$this->trigger_taxonomy_update( $feature_name, true );
 			}
 		}
 
