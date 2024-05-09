@@ -12,7 +12,6 @@ use Classifai\Providers\Watson\APIRequest;
 use Classifai\Providers\Watson\Classifier;
 use Classifai\Normalizer;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
-use Classifai\Providers\Watson\PostClassifier;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Providers\Watson\NLU;
 

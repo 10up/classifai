@@ -46,9 +46,6 @@ class Normalizer {
 		/* Strip HTML entities */
 		$post_content = preg_replace( '/&#?[a-z0-9]{2,8};/i', '', $post_content );
 
-		/* Strip abbreviations */
-		$post_content = preg_replace( '/[A-Z][A-Z]+/', '', $post_content );
-
 		/* Replace HTML linebreaks with newlines */
 		$post_content = preg_replace( '#<br\s?/?>#', "\n\n", $post_content );
 
