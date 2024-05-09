@@ -4,6 +4,10 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
 		);
+		cy.get( '#status' ).check();
+		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
+		cy.get( '#submit' ).click();
+
 		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
 		cy.get( '#endpoint_url' )
 			.clear()
@@ -14,14 +18,15 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get(
 			'#classifai_feature_classification_post_statuses_publish'
 		).check();
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
-		cy.get( '#provider' ).select( 'ibm_watson_nlu' );
 		cy.get(
 			'#classifai_feature_classification_classification_method_recommended_terms'
 		).check();
 		cy.wait( 1000 );
 		cy.get( '#category' ).check();
+		cy.get( '#category_threshold' ).clear().type( 70 );
+		cy.get( '#keyword_threshold' ).clear().type( 70 );
+		cy.get( '#entity_threshold' ).clear().type( 70 );
+		cy.get( '#concept_threshold' ).clear().type( 70 );
 		cy.get( '#submit' ).click();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
