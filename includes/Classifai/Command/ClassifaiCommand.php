@@ -11,7 +11,6 @@ use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Watson\APIRequest;
 use Classifai\Providers\Watson\Classifier;
 use Classifai\Normalizer;
-use Classifai\Providers\Watson\PostClassifier;
 use Classifai\Providers\OpenAI\Embeddings;
 
 use function Classifai\Providers\Watson\get_username;

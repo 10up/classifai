@@ -5,7 +5,6 @@ namespace Classifai;
 use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
-use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
@@ -589,7 +588,7 @@ function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
 	return filter_var(
-		$settings[ $classify_by ],
+		isset( $settings[ $classify_by ] ) ?? false,
 		FILTER_VALIDATE_BOOLEAN
 	);
 }
