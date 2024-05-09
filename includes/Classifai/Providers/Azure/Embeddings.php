@@ -95,7 +95,7 @@ class Embeddings extends OpenAI {
 		 * Useful if you want to increase or decrease the length
 		 * of each embedding.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_dimensions
 		 *
 		 * @param {int} $dimensions The default dimensions.
@@ -118,7 +118,7 @@ class Embeddings extends OpenAI {
 		 * that uses a different number of tokens, or be more
 		 * strict on the amount of tokens that can be used.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_max_tokens
 		 *
 		 * @param {int} $model The default maximum tokens.
@@ -141,7 +141,7 @@ class Embeddings extends OpenAI {
 		 * this, either decreasing to help with performance or increasing
 		 * to ensure we consider more terms.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_max_terms
 		 *
 		 * @param {int} $terms The default maximum terms.
@@ -295,8 +295,6 @@ class Embeddings extends OpenAI {
 	/**
 	 * Get the threshold for the similarity calculation.
 	 *
-	 * @since x.x.x
-	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return float
 	 */
@@ -314,7 +312,7 @@ class Embeddings extends OpenAI {
 		/**
 		 * Filter the threshold for the similarity calculation.
 		 *
-		 * @since x.x.x
+		 * @since 2.5.0
 		 * @hook classifai_threshold
 		 *
 		 * @param {float} $threshold The threshold to use.
@@ -327,8 +325,6 @@ class Embeddings extends OpenAI {
 
 	/**
 	 * Get the data to preview terms.
-	 *
-	 * @since 2.5.0
 	 *
 	 * @return array
 	 */
@@ -375,7 +371,7 @@ class Embeddings extends OpenAI {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
@@ -575,8 +571,6 @@ class Embeddings extends OpenAI {
 	/**
 	 * Get the similarity between an embedding and all terms.
 	 *
-	 * @since x.x.x
-	 *
 	 * @param array $embedding Embedding data.
 	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
@@ -639,7 +633,7 @@ class Embeddings extends OpenAI {
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
 					foreach ( $term_embedding as $chunk ) {
-						$similarity = $calculations->similarity( $embedding, $chunk );
+						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
 
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
@@ -743,7 +737,7 @@ class Embeddings extends OpenAI {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
@@ -805,7 +799,7 @@ class Embeddings extends OpenAI {
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to OpenAI.
@@ -927,7 +921,7 @@ class Embeddings extends OpenAI {
 		/**
 		 * Filter content that will get sent to OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_content
 		 *
 		 * @param {string} $content Content that will be sent to OpenAI.
