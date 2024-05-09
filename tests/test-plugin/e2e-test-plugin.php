@@ -75,7 +75,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			),
 			'body'     => file_get_contents( __DIR__ . '/text-to-speech.txt' ),
 		);
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ||
+		strpos( $url, 'https://e2e-test-azure-openai-embeddings.test/openai/deployments' ) !== false
+	) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
