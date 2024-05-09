@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings;
+use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -41,6 +42,7 @@ class Classification extends Feature {
 		$this->supported_providers = [
 			NLU::ID        => __( 'IBM Watson NLU', 'classifai' ),
 			Embeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
+			AzureEmbeddings::ID => __( 'Azure OpenAI Embeddings', 'classifai' ),
 		];
 	}
 
@@ -247,6 +249,9 @@ class Classification extends Feature {
 				$results = $provider_instance->link( $post_id, $results, $link );
 				break;
 			case Embeddings::ID:
+				$results = $provider_instance->set_terms( $post_id, $results, $link );
+				break;
+			case AzureEmbeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results, $link );
 				break;
 		}
@@ -779,7 +784,7 @@ class Classification extends Feature {
 		);
 
 		// Embeddings only supports existing terms.
-		if ( isset( $settings['provider'] ) && Embeddings::ID === $settings['provider'] ) {
+		if ( isset( $settings['provider'] ) && ( Embeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] ) ) {
 			unset( $method_options['recommended_terms'] );
 			$settings['classification_method'] = 'existing_terms';
 		}
@@ -876,7 +881,7 @@ class Classification extends Feature {
 		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Embeddings only supports existing terms.
-		if ( isset( $new_settings['provider'] ) && Embeddings::ID === $new_settings['provider'] ) {
+		if ( isset( $new_settings['provider'] ) && ( Embeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] ) ) {
 			$new_settings['classification_method'] = 'existing_terms';
 		}
 

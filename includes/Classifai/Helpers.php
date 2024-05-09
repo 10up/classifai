@@ -610,7 +610,7 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
 	}
 
-	if ( Embeddings::ID === $settings['provider'] ) {
+	if ( NLU::ID !== $settings['provider'] ) {
 		$taxonomy = $classify_by;
 	}
 
