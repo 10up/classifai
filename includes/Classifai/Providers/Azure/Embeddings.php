@@ -700,11 +700,12 @@ class Embeddings extends OpenAI {
 	/**
 	 * Trigger embedding generation for term being saved.
 	 *
-	 * @param int  $term_id ID of term being saved.
-	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
+	 * @param int     $term_id ID of term being saved.
+	 * @param bool    $force   Whether to force generation of embeddings even if they already exist. Default false.
+	 * @param Feature $feature The feature instance.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_term( int $term_id, bool $force = false ) {
+	public function generate_embeddings_for_term( int $term_id, bool $force = false, Feature $feature = null ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
@@ -716,7 +717,9 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'invalid', esc_html__( 'This is not a valid term.', 'classifai' ) );
 		}
 
-		$feature    = new Classification();
+		if ( ! $feature ) {
+			$feature = new Classification();
+		}
 		$taxonomies = $feature->get_all_feature_taxonomies();
 
 		if ( in_array( 'tags', $taxonomies, true ) ) {
@@ -765,7 +768,7 @@ class Embeddings extends OpenAI {
 		// Get the embeddings for each chunk.
 		if ( ! empty( $content_chunks ) ) {
 			foreach ( $content_chunks as $chunk ) {
-				$embedding = $this->generate_embedding( $chunk );
+				$embedding = $this->generate_embedding( $chunk, $feature );
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
@@ -784,11 +787,14 @@ class Embeddings extends OpenAI {
 	/**
 	 * Generate an embedding for a particular piece of text.
 	 *
-	 * @param string $text Text to generate the embedding for.
+	 * @param string  $text    Text to generate the embedding for.
+	 * @param Feature $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embedding( string $text = '' ) {
-		$feature  = new Classification();
+	public function generate_embedding( string $text = '', Feature $feature = null ) {
+		if ( ! $feature ) {
+			$feature = new Classification();
+		}
 		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
