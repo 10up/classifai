@@ -901,12 +901,13 @@ class Embeddings extends Provider {
 	/**
 	 * Generate an embedding for a particular piece of text.
 	 *
-	 * @param string $text Text to generate the embedding for.
+	 * @param string       $text    Text to generate the embedding for.
+	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
 	public function generate_embedding( string $text = '', $feature = null ) {
 		if ( ! $feature ) {
-			$feature  = new Classification();
+			$feature = new Classification();
 		}
 		$settings = $feature->get_settings();
 
