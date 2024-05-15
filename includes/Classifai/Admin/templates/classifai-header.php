@@ -22,7 +22,7 @@ $is_setup_page = isset( $_GET['page'] ) && 'classifai_setup' === sanitize_text_f
 			if ( $is_setup_page ) {
 				?>
 				<div class="header-control-item">
-					<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai' ) ); ?>" class="classifai-help-links">
+					<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai_old' ) ); ?>" class="classifai-help-links">
 						<span class="dashicons dashicons-admin-generic"></span>
 						<span class="control-item-text"><?php esc_html_e( 'Settings', 'classifai' ); ?></span>
 					</a>
@@ -70,7 +70,7 @@ $classifai_header_menu = array_merge( $classifai_settings, $services_menu );
 	<?php
 	foreach ( $classifai_header_menu as $key => $value ) {
 		?>
-		<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai&tab=' . $key ) ); ?>" class="nav-tab <?php echo esc_attr( ( $active_page === $key ) ? 'nav-tab-active' : '' ); ?>">
+		<a href="<?php echo esc_url( admin_url( 'tools.php?page=classifai_old&tab=' . $key ) ); ?>" class="nav-tab <?php echo esc_attr( ( $active_page === $key ) ? 'nav-tab-active' : '' ); ?>">
 			<?php echo esc_html( $value ); ?>
 		</a>
 		<?php

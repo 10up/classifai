@@ -270,14 +270,14 @@ class ServicesManager {
 	 */
 	protected function get_menu_title() {
 		$registration_settings = get_option( 'classifai_settings' );
-		$this->title           = esc_html__( 'ClassifAI', 'classifai' );
+		$this->title           = esc_html__( 'ClassifAI Old', 'classifai' );
 		$this->menu_title      = $this->title;
 
 		if ( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] ) {
 			/*
 			 * Translators: Main title.
 			 */
-			$this->menu_title = sprintf( __( 'ClassifAI %s', 'classifai' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
+			$this->menu_title = sprintf( __( 'ClassifAI Old %s', 'classifai' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
 		}
 	}
 
@@ -299,7 +299,7 @@ class ServicesManager {
 			$this->title,
 			$this->menu_title,
 			'manage_options',
-			'classifai',
+			'classifai_old',
 			[ $this, 'render_settings_page' ]
 		);
 	}
