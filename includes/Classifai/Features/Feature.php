@@ -438,6 +438,22 @@ abstract class Feature {
 	}
 
 	/**
+	 * Updates the settings for the feature.
+	 *
+	 * @param array $new_settings New settings to update.
+	 */
+	public function update_settings( array $new_settings ) {
+		$settings = $this->get_settings();
+		if ( empty( $new_settings ) ) {
+			return;
+		}
+
+		// Update the settings with the new values.
+		$new_settings = array_merge( $settings, $new_settings );
+		update_option( $this->get_option_name(), $new_settings );
+	}
+
+	/**
 	 * Add settings fields for Role/User based access.
 	 */
 	protected function add_access_control_fields() {

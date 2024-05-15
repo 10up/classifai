@@ -57,6 +57,10 @@ class Plugin {
 		// Initialize the services; each service handles their features.
 		$this->init_services();
 
+		// Initialize the ClassifAI Settings.
+		$settings = new Admin\Settings();
+		$settings->init();
+
 		// Initialize the ClassifAI Onboarding.
 		$onboarding = new Admin\Onboarding();
 		$onboarding->init();
