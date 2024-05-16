@@ -42,9 +42,10 @@ export const SettingsWrapper = ( props ) => {
 				activeClass="active-tab"
 				initialTabName={ initialFeature }
 				tabs={ featureOptions }
-				onSelect={ ( featureName ) =>
-					updateUrl( 'feature', featureName )
-				}
+				onSelect={ ( featureName ) => {
+					console.log( 'featureName', featureName );
+					updateUrl( 'feature', featureName );
+				} }
 			>
 				{ ( feature ) => {
 					return (
@@ -56,7 +57,7 @@ export const SettingsWrapper = ( props ) => {
 
 								return (
 									<FeatureSettings
-										feature={ feature }
+										featureName={ feature.name }
 										key={ feature.name }
 										featureSettings={
 											settings[ feature.name ] ?? {}

@@ -8,12 +8,16 @@ import {
 	ToggleControl,
 	SelectControl,
 	Button,
+	Panel,
+	PanelBody,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
+import { UserPermissions } from './user-access';
 
 /**
  * Internal dependencies
  */
+import { getFeature } from '../utils/utils';
 
 // Provides an entry point to slot in additional settings. Must be placed
 // outside of function to avoid unnecessary rerenders.
@@ -29,11 +33,20 @@ const AdditionalSettings = withFilters( 'classifai.PluginSettings' )(
  * @param {Object} props All the props passed to this function
  */
 export const FeatureSettings = ( props ) => {
-	const { feature, featureSettings, setFeatureSettings, saveSettings } =
+	const { featureName, featureSettings, setFeatureSettings, saveSettings } =
 		props;
-	const featureName = feature?.name;
-	const featureTitle = feature?.title || __( 'Feature', 'classifai' );
+	const feature = getFeature( featureName );
+	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
 	const [ hasUpdates, setHasUpdates ] = useState( false );
+
+	const providers = Object.keys( feature?.providers || {} ).map(
+		( value ) => {
+			return {
+				value,
+				label: feature.providers[ value ] || '',
+			};
+		}
+	);
 
 	function setSettings( newSettings ) {
 		setFeatureSettings( {
@@ -50,62 +63,43 @@ export const FeatureSettings = ( props ) => {
 
 	return (
 		<>
-			<h2>
-				{
+			<Panel
+				header={
 					// translators: %s: Feature title
 					sprintf( __( '%s Settings', 'classifai' ), featureTitle )
 				}
-			</h2>
+			>
+				<PanelBody>
+					<ToggleControl
+						label={ __( 'Enable feature', 'classifai' ) }
+						checked={ featureSettings.status === '1' }
+						onChange={ ( status ) =>
+							setSettings( {
+								status: status ? '1' : '0',
+							} )
+						}
+					/>
+
+					<SelectControl // TODO: Remove this temporary code
+						label={ __( 'Select a provider', 'classifai' ) }
+						onChange={ ( provider ) => setSettings( { provider } ) }
+						value={ featureSettings.provider }
+						options={ providers }
+					/>
+
+					<Slot name="ProviderSettings" />
+					<Slot name="FeatureSettings" />
+				</PanelBody>
+				<UserPermissions
+					featureName={ featureName }
+					featureSettings={ featureSettings }
+					setSettings={ setSettings }
+				/>
+			</Panel>
 			<div className="settings-tab__plugin-settings inner-container">
 				<div className="setting-tabs__setting-panels">
-					<div className="settings-panel">
-						<div className="settings-label">
-							<span>{ __( 'Enable feature', 'classifai' ) }</span>
-						</div>
-						<div className="settings-control">
-							<ToggleControl
-								label={ __( 'Enable feature', 'classifai' ) }
-								checked={ featureSettings.status === '1' }
-								onChange={ ( status ) =>
-									setSettings( {
-										status: status ? '1' : '0',
-									} )
-								}
-							/>
-						</div>
-
-						<div className="settings-label">
-							<span>
-								{ __( 'Select a provider', 'classifai' ) }
-							</span>
-						</div>
-						<div className="settings-control">
-							<SelectControl // TODO: Remove this temporary code
-								onChange={ ( provider ) =>
-									setSettings( { provider } )
-								}
-								value={ featureSettings.provider }
-								options={ [
-									{
-										label: 'Option A',
-										value: 'a',
-									},
-									{
-										label: 'Option B',
-										value: 'b',
-									},
-									{
-										label: 'Option C',
-										value: 'c',
-									},
-								] }
-							/>
-						</div>
-						<Slot name="ProviderSettings" />
-						<Slot name="FeatureSettings" />
-					</div>
-
 					<Button
+						className="save-settings-button"
 						variant="primary"
 						disabled={ ! hasUpdates }
 						onClick={ saveFeatureSettings }

@@ -18,3 +18,15 @@ export const updateUrl = ( key, value ) => {
 		window.location.search = urlParams.toString();
 	}
 };
+
+export const getFeature = ( featureName ) => {
+	let features = {};
+	for ( const key in window.classifAISettings?.features || {} ) {
+		features = {
+			...features,
+			...( window.classifAISettings.features[ key ] || {} ),
+		};
+	}
+
+	return features[ featureName ];
+};
