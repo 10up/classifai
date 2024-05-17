@@ -121,41 +121,45 @@ class NLU extends Provider {
 				'input_type'    => 'password',
 				'large'         => true,
 				'class'         => 'classifai-provider-field provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
-						__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_feature_enabled() ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is the link to register for an IBM Cloud account, %2$s is the link to setup the NLU service */
+							__( 'Don\'t have an IBM Cloud account yet? <a title="Register for an IBM Cloud account" href="%1$s">Register for one</a> and set up a <a href="%2$s">Natural Language Understanding</a> Resource to get your API key.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://cloud.ibm.com/registration' ),
+						esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
 					),
-					esc_url( 'https://cloud.ibm.com/registration' ),
-					esc_url( 'https://cloud.ibm.com/catalog/services/natural-language-understanding' )
-				),
 			]
 		);
 
-		add_settings_field(
-			static::ID . '_toggle',
-			'',
-			function ( $args = [] ) {
-				printf(
-					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
-					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						? esc_html__( 'Use a username/password instead?', 'classifai' )
-						: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				);
-			},
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-			]
-		);
+		if ( ! $this->feature_instance->is_feature_enabled() ) {
+			add_settings_field(
+				static::ID . '_toggle',
+				'',
+				function ( $args = [] ) {
+					printf(
+						'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
+						$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							? esc_html__( 'Use a username/password instead?', 'classifai' )
+							: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					);
+				},
+				$this->feature_instance->get_option_name(),
+				$this->feature_instance->get_option_name() . '_section',
+				[
+					'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+				]
+			);
+		}
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
