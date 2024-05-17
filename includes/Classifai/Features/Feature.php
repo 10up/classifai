@@ -93,6 +93,15 @@ abstract class Feature {
 	}
 
 	/**
+	 * Returns the roles for the feature.
+	 *
+	 * @return array Array of roles.
+	 */
+	public function get_roles() {
+		return $this->roles;
+	}
+
+	/**
 	 * Returns the label of the feature.
 	 *
 	 * @return string
@@ -410,10 +419,9 @@ abstract class Feature {
 	/**
 	 * Returns the providers supported by the feature.
 	 *
-	 * @internal
 	 * @return array
 	 */
-	protected function get_providers(): array {
+	public function get_providers(): array {
 		/**
 		 * Filter the feature providers.
 		 *

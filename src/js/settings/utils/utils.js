@@ -20,6 +20,11 @@ export const updateUrl = ( key, value ) => {
 };
 
 export const getFeature = ( featureName ) => {
+	const features = getFeatures();
+	return features[ featureName ];
+};
+
+export const getFeatures = () => {
 	let features = {};
 	for ( const key in window.classifAISettings?.features || {} ) {
 		features = {
@@ -28,5 +33,5 @@ export const getFeature = ( featureName ) => {
 		};
 	}
 
-	return features[ featureName ];
+	return features;
 };

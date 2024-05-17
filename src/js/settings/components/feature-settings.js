@@ -10,6 +10,7 @@ import {
 	Button,
 	Panel,
 	PanelBody,
+	Spinner,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { UserPermissions } from './user-access';
@@ -18,24 +19,25 @@ import { UserPermissions } from './user-access';
  * Internal dependencies
  */
 import { getFeature } from '../utils/utils';
+import { useSettings } from '../hooks/use-settings';
 
-// Provides an entry point to slot in additional settings. Must be placed
-// outside of function to avoid unnecessary rerenders.
+// Provides an entry point to slot in additional settings.
 const AdditionalSettings = withFilters( 'classifai.PluginSettings' )(
 	// eslint-disable-next-line no-unused-vars
 	( props ) => <></>
 );
 
 /**
- * Renders the plugin Settings tab of the Block Visibility settings page
+ * Feature Settings component.
  *
- * @since 1.0.0
  * @param {Object} props All the props passed to this function
  */
 export const FeatureSettings = ( props ) => {
-	const { featureName, featureSettings, setFeatureSettings, saveSettings } =
-		props;
+	const { featureName } = props;
+	const { setFeatureSettings, saveSettings, settings, isLoaded } =
+		useSettings();
 	const feature = getFeature( featureName );
+	const featureSettings = settings[ featureName ] || {};
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
 	const [ hasUpdates, setHasUpdates ] = useState( false );
 
@@ -49,7 +51,7 @@ export const FeatureSettings = ( props ) => {
 	);
 
 	function setSettings( newSettings ) {
-		setFeatureSettings( {
+		setFeatureSettings( featureName, {
 			...featureSettings,
 			...newSettings,
 		} );
@@ -57,8 +59,12 @@ export const FeatureSettings = ( props ) => {
 	}
 
 	function saveFeatureSettings() {
-		saveSettings( { [ featureName ]: featureSettings } );
+		saveSettings( featureName );
 		setHasUpdates( false );
+	}
+
+	if ( ! isLoaded ) {
+		return <Spinner />;
 	}
 
 	return (
@@ -75,12 +81,11 @@ export const FeatureSettings = ( props ) => {
 						checked={ featureSettings.status === '1' }
 						onChange={ ( status ) =>
 							setSettings( {
-								status: status ? '1' : '0',
+								status: status ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
 							} )
 						}
 					/>
-
-					<SelectControl // TODO: Remove this temporary code
+					<SelectControl
 						label={ __( 'Select a provider', 'classifai' ) }
 						onChange={ ( provider ) => setSettings( { provider } ) }
 						value={ featureSettings.provider }

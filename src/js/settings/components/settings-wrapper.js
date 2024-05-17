@@ -4,7 +4,6 @@
 import { TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FeatureSettings } from './feature-settings';
-import { useSettings } from '../hooks/use-settings';
 import { updateUrl } from '../utils/utils';
 
 /**
@@ -12,24 +11,30 @@ import { updateUrl } from '../utils/utils';
  */
 const { features } = window.classifAISettings;
 
-export const SettingsWrapper = ( props ) => {
-	const { tab } = props;
-	const servicefeatures = features[ tab ];
-	const { settings, setSettings, saveSettings } = useSettings();
-
+/**
+ * SettingsWrapper component to render the feature navigation tabs and the feature settings.
+ *
+ * @param {Object} props     All the props passed to this function
+ * @param {string} props.tab The name of the tab.
+ * @return {Object} The SettingsWrapper component.
+ */
+export const SettingsWrapper = ( { tab } ) => {
+	// Switch the default feature tab based on the URL feature query
 	const urlParams = new URLSearchParams( window.location.search );
 	const requestedFeature = urlParams.get( 'feature' );
-	const initialFeature = Object.keys( servicefeatures ).includes(
+	const serviceFeatures = features[ tab ] || {};
+	const initialFeature = Object.keys( serviceFeatures ).includes(
 		requestedFeature
 	)
 		? requestedFeature
-		: Object.keys( servicefeatures )[ 0 ];
+		: Object.keys( serviceFeatures )[ 0 ] || 'classification';
 
-	const featureOptions = Object.keys( servicefeatures ).map( ( feature ) => {
+	// Get the features for the selected service.
+	const featureOptions = Object.keys( serviceFeatures ).map( ( feature ) => {
 		return {
 			name: feature,
 			title:
-				servicefeatures[ feature ]?.label ||
+				serviceFeatures[ feature ]?.label ||
 				__( 'Feature', 'classifai' ),
 			className: feature,
 		};
@@ -43,8 +48,7 @@ export const SettingsWrapper = ( props ) => {
 				initialTabName={ initialFeature }
 				tabs={ featureOptions }
 				onSelect={ ( featureName ) => {
-					console.log( 'featureName', featureName );
-					updateUrl( 'feature', featureName );
+					return updateUrl( 'feature', featureName );
 				} }
 			>
 				{ ( feature ) => {
@@ -59,16 +63,6 @@ export const SettingsWrapper = ( props ) => {
 									<FeatureSettings
 										featureName={ feature.name }
 										key={ feature.name }
-										featureSettings={
-											settings[ feature.name ] ?? {}
-										}
-										setFeatureSettings={ ( newSettings ) =>
-											setSettings( {
-												...settings,
-												[ feature.name ]: newSettings,
-											} )
-										}
-										saveSettings={ saveSettings }
 									/>
 								);
 							} ) }

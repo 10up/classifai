@@ -70,6 +70,7 @@ class Settings {
 		$data = array(
 			'features' => $this->get_features(),
 			'services' => get_services_menu(),
+			'settings' => $this->get_settings(),
 		);
 
 		wp_add_inline_script(
@@ -128,11 +129,29 @@ class Settings {
 
 			foreach ( $service->feature_classes as $feature ) {
 				$services[ $service->get_menu_slug() ][ $feature::ID ] = array(
-					'label' => $feature->get_label(),
+					'label'     => $feature->get_label(),
+					'providers' => $feature->get_providers(),
+					'roles'     => $feature->get_roles(),
 				);
 			}
 		}
 		return $services;
+	}
+
+	/**
+	 * Get the settings.
+	 *
+	 * @return array The settings.
+	 */
+	public function get_settings() {
+		$features = $this->get_features( true );
+		$settings = [];
+
+		foreach ( $features as $feature ) {
+			$settings[ $feature::ID ] = $feature->get_settings();
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -147,12 +166,12 @@ class Settings {
 			[
 				[
 					'methods'             => \WP_REST_Server::READABLE,
-					'callback'            => [ $this, 'get_settings' ],
+					'callback'            => [ $this, 'get_settings_callback' ],
 					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
 				],
 				[
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => [ $this, 'update_settings' ],
+					'callback'            => [ $this, 'update_settings_callback' ],
 					'permission_callback' => [ $this, 'update_settings_permissions_check' ],
 				],
 			]
@@ -160,18 +179,12 @@ class Settings {
 	}
 
 	/**
-	 * Get the settings.
+	 * Callback for getting the settings.
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_settings() {
-		$features = $this->get_features( true );
-		$settings = [];
-
-		foreach ( $features as $feature ) {
-			$settings[ $feature::ID ] = $feature->get_settings();
-		}
-
+	public function get_settings_callback() {
+		$settings = $this->get_settings();
 		return rest_ensure_response( $settings );
 	}
 
@@ -188,9 +201,9 @@ class Settings {
 	 * Update the settings.
 	 *
 	 * @param \WP_REST_Request $request Full data about the request.
-	 * @return \WP_REST_Response
+	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function update_settings( $request ) {
+	public function update_settings_callback( $request ) {
 		$settings = $request->get_json_params();
 
 		$feature_key = key( $settings );
@@ -201,9 +214,13 @@ class Settings {
 			return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
 		}
 
-		$feature->update_settings( $settings[ $feature_key ] );
+		$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
+		if ( is_wp_error( $new_settings ) ) {
+			return $new_settings;
+		}
 
-		return $this->get_settings();
+		$feature->update_settings( $new_settings );
+		return $this->get_settings_callback();
 	}
 
 	/**

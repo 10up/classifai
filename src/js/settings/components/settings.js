@@ -1,15 +1,30 @@
+/**
+ * WordPress dependencies
+ */
 import { TabPanel, SlotFillProvider } from '@wordpress/components';
 
-import '../../../scss/settings.scss';
-import '../providers'; // TODO: This is for testing purposes only, please remove this line
-
+/**
+ * Internal dependencies
+ */
 import { Header, SettingsWrapper } from '../components';
 import { updateUrl } from '../utils/utils';
-const { classifAISettings } = window;
-const { services } = classifAISettings;
+import { useSettings } from '../hooks/use-settings';
+
+const { services } = window.classifAISettings;
 
 const Content = () => {
-	const serviceKeys = Object.keys( services );
+	useSettings( true ); // Load settings.
+
+	// Switch the default settings tab based on the URL tab query
+	const urlParams = new URLSearchParams( window.location.search );
+	const requestedTab = urlParams.get( 'tab' );
+	const initialService = Object.keys( services || {} ).includes(
+		requestedTab
+	)
+		? requestedTab
+		: 'language_processing';
+
+	const serviceKeys = Object.keys( services || {} );
 	const serviceOptions = serviceKeys.map( ( slug ) => {
 		return {
 			name: slug,
@@ -18,20 +33,15 @@ const Content = () => {
 		};
 	} );
 
-	// Switch the default settings tab based on the URL tab query
-	const urlParams = new URLSearchParams( window.location.search );
-	const requestedTab = urlParams.get( 'tab' );
-	const initialTab = serviceKeys.includes( requestedTab )
-		? requestedTab
-		: 'language_processing';
-
 	return (
 		<TabPanel
 			className={ 'setting-tabs' }
 			activeClass="active-tab"
-			initialTabName={ initialTab }
+			initialTabName={ initialService }
 			tabs={ serviceOptions }
-			onSelect={ ( tabName ) => updateUrl( 'tab', tabName ) }
+			onSelect={ ( tabName ) => {
+				return updateUrl( 'tab', tabName );
+			} }
 		>
 			{ ( tab ) => {
 				return (
