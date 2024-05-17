@@ -2,18 +2,18 @@ import { addFilter } from '@wordpress/hooks';
 import { Fill, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
-function providerSettings() {
+function openAIWhisperSettings( ProviderSettings ) {
 	return ( props ) => {
-		const { featureSettings, setSettings } = props;
-		const { provider } = featureSettings;
-		if ( provider !== 'openai_whisper' ) {
-			return null;
+		const { featureSettings = {}, setSettings = {} } = props;
+		if ( featureSettings.provider !== 'openai_whisper' ) {
+			return <ProviderSettings { ...props } />;
 		}
 
 		const apiKey = featureSettings.openai_whisper?.api_key || '';
 
 		return (
 			<>
+				<ProviderSettings { ...props } />
 				<Fill name="ProviderSettings">
 					<TextControl
 						label={ __( 'API Key', 'classifai' ) }
@@ -34,7 +34,7 @@ function providerSettings() {
 }
 
 addFilter(
-	'classifai.PluginSettings',
+	'classifai.ProviderSettings',
 	'classifai-provider-settings/openai-whisper',
-	providerSettings
+	openAIWhisperSettings
 );

@@ -22,9 +22,13 @@ import { getFeature } from '../utils/utils';
 import { useSettings } from '../hooks/use-settings';
 
 // Provides an entry point to slot in additional settings.
-const AdditionalSettings = withFilters( 'classifai.PluginSettings' )(
-	// eslint-disable-next-line no-unused-vars
-	( props ) => <></>
+const ProviderSettingsComponent = () => <></>;
+const FeatureSettingsComponent = () => <></>;
+const ProviderSettings = withFilters( 'classifai.ProviderSettings' )(
+	ProviderSettingsComponent
+);
+const AdditionalFeatureSettings = withFilters( 'classifai.FeatureSettings' )(
+	FeatureSettingsComponent
 );
 
 /**
@@ -113,7 +117,12 @@ export const FeatureSettings = ( props ) => {
 					</Button>
 				</div>
 			</div>
-			<AdditionalSettings
+			<ProviderSettings
+				featureSettings={ featureSettings }
+				setSettings={ setSettings }
+				{ ...props }
+			/>
+			<AdditionalFeatureSettings
 				featureSettings={ featureSettings }
 				setSettings={ setSettings }
 				{ ...props }

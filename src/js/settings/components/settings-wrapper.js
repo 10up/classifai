@@ -53,20 +53,10 @@ export const SettingsWrapper = ( { tab } ) => {
 			>
 				{ ( feature ) => {
 					return (
-						<>
-							{ featureOptions.map( ( key ) => {
-								if ( key.name !== feature.name ) {
-									return null;
-								}
-
-								return (
-									<FeatureSettings
-										featureName={ feature.name }
-										key={ feature.name }
-									/>
-								);
-							} ) }
-						</>
+						<FeatureSettings
+							featureName={ feature.name }
+							key={ feature.name }
+						/>
 					);
 				} }
 			</TabPanel>

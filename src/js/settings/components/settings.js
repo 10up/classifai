@@ -44,22 +44,7 @@ const Content = () => {
 			} }
 		>
 			{ ( tab ) => {
-				return (
-					<>
-						{ serviceOptions.map( ( key ) => {
-							if ( key.name !== tab.name ) {
-								return null;
-							}
-
-							return (
-								<SettingsWrapper
-									tab={ tab.name }
-									key={ tab.name }
-								/>
-							);
-						} ) }
-					</>
-				);
+				return <SettingsWrapper tab={ tab.name } key={ tab.name } />;
 			} }
 		</TabPanel>
 	);
