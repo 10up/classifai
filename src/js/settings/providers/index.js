@@ -1,1 +1,1 @@
-import './openai-whisper';
+import './openai-moderation';
