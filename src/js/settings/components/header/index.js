@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ClassifAILogo } from '../utils/icons';
+import { ClassifAILogo } from '../../utils/icons';
 
 export const Header = ( props ) => {
 	const { isSetupPage } = props;

@@ -7,7 +7,7 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ClassifAISettings } from './components/classifai-settings';
+import { ClassifAISettings } from './components';
 import './data/store';
 import '../../scss/settings.scss';
 import './features'; // TODO: This is for testing purposes only and still in experimental phase.

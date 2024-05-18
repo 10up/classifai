@@ -6,9 +6,9 @@ import { TabPanel, SlotFillProvider } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { Header, SettingsWrapper } from '.';
-import { getInitialService, updateUrl } from '../utils/utils';
-import { useSettings } from '../hooks';
+import { Header, ServiceSettings } from '..';
+import { getInitialService, updateUrl } from '../../utils/utils';
+import { useSettings } from '../../hooks';
 
 const { services } = window.classifAISettings;
 
@@ -36,8 +36,13 @@ const Content = () => {
 				return updateUrl( 'tab', tabName );
 			} }
 		>
-			{ ( tab ) => {
-				return <SettingsWrapper tab={ tab.name } key={ tab.name } />;
+			{ ( service ) => {
+				return (
+					<ServiceSettings
+						service={ service.name }
+						key={ service.name }
+					/>
+				);
 			} }
 		</TabPanel>
 	);

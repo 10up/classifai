@@ -12,8 +12,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getFeature } from '../utils/utils';
-import { UserSelector } from '../../components';
+import { getFeature } from '../../utils/utils';
+import { UserSelector } from '../../../components';
 
 export const UserPermissions = ( {
 	featureName,

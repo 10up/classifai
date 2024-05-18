@@ -3,9 +3,9 @@
  */
 import { TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FeatureSettings } from './feature-settings';
-import { updateUrl, getInitialFeature } from '../utils/utils';
-import { useSettings } from '../hooks';
+import { FeatureSettings } from '../feature-settings';
+import { updateUrl, getInitialFeature } from '../../utils/utils';
+import { useSettings } from '../../hooks';
 
 /**
  * Internal dependencies
@@ -13,16 +13,16 @@ import { useSettings } from '../hooks';
 const { features } = window.classifAISettings;
 
 /**
- * SettingsWrapper component to render the feature navigation tabs and the feature settings.
+ * ServiceSettings component to render the feature navigation tabs and the feature settings.
  *
- * @param {Object} props     All the props passed to this function
- * @param {string} props.tab The name of the tab.
- * @return {Object} The SettingsWrapper component.
+ * @param {Object} props         All the props passed to this function
+ * @param {string} props.service The name of the service.
+ * @return {Object} The ServiceSettings component.
  */
-export const SettingsWrapper = ( { tab } ) => {
+export const ServiceSettings = ( { service } ) => {
 	// Switch the default feature tab based on the URL feature query
-	const initialFeature = getInitialFeature( tab );
-	const serviceFeatures = features[ tab ] || {};
+	const initialFeature = getInitialFeature( service );
+	const serviceFeatures = features[ service ] || {};
 	const { setCurrentFeature } = useSettings();
 
 	// Get the features for the selected service.
