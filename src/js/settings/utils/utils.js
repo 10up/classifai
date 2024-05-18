@@ -71,3 +71,13 @@ export const getInitialFeature = ( service ) => {
 		: Object.keys( serviceFeatures )[ 0 ] || 'feature_classification';
 	return initialFeature;
 };
+
+/**
+ * Get the scope name for the given string.
+ *
+ * @param {string} name The name to convert to a valid scope name.
+ * @return {string} returns the scope name
+ */
+export const getScope = ( name ) => {
+	return ( name || '' ).replace( /_/g, '-' );
+};

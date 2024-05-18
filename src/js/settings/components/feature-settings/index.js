@@ -3,47 +3,36 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import {
-	withFilters,
-	Slot,
 	ToggleControl,
 	SelectControl,
 	Button,
 	Panel,
 	PanelBody,
 	Spinner,
+	Slot,
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
-import { UserPermissions } from './user-access';
+import { PluginArea } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
  */
-import { getFeature } from '../utils/utils';
-import { useSettings } from '../hooks/use-settings';
-
-// Provides an entry point to slot in additional settings.
-const ProviderSettingsComponent = () => <></>;
-const FeatureSettingsComponent = () => <></>;
-const ProviderSettings = withFilters( 'classifai.ProviderSettings' )(
-	ProviderSettingsComponent
-);
-const AdditionalFeatureSettings = withFilters( 'classifai.FeatureSettings' )(
-	FeatureSettingsComponent
-);
+import { getFeature, getScope } from '../../utils/utils';
+import { useSettings } from '../../hooks';
+import { UserPermissions } from '../user-permissions';
 
 /**
  * Feature Settings component.
  *
- * @param {Object} props All the props passed to this function
+ * @param {Object} props             All the props passed to this function.
+ * @param {string} props.featureName The name of the feature.
  */
-export const FeatureSettings = ( props ) => {
-	const { featureName } = props;
+export const FeatureSettings = ( { featureName } ) => {
 	const { setFeatureSettings, saveSettings, settings, isLoaded } =
 		useSettings();
 	const feature = getFeature( featureName );
 	const featureSettings = settings[ featureName ] || {};
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
-	const [ hasUpdates, setHasUpdates ] = useState( false );
 
 	const providers = Object.keys( feature?.providers || {} ).map(
 		( value ) => {
@@ -55,20 +44,15 @@ export const FeatureSettings = ( props ) => {
 	);
 
 	function setSettings( newSettings ) {
-		setFeatureSettings( featureName, {
-			...featureSettings,
-			...newSettings,
-		} );
-		setHasUpdates( true );
+		setFeatureSettings( newSettings );
 	}
 
 	function saveFeatureSettings() {
 		saveSettings( featureName );
-		setHasUpdates( false );
 	}
 
 	if ( ! isLoaded ) {
-		return <Spinner />;
+		return <Spinner />; // TODO: Add proper styling for the spinner.
 	}
 
 	return (
@@ -96,8 +80,12 @@ export const FeatureSettings = ( props ) => {
 						options={ providers }
 					/>
 
-					<Slot name="ProviderSettings" />
-					<Slot name="FeatureSettings" />
+					<Slot name="ClassifAIProviderSettings">
+						{ ( fills ) => <> { fills }</> }
+					</Slot>
+					<Slot name="ClassifAIFeatureSettings">
+						{ ( fills ) => <> { fills }</> }
+					</Slot>
 				</PanelBody>
 				<UserPermissions
 					featureName={ featureName }
@@ -110,23 +98,14 @@ export const FeatureSettings = ( props ) => {
 					<Button
 						className="save-settings-button"
 						variant="primary"
-						disabled={ ! hasUpdates }
 						onClick={ saveFeatureSettings }
 					>
 						{ __( 'Save Settings', 'classifai' ) }
 					</Button>
 				</div>
 			</div>
-			<ProviderSettings
-				featureSettings={ featureSettings }
-				setSettings={ setSettings }
-				{ ...props }
-			/>
-			<AdditionalFeatureSettings
-				featureSettings={ featureSettings }
-				setSettings={ setSettings }
-				{ ...props }
-			/>
+			<PluginArea scope={ getScope( featureName ) } />
+			<PluginArea scope={ getScope( featureSettings.provider ) } />
 		</>
 	);
 };
