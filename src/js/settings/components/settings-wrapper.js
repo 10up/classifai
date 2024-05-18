@@ -4,7 +4,8 @@
 import { TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FeatureSettings } from './feature-settings';
-import { updateUrl } from '../utils/utils';
+import { updateUrl, getInitialFeature } from '../utils/utils';
+import { useSettings } from '../hooks';
 
 /**
  * Internal dependencies
@@ -20,14 +21,9 @@ const { features } = window.classifAISettings;
  */
 export const SettingsWrapper = ( { tab } ) => {
 	// Switch the default feature tab based on the URL feature query
-	const urlParams = new URLSearchParams( window.location.search );
-	const requestedFeature = urlParams.get( 'feature' );
+	const initialFeature = getInitialFeature( tab );
 	const serviceFeatures = features[ tab ] || {};
-	const initialFeature = Object.keys( serviceFeatures ).includes(
-		requestedFeature
-	)
-		? requestedFeature
-		: Object.keys( serviceFeatures )[ 0 ] || 'classification';
+	const { setCurrentFeature } = useSettings();
 
 	// Get the features for the selected service.
 	const featureOptions = Object.keys( serviceFeatures ).map( ( feature ) => {
@@ -48,6 +44,7 @@ export const SettingsWrapper = ( { tab } ) => {
 				initialTabName={ initialFeature }
 				tabs={ featureOptions }
 				onSelect={ ( featureName ) => {
+					setCurrentFeature( featureName );
 					return updateUrl( 'feature', featureName );
 				} }
 			>
