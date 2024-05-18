@@ -32,8 +32,8 @@ export const useSettings = ( loadSettings = false ) => {
 	const getFeatureSettings = ( feature ) => settings[ feature ] || {};
 
 	const setSettings = ( data ) => dispatch( STORE_NAME ).setSettings( data );
-	const setFeatureSettings = ( feature, data ) =>
-		dispatch( STORE_NAME ).setFeatureSettings( feature, data );
+	const setFeatureSettings = ( data ) =>
+		dispatch( STORE_NAME ).setFeatureSettings( data );
 	const setIsSaving = ( saving ) =>
 		dispatch( STORE_NAME ).setIsSaving( saving );
 	const setIsLoaded = ( loaded ) =>

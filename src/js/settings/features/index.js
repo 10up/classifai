@@ -1,1 +1,1 @@
-import './title-generation';
+import './comment-moderation';

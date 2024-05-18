@@ -1,5 +1,12 @@
-export const getSettings = ( state, feature ) =>
-	feature ? state.setting?.[ feature ] || state.settings : state.settings;
+export const getSettings = ( state, feature ) => {
+	if ( feature ) {
+		return state.settings?.[ feature ] || state.settings;
+	}
+	return state.settings;
+};
+
+export const getFeatureSettings = ( state ) =>
+	state.settings?.[ state.currentFeature ] || {};
 
 export const getCurrentService = ( state ) => state.currentService;
 

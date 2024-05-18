@@ -1,11 +1,20 @@
+export const setFeatureSettings =
+	( settings ) =>
+	( { select, dispatch } ) => {
+		const currentFeature = select.getCurrentFeature();
+		const featureSettings = select.getFeatureSettings();
+		dispatch( {
+			type: 'SET_FEATURE_SETTINGS',
+			feature: currentFeature,
+			payload: {
+				...featureSettings,
+				...settings,
+			},
+		} );
+	};
+
 export const setSettings = ( settings ) => ( {
 	type: 'SET_SETTINGS',
-	payload: settings,
-} );
-
-export const setFeatureSettings = ( feature, settings ) => ( {
-	type: 'SET_FEATURE_SETTINGS',
-	feature,
 	payload: settings,
 } );
 
