@@ -38,6 +38,10 @@ export const useSettings = ( loadSettings = false ) => {
 		dispatch( STORE_NAME ).setIsSaving( saving );
 	const setIsLoaded = ( loaded ) =>
 		dispatch( STORE_NAME ).setIsLoaded( loaded );
+	const setCurrentService = ( service ) =>
+		dispatch( STORE_NAME ).setCurrentService( service );
+	const setCurrentFeature = ( feature ) =>
+		dispatch( STORE_NAME ).setCurrentFeature( feature );
 
 	// Load settings when the hook is called
 	useEffect( () => {
@@ -87,5 +91,7 @@ export const useSettings = ( loadSettings = false ) => {
 		getFeatureSettings,
 		setFeatureSettings,
 		saveSettings,
+		setCurrentService,
+		setCurrentFeature,
 	};
 };

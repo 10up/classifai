@@ -35,3 +35,39 @@ export const getFeatures = () => {
 
 	return features;
 };
+
+/**
+ * Get the initial service based on the URL query.
+ *
+ * @return {string} The initial service based on the URL query.
+ */
+export const getInitialService = () => {
+	const { services } = window.classifAISettings;
+	const urlParams = new URLSearchParams( window.location.search );
+	const requestedTab = urlParams.get( 'tab' );
+	const initialService = Object.keys( services || {} ).includes(
+		requestedTab
+	)
+		? requestedTab
+		: 'language_processing';
+	return initialService;
+};
+
+/**
+ * Get the initial feature based on the URL query.
+ *
+ * @param {string} service The current service.
+ * @return {string} The initial feature based on the URL query.
+ */
+export const getInitialFeature = ( service ) => {
+	const { features } = window.classifAISettings;
+	const urlParams = new URLSearchParams( window.location.search );
+	const requestedFeature = urlParams.get( 'feature' );
+	const serviceFeatures = features[ service ] || {};
+	const initialFeature = Object.keys( serviceFeatures ).includes(
+		requestedFeature
+	)
+		? requestedFeature
+		: Object.keys( serviceFeatures )[ 0 ] || 'feature_classification';
+	return initialFeature;
+};
