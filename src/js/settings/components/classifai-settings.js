@@ -6,23 +6,15 @@ import { TabPanel, SlotFillProvider } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { Header, SettingsWrapper } from '../components';
-import { updateUrl } from '../utils/utils';
-import { useSettings } from '../hooks/use-settings';
+import { Header, SettingsWrapper } from '.';
+import { getInitialService, updateUrl } from '../utils/utils';
+import { useSettings } from '../hooks';
 
 const { services } = window.classifAISettings;
 
 const Content = () => {
-	useSettings( true ); // Load settings.
-
-	// Switch the default settings tab based on the URL tab query
-	const urlParams = new URLSearchParams( window.location.search );
-	const requestedTab = urlParams.get( 'tab' );
-	const initialService = Object.keys( services || {} ).includes(
-		requestedTab
-	)
-		? requestedTab
-		: 'language_processing';
+	const { setCurrentService } = useSettings( true ); // Load settings.
+	const initialService = getInitialService();
 
 	const serviceKeys = Object.keys( services || {} );
 	const serviceOptions = serviceKeys.map( ( slug ) => {
@@ -40,6 +32,7 @@ const Content = () => {
 			initialTabName={ initialService }
 			tabs={ serviceOptions }
 			onSelect={ ( tabName ) => {
+				setCurrentService( tabName );
 				return updateUrl( 'tab', tabName );
 			} }
 		>
@@ -50,7 +43,7 @@ const Content = () => {
 	);
 };
 
-export const Settings = () => {
+export const ClassifAISettings = () => {
 	return (
 		<SlotFillProvider>
 			<Header />
