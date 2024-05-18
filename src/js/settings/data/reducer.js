@@ -1,8 +1,12 @@
+import { getInitialFeature, getInitialService } from '../utils/utils';
+
 const { classifAISettings } = window;
+const initialService = getInitialService();
+const initialFeature = getInitialFeature( initialService );
 const DEFAULT_STATE = {
-	currentService: 'language_processing',
-	currentFeature: 'classification',
-	settings: classifAISettings || {},
+	currentService: initialService,
+	currentFeature: initialFeature,
+	settings: classifAISettings.settings || {},
 	isLoaded: false,
 	isSaving: false,
 };
