@@ -27,7 +27,8 @@
 	}
 
 	.setting-tabs {
-		margin-left: -20px;
+		max-width: 850px;
+		margin: auto;
 		.components-tab-panel__tabs {
 			justify-content: start;
 			border-bottom: 1px solid #ccd0d4;
@@ -37,6 +38,7 @@
 
 			.components-tab-panel__tabs-item {
 				font-size: 15px;
+				height: auto;
 			}
 
 			.active-tab,
