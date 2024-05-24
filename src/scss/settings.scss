@@ -24,21 +24,27 @@
 
 	.save-settings-button{
 		margin-top: 16px;
+		display: block;
+		width: 100%;
+		padding: 10px 0;
+		height: auto;
+		font-size: 15px;
 	}
 
 	.setting-tabs {
-		max-width: 850px;
+		width: 920px;
+		max-width: 100%;
 		margin: auto;
 		.components-tab-panel__tabs {
 			justify-content: start;
 			border-bottom: 1px solid #ccd0d4;
 			padding-bottom: 0;
 			margin: 0 auto;
-			max-width: 1280px;
 
 			.components-tab-panel__tabs-item {
 				font-size: 15px;
 				height: auto;
+				min-height: 45px;
 			}
 
 			.active-tab,
@@ -53,7 +59,6 @@
 	}
 
 	.classifai-settings-wrapper {
-		max-width: 1280px;
 		margin: 0 auto;
 		padding-top: 24px;
 
@@ -71,6 +76,8 @@
 				.components-tab-panel__tabs-item{
 					background: #fafafa;
 					border: 1px solid #e0e0e0;
+					text-align: left;
+					padding: 10px 16px;
 
 					&.active-tab {
 						background: #fff;
@@ -130,7 +137,6 @@
 			padding: 18px;
 			display: flex;
 			align-items: center;
-			max-width: 1280px;
 			margin: 0 auto;
 		}
 
