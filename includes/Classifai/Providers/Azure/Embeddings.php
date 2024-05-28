@@ -59,7 +59,7 @@ class Embeddings extends OpenAI {
 	/**
 	 * OpenAI Embeddings constructor.
 	 *
-	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
+	 * @param Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
@@ -227,10 +227,10 @@ class Embeddings extends OpenAI {
 	/**
 	 * Build and return the API endpoint based on settings.
 	 *
-	 * @param \Classifai\Features\Feature $feature Feature instance
+	 * @param Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( \Classifai\Features\Feature $feature = null ): string {
+	protected function prep_api_url( Feature $feature = null ): string {
 		$settings   = $feature->get_settings( static::ID );
 		$endpoint   = $settings['endpoint_url'] ?? '';
 		$deployment = $settings['deployment'] ?? '';
@@ -720,6 +720,7 @@ class Embeddings extends OpenAI {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
+
 		$taxonomies = $feature->get_all_feature_taxonomies();
 
 		if ( in_array( 'tags', $taxonomies, true ) ) {
@@ -795,6 +796,7 @@ class Embeddings extends OpenAI {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
+
 		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
