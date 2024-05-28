@@ -27,13 +27,13 @@ export const Header = ( props ) => {
 				</div>
 				<div id="classifai-header-controls">
 					{ isSetupPage && (
-						<Button href="/tools.php?page=classifai" icon={ cog }>
+						<Button href="tools.php?page=classifai" icon={ cog }>
 							{ __( 'Settings', 'classifai' ) }
 						</Button>
 					) }
 					{ ! isSetupPage && (
 						<Button
-							href="/tools.php?page=classifai_setup"
+							href="tools.php?page=classifai_setup"
 							icon={ tool }
 						>
 							{ __( 'Set up', 'classifai' ) }
