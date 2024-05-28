@@ -11,7 +11,6 @@ import {
 	Spinner,
 	Slot,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 import { PluginArea } from '@wordpress/plugins';
 
 /**

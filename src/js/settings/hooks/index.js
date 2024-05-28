@@ -9,7 +9,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { STORE_NAME } from '../data/store';
 
-export const useSettings = ( loadSettings = false ) => {
+export const useSettings = () => {
 	const dispatch = useDispatch();
 
 	const settings = useSelect( ( select ) =>
@@ -35,8 +35,6 @@ export const useSettings = ( loadSettings = false ) => {
 		dispatch( STORE_NAME ).setFeatureSettings( data );
 	const setIsSaving = ( saving ) =>
 		dispatch( STORE_NAME ).setIsSaving( saving );
-	const setIsLoaded = ( loaded ) =>
-		dispatch( STORE_NAME ).setIsLoaded( loaded );
 	const setCurrentService = ( service ) =>
 		dispatch( STORE_NAME ).setCurrentService( service );
 	const setCurrentFeature = ( feature ) =>
