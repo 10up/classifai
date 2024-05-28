@@ -5,11 +5,12 @@ import { TabPanel } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FeatureSettings } from '../feature-settings';
 import { updateUrl, getInitialFeature } from '../../utils/utils';
-import { useSettings } from '../../hooks';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { STORE_NAME } from '../../data/store';
 const { features } = window.classifAISettings;
 
 /**
@@ -23,7 +24,7 @@ export const ServiceSettings = ( { service } ) => {
 	// Switch the default feature tab based on the URL feature query
 	const initialFeature = getInitialFeature( service );
 	const serviceFeatures = features[ service ] || {};
-	const { setCurrentFeature } = useSettings();
+	const { setCurrentFeature } = useDispatch( STORE_NAME );
 
 	// Get the features for the selected service.
 	const featureOptions = Object.keys( serviceFeatures ).map( ( feature ) => {
