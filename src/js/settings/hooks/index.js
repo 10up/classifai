@@ -3,7 +3,6 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -42,22 +41,6 @@ export const useSettings = ( loadSettings = false ) => {
 		dispatch( STORE_NAME ).setCurrentService( service );
 	const setCurrentFeature = ( feature ) =>
 		dispatch( STORE_NAME ).setCurrentFeature( feature );
-
-	// Load settings when the hook is called
-	useEffect( () => {
-		if ( ! loadSettings ) {
-			return;
-		}
-
-		( async () => {
-			const classifAISettings = await apiFetch( {
-				path: '/classifai/v1/settings',
-			} ); // TODO: handle error
-
-			setSettings( classifAISettings );
-			setIsLoaded( true );
-		} )();
-	}, [ loadSettings ] );
 
 	/**
 	 * Save settings for a feature.

@@ -1,21 +1,23 @@
 /**
  * WordPress dependencies
  */
+import { useDispatch } from '@wordpress/data';
 import { TabPanel, SlotFillProvider } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import { Header, ServiceSettings } from '..';
 import { getInitialService, updateUrl } from '../../utils/utils';
-import { useSettings } from '../../hooks';
+import { STORE_NAME } from '../../data/store';
 
 const { services } = window.classifAISettings;
 
 const Content = () => {
-	const { setCurrentService } = useSettings( true ); // Load settings.
 	const initialService = getInitialService();
-
+	const { setCurrentService, setSettings, setIsLoaded } = useDispatch( STORE_NAME );
 	const serviceKeys = Object.keys( services || {} );
 	const serviceOptions = serviceKeys.map( ( slug ) => {
 		return {
@@ -24,6 +26,17 @@ const Content = () => {
 			className: slug,
 		};
 	} );
+
+	useEffect( () => {
+		( async () => {
+			const classifAISettings = await apiFetch( {
+				path: '/classifai/v1/settings',
+			} ); // TODO: handle error
+
+			setSettings( classifAISettings );
+			setIsLoaded( true );
+		} )();
+	}, [] );
 
 	return (
 		<TabPanel
