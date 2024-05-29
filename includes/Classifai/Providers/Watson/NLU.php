@@ -121,7 +121,7 @@ class NLU extends Provider {
 				'input_type'    => 'password',
 				'large'         => true,
 				'class'         => 'classifai-provider-field provider-scope-' . static::ID, // Important to add this.
-				'description'   => $this->feature_instance->is_feature_enabled() ?
+				'description'   => $this->feature_instance->is_configured() ?
 					'' :
 					sprintf(
 						wp_kses(
@@ -140,26 +140,24 @@ class NLU extends Provider {
 			]
 		);
 
-		if ( ! $this->feature_instance->is_feature_enabled() ) {
-			add_settings_field(
-				static::ID . '_toggle',
-				'',
-				function ( $args = [] ) {
-					printf(
-						'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
-						$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							? esc_html__( 'Use a username/password instead?', 'classifai' )
-							: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					);
-				},
-				$this->feature_instance->get_option_name(),
-				$this->feature_instance->get_option_name() . '_section',
-				[
-					'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				]
-			);
-		}
+		add_settings_field(
+			static::ID . '_toggle',
+			'',
+			function ( $args = [] ) {
+				printf(
+					'<a id="classifai-waston-cred-toggle" href="#" class="%s">%s</a>',
+					$args['class'] ? esc_attr( $args['class'] ) : '', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$this->use_username_password() // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						? esc_html__( 'Use a username/password instead?', 'classifai' )
+						: esc_html__( 'Use an API Key instead?', 'classifai' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				);
+			},
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'class' => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
+			]
+		);
 
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
