@@ -361,7 +361,7 @@ class ExcerptGeneration extends Feature {
 
 		$new_settings['generate_excerpt_prompt'] = sanitize_prompts( 'generate_excerpt_prompt', $new_settings );
 
-		$new_settings['length'] = absint( $settings['length'] ?? $new_settings['length'] );
+		$new_settings['length'] = absint( $new_settings['length'] ?? $settings['length'] );
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! post_type_supports( $post_type->name, 'excerpt' ) ) {

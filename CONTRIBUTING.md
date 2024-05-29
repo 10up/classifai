@@ -22,6 +22,10 @@ Pull requests represent a proposed solution to a specified problem. They should 
 
 For more on how 10up writes and manages code, check out our [10up Engineering Best Practices](https://10up.github.io/Engineering-Best-Practices/).
 
+### Testing
+
+Helping to test an open source project and provide feedback on success or failure of those tests is also a helpful contribution.  You can find details on the Critical Flows and Test Cases in [this project's GitHub Wiki](https://github.com/10up/classifai/wiki) as well as details on our overall approach to [Critical Flows and Test Cases in our Open Source Best Practices](https://10up.github.io/Open-Source-Best-Practices/testing/#critial-flows).  Submitting the results of testing via our Critical Flows as a comment on a Pull Request of a specific feature or as an Issue when testing the entire project is the best approach for providing testing results.
+
 ## Workflow
 
 The `develop` branch is the development branch which means it contains the next version to be released. `stable` contains the current latest release and `trunk` contains the corresponding stable development version. Always work on the `develop` branch and open up PRs against `develop`.
@@ -38,6 +42,7 @@ The `develop` branch is the development branch which means it contains the next 
 1. Push: Push your trunk branch to GitHub (e.g. `git push origin trunk`).
 1. [Wait for build](https://xkcd.com/303/): Head to the [Actions](https://github.com/10up/classifai/actions) tab in the repo and wait for it to finish if it hasn't already. If it doesn't succeed, figure out why and start over.
 1. Check the build: Check out the `stable` branch and test for functionality locally.
+1. Either perform a regression testing utilizing the available [Critical Flows](https://10up.github.io/Open-Source-Best-Practices/testing/#critical-flows) and Test Cases or if [end-to-end tests](https://10up.github.io/Open-Source-Best-Practices/testing/#e2e-testing) cover a significant portion of those Critical Flows then run e2e tests.  Only proceed if everything tests successfully.
 1. Release: Create a [new release](https://github.com/10up/classifai/releases/new), naming the tag and the release with the new version number, and targeting the `stable` branch. Paste the changelog from `CHANGELOG.md` into the body of the release and include a link to the closed issues on the [milestone](https://github.com/10up/classifai/milestone/#?closed=1).  The release should now appear under [releases](https://github.com/10up/classifai/releases) and in the WordPress admin as an update as well.
 1. Close milestone: Edit the [milestone](https://github.com/10up/classifai/milestone/#) with release date (in the `Due date (optional)` field) and link to GitHub release (in the `Description field`), then close the milestone.
 1. Punt incomplete items: If any open issues or PRs which were milestoned for `X.Y.Z` do not make it into the release, update their milestone to `X.Y.Z+1`, `X.Y+1.0`, `X+1.0.0` or `Future Release`.

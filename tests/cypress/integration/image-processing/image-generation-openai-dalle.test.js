@@ -57,7 +57,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the Featured image panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;

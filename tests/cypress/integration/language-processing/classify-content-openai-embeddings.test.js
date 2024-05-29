@@ -51,7 +51,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the category panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
@@ -119,7 +119,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 
 		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebarCustom();
+		cy.openDocumentSettingsSidebar();
 
 		// Find and open the category panel.
 		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Categories")`;
@@ -162,7 +162,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#category' ).check();
 		cy.get( '#submit' ).click();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Embeddings test classic',
 			content: "This feature uses OpenAI's Embeddings capabilities.",
 			postType: 'post',

@@ -1,37 +1,32 @@
 <?php
 /**
- * OpenAI Embeddings integration
+ * Azure OpenAI Embeddings integration
  */
 
-namespace Classifai\Providers\OpenAI;
+namespace Classifai\Providers\Azure;
 
-use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use WP_Error;
 
-class Embeddings extends Provider {
-
-	use \Classifai\Providers\OpenAI\OpenAI;
-
-	const ID = 'openai_embeddings';
+class Embeddings extends OpenAI {
+	const ID = 'azure_openai_embeddings';
 
 	/**
-	 * OpenAI Embeddings URL.
+	 * Embeddings URL fragment.
 	 *
 	 * @var string
 	 */
-	protected $api_url = 'https://api.openai.com/v1/embeddings';
+	protected $embeddings_url = 'openai/deployments/{deployment-id}/embeddings';
 
 	/**
-	 * OpenAI Embeddings model.
+	 * Embeddings API version.
 	 *
 	 * @var string
 	 */
-	protected $model = 'text-embedding-3-small';
+	protected $api_version = '2024-02-01';
 
 	/**
 	 * Maximum number of tokens our model supports.
@@ -64,7 +59,7 @@ class Embeddings extends Provider {
 	/**
 	 * OpenAI Embeddings constructor.
 	 *
-	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
+	 * @param Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
@@ -89,47 +84,6 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get the API URL.
-	 *
-	 * @return string
-	 */
-	public function get_api_url(): string {
-		/**
-		 * Filter the API URL.
-		 *
-		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_api_url
-		 *
-		 * @param {string} $url The default API URL.
-		 *
-		 * @return {string} The API URL.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_api_url', $this->api_url );
-	}
-
-	/**
-	 * Get the model name.
-	 *
-	 * @return string
-	 */
-	public function get_model(): string {
-		/**
-		 * Filter the model name.
-		 *
-		 * Useful if you want to use a different model, like
-		 * text-embedding-3-large.
-		 *
-		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_model
-		 *
-		 * @param {string} $model The default model to use.
-		 *
-		 * @return {string} The model to use.
-		 */
-		return apply_filters( 'classifai_openai_embeddings_model', $this->model );
-	}
-
-	/**
 	 * Get the number of dimensions for the embeddings.
 	 *
 	 * @return int
@@ -142,13 +96,13 @@ class Embeddings extends Provider {
 		 * of each embedding.
 		 *
 		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_dimensions
+		 * @hook classifai_azure_openai_embeddings_dimensions
 		 *
 		 * @param {int} $dimensions The default dimensions.
 		 *
 		 * @return {int} The dimensions.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_dimensions', $this->dimensions );
+		return apply_filters( 'classifai_azure_openai_embeddings_dimensions', $this->dimensions );
 	}
 
 	/**
@@ -165,13 +119,13 @@ class Embeddings extends Provider {
 		 * strict on the amount of tokens that can be used.
 		 *
 		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_max_tokens
+		 * @hook classifai_azure_openai_embeddings_max_tokens
 		 *
 		 * @param {int} $model The default maximum tokens.
 		 *
 		 * @return {int} The maximum tokens.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_max_tokens', $this->max_tokens );
+		return apply_filters( 'classifai_azure_openai_embeddings_max_tokens', $this->max_tokens );
 	}
 
 	/**
@@ -188,90 +142,13 @@ class Embeddings extends Provider {
 		 * to ensure we consider more terms.
 		 *
 		 * @since 3.1.0
-		 * @hook classifai_openai_embeddings_max_terms
+		 * @hook classifai_azure_openai_embeddings_max_terms
 		 *
 		 * @param {int} $terms The default maximum terms.
 		 *
 		 * @return {int} The maximum terms.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
-	}
-
-	/**
-	 * Render the provider fields.
-	 */
-	public function render_provider_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		add_settings_field(
-			static::ID . '_api_key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
-					),
-					esc_url( 'https://platform.openai.com/signup' )
-				),
-			]
-		);
-
-		// If embeddings regeneration is being requested, run that.
-		if (
-			isset( $_GET['feature'] ) &&
-			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) )
-		) {
-			if ( isset( $_GET['embedding_regen_completed'] ) ) {
-				add_action(
-					'admin_notices',
-					function () {
-						?>
-						<div class="notice notice-success is-dismissible">
-							<p><?php esc_html_e( 'Embeddings have been regenerated.', 'classifai' ); ?></p>
-						</div>
-						<?php
-					}
-				);
-			}
-
-			if (
-				isset( $_GET['embeddings_nonce'] ) &&
-				wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
-			) {
-				$this->regenerate_embeddings();
-			}
-		}
-
-		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
-	}
-
-	/**
-	 * Returns the default settings for this provider.
-	 *
-	 * @return array
-	 */
-	public function get_default_provider_settings(): array {
-		$common_settings = [
-			'api_key'       => '',
-			'authenticated' => false,
-		];
-
-		return $common_settings;
+		return apply_filters( 'classifai_azure_openai_embeddings_max_terms', $this->max_terms );
 	}
 
 	/**
@@ -332,11 +209,7 @@ class Embeddings extends Provider {
 	 * @return array The sanitized settings to be saved.
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings = $this->feature_instance->get_settings();
-
-		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
-		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
-		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings = parent::sanitize_settings( $new_settings );
 
 		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
 		// TODO: Two issues here we need to address: 1 - for sites with lots of terms, this is likely to lead to timeouts or rate limit issues. Should move this to some sort of queue/cron handler; 2 - this only works on the second save due to checking the value of get_all_feature_taxonomies() which is not updated until the settings are saved.
@@ -352,9 +225,75 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Get the threshold for the similarity calculation.
+	 * Build and return the API endpoint based on settings.
 	 *
-	 * @since 2.5.0
+	 * @param Feature $feature Feature instance
+	 * @return string
+	 */
+	protected function prep_api_url( Feature $feature = null ): string {
+		$settings   = $feature->get_settings( static::ID );
+		$endpoint   = $settings['endpoint_url'] ?? '';
+		$deployment = $settings['deployment'] ?? '';
+
+		if ( ! $endpoint ) {
+			return '';
+		}
+
+		if ( $deployment ) {
+			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
+			$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
+		}
+
+		return $endpoint;
+	}
+
+	/**
+	 * Authenticates our credentials.
+	 *
+	 * @param string $url Endpoint URL.
+	 * @param string $api_key Api Key.
+	 * @param string $deployment Deployment name.
+	 * @return bool|WP_Error
+	 */
+	protected function authenticate_credentials( string $url, string $api_key, string $deployment ) {
+		$rtn = false;
+
+		// This does basically the same thing that prep_api_url does but when running authentication,
+		// we don't have settings saved yet, which prep_api_url needs.
+		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
+		$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
+
+		$request = wp_remote_post(
+			$endpoint,
+			[
+				'headers' => [
+					'api-key'      => $api_key,
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode(
+					[
+						'input'      => 'This is a test',
+						'dimensions' => $this->get_dimensions(),
+					]
+				),
+			]
+		);
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( ! empty( $response->error ) ) {
+				$rtn = new WP_Error( 'auth', $response->error->message );
+			} else {
+				$rtn = true;
+			}
+		}
+
+		return $rtn;
+	}
+
+
+	/**
+	 * Get the threshold for the similarity calculation.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return float
@@ -385,58 +324,7 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Regenerate embeddings.
-	 *
-	 * This will regenerate embeddings for all terms
-	 * and delete existing post embeddings. Useful to run
-	 * anytime the model or dimensions are changed.
-	 */
-	public function regenerate_embeddings() {
-		$feature  = new Classification();
-		$settings = $feature->get_settings();
-
-		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
-			return;
-		}
-
-		// Regenerate embeddings for all terms.
-		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
-			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
-				// TODO: this also needs fixed for the same reasons as the other trigger_taxonomy_update call.
-				$this->trigger_taxonomy_update( $feature_name, true );
-			}
-		}
-
-		// Delete all post embeddings.
-		$embedding_posts = get_posts(
-			[
-				'post_type'      => 'any',
-				'posts_per_page' => -1, // phpcs:ignore WordPress.WP.PostsPerPageNoUnlimited.posts_per_page_posts_per_page
-				'fields'         => 'ids',
-				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare'   => 'EXISTS',
-			]
-		);
-
-		foreach ( $embedding_posts as $post_id ) {
-			delete_post_meta( $post_id, 'classifai_openai_embeddings' );
-		}
-
-		// Hide the admin notice.
-		update_option( 'classifai_hide_embeddings_notice', true, false );
-
-		// Redirect to the same page but remove the nonce so we don't run this again.
-		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification&embedding_regen_completed' ) );
-		exit;
-	}
-
-	/**
 	 * Get the data to preview terms.
-	 *
-	 * @since 2.5.0
 	 *
 	 * @return array
 	 */
@@ -483,8 +371,8 @@ class Embeddings extends Provider {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_should_classify
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
 		 * @param {int}    $id   The ID of the item to be considered for classification.
@@ -492,13 +380,13 @@ class Embeddings extends Provider {
 		 *
 		 * @return {bool} Whether the item should be classified.
 		 */
-		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
+		if ( ! apply_filters( 'classifai_azure_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
 		// Try to use the stored embeddings first.
 		if ( ! $force ) {
-			$embeddings = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+			$embeddings = get_post_meta( $post_id, 'classifai_azure_openai_embeddings', true );
 
 			if ( ! empty( $embeddings ) ) {
 				return $embeddings;
@@ -507,7 +395,7 @@ class Embeddings extends Provider {
 
 		// Chunk the post content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $post_id, 'post' );
+		$content        = $this->get_normalized_content( $post_id, 'post' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -523,7 +411,7 @@ class Embeddings extends Provider {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_post_meta( $post_id, 'classifai_openai_embeddings', $embeddings );
+			update_post_meta( $post_id, 'classifai_azure_openai_embeddings', $embeddings );
 		}
 
 		return $embeddings;
@@ -683,8 +571,6 @@ class Embeddings extends Provider {
 	/**
 	 * Get the similarity between an embedding and all terms.
 	 *
-	 * @since 2.5.0
-	 *
 	 * @param array $embedding Embedding data.
 	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
@@ -723,7 +609,7 @@ class Embeddings extends Provider {
 					'order'      => 'DESC',
 					'hide_empty' => false,
 					'fields'     => 'ids',
-					'meta_key'   => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_key'   => 'classifai_azure_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'number'     => $this->get_max_terms(),
 					'exclude'    => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 				]
@@ -742,7 +628,7 @@ class Embeddings extends Provider {
 					continue;
 				}
 
-				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+				$term_embedding = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
 
 				if ( ! empty( $term_embedding ) ) {
 					// Loop through the chunks and run a similarity calculation on each.
@@ -787,7 +673,7 @@ class Embeddings extends Provider {
 			'order'        => 'DESC',
 			'hide_empty'   => false,
 			'fields'       => 'ids',
-			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'     => 'classifai_azure_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'NOT EXISTS',
 			'number'       => $this->get_max_terms(),
 			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
@@ -815,7 +701,7 @@ class Embeddings extends Provider {
 	 * Trigger embedding generation for term being saved.
 	 *
 	 * @param int     $term_id ID of term being saved.
-	 * @param bool    $force Whether to force generation of embeddings even if they already exist. Default false.
+	 * @param bool    $force   Whether to force generation of embeddings even if they already exist. Default false.
 	 * @param Feature $feature The feature instance.
 	 * @return array|WP_Error
 	 */
@@ -834,6 +720,7 @@ class Embeddings extends Provider {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
+
 		$taxonomies = $feature->get_all_feature_taxonomies();
 
 		if ( in_array( 'tags', $taxonomies, true ) ) {
@@ -854,8 +741,8 @@ class Embeddings extends Provider {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_should_classify
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
 		 * @param {int}    $id   The ID of the item to be considered for classification.
@@ -863,12 +750,12 @@ class Embeddings extends Provider {
 		 *
 		 * @return {bool} Whether the item should be classified.
 		 */
-		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $term_id, 'term' ) ) {
+		if ( ! apply_filters( 'classifai_azure_openai_embeddings_should_classify', true, $term_id, 'term' ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
 		}
 
 		// Try to use the stored embeddings first.
-		$embeddings = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
+		$embeddings = get_term_meta( $term_id, 'classifai_azure_openai_embeddings', true );
 
 		if ( ! empty( $embeddings ) && ! $force ) {
 			return $embeddings;
@@ -876,7 +763,7 @@ class Embeddings extends Provider {
 
 		// Chunk the term content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $term_id, 'term' );
+		$content        = $this->get_normalized_content( $term_id, 'term' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -892,7 +779,7 @@ class Embeddings extends Provider {
 
 		// Store the embeddings for future use.
 		if ( ! empty( $embeddings ) ) {
-			update_term_meta( $term_id, 'classifai_openai_embeddings', $embeddings );
+			update_term_meta( $term_id, 'classifai_azure_openai_embeddings', $embeddings );
 		}
 
 		return $embeddings;
@@ -901,14 +788,15 @@ class Embeddings extends Provider {
 	/**
 	 * Generate an embedding for a particular piece of text.
 	 *
-	 * @param string       $text    Text to generate the embedding for.
-	 * @param Feature|null $feature Feature instance.
+	 * @param string  $text    Text to generate the embedding for.
+	 * @param Feature $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embedding( string $text = '', $feature = null ) {
+	public function generate_embedding( string $text = '', Feature $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
+
 		$settings = $feature->get_settings();
 
 		// Ensure the feature is enabled.
@@ -916,13 +804,11 @@ class Embeddings extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-
 		/**
 		 * Filter the request body before sending to OpenAI.
 		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_request_body
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to OpenAI.
 		 * @param {string} $text Text we are getting embeddings for.
@@ -930,9 +816,8 @@ class Embeddings extends Provider {
 		 * @return {array} Request body.
 		 */
 		$body = apply_filters(
-			'classifai_openai_embeddings_request_body',
+			'classifai_azure_openai_embeddings_request_body',
 			[
-				'model'      => $this->get_model(),
 				'input'      => $text,
 				'dimensions' => $this->get_dimensions(),
 			],
@@ -940,21 +825,26 @@ class Embeddings extends Provider {
 		);
 
 		// Make our API request.
-		$response = $request->post(
-			$this->get_api_url(),
+		$response = wp_remote_post(
+			$this->prep_api_url( $feature ),
 			[
-				'body' => wp_json_encode( $body ),
+				'headers' => [
+					'api-key'      => $settings[ static::ID ]['api_key'],
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
 			]
 		);
+		$response = $this->get_result( $response );
 
-		set_transient( 'classifai_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_azure_openai_embeddings_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
 		if ( empty( $response['data'] ) ) {
-			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
+			return new WP_Error( 'no_data', esc_html__( 'No data returned from Azure OpenAI.', 'classifai' ) );
 		}
 
 		$return = [];
@@ -1016,7 +906,7 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ): string {
+	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
 
 		// Get the content depending on the type.
@@ -1039,8 +929,8 @@ class Embeddings extends Provider {
 		/**
 		 * Filter content that will get sent to OpenAI.
 		 *
-		 * @since 2.2.0
-		 * @hook classifai_openai_embeddings_content
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_content
 		 *
 		 * @param {string} $content Content that will be sent to OpenAI.
 		 * @param {int} $post_id ID of post we are submitting.
@@ -1048,7 +938,7 @@ class Embeddings extends Provider {
 		 *
 		 * @return {string} Content.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_content', $content, $id, $type );
+		return apply_filters( 'classifai_azure_openai_embeddings_content', $content, $id, $type );
 	}
 
 	/**
@@ -1089,10 +979,10 @@ class Embeddings extends Provider {
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
 				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $settings[ $tax ], 1 );
-				$debug_info[ "Taxonomy ($tax threshold)" ] = Feature::get_debug_value_text( $settings[ $tax . '_threshold' ], 1 );
+				$debug_info[ "Taxonomy ($tax threshold)" ] = absint( $settings[ $tax . '_threshold' ] );
 			}
 
-			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_embeddings_latest_response' ) );
+			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_embeddings_latest_response' ) );
 		}
 
 		return apply_filters(
