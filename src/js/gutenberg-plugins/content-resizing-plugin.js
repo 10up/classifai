@@ -124,6 +124,9 @@ const ContentResizingPlugin = () => {
 	// Indicates if the modal window with the result is open/closed.
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
+	// Modal title depending on resizing type.
+	const [ modalTitle, setModalTitle ] = useState( '' );
+
 	const { isMultiBlocksSelected, resizingType, isResizing } = useSelect(
 		( __select ) => {
 			return {
@@ -141,6 +144,12 @@ const ContentResizingPlugin = () => {
 			( async () => {
 				await resizeContent();
 			} )();
+		}
+
+		if ( 'grow' === resizingType ) {
+			setModalTitle( __( 'Expanded text suggestions', 'classifai' ) );
+		} else {
+			setModalTitle( __( 'Condensed text suggestions', 'classifai' ) );
 		}
 	}, [ resizingType ] );
 
@@ -161,6 +170,7 @@ const ContentResizingPlugin = () => {
 		setTextArray( [] );
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
+		setModalTitle( '' );
 	}
 
 	/**
@@ -261,7 +271,7 @@ const ContentResizingPlugin = () => {
 	// Result Modal JSX.
 	const suggestionModal = ! isResizing && textArray.length && isModalOpen && (
 		<Modal
-			title={ __( 'Select a suggestion', 'classifai' ) }
+			title={ modalTitle }
 			isFullScreen={ false }
 			className="classifai-content-resize__suggestion-modal"
 			onRequestClose={ () => {
