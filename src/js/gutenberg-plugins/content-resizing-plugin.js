@@ -20,7 +20,7 @@ import {
 	count as getWordCount,
 	count as getCharacterCount,
 } from '@wordpress/wordcount';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { DisableFeatureButton } from '../components';
 import '../../scss/content-resizing-plugin.scss';
@@ -171,6 +171,24 @@ const ContentResizingPlugin = () => {
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
 		setModalTitle( '' );
+	}
+
+	/**
+	 * Refreshes results.
+	 *
+	 */
+	async function refreshResults( resizingType, selectedBlock ) {
+		dispatch(
+			resizeContentStore
+		).setResizingType( null );
+
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+
+		setSelectedBlock( selectedBlock );
+
+		dispatch(
+			resizeContentStore
+		).setResizingType( resizingType );
 	}
 
 	/**
@@ -340,6 +358,7 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
+			<p>{ sprintf( __( 'None of these suggestions are ideal, please', 'classifai' ) ) } <Button onClick={ () => refreshResults( resizingType, selectedBlock ) } variant='link'>{ sprintf( __( 'retry %s', 'classifai' ), 'grow' === resizingType ? __( 'expanding the text', 'classifai' ) : __( 'condensing the text', 'classifai' ) ) }</Button></p>
 			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
