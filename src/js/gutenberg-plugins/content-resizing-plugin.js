@@ -344,7 +344,7 @@ const ContentResizingPlugin = () => {
 									</td>
 									<td>
 										<Button
-											text={ __( 'Select', 'classifai' ) }
+											text={ __( 'Insert', 'classifai' ) }
 											variant="secondary"
 											onClick={ () =>
 												updateContent( textItem )
