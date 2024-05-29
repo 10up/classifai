@@ -1,4 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
+/* eslint-disable no-shadow */
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	store as blockEditorStore,
@@ -176,19 +177,17 @@ const ContentResizingPlugin = () => {
 	/**
 	 * Refreshes results.
 	 *
+	 * @param {string} resizingType  Type of resizing. grow|shrink|null
+	 * @param {Block}  selectedBlock The selected block.
 	 */
 	async function refreshResults( resizingType, selectedBlock ) {
-		dispatch(
-			resizeContentStore
-		).setResizingType( null );
+		dispatch( resizeContentStore ).setResizingType( null );
 
 		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 
 		setSelectedBlock( selectedBlock );
 
-		dispatch(
-			resizeContentStore
-		).setResizingType( resizingType );
+		dispatch( resizeContentStore ).setResizingType( resizingType );
 	}
 
 	/**
@@ -358,7 +357,26 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
-			<p>{ sprintf( __( 'None of these suggestions are ideal, please', 'classifai' ) ) } <Button onClick={ () => refreshResults( resizingType, selectedBlock ) } variant='link'>{ sprintf( __( 'retry %s', 'classifai' ), 'grow' === resizingType ? __( 'expanding the text', 'classifai' ) : __( 'condensing the text', 'classifai' ) ) }</Button></p>
+			<p>
+				{ __(
+					'None of these suggestions are ideal, please',
+					'classifai'
+				) }{ ' ' }
+				<Button
+					onClick={ () =>
+						refreshResults( resizingType, selectedBlock )
+					}
+					variant="link"
+				>
+					{ sprintf(
+						/* translators: %s type of resizing */
+						__( 'retry %s', 'classifai' ),
+						'grow' === resizingType
+							? __( 'expanding the text', 'classifai' )
+							: __( 'condensing the text', 'classifai' )
+					) }
+				</Button>
+			</p>
 			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
