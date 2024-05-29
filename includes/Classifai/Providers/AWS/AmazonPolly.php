@@ -47,19 +47,21 @@ class AmazonPolly extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings['access_key_id'],
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Enter the AWS access key. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Enter the AWS access key. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey' )
 					),
-					esc_url( 'https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey' )
-				),
 			]
 		);
 
@@ -75,7 +77,9 @@ class AmazonPolly extends Provider {
 				'input_type'    => 'password',
 				'default_value' => $settings['secret_access_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => esc_html__( 'Enter the AWS secret access key.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					esc_html__( 'Enter the AWS secret access key.', 'classifai' ),
 			]
 		);
 
@@ -91,12 +95,14 @@ class AmazonPolly extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings['aws_region'],
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => wp_kses(
-					__( 'Enter the AWS Region. eg: <code>us-east-1</code>', 'classifai' ),
-					[
-						'code' => [],
-					]
-				),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					wp_kses(
+						__( 'Enter the AWS Region. eg: <code>us-east-1</code>', 'classifai' ),
+						[
+							'code' => [],
+						]
+					),
 			]
 		);
 
@@ -116,21 +122,23 @@ class AmazonPolly extends Provider {
 				),
 				'default_value' => $settings['voice_engine'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Amazon Polly offers <a href="%1$s">Long-Form</a>, <a href="%2$s">Neural</a> and Standard text-to-speech voices. Please check the <a title="Pricing" href="%3$s">documentation</a> to review pricing for Long-Form, Neural and Standard usage.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Amazon Polly offers <a href="%1$s">Long-Form</a>, <a href="%2$s">Neural</a> and Standard text-to-speech voices. Please check the <a title="Pricing" href="%3$s">documentation</a> to review pricing for Long-Form, Neural and Standard usage.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
+						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
+						esc_url( 'https://aws.amazon.com/polly/pricing/' )
 					),
-					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
-					esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
-					esc_url( 'https://aws.amazon.com/polly/pricing/' )
-				),
 			]
 		);
 

@@ -48,19 +48,21 @@ class TextToSpeech extends Provider {
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://platform.openai.com/signup' )
 					),
-					esc_url( 'https://platform.openai.com/signup' )
-				),
 			]
 		);
 
@@ -78,18 +80,20 @@ class TextToSpeech extends Provider {
 					'tts-1-hd' => __( 'Text-to-speech 1 HD (Optimized for quality)', 'classifai' ),
 				],
 				'default_value' => $settings['tts_model'],
-				'description'   => sprintf(
-					wp_kses(
-						__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
 							],
-						],
+						),
+						esc_url( 'https://platform.openai.com/docs/models/tts' )
 					),
-					esc_url( 'https://platform.openai.com/docs/models/tts' )
-				),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -112,18 +116,20 @@ class TextToSpeech extends Provider {
 					'shimmer' => __( 'Shimmer (female)', 'classifai' ),
 				],
 				'default_value' => $settings['voice'],
-				'description'   => sprintf(
-					wp_kses(
-						__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
 							],
-						],
+						),
+						esc_url( 'https://platform.openai.com/docs/guides/text-to-speech/voice-options' )
 					),
-					esc_url( 'https://platform.openai.com/docs/guides/text-to-speech/voice-options' )
-				),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);

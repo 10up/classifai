@@ -121,7 +121,7 @@ class NLU extends Provider {
 				'input_type'    => 'password',
 				'large'         => true,
 				'class'         => 'classifai-provider-field provider-scope-' . static::ID, // Important to add this.
-				'description'   => $this->feature_instance->is_configured() ?
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
 					'' :
 					sprintf(
 						wp_kses(
