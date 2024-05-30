@@ -380,9 +380,7 @@ const ContentResizingPlugin = () => {
 			</div>
 			<br />
 			<Button
-				onClick={ () =>
-					refreshResults( resizingType, selectedBlock )
-				}
+				onClick={ () => refreshResults( resizingType, selectedBlock ) }
 				variant="secondary"
 			>
 				{ __( 'Refresh results', 'classifai' ) }
