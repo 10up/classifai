@@ -21,7 +21,7 @@ import {
 	count as getWordCount,
 	count as getCharacterCount,
 } from '@wordpress/wordcount';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _nx } from '@wordpress/i18n';
 
 import { DisableFeatureButton } from '../components';
 import '../../scss/content-resizing-plugin.scss';
@@ -146,13 +146,31 @@ const ContentResizingPlugin = () => {
 				await resizeContent();
 			} )();
 		}
-
-		if ( 'grow' === resizingType ) {
-			setModalTitle( __( 'Expanded text suggestions', 'classifai' ) );
-		} else {
-			setModalTitle( __( 'Condensed text suggestions', 'classifai' ) );
-		}
 	}, [ resizingType ] );
+
+	useEffect( () => {
+		if ( 'grow' === resizingType ) {
+			setModalTitle(
+				_nx(
+					'Expanded text suggestion',
+					'Expanded text suggestions',
+					textArray.length,
+					'Modal title after expand content resizing.',
+					'classifai'
+				)
+			);
+		} else {
+			setModalTitle(
+				_nx(
+					'Condensed text suggestion',
+					'Condensed text suggestions',
+					textArray.length,
+					'Modal title after condense content resizing.',
+					'classifai'
+				)
+			);
+		}
+	}, [ resizingType, textArray ] );
 
 	// Triggers AJAX request to resize the content.
 	useEffect( () => {
@@ -360,26 +378,15 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
-			<p>
-				{ __(
-					'None of these suggestions are ideal, please',
-					'classifai'
-				) }{ ' ' }
-				<Button
-					onClick={ () =>
-						refreshResults( resizingType, selectedBlock )
-					}
-					variant="link"
-				>
-					{ sprintf(
-						/* translators: %s type of resizing */
-						__( 'retry %s', 'classifai' ),
-						'grow' === resizingType
-							? __( 'expanding the text', 'classifai' )
-							: __( 'condensing the text', 'classifai' )
-					) }
-				</Button>
-			</p>
+			<br />
+			<Button
+				onClick={ () =>
+					refreshResults( resizingType, selectedBlock )
+				}
+				variant="secondary"
+			>
+				{ __( 'Refresh results', 'classifai' ) }
+			</Button>
 			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
