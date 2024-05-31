@@ -1,58 +1,27 @@
 /**
  * External dependencies
  */
-import {
-	CheckboxControl,
-	PanelBody,
-	PanelRow,
-	ToggleControl,
-} from '@wordpress/components';
+import { PanelBody, PanelRow, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { getFeature } from '../../utils/utils';
 import { UserSelector } from '../../../components';
+import { AllowedRoles } from '../allowed-roles';
 
 export const UserPermissions = ( {
 	featureName,
 	featureSettings,
 	setSettings,
 } ) => {
-	const feature = getFeature( featureName );
-	const roles = feature.roles || {};
 	return (
 		<PanelBody
 			title={ __( 'User permissions', 'classifai' ) }
 			initialOpen={ true }
 		>
 			<PanelRow>
-				<div className="classifai-settings__roles">
-					<div className="settings-label">
-						{ __( 'Allowed roles', 'classifai' ) }
-					</div>
-					{ Object.keys( roles ).map( ( role ) => {
-						return (
-							<CheckboxControl
-								key={ role }
-								checked={
-									featureSettings.roles?.[ role ] === role
-								}
-								label={ roles[ role ] }
-								onChange={ ( value ) => {
-									setSettings( {
-										...featureSettings,
-										roles: {
-											...featureSettings.roles,
-											[ role ]: value ? role : '0',
-										},
-									} );
-								} }
-							/>
-						);
-					} ) }
-				</div>
+				<AllowedRoles featureName={ featureName } />
 			</PanelRow>
 			<PanelRow>
 				<div className="classifai-settings__users">

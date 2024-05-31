@@ -17,7 +17,8 @@ const { services } = window.classifAISettings;
 
 const Content = () => {
 	const initialService = getInitialService();
-	const { setCurrentService, setSettings, setIsLoaded } = useDispatch( STORE_NAME );
+	const { setCurrentService, setSettings, setIsLoaded } =
+		useDispatch( STORE_NAME );
 	const serviceKeys = Object.keys( services || {} );
 	const serviceOptions = serviceKeys.map( ( slug ) => {
 		return {
