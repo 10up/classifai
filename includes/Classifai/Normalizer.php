@@ -49,6 +49,17 @@ class Normalizer {
 		/* Replace HTML linebreaks with newlines */
 		$post_content = preg_replace( '#<br\s?/?>#', "\n\n", $post_content );
 
+		/**
+		 * Hook to filter post content before stripping HTML tags.
+		 *
+		 * @hook classifai_normalize_content_before_strip_all_tags
+		 *
+		 * @param {string} $post_content The post content.
+		 *
+		 * @return {string} The filtered Post content.
+		 */
+		$post_content = apply_filters( 'classifai_normalize_content_before_strip_all_tags', $post_content );
+
 		/* Strip all HTML tags */
 		$post_content = wp_strip_all_tags( $post_content );
 
