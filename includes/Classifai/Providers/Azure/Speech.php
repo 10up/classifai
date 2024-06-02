@@ -57,7 +57,9 @@ class Speech extends Provider {
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
-				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
