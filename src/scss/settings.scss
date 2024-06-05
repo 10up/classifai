@@ -1,108 +1,5 @@
 #classifai-settings {
-	.settings-label {
-		font-size: 11px;
-		font-weight: 500;
-		line-height: 1.4;
-		text-transform: uppercase;
-		display: inline-block;
-		margin-bottom: 8px;
-		padding: 0px;
-		margin-top: 16px;
-	}
-
-	label.components-base-control__label,
-	label.components-input-control__label,
-	label.components-form-token-field__label {
-		margin-top: 16px;
-	}
-
-	.classifai-settings__roles {
-		.components-checkbox-control{
-			margin-bottom: 8px;
-		}
-	}
-
-	.save-settings-button{
-		margin-top: 16px;
-		display: block;
-		width: 100%;
-		padding: 10px 0;
-		height: auto;
-		font-size: 15px;
-	}
-
-	.setting-tabs {
-		width: 920px;
-		max-width: 100%;
-		margin: auto;
-		.components-tab-panel__tabs {
-			justify-content: start;
-			border-bottom: 1px solid #ccd0d4;
-			padding-bottom: 0;
-			margin: 0 auto;
-
-			.components-tab-panel__tabs-item {
-				font-size: 15px;
-				height: auto;
-				min-height: 45px;
-			}
-
-			.active-tab,
-			.components-tab-panel__tabs-item:focus:not(:disabled) {
-				box-shadow: inset 0 -2px var(--wp-admin-theme-color);
-			}
-		}
-
-		@media screen and (max-width: 782px) {
-			margin-left: -10px;
-		}
-	}
-
-	.classifai-settings-wrapper {
-		margin: 0 auto;
-		padding-top: 24px;
-
-		.feature-tabs {
-			display: flex;
-			gap: 24px;
-
-			.components-tab-panel__tabs {
-				flex-direction: column;
-				border: 0px;
-				justify-content: start;
-				flex-basis: 0;
-				flex-grow: 1;
-
-				.components-tab-panel__tabs-item{
-					background: #fafafa;
-					border: 1px solid #e0e0e0;
-					text-align: left;
-					padding: 10px 16px;
-
-					&.active-tab {
-						background: #fff;
-						border-bottom: 1px solid var(--wp-admin-theme-color);
-						box-shadow: inset 0 -2px var(--wp-admin-theme-color);
-					}
-
-					&:hover,
-					&:focus {
-						background: #fff;
-					}
-				}
-			}
-
-			.components-tab-panel__tab-content{
-				flex-basis: 0;
-				flex-grow: 3;
-			}
-
-			@media screen and (max-width: 782px) {
-				display: block;
-				gap: 0;
-			}
-		}
-	}
+	font-size: 14px;
 
 	#classifai-header {
 		background-color: #fff;
@@ -149,6 +46,143 @@
 			display: flex;
 			flex-direction: row;
 			align-items: center;
+		}
+	}
+
+	.settings-panel {
+		.settings-row {
+			display: flex;
+			justify-content: flex-start;
+			align-items: flex-start;
+			flex-direction: row;
+		}
+
+		@media (max-width: 600px) {
+			.settings-row {
+			  flex-direction: column;
+			}
+		}
+
+		.settings-label {
+			align-items: center;
+			font-weight: bold;
+			flex-shrink: 0;
+			flex: 30%;
+			padding: 12px 0px;
+		}
+
+		.settings-control {
+			align-items: center;
+			flex: 70%;
+			padding: 12px 10px;
+		}
+
+		.settings-description {
+			font-size: 13px;
+		}
+
+		.settings-allowed-roles .settings-control .components-checkbox-control {
+			margin-bottom: 8px;
+		}
+
+		.classifai-settings__users .settings-control label.components-form-token-field__label {
+			display: none;
+		}
+
+		@media screen and (max-width: 782px) {
+			margin-top: 16px;
+		}
+	}
+
+	.save-settings-button{
+		margin-top: 16px;
+		display: block;
+		width: 100%;
+		padding: 10px 0;
+		height: auto;
+		font-size: 15px;
+	}
+
+	.setting-tabs {
+		width: 100%;
+		max-width: 1280px;
+		margin: 0 auto;
+		.components-tab-panel__tabs {
+			justify-content: start;
+			border-bottom: 1px solid #ccd0d4;
+			padding-bottom: 0;
+			margin-right: 20px;
+
+			.components-tab-panel__tabs-item {
+				font-size: 15px;
+				height: auto;
+				min-height: 45px;
+			}
+
+			.active-tab,
+			.components-tab-panel__tabs-item:focus:not(:disabled) {
+				box-shadow: inset 0 -2px var(--wp-admin-theme-color);
+			}
+
+			@media screen and (max-width: 782px) {
+				margin-right: 10px;
+				margin-top: 12px;
+			}
+		}
+	}
+
+	.classifai-settings-wrapper {
+		margin-right: 20px;
+		padding-top: 24px;
+
+		@media screen and (max-width: 782px) {
+			margin-right: 10px;
+		}
+
+		.feature-tabs {
+			display: flex;
+			gap: 24px;
+
+			.components-tab-panel__tabs {
+				flex-direction: column;
+				border: 0px;
+				justify-content: start;
+				flex-basis: 0;
+				flex-grow: 1;
+
+				.components-tab-panel__tabs-item{
+					background: #fafafa;
+					border: 1px solid #e0e0e0;
+					text-align: left;
+					padding: 10px 16px;
+
+					&.active-tab {
+						background: #fff;
+						border-bottom: 1px solid var(--wp-admin-theme-color);
+						box-shadow: inset 0 -2px var(--wp-admin-theme-color);
+					}
+
+					&:hover,
+					&:focus {
+						background: #fff;
+					}
+				}
+
+				@media screen and (max-width: 782px) {
+					margin-right: 0px;
+					margin-top: 0px;
+				}
+			}
+
+			.components-tab-panel__tab-content{
+				flex-basis: 0;
+				flex-grow: 3;
+			}
+
+			@media screen and (max-width: 782px) {
+				display: block;
+				gap: 0;
+			}
 		}
 	}
 }

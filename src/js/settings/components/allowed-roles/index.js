@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { getFeature } from '../../utils/utils';
 import { STORE_NAME } from '../../data/store';
+import { SettingsRow } from '../settings-row';
 
 export const AllowedRoles = ( { featureName } ) => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
@@ -19,10 +20,14 @@ export const AllowedRoles = ( { featureName } ) => {
 	const feature = getFeature( featureName );
 	const roles = feature.roles || {};
 	return (
-		<div className="classifai-settings__roles">
-			<div className="settings-label">
-				{ __( 'Allowed roles', 'classifai' ) }
-			</div>
+		<SettingsRow
+			label={ __( 'Allowed roles', 'classifai' ) }
+			className="settings-allowed-roles"
+			description={ __(
+				'Choose which roles are allowed to access this feature.',
+				'classifai'
+			) }
+		>
 			{ Object.keys( roles ).map( ( role ) => {
 				return (
 					<CheckboxControl
@@ -40,6 +45,6 @@ export const AllowedRoles = ( { featureName } ) => {
 					/>
 				);
 			} ) }
-		</div>
+		</SettingsRow>
 	);
 };

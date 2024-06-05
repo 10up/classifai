@@ -16,9 +16,8 @@ import { addQueryArgs } from '@wordpress/url';
  * @param {Object} props          The block props.
  * @param {string} props.value    The selected user ids.
  * @param {string} props.onChange The change handler.
- * @param {string} props.label    The label for the field.
  */
-export const UserSelector = ( { value, onChange, label = null } ) => {
+export const UserSelector = ( { value, onChange } ) => {
 	const [ usersByName, setUsersByName ] = useState( {} );
 	const [ values, setValues ] = useState( [] );
 	const [ search, setSearch ] = useState( '' );
@@ -117,7 +116,7 @@ export const UserSelector = ( { value, onChange, label = null } ) => {
 			suggestions={ suggestions }
 			onChange={ handleChange }
 			onInputChange={ debouncedSearch }
-			label={ label }
+			label={ null }
 			placeholder={ __( 'Search for users', 'classifai' ) }
 			__experimentalShowHowTo={ false }
 			messages={ {

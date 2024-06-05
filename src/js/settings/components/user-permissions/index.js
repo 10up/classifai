@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PanelBody, PanelRow, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { UserSelector } from '../../../components';
 import { AllowedRoles } from '../allowed-roles';
+import { SettingsRow } from '../settings-row';
 
 export const UserPermissions = ( {
 	featureName,
@@ -20,37 +21,44 @@ export const UserPermissions = ( {
 			title={ __( 'User permissions', 'classifai' ) }
 			initialOpen={ true }
 		>
-			<PanelRow>
-				<AllowedRoles featureName={ featureName } />
-			</PanelRow>
-			<PanelRow>
-				<div className="classifai-settings__users">
-					<UserSelector
-						value={ featureSettings.users || [] }
-						onChange={ ( users ) => {
-							setSettings( {
-								...featureSettings,
-								users,
-							} );
-						} }
-						label={ __( 'Allowed users', 'classifai' ) }
-					/>
-				</div>
-			</PanelRow>
-			<PanelRow>
-				<div className="classifai-settings__user_based_opt_out">
-					<ToggleControl
-						checked={ featureSettings?.user_based_opt_out === '1' }
-						label={ __( 'Enable user-based opt-out', 'classifai' ) }
-						onChange={ ( value ) => {
-							setSettings( {
-								...featureSettings,
-								user_based_opt_out: value ? '1' : 'no',
-							} );
-						} }
-					/>
-				</div>
-			</PanelRow>
+			<AllowedRoles featureName={ featureName } />
+
+			<SettingsRow
+				label={ __( 'Allowed users', 'classifai' ) }
+				className="classifai-settings__users"
+				description={ __(
+					'Select users who can access this feature.',
+					'classifai'
+				) }
+			>
+				<UserSelector
+					value={ featureSettings.users || [] }
+					onChange={ ( users ) => {
+						setSettings( {
+							...featureSettings,
+							users,
+						} );
+					} }
+				/>
+			</SettingsRow>
+
+			<SettingsRow
+				label={ __( 'Enable user-based opt-out', 'classifai' ) }
+				description={ __(
+					'Enables ability for users to opt-out from their user profile page.',
+					'classifai'
+				) }
+			>
+				<ToggleControl
+					checked={ featureSettings?.user_based_opt_out === '1' }
+					onChange={ ( value ) => {
+						setSettings( {
+							...featureSettings,
+							user_based_opt_out: value ? '1' : 'no',
+						} );
+					} }
+				/>
+			</SettingsRow>
 		</PanelBody>
 	);
 };

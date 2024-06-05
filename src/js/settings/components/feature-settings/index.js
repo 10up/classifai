@@ -19,6 +19,7 @@ import { PluginArea } from '@wordpress/plugins';
 import { getFeature, getScope } from '../../utils/utils';
 import { useSettings } from '../../hooks';
 import { UserPermissions } from '../user-permissions';
+import { SettingsRow } from '../settings-row';
 
 /**
  * Feature Settings component.
@@ -61,23 +62,31 @@ export const FeatureSettings = ( { featureName } ) => {
 					// translators: %s: Feature title
 					sprintf( __( '%s Settings', 'classifai' ), featureTitle )
 				}
+				className="settings-panel"
 			>
 				<PanelBody>
-					<ToggleControl
-						label={ __( 'Enable feature', 'classifai' ) }
-						checked={ featureSettings.status === '1' }
-						onChange={ ( status ) =>
-							setSettings( {
-								status: status ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
-							} )
-						}
-					/>
-					<SelectControl
+					<SettingsRow label={ __( 'Enable feature', 'classifai' ) }>
+						<ToggleControl
+							label={ __( 'Enable feature', 'classifai' ) }
+							checked={ featureSettings.status === '1' }
+							onChange={ ( status ) =>
+								setSettings( {
+									status: status ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
+								} )
+							}
+						/>
+					</SettingsRow>
+					<SettingsRow
 						label={ __( 'Select a provider', 'classifai' ) }
-						onChange={ ( provider ) => setSettings( { provider } ) }
-						value={ featureSettings.provider }
-						options={ providers }
-					/>
+					>
+						<SelectControl
+							onChange={ ( provider ) =>
+								setSettings( { provider } )
+							}
+							value={ featureSettings.provider }
+							options={ providers }
+						/>
+					</SettingsRow>
 
 					<Slot name="ClassifAIProviderSettings">
 						{ ( fills ) => <> { fills }</> }
