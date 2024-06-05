@@ -868,6 +868,14 @@ class TextToSpeech extends Feature {
 		return $post_content;
 	}
 
+	/**
+	 * Filters the post content by stripping off HTML subscript and superscript tags
+	 * with its content for text to speech generation.
+	 *
+	 * @param string $post_content The post content.
+	 *
+	 * @return string The filtered post content.
+	 */
 	public function strip_sub_sup_tags( $post_content ) {
 		$post_content = preg_replace( '/<sub>.*?<\/sub>|<sup>.*?<\/sup>/', '', $post_content );
 		return $post_content;
