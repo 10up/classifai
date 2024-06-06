@@ -976,6 +976,78 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Generate embeddings for an array of text.
+	 *
+	 * @param array        $strings Array of text to generate embeddings for.
+	 * @param Feature|null $feature Feature instance.
+	 * @return array|boolean|WP_Error
+	 */
+	public function generate_embeddings( array $strings = [], $feature = null ) {
+		if ( ! $feature ) {
+			$feature = new Classification();
+		}
+
+		$settings = $feature->get_settings();
+
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+
+		/**
+		 * Filter the request body before sending to OpenAI.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_openai_embeddings_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {array} $strings Array of text we are getting embeddings for.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_openai_embeddings_request_body',
+			[
+				'model'      => $this->get_model(),
+				'input'      => $strings,
+				'dimensions' => $this->get_dimensions(),
+			],
+			$strings
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->get_api_url(),
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['data'] ) ) {
+			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
+		}
+
+		$return = [];
+
+		// Parse out the embeddings response.
+		foreach ( $response['data'] as $data ) {
+			if ( ! isset( $data['embedding'] ) || ! is_array( $data['embedding'] ) ) {
+				continue;
+			}
+
+			$return[] = $data['embedding'];
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Chunk content into smaller pieces with an overlap.
 	 *
 	 * @param string $content Content to chunk.
