@@ -43,22 +43,25 @@ class Normalizer {
 	 * @param int    $post_id      The post id. Optional.
 	 */
 	public function normalize_content( $post_content, $post_title = '', $post_id = false ) {
+
+		/**
+		 * Hook to filter post content before stripping HTML tags.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_pre_normalize
+		 *
+		 * @param {string} $post_content The post content.
+		 *
+		 * @return {string} The filtered Post content.
+		 */
+		$post_content = apply_filters( 'classifai_pre_normalize', $post_content );
+
 		/* Strip HTML entities */
 		$post_content = preg_replace( '/&#?[a-z0-9]{2,8};/i', '', $post_content );
 
 		/* Replace HTML linebreaks with newlines */
 		$post_content = preg_replace( '#<br\s?/?>#', "\n\n", $post_content );
 
-		/**
-		 * Hook to filter post content before stripping HTML tags.
-		 *
-		 * @hook classifai_normalize_content_before_strip_all_tags
-		 *
-		 * @param {string} $post_content The post content.
-		 *
-		 * @return {string} The filtered Post content.
-		 */
-		$post_content = apply_filters( 'classifai_normalize_content_before_strip_all_tags', $post_content );
 
 		/* Strip all HTML tags */
 		$post_content = wp_strip_all_tags( $post_content );
