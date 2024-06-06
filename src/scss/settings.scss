@@ -1,5 +1,6 @@
 #classifai-settings {
 	font-size: 14px;
+	box-sizing: border-box;
 
 	#classifai-header {
 		background-color: #fff;
@@ -103,58 +104,33 @@
 		font-size: 15px;
 	}
 
-	.setting-tabs {
+	.classifai-settings-wrapper {
 		width: 100%;
 		max-width: 1280px;
 		margin: 0 auto;
-		.components-tab-panel__tabs {
+
+		.classifai-tabs {
+			display: flex;
+			align-items: stretch;
+			flex-direction: row;
 			justify-content: start;
 			border-bottom: 1px solid #ccd0d4;
 			padding-bottom: 0;
 			margin-right: 20px;
 
-			.components-tab-panel__tabs-item {
-				font-size: 15px;
-				height: auto;
-				min-height: 45px;
-			}
-
-			.active-tab,
-			.components-tab-panel__tabs-item:focus:not(:disabled) {
-				box-shadow: inset 0 -2px var(--wp-admin-theme-color);
-			}
-
-			@media screen and (max-width: 782px) {
-				margin-right: 10px;
-				margin-top: 12px;
-			}
-		}
-	}
-
-	.classifai-settings-wrapper {
-		margin-right: 20px;
-		padding-top: 24px;
-
-		@media screen and (max-width: 782px) {
-			margin-right: 10px;
-		}
-
-		.feature-tabs {
-			display: flex;
-			gap: 24px;
-
-			.components-tab-panel__tabs {
+			&[aria-orientation="vertical"] {
 				flex-direction: column;
 				border: 0px;
 				justify-content: start;
 				flex-basis: 0;
 				flex-grow: 1;
+				margin-right: 0px;
 
-				.components-tab-panel__tabs-item{
+				.classifai-tabs-item {
 					background: #fafafa;
 					border: 1px solid #e0e0e0;
 					text-align: left;
-					padding: 10px 16px;
+					padding: 14px 16px;
 
 					&.active-tab {
 						background: #fff;
@@ -166,23 +142,132 @@
 					&:focus {
 						background: #fff;
 					}
+
+					@media screen and (max-width: 782px) {
+						display: block;
+					}
 				}
 
 				@media screen and (max-width: 782px) {
 					margin-right: 0px;
 					margin-top: 0px;
 				}
+
+				@media screen and (max-width: 782px) {
+					display: block;
+					gap: 0;
+				}
 			}
 
-			.components-tab-panel__tab-content{
-				flex-basis: 0;
-				flex-grow: 3;
+			.active-tab,
+			.classifai-tabs-item:focus:not(:disabled) {
+				box-shadow: inset 0 -2px var(--wp-admin-theme-color);
 			}
 
 			@media screen and (max-width: 782px) {
-				display: block;
-				gap: 0;
+				margin-right: 10px;
+				margin-top: 12px;
 			}
+
+			.classifai-tabs-item {
+				position: relative;
+				border-radius: 0;
+				background: transparent;
+				border: none;
+				box-shadow: none;
+				cursor: pointer;
+				padding: 14px 16px;
+				margin-left: 0;
+				font-weight: 500;
+				text-decoration: none;
+				font-size: 15px;
+				height: auto;
+				color: var(--wp-components-color-foreground, #1e1e1e);
+
+				&:hover,
+				&:focus {
+					color:var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+				}
+
+				&:focus:not(:disabled) {
+					position: relative;
+					box-shadow: none;
+					outline: none;
+				}
+
+				// Tab indicator
+				&::after {
+					content: "";
+					position: absolute;
+					right: 0;
+					bottom: 0;
+					left: 0;
+					pointer-events: none;
+
+					// Draw the indicator.
+					background: var(--wp-admin-theme-color, #3858e9);
+					height: calc(0 * var(--wp-admin-border-width-focus));
+					border-radius: 0;
+
+					// Animation
+					transition: all 0.1s linear;
+				}
+
+				// Active.
+				&.active-tab::after {
+					height: calc(1 * var(--wp-admin-border-width-focus));
+
+					// Windows high contrast mode.
+					outline: 2px solid transparent;
+					outline-offset: -1px;
+				}
+
+				// Focus.
+				&::before {
+					content: "";
+					position: absolute;
+					top: 12px;
+					right: 12px;
+					bottom: 12px;
+					left: 12px;
+					pointer-events: none;
+
+					// Draw the indicator.
+					box-shadow: 0 0 0 0 transparent;
+					border-radius: 2px;
+
+					// Animation
+					transition: all 0.1s linear;
+				}
+
+				&:focus-visible::before {
+					box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color, #3858e9);
+
+					// Windows high contrast mode.
+					outline: 2px solid transparent;
+				}
+			}
+		}
+	}
+
+	.service-settings-wrapper {
+		margin-right: 20px;
+		padding-top: 24px;
+		display: flex;
+		gap: 24px;
+
+		@media screen and (max-width: 782px) {
+			margin-right: 10px;
+		}
+
+		.feature-settings-wrapper{
+			flex-basis: 0;
+			flex-grow: 3;
+		}
+
+		@media screen and (max-width: 782px) {
+			display: block;
+			gap: 0;
 		}
 	}
 }

@@ -12,6 +12,8 @@ import {
 	Slot,
 } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,16 +22,36 @@ import { getFeature, getScope } from '../../utils/utils';
 import { useSettings } from '../../hooks';
 import { UserPermissions } from '../user-permissions';
 import { SettingsRow } from '../settings-row';
+import { STORE_NAME } from '../../data/store';
+import { Navigate, useParams } from 'react-router-dom';
 
+const { features } = window.classifAISettings;
 /**
  * Feature Settings component.
  *
- * @param {Object} props             All the props passed to this function.
- * @param {string} props.featureName The name of the feature.
  */
-export const FeatureSettings = ( { featureName } ) => {
-	const { setFeatureSettings, saveSettings, settings, isLoaded } =
-		useSettings();
+export const FeatureSettings = () => {
+	const { feature: featureName, service } = useParams();
+	const serviceFeatures = Object.keys( features[ service ] || {} );
+	const { setCurrentFeature } = useDispatch( STORE_NAME );
+	const { setFeatureSettings, saveSettings } = useSettings();
+
+	useEffect( () => {
+		setCurrentFeature( featureName );
+	}, [ featureName, setCurrentFeature ] );
+
+	const { settings, isLoaded } = useSelect( ( select ) => {
+		return {
+			settings: select( STORE_NAME ).getSettings(),
+			isLoaded: select( STORE_NAME ).getIsLoaded(),
+		};
+	} );
+
+	// If the feature is not available, redirect to the first feature.
+	if ( ! serviceFeatures.includes( featureName ) ) {
+		return <Navigate to={ serviceFeatures[ 0 ] } replace />;
+	}
+
 	const feature = getFeature( featureName );
 	const featureSettings = settings[ featureName ] || {};
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
@@ -101,16 +123,14 @@ export const FeatureSettings = ( { featureName } ) => {
 					setSettings={ setSettings }
 				/>
 			</Panel>
-			<div className="settings-tab__plugin-settings inner-container">
-				<div className="setting-tabs__setting-panels">
-					<Button
-						className="save-settings-button"
-						variant="primary"
-						onClick={ saveFeatureSettings }
-					>
-						{ __( 'Save Settings', 'classifai' ) }
-					</Button>
-				</div>
+			<div className="classifai-settings-footer">
+				<Button
+					className="save-settings-button"
+					variant="primary"
+					onClick={ saveFeatureSettings }
+				>
+					{ __( 'Save Settings', 'classifai' ) }
+				</Button>
 			</div>
 			<PluginArea scope={ getScope( featureName ) } />
 			<PluginArea scope={ getScope( featureSettings.provider ) } />
