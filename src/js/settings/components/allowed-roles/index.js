@@ -14,8 +14,8 @@ import { SettingsRow } from '../settings-row';
 
 export const AllowedRoles = ( { featureName } ) => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const featureSettings = useSelect( ( select ) =>
-		select( STORE_NAME ).getFeatureSettings()
+	const featureSettings = useSelect(
+		( select ) => select( STORE_NAME ).getSettings( featureName ) || {}
 	);
 	const feature = getFeature( featureName );
 	const roles = feature.roles || {};

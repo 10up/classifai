@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { NavLink, Navigate, Outlet, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useParams } from 'react-router-dom';
 
 /**
  * WordPress dependencies
@@ -14,7 +14,7 @@ import { useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../data/store';
-const { features, services } = window.classifAISettings;
+const { features } = window.classifAISettings;
 
 /**
  * ServiceSettings component to render the feature navigation tabs and the feature settings.
@@ -25,15 +25,8 @@ export const ServiceSettings = () => {
 	const { setCurrentService } = useDispatch( STORE_NAME );
 	const { service } = useParams();
 	useEffect( () => {
-		if ( service && services[ service ] ) {
-			setCurrentService( service );
-		}
+		setCurrentService( service );
 	}, [ service, setCurrentService ] );
-
-	// If the service is not available, redirect to the language processing page.
-	if ( ! services[ service ] ) {
-		return <Navigate to="/language_processing" replace />;
-	}
 
 	const serviceFeatures = features[ service ] || {};
 	return (

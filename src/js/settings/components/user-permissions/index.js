@@ -3,6 +3,7 @@
  */
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -10,12 +11,13 @@ import { __ } from '@wordpress/i18n';
 import { UserSelector } from '../../../components';
 import { AllowedRoles } from '../allowed-roles';
 import { SettingsRow } from '../settings-row';
+import { STORE_NAME } from '../../data/store';
 
-export const UserPermissions = ( {
-	featureName,
-	featureSettings,
-	setSettings,
-} ) => {
+export const UserPermissions = ( { featureName } ) => {
+	const { setFeatureSettings } = useDispatch( STORE_NAME );
+	const featureSettings = useSelect( ( select ) => {
+		return select( STORE_NAME ).getSettings( featureName ) || {};
+	} );
 	return (
 		<PanelBody
 			title={ __( 'User permissions', 'classifai' ) }
@@ -34,7 +36,7 @@ export const UserPermissions = ( {
 				<UserSelector
 					value={ featureSettings.users || [] }
 					onChange={ ( users ) => {
-						setSettings( {
+						setFeatureSettings( {
 							...featureSettings,
 							users,
 						} );
@@ -52,7 +54,7 @@ export const UserPermissions = ( {
 				<ToggleControl
 					checked={ featureSettings?.user_based_opt_out === '1' }
 					onChange={ ( value ) => {
-						setSettings( {
+						setFeatureSettings( {
 							...featureSettings,
 							user_based_opt_out: value ? '1' : 'no',
 						} );

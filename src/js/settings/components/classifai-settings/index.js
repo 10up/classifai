@@ -26,10 +26,40 @@ import { STORE_NAME } from '../../data/store';
 
 const { services, features } = window.classifAISettings;
 
+/**
+ * DefaultFeatureSettings component to navigate to the default feature settings.
+ * If no feature is selected, it will redirect to the first feature.
+ */
 const DefaultFeatureSettings = () => {
 	const { service } = useParams();
 	const feature = Object.keys( features[ service ] || {} )[ 0 ];
 	return <Navigate to={ feature } replace />;
+};
+
+/**
+ * FeatureSettingsWrapper component to render the feature settings.
+ * If the feature is not available, it will redirect to the first feature.
+ */
+const FeatureSettingsWrapper = () => {
+	const { service, feature } = useParams();
+	const serviceFeatures = Object.keys( features[ service ] || {} );
+
+	if ( ! serviceFeatures.includes( feature ) ) {
+		return <Navigate to={ serviceFeatures[ 0 ] } replace />;
+	}
+
+	return <FeatureSettings featureName={ feature } />;
+};
+
+const ServiceSettingsWrapper = () => {
+	const { service } = useParams();
+
+	// If the service is not available, redirect to the language processing page.
+	if ( ! services[ service ] ) {
+		return <Navigate to="/language_processing" replace />;
+	}
+
+	return <ServiceSettings />;
 };
 
 /**
@@ -79,14 +109,17 @@ export const ClassifAISettings = () => {
 				<div className="classifai-settings-wrapper">
 					<ServiceNavigation />
 					<Routes>
-						<Route path=":service" element={ <ServiceSettings /> }>
+						<Route
+							path=":service"
+							element={ <ServiceSettingsWrapper /> }
+						>
 							<Route
 								index
 								element={ <DefaultFeatureSettings /> }
 							/>
 							<Route
 								path=":feature"
-								element={ <FeatureSettings /> }
+								element={ <FeatureSettingsWrapper /> }
 							/>
 						</Route>
 						{ /* When no routes match, it will redirect to this route path. Note that it should be registered above. */ }

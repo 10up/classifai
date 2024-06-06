@@ -23,37 +23,30 @@ import { useSettings } from '../../hooks';
 import { UserPermissions } from '../user-permissions';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { Navigate, useParams } from 'react-router-dom';
 
-const { features } = window.classifAISettings;
 /**
  * Feature Settings component.
  *
+ * @param {Object} props             Component props.
+ * @param {string} props.featureName Feature name.
  */
-export const FeatureSettings = () => {
-	const { feature: featureName, service } = useParams();
-	const serviceFeatures = Object.keys( features[ service ] || {} );
-	const { setCurrentFeature } = useDispatch( STORE_NAME );
-	const { setFeatureSettings, saveSettings } = useSettings();
+export const FeatureSettings = ( { featureName } ) => {
+	const { setCurrentFeature, setFeatureSettings } = useDispatch( STORE_NAME );
+	const { saveSettings } = useSettings();
 
 	useEffect( () => {
 		setCurrentFeature( featureName );
 	}, [ featureName, setCurrentFeature ] );
 
-	const { settings, isLoaded } = useSelect( ( select ) => {
+	const { featureSettings, isLoaded } = useSelect( ( select ) => {
 		return {
-			settings: select( STORE_NAME ).getSettings(),
+			featureSettings:
+				select( STORE_NAME ).getSettings( featureName ) || {},
 			isLoaded: select( STORE_NAME ).getIsLoaded(),
 		};
 	} );
 
-	// If the feature is not available, redirect to the first feature.
-	if ( ! serviceFeatures.includes( featureName ) ) {
-		return <Navigate to={ serviceFeatures[ 0 ] } replace />;
-	}
-
 	const feature = getFeature( featureName );
-	const featureSettings = settings[ featureName ] || {};
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
 
 	const providers = Object.keys( feature?.providers || {} ).map(
