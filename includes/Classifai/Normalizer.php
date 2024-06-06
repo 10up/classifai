@@ -62,7 +62,6 @@ class Normalizer {
 		/* Replace HTML linebreaks with newlines */
 		$post_content = preg_replace( '#<br\s?/?>#', "\n\n", $post_content );
 
-
 		/* Strip all HTML tags */
 		$post_content = wp_strip_all_tags( $post_content );
 
