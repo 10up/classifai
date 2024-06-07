@@ -14,11 +14,11 @@ import { SettingsRow } from '../settings-row';
 
 export const AllowedRoles = ( { featureName } ) => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const featureSettings = useSelect(
-		( select ) => select( STORE_NAME ).getSettings( featureName ) || {}
+	const roles = useSelect(
+		( select ) => select( STORE_NAME ).getFeatureSettings( 'roles' ) || {}
 	);
 	const feature = getFeature( featureName );
-	const roles = feature.roles || {};
+	const featureRoles = feature.roles || {};
 	return (
 		<SettingsRow
 			label={ __( 'Allowed roles', 'classifai' ) }
@@ -28,16 +28,16 @@ export const AllowedRoles = ( { featureName } ) => {
 				'classifai'
 			) }
 		>
-			{ Object.keys( roles ).map( ( role ) => {
+			{ Object.keys( featureRoles ).map( ( role ) => {
 				return (
 					<CheckboxControl
 						key={ role }
-						checked={ featureSettings.roles?.[ role ] === role }
-						label={ roles[ role ] }
+						checked={ roles?.[ role ] === role }
+						label={ featureRoles[ role ] }
 						onChange={ ( value ) => {
 							setFeatureSettings( {
 								roles: {
-									...featureSettings.roles,
+									...roles,
 									[ role ]: value ? role : '0',
 								},
 							} );
