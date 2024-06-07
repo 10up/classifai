@@ -129,9 +129,10 @@ class Settings {
 
 			foreach ( $service->feature_classes as $feature ) {
 				$services[ $service->get_menu_slug() ][ $feature::ID ] = array(
-					'label'     => $feature->get_label(),
-					'providers' => $feature->get_providers(),
-					'roles'     => $feature->get_roles(),
+					'label'              => $feature->get_label(),
+					'providers'          => $feature->get_providers(),
+					'roles'              => $feature->get_roles(),
+					'enable_description' => $feature->get_enable_description(),
 				);
 			}
 		}

@@ -13,6 +13,24 @@ export const setFeatureSettings =
 		} );
 	};
 
+export const setProviderSettings =
+	( provider, settings ) =>
+	( { select, dispatch } ) => {
+		const currentFeature = select.getCurrentFeature();
+		const featureSettings = select.getFeatureSettings();
+		dispatch( {
+			type: 'SET_FEATURE_SETTINGS',
+			feature: currentFeature,
+			payload: {
+				...featureSettings,
+				[ provider ]: {
+					...( featureSettings[ provider ] || {} ),
+					...settings,
+				},
+			},
+		} );
+	};
+
 export const setSettings = ( settings ) => ( {
 	type: 'SET_SETTINGS',
 	payload: settings,

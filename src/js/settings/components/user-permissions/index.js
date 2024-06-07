@@ -15,8 +15,13 @@ import { STORE_NAME } from '../../data/store';
 
 export const UserPermissions = ( { featureName } ) => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const featureSettings = useSelect( ( select ) => {
-		return select( STORE_NAME ).getSettings( featureName ) || {};
+	// eslint-disable-next-line camelcase
+	const { users, user_based_opt_out } = useSelect( ( select ) => {
+		return {
+			users: select( STORE_NAME ).getFeatureSettings( 'users' ),
+			user_based_opt_out:
+				select( STORE_NAME ).getFeatureSettings( 'user_based_opt_out' ),
+		};
 	} );
 	return (
 		<PanelBody
@@ -34,11 +39,10 @@ export const UserPermissions = ( { featureName } ) => {
 				) }
 			>
 				<UserSelector
-					value={ featureSettings.users || [] }
-					onChange={ ( users ) => {
+					value={ users || [] }
+					onChange={ ( value ) => {
 						setFeatureSettings( {
-							...featureSettings,
-							users,
+							users: value,
 						} );
 					} }
 				/>
@@ -52,10 +56,10 @@ export const UserPermissions = ( { featureName } ) => {
 				) }
 			>
 				<ToggleControl
-					checked={ featureSettings?.user_based_opt_out === '1' }
+					// eslint-disable-next-line camelcase
+					checked={ user_based_opt_out === '1' }
 					onChange={ ( value ) => {
 						setFeatureSettings( {
-							...featureSettings,
 							user_based_opt_out: value ? '1' : 'no',
 						} );
 					} }

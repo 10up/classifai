@@ -21,7 +21,7 @@ const OpenAIModerationSettings = () => {
 
 	const Description = () => (
 		<>
-			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }
+			{ __( "Don't have an OpenAI account yet? ", 'classifai' ) }
 			<a
 				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
 				href="https://platform.openai.com/signup"
