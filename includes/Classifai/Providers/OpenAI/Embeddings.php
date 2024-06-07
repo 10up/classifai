@@ -1073,7 +1073,7 @@ class Embeddings extends Provider {
 				array_slice(
 					$words,
 					max( $i - $overlap_size, 0 ),
-					$i + $chunk_size
+					$chunk_size + $overlap_size
 				)
 			);
 

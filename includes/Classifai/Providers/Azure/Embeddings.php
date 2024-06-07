@@ -833,6 +833,7 @@ class Embeddings extends OpenAI {
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 		$response = $this->get_result( $response );
@@ -911,6 +912,7 @@ class Embeddings extends OpenAI {
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 		$response = $this->get_result( $response );
@@ -963,7 +965,7 @@ class Embeddings extends OpenAI {
 				array_slice(
 					$words,
 					max( $i - $overlap_size, 0 ),
-					$i + $chunk_size
+					$chunk_size + $overlap_size
 				)
 			);
 
