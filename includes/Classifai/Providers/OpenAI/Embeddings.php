@@ -533,7 +533,7 @@ class Embeddings extends Provider {
 				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
 					$embeddings = array_map(
 						function ( $embedding ) {
-							return floatval( $embedding );
+							return array_map( 'floatval', $embedding );
 						},
 						$all_embeddings
 					);
