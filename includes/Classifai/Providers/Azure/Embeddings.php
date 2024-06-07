@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
+use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
@@ -400,11 +401,29 @@ class Embeddings extends OpenAI {
 
 		// Get the embeddings for each chunk.
 		if ( ! empty( $content_chunks ) ) {
-			foreach ( $content_chunks as $chunk ) {
-				$embedding = $this->generate_embedding( $chunk );
+			$tokenizer    = new Tokenizer( $this->get_max_tokens() );
+			$total_tokens = $tokenizer->tokens_in_content( $content );
 
-				if ( $embedding && ! is_wp_error( $embedding ) ) {
-					$embeddings[] = array_map( 'floatval', $embedding );
+			// If we have a lot of tokens, we need to get embeddings for each chunk individually.
+			if ( $this->max_tokens < $total_tokens ) {
+				foreach ( $content_chunks as $chunk ) {
+					$embedding = $this->generate_embedding( $chunk );
+
+					if ( $embedding && ! is_wp_error( $embedding ) ) {
+						$embeddings[] = array_map( 'floatval', $embedding );
+					}
+				}
+			} else {
+				// Otherwise let's get all embeddings in a single request.
+				$all_embeddings = $this->generate_embeddings( $content_chunks );
+
+				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
+					$embeddings = array_map(
+						function ( $embedding ) {
+							return floatval( $embedding );
+						},
+						$all_embeddings
+					);
 				}
 			}
 		}
