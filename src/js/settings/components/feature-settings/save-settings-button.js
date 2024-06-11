@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -18,6 +19,10 @@ import { STORE_NAME } from '../../data/store';
  * @param {string} props.featureName Feature name.
  */
 export const SaveSettingsButton = ( { featureName } ) => {
+	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
+	const notices = useSelect( ( select ) =>
+		select( noticesStore ).getNotices()
+	);
 	const { setIsSaving, setSettings } = useDispatch( STORE_NAME );
 	const settings = useSelect( ( select ) =>
 		select( STORE_NAME ).getSettings()
@@ -29,6 +34,7 @@ export const SaveSettingsButton = ( { featureName } ) => {
 	 * @param {string} featureName Feature name
 	 */
 	const saveSettings = () => {
+		removeNotices( notices.map( ( { id } ) => id ) );
 		setIsSaving( true );
 		apiFetch( {
 			path: '/classifai/v1/settings/',
@@ -36,12 +42,26 @@ export const SaveSettingsButton = ( { featureName } ) => {
 			data: { [ featureName ]: settings[ featureName ] },
 		} )
 			.then( ( res ) => {
-				setSettings( res );
+				if ( res.errors && res.errors.length ) {
+					res.errors.forEach( ( error ) =>
+						createErrorNotice( error.message )
+					);
+					setSettings( res.settings );
+					setIsSaving( false );
+					return;
+				}
+
+				setSettings( res.settings );
 				setIsSaving( false );
 			} )
 			.catch( ( error ) => {
-				// eslint-disable-next-line no-console
-				console.error( error ); // TODO: handle error and show a notice
+				createErrorNotice(
+					error.message ||
+						__(
+							'An error occurred while saving settings.',
+							'classifai'
+						)
+				);
 				setIsSaving( false );
 			} );
 	};

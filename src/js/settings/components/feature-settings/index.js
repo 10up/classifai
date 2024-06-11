@@ -16,6 +16,7 @@ import { STORE_NAME } from '../../data/store';
 import { ProviderSettings } from '../provider-settings';
 import { EnableToggleControl } from './enable-feature';
 import { SaveSettingsButton } from './save-settings-button';
+import { Notices } from './notices';
 
 /**
  * Feature Settings component.
@@ -43,6 +44,7 @@ export const FeatureSettings = ( { featureName } ) => {
 
 	return (
 		<>
+			<Notices />
 			<Panel
 				header={
 					// translators: %s: Feature title

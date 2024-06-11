@@ -40,13 +40,13 @@ const ProviderFields = ( { provider, featureName } ) => {
  */
 export const ProviderSettings = ( { featureName } ) => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
+	const feature = getFeature( featureName );
 	const provider = useSelect(
 		( select ) =>
 			select( STORE_NAME ).getFeatureSettings( 'provider' ) ||
 			Object.keys( feature?.providers || {} )[ 0 ]
 	);
 
-	const feature = getFeature( featureName );
 	const providers = Object.keys( feature?.providers || {} ).map(
 		( value ) => {
 			return {
