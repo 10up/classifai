@@ -6,6 +6,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
+use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
@@ -400,11 +401,29 @@ class Embeddings extends OpenAI {
 
 		// Get the embeddings for each chunk.
 		if ( ! empty( $content_chunks ) ) {
-			foreach ( $content_chunks as $chunk ) {
-				$embedding = $this->generate_embedding( $chunk );
+			$tokenizer    = new Tokenizer( $this->get_max_tokens() );
+			$total_tokens = $tokenizer->tokens_in_content( $content );
 
-				if ( $embedding && ! is_wp_error( $embedding ) ) {
-					$embeddings[] = array_map( 'floatval', $embedding );
+			// If we have a lot of tokens, we need to get embeddings for each chunk individually.
+			if ( $this->max_tokens < $total_tokens ) {
+				foreach ( $content_chunks as $chunk ) {
+					$embedding = $this->generate_embedding( $chunk );
+
+					if ( $embedding && ! is_wp_error( $embedding ) ) {
+						$embeddings[] = array_map( 'floatval', $embedding );
+					}
+				}
+			} else {
+				// Otherwise let's get all embeddings in a single request.
+				$all_embeddings = $this->generate_embeddings( $content_chunks );
+
+				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
+					$embeddings = array_map(
+						function ( $embedding ) {
+							return array_map( 'floatval', $embedding );
+						},
+						$all_embeddings
+					);
 				}
 			}
 		}
@@ -833,6 +852,7 @@ class Embeddings extends OpenAI {
 					'Content-Type' => 'application/json',
 				],
 				'body'    => wp_json_encode( $body ),
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 		$response = $this->get_result( $response );
@@ -864,6 +884,81 @@ class Embeddings extends OpenAI {
 	}
 
 	/**
+	 * Generate embeddings for an array of text.
+	 *
+	 * @param array        $strings Array of text to generate embeddings for.
+	 * @param Feature|null $feature Feature instance.
+	 * @return array|boolean|WP_Error
+	 */
+	public function generate_embeddings( array $strings = [], $feature = null ) {
+		if ( ! $feature ) {
+			$feature = new Classification();
+		}
+
+		$settings = $feature->get_settings();
+
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Filter the request body before sending to OpenAI.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {array} $strings Array of text we are getting embeddings for.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_azure_openai_embeddings_request_body',
+			[
+				'input'      => $strings,
+				'dimensions' => $this->get_dimensions(),
+			],
+			$strings
+		);
+
+		// Make our API request.
+		$response = wp_remote_post(
+			$this->prep_api_url( $feature ),
+			[
+				'headers' => [
+					'api-key'      => $settings[ static::ID ]['api_key'],
+					'Content-Type' => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
+				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			]
+		);
+		$response = $this->get_result( $response );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['data'] ) ) {
+			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
+		}
+
+		$return = [];
+
+		// Parse out the embeddings response.
+		foreach ( $response['data'] as $data ) {
+			if ( ! isset( $data['embedding'] ) || ! is_array( $data['embedding'] ) ) {
+				continue;
+			}
+
+			$return[] = $data['embedding'];
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Chunk content into smaller pieces with an overlap.
 	 *
 	 * @param string $content Content to chunk.
@@ -889,7 +984,7 @@ class Embeddings extends OpenAI {
 				array_slice(
 					$words,
 					max( $i - $overlap_size, 0 ),
-					$i + $chunk_size
+					$chunk_size + $overlap_size
 				)
 			);
 
