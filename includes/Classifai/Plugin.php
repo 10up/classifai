@@ -172,7 +172,7 @@ class Plugin {
 				get_asset_info( 'admin', 'dependencies' ),
 				array(
 					'jquery-ui-dialog',
-					'heartbeat'
+					'heartbeat',
 				)
 			),
 			get_asset_info( 'admin', 'version' ),
