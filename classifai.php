@@ -84,6 +84,7 @@ require_once __DIR__ . '/config.php';
 function classifai_autoload() {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 
 		return true;
 	} else {

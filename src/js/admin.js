@@ -1,5 +1,5 @@
 /* global ClassifAI */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -413,5 +413,24 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 		// Trigger 'change' on page load.
 		engineSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );
+
+// Heartbeat check to hide notice once the embedding generation is complete.
+( function( $ ) {
+	$( document ).ready( () => $( '.classifai-openai-embeddings-message' ).length > 0 && wp.heartbeat.interval( 5 ) );
+
+	$( document ).on( 'heartbeat-tick.custom-heartbeat', function( e, data ) {
+		if ( ! data.classifaiEmbedInProgress ) {
+			const messageEl = $( '.classifai-openai-embeddings-message' );
+			messageEl.removeClass( 'notice-info' );
+			messageEl.addClass( 'notice-success' );
+			messageEl.find( 'p' ).html( sprintf(
+				'<strong>%1$s</strong>: %2$s',
+				__( 'OpenAI Embeddings', 'classifai' ),
+				__( 'Classification completed.', 'classifai' )
+			) )
+			wp.heartbeat.interval( 5000 )
+		}
 	} );
 } )( jQuery );

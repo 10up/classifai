@@ -286,6 +286,8 @@ class Embeddings extends Provider {
 
 		$feature = new Classification();
 
+		add_filter( 'heartbeat_send', [ $this, 'check_embedding_generation_status' ] );
+		add_action( 'classifai_before_feature_nav', [ $this, 'render_embeddings_generation_status' ] );
 		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
 		add_action( 'action_scheduler_after_execute', [ $this, 'log_failed_embeddings' ], 10, 2 );
 
@@ -839,7 +841,7 @@ class Embeddings extends Provider {
 			'user_id'  => $user_id,
 		];
 
-		as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+		\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
 	}
 
 	/**
@@ -890,13 +892,66 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Check if embeddings generation is in progress.
+	 *
+	 * @return bool
+	 */
+	public static function is_embeddings_generation_in_progress() {
+		$store = \ActionScheduler_Store::instance();
+
+		$action_id = $store->find_action(
+			'classifai_schedule_generate_embedding_job',
+			array(
+				'status' => \ActionScheduler_Store::STATUS_PENDING,
+			)
+		);
+
+		return ! empty( $action_id );
+	}
+
+	/**
+	 * Render the embeddings generation status notice.
+	 */
+	public function render_embeddings_generation_status() {
+		$in_progress = self::is_embeddings_generation_in_progress();
+
+		if ( ! $in_progress ) {
+			return;
+		}
+
+		?>
+		<div class="notice notice-info classifai-openai-embeddings-message">
+			<p>
+			<?php
+			printf(
+				'<strong>%1$s</strong>: %2$s',
+				esc_html__( 'OpenAI Embeddings', 'classifai' ),
+				esc_html__( 'Classification is in progress in the background.', 'classifai' )
+			)
+			?>
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * AJAX callback to check the status of embeddings generation.
+	 *
+	 * @param array $response The heartbeat response.
+	 */
+	public function check_embedding_generation_status( $response ) {
+		$response['classifaiEmbedInProgress'] = self::is_embeddings_generation_in_progress();
+
+		return $response;
+	}
+
+	/**
 	 * Logs failed embeddings.
 	 *
 	 * @param int                     $action_id The action ID.
 	 * @param \ActionScheduler_Action $action    The action object.
 	 */
 	public function log_failed_embeddings( $action_id, $action ) {
-		/** @var \ActionScheduler_Action $action */
 		if ( 'classifai_schedule_generate_embedding_job' !== $action->get_hook() ) {
 			return;
 		}
