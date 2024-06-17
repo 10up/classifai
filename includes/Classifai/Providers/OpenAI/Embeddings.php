@@ -808,6 +808,18 @@ class Embeddings extends Provider {
 			}
 		}
 
+		/**
+		 * Filter the maximum number of terms to process.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_max_terms
+		 *
+		 * @param {int} $number Number of terms to process per job.
+		 *
+		 * @return {int} Filtered number of terms to process per job.
+		 */
+		$number = apply_filters( 'classifai_openai_embeddings_max_terms', 20 );
+
 		$default_args = [
 			'taxonomy'     => $taxonomy,
 			'orderby'      => 'count',
@@ -816,7 +828,7 @@ class Embeddings extends Provider {
 			'fields'       => 'ids',
 			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'NOT EXISTS',
-			'number'       => apply_filters( 'classifai_openai_embeddings_max_terms', 20 ),
+			'number'       => $number,
 			'offset'       => 0,
 			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
