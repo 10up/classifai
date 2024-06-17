@@ -286,6 +286,9 @@ class Embeddings extends Provider {
 
 		$feature = new Classification();
 
+		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
+		add_action( 'action_scheduler_after_execute', [ $this, 'log_failed_embeddings' ], 10, 2 );
+
 		if (
 			! $feature->is_feature_enabled() ||
 			$feature->get_feature_provider_instance()::ID !== static::ID
@@ -785,12 +788,14 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Generate embedding data for all terms within a taxonomy.
+	 * Schedules the job for generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
-	 * @param bool   $all Whether to generate embeddings for all terms or just those without embeddings.
+	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
+	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param int    $user_id  The user ID to run this as.
 	 */
-	private function trigger_taxonomy_update( string $taxonomy = '', bool $all = false ) {
+	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
 		$exclude = [];
 
 		// Exclude the uncategorized term.
@@ -801,7 +806,7 @@ class Embeddings extends Provider {
 			}
 		}
 
-		$args = [
+		$default_args = [
 			'taxonomy'     => $taxonomy,
 			'orderby'      => 'count',
 			'order'        => 'DESC',
@@ -809,13 +814,48 @@ class Embeddings extends Provider {
 			'fields'       => 'ids',
 			'meta_key'     => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'NOT EXISTS',
-			'number'       => $this->get_max_terms(),
+			'number'       => apply_filters( 'classifai_openai_embeddings_max_terms', 20 ),
+			'offset'       => 0,
 			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
+		$default_args = array_merge( $default_args, $args );
+
 		// If we want all terms, remove our meta query.
 		if ( $all ) {
-			unset( $args['meta_key'], $args['meta_compare'] );
+			unset( $default_args['meta_key'], $default_args['meta_compare'] );
+		} else {
+			unset( $default_args['offset'] );
+		}
+
+		if ( 0 === $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$job_args = [
+			'taxonomy' => $taxonomy,
+			'all'      => $all,
+			'args'     => $default_args,
+			'user_id'  => $user_id,
+		];
+
+		as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+	}
+
+	/**
+	 * Job for generate embedding data for all terms within a taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
+	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param int    $user_id  The user ID to run this as.
+	 */
+	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+
+		if ( $user_id > 0 ) {
+			// We set this as current_user_can() fails when this function runs
+			// under the context of Action Scheduler.
+			wp_set_current_user( $user_id );
 		}
 
 		$terms = get_terms( $args );
@@ -824,11 +864,61 @@ class Embeddings extends Provider {
 			return;
 		}
 
+		// Re-orders the keys.
+		$terms   = array_values( $terms );
+		$exclude = [];
+
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
 			/** @var int $term_id */
-			$this->generate_embeddings_for_term( $term_id, $all );
+			$has_generated = $this->generate_embeddings_for_term( $term_id, $all );
+
+			if ( is_wp_error( $has_generated ) ) {
+				$exclude[] = $term_id;
+			}
 		}
+
+		if ( $all && isset( $args['offset'] ) && isset( $args['number'] ) ) {
+			$args['offset'] = $args['offset'] + $args['number'];
+		}
+
+		if ( ! empty( $exclude ) ) {
+			$args['exclude'] = array_merge( $args['exclude'], $exclude );
+		}
+
+		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
+	}
+
+	/**
+	 * Logs failed embeddings.
+	 *
+	 * @param int                     $action_id The action ID.
+	 * @param \ActionScheduler_Action $action    The action object.
+	 */
+	public function log_failed_embeddings( $action_id, $action ) {
+		/** @var \ActionScheduler_Action $action */
+		if ( 'classifai_schedule_generate_embedding_job' !== $action->get_hook() ) {
+			return;
+		}
+
+		$args = $action->get_args();
+
+		if ( ! isset( $args['args'] ) ) {
+			return;
+		}
+
+		if ( ! isset( $args['args']['exclude'] ) ) {
+			return;
+		}
+
+		$excludes = $args['args']['exclude'];
+
+		if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
+			return;
+		}
+
+		$logger = new \ActionScheduler_DBLogger();
+		$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
 	}
 
 	/**
