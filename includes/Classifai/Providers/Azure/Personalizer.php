@@ -110,20 +110,22 @@ class Personalizer extends Provider {
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						// translators: 1 - link to create a Personalizer resource; 2 - link to GitHub issue.
-						__( 'Azure AI Personalizer Endpoint; <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint. Note that <a href="%2$s" target="_blank">as of September 2023</a>, it is no longer possible to create this resource. Previously created Personalizer resources can still be used.', 'classifai' ),
-						array(
-							'a' => array(
-								'href'   => array(),
-								'target' => array(),
-							),
-						)
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							// translators: 1 - link to create a Personalizer resource; 2 - link to GitHub issue.
+							__( 'Azure AI Personalizer Endpoint; <a href="%1$s" target="_blank">create a Personalizer resource</a> in the Azure portal to get your key and endpoint. Note that <a href="%2$s" target="_blank">as of September 2023</a>, it is no longer possible to create this resource. Previously created Personalizer resources can still be used.', 'classifai' ),
+							array(
+								'a' => array(
+									'href'   => array(),
+									'target' => array(),
+								),
+							)
+						),
+						'https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer',
+						'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/'
 					),
-					'https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer',
-					'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/'
-				),
 			]
 		);
 
