@@ -14,7 +14,7 @@
     "yahnis-elsts/plugin-update-checker": "5.1",
     "ua-parser/uap-php": "dev-master",
     "aws/aws-sdk-php": "^3.300",
-    "woocommerce/action-scheduler": "dev-trunk"
+    "woocommerce/action-scheduler": "3.8.1"
   },
   "autoload": {
     "psr-4": {
