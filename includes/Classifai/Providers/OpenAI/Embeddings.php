@@ -854,6 +854,14 @@ class Embeddings extends Provider {
 			'user_id'  => $user_id,
 		];
 
+		if ( ! as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
+			$terms = get_terms( $default_args );
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				return;
+			}
+		}
+
 		\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
 	}
 
@@ -910,6 +918,10 @@ class Embeddings extends Provider {
 	 * @return bool
 	 */
 	public static function is_embeddings_generation_in_progress(): bool {
+		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
+			return false;
+		}
+
 		$store = ActionScheduler_Store::instance();
 
 		$action_id = $store->find_action(
