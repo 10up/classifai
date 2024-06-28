@@ -18,6 +18,9 @@ import { GoogleAIGeminiAPISettings } from './google-gemini-api';
 import { AzureOpenAISettings } from './azure-openai';
 import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
+import { OpenAIModerationSettings } from './openai-moderation';
+import { OpenAIEmbeddingsSettings } from './openai-embeddings';
+import { OpenAIWhisperSettings } from './openai-whisper';
 
 const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
@@ -32,6 +35,15 @@ const ProviderFields = ( { provider } ) => {
 
 		case 'ibm_watson_nlu':
 			return <IBMWatsonNLUSettings />;
+
+		case 'openai_embeddings':
+			return <OpenAIEmbeddingsSettings />;
+
+		case 'openai_whisper':
+			return <OpenAIWhisperSettings />;
+
+		case 'openai_moderation':
+			return <OpenAIModerationSettings />;
 
 		default:
 			return null;
