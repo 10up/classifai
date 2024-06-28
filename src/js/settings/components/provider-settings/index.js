@@ -21,6 +21,8 @@ import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
 import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAIWhisperSettings } from './openai-whisper';
+import { AzureAIVisionSettings } from './azure-ai-vision';
+import { AzurePersonalizerSettings } from './azure-personlizer';
 
 const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
@@ -31,7 +33,8 @@ const ProviderFields = ( { provider } ) => {
 			return <GoogleAIGeminiAPISettings />;
 
 		case 'azure_openai':
-			return <AzureOpenAISettings />;
+		case 'azure_openai_embeddings':
+			return <AzureOpenAISettings providerName={ provider } />;
 
 		case 'ibm_watson_nlu':
 			return <IBMWatsonNLUSettings />;
@@ -44,6 +47,12 @@ const ProviderFields = ( { provider } ) => {
 
 		case 'openai_moderation':
 			return <OpenAIModerationSettings />;
+
+		case 'ms_computer_vision':
+			return <AzureAIVisionSettings />;
+
+		case 'ms_azure_personalizer':
+			return <AzurePersonalizerSettings />;
 
 		default:
 			return null;
@@ -67,9 +76,7 @@ export const ProviderSettings = () => {
 		select( STORE_NAME ).getFeatureSettings()
 	);
 
-	const configured = isProviderConfigured( featureSettings );
 	const providerLabel = feature.providers[ provider ] || '';
-
 	const providers = Object.keys( feature?.providers || {} ).map(
 		( value ) => {
 			return {
@@ -79,9 +86,14 @@ export const ProviderSettings = () => {
 		}
 	);
 
+	const configured =
+		isProviderConfigured( featureSettings ) &&
+		! editProvider &&
+		providerLabel;
+
 	return (
 		<>
-			{ configured && ! editProvider && (
+			{ configured && (
 				<>
 					<SettingsRow label={ __( 'Provider', 'classifai' ) }>
 						<>
@@ -96,7 +108,6 @@ export const ProviderSettings = () => {
 									className="classifai-settings-edit-provider"
 									style={ {
 										cursor: 'pointer',
-
 									} }
 									onClick={ () => setEditProvider( true ) }
 								/>
@@ -105,7 +116,7 @@ export const ProviderSettings = () => {
 					</SettingsRow>
 				</>
 			) }
-			{ ( ! configured || editProvider ) && (
+			{ ! configured && (
 				<>
 					<SettingsRow
 						label={ __( 'Select a provider', 'classifai' ) }

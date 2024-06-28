@@ -2,15 +2,14 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Panel, PanelBody, Spinner, Slot } from '@wordpress/components';
-import { PluginArea } from '@wordpress/plugins';
+import { Panel, PanelBody, Spinner } from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { getFeature, getScope } from '../../utils/utils';
+import { getFeature } from '../../utils/utils';
 import { UserPermissions } from '../user-permissions';
 import { STORE_NAME } from '../../data/store';
 import { ProviderSettings } from '../provider-settings';
@@ -18,6 +17,7 @@ import { EnableToggleControl } from './enable-feature';
 import { SaveSettingsButton } from './save-settings-button';
 import { Notices } from './notices';
 import { useFeatureContext } from './context';
+import { FeatureAdditionalSettings } from '../feature-additional-settings';
 
 /**
  * Feature Settings component.
@@ -54,16 +54,13 @@ export const FeatureSettings = () => {
 				<PanelBody>
 					<EnableToggleControl />
 					<ProviderSettings />
-					<Slot name="ClassifAIFeatureSettings">
-						{ ( fills ) => <> { fills }</> }
-					</Slot>
+					<FeatureAdditionalSettings />
 				</PanelBody>
 				<UserPermissions />
 			</Panel>
 			<div className="classifai-settings-footer">
 				<SaveSettingsButton />
 			</div>
-			<PluginArea scope={ getScope( featureName ) } />
 		</>
 	);
 };
