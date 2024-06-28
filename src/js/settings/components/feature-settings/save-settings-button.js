@@ -15,9 +15,6 @@ import { useFeatureContext } from './context';
 
 /**
  * Save Settings Button component.
- *
- * @param {Object} props             Component props.
- * @param {string} props.featureName Feature name.
  */
 export const SaveSettingsButton = () => {
 	const { featureName } = useFeatureContext();

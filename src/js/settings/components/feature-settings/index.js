@@ -21,9 +21,6 @@ import { useFeatureContext } from './context';
 
 /**
  * Feature Settings component.
- *
- * @param {Object} props             Component props.
- * @param {string} props.featureName Feature name.
  */
 export const FeatureSettings = () => {
 	const { featureName } = useFeatureContext();
