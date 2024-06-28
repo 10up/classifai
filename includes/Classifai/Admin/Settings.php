@@ -85,12 +85,7 @@ class Settings {
 		wp_enqueue_style(
 			'classifai-settings',
 			CLASSIFAI_PLUGIN_URL . 'dist/settings.css',
-			array_filter(
-				get_asset_info( 'settings', 'dependencies' ),
-				function ( $style ) {
-					return wp_style_is( $style, 'registered' );
-				}
-			),
+			array( 'wp-edit-blocks' ),
 			get_asset_info( 'settings', 'version' ),
 			'all'
 		);
