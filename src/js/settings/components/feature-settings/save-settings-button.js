@@ -23,6 +23,9 @@ export const SaveSettingsButton = () => {
 		select( noticesStore ).getNotices()
 	);
 	const { setIsSaving, setSettings } = useDispatch( STORE_NAME );
+	const isSaving = useSelect( ( select ) =>
+		select( STORE_NAME ).getIsSaving()
+	);
 	const settings = useSelect( ( select ) =>
 		select( STORE_NAME ).getSettings()
 	);
@@ -68,8 +71,11 @@ export const SaveSettingsButton = () => {
 			className="save-settings-button"
 			variant="primary"
 			onClick={ saveSettings }
+			isBusy={ isSaving }
 		>
-			{ __( 'Save Settings', 'classifai' ) }
+			{ isSaving
+				? __( 'Saving…', 'classifai' )
+				: __( 'Save Settings', 'classifai' ) }
 		</Button>
 	);
 };
