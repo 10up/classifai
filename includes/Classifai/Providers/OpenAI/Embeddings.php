@@ -11,6 +11,9 @@ use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
+use ActionScheduler_Action;
+use ActionScheduler_DBLogger;
+use ActionScheduler_Store;
 use WP_Error;
 
 class Embeddings extends Provider {
@@ -346,8 +349,7 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
-		// TODO: Two issues here we need to address: 1 - for sites with lots of terms, this is likely to lead to timeouts or rate limit issues. Should move this to some sort of queue/cron handler; 2 - this only works on the second save due to checking the value of get_all_feature_taxonomies() which is not updated until the settings are saved.
-		if ( isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
+		if ( $new_settings[ static::ID ]['authenticated'] && isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
 			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
 					$this->trigger_taxonomy_update( $feature_name );
@@ -412,7 +414,6 @@ class Embeddings extends Provider {
 		// Regenerate embeddings for all terms.
 		foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 			if ( isset( $settings[ $feature_name ] ) && 1 === (int) $settings[ $feature_name ] ) {
-				// TODO: this also needs fixed for the same reasons as the other trigger_taxonomy_update call.
 				$this->trigger_taxonomy_update( $feature_name, true );
 			}
 		}
@@ -790,7 +791,7 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Schedules the job for generate embedding data for all terms within a taxonomy.
+	 * Schedules the job to generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
@@ -809,16 +810,16 @@ class Embeddings extends Provider {
 		}
 
 		/**
-		 * Filter the maximum number of terms to process.
+		 * Filter the number of terms to process in a batch.
 		 *
-		 * @since x.x.x
-		 * @hook classifai_openai_embeddings_max_terms
+		 * @since 3.1.0
+		 * @hook classifai_openai_embeddings_terms_per_job
 		 *
 		 * @param {int} $number Number of terms to process per job.
 		 *
 		 * @return {int} Filtered number of terms to process per job.
 		 */
-		$number = apply_filters( 'classifai_openai_embeddings_max_terms', 20 );
+		$number = apply_filters( 'classifai_openai_embeddings_terms_per_job', 100 );
 
 		$default_args = [
 			'taxonomy'     => $taxonomy,
@@ -857,7 +858,7 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Job for generate embedding data for all terms within a taxonomy.
+	 * Job to generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
@@ -897,7 +898,7 @@ class Embeddings extends Provider {
 		}
 
 		if ( ! empty( $exclude ) ) {
-			$args['exclude'] = array_merge( $args['exclude'], $exclude );
+			$args['exclude'] = array_merge( $args['exclude'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		}
 
 		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
@@ -908,13 +909,13 @@ class Embeddings extends Provider {
 	 *
 	 * @return bool
 	 */
-	public static function is_embeddings_generation_in_progress() {
-		$store = \ActionScheduler_Store::instance();
+	public static function is_embeddings_generation_in_progress(): bool {
+		$store = ActionScheduler_Store::instance();
 
 		$action_id = $store->find_action(
 			'classifai_schedule_generate_embedding_job',
 			array(
-				'status' => \ActionScheduler_Store::STATUS_PENDING,
+				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)
 		);
 
@@ -925,9 +926,7 @@ class Embeddings extends Provider {
 	 * Render the embeddings generation status notice.
 	 */
 	public function render_embeddings_generation_status() {
-		$in_progress = self::is_embeddings_generation_in_progress();
-
-		if ( ! $in_progress ) {
+		if ( ! self::is_embeddings_generation_in_progress() ) {
 			return;
 		}
 
@@ -938,7 +937,7 @@ class Embeddings extends Provider {
 			printf(
 				'<strong>%1$s</strong>: %2$s',
 				esc_html__( 'OpenAI Embeddings', 'classifai' ),
-				esc_html__( 'Classification is in progress in the background.', 'classifai' )
+				esc_html__( 'Generation of embeddings is in progress.', 'classifai' )
 			)
 			?>
 			</p>
@@ -950,6 +949,7 @@ class Embeddings extends Provider {
 	 * AJAX callback to check the status of embeddings generation.
 	 *
 	 * @param array $response The heartbeat response.
+	 * @return array
 	 */
 	public function check_embedding_generation_status( $response ) {
 		$response['classifaiEmbedInProgress'] = self::is_embeddings_generation_in_progress();
@@ -960,8 +960,8 @@ class Embeddings extends Provider {
 	/**
 	 * Logs failed embeddings.
 	 *
-	 * @param int                     $action_id The action ID.
-	 * @param \ActionScheduler_Action $action    The action object.
+	 * @param int                    $action_id The action ID.
+	 * @param ActionScheduler_Action $action    The action object.
 	 */
 	public function log_failed_embeddings( $action_id, $action ) {
 		if ( 'classifai_schedule_generate_embedding_job' !== $action->get_hook() ) {
@@ -970,11 +970,7 @@ class Embeddings extends Provider {
 
 		$args = $action->get_args();
 
-		if ( ! isset( $args['args'] ) ) {
-			return;
-		}
-
-		if ( ! isset( $args['args']['exclude'] ) ) {
+		if ( ! isset( $args['args'] ) && ! isset( $args['args']['exclude'] ) ) {
 			return;
 		}
 
@@ -984,7 +980,7 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		$logger = new \ActionScheduler_DBLogger();
+		$logger = new ActionScheduler_DBLogger();
 		$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
 	}
 
