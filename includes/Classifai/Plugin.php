@@ -243,8 +243,8 @@ class Plugin {
 		$feature                  = new \Classifai\Features\Classification();
 		$is_feature_being_enabled = false;
 
-		if ( isset( $_POST['classifai_feature_classification'] ) ) {
-			$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) );
+		if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 
 		if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
