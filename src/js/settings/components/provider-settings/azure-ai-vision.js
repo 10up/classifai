@@ -6,7 +6,8 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 
-export const AzureOpenAISettings = ( { providerName = 'azure_openai' } ) => {
+export const AzureAIVisionSettings = () => {
+	const providerName = 'ms_computer_vision';
 	const { featureName } = useFeatureContext();
 	const providerSettings = useSelect(
 		( select ) =>
@@ -48,35 +49,45 @@ export const AzureOpenAISettings = ( { providerName = 'azure_openai' } ) => {
 					onChange={ ( value ) => onChange( { api_key: value } ) }
 				/>
 			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Deployment name', 'classifai' ) }
-				description={ __(
-					'Custom name you chose for your deployment when you deployed a model.',
-					'classifai'
-				) }
-			>
-				<InputControl
-					type="text"
-					value={ providerSettings.deployment || '' }
-					onChange={ ( value ) => onChange( { deployment: value } ) }
-				/>
-			</SettingsRow>
-			{ [
-				'feature_content_resizing',
-				'feature_title_generation',
-			].includes( featureName ) && (
+			{ 'feature_descriptive_text_generator' === featureName && (
 				<SettingsRow
-					label={ __( 'Number of suggestions', 'classifai' ) }
+					label={ __( 'Confidence threshold', 'classifai' ) }
 					description={ __(
-						'Number of suggestions that will be generated in one request.',
+						'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 55.',
 						'classifai'
 					) }
 				>
 					<InputControl
 						type="number"
-						value={ providerSettings.number_of_suggestions || 1 }
+						value={
+							providerSettings.descriptive_confidence_threshold ||
+							55
+						}
 						onChange={ ( value ) =>
-							onChange( { number_of_suggestions: value } )
+							onChange( {
+								descriptive_confidence_threshold: value,
+							} )
+						}
+					/>
+				</SettingsRow>
+			) }
+			{ 'feature_image_tags_generator' === featureName && (
+				<SettingsRow
+					label={ __( 'Confidence threshold', 'classifai' ) }
+					description={ __(
+						'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.',
+						'classifai'
+					) }
+				>
+					<InputControl
+						type="number"
+						value={
+							providerSettings.tag_confidence_threshold || 70
+						}
+						onChange={ ( value ) =>
+							onChange( {
+								tag_confidence_threshold: value,
+							} )
 						}
 					/>
 				</SettingsRow>
