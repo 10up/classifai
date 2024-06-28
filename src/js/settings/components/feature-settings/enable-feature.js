@@ -12,14 +12,14 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { getFeature } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { useFeatureContext } from './context';
 
 /**
  * Enable Feature Toggle component.
  *
- * @param {Object} props             Component props.
- * @param {string} props.featureName Feature name.
  */
-export const EnableToggleControl = ( { featureName } ) => {
+export const EnableToggleControl = () => {
+	const { featureName } = useFeatureContext();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const status = useSelect(
 		( select ) => select( STORE_NAME ).getFeatureSettings( 'status' ) || '0'

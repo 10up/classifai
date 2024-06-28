@@ -23,6 +23,7 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { FeatureSettings, Header, ServiceSettings } from '..';
 import { STORE_NAME } from '../../data/store';
+import { FeatureContext } from '../feature-settings/context';
 
 const { services, features } = window.classifAISettings;
 
@@ -48,7 +49,11 @@ const FeatureSettingsWrapper = () => {
 		return <Navigate to={ serviceFeatures[ 0 ] } replace />;
 	}
 
-	return <FeatureSettings featureName={ feature } />;
+	return (
+		<FeatureContext.Provider value={ { featureName: feature } }>
+			<FeatureSettings />
+		</FeatureContext.Provider>
+	);
 };
 
 const ServiceSettingsWrapper = () => {

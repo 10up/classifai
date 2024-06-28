@@ -17,6 +17,7 @@ import { ProviderSettings } from '../provider-settings';
 import { EnableToggleControl } from './enable-feature';
 import { SaveSettingsButton } from './save-settings-button';
 import { Notices } from './notices';
+import { useFeatureContext } from './context';
 
 /**
  * Feature Settings component.
@@ -24,7 +25,8 @@ import { Notices } from './notices';
  * @param {Object} props             Component props.
  * @param {string} props.featureName Feature name.
  */
-export const FeatureSettings = ( { featureName } ) => {
+export const FeatureSettings = () => {
+	const { featureName } = useFeatureContext();
 	const { setCurrentFeature } = useDispatch( STORE_NAME );
 
 	useEffect( () => {
@@ -53,16 +55,16 @@ export const FeatureSettings = ( { featureName } ) => {
 				className="settings-panel"
 			>
 				<PanelBody>
-					<EnableToggleControl featureName={ featureName } />
-					<ProviderSettings featureName={ featureName } />
+					<EnableToggleControl />
+					<ProviderSettings />
 					<Slot name="ClassifAIFeatureSettings">
 						{ ( fills ) => <> { fills }</> }
 					</Slot>
 				</PanelBody>
-				<UserPermissions featureName={ featureName } />
+				<UserPermissions />
 			</Panel>
 			<div className="classifai-settings-footer">
-				<SaveSettingsButton featureName={ featureName } />
+				<SaveSettingsButton />
 			</div>
 			<PluginArea scope={ getScope( featureName ) } />
 		</>

@@ -11,8 +11,10 @@ import { __ } from '@wordpress/i18n';
 import { getFeature } from '../../utils/utils';
 import { STORE_NAME } from '../../data/store';
 import { SettingsRow } from '../settings-row';
+import { useFeatureContext } from '../feature-settings/context';
 
-export const AllowedRoles = ( { featureName } ) => {
+export const AllowedRoles = () => {
+	const { featureName } = useFeatureContext();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const roles = useSelect(
 		( select ) => select( STORE_NAME ).getFeatureSettings( 'roles' ) || {}

@@ -4,8 +4,10 @@ import { __experimentalInputControl as InputControl } from '@wordpress/component
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { useFeatureContext } from '../feature-settings/context';
 
-export const OpenAIChatGPTSettings = ( { featureName } ) => {
+export const OpenAIChatGPTSettings = () => {
+	const { featureName } = useFeatureContext();
 	const providerName = 'openai_chatgpt';
 	const providerSettings = useSelect(
 		( select ) =>

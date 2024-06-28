@@ -11,6 +11,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../data/store';
+import { useFeatureContext } from './context';
 
 /**
  * Save Settings Button component.
@@ -18,7 +19,8 @@ import { STORE_NAME } from '../../data/store';
  * @param {Object} props             Component props.
  * @param {string} props.featureName Feature name.
  */
-export const SaveSettingsButton = ( { featureName } ) => {
+export const SaveSettingsButton = () => {
+	const { featureName } = useFeatureContext();
 	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
@@ -30,8 +32,6 @@ export const SaveSettingsButton = ( { featureName } ) => {
 
 	/**
 	 * Save settings for a feature.
-	 *
-	 * @param {string} featureName Feature name
 	 */
 	const saveSettings = () => {
 		removeNotices( notices.map( ( { id } ) => id ) );

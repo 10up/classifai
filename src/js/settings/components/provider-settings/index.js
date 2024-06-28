@@ -15,17 +15,18 @@ import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
 import { GoogleAIGeminiAPISettings } from './google-gemini-api';
 import { AzureOpenAISettings } from './azure-openai';
+import { useFeatureContext } from '../feature-settings/context';
 
-const ProviderFields = ( { provider, featureName } ) => {
+const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
 		case 'openai_chatgpt':
-			return <OpenAIChatGPTSettings featureName={ featureName } />;
+			return <OpenAIChatGPTSettings />;
 
 		case 'googleai_gemini_api':
-			return <GoogleAIGeminiAPISettings featureName={ featureName } />;
+			return <GoogleAIGeminiAPISettings />;
 
 		case 'azure_openai':
-			return <AzureOpenAISettings featureName={ featureName } />;
+			return <AzureOpenAISettings />;
 
 		default:
 			return null;
@@ -34,11 +35,9 @@ const ProviderFields = ( { provider, featureName } ) => {
 
 /**
  * Feature Settings component.
- *
- * @param {Object} props             Component props.
- * @param {string} props.featureName Feature name.
  */
-export const ProviderSettings = ( { featureName } ) => {
+export const ProviderSettings = () => {
+	const { featureName } = useFeatureContext();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const feature = getFeature( featureName );
 	const provider = useSelect(
@@ -67,7 +66,7 @@ export const ProviderSettings = ( { featureName } ) => {
 					options={ providers }
 				/>
 			</SettingsRow>
-			<ProviderFields provider={ provider } featureName={ featureName } />
+			<ProviderFields provider={ provider } />
 			<Slot name="ClassifAIProviderSettings">
 				{ ( fills ) => <> { fills }</> }
 			</Slot>

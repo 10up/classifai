@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const GoogleAIGeminiAPISettings = ( { featureName } ) => {
+export const GoogleAIGeminiAPISettings = () => {
 	const providerName = 'googleai_gemini_api';
 	const providerSettings = useSelect(
 		( select ) =>

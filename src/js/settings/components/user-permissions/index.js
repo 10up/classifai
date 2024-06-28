@@ -13,7 +13,7 @@ import { AllowedRoles } from '../allowed-roles';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const UserPermissions = ( { featureName } ) => {
+export const UserPermissions = () => {
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	// eslint-disable-next-line camelcase
 	const { users, user_based_opt_out } = useSelect( ( select ) => {
@@ -28,7 +28,7 @@ export const UserPermissions = ( { featureName } ) => {
 			title={ __( 'User permissions', 'classifai' ) }
 			initialOpen={ true }
 		>
-			<AllowedRoles featureName={ featureName } />
+			<AllowedRoles />
 
 			<SettingsRow
 				label={ __( 'Allowed users', 'classifai' ) }
