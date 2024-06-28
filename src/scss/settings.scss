@@ -261,6 +261,18 @@
 				}
 			}
 		}
+
+		span.dashicons.dashicons-yes-alt {
+			color: #46b450;
+		}
+
+		.classifai-settings-edit-provider {
+			cursor: pointer;
+
+			&:hover {
+				color: #3858e9;
+			}
+		}
 	}
 
 	.service-settings-wrapper {

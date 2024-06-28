@@ -81,3 +81,18 @@ export const getInitialFeature = ( service ) => {
 export const getScope = ( name ) => {
 	return ( name || '' ).replace( /_/g, '-' );
 };
+
+/**
+ * Check if the provider is configured.
+ *
+ * @param {Object} featureSettings The feature settings.
+ * @return {boolean} True if the provider is configured, false otherwise.
+ */
+export const isProviderConfigured = ( featureSettings ) => {
+	const selectedProvider = featureSettings?.provider;
+	if ( ! selectedProvider ) {
+		return false;
+	}
+
+	return featureSettings[ selectedProvider ]?.authenticated || false;
+};
