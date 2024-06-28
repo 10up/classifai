@@ -854,6 +854,7 @@ class Embeddings extends Provider {
 			'user_id'  => $user_id,
 		];
 
+		// We return early and don't schedule the job if there are no terms.
 		if ( ! as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
 			$terms = get_terms( $default_args );
 
