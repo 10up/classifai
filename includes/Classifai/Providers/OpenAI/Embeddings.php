@@ -11,9 +11,7 @@ use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
-use ActionScheduler_Action;
-use ActionScheduler_DBLogger;
-use ActionScheduler_Store;
+use Classifai\EmbeddingsScheduler;
 use WP_Error;
 
 class Embeddings extends Provider {
@@ -63,6 +61,13 @@ class Embeddings extends Provider {
 	 * @var array
 	 */
 	public $nlu_features = [];
+
+	/**
+	 * Scheduler instance.
+	 *
+	 * @var EmbeddingsScheduler|null
+	 */
+	private static $scheduler_instance = null;
 
 	/**
 	 * OpenAI Embeddings constructor.
@@ -289,10 +294,12 @@ class Embeddings extends Provider {
 
 		$feature = new Classification();
 
-		add_filter( 'heartbeat_send', [ $this, 'check_embedding_generation_status' ] );
-		add_action( 'classifai_before_feature_nav', [ $this, 'render_embeddings_generation_status' ] );
+		self::$scheduler_instance = new EmbeddingsScheduler(
+			'classifai_schedule_generate_embedding_job',
+			__( 'OpenAI Embeddings', 'classifai' )
+		);
+		self::$scheduler_instance->init();
 		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
-		add_action( 'action_scheduler_after_execute', [ $this, 'log_failed_embeddings' ], 10, 2 );
 
 		if (
 			! $feature->is_feature_enabled() ||
@@ -799,6 +806,15 @@ class Embeddings extends Provider {
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+		$feature = new Classification();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
 		$exclude = [];
 
 		// Exclude the uncategorized term.
@@ -911,90 +927,6 @@ class Embeddings extends Provider {
 		}
 
 		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
-	}
-
-	/**
-	 * Check if embeddings generation is in progress.
-	 *
-	 * @return bool
-	 */
-	public static function is_embeddings_generation_in_progress(): bool {
-		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
-			return false;
-		}
-
-		$store = ActionScheduler_Store::instance();
-
-		$action_id = $store->find_action(
-			'classifai_schedule_generate_embedding_job',
-			array(
-				'status' => ActionScheduler_Store::STATUS_PENDING,
-			)
-		);
-
-		return ! empty( $action_id );
-	}
-
-	/**
-	 * Render the embeddings generation status notice.
-	 */
-	public function render_embeddings_generation_status() {
-		if ( ! self::is_embeddings_generation_in_progress() ) {
-			return;
-		}
-
-		?>
-		<div class="notice notice-info classifai-openai-embeddings-message">
-			<p>
-			<?php
-			printf(
-				'<strong>%1$s</strong>: %2$s',
-				esc_html__( 'OpenAI Embeddings', 'classifai' ),
-				esc_html__( 'Generation of embeddings is in progress.', 'classifai' )
-			)
-			?>
-			</p>
-		</div>
-		<?php
-	}
-
-	/**
-	 * AJAX callback to check the status of embeddings generation.
-	 *
-	 * @param array $response The heartbeat response.
-	 * @return array
-	 */
-	public function check_embedding_generation_status( $response ) {
-		$response['classifaiEmbedInProgress'] = self::is_embeddings_generation_in_progress();
-
-		return $response;
-	}
-
-	/**
-	 * Logs failed embeddings.
-	 *
-	 * @param int                    $action_id The action ID.
-	 * @param ActionScheduler_Action $action    The action object.
-	 */
-	public function log_failed_embeddings( $action_id, $action ) {
-		if ( 'classifai_schedule_generate_embedding_job' !== $action->get_hook() ) {
-			return;
-		}
-
-		$args = $action->get_args();
-
-		if ( ! isset( $args['args'] ) && ! isset( $args['args']['exclude'] ) ) {
-			return;
-		}
-
-		$excludes = $args['args']['exclude'];
-
-		if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
-			return;
-		}
-
-		$logger = new ActionScheduler_DBLogger();
-		$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
 	}
 
 	/**

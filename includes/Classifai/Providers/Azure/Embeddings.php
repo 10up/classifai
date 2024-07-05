@@ -10,6 +10,7 @@ use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
+use Classifai\EmbeddingsScheduler;
 use WP_Error;
 
 class Embeddings extends OpenAI {
@@ -56,6 +57,13 @@ class Embeddings extends OpenAI {
 	 * @var array
 	 */
 	public $nlu_features = [];
+
+	/**
+	 * Scheduler instance.
+	 *
+	 * @var EmbeddingsScheduler|null
+	 */
+	private static $scheduler_instance = null;
 
 	/**
 	 * OpenAI Embeddings constructor.
@@ -161,6 +169,13 @@ class Embeddings extends OpenAI {
 		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
 
 		$feature = new Classification();
+
+		self::$scheduler_instance = new EmbeddingsScheduler(
+			'classifai_schedule_generate_azure_embedding_job',
+			__( 'Azure OpenAI Embeddings', 'classifai' )
+		);
+		self::$scheduler_instance->init();
+		add_action( 'classifai_schedule_generate_azure_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
 
 		if (
 			! $feature->is_feature_enabled() ||
@@ -670,12 +685,23 @@ class Embeddings extends OpenAI {
 	}
 
 	/**
-	 * Generate embedding data for all terms within a taxonomy.
+	 * Schedules the job to generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all Whether to generate embeddings for all terms or just those without embeddings.
+	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param int    $user_id  The user ID to run this as.
 	 */
-	private function trigger_taxonomy_update( string $taxonomy = '', bool $all = false ) {
+	private function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+		$feature = new Classification();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
 		$exclude = [];
 
 		// Exclude the uncategorized term.
@@ -686,7 +712,19 @@ class Embeddings extends OpenAI {
 			}
 		}
 
-		$args = [
+		/**
+		 * Filter the number of terms to process in a batch.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_azure_openai_embeddings_terms_per_job
+		 *
+		 * @param {int} $number Number of terms to process per job.
+		 *
+		 * @return {int} Filtered number of terms to process per job.
+		 */
+		$number = apply_filters( 'classifai_azure_openai_embeddings_terms_per_job', 100 );
+
+		$default_args = [
 			'taxonomy'     => $taxonomy,
 			'orderby'      => 'count',
 			'order'        => 'DESC',
@@ -694,26 +732,87 @@ class Embeddings extends OpenAI {
 			'fields'       => 'ids',
 			'meta_key'     => 'classifai_azure_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 			'meta_compare' => 'NOT EXISTS',
-			'number'       => $this->get_max_terms(),
+			'number'       => $number,
+			'offset'       => 0,
 			'exclude'      => $exclude, // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
 		];
 
+		$default_args = array_merge( $default_args, $args );
+
 		// If we want all terms, remove our meta query.
 		if ( $all ) {
-			unset( $args['meta_key'], $args['meta_compare'] );
+			unset( $default_args['meta_key'], $default_args['meta_compare'] );
+		} else {
+			unset( $default_args['offset'] );
+		}
+
+		if ( 0 === $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$job_args = [
+			'taxonomy' => $taxonomy,
+			'all'      => $all,
+			'args'     => $default_args,
+			'user_id'  => $user_id,
+		];
+
+		// We return early and don't schedule the job if there are no terms.
+		if ( ! as_has_scheduled_action( 'classifai_schedule_generate_azure_embedding_job', $job_args ) ) {
+			$terms = get_terms( $default_args );
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				return;
+			}
+		}
+
+		\as_enqueue_async_action( 'classifai_schedule_generate_azure_embedding_job', $job_args );
+	}
+
+	/**
+	 * Job to generate embedding data for all terms within a taxonomy.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
+	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param int    $user_id  The user ID to run this as.
+	 */
+	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+
+		if ( $user_id > 0 ) {
+			// We set this as current_user_can() fails when this function runs
+			// under the context of Action Scheduler.
+			wp_set_current_user( $user_id );
 		}
 
 		$terms = get_terms( $args );
-
 		if ( is_wp_error( $terms ) || empty( $terms ) ) {
 			return;
 		}
 
+		// Re-orders the keys.
+		$terms   = array_values( $terms );
+		$exclude = [];
+
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
 			/** @var int $term_id */
-			$this->generate_embeddings_for_term( $term_id, $all );
+			$has_generated = $this->generate_embeddings_for_term( $term_id, $all );
+
+			if ( is_wp_error( $has_generated ) ) {
+				$exclude[] = $term_id;
+			}
 		}
+
+		if ( $all && isset( $args['offset'] ) && isset( $args['number'] ) ) {
+			$args['offset'] = $args['offset'] + $args['number'];
+		}
+
+		if ( ! empty( $exclude ) ) {
+			$args['exclude'] = array_merge( $args['exclude'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+		}
+
+		$this->trigger_taxonomy_update( $taxonomy, $all, $args, $user_id );
 	}
 
 	/**
