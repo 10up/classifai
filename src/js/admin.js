@@ -426,7 +426,9 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 	$( document ).on( 'heartbeat-tick.custom-heartbeat', function ( e, data ) {
 		if ( ! data.classifaiEmbedInProgress ) {
-			const messageEl = $( '.classifai-classification-embeddings-message' );
+			const messageEl = $(
+				'.classifai-classification-embeddings-message'
+			);
 			messageEl.removeClass( 'notice-info' );
 			messageEl.addClass( 'notice-success' );
 			messageEl

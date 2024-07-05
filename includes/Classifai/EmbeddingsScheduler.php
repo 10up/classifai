@@ -24,10 +24,11 @@ class EmbeddingsScheduler {
 	/**
 	 * EmbeddingsScheduler constructor.
 	 *
-	 * @param string $job_name The name of the job.
+	 * @param string $job_name      The name of the job.
+	 * @param string $provider_name The label of the provider.
 	 */
 	public function __construct( $job_name = '', $provider_name = '' ) {
-		$this->job_name = $job_name;
+		$this->job_name      = $job_name;
 		$this->provider_name = $provider_name;
 	}
 
@@ -76,7 +77,7 @@ class EmbeddingsScheduler {
 			<?php
 			printf(
 				'<strong>%1$s</strong>: %2$s',
-				$this->provider_name,
+				$this->provider_name, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				esc_html__( 'Generation of embeddings is in progress.', 'classifai' )
 			)
 			?>
