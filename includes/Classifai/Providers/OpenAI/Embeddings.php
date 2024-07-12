@@ -871,7 +871,7 @@ class Embeddings extends Provider {
 		];
 
 		// We return early and don't schedule the job if there are no terms.
-		if ( ! as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
 			$terms = get_terms( $default_args );
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -879,7 +879,9 @@ class Embeddings extends Provider {
 			}
 		}
 
-		\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+		}
 	}
 
 	/**

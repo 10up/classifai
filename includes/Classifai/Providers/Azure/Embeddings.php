@@ -228,7 +228,6 @@ class Embeddings extends OpenAI {
 		$new_settings = parent::sanitize_settings( $new_settings );
 
 		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
-		// TODO: Two issues here we need to address: 1 - for sites with lots of terms, this is likely to lead to timeouts or rate limit issues. Should move this to some sort of queue/cron handler; 2 - this only works on the second save due to checking the value of get_all_feature_taxonomies() which is not updated until the settings are saved.
 		if ( isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
 			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
 				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
@@ -758,7 +757,7 @@ class Embeddings extends OpenAI {
 		];
 
 		// We return early and don't schedule the job if there are no terms.
-		if ( ! as_has_scheduled_action( 'classifai_schedule_generate_azure_embedding_job', $job_args ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_schedule_generate_azure_embedding_job', $job_args ) ) {
 			$terms = get_terms( $default_args );
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -766,7 +765,9 @@ class Embeddings extends OpenAI {
 			}
 		}
 
-		\as_enqueue_async_action( 'classifai_schedule_generate_azure_embedding_job', $job_args );
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			\as_enqueue_async_action( 'classifai_schedule_generate_azure_embedding_job', $job_args );
+		}
 	}
 
 	/**

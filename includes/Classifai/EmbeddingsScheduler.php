@@ -7,6 +7,7 @@ use ActionScheduler_DBLogger;
 use ActionScheduler_Store;
 
 class EmbeddingsScheduler {
+
 	/**
 	 * The name of the job.
 	 *
@@ -70,19 +71,20 @@ class EmbeddingsScheduler {
 		if ( ! $this->is_embeddings_generation_in_progress() ) {
 			return;
 		}
-
 		?>
+
 		<div class="notice notice-info classifai-classification-embeddings-message">
 			<p>
 			<?php
 			printf(
 				'<strong>%1$s</strong>: %2$s',
-				$this->provider_name, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				esc_html( $this->provider_name ),
 				esc_html__( 'Generation of embeddings is in progress.', 'classifai' )
 			)
 			?>
 			</p>
 		</div>
+
 		<?php
 	}
 
@@ -105,6 +107,10 @@ class EmbeddingsScheduler {
 	 * @param ActionScheduler_Action $action    The action object.
 	 */
 	public function log_failed_embeddings( $action_id, $action ) {
+		if ( ! class_exists( 'ActionScheduler_DBLogger' ) ) {
+			return;
+		}
+
 		if ( $this->job_name !== $action->get_hook() ) {
 			return;
 		}

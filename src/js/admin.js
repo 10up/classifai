@@ -436,7 +436,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 				.html(
 					sprintf(
 						'<strong>%1$s</strong>: %2$s',
-						__( 'OpenAI Embeddings', 'classifai' ),
+						__( 'Embeddings', 'classifai' ),
 						__( 'Classification completed.', 'classifai' )
 					)
 				);
