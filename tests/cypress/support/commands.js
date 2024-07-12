@@ -339,7 +339,7 @@ Cypress.Commands.add( 'verifyExcerptGenerationEnabled', ( enabled = true ) => {
 				'.editor-post-panel__section'
 			);
 
-			if ( ! $newPanel ) {
+			if ( $newPanel.length === 0 ) {
 				// Find the panel container.
 				const $panel = $panelButton.parents(
 					'.components-panel__body'
@@ -437,7 +437,7 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
 		// Support pre WP 6.6+.
 		const $newPanel = $panelButton.parents( '.editor-post-panel__section' );
 
-		if ( ! $newPanel ) {
+		if ( $newPanel.length === 0 ) {
 			// Find the panel container.
 			const $panel = $panelButton.parents( '.components-panel__body' );
 
@@ -490,7 +490,7 @@ Cypress.Commands.add( 'verifyImageGenerationEnabled', ( enabled = true ) => {
 		// Support pre WP 6.6+.
 		const $newPanel = $panelButton.parents( '.editor-post-panel__section' );
 
-		if ( ! $newPanel ) {
+		if ( $newPanel.length === 0 ) {
 			// Find the panel container.
 			const $panel = $panelButton.parents( '.components-panel__body' );
 

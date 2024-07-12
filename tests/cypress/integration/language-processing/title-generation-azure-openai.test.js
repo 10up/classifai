@@ -74,9 +74,11 @@ describe( '[Language processing] Title Generation Tests', () => {
 				'.editor-post-panel__section'
 			);
 
-			if ( ! $newPanel ) {
+			if ( $newPanel.length === 0 ) {
 				// Find the panel container.
-				const $panel = $panelButton.parents( '.components-panel__body' );
+				const $panel = $panelButton.parents(
+					'.components-panel__body'
+				);
 
 				// Open panel.
 				if ( ! $panel.hasClass( 'is-opened' ) ) {

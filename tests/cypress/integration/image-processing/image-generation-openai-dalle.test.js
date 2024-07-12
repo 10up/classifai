@@ -68,7 +68,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 				'.editor-post-panel__section'
 			);
 
-			if ( ! $newPanel ) {
+			if ( $newPanel.length === 0 ) {
 				// Find the panel container.
 				const $panel = $panelButton.parents(
 					'.components-panel__body'
