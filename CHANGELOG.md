@@ -4,6 +4,54 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.1.0] - 2024-07-15
+
+### Added
+
+- Amazon Polly as a Provider for the Text-to-Speech Feature (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#734](https://github.com/10up/classifai/pull/734)).
+- OpenAI as a Provider for the Text-to-Speech Feature (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#747](https://github.com/10up/classifai/pull/747)).
+- Azure OpenAI Embeddings as a Provider for the Classification Feature (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#764](https://github.com/10up/classifai/pull/764)).
+- "Generate image" button to media upload components (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#749](https://github.com/10up/classifai/pull/749)).
+- Feature to refresh Content Resizing results without closing the results modal (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#774](https://github.com/10up/classifai/pull/774)).
+- Filter hook `classifai_ms_computer_vision_scan_image_timeout` to increase image processing timeout (props [@Sidsector9](https://github.com/Sidsector9), [@QAharshalkadu](https://github.com/QAharshalkadu), [@dkotter](https://github.com/dkotter) via [#754](https://github.com/10up/classifai/pull/754)).
+- New filter `classifai_feature_classification_pre_save_results` that allows you to filter the classification results before they're saved, either modifying those results or running custom save routines (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#762](https://github.com/10up/classifai/pull/762)).
+- New filters allowing the ability to change some of the OpenAI Embedding variables, like model or dimensions (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#758](https://github.com/10up/classifai/pull/758)).
+- New filter `classifai_normalize_content_before_strip_all_tags` that allows you to filter the content before stripping all tags (props [@CacheMeOwside](https://github.com/CacheMeOwside), [@dkotter](https://github.com/dkotter) via [#775](https://github.com/10up/classifai/pull/775)).
+- New filter `classifai_openai_embeddings_max_terms` to change the number of terms to process per job during Embeddings classification (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#779](https://github.com/10up/classifai/pull/779)).
+- Higher timeout for Azure OpenAI Embedding requests (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#776](https://github.com/10up/classifai/pull/776)).
+- "Testing" section in the `CONTRIBUTING.md` file (props [@kmgalanakis](https://github.com/kmgalanakis), [@jeffpaul](https://github.com/jeffpaul) via [#763](https://github.com/10up/classifai/pull/763)).
+
+### Changed
+
+- Update from the `text-embedding-ada-002` to the `text-embedding-3-small` model for the OpenAI Embeddings Provider. Note this requires regenerating all existing embeddings for comparisons to work properly. Also worth mentioning you'll want to check your threshold settings to ensure that works well with these changes, as we're seeing lower threshold scores with this new model (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#758](https://github.com/10up/classifai/pull/758)).
+- When generating embeddings, ensure we chunk our content down and reduce our vector dimensions to 512 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#758](https://github.com/10up/classifai/pull/758)).
+- Increase the amount of terms we consider when running comparisons using the OpenAI Embeddings Provider from 500 to 5000 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#758](https://github.com/10up/classifai/pull/758)).
+- Allow the Embeddings Provider to be used by Features other than Classification (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#766](https://github.com/10up/classifai/pull/766)).
+- Hide the Provider's configuration help text when the Provider is already configured (props [@kmgalanakis](https://github.com/kmgalanakis), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#770](https://github.com/10up/classifai/pull/770)).
+- `Select` label is changed to `Replace` within Content Resizing suggestions modal (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#774](https://github.com/10up/classifai/pull/774)).
+- Content Resizing modal title is updated from static to dynamic depending on the type of resizing (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#774](https://github.com/10up/classifai/pull/774)).
+- Add the ability to send chunked content in a single request to the Embedding API (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#776](https://github.com/10up/classifai/pull/776)).
+- Embeddings classification now uses background processing to improve performance. This is done by including the Action Scheduler package (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#779](https://github.com/10up/classifai/pull/779)).
+- Bump WordPress "tested up to" version to 6.6 (props [@qasumitbagthariya](https://github.com/qasumitbagthariya), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#751](https://github.com/10up/classifai/pull/751)).
+- Replaced `lee-dohm/no-response` with `actions/stale` to help with closing no-response/stale issues (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#751](https://github.com/10up/classifai/pull/751)).
+- Update the `@10up/cypress-wp-utils` package to 0.3.0 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#760](https://github.com/10up/classifai/pull/760)).
+
+### Fixed
+
+- Timeout issue with processing `.png` images of large file sizes (props [@Sidsector9](https://github.com/Sidsector9), [@QAharshalkadu](https://github.com/QAharshalkadu), [@dkotter](https://github.com/dkotter) via [#754](https://github.com/10up/classifai/pull/754)).
+- Ensure the classification admin preview functionality loads for non built-in Providers (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#762](https://github.com/10up/classifai/pull/762)).
+- Fix some undefined PHP variable warnings when running automatic classification (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#758](https://github.com/10up/classifai/pull/758)).
+- Ensure the `Excerpt length` setting for the Excerpt Generation Feature can be changed (props [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#767](https://github.com/10up/classifai/pull/767)).
+- Strip off superscript and subscript tags in content for text to speech generation (props [@CacheMeOwside](https://github.com/CacheMeOwside), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#775](https://github.com/10up/classifai/pull/775)).
+- Ensure we chunk content correctly, keeping each chunk roughly the same size (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#776](https://github.com/10up/classifai/pull/776)).
+
+### Security
+
+- Bump `follow-redirects` from 1.15.5 to 1.15.6 and `jsdoc` from 3.6.11 to 4.0.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#750](https://github.com/10up/classifai/pull/750)).
+- Bump `webpack-dev-middleware` from 5.3.3 to 5.3.4 and `taffydb` from 2.6.2 to 2.7.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@faisal-alvi](https://github.com/faisal-alvi) via [#752](https://github.com/10up/classifai/pull/752)).
+- Bump `express` from 4.18.2 to 4.19.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@faisal-alvi](https://github.com/faisal-alvi) via [#753](https://github.com/10up/classifai/pull/753)).
+- Bump `braces` from 3.0.2 to 3.0.3 and `ws` from 7.5.9 to 7.5.10 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#780](https://github.com/10up/classifai/pull/780)).
+
 ## [3.0.1] - 2024-03-07
 ### Fixed
 - Ensure we only pass in array data to our `merge_settings` method (props [@dkotter](https://github.com/dkotter), [@ajaxthemestudios](https://github.com/ajaxthemestudios), [@peterwilsoncc](https://github.com/peterwilsoncc) via [#733](https://github.com/10up/classifai/pull/733)).
@@ -551,6 +599,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.1.0]: https://github.com/10up/classifai/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/10up/classifai/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/10up/classifai/compare/2.5.1...3.0.0
 [2.5.1]: https://github.com/10up/classifai/compare/2.5.0...2.5.1
