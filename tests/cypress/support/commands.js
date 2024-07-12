@@ -317,21 +317,49 @@ Cypress.Commands.add( 'verifyExcerptGenerationEnabled', ( enabled = true ) => {
 
 	// Find and open the excerpt panel.
 	cy.closeWelcomeGuide();
-	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt")`;
+	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Excerpt"),.editor-sidebar__panel .editor-post-panel__section .editor-post-excerpt__dropdown`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-		// Find the panel container.
-		const $panel = $panelButton.parents( '.components-panel__body' );
+		if ( enabled ) {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
 
-		// Open panel.
-		if ( ! $panel.hasClass( 'is-opened' ) ) {
-			cy.wrap( $panelButton ).click();
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button exists.
+			cy.wrap( $panel )
+				.find( '.editor-post-excerpt button' )
+				.should( shouldExist );
+		} else {
+			// Support pre WP 6.6+.
+			const $newPanel = $panelButton.parents(
+				'.editor-post-panel__section'
+			);
+
+			if ( ! $newPanel ) {
+				// Find the panel container.
+				const $panel = $panelButton.parents(
+					'.components-panel__body'
+				);
+
+				// Open panel.
+				if ( ! $panel.hasClass( 'is-opened' ) ) {
+					cy.wrap( $panelButton ).click();
+				}
+
+				// Verify button doesn't exist.
+				cy.wrap( $panel )
+					.find( '.editor-post-excerpt button' )
+					.should( shouldExist );
+			} else {
+				cy.wrap( $newPanel )
+					.find( '.editor-post-excerpt button' )
+					.should( shouldExist );
+			}
 		}
-
-		// Verify button doesn't exist.
-		cy.wrap( $panel )
-			.find( '.editor-post-excerpt button' )
-			.should( shouldExist );
 	} );
 } );
 
@@ -403,21 +431,31 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
 
 	// Find and open the summary panel.
 	cy.closeWelcomeGuide();
-	const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+	const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button,.editor-sidebar__panel .editor-post-panel__section .editor-post-card-panel`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-		// Find the panel container.
-		const $panel = $panelButton.parents( '.components-panel__body' );
+		// Support pre WP 6.6+.
+		const $newPanel = $panelButton.parents( '.editor-post-panel__section' );
 
-		// Open panel.
-		if ( ! $panel.hasClass( 'is-opened' ) ) {
-			cy.wrap( $panelButton ).click();
+		if ( ! $newPanel ) {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Verify button either exists or doesn't.
+			cy.wrap( $panel )
+				.find( '.classifai-post-status button.title' )
+				.should( shouldExist );
+		} else {
+			// Verify button either exists or doesn't.
+			cy.wrap( $newPanel )
+				.find( '.classifai-post-status button.title' )
+				.should( shouldExist );
 		}
-
-		// Verify button doesn't exist.
-		cy.wrap( $panel )
-			.find( '.classifai-post-status button.title' )
-			.should( shouldExist );
 	} );
 } );
 
@@ -446,19 +484,32 @@ Cypress.Commands.add( 'verifyImageGenerationEnabled', ( enabled = true ) => {
 
 	// Find and open the Featured image panel.
 	cy.closeWelcomeGuide();
-	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+	const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image"),.editor-sidebar__panel .editor-post-panel__section .editor-post-featured-image`;
 
 	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-		// Find the panel container.
-		const $panel = $panelButton.parents( '.components-panel__body' );
+		// Support pre WP 6.6+.
+		const $newPanel = $panelButton.parents( '.editor-post-panel__section' );
 
-		// Open panel.
-		if ( ! $panel.hasClass( 'is-opened' ) ) {
-			cy.wrap( $panelButton ).click();
+		if ( ! $newPanel ) {
+			// Find the panel container.
+			const $panel = $panelButton.parents( '.components-panel__body' );
+
+			// Open panel.
+			if ( ! $panel.hasClass( 'is-opened' ) ) {
+				cy.wrap( $panelButton ).click();
+			}
+
+			// Click to open media modal.
+			cy.wrap( $panel )
+				.find( '.editor-post-featured-image__toggle' )
+				.click();
+		} else {
+			cy.wrap( $newPanel )
+				.find(
+					'.editor-post-featured-image .editor-post-featured-image__container button'
+				)
+				.click();
 		}
-
-		// Click to open media modal.
-		cy.wrap( $panel ).find( '.editor-post-featured-image__toggle' ).click();
 
 		// Verify tab doesn't exist.
 		cy.get( '#menu-item-generate' ).should( shouldExist );

@@ -50,26 +50,43 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.openDocumentSettingsSidebar();
 
 		// Find and open the summary panel.
-		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button`;
+		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button,.editor-sidebar__panel .editor-post-panel__section .editor-post-card-panel`;
 
 		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
+			// Support pre WP 6.6+.
+			const $newPanel = $panelButton.parents(
+				'.editor-post-panel__section'
+			);
 
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
+			if ( ! $newPanel ) {
+				// Find the panel container.
+				const $panel = $panelButton.parents( '.components-panel__body' );
+
+				// Open panel.
+				if ( ! $panel.hasClass( 'is-opened' ) ) {
+					cy.wrap( $panelButton ).click();
+				}
+
+				// Verify button exists.
+				cy.wrap( $panel )
+					.find( '.classifai-post-status button.title' )
+					.should( 'exist' );
+
+				// Click on button and verify modal shows.
+				cy.wrap( $panel )
+					.find( '.classifai-post-status button.title' )
+					.click();
+			} else {
+				// Verify button exists.
+				cy.wrap( $newPanel )
+					.find( '.classifai-post-status button.title' )
+					.should( 'exist' );
+
+				// Click on button and verify modal shows.
+				cy.wrap( $newPanel )
+					.find( '.classifai-post-status button.title' )
+					.click();
 			}
-
-			// Verify button exists.
-			cy.wrap( $panel )
-				.find( '.classifai-post-status button.title' )
-				.should( 'exist' );
-
-			// Click on button and verify modal shows.
-			cy.wrap( $panel )
-				.find( '.classifai-post-status button.title' )
-				.click();
 		} );
 
 		cy.get( '.title-modal' ).should( 'exist' );

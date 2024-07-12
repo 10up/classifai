@@ -60,21 +60,36 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.openDocumentSettingsSidebar();
 
 		// Find and open the Featured image panel.
-		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image")`;
+		const panelButtonSelector = `.components-panel__body .components-panel__body-title button:contains("Featured image"),.editor-sidebar__panel .editor-post-panel__section .editor-post-featured-image`;
 
 		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
+			// Support pre WP 6.6+.
+			const $newPanel = $panelButton.parents(
+				'.editor-post-panel__section'
+			);
 
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
+			if ( ! $newPanel ) {
+				// Find the panel container.
+				const $panel = $panelButton.parents(
+					'.components-panel__body'
+				);
+
+				// Open panel.
+				if ( ! $panel.hasClass( 'is-opened' ) ) {
+					cy.wrap( $panelButton ).click();
+				}
+
+				// Click to open media modal.
+				cy.wrap( $panel )
+					.find( '.editor-post-featured-image__toggle' )
+					.click();
+			} else {
+				cy.wrap( $newPanel )
+					.find(
+						'.editor-post-featured-image .editor-post-featured-image__container button'
+					)
+					.click();
 			}
-
-			// Click to open media modal.
-			cy.wrap( $panel )
-				.find( '.editor-post-featured-image__toggle' )
-				.click();
 
 			// Verify tab exists.
 			cy.get( '#menu-item-generate' ).should( 'exist' );
