@@ -78,7 +78,9 @@ class OpenAI extends Provider {
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
-				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://EXAMPLE.openai.azure.com</code>.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Supported protocol and hostname endpoints, e.g., <code>https://EXAMPLE.openai.azure.com</code>.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
@@ -109,7 +111,9 @@ class OpenAI extends Provider {
 				'label_for'     => 'deployment',
 				'input_type'    => 'text',
 				'default_value' => $settings['deployment'],
-				'description'   => __( 'Custom name you chose for your deployment when you deployed a model.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Custom name you chose for your deployment when you deployed a model.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);

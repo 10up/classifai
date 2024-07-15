@@ -270,19 +270,33 @@ class APIRequest {
 	 */
 	public function get_result( $response ) {
 		if ( ! is_wp_error( $response ) ) {
+			$headers      = wp_remote_retrieve_headers( $response );
+			$content_type = false;
+
+			if ( ! is_wp_error( $headers ) ) {
+				$content_type = isset( $headers['content-type'] ) ? $headers['content-type'] : false;
+			}
+
 			$body = wp_remote_retrieve_body( $response );
 			$code = wp_remote_retrieve_response_code( $response );
-			$json = json_decode( $body, true );
 
-			if ( json_last_error() === JSON_ERROR_NONE ) {
-				if ( empty( $json['error'] ) ) {
-					return $json;
+			if ( false === $content_type || false !== strpos( $content_type, 'application/json' ) ) {
+				$json = json_decode( $body, true );
+
+				if ( json_last_error() === JSON_ERROR_NONE ) {
+					if ( empty( $json['error'] ) ) {
+						return $json;
+					} else {
+						$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
+						return new WP_Error( $code, $message );
+					}
 				} else {
-					$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
-					return new WP_Error( $code, $message );
+					return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
 				}
+			} elseif ( $content_type && false !== strpos( $content_type, 'audio/mpeg' ) ) {
+				return $response;
 			} else {
-				return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
+				return new WP_Error( 'Invalid content type', $response );
 			}
 		} else {
 			return $response;

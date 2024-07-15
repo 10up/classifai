@@ -6,7 +6,6 @@ use Classifai\Features\Classification;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
-use Classifai\Providers\OpenAI\Embeddings;
 use Classifai\Services\Service;
 use Classifai\Services\ServicesManager;
 use WP_Error;
@@ -589,7 +588,7 @@ function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
 	return filter_var(
-		$settings[ $classify_by ],
+		isset( $settings[ $classify_by ] ) ?? false,
 		FILTER_VALIDATE_BOOLEAN
 	);
 }
@@ -610,7 +609,7 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 		$taxonomy = $settings[ $classify_by . '_taxonomy' ];
 	}
 
-	if ( Embeddings::ID === $settings['provider'] ) {
+	if ( NLU::ID !== $settings['provider'] ) {
 		$taxonomy = $classify_by;
 	}
 
