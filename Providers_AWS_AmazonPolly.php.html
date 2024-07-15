@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Source: Providers/AWS/AmazonPolly.php - 10up ClassifAI Hook Docs</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+
+	<link href="https://fonts.googleapis.com/css?family=IBM+Plex+Mono|IBM+Plex+Sans:300,400|Playfair+Display:900&display=swap" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="styles-10up.css">
+</head>
+
+<body>
+
+<div id="main">
+
+	
+    <h1 class="page-title">Source: Providers/AWS/AmazonPolly.php</h1>
+	
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>&lt;?php
+/**
+ * Provides Text to Speech synthesis feature using Amazon Polly.
+ *
+ * @package Classifai\Providers\AWS
+ * @since 3.1.0
+ */
+
+namespace Classifai\Providers\AWS;
+
+use Classifai\Providers\Provider;
+use Classifai\Features\TextToSpeech;
+use WP_Error;
+use Aws\Sdk;
+
+class AmazonPolly extends Provider {
+
+	const ID = 'aws_polly';
+
+	/**
+	 * AmazonPolly Text to Speech constructor.
+	 *
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
+	 */
+	public function __construct( $feature_instance = null ) {
+		$this->feature_instance = $feature_instance;
+
+		do_action( 'classifai_' . static::ID . '_init', $this );
+		add_action( 'wp_ajax_classifai_get_voice_dropdown', [ $this, 'get_voice_dropdown' ] );
+	}
+
+	/**
+	 * Render the provider fields.
+	 */
+	public function render_provider_fields() {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		add_settings_field(
+			'access_key_id',
+			esc_html__( 'Access key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'access_key_id',
+				'input_type'    => 'text',
+				'default_value' => $settings['access_key_id'],
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Enter the AWS access key. Please follow the steps given &lt;a title="AWS documentation" href="%1$s">here&lt;/a> to generate AWS credentials.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html#Using_CreateAccessKey' )
+					),
+			]
+		);
+
+		add_settings_field(
+			'secret_access_key',
+			esc_html__( 'Secret access key', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'secret_access_key',
+				'input_type'    => 'password',
+				'default_value' => $settings['secret_access_key'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					esc_html__( 'Enter the AWS secret access key.', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'aws_region',
+			esc_html__( 'Region', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'aws_region',
+				'input_type'    => 'text',
+				'default_value' => $settings['aws_region'],
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					wp_kses(
+						__( 'Enter the AWS Region. eg: &lt;code>us-east-1&lt;/code>', 'classifai' ),
+						[
+							'code' => [],
+						]
+					),
+			]
+		);
+
+		add_settings_field(
+			'voice_engine',
+			esc_html__( 'Engine', 'classifai' ),
+			[ $this->feature_instance, 'render_select' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'voice_engine',
+				'options'       => array(
+					'standard'  => esc_html__( 'Standard', 'classifai' ),
+					'neural'    => esc_html__( 'Neural', 'classifai' ),
+					'long-form' => esc_html__( 'Long Form', 'classifai' ),
+				),
+				'default_value' => $settings['voice_engine'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Amazon Polly offers &lt;a href="%1$s">Long-Form&lt;/a>, &lt;a href="%2$s">Neural&lt;/a> and Standard text-to-speech voices. Please check the &lt;a title="Pricing" href="%3$s">documentation&lt;/a> to review pricing for Long-Form, Neural and Standard usage.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html' ),
+						esc_url( 'https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html' ),
+						esc_url( 'https://aws.amazon.com/polly/pricing/' )
+					),
+			]
+		);
+
+		$voices_options = $this->get_voices_select_options( $settings['voice_engine'] ?? '' );
+		if ( ! empty( $voices_options ) ) {
+			add_settings_field(
+				'voice',
+				esc_html__( 'Voice', 'classifai' ),
+				[ $this->feature_instance, 'render_select' ],
+				$this->feature_instance->get_option_name(),
+				$this->feature_instance->get_option_name() . '_section',
+				[
+					'option_index'  => static::ID,
+					'label_for'     => 'voice',
+					'options'       => $voices_options,
+					'default_value' => $settings['voice'],
+					'class'         => 'classifai-aws-polly-voices classifai-provider-field hidden provider-scope-' . static::ID,
+				]
+			);
+		}
+
+		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
+	}
+
+	/**
+	 * Returns the default settings for this provider.
+	 *
+	 * @return array
+	 */
+	public function get_default_provider_settings(): array {
+		$common_settings = [
+			'access_key_id'     => '',
+			'secret_access_key' => '',
+			'aws_region'        => '',
+			'authenticated'     => false,
+			'voice_engine'      => 'standard',
+			'voices'            => [],
+			'voice'             => '',
+		];
+
+		switch ( $this->feature_instance::ID ) {
+			case TextToSpeech::ID:
+				return $common_settings;
+		}
+
+		return [];
+	}
+
+	/**
+	 * Sanitization callback for settings.
+	 *
+	 * @param array $new_settings The settings being saved.
+	 * @return array
+	 */
+	public function sanitize_settings( array $new_settings ): array {
+		$settings               = $this->feature_instance->get_settings();
+		$is_credentials_changed = false;
+
+		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['voices']        = $settings[ static::ID ]['voices'];
+
+		if (
+			! empty( $new_settings[ static::ID ]['access_key_id'] ) &amp;&amp;
+			! empty( $new_settings[ static::ID ]['secret_access_key'] ) &amp;&amp;
+			! empty( $new_settings[ static::ID ]['aws_region'] )
+		) {
+			$new_access_key_id     = sanitize_text_field( $new_settings[ static::ID ]['access_key_id'] );
+			$new_secret_access_key = sanitize_text_field( $new_settings[ static::ID ]['secret_access_key'] );
+			$new_aws_region        = sanitize_text_field( $new_settings[ static::ID ]['aws_region'] );
+
+			if (
+				$new_access_key_id !== $settings[ static::ID ]['access_key_id'] ||
+				$new_secret_access_key !== $settings[ static::ID ]['secret_access_key'] ||
+				$new_aws_region !== $settings[ static::ID ]['aws_region']
+			) {
+				$is_credentials_changed = true;
+			}
+
+			if ( $is_credentials_changed ) {
+				$new_settings[ static::ID ]['access_key_id']     = $new_access_key_id;
+				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
+				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
+				$new_settings[ static::ID ]['voices']            = $this->connect_to_service(
+					array(
+						'access_key_id'     => $new_access_key_id,
+						'secret_access_key' => $new_secret_access_key,
+						'aws_region'        => $new_aws_region,
+					)
+				);
+
+				if ( ! empty( $new_settings[ static::ID ]['voices'] ) ) {
+					$new_settings[ static::ID ]['authenticated'] = true;
+				} else {
+					$new_settings[ static::ID ]['voices']        = [];
+					$new_settings[ static::ID ]['authenticated'] = false;
+				}
+			}
+		} else {
+			$new_settings[ static::ID ]['access_key_id']     = $settings[ static::ID ]['access_key_id'];
+			$new_settings[ static::ID ]['secret_access_key'] = $settings[ static::ID ]['secret_access_key'];
+			$new_settings[ static::ID ]['aws_region']        = $settings[ static::ID ]['aws_region'];
+
+			add_settings_error(
+				$this->feature_instance->get_option_name(),
+				'classifai-ams-polly-auth-empty',
+				esc_html__( 'One or more credentials required to connect to the Amazon Polly service is empty.', 'classifai' ),
+				'error'
+			);
+		}
+
+		$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] ?? $settings[ static::ID ]['voice'] );
+
+		return $new_settings;
+	}
+
+	/**
+	 * Connects to the Amazon Polly service.
+	 *
+	 * @param array $args Overridable args.
+	 * @return array
+	 */
+	public function connect_to_service( array $args = array() ): array {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		$default = array(
+			'access_key_id'     => $settings[ static::ID ]['access_key_id'] ?? '',
+			'secret_access_key' => $settings[ static::ID ]['secret_access_key'] ?? '',
+			'aws_region'        => $settings[ static::ID ]['aws_region'] ?? 'us-east-1',
+		);
+
+		$default = wp_parse_args( $args, $default );
+
+		// Return if credentials don't exist.
+		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {
+			return array();
+		}
+
+		try {
+			/**
+			 * Filters the return value of the connect to services function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit the describe voices request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_connect_to_service
+			 *
+			 * @param {bool} $pre The value of pre connect to service. Default false. non-false value will short-circuit the describe voices request.
+			 *
+			 * @return {bool|mixed} The filtered value of connect to service.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
+			$polly_client = $this->get_polly_client( $args );
+			$polly_voices = $polly_client->describeVoices();
+			return $polly_voices->get( 'Voices' );
+		} catch ( \Exception $e ) {
+			add_settings_error(
+				$this->feature_instance->get_option_name(),
+				'aws-polly-auth-failed',
+				esc_html__( 'Connection to Amazon Polly failed.', 'classifai' ),
+				'error'
+			);
+			return array();
+		}
+	}
+
+	/**
+	 * Returns HTML select dropdown options for voices.
+	 *
+	 * @param string $engine Engine type.
+	 * @return array
+	 */
+	public function get_voices_select_options( string $engine = '' ): array {
+		$settings = $this->feature_instance->get_settings( static::ID );
+		$voices   = $settings['voices'];
+		$options  = array();
+
+		if ( false === $voices ) {
+			return $options;
+		}
+
+		foreach ( $voices as $voice ) {
+			if (
+				! is_array( $voice ) ||
+				empty( $voice ) ||
+				(
+					! empty( $engine ) &amp;&amp;
+					! in_array( $engine, $voice['SupportedEngines'], true )
+				)
+			) {
+				continue;
+			}
+
+			$options[ $voice['Id'] ] = sprintf(
+				'%1$s - %2$s (%3$s)',
+				esc_html( $voice['LanguageName'] ),
+				esc_html( $voice['Name'] ),
+				esc_html( $voice['Gender'] )
+			);
+		}
+
+		// Sort the options.
+		asort( $options );
+
+		return $options;
+	}
+
+	/**
+	 * Synthesizes speech from a post item.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return string|WP_Error
+	 */
+	public function synthesize_speech( int $post_id ) {
+		if ( empty( $post_id ) ) {
+			return new WP_Error(
+				'aws_polly_post_id_missing',
+				esc_html__( 'Post ID missing.', 'classifai' )
+			);
+		}
+
+		// We skip the user cap check if running under WP-CLI.
+		if ( ! current_user_can( 'edit_post', $post_id ) &amp;&amp; ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+			return new WP_Error(
+				'aws_polly_user_not_authorized',
+				esc_html__( 'Unauthorized user.', 'classifai' )
+			);
+		}
+
+		$feature             = new TextToSpeech();
+		$settings            = $feature->get_settings();
+		$post_content        = $feature->normalize_post_content( $post_id );
+		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
+		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
+
+		// Don't regenerate the audio file it it already exists and the content hasn't changed.
+		if ( $saved_attachment_id ) {
+
+			// Check if the audio file exists.
+			$audio_attachment_url = wp_get_attachment_url( $saved_attachment_id );
+
+			if ( $audio_attachment_url &amp;&amp; ! empty( $content_hash ) &amp;&amp; ( md5( $post_content ) === $content_hash ) ) {
+				return $saved_attachment_id;
+			}
+		}
+
+		if ( mb_strlen( $post_content ) > 3000 ) {
+			return new WP_Error(
+				'aws_polly_length_error',
+				esc_html__( 'Maximum text length has been exceeded.', 'classifai' )
+			);
+		}
+
+		$voice = $settings[ static::ID ]['voice'] ?? '';
+
+		try {
+			/**
+			 * Filter Synthesize speech args.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_synthesize_speech_args
+			 *
+			 * @param {array} Associative array of synthesize speech args.
+			 * @param {int}   $post_id Post ID.
+			 * @param {object} $provider_instance Provider instance.
+			 * @param {object} $feature_instance Feature instance.
+			 *
+			 * @return {array} The filtered array of synthesize speech args.
+			 */
+			$synthesize_data = apply_filters(
+				'classifai_' . self::ID . '_synthesize_speech_args',
+				array(
+					'OutputFormat' => 'mp3',
+					'Text'         => $post_content,
+					'TextType'     => 'text',
+					'Engine'       => $settings[ static::ID ]['voice_engine'] ?? 'standard',
+					'VoiceId'      => $voice,
+				),
+				$post_id,
+				$this,
+				$this->feature_instance
+			);
+
+			/**
+			 * Filters the return value of the synthesize speech function.
+			 *
+			 * Returning a non-false value from the filter will short-circuit the synthesize speech request and return early with that value.
+			 * This filter is useful for E2E tests.
+			 *
+			 * @since 3.1.0
+			 * @hook classifai_aws_polly_pre_synthesize_speech
+			 *
+			 * @param {bool}   $pre A value of pre synthesize speech. Default false.
+			 * @param {array}  $synthesize_data HTTP request arguments.
+			 *
+			 * @return {bool|mixed} The filtered value of pre synthesize speech.
+			 */
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_synthesize_speech', false, $synthesize_data );
+
+			if ( false !== $pre ) {
+				return $pre;
+			}
+
+			$polly_client = $this->get_polly_client();
+			$result       = $polly_client->synthesizeSpeech( $synthesize_data );
+
+			update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
+			$contents = $result['AudioStream']->getContents();
+			return $contents;
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'aws_polly_http_error',
+				esc_html( $e->getMessage() )
+			);
+		}
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id       The post ID we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 * @return array|string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'synthesize':
+				$return = $this->synthesize_speech( $post_id, $args );
+				break;
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof TextToSpeech ) {
+			$post_types = array_filter(
+				$settings['post_types'],
+				function ( $value ) {
+					return '0' !== $value;
+				}
+			);
+
+			$debug_info[ __( 'Allowed post types', 'classifai' ) ]       = implode( ', ', $post_types );
+			$debug_info[ __( 'Voice', 'classifai' ) ]                    = $provider_settings['voice'];
+			$debug_info[ __( 'Latest response - Voices', 'classifai' ) ] = $this->get_formatted_latest_response( $provider_settings['voices'] );
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
+	}
+
+	/**
+	 * Returns aws polly client.
+	 *
+	 * @param array $aws_config AWS configuration array.
+	 * @return \Aws\Polly\PollyClient|null
+	 */
+	public function get_polly_client( array $aws_config = array() ) {
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		$default = array(
+			'access_key_id'     => $settings['access_key_id'] ?? '',
+			'secret_access_key' => $settings['secret_access_key'] ?? '',
+			'aws_region'        => $settings['aws_region'] ?? 'us-east-1',
+		);
+
+		$default = wp_parse_args( $aws_config, $default );
+
+		// Return if credentials don't exist.
+		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {
+			return null;
+		}
+
+		// Set the AWS SDK configuration.
+		$aws_sdk_config = [
+			'region'      => $default['aws_region'] ?? 'us-east-1',
+			'version'     => 'latest',
+			'ua_append'   => [ 'request-source/classifai' ],
+			'credentials' => [
+				'key'    => $default['access_key_id'],
+				'secret' => $default['secret_access_key'],
+			],
+		];
+
+		$sdk = new Sdk( $aws_sdk_config );
+		return $sdk->createPolly();
+	}
+
+	/**
+	 * Returns the voice dropdown for the selected engine.
+	 */
+	public function get_voice_dropdown() {
+		if ( ! wp_doing_ajax() ) {
+			return;
+		}
+
+		// Nonce check.
+		if ( ! check_ajax_referer( 'classifai', 'nonce', false ) ) {
+			$error = new WP_Error( 'classifai_nonce_error', __( 'Nonce could not be verified.', 'classifai' ) );
+			wp_send_json_error( $error );
+			exit();
+		}
+
+		// Set the feature instance if it's not already set.
+		if ( ! $this->feature_instance instanceof TextToSpeech ) {
+			$this->feature_instance = new TextToSpeech();
+		}
+
+		// Attachment ID check.
+		$engine         = isset( $_POST['engine'] ) ? sanitize_text_field( wp_unslash( $_POST['engine'] ) ) : 'standard';
+		$settings       = $this->feature_instance->get_settings( static::ID );
+		$voices_options = $this->get_voices_select_options( $engine );
+
+		ob_start();
+		$this->feature_instance->render_select(
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'voice',
+				'options'       => $voices_options,
+				'default_value' => $settings['voice'],
+				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
+			]
+		);
+		$voice_dropdown = ob_get_clean();
+
+		wp_send_json_success( $voice_dropdown );
+	}
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+    <footer>
+		<a href="https://classifaiplugin.com/">ClassifAI Plugin</a> &bull;
+		<a href="https://github.com/10up/classifai/">ClassifAI on GitHub</a> &bull;
+		<a href="https://10up.com/careers">Careers at 10up</a>
+	</footer>
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Actions</h3><ul><li><a href="after_classifai_init.html">after_classifai_init</a></li><li><a href="before_classifai_init.html">before_classifai_init</a></li><li><a href="classifai_after_feature_settings_form.html">classifai_after_feature_settings_form</a></li><li><a href="classifai_azure_read_after_request.html">classifai_azure_read_after_request</a></li><li><a href="classifai_before_feature_nav.html">classifai_before_feature_nav</a></li><li><a href="classifai_before_feature_settings_form.html">classifai_before_feature_settings_form</a></li><li><a href="classifai_computer_vision_caption_failed.html">classifai_computer_vision_caption_failed</a></li><li><a href="classifai_computer_vision_image_tag_failed.html">classifai_computer_vision_image_tag_failed</a></li><li><a href="classifai_ms_computer_vision_render_provider_fields.html">classifai_ms_computer_vision_render_provider_fields</a></li><li><a href="classifai_ocr_after_request.html">classifai_ocr_after_request</a></li><li><a href="classifai_ocr_unsuccessful_response.html">classifai_ocr_unsuccessful_response</a></li><li><a href="classifai_render_attachment_metabox.html">classifai_render_attachment_metabox</a></li><li><a href="classifai_smart_cropping_after_request.html">classifai_smart_cropping_after_request</a></li><li><a href="classifai_smart_cropping_unsuccessful_response.html">classifai_smart_cropping_unsuccessful_response</a></li></ul><h3>Filters</h3><ul><li><a href="classifai_all_post_statuses.html">classifai_all_post_statuses</a></li><li><a href="classifai_audio_generation_initial_state.html">classifai_audio_generation_initial_state</a></li><li><a href="classifai_audio_generation_subsequent_state.html">classifai_audio_generation_subsequent_state</a></li><li><a href="classifai_aws_polly_pre_connect_to_service.html">classifai_aws_polly_pre_connect_to_service</a></li><li><a href="classifai_aws_polly_pre_synthesize_speech.html">classifai_aws_polly_pre_synthesize_speech</a></li><li><a href="classifai_aws_polly_synthesize_speech_args.html">classifai_aws_polly_synthesize_speech_args</a></li><li><a href="classifai_azure_openai_content.html">classifai_azure_openai_content</a></li><li><a href="classifai_azure_openai_embeddings_content.html">classifai_azure_openai_embeddings_content</a></li><li><a href="classifai_azure_openai_embeddings_dimensions.html">classifai_azure_openai_embeddings_dimensions</a></li><li><a href="classifai_azure_openai_embeddings_max_terms.html">classifai_azure_openai_embeddings_max_terms</a></li><li><a href="classifai_azure_openai_embeddings_max_tokens.html">classifai_azure_openai_embeddings_max_tokens</a></li><li><a href="classifai_azure_openai_embeddings_request_body.html">classifai_azure_openai_embeddings_request_body</a></li><li><a href="classifai_azure_openai_embeddings_should_classify.html">classifai_azure_openai_embeddings_should_classify</a></li><li><a href="classifai_azure_openai_embeddings_terms_per_job.html">classifai_azure_openai_embeddings_terms_per_job</a></li><li><a href="classifai_azure_openai_excerpt_prompt.html">classifai_azure_openai_excerpt_prompt</a></li><li><a href="classifai_azure_openai_excerpt_request_body.html">classifai_azure_openai_excerpt_request_body</a></li><li><a href="classifai_azure_openai_resize_content_request_body.html">classifai_azure_openai_resize_content_request_body</a></li><li><a href="classifai_azure_openai_title_prompt.html">classifai_azure_openai_title_prompt</a></li><li><a href="classifai_azure_openai_title_request_body.html">classifai_azure_openai_title_request_body</a></li><li><a href="classifai_azure_read_request_args.html">classifai_azure_read_request_args</a></li><li><a href="classifai_azure_read_result_max_page.html">classifai_azure_read_result_max_page</a></li><li><a href="classifai_azure_read_retry_interval.html">classifai_azure_read_retry_interval</a></li><li><a href="classifai_azure_read_should_process.html">classifai_azure_read_should_process</a></li><li><a href="classifai_azure_read_text_result.html">classifai_azure_read_text_result</a></li><li><a href="classifai_chatgpt_content.html">classifai_chatgpt_content</a></li><li><a href="classifai_chatgpt_excerpt_prompt.html">classifai_chatgpt_excerpt_prompt</a></li><li><a href="classifai_chatgpt_excerpt_request_body.html">classifai_chatgpt_excerpt_request_body</a></li><li><a href="classifai_chatgpt_resize_content_request_body.html">classifai_chatgpt_resize_content_request_body</a></li><li><a href="classifai_chatgpt_title_prompt.html">classifai_chatgpt_title_prompt</a></li><li><a href="classifai_chatgpt_title_request_body.html">classifai_chatgpt_title_request_body</a></li><li><a href="classifai_classified_data.html">classifai_classified_data</a></li><li><a href="classifai_computer_vision_captions.html">classifai_computer_vision_captions</a></li><li><a href="classifai_computer_vision_image_tags.html">classifai_computer_vision_image_tags</a></li><li><a href="classifai_computer_vision_max_filesize.html">classifai_computer_vision_max_filesize</a></li><li><a href="classifai_dalle_caption.html">classifai_dalle_caption</a></li><li><a href="classifai_dalle_prompt.html">classifai_dalle_prompt</a></li><li><a href="classifai_dalle_request_body.html">classifai_dalle_request_body</a></li><li><a href="classifai_debug_information.html">classifai_debug_information</a></li><li><a href="classifai_disable_post_to_audio_block.html">classifai_disable_post_to_audio_block</a></li><li><a href="classifai_feature_classification_pre_save_results.html">classifai_feature_classification_pre_save_results</a></li><li><a href="classifai_feature_classification_setting_taxonomies.html">classifai_feature_classification_setting_taxonomies</a></li><li><a href="classifai_feature_classification_taxonomy_for_feature.html">classifai_feature_classification_taxonomy_for_feature</a></li><li><a href="classifai_feature_image_generation_roles.html">classifai_feature_image_generation_roles</a></li><li><a href="classifai_feature_pdf_to_text_generation_read_status.html">classifai_feature_pdf_to_text_generation_read_status</a></li><li><a href="classifai_feature_threshold.html">classifai_feature_threshold</a></li><li><a href="classifai_generate_image_alt_tags_source_url.html">classifai_generate_image_alt_tags_source_url</a></li><li><a href="classifai_googleai_api_request_get_options.html">classifai_googleai_api_request_get_options</a></li><li><a href="classifai_googleai_api_request_get_url.html">classifai_googleai_api_request_get_url</a></li><li><a href="classifai_googleai_api_request_post_options.html">classifai_googleai_api_request_post_options</a></li><li><a href="classifai_googleai_api_request_post_url.html">classifai_googleai_api_request_post_url</a></li><li><a href="classifai_googleai_api_response_get.html">classifai_googleai_api_response_get</a></li><li><a href="classifai_googleai_api_response_post.html">classifai_googleai_api_response_post</a></li><li><a href="classifai_googleai_content.html">classifai_googleai_content</a></li><li><a href="classifai_googleai_gemini_api_excerpt_prompt.html">classifai_googleai_gemini_api_excerpt_prompt</a></li><li><a href="classifai_googleai_gemini_api_excerpt_request_body.html">classifai_googleai_gemini_api_excerpt_request_body</a></li><li><a href="classifai_googleai_gemini_api_resize_content_request_body.html">classifai_googleai_gemini_api_resize_content_request_body</a></li><li><a href="classifai_googleai_gemini_api_title_prompt.html">classifai_googleai_gemini_api_title_prompt</a></li><li><a href="classifai_googleai_gemini_api_title_request_body.html">classifai_googleai_gemini_api_title_request_body</a></li><li><a href="classifai_image_processing_service_providers.html">classifai_image_processing_service_providers</a></li><li><a href="classifai_language_processing_service_providers.html">classifai_language_processing_service_providers</a></li><li><a href="classifai_language_settings_post_statuses.html">classifai_language_settings_post_statuses</a></li><li><a href="classifai_language_settings_post_types.html">classifai_language_settings_post_types</a></li><li><a href="classifai_listen_to_this_post_text.html">classifai_listen_to_this_post_text</a></li><li><a href="classifai_ms_computer_vision_scan_image_timeout.html">classifai_ms_computer_vision_scan_image_timeout</a></li><li><a href="classifai_normalize.html">classifai_normalize</a></li><li><a href="classifai_ocr_approved_media_types.html">classifai_ocr_approved_media_types</a></li><li><a href="classifai_ocr_should_process.html">classifai_ocr_should_process</a></li><li><a href="classifai_ocr_tag_confidence.html">classifai_ocr_tag_confidence</a></li><li><a href="classifai_ocr_tags.html">classifai_ocr_tags</a></li><li><a href="classifai_ocr_text.html">classifai_ocr_text</a></li><li><a href="classifai_ocr_text_post_args.html">classifai_ocr_text_post_args</a></li><li><a href="classifai_openai_api_request_get_options.html">classifai_openai_api_request_get_options</a></li><li><a href="classifai_openai_api_request_get_url.html">classifai_openai_api_request_get_url</a></li><li><a href="classifai_openai_api_request_post_form_options.html">classifai_openai_api_request_post_form_options</a></li><li><a href="classifai_openai_api_request_post_form_url.html">classifai_openai_api_request_post_form_url</a></li><li><a href="classifai_openai_api_request_post_options.html">classifai_openai_api_request_post_options</a></li><li><a href="classifai_openai_api_request_post_url.html">classifai_openai_api_request_post_url</a></li><li><a href="classifai_openai_api_response_get.html">classifai_openai_api_response_get</a></li><li><a href="classifai_openai_api_response_post.html">classifai_openai_api_response_post</a></li><li><a href="classifai_openai_api_response_post_form.html">classifai_openai_api_response_post_form</a></li><li><a href="classifai_openai_characters_in_token.html">classifai_openai_characters_in_token</a></li><li><a href="classifai_openai_embeddings_api_url.html">classifai_openai_embeddings_api_url</a></li><li><a href="classifai_openai_embeddings_content.html">classifai_openai_embeddings_content</a></li><li><a href="classifai_openai_embeddings_dimensions.html">classifai_openai_embeddings_dimensions</a></li><li><a href="classifai_openai_embeddings_max_terms.html">classifai_openai_embeddings_max_terms</a></li><li><a href="classifai_openai_embeddings_max_tokens.html">classifai_openai_embeddings_max_tokens</a></li><li><a href="classifai_openai_embeddings_model.html">classifai_openai_embeddings_model</a></li><li><a href="classifai_openai_embeddings_request_body.html">classifai_openai_embeddings_request_body</a></li><li><a href="classifai_openai_embeddings_should_classify.html">classifai_openai_embeddings_should_classify</a></li><li><a href="classifai_openai_embeddings_terms_per_job.html">classifai_openai_embeddings_terms_per_job</a></li><li><a href="classifai_openai_moderation_request_body.html">classifai_openai_moderation_request_body</a></li><li><a href="classifai_openai_settings_post_statuses.html">classifai_openai_settings_post_statuses</a></li><li><a href="classifai_openai_settings_post_types.html">classifai_openai_settings_post_types</a></li><li><a href="classifai_openai_settings_taxonomies.html">classifai_openai_settings_taxonomies</a></li><li><a href="classifai_openai_tokens_per_word.html">classifai_openai_tokens_per_word</a></li><li><a href="classifai_pre_normalize.html">classifai_pre_normalize</a></li><li><a href="classifai_pre_render_post_audio_controls.html">classifai_pre_render_post_audio_controls</a></li><li><a href="classifai_recommendation_service_providers.html">classifai_recommendation_service_providers</a></li><li><a href="classifai_recommended_block_attributes.html">classifai_recommended_block_attributes</a></li><li><a href="classifai_recommended_block_markup.html">classifai_recommended_block_markup</a></li><li><a href="classifai_recommended_content_post_args.html">classifai_recommended_content_post_args</a></li><li><a href="classifai_services.html">classifai_services</a></li><li><a href="classifai_should_classify_post.html">classifai_should_classify_post</a></li><li><a href="classifai_should_crop_size.html">classifai_should_crop_size</a></li><li><a href="classifai_should_ocr_scan_image.html">classifai_should_ocr_scan_image</a></li><li><a href="classifai_should_smart_crop_image.html">classifai_should_smart_crop_image</a></li><li><a href="classifai_smart_crop_max_pixel_dimension.html">classifai_smart_crop_max_pixel_dimension</a></li><li><a href="classifai_smart_crop_wp_filesystem.html">classifai_smart_crop_wp_filesystem</a></li><li><a href="classifai_smart_cropping_source_url.html">classifai_smart_cropping_source_url</a></li><li><a href="classifai_smart_cropping_thumb_file_name.html">classifai_smart_cropping_thumb_file_name</a></li><li><a href="classifai_threshold.html">classifai_threshold</a></li><li><a href="classifai_whisper_transcribe_request_body.html">classifai_whisper_transcribe_request_body</a></li><li><a href="classifai_whisper_transcribe_result.html">classifai_whisper_transcribe_result</a></li><li><a href="classifai_%257B$feature%257D_has_access.html">classifai_{$feature}_has_access</a></li><li><a href="classifai_%257B$feature%257D_is_enabled.html">classifai_{$feature}_is_enabled</a></li><li><a href="classifai_%257B$feature%257D_is_feature_enabled.html">classifai_{$feature}_is_feature_enabled</a></li><li><a href="classifai_%257B$feature%257D_sanitize_settings.html">classifai_{$feature}_sanitize_settings</a></li><li><a href="classifai_%257Bfeature%257D_debug_information.html">classifai_{feature}_debug_information</a></li><li><a href="classifai_%257Bfeature%257D_get_default_settings.html">classifai_{feature}_get_default_settings</a></li><li><a href="classifai_%257Bfeature%257D_label.html">classifai_{feature}_label</a></li><li><a href="classifai_%257Bfeature%257D_post_statuses.html">classifai_{feature}_post_statuses</a></li><li><a href="classifai_%257Bfeature%257D_post_types.html">classifai_{feature}_post_types</a></li><li><a href="classifai_%257Bfeature%257D_providers.html">classifai_{feature}_providers</a></li><li><a href="classifai_%257Bfeature%257D_rest_route_%257Broute%257D_args.html">classifai_{feature}_rest_route_{route}_args</a></li><li><a href="classifai_%257Bfeature%257D_roles.html">classifai_{feature}_roles</a></li><li><a href="classifai_%257Bfeature%257D_run.html">classifai_{feature}_run</a></li><li><a href="%257B$this-_menu_slug%257D_features.html">{$this->menu_slug}_features</a></li><li><a href="%257B$this-_menu_slug%257D_providers.html">{$this->menu_slug}_providers</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-migration-guide-v2-to-v3.html">Migration guide (version 2 to version 3)</a></li><li><a href="tutorial-useful-snippets.html">Useful snippets</a></li><li><a href="tutorial-wp-cli.html">WP-CLI commands</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
