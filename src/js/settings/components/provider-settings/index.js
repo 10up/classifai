@@ -24,6 +24,7 @@ import { OpenAIWhisperSettings } from './openai-whisper';
 import { AzureAIVisionSettings } from './azure-ai-vision';
 import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIDallESettings } from './openai-dalle';
+import { AmazonPollySettings } from './amazon-polly';
 
 const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
@@ -57,6 +58,9 @@ const ProviderFields = ( { provider } ) => {
 
 		case 'ms_azure_personalizer':
 			return <AzurePersonalizerSettings />;
+
+		case 'aws_polly':
+			return <AmazonPollySettings />;
 
 		default:
 			return null;
