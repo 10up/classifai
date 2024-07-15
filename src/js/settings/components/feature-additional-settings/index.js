@@ -10,6 +10,7 @@ import { PluginArea } from '@wordpress/plugins';
 import { getScope } from '../../utils/utils';
 import { useFeatureContext } from '../feature-settings/context';
 import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
+import { ImageTagGeneratorSettings } from './image-tag-generator';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -17,6 +18,9 @@ const AdditionalSettingsFields = () => {
 	switch ( featureName ) {
 		case 'feature_descriptive_text_generator':
 			return <DescriptiveTextGeneratorSettings />;
+
+		case 'feature_image_tags_generator':
+			return <ImageTagGeneratorSettings />;
 
 		default:
 			return null;
