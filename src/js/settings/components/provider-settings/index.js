@@ -23,6 +23,7 @@ import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAIWhisperSettings } from './openai-whisper';
 import { AzureAIVisionSettings } from './azure-ai-vision';
 import { AzurePersonalizerSettings } from './azure-personlizer';
+import { OpenAIDallESettings } from './openai-dalle';
 
 const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
@@ -47,6 +48,9 @@ const ProviderFields = ( { provider } ) => {
 
 		case 'openai_moderation':
 			return <OpenAIModerationSettings />;
+
+		case 'openai_dalle':
+			return <OpenAIDallESettings />;
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings />;
@@ -116,8 +120,8 @@ export const ProviderSettings = () => {
 					</SettingsRow>
 				</>
 			) }
-			{ ! configured && (
-				<>
+			<>
+				{ ! configured && (
 					<SettingsRow
 						label={ __( 'Select a provider', 'classifai' ) }
 					>
@@ -129,13 +133,13 @@ export const ProviderSettings = () => {
 							options={ providers }
 						/>
 					</SettingsRow>
-					<ProviderFields provider={ provider } />
-					<Slot name="ClassifAIProviderSettings">
-						{ ( fills ) => <> { fills }</> }
-					</Slot>
-					<PluginArea scope={ getScope( provider ) } />
-				</>
-			) }
+				) }
+				<ProviderFields provider={ provider } />
+				<Slot name="ClassifAIProviderSettings">
+					{ ( fills ) => <> { fills }</> }
+				</Slot>
+				<PluginArea scope={ getScope( provider ) } />
+			</>
 		</>
 	);
 };
