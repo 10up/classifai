@@ -26,6 +26,7 @@ import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIDallESettings } from './openai-dalle';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
+import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
 
 const ProviderFields = ( { provider } ) => {
 	switch ( provider ) {
@@ -65,6 +66,9 @@ const ProviderFields = ( { provider } ) => {
 
 		case 'ms_azure_text_to_speech':
 			return <AzureTextToSpeechSettings />;
+
+		case 'openai_text_to_speech':
+			return <OpenAITextToSpeachSettings />;
 
 		default:
 			return null;
