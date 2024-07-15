@@ -44,10 +44,13 @@ export const AmazonPollySettings = () => {
 			</SettingsRow>
 			<SettingsRow
 				label={ __( 'Region', 'classifai' ) }
-				description={ __(
-					'Enter the AWS Region. eg: <code>us-east-1</code>.',
-					'classifai'
-				) }
+				description={
+					<>
+						{ ' ' }
+						{ __( 'Enter the AWS Region. eg: ', 'classifai' ) }
+						<code> { __( 'us-east-1', 'classifai' ) } </code>.
+					</>
+				}
 			>
 				<InputControl
 					type="text"
