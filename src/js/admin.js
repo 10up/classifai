@@ -1,5 +1,5 @@
 /* global ClassifAI */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import '../scss/admin.scss';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
@@ -366,5 +366,81 @@ document.addEventListener( 'DOMContentLoaded', function () {
 
 		// Trigger 'change' on page load.
 		providerSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );
+
+( function ( $ ) {
+	$( function () {
+		const engineSelectEl = $( 'select#voice_engine' );
+		if ( ! engineSelectEl.length ) {
+			return;
+		}
+
+		engineSelectEl.on( 'change', function () {
+			const engine = $( this ).val();
+			$( 'select#voice' ).prop( 'disabled', true );
+			$.ajax( {
+				url: ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'classifai_get_voice_dropdown',
+					nonce: ClassifAI.ajax_nonce,
+					engine,
+				},
+				success( response ) {
+					if ( response.success && response.data ) {
+						jQuery( '.classifai-aws-polly-voices td' ).html(
+							response.data
+						);
+					} else {
+						// eslint-disable-next-line no-console
+						console.error( response.data );
+					}
+					$( 'select#voice' ).prop( 'disabled', false );
+				},
+				error( jqXHR, textStatus, errorThrown ) {
+					// eslint-disable-next-line no-console
+					console.error(
+						'Error: ',
+						textStatus,
+						', Details: ',
+						errorThrown
+					);
+					$( 'select#voice' ).prop( 'disabled', false );
+				},
+			} );
+		} );
+
+		// Trigger 'change' on page load.
+		engineSelectEl.trigger( 'change' );
+	} );
+} )( jQuery );
+
+// Heartbeat check to hide notice once the embedding generation is complete.
+( function ( $ ) {
+	$( document ).ready(
+		() =>
+			$( '.classifai-classification-embeddings-message' ).length > 0 &&
+			wp.heartbeat.interval( 5 )
+	);
+
+	$( document ).on( 'heartbeat-tick.custom-heartbeat', function ( e, data ) {
+		if ( ! data.classifaiEmbedInProgress ) {
+			const messageEl = $(
+				'.classifai-classification-embeddings-message'
+			);
+			messageEl.removeClass( 'notice-info' );
+			messageEl.addClass( 'notice-success' );
+			messageEl
+				.find( 'p' )
+				.html(
+					sprintf(
+						'<strong>%1$s</strong>: %2$s',
+						__( 'Embeddings', 'classifai' ),
+						__( 'Classification completed.', 'classifai' )
+					)
+				);
+			wp.heartbeat.interval( 5000 );
+		}
 	} );
 } )( jQuery );

@@ -19,7 +19,9 @@
 		"_": "readonly",
 		"File": "readonly",
 		"Headers": "readonly",
-		"requestAnimationFrame": "readonly"
+		"requestAnimationFrame": "readonly",
+		"React": "readonly",
+		"Block": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
 	"ignorePatterns": ["*.json"]

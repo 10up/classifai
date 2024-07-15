@@ -11,8 +11,9 @@ use Classifai\Features\TextToSpeech;
 use Classifai\Providers\Watson\APIRequest;
 use Classifai\Providers\Watson\Classifier;
 use Classifai\Normalizer;
-use Classifai\Providers\Watson\PostClassifier;
+use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\OpenAI\Embeddings;
+use Classifai\Providers\Watson\NLU;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
@@ -64,7 +65,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$feature  = new Classification();
 		$provider = $feature->get_feature_provider_instance();
 
-		if ( Embeddings::ID !== $provider::ID ) {
+		if ( NLU::ID !== $provider::ID ) {
 			\WP_CLI::error( 'This command is only available for the IBM Watson Provider' );
 		}
 
@@ -965,8 +966,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$feature  = new Classification();
 		$provider = $feature->get_feature_provider_instance();
 
-		if ( Embeddings::ID !== $provider::ID ) {
-			\WP_CLI::error( 'This command is only available for the OpenAI Embeddings feature' );
+		if ( Embeddings::ID !== $provider::ID && AzureEmbeddings::ID !== $provider::ID ) {
+			\WP_CLI::error( 'This command is only available for the OpenAI Embeddings and Azure OpenAI Embeddings providers.' );
 		}
 
 		$embeddings          = new Embeddings( false );

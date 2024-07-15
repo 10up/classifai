@@ -4,6 +4,9 @@ namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Azure\Speech;
+use Classifai\Providers\AWS\AmazonPolly;
+use Classifai\Providers\OpenAI\TextToSpeech as OpenAITTS;
+use Classifai\Normalizer;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -44,6 +47,14 @@ class TextToSpeech extends Feature {
 	const DISPLAY_GENERATED_AUDIO = '_classifai_display_generated_audio';
 
 	/**
+	 * Meta key to get/set the audio hash that helps to indicate if there is any need
+	 * for the audio file to be regenerated or not.
+	 *
+	 * @var string
+	 */
+	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -54,7 +65,9 @@ class TextToSpeech extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Speech::ID => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			AmazonPolly::ID => __( 'Amazon Polly', 'classifai' ),
+			Speech::ID      => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			OpenAITTS::ID   => __( 'OpenAI Text to Speech', 'classifai' ),
 		];
 	}
 
@@ -84,6 +97,7 @@ class TextToSpeech extends Feature {
 		}
 
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
+		add_action( 'admin_notices', [ $this, 'show_error_if' ] );
 		add_action( 'save_post', [ $this, 'save_post_metadata' ], 5 );
 	}
 
@@ -225,6 +239,18 @@ class TextToSpeech extends Feature {
 
 			if ( $results && ! is_wp_error( $results ) ) {
 				$this->save( $results, $request->get_param( 'id' ) );
+				delete_post_meta( $post->ID, '_classifai_text_to_speech_error' );
+			} elseif ( is_wp_error( $results ) ) {
+				update_post_meta(
+					$post->ID,
+					'_classifai_text_to_speech_error',
+					wp_json_encode(
+						[
+							'code'    => $results->get_error_code(),
+							'message' => $results->get_error_message(),
+						]
+					)
+				);
 			}
 		}
 	}
@@ -233,6 +259,19 @@ class TextToSpeech extends Feature {
 	 * Register any needed endpoints.
 	 */
 	public function register_endpoints() {
+		$post_types = $this->get_supported_post_types();
+		foreach ( $post_types as $post_type ) {
+			register_meta(
+				$post_type,
+				'_classifai_text_to_speech_error',
+				[
+					'show_in_rest'  => true,
+					'single'        => true,
+					'auth_callback' => '__return_true',
+				]
+			);
+		}
+
 		register_rest_route(
 			'classifai/v1',
 			'synthesize-speech/(?P<id>\d+)',
@@ -460,6 +499,18 @@ class TextToSpeech extends Feature {
 
 			if ( $results && ! is_wp_error( $results ) ) {
 				$this->save( $results, $post_id );
+				delete_post_meta( $post_id, '_classifai_text_to_speech_error' );
+			} elseif ( is_wp_error( $results ) ) {
+				update_post_meta(
+					$post_id,
+					'_classifai_text_to_speech_error',
+					wp_json_encode(
+						[
+							'code'    => $results->get_error_code(),
+							'message' => $results->get_error_message(),
+						]
+					)
+				);
 			}
 		}
 	}
@@ -671,7 +722,7 @@ class TextToSpeech extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate titles.', 'classifai' );
+		return esc_html__( 'Enables speech generation for post content.', 'classifai' );
 	}
 
 	/**
@@ -801,6 +852,36 @@ class TextToSpeech extends Feature {
 	}
 
 	/**
+	 * Normalizes the post content for text to speech generation.
+	 *
+	 * @param int $post_id The post ID.
+	 *
+	 * @return string The normalized post content.
+	 */
+	public function normalize_post_content( int $post_id ): string {
+		add_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
+		$normalizer   = new Normalizer();
+		$post         = get_post( $post_id );
+		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		remove_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
+
+		return $post_content;
+	}
+
+	/**
+	 * Filters the post content by stripping off HTML subscript and superscript tags
+	 * with its content for text to speech generation.
+	 *
+	 * @param string $post_content The post content.
+	 *
+	 * @return string The filtered post content.
+	 */
+	public function strip_sub_sup_tags( string $post_content ): string {
+		$post_content = preg_replace( '/<sub>.*?<\/sub>|<sup>.*?<\/sup>/', '', $post_content );
+		return $post_content;
+	}
+
+	/**
 	 * Generates feature setting data required for migration from
 	 * ClassifAI < 3.0.0 to 3.0.0
 	 *
@@ -853,5 +934,44 @@ class TextToSpeech extends Feature {
 		}
 
 		return $new_settings;
+	}
+
+	/**
+	 * Outputs an admin notice with the error message if needed.
+	 */
+	public function show_error_if() {
+		global $post;
+
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		$post_id = $post->ID;
+
+		if ( empty( $post_id ) ) {
+			return;
+		}
+
+		$error = get_post_meta( $post_id, '_classifai_text_to_speech_error', true );
+
+		if ( ! empty( $error ) ) {
+			delete_post_meta( $post_id, '_classifai_text_to_speech_error' );
+			$error   = (array) json_decode( $error );
+			$code    = ! empty( $error['code'] ) ? $error['code'] : 500;
+			$message = ! empty( $error['message'] ) ? $error['message'] : 'Unknown API error';
+
+			?>
+			<div class="notice notice-error is-dismissible">
+				<p>
+					<?php esc_html_e( 'Error: Audio generation failed.', 'classifai' ); ?>
+				</p>
+				<p>
+					<?php echo esc_html( $code ); ?>
+					-
+					<?php echo esc_html( $message ); ?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 }

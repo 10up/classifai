@@ -40,6 +40,7 @@ class Plugin {
 		add_action( 'admin_init', [ $this, 'maybe_migrate_to_v3' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_filter( 'plugin_action_links_' . CLASSIFAI_PLUGIN_BASENAME, array( $this, 'filter_plugin_action_links' ) );
+		add_action( 'after_classifai_init', [ $this, 'load_action_scheduler' ] );
 	}
 
 	/**
@@ -172,6 +173,7 @@ class Plugin {
 				get_asset_info( 'admin', 'dependencies' ),
 				array(
 					'jquery-ui-dialog',
+					'heartbeat',
 				)
 			),
 			get_asset_info( 'admin', 'version' ),
@@ -232,6 +234,24 @@ class Plugin {
 			),
 			$links
 		);
+	}
+
+	/**
+	 * Load the Action Scheduler library.
+	 */
+	public function load_action_scheduler() {
+		$feature                  = new \Classifai\Features\Classification();
+		$is_feature_being_enabled = false;
+
+		if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+
+		if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
+			return;
+		}
+
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
 	}
 
 	/**

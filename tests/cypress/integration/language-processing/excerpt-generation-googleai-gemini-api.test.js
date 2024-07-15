@@ -95,7 +95,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		const data = getGeminiAPIData();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Excerpt test classic',
 			content: 'Test GPT content.',
 			postType: 'post',

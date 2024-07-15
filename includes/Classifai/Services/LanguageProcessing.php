@@ -38,6 +38,7 @@ class LanguageProcessing extends Service {
 			'classifai_language_processing_service_providers',
 			[
 				'Classifai\Providers\Azure\Speech',
+				'Classifai\Providers\OpenAI\TextToSpeech',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Moderation',
@@ -45,6 +46,8 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\GoogleAI\GeminiAPI',
 				'Classifai\Providers\Azure\OpenAI',
+				'Classifai\Providers\AWS\AmazonPolly',
+				'Classifai\Providers\Azure\Embeddings',
 			]
 		);
 	}

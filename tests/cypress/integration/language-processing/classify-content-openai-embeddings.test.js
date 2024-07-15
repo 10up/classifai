@@ -162,7 +162,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#category' ).check();
 		cy.get( '#submit' ).click();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Embeddings test classic',
 			content: "This feature uses OpenAI's Embeddings capabilities.",
 			postType: 'post',

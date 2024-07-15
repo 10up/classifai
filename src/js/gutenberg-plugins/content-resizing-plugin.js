@@ -1,4 +1,5 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
+/* eslint-disable no-shadow */
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	store as blockEditorStore,
@@ -20,7 +21,7 @@ import {
 	count as getWordCount,
 	count as getCharacterCount,
 } from '@wordpress/wordcount';
-import { __ } from '@wordpress/i18n';
+import { __, _nx } from '@wordpress/i18n';
 
 import { DisableFeatureButton } from '../components';
 import '../../scss/content-resizing-plugin.scss';
@@ -124,6 +125,9 @@ const ContentResizingPlugin = () => {
 	// Indicates if the modal window with the result is open/closed.
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
 
+	// Modal title depending on resizing type.
+	const [ modalTitle, setModalTitle ] = useState( '' );
+
 	const { isMultiBlocksSelected, resizingType, isResizing } = useSelect(
 		( __select ) => {
 			return {
@@ -144,6 +148,30 @@ const ContentResizingPlugin = () => {
 		}
 	}, [ resizingType ] );
 
+	useEffect( () => {
+		if ( 'grow' === resizingType ) {
+			setModalTitle(
+				_nx(
+					'Expanded text suggestion',
+					'Expanded text suggestions',
+					textArray.length,
+					'Modal title after expand content resizing.',
+					'classifai'
+				)
+			);
+		} else {
+			setModalTitle(
+				_nx(
+					'Condensed text suggestion',
+					'Condensed text suggestions',
+					textArray.length,
+					'Modal title after condense content resizing.',
+					'classifai'
+				)
+			);
+		}
+	}, [ resizingType, textArray ] );
+
 	// Triggers AJAX request to resize the content.
 	useEffect( () => {
 		if ( isResizing && selectedBlock ) {
@@ -161,6 +189,23 @@ const ContentResizingPlugin = () => {
 		setTextArray( [] );
 		setIsModalOpen( false );
 		dispatch( resizeContentStore ).setResizingType( null );
+		setModalTitle( '' );
+	}
+
+	/**
+	 * Refreshes results.
+	 *
+	 * @param {string} resizingType  Type of resizing. grow|shrink|null
+	 * @param {Block}  selectedBlock The selected block.
+	 */
+	async function refreshResults( resizingType, selectedBlock ) {
+		dispatch( resizeContentStore ).setResizingType( null );
+
+		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
+
+		setSelectedBlock( selectedBlock );
+
+		dispatch( resizeContentStore ).setResizingType( resizingType );
 	}
 
 	/**
@@ -261,7 +306,7 @@ const ContentResizingPlugin = () => {
 	// Result Modal JSX.
 	const suggestionModal = ! isResizing && textArray.length && isModalOpen && (
 		<Modal
-			title={ __( 'Select a suggestion', 'classifai' ) }
+			title={ modalTitle }
 			isFullScreen={ false }
 			className="classifai-content-resize__suggestion-modal"
 			onRequestClose={ () => {
@@ -316,7 +361,10 @@ const ContentResizingPlugin = () => {
 									</td>
 									<td>
 										<Button
-											text={ __( 'Select', 'classifai' ) }
+											text={ __(
+												'Replace',
+												'classifai'
+											) }
 											variant="secondary"
 											onClick={ () =>
 												updateContent( textItem )
@@ -330,6 +378,13 @@ const ContentResizingPlugin = () => {
 					</tbody>
 				</table>
 			</div>
+			<br />
+			<Button
+				onClick={ () => refreshResults( resizingType, selectedBlock ) }
+				variant="secondary"
+			>
+				{ __( 'Refresh results', 'classifai' ) }
+			</Button>
 			<DisableFeatureButton feature="feature_content_resizing" />
 		</Modal>
 	);
