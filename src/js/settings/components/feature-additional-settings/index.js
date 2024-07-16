@@ -11,6 +11,7 @@ import { getScope } from '../../utils/utils';
 import { useFeatureContext } from '../feature-settings/context';
 import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
+import { TextToSpeechSettings } from './text-to-speech';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -21,6 +22,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_image_tags_generator':
 			return <ImageTagGeneratorSettings />;
+
+		case 'feature_text_to_speech_generation':
+			return <TextToSpeechSettings />;
 
 		default:
 			return null;
