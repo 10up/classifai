@@ -13,6 +13,7 @@ import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
+import { ContentResizingSettings } from './content-resizing';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -20,6 +21,9 @@ const AdditionalSettingsFields = () => {
 	switch ( featureName ) {
 		case 'feature_title_generation':
 			return <TitleGenerationSettings />;
+
+		case 'feature_content_resizing':
+			return <ContentResizingSettings />;
 
 		case 'feature_descriptive_text_generator':
 			return <DescriptiveTextGeneratorSettings />;
