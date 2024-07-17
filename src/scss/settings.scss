@@ -274,6 +274,75 @@
 				color: #3858e9;
 			}
 		}
+
+		.classifai-field-type-prompt-setting {
+			padding: 5px 20px;
+			border: 1px solid #f0f0f1;
+			position: relative;
+			display: flex;
+			flex-direction:column;
+			max-width: 600px;
+
+			&:first-child {
+				> input,
+				> label {
+					display: none;
+				}
+			}
+
+			&:nth-child(2n + 1) {
+				background-color: #f0f0f1;
+			}
+
+			label {
+				display: block;
+			}
+
+			input, textarea {
+				margin-right: 0;
+				display: block;
+			}
+
+			input[type="text"] {
+				width: 90%;
+			}
+
+			.components-base-control {
+				margin-top: 8px;
+			}
+
+			/* Style for prompt action items container */
+			.actions-rows {
+				display: flex;
+				margin: 0.35em 0 .5em!important;
+
+				/* Style for prompt actions */
+				button {
+					cursor: pointer;
+					text-decoration: none;
+
+					&.action__remove_prompt {
+						color: #b32d2e;
+					}
+				}
+
+				span.separator{
+					margin-left: 8px;
+					margin-right: 8px;
+					color: #a7aaad;
+				}
+
+				/* Styling for default prompt first action */
+				button:disabled{
+					pointer-events: none;
+				}
+
+			}
+
+			+ button {
+				margin-top: 10px;
+			}
+		}
 	}
 
 	.service-settings-wrapper {

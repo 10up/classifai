@@ -12,11 +12,15 @@ import { useFeatureContext } from '../feature-settings/context';
 import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { TextToSpeechSettings } from './text-to-speech';
+import { TitleGenerationSettings } from './title-generation';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
 
 	switch ( featureName ) {
+		case 'feature_title_generation':
+			return <TitleGenerationSettings />;
+
 		case 'feature_descriptive_text_generator':
 			return <DescriptiveTextGeneratorSettings />;
 
