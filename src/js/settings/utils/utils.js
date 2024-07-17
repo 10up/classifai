@@ -126,5 +126,21 @@ export const usePostTypes = () => {
 			} ) ),
 		[ postTypes ]
 	);
-	return { postTypesSelectOptions, postTypes };
+
+	const excerptPostTypes = useSelect( ( select ) => {
+		const { getPostTypes } = select( coreStore );
+		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
+			( { viewable, supports } ) => viewable && supports?.excerpt
+		);
+		return filteredPostTypes;
+	}, [] );
+
+	const excerptPostTypesOptions = useMemo( () => {
+		return ( excerptPostTypes || [] ).map( ( { labels, slug } ) => ( {
+			label: labels.singular_name,
+			value: slug,
+		} ) );
+	}, [ excerptPostTypes ] );
+
+	return { postTypesSelectOptions, postTypes, excerptPostTypesOptions };
 };

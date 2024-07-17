@@ -14,6 +14,7 @@ import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
+import { ExcerptGenerationSettings } from './excerpt-generation';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -21,6 +22,9 @@ const AdditionalSettingsFields = () => {
 	switch ( featureName ) {
 		case 'feature_title_generation':
 			return <TitleGenerationSettings />;
+
+		case 'feature_excerpt_generation':
+			return <ExcerptGenerationSettings />;
 
 		case 'feature_content_resizing':
 			return <ContentResizingSettings />;
