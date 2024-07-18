@@ -144,3 +144,39 @@ export const usePostTypes = () => {
 
 	return { postTypesSelectOptions, postTypes, excerptPostTypesOptions };
 };
+
+/**
+ * Post Statuses Hook.
+ * Returns a helper object that contains:
+ * An `options` object from the available post statuses.
+ *
+ * @return {Object} The helper object related to post statuses.
+ */
+export const usePostStatuses = () => {
+	const postStatuses = useSelect( ( select ) => {
+		const excludeStatutes = [
+			'auto-draft',
+			'inherit',
+			'trash',
+			'future',
+			'request-pending',
+			'request-confirmed',
+			'request-failed',
+			'request-completed',
+		];
+		return select( 'core' )
+			.getStatuses()
+			?.filter( ( { slug } ) => ! excludeStatutes.includes( slug ) );
+	}, [] );
+
+	const postStatusOptions = useMemo(
+		() =>
+			( postStatuses || [] ).map( ( { name, slug } ) => ( {
+				label: name,
+				value: slug,
+			} ) ),
+		[ postStatuses ]
+	);
+
+	return { postStatusOptions };
+};

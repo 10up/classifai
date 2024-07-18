@@ -15,11 +15,15 @@ import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
 import { ExcerptGenerationSettings } from './excerpt-generation';
+import { ClassificationSettings } from './classification';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
 
 	switch ( featureName ) {
+		case 'feature_classification':
+			return <ClassificationSettings />;
+
 		case 'feature_title_generation':
 			return <TitleGenerationSettings />;
 
