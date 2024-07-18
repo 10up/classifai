@@ -12,8 +12,10 @@ import { UserSelector } from '../../../components';
 import { AllowedRoles } from '../allowed-roles';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { useUserPermissionsPreferences } from '../../utils/utils';
 
 export const UserPermissions = () => {
+	const { isOpen, setIsOpen } = useUserPermissionsPreferences();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	// eslint-disable-next-line camelcase
 	const { users, user_based_opt_out } = useSelect( ( select ) => {
@@ -26,7 +28,10 @@ export const UserPermissions = () => {
 	return (
 		<PanelBody
 			title={ __( 'User permissions', 'classifai' ) }
-			initialOpen={ true }
+			initialOpen={ isOpen }
+			onToggle={ ( opened ) => {
+				setIsOpen( opened );
+			} }
 		>
 			<AllowedRoles />
 

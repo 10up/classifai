@@ -1,4 +1,4 @@
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
 
@@ -205,4 +205,56 @@ export const useTaxonomies = () => {
 	const taxonomies = useMemo( () => taxonomyOptions, [ taxonomyOptions ] );
 
 	return { taxonomies };
+};
+
+/**
+ * User Permissions Preferences Hook.
+ *
+ * Exports a hook that returns the user permissions preferences.
+ * It uses the `core/preferences` store to manage the user permissions panel state.
+ * @return {Object} The user permissions preferences.
+ */
+export const useUserPermissionsPreferences = () => {
+	let cache;
+	const { set, setPersistenceLayer } = useDispatch( 'core/preferences' );
+	setPersistenceLayer( {
+		async get() {
+			if ( cache ) {
+				return cache;
+			}
+
+			const preferences = JSON.parse(
+				window.localStorage.getItem( 'CLASSIFAI_SETTINGS_PREFERENCES' )
+			);
+			if ( preferences ) {
+				cache = preferences;
+			} else {
+				cache = {};
+			}
+			return cache;
+		},
+		set( preferences ) {
+			cache = preferences;
+			window.localStorage.setItem(
+				'CLASSIFAI_SETTINGS_PREFERENCES',
+				JSON.stringify( preferences )
+			);
+		},
+	} );
+
+	const isOpen = useSelect( ( select ) => {
+		const { get } = select( 'core/preferences' );
+
+		const open = get( 'classifai/settings', 'user-permissions-panel-open' );
+		if ( open === undefined ) {
+			return true;
+		}
+		return open;
+	}, [] );
+
+	const setIsOpen = ( value ) => {
+		set( 'classifai/settings', 'user-permissions-panel-open', value );
+	};
+
+	return { isOpen, setIsOpen };
 };
