@@ -343,6 +343,17 @@
 				margin-top: 10px;
 			}
 		}
+
+		.settings-row.nlu-features {
+			.components-base-control {
+				max-width: 180px;
+				margin-bottom: 8px;
+			}
+		}
+
+		.components-radio-control__option {
+			margin-bottom: 4px;
+		}
 	}
 
 	.service-settings-wrapper {

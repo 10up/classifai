@@ -180,3 +180,29 @@ export const usePostStatuses = () => {
 
 	return { postStatusOptions };
 };
+
+/**
+ * Post Statuses Hook.
+ * Returns a helper object that contains:
+ * An `options` object from the available post statuses.
+ *
+ * @return {Object} The helper object related to post statuses.
+ */
+export const useTaxonomies = () => {
+	const taxonomyOptions = useSelect( ( select ) => {
+		// Remove the NLUs taxonomies from the list of taxonomies
+		const excludedTaxonomies = [
+			'watson-category',
+			'watson-keyword',
+			'watson-concept',
+			'watson-entity',
+		];
+		return select( 'core' )
+			.getTaxonomies()
+			?.filter( ( { slug } ) => ! excludedTaxonomies.includes( slug ) );
+	}, [] );
+
+	const taxonomies = useMemo( () => taxonomyOptions, [ taxonomyOptions ] );
+
+	return { taxonomies };
+};

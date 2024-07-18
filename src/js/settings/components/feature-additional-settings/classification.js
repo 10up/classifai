@@ -1,10 +1,10 @@
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { RadioControl, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { usePostTypes, usePostStatuses } from '../../utils/utils';
+import { NLUFeatureSettings } from './nlu-feature';
 
 const ClassificationMethodSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
@@ -91,6 +91,7 @@ export const ClassificationSettings = () => {
 				/>
 			</SettingsRow>
 			<ClassificationMethodSettings />
+			<NLUFeatureSettings />
 			<SettingsRow
 				label={ __( 'Post statuses', 'classifai' ) }
 				description={ __(
