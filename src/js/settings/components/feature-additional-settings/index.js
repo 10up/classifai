@@ -16,6 +16,7 @@ import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
 import { ExcerptGenerationSettings } from './excerpt-generation';
 import { ClassificationSettings } from './classification';
+import { ModerationSettings } from './moderation';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -41,6 +42,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_text_to_speech_generation':
 			return <TextToSpeechSettings />;
+
+		case 'feature_moderation':
+			return <ModerationSettings />;
 
 		default:
 			return null;
