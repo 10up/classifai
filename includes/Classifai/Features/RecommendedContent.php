@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use Classifai\Services\Personalizer as PersonalizerService;
 use Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
+use Classifai\Providers\AWS\AmazonPersonalize as PersonalizeProvider;
 
 /**
  * Class RecommendedContent
@@ -27,6 +28,7 @@ class RecommendedContent extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
+			PersonalizeProvider::ID  => __( 'Amazon AWS Personalize', 'classifai' ),
 			PersonalizerProvider::ID => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 		];
 	}
