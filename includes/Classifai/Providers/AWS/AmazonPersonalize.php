@@ -104,6 +104,22 @@ class AmazonPersonalize extends Provider {
 			]
 		);
 
+		add_settings_field(
+			'event_tracker_id',
+			esc_html__( 'Event Tracker ID', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'event_tracker_id',
+				'input_type'    => 'text',
+				'default_value' => $settings['event_tracker_id'], // TODO: could make an API request to get all event trackers and populate a dropdown. Or make an API request to get the dataset and automatically get the tracker ID from the chosen dataset.
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => esc_html__( 'Enter the event tracker ID associated with your dataset', 'classifai' ),
+			]
+		);
+
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -117,6 +133,7 @@ class AmazonPersonalize extends Provider {
 			'access_key_id'     => '',
 			'secret_access_key' => '',
 			'aws_region'        => '',
+			'event_tracker_id'  => '',
 			'authenticated'     => false,
 		];
 
@@ -188,6 +205,8 @@ class AmazonPersonalize extends Provider {
 				'error'
 			);
 		}
+
+		$new_settings[ static::ID ]['event_tracker_id'] = sanitize_text_field( $new_settings[ static::ID ]['event_tracker_id'] ?? $settings[ static::ID ]['event_tracker_id'] );
 
 		return $new_settings;
 	}
@@ -553,7 +572,8 @@ class AmazonPersonalize extends Provider {
 	 * @return bool|WP_Error
 	 */
 	public function track_event( $post_id, array $args = [] ) {
-		$client = $this->get_client( 'personalize-events' );
+		$settings = $this->feature_instance->get_settings( static::ID );
+		$client   = $this->get_client( 'personalize-events' );
 
 		if ( ! $client ) {
 			return new WP_Error( 'client_not_found', esc_html__( 'Client not found.', 'classifai' ) );
@@ -569,7 +589,7 @@ class AmazonPersonalize extends Provider {
 				],
 			],
 			'sessionId'  => $id,
-			'trackingId' => '6285cb6f-1239-48cf-9c74-0cae1fea5236', // TODO: add setting for this.
+			'trackingId' => $settings['event_tracker_id'] ?? '',
 			'userId'     => $id,
 		];
 
