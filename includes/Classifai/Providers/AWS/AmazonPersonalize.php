@@ -161,7 +161,7 @@ class AmazonPersonalize extends Provider {
 				$new_settings[ static::ID ]['secret_access_key'] = $new_secret_access_key;
 				$new_settings[ static::ID ]['aws_region']        = $new_aws_region;
 
-				$connected = $this->connect_to_service(
+				$connected = $this->check_connection(
 					[
 						'access_key_id'     => $new_access_key_id,
 						'secret_access_key' => $new_secret_access_key,
@@ -192,12 +192,12 @@ class AmazonPersonalize extends Provider {
 	}
 
 	/**
-	 * Connects to the Amazon Personalize service.
+	 * Check the connection to the Amazon Personalize service.
 	 *
 	 * @param array $args Overridable args.
-	 * @return array
+	 * @return bool
 	 */
-	public function connect_to_service( array $args = array() ): array {
+	public function check_connection( array $args = array() ): bool {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = [
@@ -210,12 +210,12 @@ class AmazonPersonalize extends Provider {
 
 		// Return if credentials don't exist.
 		if ( empty( $default['access_key_id'] ) || empty( $default['secret_access_key'] ) ) {
-			return [];
+			return false;
 		}
 
 		try {
 			/**
-			 * Filters the return value of the connect to services function.
+			 * Filters the return value of the check connection function.
 			 *
 			 * Returning a non-false value from the filter will short-circuit the request
 			 * and return early with that value.
@@ -223,22 +223,22 @@ class AmazonPersonalize extends Provider {
 			 * This filter is useful for E2E tests.
 			 *
 			 * @since x.x.x
-			 * @hook classifai_aws_personalize_pre_connect_to_service
+			 * @hook classifai_aws_personalize_pre_check_connection
 			 *
 			 * @param {bool} $pre The value of pre connect to service. Default false. Non-false value will short-circuit the request.
 			 *
-			 * @return {bool|mixed} The filtered value of connect to service.
+			 * @return {bool} The filtered value of connect to service.
 			 */
-			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
+			$pre = apply_filters( 'classifai_' . self::ID . '_pre_check_connection', false );
 
 			if ( false !== $pre ) {
-				return $pre;
+				return (bool) $pre;
 			}
 
-			$client  = $this->get_personalize_client( $args );
+			$client  = $this->get_client( 'personalize', $args );
 			$schemas = $client->listSchemas();
 
-			return $schemas;
+			return $schemas && isset( $schemas['schemas'] );
 		} catch ( \Exception $e ) {
 			add_settings_error(
 				$this->feature_instance->get_option_name(),
@@ -251,39 +251,18 @@ class AmazonPersonalize extends Provider {
 				'error'
 			);
 
-			return [];
+			return false;
 		}
 	}
 
 	/**
-	 * Returns the debug information for the provider settings.
+	 * Returns proper AWS client.
 	 *
-	 * @return array
+	 * @param string $client_type Client type.
+	 * @param array  $aws_config AWS configuration array.
+	 * @return \Aws\AwsClient|null
 	 */
-	public function get_debug_information(): array {
-		$settings          = $this->feature_instance->get_settings();
-		$provider_settings = $settings[ static::ID ];
-		$debug_info        = [];
-
-		if ( $this->feature_instance instanceof RecommendedContent ) {
-			$debug_info[ __( 'Authenticated', 'classifai' ) ] = $provider_settings['authenticated'];
-		}
-
-		return apply_filters(
-			'classifai_' . self::ID . '_debug_information',
-			$debug_info,
-			$settings,
-			$this->feature_instance
-		);
-	}
-
-	/**
-	 * Returns AWS Personalize client.
-	 *
-	 * @param array $aws_config AWS configuration array.
-	 * @return \Aws\Personalize\PersonalizeClient|null
-	 */
-	public function get_personalize_client( array $aws_config = array() ) {
+	public function get_client( string $client_type = '', array $aws_config = [] ) {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = [
@@ -312,6 +291,37 @@ class AmazonPersonalize extends Provider {
 
 		$sdk = new Sdk( $config );
 
-		return $sdk->createPersonalize();
+		switch ( $client_type ) {
+			case 'personalize':
+				return $sdk->createPersonalize();
+			case 'personalize-events':
+				return $sdk->createPersonalizeEvents();
+			case 'personalize-runtime':
+				return $sdk->createPersonalizeRuntime();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Returns the debug information for the provider settings.
+	 *
+	 * @return array
+	 */
+	public function get_debug_information(): array {
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
+
+		if ( $this->feature_instance instanceof RecommendedContent ) {
+			$debug_info[ __( 'Authenticated', 'classifai' ) ] = $provider_settings['authenticated'];
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }
