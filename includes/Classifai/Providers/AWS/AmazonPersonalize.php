@@ -468,7 +468,8 @@ class AmazonPersonalize extends Provider {
 	public function get_default_recommended_content( array $attributes ) {
 		$post_type      = $attributes['contentPostType'];
 		$key_attributes = [
-			'terms' => $attributes['taxQuery'] ?? [],
+			'terms'    => $attributes['taxQuery'] ?? [],
+			'excluded' => $attributes['excludeId'] ?? 0,
 		];
 		$transient_key  = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
 		$content        = get_transient( $transient_key );
