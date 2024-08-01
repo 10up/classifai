@@ -8,7 +8,6 @@
 namespace Classifai\Blocks\RecommendedContentBlock;
 
 use Classifai\Features\RecommendedContent;
-use Classifai\Providers\Azure\Personalizer;
 use function Classifai\get_asset_info;
 
 /**
@@ -54,8 +53,8 @@ function register() {
 function render_block_callback( array $attributes ): string {
 	// Render block in Gutenberg Editor.
 	if ( defined( 'REST_REQUEST' ) && \REST_REQUEST ) {
-		$personalizer = new Personalizer( false );
-		return $personalizer->render_recommended_content( $attributes );
+		$provider_instance = ( new RecommendedContent() )->get_feature_provider_instance();
+		return $provider_instance->render_recommended_content( $attributes );
 	}
 
 	// Render block in Front-end.

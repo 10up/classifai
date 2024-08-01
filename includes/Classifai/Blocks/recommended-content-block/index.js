@@ -26,7 +26,7 @@ import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 registerBlockType( block.name, {
 	title: __( 'Recommended Content', 'classifai' ),
 	description: __(
-		'Display content recommended by Azure AI Personalizer',
+		'Display personalized content recommended by AI',
 		'classifai'
 	),
 	edit,

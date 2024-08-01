@@ -48,7 +48,7 @@ class AmazonPersonalize extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
-							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							/* translators: %1$s is replaced with the AWS documentation URL */
 							__( 'Enter the AWS access key. Please follow the steps given <a title="AWS documentation" href="%1$s">here</a> to generate AWS credentials.', 'classifai' ),
 							[
 								'a' => [
@@ -197,7 +197,7 @@ class AmazonPersonalize extends Provider {
 	 * @param array $args Overridable args.
 	 * @return bool
 	 */
-	public function check_connection( array $args = array() ): bool {
+	public function check_connection( array $args = [] ): bool {
 		$settings = $this->feature_instance->get_settings( static::ID );
 
 		$default = [
@@ -236,7 +236,7 @@ class AmazonPersonalize extends Provider {
 			}
 
 			$client  = $this->get_client( 'personalize', $args );
-			$schemas = $client->listSchemas();
+			$schemas = $client->listSchemas( [ 'maxResults' => 1 ] );
 
 			return $schemas && isset( $schemas['schemas'] );
 		} catch ( \Exception $e ) {
@@ -301,6 +301,246 @@ class AmazonPersonalize extends Provider {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Renders the markup for the Recommended Content block.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return string.
+	 */
+	public function render_recommended_content( array $attributes ): string {
+		/**
+		 * Filter the recommended content block attributes
+		 *
+		 * @since 2.0.0
+		 * @hook classifai_recommended_block_attributes
+		 *
+		 * @param {array} $attributes Attributes of blocks.
+		 *
+		 * @return {string} The filtered attributes.
+		 */
+		$attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
+
+		// TODO: Implement the logic to get recommended content from AWS Personalize.
+
+		// No results from AWS, use default query.
+		$recommended_ids = $this->get_default_recommended_content( $attributes );
+
+		if ( empty( $recommended_ids ) ) {
+			return __( 'No results found.', 'classifai' );
+		}
+
+		$markup = '';
+		$args   = [
+			'post__in'               => $recommended_ids,
+			'post_type'              => $attributes['contentPostType'],
+			'posts_per_page'         => isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3,
+			'orderby'                => 'post__in',
+			'no_found_rows'          => true,
+			'update_post_term_cache' => false,
+		];
+
+		$recommended_posts = get_posts( $args );
+
+		foreach ( $recommended_posts as $post ) {
+			$post_link = get_permalink( $post );
+			$title     = get_the_title( $post );
+
+			if ( ! $title ) {
+				$title = __( '(no title)', 'classifai' );
+			}
+
+			$markup .= '<li>';
+
+			if ( $attributes['displayFeaturedImage'] && has_post_thumbnail( $post ) ) {
+				$image_classes = 'wp-block-classifai-recommended-content__featured-image';
+
+				$featured_image = get_the_post_thumbnail( $post );
+
+				if ( $attributes['addLinkToFeaturedImage'] ) {
+					$featured_image = sprintf(
+						'<a href="%1$s" aria-label="%2$s" class="classifai-send-reward" data-eventid="%3$s">%4$s</a>',
+						esc_url( $post_link ),
+						esc_attr( $title ),
+						esc_attr( $post->ID ),
+						$featured_image
+					);
+				}
+
+				$markup .= sprintf(
+					'<div class="%1$s">%2$s</div>',
+					esc_attr( $image_classes ),
+					$featured_image
+				);
+			}
+
+			$markup .= sprintf(
+				'<a href="%1$s" class="classifai-send-reward" data-eventid="%2$s">%3$s</a>',
+				esc_url( $post_link ),
+				esc_attr( $post->ID ),
+				esc_html( $title )
+			);
+
+			if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
+				$author_display_name = get_the_author_meta( 'display_name', $post->post_author );
+
+				/* translators: byline. %s: current author. */
+				$byline = sprintf( __( 'by %s', 'classifai' ), $author_display_name );
+
+				if ( ! empty( $author_display_name ) ) {
+					$markup .= sprintf(
+						'<div class="wp-block-classifai-recommended-content__post-author">%1$s</div>',
+						esc_html( $byline )
+					);
+				}
+			}
+
+			if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
+				$markup .= sprintf(
+					'<time datetime="%1$s" class="wp-block-classifai-recommended-content__post-date">%2$s</time>',
+					esc_attr( get_the_date( 'c', $post ) ),
+					esc_html( get_the_date( '', $post ) )
+				);
+			}
+
+			if ( isset( $attributes['displayPostExcerpt'] ) && $attributes['displayPostExcerpt'] ) {
+				$trimmed_excerpt = get_the_excerpt( $post );
+
+				if ( post_password_required( $post ) ) {
+					$trimmed_excerpt = __( 'This content is password protected.', 'classifai' );
+				}
+
+				$markup .= sprintf(
+					'<div class="wp-block-classifai-recommended-content__post-excerpt">%1$s</div>',
+					esc_html( $trimmed_excerpt )
+				);
+			}
+
+			$markup .= "</li>\n";
+		}
+
+		$class = 'wp-block-classifai-recommended-content wp-block-classifai-recommended-content__list';
+
+		if ( 'grid' === $attributes['displayLayout'] ) {
+			$class .= ' is-grid';
+
+			if ( isset( $attributes['columns'] ) && $attributes['columns'] ) {
+				$class .= ' columns-' . $attributes['columns'];
+			}
+		}
+
+		if ( isset( $attributes['displayPostDate'] ) && $attributes['displayPostDate'] ) {
+			$class .= ' has-dates';
+		}
+
+		if ( isset( $attributes['displayAuthor'] ) && $attributes['displayAuthor'] ) {
+			$class .= ' has-author';
+		}
+
+		$final_markup = sprintf(
+			'<ul class="%1$s">%2$s</ul>',
+			esc_attr( $class ),
+			$markup
+		);
+
+		/**
+		 * Filter the recommended content block markup
+		 *
+		 * @since 1.8.0
+		 * @hook classifai_recommended_block_markup
+		 *
+		 * @param {string} $final_markup HTML Markup of recommended content block.
+		 * @param {array}  $attributes   Attributes of blocks.
+		 *
+		 * @return {string} The filtered markup.
+		 */
+		return apply_filters( 'classifai_recommended_block_markup', $final_markup, $attributes );
+	}
+
+	/**
+	 * Get default recommended content.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return mixed
+	 */
+	public function get_default_recommended_content( array $attributes ) {
+		$post_type      = $attributes['contentPostType'];
+		$key_attributes = [
+			'terms' => $attributes['taxQuery'] ?? [],
+		];
+		$transient_key  = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
+		$content        = get_transient( $transient_key );
+
+		if ( false !== $content ) {
+			return $content;
+		}
+
+		$query_args = [
+			'posts_per_page'      => isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3,
+			'post_status'         => 'publish',
+			'no_found_rows'       => true,
+			'ignore_sticky_posts' => true,
+			'post_type'           => $post_type,
+		];
+
+		// Exclude item on which we are displaying the content.
+		if ( ! empty( $attributes['excludeId'] ) ) {
+			$query_args['post__not_in'] = [ absint( $attributes['excludeId'] ) ];
+		}
+
+		// Handle Taxonomy filters.
+		if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
+			foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
+				if ( ! empty( $terms ) ) {
+					$query_args['tax_query'][] = [
+						'taxonomy' => $taxonomy,
+						'field'    => 'term_id',
+						'terms'    => $terms,
+					];
+				}
+			}
+
+			if ( isset( $query_args['tax_query'] ) && count( $query_args['tax_query'] ) > 1 ) {
+				$query_args['tax_query']['relation'] = 'AND';
+			}
+		}
+
+		/**
+		 * Filters Recommended Content post arguments.
+		 *
+		 * @since 1.8.0
+		 * @hook classifai_recommended_content_post_args
+		 *
+		 * @param {array} $query_args Array of query args to get posts
+		 * @param {array} $attributes The block attributes.
+		 *
+		 * @return {array} Array of query args to get posts
+		 */
+		$query_args = apply_filters(
+			'classifai_recommended_content_post_args',
+			$query_args,
+			$attributes
+		);
+
+		$content = [];
+		$query   = new \WP_Query( $query_args );
+
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+
+				$content[] = get_the_ID();
+			}
+		}
+
+		wp_reset_postdata();
+
+		if ( ! empty( $content ) ) {
+			set_transient( $transient_key, $content, 6 * \HOUR_IN_SECONDS );
+		}
+
+		return $content;
 	}
 
 	/**

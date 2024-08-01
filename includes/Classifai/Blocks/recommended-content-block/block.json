@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 2,
   "title": "Recommended Content",
-  "description": "Display content recommended by Azure AI Personalizer",
+  "description": "Display personalized content recommended by AI",
   "textdomain": "classifai",
   "name": "classifai/recommended-content-block",
   "category": "classifai-blocks",

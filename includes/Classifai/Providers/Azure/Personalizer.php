@@ -48,13 +48,6 @@ class Personalizer extends Provider {
 	 */
 	public function register() {
 		add_action( 'classifai_before_feature_nav', [ $this, 'show_deprecation_message' ] );
-
-		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
-			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
-			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
-			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
-			Blocks\setup();
-		}
 	}
 
 	/**
@@ -801,60 +794,6 @@ class Personalizer extends Provider {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Render Recommended Content over AJAX.
-	 */
-	public function ajax_render_recommended_content() {
-		check_ajax_referer( 'classifai-recommended-block', 'security' );
-
-		if ( ! isset( $_POST['contentPostType'] ) || empty( $_POST['contentPostType'] ) ) {
-			esc_html_e( 'No results found.', 'classifai' );
-			exit();
-		}
-
-		$attributes = array(
-			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( wp_unslash( $_POST['displayLayout'] ) ) : 'grid',
-			'contentPostType'        => sanitize_text_field( wp_unslash( $_POST['contentPostType'] ) ),
-			'excludeId'              => isset( $_POST['excludeId'] ) ? absint( $_POST['excludeId'] ) : 0,
-			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( wp_unslash( $_POST['displayPostExcerpt'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( wp_unslash( $_POST['displayAuthor'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( wp_unslash( $_POST['displayPostDate'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['displayFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
-			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['addLinkToFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
-			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
-		);
-
-		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			foreach ( $_POST['taxQuery'] as $key => $value ) {
-				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
-			}
-		}
-
-		echo $this->render_recommended_content( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-		exit();
-	}
-
-	/**
-	 * Maybe clear transients for recent actions.
-	 *
-	 * @param int $post_id Post Id.
-	 */
-	public function maybe_clear_transient( int $post_id ) {
-		global $wpdb;
-		$post_type = get_post_type( $post_id );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$transients = $wpdb->get_col( $wpdb->prepare( "SELECT `option_name` FROM {$wpdb->options} WHERE  option_name LIKE %s", '_transient_classifai_actions_' . $post_type . '%' ) );
-		// Delete all transients
-		if ( ! empty( $transients ) ) {
-			foreach ( $transients as $transient ) {
-				delete_transient( str_replace( '_transient_', '', $transient ) );
-			}
-		}
 	}
 
 	/**
