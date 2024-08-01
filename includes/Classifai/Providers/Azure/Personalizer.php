@@ -63,7 +63,7 @@ class Personalizer extends Provider {
 	 * @param string $active_feature Feature currently shown.
 	 */
 	public function show_deprecation_message( string $active_feature ) {
-		if ( 'feature_recommended_content' !== $active_feature ) {
+		if ( 'feature_recommended_content' !== $active_feature || ( new RecommendedContent() )->get_settings( 'provider' ) !== static::ID ) {
 			return;
 		}
 		?>
