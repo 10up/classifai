@@ -6,6 +6,9 @@ use Classifai\Services\Personalizer as PersonalizerService;
 use Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
 use Classifai\Providers\AWS\AmazonPersonalize as PersonalizeProvider;
 use Classifai\Blocks;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_Error;
 
 /**
  * Class RecommendedContent
@@ -37,6 +40,16 @@ class RecommendedContent extends Feature {
 	/**
 	 * Set up necessary hooks.
 	 *
+	 * We utilize this so we can register the REST route.
+	 */
+	public function setup() {
+		parent::setup();
+		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Set up necessary hooks.
+	 *
 	 * This only runs if is_feature_enabled() returns true.
 	 */
 	public function feature_setup() {
@@ -48,6 +61,96 @@ class RecommendedContent extends Feature {
 		add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 
 		add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
+	}
+
+	/**
+	 * Register any needed endpoints.
+	 */
+	public function register_endpoints() {
+		register_rest_route(
+			'classifai/v1',
+			'personalizer/reward/(?P<itemId>\d+)',
+			[
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => [ $this, 'rest_endpoint_callback' ],
+				'args'                => [
+					'itemId'   => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Item ID to track', 'classifai' ),
+					],
+					'event'    => [
+						'required'          => false,
+						'type'              => 'object',
+						'properties'        => [
+							'id'   => [
+								'type' => 'string',
+							],
+							'type' => [
+								'type' => 'string',
+							],
+						],
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Event details to track', 'classifai' ),
+					],
+					'rewarded' => [
+						'required'          => false,
+						'type'              => 'string',
+						'enum'              => [
+							'0',
+							'1',
+						],
+						'default'           => '0',
+						'sanitize_callback' => 'sanitize_text_field',
+						'description'       => esc_html__( 'Reward value we want to send', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'permissions_check' ],
+			]
+		);
+	}
+
+	/**
+	 * Check if a given request has access to send reward.
+	 *
+	 * This check ensures that we are properly authenticated.
+	 * TODO: add additional checks here, maybe a nonce check or rate limiting?
+	 *
+	 * @return WP_Error|bool
+	 */
+	public function permissions_check() {
+		// Check if valid authentication is in place.
+		if ( ! $this->is_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Recommended Content not currently enabled.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Generic request handler for all our custom routes.
+	 *
+	 * @param WP_REST_Request $request The full request object.
+	 * @return \WP_REST_Response
+	 */
+	public function rest_endpoint_callback( WP_REST_Request $request ) {
+		$route = $request->get_route();
+
+		if ( strpos( $route, '/classifai/v1/personalizer/reward' ) === 0 ) {
+			return rest_ensure_response(
+				$this->run(
+					$request->get_param( 'itemId' ),
+					'reward',
+					[
+						'event'  => $request->get_param( 'event' ),
+						'reward' => $request->get_param( 'rewarded' ),
+					]
+				)
+			);
+		}
+
+		return parent::rest_endpoint_callback( $request );
 	}
 
 	/**
@@ -127,27 +230,6 @@ class RecommendedContent extends Feature {
 		return [
 			'provider' => PersonalizerProvider::ID,
 		];
-	}
-
-	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 * @return mixed
-	 */
-	public function run( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? PersonalizerProvider::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( PersonalizerProvider::ID === $provider_instance::ID ) {
-			/** @var PersonalizerProvider $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'personalizer_send_reward' ],
-				[ ...$args ]
-			);
-		}
 	}
 
 	/**

@@ -10,6 +10,7 @@ namespace Classifai\Providers\AWS;
 use Classifai\Providers\Provider;
 use Classifai\Features\RecommendedContent;
 use Aws\Sdk;
+use WP_Error;
 
 class AmazonPersonalize extends Provider {
 
@@ -541,6 +542,73 @@ class AmazonPersonalize extends Provider {
 		}
 
 		return $content;
+	}
+
+	/**
+	 * Send a tracking event to Amazon Personalize.
+	 *
+	 * @param int   $post_id The post ID to track.
+	 * @param array $args Additional event arguments.
+	 * @return bool|WP_Error
+	 */
+	public function track_event( $post_id, array $args = [] ) {
+		$client = $this->get_client( 'personalize-events' );
+
+		if ( ! $client ) {
+			return new WP_Error( 'client_not_found', esc_html__( 'Client not found.', 'classifai' ) );
+		}
+
+		$id     = uniqid(); // TODO: Is this the best way to generate a session ID?
+		$params = [
+			'eventList'  => [
+				[
+					'eventType' => $args['event']['type'] ?? 'click',
+					'itemId'    => (string) $post_id,
+					'sentAt'    => time(),
+				],
+			],
+			'sessionId'  => $id,
+			'trackingId' => '6285cb6f-1239-48cf-9c74-0cae1fea5236', // TODO: add setting for this.
+			'userId'     => $id,
+		];
+
+		if ( isset( $args['event']['id'] ) ) {
+			$params['eventList'][0]['eventId'] = (string) $args['event']['id'];
+		}
+
+		try {
+			$client->putEvents( $params );
+		} catch ( \Exception $e ) {
+			return new WP_Error( 'event_failed', esc_html__( 'Event tracking failed.', 'classifai' ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Common entry point for all REST endpoints for this provider.
+	 *
+	 * @param int    $post_id       The post ID we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 * @return array|string|WP_Error
+	 */
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
+		}
+
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'reward':
+				$return = $this->track_event( $post_id, $args );
+				break;
+		}
+
+		return $return;
 	}
 
 	/**

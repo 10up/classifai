@@ -39,7 +39,6 @@ class Personalizer extends Provider {
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
 
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
@@ -737,63 +736,29 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Register the REST API endpoints.
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1',
-			'personalizer/reward/(?P<eventId>[a-zA-Z0-9-]+)',
-			[
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'reward_endpoint_callback' ],
-				'args'                => [
-					'eventId'  => [
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'description'       => esc_html__( 'Event ID to track', 'classifai' ),
-					],
-					'rewarded' => [
-						'required'          => false,
-						'type'              => 'string',
-						'enum'              => [
-							'0',
-							'1',
-						],
-						'default'           => '0',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Reward we want to send', 'classifai' ),
-					],
-					'route'    => [
-						'required'          => false,
-						'type'              => 'string',
-						'default'           => 'reward',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Route we want to call', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'reward_permissions_check' ],
-			]
-		);
-	}
-
-	/**
-	 * Check if a given request has access to send reward.
+	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * This check ensures that we are properly authenticated.
-	 * TODO: add additional checks here, maybe a nonce check or rate limiting?
-	 *
-	 * @return WP_Error|bool
+	 * @param int    $post_id       The post ID we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 * @return array|string|WP_Error
 	 */
-	public function reward_permissions_check() {
-		// Check if valid authentication is in place.
-		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
 
-		return true;
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
+
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'reward':
+				$return = $this->personalizer_send_reward( $post_id, $args['rewarded'] );
+				break;
+		}
+
+		return $return;
 	}
 
 	/**
