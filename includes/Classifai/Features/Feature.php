@@ -507,8 +507,9 @@ abstract class Feature {
 		switch ( $type ) {
 			case 'text':
 			case 'password':
-				$attrs = ' value="' . esc_attr( $value ) . '"';
-				$class = 'regular-text';
+				$placeholder = $args['placeholder'] ?? '';
+				$attrs       = ' value="' . esc_attr( $value ) . '" placeholder="' . esc_attr( $placeholder ) . '"';
+				$class       = 'regular-text';
 				break;
 			case 'number':
 				$attrs = ' value="' . esc_attr( $value ) . '"';

@@ -115,8 +115,26 @@ class AmazonPersonalize extends Provider {
 				'label_for'     => 'event_tracker_id',
 				'input_type'    => 'text',
 				'default_value' => $settings['event_tracker_id'], // TODO: could make an API request to get all event trackers and populate a dropdown. Or make an API request to get the dataset and automatically get the tracker ID from the chosen dataset.
+				'placeholder'   => '4282ac5f-1681-53fg-8g35-1acf2gae4125',
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
 				'description'   => esc_html__( 'Enter the event tracker ID associated with your dataset', 'classifai' ),
+			]
+		);
+
+		add_settings_field(
+			'campaign_arn',
+			esc_html__( 'Campaign ARN', 'classifai' ),
+			[ $this->feature_instance, 'render_input' ],
+			$this->feature_instance->get_option_name(),
+			$this->feature_instance->get_option_name() . '_section',
+			[
+				'option_index'  => static::ID,
+				'label_for'     => 'campaign_arn',
+				'input_type'    => 'text',
+				'default_value' => $settings['campaign_arn'],
+				'placeholder'   => 'arn:aws:personalize:us-east-1:12345:campaign/name',
+				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID,
+				'description'   => esc_html__( 'Enter the Amazon Resource Name (ARN) of the campaign to use for generating the personalized ranking', 'classifai' ),
 			]
 		);
 
@@ -134,6 +152,7 @@ class AmazonPersonalize extends Provider {
 			'secret_access_key' => '',
 			'aws_region'        => '',
 			'event_tracker_id'  => '',
+			'campaign_arn'      => '',
 			'authenticated'     => false,
 		];
 
@@ -207,6 +226,8 @@ class AmazonPersonalize extends Provider {
 		}
 
 		$new_settings[ static::ID ]['event_tracker_id'] = sanitize_text_field( $new_settings[ static::ID ]['event_tracker_id'] ?? $settings[ static::ID ]['event_tracker_id'] );
+
+		$new_settings[ static::ID ]['campaign_arn'] = sanitize_text_field( $new_settings[ static::ID ]['campaign_arn'] ?? $settings[ static::ID ]['campaign_arn'] );
 
 		return $new_settings;
 	}
@@ -590,7 +611,7 @@ class AmazonPersonalize extends Provider {
 			],
 			'sessionId'  => $id,
 			'trackingId' => $settings['event_tracker_id'] ?? '',
-			'userId'     => $id,
+			'userId'     => $id, // TODO: We need a user ID that can be tracked across page views.
 		];
 
 		if ( isset( $args['event']['id'] ) ) {
