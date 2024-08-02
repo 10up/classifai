@@ -363,20 +363,20 @@ class AmazonPersonalize extends Provider {
 		 */
 		$attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
 
-		// TODO: Implement the logic to get recommended content from AWS Personalize.
-
-		// No results from AWS, use default query.
-		$recommended_ids = $this->get_default_recommended_content( $attributes );
+		$recommended_ids = $this->get_recommended_items( $attributes );
 
 		if ( empty( $recommended_ids ) ) {
 			return __( 'No results found.', 'classifai' );
 		}
 
+		$number_of_posts = isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3;
+		$recommended_ids = array_slice( $recommended_ids, 0, $number_of_posts );
+
 		$markup = '';
 		$args   = [
 			'post__in'               => $recommended_ids,
 			'post_type'              => $attributes['contentPostType'],
-			'posts_per_page'         => isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3,
+			'posts_per_page'         => $number_of_posts,
 			'orderby'                => 'post__in',
 			'no_found_rows'          => true,
 			'update_post_term_cache' => false,
@@ -500,38 +500,101 @@ class AmazonPersonalize extends Provider {
 	}
 
 	/**
-	 * Get default recommended content.
+	 * Get recommended items from Amazon Personalize.
 	 *
 	 * @param array $attributes The block attributes.
-	 * @return mixed
+	 * @return array
 	 */
-	public function get_default_recommended_content( array $attributes ) {
+	public function get_recommended_items( array $attributes ): array {
+		$items = $this->get_recent_items( $attributes );
+
+		if ( empty( $items ) ) {
+			return $items;
+		}
+
+		// If items are less than or equal to number we want to display, avoid API call.
+		$number_of_posts = isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3;
+		if ( count( $items ) <= $number_of_posts ) {
+			return $items;
+		}
+
+		// Get our AWS client.
+		$client = $this->get_client( 'personalize-runtime' );
+
+		if ( ! $client ) {
+			return $items;
+		}
+
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		// Convert the post IDs to strings as the API expects that.
+		$items = array_map(
+			function ( $item ) {
+				return (string) $item;
+			},
+			$items
+		);
+
+		try {
+			$result = $client->getPersonalizedRanking(
+				[
+					'campaignArn' => $settings['campaign_arn'] ?? '',
+					'inputList'   => $items,
+					'userId'      => '1', // TODO: We need a user ID that can be tracked across page views.
+				]
+			);
+
+			// Pull the post IDs out of the personalized ranking response.
+			if ( ! empty( $result['personalizedRanking'] ) ) {
+				$items = array_map(
+					function ( $item ) {
+						return (int) $item['itemId'];
+					},
+					$result['personalizedRanking']
+				);
+			}
+		} catch ( \Exception $e ) {
+			return $items;
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get recent items based on given arguments.
+	 *
+	 * These will then be re-ranked by Amazon Personalize.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return array
+	 */
+	public function get_recent_items( array $attributes ): array {
 		$post_type      = $attributes['contentPostType'];
 		$key_attributes = [
 			'terms'    => $attributes['taxQuery'] ?? [],
 			'excluded' => $attributes['excludeId'] ?? 0,
 		];
 		$transient_key  = 'classifai_actions_' . $post_type . md5( maybe_serialize( $key_attributes ) );
-		$content        = get_transient( $transient_key );
+		$items          = get_transient( $transient_key );
 
-		if ( false !== $content ) {
-			return $content;
+		if ( false !== $items && ! empty( $items ) ) {
+			return $items;
 		}
 
 		$query_args = [
-			'posts_per_page'      => isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3,
+			'posts_per_page'      => 100,
 			'post_status'         => 'publish',
 			'no_found_rows'       => true,
 			'ignore_sticky_posts' => true,
 			'post_type'           => $post_type,
 		];
 
-		// Exclude item on which we are displaying the content.
+		// Exclude item on which we are displaying the block.
 		if ( ! empty( $attributes['excludeId'] ) ) {
 			$query_args['post__not_in'] = [ absint( $attributes['excludeId'] ) ];
 		}
 
-		// Handle Taxonomy filters.
+		// Handle taxonomy filters.
 		if ( isset( $attributes['taxQuery'] ) && ! empty( $attributes['taxQuery'] ) ) {
 			foreach ( $attributes['taxQuery'] as $taxonomy => $terms ) {
 				if ( ! empty( $terms ) ) {
@@ -549,7 +612,7 @@ class AmazonPersonalize extends Provider {
 		}
 
 		/**
-		 * Filters Recommended Content post arguments.
+		 * Filters recommended content post arguments.
 		 *
 		 * @since 1.8.0
 		 * @hook classifai_recommended_content_post_args
@@ -565,24 +628,24 @@ class AmazonPersonalize extends Provider {
 			$attributes
 		);
 
-		$content = [];
-		$query   = new \WP_Query( $query_args );
+		$items = [];
+		$query = new \WP_Query( $query_args );
 
 		if ( $query->have_posts() ) {
 			while ( $query->have_posts() ) {
 				$query->the_post();
 
-				$content[] = get_the_ID();
+				$items[] = get_the_ID();
 			}
 		}
 
 		wp_reset_postdata();
 
 		if ( ! empty( $content ) ) {
-			set_transient( $transient_key, $content, 6 * \HOUR_IN_SECONDS );
+			set_transient( $transient_key, $items, 6 * \HOUR_IN_SECONDS );
 		}
 
-		return $content;
+		return $items;
 	}
 
 	/**
