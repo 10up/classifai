@@ -212,9 +212,21 @@ class Language extends Provider {
 	 * @return array
 	 */
 	public function get_debug_information(): array {
-		$settings   = $this->feature_instance->get_settings();
-		$debug_info = [];
+		$settings          = $this->feature_instance->get_settings();
+		$provider_settings = $settings[ static::ID ];
+		$debug_info        = [];
 
-		return $debug_info;
+		if ( $this->feature_instance instanceof ExcerptGeneration ) {
+			$debug_info[ __( 'Excerpt length', 'classifai' ) ] = apply_filters( 'classifai_azure_language_summary_length', 'oneSentence' );
+			$debug_info[ __( 'Provider', 'classifai' ) ]       = 'Azure Language Services';
+			$debug_info[ __( 'Endpoint URL', 'classifai' ) ]   = $provider_settings['endpoint_url'];
+		}
+
+		return apply_filters(
+			'classifai_' . self::ID . '_debug_information',
+			$debug_info,
+			$settings,
+			$this->feature_instance
+		);
 	}
 }
