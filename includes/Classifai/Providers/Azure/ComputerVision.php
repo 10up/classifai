@@ -692,7 +692,7 @@ class ComputerVision extends Provider {
 					'Ocp-Apim-Subscription-Key' => $api_key,
 					'Content-Type'              => 'application/json',
 				],
-				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/header.png"}',
+				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
 			]
 		);
 
