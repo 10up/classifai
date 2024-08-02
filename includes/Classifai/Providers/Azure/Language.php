@@ -127,6 +127,9 @@ class Language extends Provider {
 				esc_html( 'There was an error authenticating with Azure Language Services. Please check your credentials.' ),
 				'error'
 			);
+
+			// disable the feature if we're unable to authenticate./
+			$new_settings['status'] = 0;
 		}
 
 		return $new_settings;
