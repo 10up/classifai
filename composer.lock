@@ -3385,11 +3385,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.2"
+        "php": ">=7.4"
     },
     "platform-dev": [],
-    "platform-overrides": {
-        "php": "7.2.5"
-    },
     "plugin-api-version": "2.6.0"
 }
