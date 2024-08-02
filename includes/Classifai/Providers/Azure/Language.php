@@ -19,6 +19,20 @@ class Language extends Provider {
 	const ID = 'azure_language';
 
 	/**
+	 * The Provider Name.
+	 *
+	 * Required and should be unique.
+	 */
+	const API_VERSION = '2023-04-01';
+
+	/**
+	 * Analyze Text endpoint.
+	 *
+	 * @var string
+	 */
+	const ANALYZE_TEXT_ENDPOINT = '/language/analyze-text/jobs';
+
+	/**
 	 * MyProvider constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
@@ -36,20 +50,20 @@ class Language extends Provider {
 	 */
 	public function render_provider_fields() {
 		$settings = $this->feature_instance->get_settings( static::ID );
-		$id       = 'endpoint_url';
 
 		$this->add_api_key_field();
+
 		add_settings_field(
-			$id,
+			static::ID . '_endpoint_url',
 			$args['label'] ?? esc_html__( 'Endpoint URL', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
 			[
 				'option_index'  => static::ID,
-				'label_for'     => $id,
+				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
-				'default_value' => $settings[ $id ] ?? '',
+				'default_value' => $settings['endpoint_url'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 				'description'   => sprintf(
 					wp_kses(
@@ -76,8 +90,8 @@ class Language extends Provider {
 	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
+			'endpoint_url'  => '',
 			'authenticated' => false,
-			'uses_prompt'   => false,
 		];
 
 		return $common_settings;
@@ -95,11 +109,66 @@ class Language extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings = $this->feature_instance->get_settings();
 
-		// Ensure proper validation of credentials happens here.
 		$new_settings[ static::ID ]['api_key']       = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
-		$new_settings[ static::ID ]['authenticated'] = true;
+		$new_settings[ static::ID ]['endpoint_url']  = esc_url_raw( $new_settings[ static::ID ]['endpoint_url'] ?? $settings[ static::ID ]['endpoint_url'] );
+		$new_settings[ static::ID ]['authenticated'] = false;
+
+		if ( ! empty( $new_settings[ static::ID ]['endpoint_url'] ) && ! empty( $new_settings[ static::ID ]['api_key'] ) ) {
+			$new_settings[ static::ID ]['authenticated'] = $this->authenticate_credentials(
+				$new_settings[ static::ID ]['endpoint_url'],
+				$new_settings[ static::ID ]['api_key']
+			);
+		}
+
+		if ( ! $new_settings[ static::ID ]['authenticated'] ) {
+			add_settings_error(
+				'authenticated',
+				400,
+				esc_html( 'There was an error authenticating with Azure Language Services. Please check your credentials.' ),
+				'error'
+			);
+		}
 
 		return $new_settings;
+	}
+
+	/**
+	 * Authenticates our credentials.
+	 *
+	 * Performs a simple test to ensure the credentials are valid.
+	 *
+	 * @param string $url Endpoint URL.
+	 * @param string $api_key Api Key.
+	 *
+	 * @return bool|WP_Error
+	 */
+	protected function authenticate_credentials( string $url, string $api_key ) {
+		$rtn = false;
+
+		$endpoint = trailingslashit( $url ) . '/text/analytics/v3.1/languages';
+		$endpoint = add_query_arg( 'api-version', static::API_VERSION, $endpoint );
+
+		$request = wp_remote_post(
+			$endpoint,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $api_key,
+					'Content-Type'              => 'application/json',
+				],
+				'body'    => '{"documents": [{"id": "1","text": "Hello world"}]}',
+			]
+		);
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( ! empty( $response->error ) ) {
+				$rtn = new WP_Error( 'auth', $response->error->message );
+			} else {
+				$rtn = true;
+			}
+		}
+
+		return $rtn;
 	}
 
 	/**
