@@ -206,6 +206,16 @@ class ComputerVision extends Provider {
 
 				if ( is_wp_error( $auth_check ) ) {
 					$new_settings[ static::ID ]['authenticated'] = false;
+
+					$error_message = $auth_check->get_error_message();
+
+					// Add an error message.
+					add_settings_error(
+						'api_key',
+						'classifai-auth',
+						$error_message,
+						'error'
+					);
 				} else {
 					$new_settings[ static::ID ]['authenticated'] = true;
 				}
