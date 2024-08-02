@@ -6,6 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Azure\OpenAI;
+use Classifai\Providers\Azure\Language;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -45,6 +46,7 @@ class ExcerptGeneration extends Feature {
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
+			Language::ID  => __( 'Azure Language', 'classifai' ),
 		];
 	}
 

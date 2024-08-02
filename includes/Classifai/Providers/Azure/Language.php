@@ -8,6 +8,7 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
+use Classifai\Features\ExcerptGeneration;
 use WP_Error;
 
 class Language extends Provider {
@@ -195,15 +196,168 @@ class Language extends Provider {
 		$route_to_call = strtolower( $route_to_call );
 		$return        = '';
 
-		// Handle all of our routes.
 		switch ( $route_to_call ) {
-			case 'test':
-				// Ensure this method exists.
-				$return = $this->generate( $post_id, $args );
+			case 'excerpt':
+				$return = $this->generate_excerpt( $post_id, $args );
 				break;
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Generate an excerpt for a given post.
+	 *
+	 * This service requires two API calls - one to request the summary and another to retrieve the summary.
+	 *
+	 * @param int   $post_id The Post ID we're processing.
+	 * @param array $args Optional arguments to pass to the route.
+	 * @return string
+	 */
+	public function generate_excerpt( $post_id, $args ) {
+		$feature      = new ExcerptGeneration();
+		$settings     = $feature->get_settings();
+		$api_key      = $settings[ static::ID ]['api_key'];
+		$endpoint_url = $settings[ static::ID ]['endpoint_url'];
+		$post_content = get_post_field( 'post_content', $post_id );
+
+		// Request the summary form the API.
+		$summary_request_url = $this->request_summary( $endpoint_url, $api_key, $post_content, $post_id );
+		if ( is_wp_error( $summary_request_url ) ) {
+			return $summary_request_url;
+		}
+
+		// Retrieve the Summary after the job is complete.
+		$summary = $this->retrieve_summary( $summary_request_url );
+
+		return $summary;
+	}
+
+	/**
+	 * Request the summary from the API.
+	 *
+	 * @param string $endpoint_url The endpoint URL.
+	 * @param string $api_key The API key.
+	 * @param string $post_content The post content.
+	 * @param int    $post_id The post ID.
+	 *
+	 * @return mixed The summary job URL or WP_Error.
+	 */
+	public function request_summary( $endpoint_url, $api_key, $post_content, $post_id ) {
+		$endpoint_url = add_query_arg(
+			'api-version',
+			static::API_VERSION,
+			$endpoint_url . static::ANALYZE_TEXT_ENDPOINT
+		);
+
+		$body = [
+			'analysisInput' => [
+				'documents' => [
+					[
+						'id'       => '1',
+						'language' => 'en',
+						'text'     => $post_content,
+					],
+				],
+			],
+			'tasks'         => [
+				[
+					'kind'       => 'AbstractiveSummarization',
+					'taskName'   => 'Classifai Summarization ' . $post_id,
+					'parameters' => [
+						/**
+						 * Filter the summary length.
+						 * Possible values are 'oneSentence', 'short', 'medium', 'long'.
+						 * Default is 'oneSentence'.
+						 *
+						 * @since 3.3.0
+						 * @hook classifai_azure_language_summary_length
+						 * @param string $summary_length The summary length.
+						 * @return string
+						 */
+						'summaryLength' => apply_filters( 'classifai_azure_language_summary_length', 'oneSentence' ),
+					],
+				],
+			],
+		];
+
+		$request = wp_remote_post(
+			$endpoint_url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $api_key,
+					'Content-Type'              => 'application/json',
+				],
+				'body'    => wp_json_encode( $body ),
+			]
+		);
+
+		$headers = wp_remote_retrieve_headers( $request );
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( ! empty( $response->error ) ) {
+				return new WP_Error( 'summary_request', $response->error->message );
+			} elseif ( empty( $headers['operation-location'] ) ) {
+				return new WP_Error( 'summary_request', esc_html__( 'There was an error requesting the summary.', 'classifai' ) );
+			} else {
+				return $headers['operation-location'];
+			}
+		}
+
+		return $request;
+	}
+
+	/**
+	 * Get the text analysis job response
+	 *
+	 * The endpoint URL is returned in the 'operation-location' header of the initial request.
+	 * The job response will return a 'status' property if the job is completed.
+	 * If the job is not completed, wait a second and try again.
+	 *
+	 * @param string $url The URL to analyze.
+	 * @see https://learn.microsoft.com/en-us/azure/ai-services/language-service/summarization/quickstart?tabs=text-summarization%2Cmacos&pivots=rest-api
+	 * @return mixed
+	 */
+	private function retrieve_summary( $url ) {
+		$api_key = $this->feature_instance->get_settings( static::ID )['api_key'];
+
+		$request = wp_remote_get(
+			$url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $api_key,
+					'Content-Type'              => 'application/json',
+				],
+			]
+		);
+
+		$summary = '';
+
+		if ( ! is_wp_error( $request ) ) {
+			$response = json_decode( wp_remote_retrieve_body( $request ) );
+			if ( ! empty( $response->error ) ) {
+				return new WP_Error( 'auth', $response->error->message );
+			}
+
+			while ( 'succeeded' !== $response->status ) {
+				sleep( .5 );
+				$request  = wp_remote_get(
+					$url,
+					[
+						'headers' => [
+							'Ocp-Apim-Subscription-Key' => $api_key,
+							'Content-Type'              => 'application/json',
+						],
+					]
+				);
+				$response = json_decode( wp_remote_retrieve_body( $request ) );
+			}
+
+			$summary = $response->tasks->items[0]->results->documents[0]->summaries[0]->text;
+		}
+
+		return $summary;
 	}
 
 	/**
