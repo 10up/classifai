@@ -172,6 +172,23 @@ class Settings {
 				],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1',
+			'registration',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'get_registration_settings_callback' ],
+					'permission_callback' => [ $this, 'registration_settings_permissions_check' ],
+				],
+				[
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => [ $this, 'update_registration_settings_callback' ],
+					'permission_callback' => [ $this, 'registration_settings_permissions_check' ],
+				],
+			]
+		);
 	}
 
 	/**
@@ -257,6 +274,78 @@ class Settings {
 	 * @return bool|\WP_Error
 	 */
 	public function update_settings_permissions_check() {
+		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Callback for getting the registration settings.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function get_registration_settings_callback() {
+		$service_manager = new ServicesManager();
+		$settings        = $service_manager->get_settings();
+		return rest_ensure_response( $settings );
+	}
+
+	/**
+	 * Update the registration settings.
+	 *
+	 * @param \WP_REST_Request $request Full data about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function update_registration_settings_callback( $request ) {
+		// Load settings error functions.
+		if ( ! function_exists( 'add_settings_error' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
+
+		$service_manager = new ServicesManager();
+		$settings        = $service_manager->get_settings();
+		$new_settings    = $service_manager->sanitize_settings( $request->get_json_params() );
+
+		if ( is_wp_error( $new_settings ) ) {
+			return $new_settings;
+		}
+
+		// Update the settings with the new values.
+		$new_settings = array_merge( $settings, $new_settings );
+		update_option( 'classifai_settings', $new_settings );
+
+		$setting_errors = get_settings_errors();
+		$errors         = array();
+		if ( ! empty( $setting_errors ) ) {
+			foreach ( $setting_errors as $setting_error ) {
+				if ( empty( $setting_error['message'] ) ) {
+					continue;
+				}
+
+				$errors[] = array(
+					'code'    => $setting_error['code'],
+					'message' => wp_strip_all_tags( $setting_error['message'] ),
+				);
+			}
+		}
+
+		$response = array(
+			'success'  => true,
+			'settings' => $new_settings,
+		);
+
+		if ( ! empty( $errors ) ) {
+			$response['success'] = false;
+			$response['errors']  = $errors;
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Check if a given request has access to get/update registration settings.
+	 *
+	 * @return bool|\WP_Error
+	 */
+	public function registration_settings_permissions_check() {
 		return current_user_can( 'manage_options' );
 	}
 }

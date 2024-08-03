@@ -1,0 +1,184 @@
+/**
+ * External dependencies
+ */
+import { NavLink } from 'react-router-dom';
+import {
+	Panel,
+	PanelBody,
+	Spinner,
+	Button,
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+} from '@wordpress/components';
+import { Notices } from '../feature-settings/notices';
+import { __ } from '@wordpress/i18n';
+import { SettingsRow } from '../settings-row';
+import apiFetch from '@wordpress/api-fetch';
+import { useState, useEffect } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
+
+const ClassifAIRegistrationForm = () => {
+	const [ settings, setSettings ] = useState( {} );
+	const [ isLoaded, setIsLoaded ] = useState( false );
+
+	// Load the settings.
+	useEffect( () => {
+		( async () => {
+			const registrationSettings = await apiFetch( {
+				path: '/classifai/v1/registration',
+			} ); // TODO: handle error
+
+			setSettings( registrationSettings );
+			setIsLoaded( true );
+		} )();
+	}, [ setSettings, setIsLoaded ] );
+
+	if ( ! isLoaded ) {
+		return <Spinner />;
+	}
+
+	return (
+		<>
+			<Notices />
+			<Panel
+				header={ __( 'Classifai Registration Settings', 'classifai' ) }
+				className="settings-panel"
+			>
+				<PanelBody>
+					<SettingsRow
+						label={ __( 'Registered Email', 'classifai' ) }
+					>
+						<InputControl
+							type="email"
+							value={ settings.email || '' }
+							onChange={ ( value ) => {
+								setSettings( { ...settings, email: value } );
+							} }
+						/>
+					</SettingsRow>
+					<SettingsRow
+						label={ __( 'Registration Key', 'classifai' ) }
+						description={
+							<>
+								{
+									// eslint-disable-next-line @wordpress/i18n-translator-comments
+									__(
+										'Registration is 100% free and provides update notifications and upgrades inside the dashboard.',
+										'classifai'
+									)
+								}{ ' ' }
+								<a
+									href="https://classifaiplugin.com/#cta"
+									target="_blank"
+									rel="noreferrer"
+								>
+									{ __(
+										'Register for your key',
+										'classifai'
+									) }
+								</a>
+							</>
+						}
+					>
+						<InputControl
+							type="password"
+							value={ settings.license_key || '' }
+							onChange={ ( value ) => {
+								setSettings( {
+									...settings,
+									license_key: value,
+								} );
+							} }
+						/>
+					</SettingsRow>
+				</PanelBody>
+			</Panel>
+			<div className="classifai-settings-footer">
+				<SaveSettingsButton
+					settings={ settings }
+					setSettings={ setSettings }
+				/>
+			</div>
+		</>
+	);
+};
+
+/**
+ * Save Settings Button component.
+ *
+ * @param {Object}   props             Component props.
+ * @param {Object}   props.settings    Settings object.
+ * @param {Function} props.setSettings Set settings function.
+ * @return {Object} SaveSettingsButton Component.
+ */
+export const SaveSettingsButton = ( { settings, setSettings }) => {
+	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
+	const notices = useSelect( ( select ) =>
+		select( noticesStore ).getNotices()
+	);
+	const [ isSaving, setIsSaving ] = useState( false );
+
+	/**
+	 * Save settings for a feature.
+	 */
+	const saveSettings = () => {
+		removeNotices( notices.map( ( { id } ) => id ) );
+		setIsSaving( true );
+		apiFetch( {
+			path: '/classifai/v1/registration/',
+			method: 'POST',
+			data: settings,
+		} )
+			.then( ( res ) => {
+				if ( res.errors && res.errors.length ) {
+					res.errors.forEach( ( error ) =>
+						createErrorNotice( error.message )
+					);
+					setSettings( res.settings );
+					setIsSaving( false );
+					return;
+				}
+
+				setSettings( res.settings );
+				setIsSaving( false );
+			} )
+			.catch( ( error ) => {
+				createErrorNotice(
+					error.message ||
+						__(
+							'An error occurred while saving settings.',
+							'classifai'
+						)
+				);
+				setIsSaving( false );
+			} );
+	};
+
+	return (
+		<Button
+			className="save-settings-button"
+			variant="primary"
+			onClick={ saveSettings }
+			isBusy={ isSaving }
+		>
+			{ isSaving
+				? __( 'Saving…', 'classifai' )
+				: __( 'Save Settings', 'classifai' ) }
+		</Button>
+	);
+};
+
+export const ClassifAIRegistration = () => {
+	return (
+		<div className="service-settings-wrapper">
+			<div className="classifai-tabs" aria-orientation="vertical">
+				<NavLink className={ 'active-tab classifai-tabs-item' }>
+					{ __( 'ClassifAI Registration', 'classifai' ) }
+				</NavLink>
+			</div>
+			<div className="feature-settings-wrapper">
+				<ClassifAIRegistrationForm />
+			</div>
+		</div>
+	);
+};

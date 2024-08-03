@@ -15,6 +15,7 @@ import {
  */
 import { useDispatch } from '@wordpress/data';
 import { SlotFillProvider } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -24,6 +25,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { FeatureSettings, Header, ServiceSettings } from '..';
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
+import { ClassifAIRegistration } from '../classifai-registration';
 
 const { services, features } = window.classifAISettings;
 
@@ -89,9 +91,21 @@ export const ServiceNavigation = () => {
 					{ services[ service ] }
 				</NavLink>
 			) ) }
+			<NavLink
+				to="classifai_registration"
+				key="classifai_registration"
+				className={ ( { isActive } ) =>
+					isActive
+						? 'active-tab classifai-tabs-item'
+						: 'classifai-tabs-item'
+				}
+			>
+				{ __( 'ClassifAI Registration', 'classifai') }
+			</NavLink>
 		</div>
 	);
 };
+
 export const ClassifAISettings = () => {
 	const { setSettings, setIsLoaded } = useDispatch( STORE_NAME );
 
@@ -127,6 +141,10 @@ export const ClassifAISettings = () => {
 								element={ <FeatureSettingsWrapper /> }
 							/>
 						</Route>
+						<Route
+							path="classifai_registration"
+							element={ <ClassifAIRegistration /> }
+						/>
 						{ /* When no routes match, it will redirect to this route path. Note that it should be registered above. */ }
 						<Route
 							path="*"
