@@ -270,7 +270,7 @@ class Language extends Provider {
 						 * Possible values are 'oneSentence', 'short', 'medium', 'long'.
 						 * Default is 'oneSentence'.
 						 *
-						 * @since 3.3.0
+						 * @since 3.2.0
 						 * @hook classifai_azure_language_summary_length
 						 * @param string $summary_length The summary length.
 						 * @return string
