@@ -492,11 +492,12 @@ class AmazonPersonalize extends Provider {
 		 * @hook classifai_recommended_block_markup
 		 *
 		 * @param {string} $final_markup HTML Markup of recommended content block.
-		 * @param {array}  $attributes   Attributes of blocks.
+		 * @param {array}  $attributes   The block attributes.
+		 * @param {array}  $recommended_ids Recommended post IDs.
 		 *
 		 * @return {string} The filtered markup.
 		 */
-		return apply_filters( 'classifai_recommended_block_markup', $final_markup, $attributes );
+		return apply_filters( 'classifai_recommended_block_markup', $final_markup, $attributes, $recommended_ids );
 	}
 
 	/**
@@ -518,14 +519,19 @@ class AmazonPersonalize extends Provider {
 			return $items;
 		}
 
+		$settings = $this->feature_instance->get_settings( static::ID );
+
+		// We need a campaign ARN to proceed.
+		if ( empty( $settings['campaign_arn'] ) ) {
+			return $items;
+		}
+
 		// Get our AWS client.
 		$client = $this->get_client( 'personalize-runtime' );
 
 		if ( ! $client ) {
 			return $items;
 		}
-
-		$settings = $this->feature_instance->get_settings( static::ID );
 
 		// Convert the post IDs to strings as the API expects that.
 		$items = array_map(
@@ -669,7 +675,7 @@ class AmazonPersonalize extends Provider {
 				[
 					'eventType' => $args['event']['type'] ?? 'click',
 					'itemId'    => (string) $post_id,
-					'sentAt'    => time(),
+					'sentAt'    => time(), // TODO: what other things should we / can we track?
 				],
 			],
 			'sessionId'  => $id,
