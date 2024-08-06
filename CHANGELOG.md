@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.1.1] - 2024-08-06
+
+### Changed
+
+- Switch from using the `gpt-3.5-turbo` model to the new `gpt-4o-mini` model for any OpenAI text generation requests. Increase our context window from 16,385 tokens to 128,000 tokens (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#785](https://github.com/10up/classifai/pull/785)).
+
+### Fixed
+
+- Update a image URLs that no longer exist, fixing an issue with authentication in the Azure AI Vision Provider (props [@faisal-alvi](https://github.com/faisal-alvi), [@jamespstyles](https://github.com/jamespstyles), [@dkotter](https://github.com/dkotter) via [#787](https://github.com/10up/classifai/pull/787)).
+- Ensure we show a proper error notice if the Azure AI Vision Provider fails to authenticate (props [@faisal-alvi](https://github.com/faisal-alvi), [@jamespstyles](https://github.com/jamespstyles), [@dkotter](https://github.com/dkotter) via [#787](https://github.com/10up/classifai/pull/787)).
+
 ## [3.1.0] - 2024-07-15
 
 ### Added
@@ -599,6 +610,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.1.1]: https://github.com/10up/classifai/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/10up/classifai/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/10up/classifai/compare/3.0.0...3.0.1
 [3.0.0]: https://github.com/10up/classifai/compare/2.5.1...3.0.0
