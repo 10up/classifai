@@ -10,6 +10,8 @@ namespace Classifai\Providers\Azure;
 use Classifai\Providers\Provider;
 use Classifai\Features\ExcerptGeneration;
 use WP_Error;
+use function Classifai\safe_wp_remote_get;
+
 
 class Language extends Provider {
 	/**
@@ -152,7 +154,7 @@ class Language extends Provider {
 		$endpoint = trailingslashit( $url ) . '/text/analytics/v3.1/languages';
 		$endpoint = add_query_arg( 'api-version', static::API_VERSION, $endpoint );
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_get(
 			$endpoint,
 			[
 				'headers' => [
@@ -322,7 +324,7 @@ class Language extends Provider {
 	private function retrieve_summary( $url ) {
 		$api_key = $this->feature_instance->get_settings( static::ID )['api_key'];
 
-		$request = wp_remote_get(
+		$request = safe_wp_remote_get(
 			$url,
 			[
 				'headers' => [
@@ -342,7 +344,7 @@ class Language extends Provider {
 
 			while ( 'succeeded' !== $response->status ) {
 				sleep( .5 );
-				$request  = wp_remote_get(
+				$request  = safe_wp_remote_get(
 					$url,
 					[
 						'headers' => [

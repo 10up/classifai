@@ -661,3 +661,27 @@ function get_classification_mode(): string {
 
 	return $value;
 }
+
+
+/**
+ * Use VIP's `vip_safe_wp_remote_get` if available, otherwise use `wp_remote_get`.
+ *
+ * @param string $url URL to fetch.
+ * @param array  $args Optional. Request arguments.
+ * @return WP_Error|array The response or WP_Error on failure.
+ */
+function safe_wp_remote_get( string $url, array $args = [] ) {
+	if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
+		return vip_safe_wp_remote_get( $url, $args );
+	}
+
+	wp_parse_args(
+		$args,
+		[
+			'timeout' => 20, // phpcs:ignore
+
+		]
+	);
+
+	return wp_remote_get( $url, $args ); // phpcs:ignore
+}
