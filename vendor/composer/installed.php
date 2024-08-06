@@ -3,7 +3,7 @@
         'name' => '10up/classifai',
         'pretty_version' => 'dev-trunk',
         'version' => 'dev-trunk',
-        'reference' => '9bbea9aa0dacb0bbce2595a6cdb1c4292d8f08ba',
+        'reference' => '694171169eac28a96141331f76977e0545f27ee9',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '10up/classifai' => array(
             'pretty_version' => 'dev-trunk',
             'version' => 'dev-trunk',
-            'reference' => '9bbea9aa0dacb0bbce2595a6cdb1c4292d8f08ba',
+            'reference' => '694171169eac28a96141331f76977e0545f27ee9',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

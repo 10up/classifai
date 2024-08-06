@@ -2,9 +2,9 @@
 # This file is distributed under the GPLv2.
 msgid ""
 msgstr ""
-"Project-Id-Version: ClassifAI 3.1.0\n"
+"Project-Id-Version: ClassifAI 3.1.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/classifai\n"
-"POT-Creation-Date: 2024-07-15 15:27:24+00:00\n"
+"POT-Creation-Date: 2024-08-06 19:04:39+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -75,7 +75,7 @@ msgstr ""
 #: includes/Classifai/Admin/BulkActions.php:383
 #: includes/Classifai/Admin/BulkActions.php:530
 #: includes/Classifai/Features/DescriptiveTextGenerator.php:242
-#: includes/Classifai/Providers/Azure/ComputerVision.php:832
+#: includes/Classifai/Providers/Azure/ComputerVision.php:842
 msgid "Generate descriptive text"
 msgstr ""
 
@@ -1011,7 +1011,7 @@ msgid "Image tags will be added automatically."
 msgstr ""
 
 #: includes/Classifai/Features/ImageTagsGenerator.php:313
-#: includes/Classifai/Providers/Azure/ComputerVision.php:838
+#: includes/Classifai/Providers/Azure/ComputerVision.php:848
 msgid "Tag taxonomy"
 msgstr ""
 
@@ -1112,7 +1112,7 @@ msgid "Attachment ID to extact text from the PDF file."
 msgstr ""
 
 #: includes/Classifai/Features/PDFTextExtraction.php:105
-#: includes/Classifai/Providers/Azure/ComputerVision.php:492
+#: includes/Classifai/Providers/Azure/ComputerVision.php:502
 msgid "PDF Text Extraction is disabled. Please check your settings."
 msgstr ""
 
@@ -1436,7 +1436,7 @@ msgid "Latest response - Voices"
 msgstr ""
 
 #: includes/Classifai/Providers/AWS/AmazonPolly.php:568
-#: includes/Classifai/Providers/Azure/ComputerVision.php:249
+#: includes/Classifai/Providers/Azure/ComputerVision.php:259
 msgid "Nonce could not be verified."
 msgstr ""
 
@@ -1457,8 +1457,8 @@ msgstr ""
 
 #: includes/Classifai/Providers/Azure/ComputerVision.php:107
 #: includes/Classifai/Providers/Azure/ComputerVision.php:132
-#: includes/Classifai/Providers/Azure/ComputerVision.php:833
-#: includes/Classifai/Providers/Azure/ComputerVision.php:839
+#: includes/Classifai/Providers/Azure/ComputerVision.php:843
+#: includes/Classifai/Providers/Azure/ComputerVision.php:849
 msgid "Confidence threshold"
 msgstr ""
 
@@ -1474,57 +1474,57 @@ msgid ""
 "from 0-100. Recommended to be set to at least 70."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:257
+#: includes/Classifai/Providers/Azure/ComputerVision.php:267
 msgid "Invalid attachment ID."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:264
+#: includes/Classifai/Providers/Azure/ComputerVision.php:274
 msgid "Unauthorized access."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:322
-#: includes/Classifai/Providers/Azure/ComputerVision.php:376
-#: includes/Classifai/Providers/Azure/ComputerVision.php:424
-#: includes/Classifai/Providers/Azure/ComputerVision.php:520
+#: includes/Classifai/Providers/Azure/ComputerVision.php:332
+#: includes/Classifai/Providers/Azure/ComputerVision.php:386
+#: includes/Classifai/Providers/Azure/ComputerVision.php:434
+#: includes/Classifai/Providers/Azure/ComputerVision.php:530
 msgid "This attachment can't be processed."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:329
-#: includes/Classifai/Providers/Azure/ComputerVision.php:383
+#: includes/Classifai/Providers/Azure/ComputerVision.php:339
+#: includes/Classifai/Providers/Azure/ComputerVision.php:393
 msgid "Invalid data found. Please check your settings and try again."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:357
+#: includes/Classifai/Providers/Azure/ComputerVision.php:367
 msgid "Access to the filesystem is required for this feature to work."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:595
+#: includes/Classifai/Providers/Azure/ComputerVision.php:605
 msgid "Feature not enabled."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:640
-#: includes/Classifai/Providers/Azure/ComputerVision.php:644
+#: includes/Classifai/Providers/Azure/ComputerVision.php:650
+#: includes/Classifai/Providers/Azure/ComputerVision.php:654
 msgid "An error occurred."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:723
+#: includes/Classifai/Providers/Azure/ComputerVision.php:733
 #. translators: %1$s: the attachment ID
 msgid "%1$d is not found or is not an attachment"
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:733
+#: includes/Classifai/Providers/Azure/ComputerVision.php:743
 msgid "No valid metadata found."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:760
+#: includes/Classifai/Providers/Azure/ComputerVision.php:770
 msgid "Valid image size not found. Make sure the image is less than 4MB."
 msgstr ""
 
-#: includes/Classifai/Providers/Azure/ComputerVision.php:834
-#: includes/Classifai/Providers/Azure/ComputerVision.php:840
 #: includes/Classifai/Providers/Azure/ComputerVision.php:844
-#: includes/Classifai/Providers/Azure/ComputerVision.php:848
-#: includes/Classifai/Providers/Azure/ComputerVision.php:852
+#: includes/Classifai/Providers/Azure/ComputerVision.php:850
+#: includes/Classifai/Providers/Azure/ComputerVision.php:854
+#: includes/Classifai/Providers/Azure/ComputerVision.php:858
+#: includes/Classifai/Providers/Azure/ComputerVision.php:862
 #: includes/Classifai/Providers/OpenAI/DallE.php:374
 msgid "Latest response:"
 msgstr ""
