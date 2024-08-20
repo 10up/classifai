@@ -859,10 +859,25 @@ class TextToSpeech extends Feature {
 	 * @return string The normalized post content.
 	 */
 	public function normalize_post_content( int $post_id ): string {
+		add_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
 		$normalizer   = new Normalizer();
 		$post         = get_post( $post_id );
 		$post_content = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
+		remove_filter( 'classifai_pre_normalize', [ $this, 'strip_sub_sup_tags' ] );
 
+		return $post_content;
+	}
+
+	/**
+	 * Filters the post content by stripping off HTML subscript and superscript tags
+	 * with its content for text to speech generation.
+	 *
+	 * @param string $post_content The post content.
+	 *
+	 * @return string The filtered post content.
+	 */
+	public function strip_sub_sup_tags( string $post_content ): string {
+		$post_content = preg_replace( '/<sub>.*?<\/sub>|<sup>.*?<\/sup>/', '', $post_content );
 		return $post_content;
 	}
 

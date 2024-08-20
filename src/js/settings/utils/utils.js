@@ -1,3 +1,7 @@
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useMemo } from '@wordpress/element';
+import { store as coreStore } from '@wordpress/core-data';
+
 // Update URL based on the current tab and feature selected
 export const updateUrl = ( key, value ) => {
 	const urlParams = new URLSearchParams( window.location.search );
@@ -80,4 +84,177 @@ export const getInitialFeature = ( service ) => {
  */
 export const getScope = ( name ) => {
 	return ( name || '' ).replace( /_/g, '-' );
+};
+
+/**
+ * Check if the provider is configured.
+ *
+ * @param {Object} featureSettings The feature settings.
+ * @return {boolean} True if the provider is configured, false otherwise.
+ */
+export const isProviderConfigured = ( featureSettings ) => {
+	const selectedProvider = featureSettings?.provider;
+	if ( ! selectedProvider ) {
+		return false;
+	}
+
+	return featureSettings[ selectedProvider ]?.authenticated || false;
+};
+
+/**
+ * Returns a helper object that contains:
+ * An `options` object from the available post types, to be passed to a `SelectControl`.
+ *
+ * @return {Object} The helper object related to post types.
+ */
+export const usePostTypes = () => {
+	const postTypes = useSelect( ( select ) => {
+		const { getPostTypes } = select( coreStore );
+		const excludedPostTypes = [ 'attachment' ];
+		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
+			( { viewable, slug } ) =>
+				viewable && ! excludedPostTypes.includes( slug )
+		);
+		return filteredPostTypes;
+	}, [] );
+
+	const postTypesSelectOptions = useMemo(
+		() =>
+			( postTypes || [] ).map( ( { labels, slug } ) => ( {
+				label: labels.singular_name,
+				value: slug,
+			} ) ),
+		[ postTypes ]
+	);
+
+	const excerptPostTypes = useSelect( ( select ) => {
+		const { getPostTypes } = select( coreStore );
+		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
+			( { viewable, supports } ) => viewable && supports?.excerpt
+		);
+		return filteredPostTypes;
+	}, [] );
+
+	const excerptPostTypesOptions = useMemo( () => {
+		return ( excerptPostTypes || [] ).map( ( { labels, slug } ) => ( {
+			label: labels.singular_name,
+			value: slug,
+		} ) );
+	}, [ excerptPostTypes ] );
+
+	return { postTypesSelectOptions, postTypes, excerptPostTypesOptions };
+};
+
+/**
+ * Post Statuses Hook.
+ * Returns a helper object that contains:
+ * An `options` object from the available post statuses.
+ *
+ * @return {Object} The helper object related to post statuses.
+ */
+export const usePostStatuses = () => {
+	const postStatuses = useSelect( ( select ) => {
+		const excludeStatutes = [
+			'auto-draft',
+			'inherit',
+			'trash',
+			'future',
+			'request-pending',
+			'request-confirmed',
+			'request-failed',
+			'request-completed',
+		];
+		return select( 'core' )
+			.getStatuses()
+			?.filter( ( { slug } ) => ! excludeStatutes.includes( slug ) );
+	}, [] );
+
+	const postStatusOptions = useMemo(
+		() =>
+			( postStatuses || [] ).map( ( { name, slug } ) => ( {
+				label: name,
+				value: slug,
+			} ) ),
+		[ postStatuses ]
+	);
+
+	return { postStatusOptions };
+};
+
+/**
+ * Post Statuses Hook.
+ * Returns a helper object that contains:
+ * An `options` object from the available post statuses.
+ *
+ * @return {Object} The helper object related to post statuses.
+ */
+export const useTaxonomies = () => {
+	const taxonomyOptions = useSelect( ( select ) => {
+		// Remove the NLUs taxonomies from the list of taxonomies
+		const excludedTaxonomies = [
+			'watson-category',
+			'watson-keyword',
+			'watson-concept',
+			'watson-entity',
+		];
+		return select( 'core' )
+			.getTaxonomies()
+			?.filter( ( { slug } ) => ! excludedTaxonomies.includes( slug ) );
+	}, [] );
+
+	const taxonomies = useMemo( () => taxonomyOptions, [ taxonomyOptions ] );
+
+	return { taxonomies };
+};
+
+/**
+ * User Permissions Preferences Hook.
+ *
+ * Exports a hook that returns the user permissions preferences.
+ * It uses the `core/preferences` store to manage the user permissions panel state.
+ * @return {Object} The user permissions preferences.
+ */
+export const useUserPermissionsPreferences = () => {
+	let cache;
+	const { set, setPersistenceLayer } = useDispatch( 'core/preferences' );
+	setPersistenceLayer( {
+		async get() {
+			if ( cache ) {
+				return cache;
+			}
+
+			const preferences = JSON.parse(
+				window.localStorage.getItem( 'CLASSIFAI_SETTINGS_PREFERENCES' )
+			);
+			if ( preferences ) {
+				cache = preferences;
+			} else {
+				cache = {};
+			}
+			return cache;
+		},
+		set( preferences ) {
+			cache = preferences;
+			window.localStorage.setItem(
+				'CLASSIFAI_SETTINGS_PREFERENCES',
+				JSON.stringify( preferences )
+			);
+		},
+	} );
+
+	const isOpen = useSelect( ( select ) => {
+		const { get } = select( 'core/preferences' );
+
+		const open = get( 'classifai/settings', 'user-permissions-panel-open' );
+		if ( open === undefined ) {
+			return true;
+		}
+		return open;
+	}, [] );
+
+	const setIsOpen = ( value ) => {
+		set( 'classifai/settings', 'user-permissions-panel-open', value );
+	};
+
+	return { isOpen, setIsOpen };
 };

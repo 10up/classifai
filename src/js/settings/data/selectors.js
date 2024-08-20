@@ -5,8 +5,12 @@ export const getSettings = ( state, feature ) => {
 	return state.settings;
 };
 
-export const getFeatureSettings = ( state ) =>
-	state.settings?.[ state.currentFeature ] || {};
+export const getFeatureSettings = ( state, key ) => {
+	if ( key ) {
+		return state.settings?.[ state.currentFeature ]?.[ key ];
+	}
+	return state.settings?.[ state.currentFeature ] || {};
+};
 
 export const getCurrentService = ( state ) => state.currentService;
 

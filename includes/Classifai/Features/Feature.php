@@ -1144,6 +1144,29 @@ abstract class Feature {
 	}
 
 	/**
+	 * Returns whether the feature is configured with the specified provider or not.
+	 *
+	 * @param string $provider The specified provider.
+	 *
+	 * @return bool
+	 */
+	public function is_configured_with_provider( string $provider ): bool {
+		$settings      = $this->get_settings();
+		$provider_id   = $settings['provider'];
+		$is_configured = false;
+
+		if (
+			! empty( $settings ) &&
+			$provider_id === $provider &&
+			! empty( $settings[ $provider_id ]['authenticated'] )
+		) {
+			$is_configured = true;
+		}
+
+		return $is_configured;
+	}
+
+	/**
 	 * Can the feature be initialized?
 	 *
 	 * @return bool

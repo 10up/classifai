@@ -1,87 +1,75 @@
 /**
  * External dependencies
  */
-import {
-	CheckboxControl,
-	PanelBody,
-	PanelRow,
-	ToggleControl,
-} from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useDispatch, useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { getFeature } from '../../utils/utils';
 import { UserSelector } from '../../../components';
+import { AllowedRoles } from '../allowed-roles';
+import { SettingsRow } from '../settings-row';
+import { STORE_NAME } from '../../data/store';
+import { useUserPermissionsPreferences } from '../../utils/utils';
 
-export const UserPermissions = ( {
-	featureName,
-	featureSettings,
-	setSettings,
-} ) => {
-	const feature = getFeature( featureName );
-	const roles = feature.roles || {};
+export const UserPermissions = () => {
+	const { isOpen, setIsOpen } = useUserPermissionsPreferences();
+	const { setFeatureSettings } = useDispatch( STORE_NAME );
+	// eslint-disable-next-line camelcase
+	const { users, user_based_opt_out } = useSelect( ( select ) => {
+		return {
+			users: select( STORE_NAME ).getFeatureSettings( 'users' ),
+			user_based_opt_out:
+				select( STORE_NAME ).getFeatureSettings( 'user_based_opt_out' ),
+		};
+	} );
 	return (
 		<PanelBody
 			title={ __( 'User permissions', 'classifai' ) }
-			initialOpen={ true }
+			initialOpen={ isOpen }
+			onToggle={ ( opened ) => {
+				setIsOpen( opened );
+			} }
 		>
-			<PanelRow>
-				<div className="classifai-settings__roles">
-					<div className="settings-label">
-						{ __( 'Allowed roles', 'classifai' ) }
-					</div>
-					{ Object.keys( roles ).map( ( role ) => {
-						return (
-							<CheckboxControl
-								key={ role }
-								checked={
-									featureSettings.roles?.[ role ] === role
-								}
-								label={ roles[ role ] }
-								onChange={ ( value ) => {
-									setSettings( {
-										...featureSettings,
-										roles: {
-											...featureSettings.roles,
-											[ role ]: value ? role : '0',
-										},
-									} );
-								} }
-							/>
-						);
-					} ) }
-				</div>
-			</PanelRow>
-			<PanelRow>
-				<div className="classifai-settings__users">
-					<UserSelector
-						value={ featureSettings.users || [] }
-						onChange={ ( users ) => {
-							setSettings( {
-								...featureSettings,
-								users,
-							} );
-						} }
-						label={ __( 'Allowed users', 'classifai' ) }
-					/>
-				</div>
-			</PanelRow>
-			<PanelRow>
-				<div className="classifai-settings__user_based_opt_out">
-					<ToggleControl
-						checked={ featureSettings?.user_based_opt_out === '1' }
-						label={ __( 'Enable user-based opt-out', 'classifai' ) }
-						onChange={ ( value ) => {
-							setSettings( {
-								...featureSettings,
-								user_based_opt_out: value ? '1' : 'no',
-							} );
-						} }
-					/>
-				</div>
-			</PanelRow>
+			<AllowedRoles />
+
+			<SettingsRow
+				label={ __( 'Allowed users', 'classifai' ) }
+				className="classifai-settings__users"
+				description={ __(
+					'Select users who can access this feature.',
+					'classifai'
+				) }
+			>
+				<UserSelector
+					value={ users || [] }
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							users: value,
+						} );
+					} }
+				/>
+			</SettingsRow>
+
+			<SettingsRow
+				label={ __( 'Enable user-based opt-out', 'classifai' ) }
+				description={ __(
+					'Enables ability for users to opt-out from their user profile page.',
+					'classifai'
+				) }
+			>
+				<ToggleControl
+					// eslint-disable-next-line camelcase
+					checked={ user_based_opt_out === '1' }
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							user_based_opt_out: value ? '1' : 'no',
+						} );
+					} }
+				/>
+			</SettingsRow>
 		</PanelBody>
 	);
 };

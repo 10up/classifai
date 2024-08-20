@@ -5,6 +5,7 @@ import { CheckboxControl, Fill } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
+import { SettingsRow } from '../components';
 
 const ModerationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
@@ -17,10 +18,13 @@ const ModerationSettings = () => {
 	return (
 		<>
 			<Fill name="ClassifAIFeatureSettings">
-				<div className="classifai-settings-input-control">
-					<div className="settings-label">
-						{ __( 'Content to moderate', 'classifai' ) }
-					</div>
+				<SettingsRow
+					label={ __( 'Content to moderate', 'classifai' ) }
+					description={ __(
+						'Choose what type of content to moderate.',
+						'classifai'
+					) }
+				>
 					{ Object.keys( contentTypes ).map( ( contentType ) => {
 						return (
 							<CheckboxControl
@@ -44,13 +48,7 @@ const ModerationSettings = () => {
 							/>
 						);
 					} ) }
-					<span className="description classifai-input-description">
-						{ __(
-							'Choose what type of content to moderate.',
-							'classifai'
-						) }
-					</span>
-				</div>
+				</SettingsRow>
 			</Fill>
 		</>
 	);

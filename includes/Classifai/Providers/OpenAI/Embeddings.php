@@ -215,19 +215,21 @@ class Embeddings extends Provider {
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://platform.openai.com/signup' )
 					),
-					esc_url( 'https://platform.openai.com/signup' )
-				),
 			]
 		);
 
@@ -512,11 +514,29 @@ class Embeddings extends Provider {
 
 		// Get the embeddings for each chunk.
 		if ( ! empty( $content_chunks ) ) {
-			foreach ( $content_chunks as $chunk ) {
-				$embedding = $this->generate_embedding( $chunk );
+			$tokenizer    = new Tokenizer( $this->get_max_tokens() );
+			$total_tokens = $tokenizer->tokens_in_content( $content );
 
-				if ( $embedding && ! is_wp_error( $embedding ) ) {
-					$embeddings[] = array_map( 'floatval', $embedding );
+			// If we have a lot of tokens, we need to get embeddings for each chunk individually.
+			if ( $this->max_tokens < $total_tokens ) {
+				foreach ( $content_chunks as $chunk ) {
+					$embedding = $this->generate_embedding( $chunk );
+
+					if ( $embedding && ! is_wp_error( $embedding ) ) {
+						$embeddings[] = array_map( 'floatval', $embedding );
+					}
+				}
+			} else {
+				// Otherwise let's get all embeddings in a single request.
+				$all_embeddings = $this->generate_embeddings( $content_chunks );
+
+				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
+					$embeddings = array_map(
+						function ( $embedding ) {
+							return array_map( 'floatval', $embedding );
+						},
+						$all_embeddings
+					);
 				}
 			}
 		}
@@ -974,6 +994,78 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Generate embeddings for an array of text.
+	 *
+	 * @param array        $strings Array of text to generate embeddings for.
+	 * @param Feature|null $feature Feature instance.
+	 * @return array|boolean|WP_Error
+	 */
+	public function generate_embeddings( array $strings = [], $feature = null ) {
+		if ( ! $feature ) {
+			$feature = new Classification();
+		}
+
+		$settings = $feature->get_settings();
+
+		// Ensure the feature is enabled.
+		if ( ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+
+		/**
+		 * Filter the request body before sending to OpenAI.
+		 *
+		 * @since 2.2.0
+		 * @hook classifai_openai_embeddings_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {array} $strings Array of text we are getting embeddings for.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_openai_embeddings_request_body',
+			[
+				'model'      => $this->get_model(),
+				'input'      => $strings,
+				'dimensions' => $this->get_dimensions(),
+			],
+			$strings
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->get_api_url(),
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		if ( empty( $response['data'] ) ) {
+			return new WP_Error( 'no_data', esc_html__( 'No data returned from OpenAI.', 'classifai' ) );
+		}
+
+		$return = [];
+
+		// Parse out the embeddings response.
+		foreach ( $response['data'] as $data ) {
+			if ( ! isset( $data['embedding'] ) || ! is_array( $data['embedding'] ) ) {
+				continue;
+			}
+
+			$return[] = $data['embedding'];
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Chunk content into smaller pieces with an overlap.
 	 *
 	 * @param string $content Content to chunk.
@@ -999,7 +1091,7 @@ class Embeddings extends Provider {
 				array_slice(
 					$words,
 					max( $i - $overlap_size, 0 ),
-					$i + $chunk_size
+					$chunk_size + $overlap_size
 				)
 			);
 

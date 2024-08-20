@@ -53,7 +53,9 @@ class ComputerVision extends Provider {
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
-				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);

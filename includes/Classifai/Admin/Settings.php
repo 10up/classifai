@@ -85,12 +85,7 @@ class Settings {
 		wp_enqueue_style(
 			'classifai-settings',
 			CLASSIFAI_PLUGIN_URL . 'dist/settings.css',
-			array_filter(
-				get_asset_info( 'settings', 'dependencies' ),
-				function ( $style ) {
-					return wp_style_is( $style, 'registered' );
-				}
-			),
+			array( 'wp-edit-blocks' ),
 			get_asset_info( 'settings', 'version' ),
 			'all'
 		);
@@ -129,9 +124,10 @@ class Settings {
 
 			foreach ( $service->feature_classes as $feature ) {
 				$services[ $service->get_menu_slug() ][ $feature::ID ] = array(
-					'label'     => $feature->get_label(),
-					'providers' => $feature->get_providers(),
-					'roles'     => $feature->get_roles(),
+					'label'              => $feature->get_label(),
+					'providers'          => $feature->get_providers(),
+					'roles'              => $feature->get_roles(),
+					'enable_description' => $feature->get_enable_description(),
 				);
 			}
 		}
@@ -214,13 +210,45 @@ class Settings {
 			return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
 		}
 
+		// Load settings error functions.
+		if ( ! function_exists( 'add_settings_error' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
+
 		$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
 		if ( is_wp_error( $new_settings ) ) {
 			return $new_settings;
 		}
 
+		// Update settings.
 		$feature->update_settings( $new_settings );
-		return $this->get_settings_callback();
+
+		$setting_errors = get_settings_errors();
+		$errors         = array();
+		if ( ! empty( $setting_errors ) ) {
+			foreach ( $setting_errors as $setting_error ) {
+				if ( empty( $setting_error['message'] ) ) {
+					continue;
+				}
+
+				$errors[] = array(
+					'code'    => $setting_error['code'],
+					'message' => wp_strip_all_tags( $setting_error['message'] ),
+				);
+			}
+		}
+
+		$response = array(
+			'success'  => true,
+			'settings' => $this->get_settings(),
+		);
+
+		if ( ! empty( $errors ) ) {
+			$response['success'] = false;
+			$response['errors']  = $errors;
+		}
+
+		return rest_ensure_response( $response );
 	}
 
 	/**
