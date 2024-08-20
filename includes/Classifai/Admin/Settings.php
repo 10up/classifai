@@ -53,7 +53,7 @@ class Settings {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
-		if ( 'tools_page_classifai' !== $hook_suffix ) {
+		if ( ! in_array( $hook_suffix, array( 'tools_page_classifai_setup', 'tools_page_classifai' ), true ) ) {
 			return;
 		}
 

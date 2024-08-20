@@ -18,7 +18,7 @@ import { useFeatureContext } from './context';
  * Enable Feature Toggle component.
  *
  */
-export const EnableToggleControl = () => {
+export const EnableToggleControl = ( { children } ) => {
 	const { featureName } = useFeatureContext();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const status = useSelect(
@@ -29,6 +29,10 @@ export const EnableToggleControl = () => {
 	const enableDescription = decodeEntities(
 		feature?.enable_description || __( 'Enable feature', 'classifai' )
 	);
+
+	if ( children && 'function' === typeof children ) {
+		return children( { feature, status, setFeatureSettings } );
+	}
 
 	return (
 		<SettingsRow
