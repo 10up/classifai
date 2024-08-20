@@ -47,12 +47,9 @@ export const ClassifAIOnboarding = () => {
 															<ToggleControl
 																checked={ status === '1' }
 																onChange={ ( value ) => 
-																	// setFeatureSettings(
-																	// 	{
-																	// 		status: value ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
-																	// 	},
-																	// 	featureSlug
-																	// )
+																	setFeatureSettings( {
+																		status: value ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
+																	} )
 																}
 															/>
 														</FlexItem>

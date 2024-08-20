@@ -1,8 +1,9 @@
 export const setFeatureSettings =
-	( settings ) =>
+	( settings, feature = null ) =>
 	( { select, dispatch } ) => {
-		const currentFeature = select.getCurrentFeature();
-		const featureSettings = select.getFeatureSettings();
+		const currentFeature = feature || select.getCurrentFeature();
+		const featureSettings = select.getFeatureSettings( null, feature );
+
 		dispatch( {
 			type: 'SET_FEATURE_SETTINGS',
 			feature: currentFeature,

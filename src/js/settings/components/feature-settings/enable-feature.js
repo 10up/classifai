@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { ToggleControl } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -11,20 +10,15 @@ import { decodeEntities } from '@wordpress/html-entities';
  */
 import { getFeature } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
-import { STORE_NAME } from '../../data/store';
-import { useFeatureContext } from './context';
+import { useFeatureSettings } from '../../data/hooks';
 
 /**
  * Enable Feature Toggle component.
  *
  */
 export const EnableToggleControl = ( { children } ) => {
-	const { featureName } = useFeatureContext();
-	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const status = useSelect(
-		( select ) => select( STORE_NAME ).getFeatureSettings( 'status' ) || '0'
-	);
-
+	const { featureName, getFeatureSettings, setFeatureSettings } = useFeatureSettings();
+	const status = getFeatureSettings( 'status' ) || '0';
 	const feature = getFeature( featureName );
 	const enableDescription = decodeEntities(
 		feature?.enable_description || __( 'Enable feature', 'classifai' )
