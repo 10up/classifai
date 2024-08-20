@@ -1,4 +1,4 @@
-# ![ClassifAI](https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/logo.svg "ClassifAI")
+# ![ClassifAI](https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/logo.svg "ClassifAI")
 
 > Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
