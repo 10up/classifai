@@ -1,14 +1,16 @@
 import { useDispatch } from '@wordpress/data';
-import { useEffect } from '@wordpress/element';
-import { ToggleControl, Flex, FlexItem } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 import { STORE_NAME } from '../../data/store';
-import { FeatureContext } from '../feature-settings/context';
-import { EnableToggleControl } from '../feature-settings/enable-feature';
+import { EnableFeatures } from './enable-features';
+import { ConfigureFeatures } from './configure-features';
+import { ConfigurationStatus } from './configuration-status';
+import { Header, Layout } from '../../components';
 
 export const ClassifAIOnboarding = () => {
 	const { setSettings, setIsLoaded } = useDispatch( STORE_NAME );
+	const [ step, setStep ] = useState( 'enable_features' );
 
 	// Load the settings.
 	useEffect( () => {
@@ -22,49 +24,14 @@ export const ClassifAIOnboarding = () => {
 		} )();
 	}, [ setSettings, setIsLoaded ] );
 
-	const { features, services } = classifAISettings;
-
-	return Object.keys( services ).map( service => (
+	return (
 		<>
-			<div className='classifai-feature-box-title'>
-				{ services[ service ] }
-			</div>
-			<div className='classifai-features'>
-				<ul>
-					{
-						Object.keys( features[ service ] ).map( featureSlug => (
-							<li className='classifai-enable-feature' key={ featureSlug }>
-								<FeatureContext.Provider value={ { featureName: featureSlug } }>
-									<EnableToggleControl>
-										{
-											( { feature, status, setFeatureSettings } ) => {
-												return (
-													<Flex>
-														<FlexItem>
-															<span>{ feature.label }</span>
-														</FlexItem>
-														<FlexItem>
-															<ToggleControl
-																checked={ status === '1' }
-																onChange={ ( value ) => 
-																	setFeatureSettings( {
-																		status: value ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
-																	} )
-																}
-															/>
-														</FlexItem>
-													</Flex>
-												)
-											}
-										}
-									</EnableToggleControl>
-								</FeatureContext.Provider>
-							</li>
-						) )
-					}
-				</ul>
-			</div>
+			<Header />
+			<Layout>
+				{ 'enable_features' === step && <EnableFeatures step={ step } setStep={ setStep } /> }
+				{ 'configure_features' === step && <ConfigureFeatures step={ step } setStep={ setStep } /> }
+				{ 'configuration_status' === step && <ConfigurationStatus step={ step } setStep={ setStep } /> }
+			</Layout>
 		</>
-	) );
-
+	)
 };

@@ -53,7 +53,7 @@ class Settings {
 	 * @param string $hook_suffix The current admin page.
 	 */
 	public function admin_enqueue_scripts( $hook_suffix ) {
-		if ( ! in_array( $hook_suffix, array( 'tools_page_classifai_setup', 'tools_page_classifai' ), true ) ) {
+		if ( ! in_array( $hook_suffix, array( 'admin_page_classifai_setup', 'tools_page_classifai' ), true ) ) {
 			return;
 		}
 
@@ -201,42 +201,45 @@ class Settings {
 	 */
 	public function update_settings_callback( $request ) {
 		$settings = $request->get_json_params();
+		$features = $this->get_features( true );
 
-		$feature_key = key( $settings );
-		$features    = $this->get_features( true );
-		$feature     = $features[ $feature_key ];
+		foreach ( $settings as $feature_key => $feature_setting ) {
+			$feature  = $features[ $feature_key ];
 
-		if ( ! $feature ) {
-			return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
-		}
+			if ( ! $feature ) {
+				return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
+			}
 
-		// Load settings error functions.
-		if ( ! function_exists( 'add_settings_error' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/template.php';
-		}
+			// Load settings error functions.
+			if ( ! function_exists( 'add_settings_error' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/template.php';
+			}
 
-		$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
-		if ( is_wp_error( $new_settings ) ) {
-			return $new_settings;
-		}
+			$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
 
-		// Update settings.
-		$feature->update_settings( $new_settings );
+			if ( is_wp_error( $new_settings ) ) {
+				continue;
+			}
 
-		$setting_errors = get_settings_errors();
-		$errors         = array();
-		if ( ! empty( $setting_errors ) ) {
-			foreach ( $setting_errors as $setting_error ) {
-				if ( empty( $setting_error['message'] ) ) {
-					continue;
+			// Update settings.
+			$feature->update_settings( $new_settings );
+
+			$setting_errors = get_settings_errors();
+			$errors         = array();
+			if ( ! empty( $setting_errors ) ) {
+				foreach ( $setting_errors as $setting_error ) {
+					if ( empty( $setting_error['message'] ) ) {
+						continue;
+					}
+
+					$errors[] = array(
+						'code'    => $setting_error['code'],
+						'message' => wp_strip_all_tags( $setting_error['message'] ),
+					);
 				}
-
-				$errors[] = array(
-					'code'    => $setting_error['code'],
-					'message' => wp_strip_all_tags( $setting_error['message'] ),
-				);
 			}
 		}
+
 
 		$response = array(
 			'success'  => true,

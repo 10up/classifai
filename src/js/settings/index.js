@@ -7,22 +7,15 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ClassifAISettings, ClassifAIOnboarding } from './components';
+import { ClassifAIAdmin } from './classifai-admin';
 import './data/store';
 import '../../scss/settings.scss';
 
 domReady( () => {
-	const onboardingEl = document.getElementById( 'classifai-onboarding' );
+	const adminEl = document.getElementById( 'classifai-settings' );
 
-	if ( onboardingEl ) {
-		const onboardingRoot = createRoot( onboardingEl );
-		onboardingRoot.render( <ClassifAIOnboarding /> );
-	}
-
-	const settingsEl = document.getElementById( 'classifai-settings' );
-
-	if ( settingsEl ) {
-		const settingsRoot = createRoot( settingsEl );
-		settingsRoot.render( <ClassifAISettings /> );
+	if ( adminEl ) {
+		const settingsRoot = createRoot( adminEl );
+		settingsRoot.render( <ClassifAIAdmin /> );
 	}
 } );
