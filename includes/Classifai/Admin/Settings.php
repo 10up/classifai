@@ -221,7 +221,7 @@ class Settings {
 		$features = $this->get_features( true );
 
 		foreach ( $settings as $feature_key => $feature_setting ) {
-			$feature  = $features[ $feature_key ];
+			$feature = $features[ $feature_key ];
 
 			if ( ! $feature ) {
 				return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
@@ -256,7 +256,6 @@ class Settings {
 				}
 			}
 		}
-
 
 		$response = array(
 			'success'  => true,
