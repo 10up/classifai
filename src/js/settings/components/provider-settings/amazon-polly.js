@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const AmazonPollySettings = () => {
+export const AmazonPollySettings = ( { isConfigured = false } ) => {
 	const providerName = 'aws_polly';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -18,46 +18,59 @@ export const AmazonPollySettings = () => {
 
 	return (
 		<>
-			<SettingsRow label={ __( 'Access key', 'classifai' ) }>
-				<InputControl
-					type="text"
-					value={ providerSettings.access_key_id || '' }
-					onChange={ ( value ) =>
-						onChange( { access_key_id: value } )
-					}
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Secret access key', 'classifai' ) }
-				description={ __(
-					'Enter the AWS secret access key.',
-					'classifai'
-				) }
-			>
-				<InputControl
-					type="password"
-					value={ providerSettings.secret_access_key || '' }
-					onChange={ ( value ) =>
-						onChange( { secret_access_key: value } )
-					}
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Region', 'classifai' ) }
-				description={
-					<>
-						{ ' ' }
-						{ __( 'Enter the AWS Region. eg: ', 'classifai' ) }
-						<code> { __( 'us-east-1', 'classifai' ) } </code>.
-					</>
-				}
-			>
-				<InputControl
-					type="text"
-					value={ providerSettings.aws_region || '' }
-					onChange={ ( value ) => onChange( { aws_region: value } ) }
-				/>
-			</SettingsRow>
+			{ ! isConfigured && (
+				<>
+					<SettingsRow label={ __( 'Access key', 'classifai' ) }>
+						<InputControl
+							type="text"
+							value={ providerSettings.access_key_id || '' }
+							onChange={ ( value ) =>
+								onChange( { access_key_id: value } )
+							}
+						/>
+					</SettingsRow>
+					<SettingsRow
+						label={ __( 'Secret access key', 'classifai' ) }
+						description={ __(
+							'Enter the AWS secret access key.',
+							'classifai'
+						) }
+					>
+						<InputControl
+							type="password"
+							value={ providerSettings.secret_access_key || '' }
+							onChange={ ( value ) =>
+								onChange( { secret_access_key: value } )
+							}
+						/>
+					</SettingsRow>
+					<SettingsRow
+						label={ __( 'Region', 'classifai' ) }
+						description={
+							<>
+								{ ' ' }
+								{ __(
+									'Enter the AWS Region. eg: ',
+									'classifai'
+								) }
+								<code>
+									{ ' ' }
+									{ __( 'us-east-1', 'classifai' ) }{ ' ' }
+								</code>
+								.
+							</>
+						}
+					>
+						<InputControl
+							type="text"
+							value={ providerSettings.aws_region || '' }
+							onChange={ ( value ) =>
+								onChange( { aws_region: value } )
+							}
+						/>
+					</SettingsRow>
+				</>
+			) }
 			<SettingsRow
 				label={ __( 'Engine', 'classifai' ) }
 				description={

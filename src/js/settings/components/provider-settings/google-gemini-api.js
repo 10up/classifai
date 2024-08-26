@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const GoogleAIGeminiAPISettings = () => {
+export const GoogleAIGeminiAPISettings = ( { isConfigured = false } ) => {
 	const providerName = 'googleai_gemini_api';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -13,6 +13,10 @@ export const GoogleAIGeminiAPISettings = () => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
+
+	if ( isConfigured ) {
+		return null;
+	}
 
 	const Description = () => (
 		<>

@@ -6,7 +6,7 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 
-export const AzureAIVisionSettings = () => {
+export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 	const providerName = 'ms_computer_vision';
 	const { featureName } = useFeatureContext();
 	const providerSettings = useSelect(
@@ -30,25 +30,31 @@ export const AzureAIVisionSettings = () => {
 
 	return (
 		<>
-			<SettingsRow
-				label={ __( 'Endpoint URL', 'classifai' ) }
-				description={ <Description /> }
-			>
-				<InputControl
-					type="text"
-					value={ providerSettings.endpoint_url || '' }
-					onChange={ ( value ) =>
-						onChange( { endpoint_url: value } )
-					}
-				/>
-			</SettingsRow>
-			<SettingsRow label={ __( 'API Key', 'classifai' ) }>
-				<InputControl
-					type="password"
-					value={ providerSettings.api_key || '' }
-					onChange={ ( value ) => onChange( { api_key: value } ) }
-				/>
-			</SettingsRow>
+			{ ! isConfigured && (
+				<>
+					<SettingsRow
+						label={ __( 'Endpoint URL', 'classifai' ) }
+						description={ <Description /> }
+					>
+						<InputControl
+							type="text"
+							value={ providerSettings.endpoint_url || '' }
+							onChange={ ( value ) =>
+								onChange( { endpoint_url: value } )
+							}
+						/>
+					</SettingsRow>
+					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
+						<InputControl
+							type="password"
+							value={ providerSettings.api_key || '' }
+							onChange={ ( value ) =>
+								onChange( { api_key: value } )
+							}
+						/>
+					</SettingsRow>
+				</>
+			) }
 			{ 'feature_descriptive_text_generator' === featureName && (
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }

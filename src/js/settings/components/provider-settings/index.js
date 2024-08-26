@@ -28,47 +28,52 @@ import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
 
-const ProviderFields = ( { provider } ) => {
+const ProviderFields = ( { provider, isConfigured } ) => {
 	switch ( provider ) {
 		case 'openai_chatgpt':
-			return <OpenAIChatGPTSettings />;
+			return <OpenAIChatGPTSettings isConfigured={ isConfigured } />;
 
 		case 'googleai_gemini_api':
-			return <GoogleAIGeminiAPISettings />;
+			return <GoogleAIGeminiAPISettings isConfigured={ isConfigured } />;
 
 		case 'azure_openai':
 		case 'azure_openai_embeddings':
-			return <AzureOpenAISettings providerName={ provider } />;
+			return (
+				<AzureOpenAISettings
+					providerName={ provider }
+					isConfigured={ isConfigured }
+				/>
+			);
 
 		case 'ibm_watson_nlu':
-			return <IBMWatsonNLUSettings />;
+			return <IBMWatsonNLUSettings isConfigured={ isConfigured } />;
 
 		case 'openai_embeddings':
-			return <OpenAIEmbeddingsSettings />;
+			return <OpenAIEmbeddingsSettings isConfigured={ isConfigured } />;
 
 		case 'openai_whisper':
-			return <OpenAIWhisperSettings />;
+			return <OpenAIWhisperSettings isConfigured={ isConfigured } />;
 
 		case 'openai_moderation':
-			return <OpenAIModerationSettings />;
+			return <OpenAIModerationSettings isConfigured={ isConfigured } />;
 
 		case 'openai_dalle':
-			return <OpenAIDallESettings />;
+			return <OpenAIDallESettings isConfigured={ isConfigured } />;
 
 		case 'ms_computer_vision':
-			return <AzureAIVisionSettings />;
+			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
 
 		case 'ms_azure_personalizer':
-			return <AzurePersonalizerSettings />;
+			return <AzurePersonalizerSettings isConfigured={ isConfigured } />;
 
 		case 'aws_polly':
-			return <AmazonPollySettings />;
+			return <AmazonPollySettings isConfigured={ isConfigured } />;
 
 		case 'ms_azure_text_to_speech':
-			return <AzureTextToSpeechSettings />;
+			return <AzureTextToSpeechSettings isConfigured={ isConfigured } />;
 
 		case 'openai_text_to_speech':
-			return <OpenAITextToSpeachSettings />;
+			return <OpenAITextToSpeachSettings isConfigured={ isConfigured } />;
 
 		default:
 			return null;
@@ -104,7 +109,7 @@ export const ProviderSettings = () => {
 
 	const configured =
 		isProviderConfigured( featureSettings ) &&
-		! editProvider &&
+		featureName !== editProvider &&
 		providerLabel;
 
 	return (
@@ -119,8 +124,8 @@ export const ProviderSettings = () => {
 								</>
 							</Tooltip>{ ' ' }
 							<Tooltip text={ __( 'Edit', 'classifai' ) }>
-								{/* The fragment is necessary here. `Tooltip` tries to pass `refs` to `Icon` which isn't
-								wrapped inside forwardRef(), without which it throws an error. DO NOT REMOVE THE FRAGMENTS. */}
+								{ /* The fragment is necessary here. `Tooltip` tries to pass `refs` to `Icon` which isn't
+								wrapped inside forwardRef(), without which it throws an error. DO NOT REMOVE THE FRAGMENTS. */ }
 								<>
 									<Icon
 										icon="edit"
@@ -128,7 +133,9 @@ export const ProviderSettings = () => {
 										style={ {
 											cursor: 'pointer',
 										} }
-										onClick={ () => setEditProvider( true ) }
+										onClick={ () =>
+											setEditProvider( featureName )
+										}
 									/>
 								</>
 							</Tooltip>
@@ -150,7 +157,10 @@ export const ProviderSettings = () => {
 						/>
 					</SettingsRow>
 				) }
-				<ProviderFields provider={ provider } />
+				<ProviderFields
+					provider={ provider }
+					isConfigured={ configured }
+				/>
 				<Slot name="ClassifAIProviderSettings">
 					{ ( fills ) => <> { fills }</> }
 				</Slot>

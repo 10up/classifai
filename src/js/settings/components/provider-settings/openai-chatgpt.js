@@ -6,7 +6,7 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 
-export const OpenAIChatGPTSettings = () => {
+export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 	const { featureName } = useFeatureContext();
 	const providerName = 'openai_chatgpt';
 	const providerSettings = useSelect(
@@ -31,16 +31,18 @@ export const OpenAIChatGPTSettings = () => {
 
 	return (
 		<>
-			<SettingsRow
-				label={ __( 'API Key', 'classifai' ) }
-				description={ <Description /> }
-			>
-				<InputControl
-					type="password"
-					value={ providerSettings.api_key || '' }
-					onChange={ ( value ) => onChange( { api_key: value } ) }
-				/>
-			</SettingsRow>
+			{ ! isConfigured && (
+				<SettingsRow
+					label={ __( 'API Key', 'classifai' ) }
+					description={ <Description /> }
+				>
+					<InputControl
+						type="password"
+						value={ providerSettings.api_key || '' }
+						onChange={ ( value ) => onChange( { api_key: value } ) }
+					/>
+				</SettingsRow>
+			) }
 			{ [
 				'feature_content_resizing',
 				'feature_title_generation',

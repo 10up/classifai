@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const AzurePersonalizerSettings = () => {
+export const AzurePersonalizerSettings = ( { isConfigured = false } ) => {
 	const providerName = 'ms_azure_personalizer';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -13,6 +13,10 @@ export const AzurePersonalizerSettings = () => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
+
+	if ( isConfigured ) {
+		return null;
+	}
 
 	return (
 		<>

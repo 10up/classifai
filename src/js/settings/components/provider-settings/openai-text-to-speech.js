@@ -7,7 +7,7 @@ import { SettingsRow } from '../settings-row';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_NAME } from '../../data/store';
 
-export const OpenAITextToSpeachSettings = () => {
+export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_text_to_speech';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -31,16 +31,18 @@ export const OpenAITextToSpeachSettings = () => {
 
 	return (
 		<>
-			<SettingsRow
-				label={ __( 'API Key', 'classifai' ) }
-				description={ <Description /> }
-			>
-				<InputControl
-					type="password"
-					value={ providerSettings.api_key || '' }
-					onChange={ ( value ) => onChange( { api_key: value } ) }
-				/>
-			</SettingsRow>
+			{ ! isConfigured && (
+				<SettingsRow
+					label={ __( 'API Key', 'classifai' ) }
+					description={ <Description /> }
+				>
+					<InputControl
+						type="password"
+						value={ providerSettings.api_key || '' }
+						onChange={ ( value ) => onChange( { api_key: value } ) }
+					/>
+				</SettingsRow>
+			) }
 			<SettingsRow
 				label={ __( 'TTS model', 'classifai' ) }
 				description={

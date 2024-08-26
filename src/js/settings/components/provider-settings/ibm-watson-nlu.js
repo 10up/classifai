@@ -8,7 +8,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
-export const IBMWatsonNLUSettings = () => {
+export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 	const providerName = 'ibm_watson_nlu';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -19,6 +19,10 @@ export const IBMWatsonNLUSettings = () => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
+
+	if ( isConfigured ) {
+		return null;
+	}
 
 	const Description = () => (
 		<>
