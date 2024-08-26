@@ -119,14 +119,18 @@ export const ProviderSettings = () => {
 								</>
 							</Tooltip>{ ' ' }
 							<Tooltip text={ __( 'Edit', 'classifai' ) }>
-								<Icon
-									icon="edit"
-									className="classifai-settings-edit-provider"
-									style={ {
-										cursor: 'pointer',
-									} }
-									onClick={ () => setEditProvider( true ) }
-								/>
+								{/* The fragment is necessary here. `Tooltip` tries to pass `refs` to `Icon` which isn't
+								wrapped inside forwardRef(), without which it throws an error. DO NOT REMOVE THE FRAGMENTS. */}
+								<>
+									<Icon
+										icon="edit"
+										className="classifai-settings-edit-provider"
+										style={ {
+											cursor: 'pointer',
+										} }
+										onClick={ () => setEditProvider( true ) }
+									/>
+								</>
 							</Tooltip>
 						</>
 					</SettingsRow>

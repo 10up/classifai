@@ -14,7 +14,7 @@ import { UserPermissions } from '../user-permissions';
 import { STORE_NAME } from '../../data/store';
 import { ProviderSettings } from '../provider-settings';
 import { EnableToggleControl } from './enable-feature';
-import { SaveSettingsButton } from './save-settings-button';
+import { SaveSettingsButton, SaveButtonSlot } from './save-settings-button';
 import { Notices } from './notices';
 import { useFeatureContext } from './context';
 import { FeatureAdditionalSettings } from '../feature-additional-settings';
@@ -59,7 +59,9 @@ export const FeatureSettings = () => {
 				<UserPermissions />
 			</Panel>
 			<div className="classifai-settings-footer">
-				<SaveSettingsButton />
+				<SaveButtonSlot>
+					<SaveSettingsButton />
+				</SaveButtonSlot>
 			</div>
 		</>
 	);

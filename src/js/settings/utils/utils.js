@@ -258,3 +258,30 @@ export const useUserPermissionsPreferences = () => {
 
 	return { isOpen, setIsOpen };
 };
+
+/**
+ * Returns array of feature slugs for features that are enabled, and not
+ * necessarily authenticated.
+ *
+ * @returns {Array} Array of feature slugs, for example
+ *                  ['feature_excerpt_generation', 'feature_content_resizing']
+ */
+export function getEnabledFeaturesSlugs() {
+	const { settings: features } = classifAISettings;
+
+	return Object.keys( features ).filter( feature => '1' === features[ feature ].status )
+};
+
+/**
+ * Returns true if a feature is enabled and authenticated.
+ *
+ * @param {Object} feature The feature object.
+ * @returns {Boolean} True if the feature is enabled and authenticated, false otherwise.
+ */
+export const isFeatureActive = ( feature ) => {
+	const isEnabled = '1' === feature.status;
+	const provider = feature?.provider;
+	const authenticated = feature[ provider ].authenticated;
+
+	return isEnabled && authenticated;
+};

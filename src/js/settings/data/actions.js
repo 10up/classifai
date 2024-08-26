@@ -1,8 +1,9 @@
 export const setFeatureSettings =
-	( settings ) =>
+	( settings, feature = null ) =>
 	( { select, dispatch } ) => {
-		const currentFeature = select.getCurrentFeature();
-		const featureSettings = select.getFeatureSettings();
+		const currentFeature = feature || select.getCurrentFeature();
+		const featureSettings = select.getFeatureSettings( null, feature );
+
 		dispatch( {
 			type: 'SET_FEATURE_SETTINGS',
 			feature: currentFeature,
@@ -54,4 +55,14 @@ export const setIsLoaded = ( isLoaded ) => ( {
 export const setIsSaving = ( isSaving ) => ( {
 	type: 'SET_IS_SAVING',
 	payload: isSaving,
+} );
+
+export const setSettingsScreen = ( screen ) => ( {
+	type: 'SET_SETTINGS_SCREEN',
+	payload: screen,
+} );
+
+export const setSaveErrors = ( data ) => ( {
+	type: 'SET_SAVE_ERRORS',
+	payload: data,
 } );

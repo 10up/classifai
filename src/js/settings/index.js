@@ -7,12 +7,15 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { ClassifAISettings } from './components';
+import { ClassifAIAdmin } from './classifai-admin';
 import './data/store';
 import '../../scss/settings.scss';
 
 domReady( () => {
-	const root = createRoot( document.getElementById( 'classifai-settings' ) );
+	const adminEl = document.getElementById( 'classifai-settings' );
 
-	root.render( <ClassifAISettings /> );
+	if ( adminEl ) {
+		const settingsRoot = createRoot( adminEl );
+		settingsRoot.render( <ClassifAIAdmin /> );
+	}
 } );

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Slot } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
@@ -11,18 +11,18 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal dependencies
  */
 import { STORE_NAME } from '../../data/store';
-import { useFeatureContext } from './context';
+import { useFeatureSettings } from '../../data/hooks';
 
 /**
  * Save Settings Button component.
  */
-export const SaveSettingsButton = () => {
-	const { featureName } = useFeatureContext();
+export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
+	const { featureName } = useFeatureSettings();
 	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
-	const { setIsSaving, setSettings } = useDispatch( STORE_NAME );
+	const { setIsSaving, setSettings, setSaveErrors } = useDispatch( STORE_NAME );
 	const isSaving = useSelect( ( select ) =>
 		select( STORE_NAME ).getIsSaving()
 	);
@@ -36,19 +36,27 @@ export const SaveSettingsButton = () => {
 	const saveSettings = () => {
 		removeNotices( notices.map( ( { id } ) => id ) );
 		setIsSaving( true );
+
+		const data = featureName ? { [ featureName ]: settings[ featureName ] } : settings;
+
 		apiFetch( {
 			path: '/classifai/v1/settings/',
 			method: 'POST',
-			data: { [ featureName ]: settings[ featureName ] },
+			data,
 		} )
 			.then( ( res ) => {
 				if ( res.errors && res.errors.length ) {
-					res.errors.forEach( ( error ) =>
-						createErrorNotice( error.message )
-					);
+					if ( ! disableErrorReporting ) {
+						res.errors.forEach( ( error ) => {
+							createErrorNotice( error.message )
+						} );
+					}
 					setSettings( res.settings );
 					setIsSaving( false );
+					setSaveErrors( res.errors );
 					return;
+				} else {
+					setSaveErrors( [] );
 				}
 
 				setSettings( res.settings );
@@ -78,4 +86,18 @@ export const SaveSettingsButton = () => {
 				: __( 'Save Settings', 'classifai' ) }
 		</Button>
 	);
+};
+
+export const SaveButtonSlot = ( { children } ) => {
+	return (
+		<>
+			<Slot name="BeforeSaveButton">
+				{ ( fills ) => <>{ fills }</> }
+			</Slot>
+			{ children }
+			<Slot name="AfterSaveButton">
+				{ ( fills ) => <>{ fills }</> }
+			</Slot>
+		</>
+	)
 };

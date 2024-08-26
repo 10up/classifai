@@ -5,11 +5,11 @@ export const getSettings = ( state, feature ) => {
 	return state.settings;
 };
 
-export const getFeatureSettings = ( state, key ) => {
+export const getFeatureSettings = ( state, key, feature ) => {
 	if ( key ) {
-		return state.settings?.[ state.currentFeature ]?.[ key ];
+		return state.settings?.[ feature || state.currentFeature ]?.[ key ];
 	}
-	return state.settings?.[ state.currentFeature ] || {};
+	return state.settings?.[ feature || state.currentFeature ] || {};
 };
 
 export const getCurrentService = ( state ) => state.currentService;
@@ -19,3 +19,7 @@ export const getCurrentFeature = ( state ) => state.currentFeature;
 export const getIsLoaded = ( state ) => state.isLoaded;
 
 export const getIsSaving = ( state ) => state.isSaving;
+
+export const getSettingsScreen = ( state ) => state.settingsScreen;
+
+export const getSaveErrors = ( state ) => state.saveErrors;

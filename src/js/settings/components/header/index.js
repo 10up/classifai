@@ -8,16 +8,21 @@ import {
 	VisuallyHidden,
 	Button,
 } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { external, help, cog, tool } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import { STORE_NAME } from '../..//data/store';
 import { ClassifAILogo } from '../../utils/icons';
 
 export const Header = ( props ) => {
 	const { isSetupPage } = props;
+
+	const settingsScreen = useSelect( select => select( STORE_NAME ).getSettingsScreen() );
+	const { setSettingsScreen } = useDispatch( STORE_NAME );
 
 	return (
 		<header id="classifai-header">
@@ -33,8 +38,14 @@ export const Header = ( props ) => {
 					) }
 					{ ! isSetupPage && (
 						<Button
-							href="tools.php?page=classifai_setup"
 							icon={ tool }
+							onClick={ () => {
+								if ( 'settings' === settingsScreen ) {
+									setSettingsScreen( 'onboarding' );
+								} else if ( 'onboarding' === settingsScreen ) {
+									setSettingsScreen( 'settings' );
+								}
+							} }
 						>
 							{ __( 'Set up', 'classifai' ) }
 						</Button>
