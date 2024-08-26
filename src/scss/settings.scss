@@ -54,6 +54,10 @@
         &, &__content {
             margin: 0;
         }
+
+		&.personalizer-deprecation-notice {
+			margin-bottom: 16px;
+		}
     }
 
     .components-notice-list {
