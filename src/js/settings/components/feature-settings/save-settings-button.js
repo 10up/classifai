@@ -22,7 +22,8 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
-	const { setIsSaving, setSettings, setSaveErrors } = useDispatch( STORE_NAME );
+	const { setIsSaving, setSettings, setSaveErrors } =
+		useDispatch( STORE_NAME );
 	const isSaving = useSelect( ( select ) =>
 		select( STORE_NAME ).getIsSaving()
 	);
@@ -37,7 +38,9 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 		removeNotices( notices.map( ( { id } ) => id ) );
 		setIsSaving( true );
 
-		const data = featureName ? { [ featureName ]: settings[ featureName ] } : settings;
+		const data = featureName
+			? { [ featureName ]: settings[ featureName ] }
+			: settings;
 
 		apiFetch( {
 			path: '/classifai/v1/settings/',
@@ -48,16 +51,17 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 				if ( res.errors && res.errors.length ) {
 					if ( ! disableErrorReporting ) {
 						res.errors.forEach( ( error ) => {
-							createErrorNotice( error.message )
+							createErrorNotice( error.message, {
+								id: `error-${ featureName }`,
+							} );
 						} );
 					}
 					setSettings( res.settings );
 					setIsSaving( false );
 					setSaveErrors( res.errors );
 					return;
-				} else {
-					setSaveErrors( [] );
 				}
+				setSaveErrors( [] );
 
 				setSettings( res.settings );
 				setIsSaving( false );
@@ -68,7 +72,10 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 						__(
 							'An error occurred while saving settings.',
 							'classifai'
-						)
+						),
+					{
+						id: `error-${ featureName }`,
+					}
 				);
 				setIsSaving( false );
 			} );
@@ -91,13 +98,9 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 export const SaveButtonSlot = ( { children } ) => {
 	return (
 		<>
-			<Slot name="BeforeSaveButton">
-				{ ( fills ) => <>{ fills }</> }
-			</Slot>
+			<Slot name="BeforeSaveButton">{ ( fills ) => <>{ fills }</> }</Slot>
 			{ children }
-			<Slot name="AfterSaveButton">
-				{ ( fills ) => <>{ fills }</> }
-			</Slot>
+			<Slot name="AfterSaveButton">{ ( fills ) => <>{ fills }</> }</Slot>
 		</>
-	)
+	);
 };

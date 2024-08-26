@@ -39,7 +39,7 @@ const ClassifAIRegistrationForm = () => {
 
 	return (
 		<>
-			<Notices />
+			<Notices feature="registration" />
 			<Panel
 				header={ __( 'Classifai Registration Settings', 'classifai' ) }
 				className="settings-panel"
@@ -111,7 +111,7 @@ const ClassifAIRegistrationForm = () => {
  * @param {Function} props.setSettings Set settings function.
  * @return {Object} SaveSettingsButton Component.
  */
-export const SaveSettingsButton = ( { settings, setSettings }) => {
+export const SaveSettingsButton = ( { settings, setSettings } ) => {
 	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
@@ -132,7 +132,9 @@ export const SaveSettingsButton = ( { settings, setSettings }) => {
 			.then( ( res ) => {
 				if ( res.errors && res.errors.length ) {
 					res.errors.forEach( ( error ) =>
-						createErrorNotice( error.message )
+						createErrorNotice( error.message, {
+							id: 'error-registration',
+						} )
 					);
 					setSettings( res.settings );
 					setIsSaving( false );
@@ -148,7 +150,10 @@ export const SaveSettingsButton = ( { settings, setSettings }) => {
 						__(
 							'An error occurred while saving settings.',
 							'classifai'
-						)
+						),
+					{
+						id: 'error-registration',
+					}
 				);
 				setIsSaving( false );
 			} );

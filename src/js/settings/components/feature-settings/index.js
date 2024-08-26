@@ -43,7 +43,7 @@ export const FeatureSettings = () => {
 
 	return (
 		<>
-			<Notices />
+			<Notices feature={ featureName } />
 			<Panel
 				header={
 					// translators: %s: Feature title
