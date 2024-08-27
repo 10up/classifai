@@ -12,12 +12,17 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { STORE_NAME } from '../../data/store';
 import { useFeatureSettings } from '../../data/hooks';
+import { useSetupPage } from '../classifai-onboarding/hooks';
 
 /**
  * Save Settings Button component.
  */
-export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
+export const SaveSettingsButton = ( {
+	disableErrorReporting = false,
+	label = __( 'Save Settings', 'classifai' ),
+} ) => {
 	const { featureName } = useFeatureSettings();
+	const { isSetupPage, step } = useSetupPage();
 	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
@@ -38,9 +43,16 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 		removeNotices( notices.map( ( { id } ) => id ) );
 		setIsSaving( true );
 
-		const data = featureName
-			? { [ featureName ]: settings[ featureName ] }
-			: settings;
+		const data = {
+			settings: featureName
+				? { [ featureName ]: settings[ featureName ] }
+				: settings,
+		};
+
+		if ( isSetupPage ) {
+			data.is_setup = true;
+			data.step = step;
+		}
 
 		apiFetch( {
 			path: '/classifai/v1/settings/',
@@ -62,7 +74,6 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 					return;
 				}
 				setSaveErrors( [] );
-
 				setSettings( res.settings );
 				setIsSaving( false );
 			} )
@@ -88,9 +99,7 @@ export const SaveSettingsButton = ( { disableErrorReporting = false } ) => {
 			onClick={ saveSettings }
 			isBusy={ isSaving }
 		>
-			{ isSaving
-				? __( 'Saving…', 'classifai' )
-				: __( 'Save Settings', 'classifai' ) }
+			{ isSaving ? __( 'Saving…', 'classifai' ) : label }
 		</Button>
 	);
 };

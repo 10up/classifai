@@ -382,20 +382,8 @@
 	}
 }
 
-.classifai-setup-title {
-	font-size: 22px;
-	padding: 0px;
-	font-weight: 400;
-	text-align: center;
-	margin: 3rem 0;
-}
-
 .classifai-onboarding {
 	&__configure {
-		display: flex;
-		gap: 2rem;
-		padding-top: 0 !important;
-
 		.classifai-settings-footer {
 			display: flex;
 
@@ -408,14 +396,8 @@
 
 		&--status,
 		&--enable-features {
-			& > div {
-				flex-grow: 1;
-				flex-basis: 0;
-				max-width: 50%;
-
-				img {
-					max-width: 100%;
-				}
+			& img {
+				max-width: 100%;
 			}
 		}
 	}

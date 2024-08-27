@@ -285,3 +285,29 @@ export const isFeatureActive = ( feature ) => {
 
 	return isEnabled && authenticated;
 };
+
+/**
+ * Returns the onboarding steps.
+ *
+ * @return {Array} Array of onboarding steps.
+ */
+export const getOnboardingSteps = () => {
+	return [
+		'enable_features',
+		// 'classifai_registration', // TODO: Uncomment when registration is implemented
+		'configure_features',
+		'finish',
+	];
+};
+
+/**
+ * Get the next step in the onboarding process.
+ *
+ * @param {string} currentStep
+ * @return {string} The next step in the onboarding process.
+ */
+export const getNextOnboardingStep = ( currentStep ) => {
+	const steps = getOnboardingSteps();
+	const currentIndex = steps.indexOf( currentStep );
+	return steps[ currentIndex + 1 ];
+};

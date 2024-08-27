@@ -22,10 +22,17 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { FeatureSettings, Header, ServiceSettings } from '..';
+import {
+	ClassifAIOnboarding,
+	FeatureSettings,
+	Header,
+	ServiceSettings,
+} from '..';
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
 import { ClassifAIRegistration } from '../classifai-registration';
+import { ConfigureFeatures, EnableFeatures } from '../classifai-onboarding';
+import { useSetupPage } from '../classifai-onboarding/hooks';
 
 const { services, features } = window.classifAISettings;
 
@@ -75,6 +82,11 @@ const ServiceSettingsWrapper = () => {
  * @return {Object} The ServiceNavigation component.
  */
 export const ServiceNavigation = () => {
+	const { isSetupPage } = useSetupPage();
+	if ( isSetupPage ) {
+		return null;
+	}
+
 	const serviceKeys = Object.keys( services || {} );
 	return (
 		<div className="classifai-tabs" aria-orientation="horizontal">
@@ -123,8 +135,8 @@ export const ClassifAISettings = () => {
 
 	return (
 		<SlotFillProvider>
-			<Header />
 			<HashRouter>
+				<Header />
 				<div className="classifai-settings-wrapper">
 					<ServiceNavigation />
 					<Routes>
@@ -139,6 +151,29 @@ export const ClassifAISettings = () => {
 							<Route
 								path=":feature"
 								element={ <FeatureSettingsWrapper /> }
+							/>
+						</Route>
+						<Route
+							path="classifai_setup"
+							element={ <ClassifAIOnboarding /> }
+						>
+							<Route
+								index
+								element={
+									<Navigate to="enable_features" replace />
+								}
+							/>
+							<Route
+								path="enable_features"
+								element={ <EnableFeatures /> }
+							/>
+							{/* <Route
+								path="classifai_registration"
+								element={ <ClassifAIRegistration /> }
+							/> */}
+							<Route
+								path="configure_features"
+								element={ <ConfigureFeatures /> }
 							/>
 						</Route>
 						<Route

@@ -217,25 +217,36 @@ class Settings {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function update_settings_callback( $request ) {
-		$settings = $request->get_json_params();
+		$params   = $request->get_json_params();
+		$settings = $params['settings'] ?? [];
+		$is_setup = $params['is_setup'] ?? false;
+		$step     = $params['step'] ?? '';
 		$features = $this->get_features( true );
 
-		foreach ( $settings as $feature_key => $feature_setting ) {
+		// Load settings error functions.
+		if ( ! function_exists( 'add_settings_error' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/template.php';
+		}
+
+		foreach ( $settings as $feature_key => $feature_settings ) {
 			$feature = $features[ $feature_key ];
 
 			if ( ! $feature ) {
 				return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
 			}
 
-			// Load settings error functions.
-			if ( ! function_exists( 'add_settings_error' ) ) {
-				require_once ABSPATH . 'wp-admin/includes/template.php';
-			}
+			// Skip sanitizing settings for setup step 1.
+			if ( true === $is_setup && 'enable_features' === $step ) {
+				$current_settings = $feature->get_settings();
 
-			$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
-
-			if ( is_wp_error( $new_settings ) ) {
-				continue;
+				// Update only status of the feature.
+				$current_settings['status'] = $feature_settings['status'] ?? $current_settings['status'];
+				$new_settings = $current_settings;
+			} else {
+				$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
+				if ( is_wp_error( $new_settings ) ) {
+					continue;
+				}
 			}
 
 			// Update settings.

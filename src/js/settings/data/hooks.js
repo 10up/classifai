@@ -13,7 +13,9 @@ export const useFeatureSettings = () => {
 	}
 
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const __isSaving = useSelect( select => select( STORE_NAME ).getIsSaving() );
+	const __isSaving = useSelect( ( select ) =>
+		select( STORE_NAME ).getIsSaving()
+	);
 
 	useEffect( () => {
 		if ( __isSaving ) {
@@ -27,9 +29,13 @@ export const useFeatureSettings = () => {
 	return {
 		isSaving,
 		featureName,
-		getFeatureSettings: ( key ) => useSelect( select => select( STORE_NAME ).getFeatureSettings( key, featureName ) ),
-		getSettings: ( key, featureName ) => useSelect( select => select( STORE_NAME ).getSettings( key, featureName ) ),
-		setFeatureSettings: ( settings ) => setFeatureSettings( settings, featureName ),
-		getIsSaving: () => useSelect( select => select( STORE_NAME ).getIsSaving() ),
-	}
+		getFeatureSettings: ( key ) =>
+			useSelect( ( select ) =>
+				select( STORE_NAME ).getFeatureSettings( key, featureName )
+			),
+		setFeatureSettings: ( settings ) =>
+			setFeatureSettings( settings, featureName ),
+		getIsSaving: () =>
+			useSelect( ( select ) => select( STORE_NAME ).getIsSaving() ),
+	};
 };

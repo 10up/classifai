@@ -15,18 +15,22 @@ import { useFeatureSettings } from '../../data/hooks';
 /**
  * Enable Feature Toggle component.
  *
+ * @param {Object} props          Component props.
+ * @param {Object} props.children Component children.
  */
 export const EnableToggleControl = ( { children } ) => {
-	const { featureName, getFeatureSettings, setFeatureSettings } = useFeatureSettings();
+	const { featureName, getFeatureSettings, setFeatureSettings } =
+		useFeatureSettings();
 	const status = getFeatureSettings( 'status' ) || '0';
 	const feature = getFeature( featureName );
-	const enableDescription = decodeEntities(
-		feature?.enable_description || __( 'Enable feature', 'classifai' )
-	);
 
 	if ( children && 'function' === typeof children ) {
 		return children( { feature, status, setFeatureSettings } );
 	}
+
+	const enableDescription = decodeEntities(
+		feature?.enable_description || __( 'Enable feature', 'classifai' )
+	);
 
 	return (
 		<SettingsRow

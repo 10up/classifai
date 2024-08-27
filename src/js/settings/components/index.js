@@ -1,6 +1,5 @@
 export * from './header';
 export * from './layout';
-export * from './admin-header';
 export * from './classifai-onboarding';
 export * from './classifai-settings';
 export * from './service-settings';
