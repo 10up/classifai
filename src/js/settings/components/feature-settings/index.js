@@ -54,7 +54,7 @@ const PersonalizerDeprecationNotice = () => (
 /**
  * Feature Settings component.
  */
-export const FeatureSettings = () => {
+export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 	const { featureName } = useFeatureContext();
 	const { setCurrentFeature } = useDispatch( STORE_NAME );
 
@@ -95,7 +95,7 @@ export const FeatureSettings = () => {
 			</Panel>
 			<div className="classifai-settings-footer">
 				<SaveButtonSlot>
-					<SaveSettingsButton />
+					<SaveSettingsButton onSaveSuccess={ onSaveSuccess } />
 				</SaveButtonSlot>
 			</div>
 		</>

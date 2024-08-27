@@ -18,7 +18,7 @@ import { useSetupPage } from '../classifai-onboarding/hooks';
  * Save Settings Button component.
  */
 export const SaveSettingsButton = ( {
-	disableErrorReporting = false,
+	onSaveSuccess = () => {},
 	label = __( 'Save Settings', 'classifai' ),
 } ) => {
 	const { featureName } = useFeatureSettings();
@@ -61,19 +61,18 @@ export const SaveSettingsButton = ( {
 		} )
 			.then( ( res ) => {
 				if ( res.errors && res.errors.length ) {
-					if ( ! disableErrorReporting ) {
-						res.errors.forEach( ( error ) => {
-							createErrorNotice( error.message, {
-								id: `error-${ featureName }`,
-							} );
+					res.errors.forEach( ( error ) => {
+						createErrorNotice( error.message, {
+							id: `error-${ featureName }`,
 						} );
-					}
+					} );
 					setSettings( res.settings );
 					setIsSaving( false );
 					setSaveErrors( res.errors );
 					return;
 				}
 				setSaveErrors( [] );
+				onSaveSuccess();
 				setSettings( res.settings );
 				setIsSaving( false );
 			} )

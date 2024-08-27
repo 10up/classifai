@@ -1,4 +1,3 @@
-import { useState } from '@wordpress/element';
 import { Outlet } from 'react-router-dom';
 
 // Export the steps of the onboarding process.

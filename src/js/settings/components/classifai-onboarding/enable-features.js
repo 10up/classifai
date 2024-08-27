@@ -5,27 +5,21 @@ import {
 	BaseControl,
 	Button,
 } from '@wordpress/components';
-import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 import { FeatureContext } from '../feature-settings/context';
 import { EnableToggleControl } from '../feature-settings/enable-feature';
 import { SaveSettingsButton } from '../../components/feature-settings/save-settings-button';
-import { useFeatureSettings } from '../../data/hooks';
 import { useSetupPage } from './hooks';
 import { useNavigate } from 'react-router-dom';
 
 export const EnableFeatures = () => {
 	const { features, services } = window.classifAISettings;
-	const { isSaving } = useFeatureSettings();
-	const { step, nextStepPath } = useSetupPage();
+	const { nextStepPath } = useSetupPage();
 	const navigate = useNavigate();
-
-	useEffect( () => {
-		if ( 'enable_features' === step && false === isSaving ) {
-			navigate( nextStepPath );
-		}
-	}, [ isSaving, nextStepPath, step ] );
+	const onSaveSuccess = () => {
+		navigate( nextStepPath );
+	};
 
 	const featureToggles = Object.keys( services ).map(
 		( service, serviceIndex ) => (
@@ -121,7 +115,7 @@ export const EnableFeatures = () => {
 							</Button>
 							<SaveSettingsButton
 								label={ __( 'Start Setup', 'classifai' ) }
-								disableErrorReporting={ true }
+								onSaveSuccess={ onSaveSuccess }
 							/>
 						</div>
 					</div>
