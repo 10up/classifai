@@ -25,9 +25,9 @@ export const EnableFeatures = () => {
 		( service, serviceIndex ) => (
 			<React.Fragment key={ service }>
 				<div className="classifai-feature-box">
-					<h3 className="classifai-feature-box-title">
+					<h4 className="classifai-feature-box-title">
 						{ services[ service ] }
-					</h3>
+					</h4>
 					<div className="classifai-features">
 						{ Object.keys( features[ service ] ).map(
 							( featureSlug ) => (

@@ -31,7 +31,11 @@ import {
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
 import { ClassifAIRegistration } from '../classifai-registration';
-import { ConfigureFeatures, EnableFeatures } from '../classifai-onboarding';
+import {
+	ConfigureFeatures,
+	EnableFeatures,
+	FinishStep,
+} from '../classifai-onboarding';
 import { useSetupPage } from '../classifai-onboarding/hooks';
 
 const { services, features } = window.classifAISettings;
@@ -175,6 +179,7 @@ export const ClassifAISettings = () => {
 								path="configure_features"
 								element={ <ConfigureFeatures /> }
 							/>
+							<Route path="finish" element={ <FinishStep /> } />
 						</Route>
 						<Route
 							path="classifai_registration"
