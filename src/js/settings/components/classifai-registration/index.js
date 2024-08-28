@@ -7,6 +7,7 @@ import {
 	PanelBody,
 	Spinner,
 	Button,
+	Slot,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { Notices } from '../feature-settings/notices';
@@ -17,7 +18,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
-const ClassifAIRegistrationForm = () => {
+export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 	const [ settings, setSettings ] = useState( {} );
 	const [ isLoaded, setIsLoaded ] = useState( false );
 
@@ -94,9 +95,13 @@ const ClassifAIRegistrationForm = () => {
 				</PanelBody>
 			</Panel>
 			<div className="classifai-settings-footer">
+				<Slot name="BeforeRegisterSaveButton">
+					{ ( fills ) => <>{ fills }</> }
+				</Slot>
 				<SaveSettingsButton
 					settings={ settings }
 					setSettings={ setSettings }
+					onSaveSuccess={ onSaveSuccess }
 				/>
 			</div>
 		</>
@@ -106,12 +111,17 @@ const ClassifAIRegistrationForm = () => {
 /**
  * Save Settings Button component.
  *
- * @param {Object}   props             Component props.
- * @param {Object}   props.settings    Settings object.
- * @param {Function} props.setSettings Set settings function.
+ * @param {Object}   props               Component props.
+ * @param {Object}   props.settings      Settings object.
+ * @param {Function} props.setSettings   Set settings function.
+ * @param {Function} props.onSaveSuccess Callback function to be executed after saving settings.
  * @return {Object} SaveSettingsButton Component.
  */
-export const SaveSettingsButton = ( { settings, setSettings } ) => {
+export const SaveSettingsButton = ( {
+	settings,
+	setSettings,
+	onSaveSuccess = () => {},
+} ) => {
 	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
@@ -142,6 +152,7 @@ export const SaveSettingsButton = ( { settings, setSettings } ) => {
 				}
 
 				setSettings( res.settings );
+				onSaveSuccess();
 				setIsSaving( false );
 			} )
 			.catch( ( error ) => {

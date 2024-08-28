@@ -35,6 +35,7 @@ import {
 	ConfigureFeatures,
 	EnableFeatures,
 	FinishStep,
+	ClassifAIRegistrationStep,
 } from '../classifai-onboarding';
 import { useSetupPage } from '../classifai-onboarding/hooks';
 
@@ -170,6 +171,10 @@ export const ClassifAISettings = () => {
 							<Route
 								path="enable_features"
 								element={ <EnableFeatures /> }
+							/>
+							<Route
+								path="classifai_registration"
+								element={ <ClassifAIRegistrationStep /> }
 							/>
 							<Route
 								path="configure_features"

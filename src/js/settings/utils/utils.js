@@ -281,7 +281,7 @@ export const isFeatureActive = ( feature ) => {
 export const getOnboardingSteps = () => {
 	return [
 		'enable_features',
-		// 'classifai_registration', // TODO: Uncomment when registration is implemented
+		'classifai_registration',
 		'configure_features',
 		'finish',
 	];
