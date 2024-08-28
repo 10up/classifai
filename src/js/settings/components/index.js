@@ -1,5 +1,4 @@
 export * from './header';
-export * from './layout';
 export * from './classifai-onboarding';
 export * from './classifai-settings';
 export * from './service-settings';
