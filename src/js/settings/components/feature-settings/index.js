@@ -53,6 +53,9 @@ const PersonalizerDeprecationNotice = () => (
 
 /**
  * Feature Settings component.
+ *
+ * @param {Object}   props               Component props.
+ * @param {Function} props.onSaveSuccess Callback function to be executed after saving settings.
  */
 export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 	const { featureName } = useFeatureContext();

@@ -136,7 +136,8 @@ export const Header = () => {
 												}` }
 											>
 												<div className="classifai-setup__step__label">
-													<a href="#"> {/* TODO: Update this with action router navlinks */}
+													<a href="#">
+														{ /* TODO: Update this with action router navlinks */ }
 														<span className="step-count">
 															{
 																onBoardingSteps[

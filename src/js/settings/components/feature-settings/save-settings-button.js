@@ -16,6 +16,10 @@ import { useSetupPage } from '../classifai-onboarding/hooks';
 
 /**
  * Save Settings Button component.
+ *
+ * @param {Object}   props               Component props.
+ * @param {Function} props.onSaveSuccess Callback function to be executed after saving settings.
+ * @param {string}   props.label         Button label.
  */
 export const SaveSettingsButton = ( {
 	onSaveSuccess = () => {},
@@ -27,8 +31,7 @@ export const SaveSettingsButton = ( {
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
-	const { setIsSaving, setSettings, setSaveErrors } =
-		useDispatch( STORE_NAME );
+	const { setIsSaving, setSettings } = useDispatch( STORE_NAME );
 	const isSaving = useSelect( ( select ) =>
 		select( STORE_NAME ).getIsSaving()
 	);
@@ -68,10 +71,8 @@ export const SaveSettingsButton = ( {
 					} );
 					setSettings( res.settings );
 					setIsSaving( false );
-					setSaveErrors( res.errors );
 					return;
 				}
-				setSaveErrors( [] );
 				onSaveSuccess();
 				setSettings( res.settings );
 				setIsSaving( false );

@@ -56,9 +56,3 @@ export const setIsSaving = ( isSaving ) => ( {
 	type: 'SET_IS_SAVING',
 	payload: isSaving,
 } );
-
-
-export const setSaveErrors = ( data ) => ( {
-	type: 'SET_SAVE_ERRORS',
-	payload: data,
-} );

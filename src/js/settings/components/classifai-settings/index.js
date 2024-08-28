@@ -116,7 +116,7 @@ export const ServiceNavigation = () => {
 						: 'classifai-tabs-item'
 				}
 			>
-				{ __( 'ClassifAI Registration', 'classifai') }
+				{ __( 'ClassifAI Registration', 'classifai' ) }
 			</NavLink>
 		</div>
 	);
@@ -171,10 +171,6 @@ export const ClassifAISettings = () => {
 								path="enable_features"
 								element={ <EnableFeatures /> }
 							/>
-							{/* <Route
-								path="classifai_registration"
-								element={ <ClassifAIRegistration /> }
-							/> */}
 							<Route
 								path="configure_features"
 								element={ <ConfigureFeatures /> }
