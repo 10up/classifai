@@ -14,7 +14,7 @@ import { useSetupPage } from './hooks';
 import { useNavigate } from 'react-router-dom';
 
 export const EnableFeatures = () => {
-	const { features, services } = window.classifAISettings;
+	const { features, services, dashboardUrl } = window.classifAISettings;
 	const { nextStepPath } = useSetupPage();
 	const navigate = useNavigate();
 	const onSaveSuccess = () => {
@@ -110,7 +110,11 @@ export const EnableFeatures = () => {
 						</h2>
 						{ featureToggles }
 						<div className="classifai-settings-footer">
-							<Button>
+							<Button
+								onClick={ () => {
+									window.location.href = dashboardUrl;
+								} }
+							>
 								{ __( 'Skip for now', 'classifai' ) }
 							</Button>
 							<SaveSettingsButton

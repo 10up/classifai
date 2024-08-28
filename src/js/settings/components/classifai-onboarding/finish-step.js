@@ -1,12 +1,18 @@
-import { Icon } from '@wordpress/components';
+import { Icon, Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 import { STORE_NAME } from '../../data/store';
 import { isFeatureActive, getFeature } from '../../utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 export const FinishStep = () => {
-	const { features: __settings, services } = window.classifAISettings;
+	const {
+		features: __settings,
+		services,
+		dashboardUrl,
+	} = window.classifAISettings;
+	const navigate = useNavigate();
 	const settingsState = useSelect( ( select ) =>
 		select( STORE_NAME ).getSettings()
 	);
@@ -32,7 +38,7 @@ export const FinishStep = () => {
 			<h1 className="classifai-setup-heading">
 				{ __( 'Welcome to ClassifAI', 'classifai' ) }
 			</h1>
-			<div className="classifai-setup__content__row">
+			<div className="classifai-setup__content__row classifai-onboarding__configure ">
 				<div className="classifai-setup__content__row__column">
 					<div className="classifai-setup-image">
 						<img
@@ -103,6 +109,22 @@ export const FinishStep = () => {
 								</div>
 							);
 						} ) }
+					</div>
+					<div className="classifai-settings-footer">
+						<Button
+							onClick={ () => navigate( '/language_processing' ) }
+						>
+							{ __( 'Adjust ClassifAI settings', 'classifai' ) }
+						</Button>
+						<Button
+							variant="primary"
+							className="save-settings-button"
+							onClick={ () => {
+								window.location.href = dashboardUrl;
+							} }
+						>
+							{ __( 'Done', 'classifai' ) }
+						</Button>
 					</div>
 				</div>
 			</div>

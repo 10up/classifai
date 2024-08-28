@@ -71,6 +71,7 @@ class Settings {
 			'features' => $this->get_features(),
 			'services' => get_services_menu(),
 			'settings' => $this->get_settings(),
+			'dashboardUrl' => admin_url( '/' ),
 		);
 
 		wp_add_inline_script(
