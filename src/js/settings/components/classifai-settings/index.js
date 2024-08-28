@@ -176,6 +176,12 @@ export const ClassifAISettings = () => {
 								element={ <ConfigureFeatures /> }
 							/>
 							<Route path="finish" element={ <FinishStep /> } />
+							<Route
+								path="*"
+								element={
+									<Navigate to="enable_features" replace />
+								}
+							/>
 						</Route>
 						<Route
 							path="classifai_registration"
