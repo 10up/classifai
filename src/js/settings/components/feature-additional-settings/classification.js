@@ -1,7 +1,18 @@
 import { useSelect, useDispatch } from '@wordpress/data';
-import { RadioControl, CheckboxControl, Button, SearchControl, TextHighlight } from '@wordpress/components';
+import {
+	RadioControl,
+	CheckboxControl,
+	Button,
+	SearchControl,
+	TextHighlight,
+	Card,
+	CardHeader,
+	CardBody,
+	__experimentalHeading as Heading
+} from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
+import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
@@ -161,17 +172,19 @@ export const ClassificationSettings = () => {
 };
 
 function Previewer() {
+	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
+
 	return (
 		<div className='classifai__classification-previewer'>
-			<PostSelector />
+			<PostSelector setSelectedPostId={ setSelectedPostId } />
+			<PreviewerResults selectedPostId={ selectedPostId } />
 		</div>
 	);
 }
 
-function PostSelector() {
+function PostSelector( { setSelectedPostId } ) {
 	const [ searchText, setSearchText ] = useState( '' );
 	const [ searchResults, setSearchResults ] = useState( [] );
-	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
 	const [ shouldSearch, setShoudlSearch ] = useState( true );
 	const debouncedSearch = useDebounce( setSearchText, 1000 );
 
@@ -232,6 +245,7 @@ function PostSelector() {
 					} }
 					onClose={ () => {
 						setSearchText( '' );
+						setSelectedPostId( 0 );
 						setSearchResults( [] );
 						setShoudlSearch( true );
 					} }
@@ -247,4 +261,92 @@ function PostSelector() {
 			<Button size='compact' variant='primary'>{ __( 'Preview', 'classifai' ) }</Button>
 		</div>
 	);
+}
+
+function PreviewerResults( { selectedPostId } ) {
+	const activeProvider = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings().provider );
+
+	if ( ! selectedPostId ) {
+		return null;
+	}
+
+	if ( ! activeProvider ) {
+		return null;
+	}
+
+	return (
+		<div className='classifai__classification-previewer-search-result-container'>
+			{ 'azure_openai_embeddings' === activeProvider && <AzureOpenAIEmbeddingsResults postId={ selectedPostId } /> }
+		</div>
+	);
+}
+
+function AzureOpenAIEmbeddingsResults( { postId } ) {
+	const [ responseData, setResponseData ] = useState( [] );
+
+	useEffect( () => {
+		if ( ! postId ) {
+			return;
+		}
+
+		const formData = new FormData();
+
+		formData.append( 'post_id', postId );
+		formData.append(
+			'action',
+			'get_post_classifier_embeddings_preview_data'
+		);
+		// formData.append( 'nonce', previewerNonce );
+
+		( async () => {
+			const response = await fetch( ajaxurl, {
+				method: 'POST',
+				body: formData,
+			} );
+
+			if ( ! response.ok ) {
+				return;
+			}
+
+			const responseJSON = await response.json();
+
+			if ( responseJSON.success ) {
+				const flattenedResponse = responseJSON.data.reduce((acc, obj) => {
+					const [ key, value ] = Object.entries( obj )[0];
+					acc[ key ] = value;
+					return acc;
+				}, {} );
+
+				setResponseData( flattenedResponse );
+			}
+		} )()
+	}, [ postId ] );
+
+	const card = Object.keys( responseData ).map( ( taxLabel, index ) => {
+		const tags = responseData[ taxLabel ].map( ( tag, _index ) => (
+			<div className='classifai__classification-previewer-result-tag'>
+				<span className='classifai__classification-previewer-result-tag-score'>{ formatScore( tag.score ) }</span>
+				<span className='classifai__classification-previewer-result-tag-label'>{ tag.label }</span>
+			</div>
+		) );
+
+		return (
+			<Card className='classifai__classification-previewer-result-card'>
+				<CardHeader>
+					<Heading className='classifai__classification-previewer-result-card-heading'>
+						{ taxLabel }
+					</Heading>
+				</CardHeader>
+				<CardBody>
+					{ tags.length ? tags : __( `No classification data found for ${ taxLabel }`, 'classifai' ) }
+				</CardBody>
+			</Card>
+		)
+	} );
+
+	return card.length ? card : null
+}
+
+function formatScore( score ) {
+	return ( score * 100 ).toFixed( 2 );
 }
