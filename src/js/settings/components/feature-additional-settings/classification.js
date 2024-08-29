@@ -8,9 +8,10 @@ import {
 	Card,
 	CardHeader,
 	CardBody,
+	Spinner,
 	__experimentalHeading as Heading
 } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, createContext, useContext } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
@@ -69,8 +70,23 @@ const ClassificationMethodSettings = () => {
 	);
 };
 
+const PreviewerProviderContext = createContext( {
+	isPreviewerOpen: false
+} );
+
+function PreviewerProvider( { children, value } ) {
+	return (
+		<PreviewerProviderContext.Provider value={ value }>
+			{ children }
+		</PreviewerProviderContext.Provider>
+	)
+}
+
 export const ClassificationSettings = () => {
 	const [ isPreviewerOpen, setIsPreviewerOpen ] = useState( false );
+	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
+	const [ isPreviewUnderProcess, setPreviewUnderProcess ] = useState( null );
+
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
@@ -78,13 +94,23 @@ export const ClassificationSettings = () => {
 	const { postTypesSelectOptions } = usePostTypes();
 	const { postStatusOptions } = usePostStatuses();
 
+	const previewerContextData = { 
+		isPreviewerOpen,
+		selectedPostId,
+		setSelectedPostId,
+		isPreviewUnderProcess,
+		setPreviewUnderProcess,
+	};
+
 	return (
 		<>
 			<SettingsRow>
 				<Button variant='secondary' onClick={ () => setIsPreviewerOpen( ! isPreviewerOpen ) }>
 					{ isPreviewerOpen ? __( 'Close Previewer', 'classifai' ) : __( 'Open Previewer', 'classifai' ) }
 				</Button>
-				<Previewer isPreviewerOpen={ isPreviewerOpen } />
+				<PreviewerProvider value={ previewerContextData }>
+					<Previewer />
+				</PreviewerProvider>
 			</SettingsRow>
 			<SettingsRow label={ __( 'Classification mode', 'classifai' ) }>
 				<RadioControl
@@ -171,15 +197,39 @@ export const ClassificationSettings = () => {
 	);
 };
 
-function Previewer( { isPreviewerOpen = false } ) {
-	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
+function Previewer() {
+	const {
+		isPreviewerOpen,
+		selectedPostId,
+		setSelectedPostId,
+	} = useContext( PreviewerProviderContext );
 
 	return (
 		<div className={ `classifai__classification-previewer ${ isPreviewerOpen ? 'classifai__classification-previewer--open' : '' }` }>
 			<PostSelector setSelectedPostId={ setSelectedPostId } />
+			<PreviewInProcess />
 			<PreviewerResults selectedPostId={ selectedPostId } />
 		</div>
 	);
+}
+
+function PreviewInProcess() {
+	const { isPreviewUnderProcess } = useContext( PreviewerProviderContext );
+
+	if ( ! isPreviewUnderProcess ) {
+		return null;
+	}
+
+	return (
+		<div className='classifai__classification-previewer-processing'>
+			<Spinner
+				style={ {
+					width: '48px',
+					height: '48px',
+				} }
+			/>
+		</div>
+	)
 }
 
 function PostSelector( { setSelectedPostId } ) {
@@ -258,7 +308,7 @@ function PostSelector( { setSelectedPostId } ) {
 					) : null
 				}
 			</div>
-			<Button size='compact' variant='primary'>{ __( 'Preview', 'classifai' ) }</Button>
+			{/* <Button size='compact' variant='primary'>{ __( 'Preview', 'classifai' ) }</Button> */}
 		</div>
 	);
 }
@@ -282,6 +332,10 @@ function PreviewerResults( { selectedPostId } ) {
 }
 
 function AzureOpenAIEmbeddingsResults( { postId } ) {
+	const {
+		setPreviewUnderProcess
+	} = useContext( PreviewerProviderContext );
+
 	const [ responseData, setResponseData ] = useState( [] );
 	const settings = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings() );
 
@@ -289,6 +343,8 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 		if ( ! postId ) {
 			return;
 		}
+
+		setPreviewUnderProcess( true );
 
 		const formData = new FormData();
 
@@ -314,6 +370,8 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 			if ( responseJSON.success ) {
 				setResponseData( responseJSON.data );
 			}
+
+			setPreviewUnderProcess( false );
 		} )()
 	}, [ postId ] );
 
@@ -350,5 +408,5 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 }
 
 function normalizeScore( score ) {
-	return ( score * 100 ).toFixed( 2 );
+	return Number( ( score * 100 ).toFixed( 2 ) );
 }

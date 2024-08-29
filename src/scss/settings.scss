@@ -454,8 +454,18 @@
 	background-color: #fff;
 }
 
+.classifai__classification-previewer-processing {
+	margin: 2rem auto;
+	width: 48px;
+	height: 48px;
+
+	svg {
+		margin: 0;
+	}
+}
+
 .classifai__classification-previewer-search-result-container {
-	margin-top: 4rem;
+	margin-top: 3rem;
 }
 
 .classifai__classification-previewer-search-item {
