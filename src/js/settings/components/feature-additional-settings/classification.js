@@ -12,7 +12,6 @@ import {
 } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
-import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
@@ -71,6 +70,7 @@ const ClassificationMethodSettings = () => {
 };
 
 export const ClassificationSettings = () => {
+	const [ isPreviewerOpen, setIsPreviewerOpen ] = useState( false );
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
@@ -81,10 +81,10 @@ export const ClassificationSettings = () => {
 	return (
 		<>
 			<SettingsRow>
-				<Button variant='secondary'>
-					{ __( 'Open Previewer', 'classifai' ) }
+				<Button variant='secondary' onClick={ () => setIsPreviewerOpen( ! isPreviewerOpen ) }>
+					{ isPreviewerOpen ? __( 'Close Previewer', 'classifai' ) : __( 'Open Previewer', 'classifai' ) }
 				</Button>
-				<Previewer />
+				<Previewer isPreviewerOpen={ isPreviewerOpen } />
 			</SettingsRow>
 			<SettingsRow label={ __( 'Classification mode', 'classifai' ) }>
 				<RadioControl
@@ -171,11 +171,11 @@ export const ClassificationSettings = () => {
 	);
 };
 
-function Previewer() {
+function Previewer( { isPreviewerOpen = false } ) {
 	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
 
 	return (
-		<div className='classifai__classification-previewer'>
+		<div className={ `classifai__classification-previewer ${ isPreviewerOpen ? 'classifai__classification-previewer--open' : '' }` }>
 			<PostSelector setSelectedPostId={ setSelectedPostId } />
 			<PreviewerResults selectedPostId={ selectedPostId } />
 		</div>
@@ -283,6 +283,7 @@ function PreviewerResults( { selectedPostId } ) {
 
 function AzureOpenAIEmbeddingsResults( { postId } ) {
 	const [ responseData, setResponseData ] = useState( [] );
+	const settings = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings() );
 
 	useEffect( () => {
 		if ( ! postId ) {
@@ -311,30 +312,31 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 			const responseJSON = await response.json();
 
 			if ( responseJSON.success ) {
-				const flattenedResponse = responseJSON.data.reduce((acc, obj) => {
-					const [ key, value ] = Object.entries( obj )[0];
-					acc[ key ] = value;
-					return acc;
-				}, {} );
-
-				setResponseData( flattenedResponse );
+				setResponseData( responseJSON.data );
 			}
 		} )()
 	}, [ postId ] );
 
-	const card = Object.keys( responseData ).map( ( taxLabel, index ) => {
-		const tags = responseData[ taxLabel ].map( ( tag, _index ) => (
-			<div className='classifai__classification-previewer-result-tag'>
-				<span className='classifai__classification-previewer-result-tag-score'>{ formatScore( tag.score ) }</span>
-				<span className='classifai__classification-previewer-result-tag-label'>{ tag.label }</span>
-			</div>
-		) );
+	const card = Object.keys( responseData ).map( ( taxSlug ) => {
+		const tags = responseData[ taxSlug ].data.map( ( tag, _index ) => {
+			const threshold = settings[ `${ taxSlug}_threshold` ];
+			const score = normalizeScore( tag.score );
+
+			const scoreClass = score >= threshold ? 'classifai__classification-previewer-result-tag--exceeds-threshold' : '';
+
+			return (
+				<div className={ `classifai__classification-previewer-result-tag ${ scoreClass }` } key={ _index }>
+					<span className='classifai__classification-previewer-result-tag-score'>{ normalizeScore( tag.score ) }%</span>
+					<span className='classifai__classification-previewer-result-tag-label'>{ tag.label }</span>
+				</div>
+			)
+		} );
 
 		return (
-			<Card className='classifai__classification-previewer-result-card'>
+			<Card className='classifai__classification-previewer-result-card' key={ taxSlug }>
 				<CardHeader>
 					<Heading className='classifai__classification-previewer-result-card-heading'>
-						{ taxLabel }
+						{ responseData[ taxSlug ].label }
 					</Heading>
 				</CardHeader>
 				<CardBody>
@@ -347,6 +349,6 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 	return card.length ? card : null
 }
 
-function formatScore( score ) {
+function normalizeScore( score ) {
 	return ( score * 100 ).toFixed( 2 );
 }
