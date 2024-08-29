@@ -19,7 +19,3 @@ export const getCurrentFeature = ( state ) => state.currentFeature;
 export const getIsLoaded = ( state ) => state.isLoaded;
 
 export const getIsSaving = ( state ) => state.isSaving;
-
-export const getSettingsScreen = ( state ) => state.settingsScreen;
-
-export const getSaveErrors = ( state ) => state.saveErrors;

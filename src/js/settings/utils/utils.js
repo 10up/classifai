@@ -260,23 +260,10 @@ export const useUserPermissionsPreferences = () => {
 };
 
 /**
- * Returns array of feature slugs for features that are enabled, and not
- * necessarily authenticated.
- *
- * @returns {Array} Array of feature slugs, for example
- *                  ['feature_excerpt_generation', 'feature_content_resizing']
- */
-export function getEnabledFeaturesSlugs() {
-	const { settings: features } = classifAISettings;
-
-	return Object.keys( features ).filter( feature => '1' === features[ feature ].status )
-};
-
-/**
  * Returns true if a feature is enabled and authenticated.
  *
  * @param {Object} feature The feature object.
- * @returns {Boolean} True if the feature is enabled and authenticated, false otherwise.
+ * @return {boolean} True if the feature is enabled and authenticated, false otherwise.
  */
 export const isFeatureActive = ( feature ) => {
 	const isEnabled = '1' === feature.status;
@@ -284,4 +271,30 @@ export const isFeatureActive = ( feature ) => {
 	const authenticated = feature[ provider ].authenticated;
 
 	return isEnabled && authenticated;
+};
+
+/**
+ * Returns the onboarding steps.
+ *
+ * @return {Array} Array of onboarding steps.
+ */
+export const getOnboardingSteps = () => {
+	return [
+		'enable_features',
+		'classifai_registration',
+		'configure_features',
+		'finish',
+	];
+};
+
+/**
+ * Get the next step in the onboarding process.
+ *
+ * @param {string} currentStep
+ * @return {string} The next step in the onboarding process.
+ */
+export const getNextOnboardingStep = ( currentStep ) => {
+	const steps = getOnboardingSteps();
+	const currentIndex = steps.indexOf( currentStep );
+	return steps[ currentIndex + 1 ];
 };

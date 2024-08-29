@@ -15,15 +15,29 @@ import {
  */
 import { useDispatch } from '@wordpress/data';
 import { SlotFillProvider } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
-import { FeatureSettings, Header, ServiceSettings } from '..';
+import {
+	ClassifAIOnboarding,
+	FeatureSettings,
+	Header,
+	ServiceSettings,
+} from '..';
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
+import { ClassifAIRegistration } from '../classifai-registration';
+import {
+	ConfigureFeatures,
+	EnableFeatures,
+	FinishStep,
+	ClassifAIRegistrationStep,
+} from '../classifai-onboarding';
+import { useSetupPage } from '../classifai-onboarding/hooks';
 
 const { services, features } = window.classifAISettings;
 
@@ -73,6 +87,11 @@ const ServiceSettingsWrapper = () => {
  * @return {Object} The ServiceNavigation component.
  */
 export const ServiceNavigation = () => {
+	const { isSetupPage } = useSetupPage();
+	if ( isSetupPage ) {
+		return null;
+	}
+
 	const serviceKeys = Object.keys( services || {} );
 	return (
 		<div className="classifai-tabs" aria-orientation="horizontal">
@@ -89,9 +108,21 @@ export const ServiceNavigation = () => {
 					{ services[ service ] }
 				</NavLink>
 			) ) }
+			<NavLink
+				to="classifai_registration"
+				key="classifai_registration"
+				className={ ( { isActive } ) =>
+					isActive
+						? 'active-tab classifai-tabs-item'
+						: 'classifai-tabs-item'
+				}
+			>
+				{ __( 'ClassifAI Registration', 'classifai' ) }
+			</NavLink>
 		</div>
 	);
 };
+
 export const ClassifAISettings = () => {
 	const { setSettings, setIsLoaded } = useDispatch( STORE_NAME );
 
@@ -109,8 +140,8 @@ export const ClassifAISettings = () => {
 
 	return (
 		<SlotFillProvider>
-			<Header />
 			<HashRouter>
+				<Header />
 				<div className="classifai-settings-wrapper">
 					<ServiceNavigation />
 					<Routes>
@@ -127,6 +158,40 @@ export const ClassifAISettings = () => {
 								element={ <FeatureSettingsWrapper /> }
 							/>
 						</Route>
+						<Route
+							path="classifai_setup"
+							element={ <ClassifAIOnboarding /> }
+						>
+							<Route
+								index
+								element={
+									<Navigate to="enable_features" replace />
+								}
+							/>
+							<Route
+								path="enable_features"
+								element={ <EnableFeatures /> }
+							/>
+							<Route
+								path="classifai_registration"
+								element={ <ClassifAIRegistrationStep /> }
+							/>
+							<Route
+								path="configure_features"
+								element={ <ConfigureFeatures /> }
+							/>
+							<Route path="finish" element={ <FinishStep /> } />
+							<Route
+								path="*"
+								element={
+									<Navigate to="enable_features" replace />
+								}
+							/>
+						</Route>
+						<Route
+							path="classifai_registration"
+							element={ <ClassifAIRegistration /> }
+						/>
 						{ /* When no routes match, it will redirect to this route path. Note that it should be registered above. */ }
 						<Route
 							path="*"

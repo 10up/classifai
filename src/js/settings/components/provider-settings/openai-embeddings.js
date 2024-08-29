@@ -2,7 +2,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_NAME } from '../../data/store';
 import { OpenAISettings } from './openai';
 
-export const OpenAIEmbeddingsSettings = () => {
+export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_embeddings';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -10,6 +10,10 @@ export const OpenAIEmbeddingsSettings = () => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
+
+	if ( isConfigured ) {
+		return null;
+	}
 
 	return (
 		<OpenAISettings

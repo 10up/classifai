@@ -1,28 +1,44 @@
 /**
  * External dependencies
  */
+import { NavLink } from 'react-router-dom';
+
 import {
 	DropdownMenu,
 	MenuGroup,
 	MenuItem,
 	VisuallyHidden,
-	Button,
+	Icon,
 } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
 import { external, help, cog, tool } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from '../..//data/store';
 import { ClassifAILogo } from '../../utils/icons';
+import { useSetupPage } from '../classifai-onboarding/hooks';
 
-export const Header = ( props ) => {
-	const { isSetupPage } = props;
-
-	const settingsScreen = useSelect( select => select( STORE_NAME ).getSettingsScreen() );
-	const { setSettingsScreen } = useDispatch( STORE_NAME );
+export const Header = () => {
+	const { isSetupPage, step } = useSetupPage();
+	const onBoardingSteps = {
+		enable_features: {
+			step: __( '1', 'classifai' ),
+			title: __( 'Enable Features', 'classifai' ),
+		},
+		classifai_registration: {
+			step: __( '2', 'classifai' ),
+			title: __( 'Register ClassifAI', 'classifai' ),
+		},
+		configure_features: {
+			step: __( '3', 'classifai' ),
+			title: __( 'Access AI', 'classifai' ),
+		},
+		finish: {
+			step: __( '4', 'classifai' ),
+			title: __( 'Finish', 'classifai' ),
+		},
+	};
 
 	return (
 		<header id="classifai-header">
@@ -32,23 +48,24 @@ export const Header = ( props ) => {
 				</div>
 				<div id="classifai-header-controls">
 					{ isSetupPage && (
-						<Button href="tools.php?page=classifai" icon={ cog }>
+						<NavLink
+							to="language_processing"
+							key="classifai_settings"
+							className="components-button has-text has-icon"
+						>
+							<Icon icon={ cog } />
 							{ __( 'Settings', 'classifai' ) }
-						</Button>
+						</NavLink>
 					) }
 					{ ! isSetupPage && (
-						<Button
-							icon={ tool }
-							onClick={ () => {
-								if ( 'settings' === settingsScreen ) {
-									setSettingsScreen( 'onboarding' );
-								} else if ( 'onboarding' === settingsScreen ) {
-									setSettingsScreen( 'settings' );
-								}
-							} }
+						<NavLink
+							to="classifai_setup"
+							key="classifai_setup"
+							className="components-button has-text has-icon"
 						>
+							<Icon icon={ tool } />
 							{ __( 'Set up', 'classifai' ) }
-						</Button>
+						</NavLink>
 					) }
 					<DropdownMenu
 						popoverProps={ { placement: 'bottom-end' } }
@@ -107,6 +124,89 @@ export const Header = ( props ) => {
 					</DropdownMenu>
 				</div>
 			</div>
+			{ isSetupPage && (
+				<div className="classifai-setup__header">
+					<div className="classifai-setup__step-wrapper">
+						<div className="classifai-setup__steps">
+							{ Object.keys( onBoardingSteps ).map(
+								( stepKey, stepIndex ) => {
+									if ( stepKey === 'finish' ) {
+										return null;
+									}
+
+									const isCompleted =
+										stepIndex <
+										Object.keys( onBoardingSteps ).indexOf(
+											step
+										);
+									const isCurrent = step === stepKey;
+									const shouldShowLink =
+										isCompleted || isCurrent;
+									const classes = [];
+									if ( isCompleted ) {
+										classes.push( 'is-complete' );
+									}
+									if ( isCurrent ) {
+										classes.push( 'is-active' );
+									}
+
+									const stepLabel = (
+										<>
+											<span className="step-count">
+												{ isCompleted ? (
+													<Icon icon="yes" />
+												) : (
+													<>
+														{
+															onBoardingSteps[
+																stepKey
+															].step
+														}
+													</>
+												) }
+											</span>
+											<span className="step-title">
+												{
+													onBoardingSteps[ stepKey ]
+														.title
+												}
+											</span>
+										</>
+									);
+
+									return (
+										<React.Fragment key={ stepIndex }>
+											<div
+												className={ `classifai-setup__step ${ classes.join(
+													' '
+												) }` }
+											>
+												<div className="classifai-setup__step__label">
+													{ shouldShowLink ? (
+														<NavLink
+															to={ `/classifai_setup/${ stepKey }` }
+															key={ stepKey }
+														>
+															{ stepLabel }
+														</NavLink>
+													) : (
+														<>{ stepLabel }</>
+													) }
+												</div>
+											</div>
+											{ Object.keys( onBoardingSteps )
+												.length !==
+												stepIndex + 2 && (
+												<div className="classifai-setup__step-divider"></div>
+											) }
+										</React.Fragment>
+									);
+								}
+							) }
+						</div>
+					</div>
+				</div>
+			) }
 		</header>
 	);
 };
