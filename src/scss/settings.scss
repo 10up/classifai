@@ -406,3 +406,53 @@
 		text-align: center;
 	}
 }
+
+// Previewer.
+.classifai__classification-previewer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 100%;
+	max-width: 500px;
+	height: 100%;
+	box-shadow: 0 19px 28px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+	backdrop-filter: blur(15px);
+    background-color: rgba(0, 0, 0, 0.2);
+	z-index: 99999;
+	padding: 4rem 1rem;
+}
+
+.classifai__classification-previewer-search-control {
+	display: flex;
+	gap: 1rem;
+	width: 100%;
+
+	& > div {
+		flex-grow: 1;
+	}
+}
+
+.classifai__classification-previewer-search-and-results {
+	position: relative;
+	background-color: #fff;
+}
+
+.classifai__classification-previewer-search-results {
+	position: absolute;
+	top: 32px;
+	left: 0;
+	width: 100%;
+	padding: 0.25rem 0;
+	height: auto;
+	background-color: #fff;
+}
+
+.classifai__classification-previewer-search-item {
+	padding: 0.25rem 0.5rem;
+
+	&:hover {
+		background-color: #777;
+		color: #fff;
+		cursor: pointer;
+	}
+}

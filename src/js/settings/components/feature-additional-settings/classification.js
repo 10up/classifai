@@ -1,5 +1,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
-import { RadioControl, CheckboxControl } from '@wordpress/components';
+import { RadioControl, CheckboxControl, Button, SearchControl, TextHighlight } from '@wordpress/components';
+import { useState, useEffect } from '@wordpress/element';
+import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
@@ -67,6 +69,12 @@ export const ClassificationSettings = () => {
 
 	return (
 		<>
+			<SettingsRow>
+				<Button variant='secondary'>
+					{ __( 'Open Previewer', 'classifai' ) }
+				</Button>
+				<Previewer />
+			</SettingsRow>
 			<SettingsRow label={ __( 'Classification mode', 'classifai' ) }>
 				<RadioControl
 					onChange={ ( value ) => {
@@ -151,3 +159,92 @@ export const ClassificationSettings = () => {
 		</>
 	);
 };
+
+function Previewer() {
+	return (
+		<div className='classifai__classification-previewer'>
+			<PostSelector />
+		</div>
+	);
+}
+
+function PostSelector() {
+	const [ searchText, setSearchText ] = useState( '' );
+	const [ searchResults, setSearchResults ] = useState( [] );
+	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
+	const [ shouldSearch, setShoudlSearch ] = useState( true );
+	const debouncedSearch = useDebounce( setSearchText, 1000 );
+
+	function selectPost( post ) {
+		setShoudlSearch( false );
+		setSelectedPostId( post.id );
+		setSearchText( post.title );
+		setSearchResults( [] );
+	}
+
+	useEffect( () => {
+		if ( ! searchText ) {
+			setSearchResults( [] );
+			return;
+		}
+
+		if ( ! shouldSearch ) {
+			return;
+		}
+
+		( async () => {
+			const response = await wp.apiRequest({
+				path: '/wp/v2/posts',
+				data: {
+					search: searchText
+				}
+			} );
+
+			if ( Array.isArray( response ) ) {
+				setSearchResults(
+					response.map( post => ( { id: post.id, title: post.title.rendered } ) )
+				);
+			}
+		} )()
+	}, [ searchText, shouldSearch ] );
+
+	const searchResultsHtml = searchResults.length ? searchResults.map( ( post ) => (
+		<div
+			key={ post.id }
+			onClick={ () => selectPost( post ) }
+			className='classifai__classification-previewer-search-item'
+		>
+			<TextHighlight text={ post.title } highlight={ searchText } />
+		</div>
+	) ) : [];
+
+	return (
+		<div className='classifai__classification-previewer-search-control'>
+			<div className='classifai__classification-previewer-search-and-results'>
+				<SearchControl
+					__nextHasNoMarginBottom
+					size="compact"
+					value={ searchText }
+					placeholder={ __( 'Search for a post:', 'classifai' ) }
+					onChange={ ( text ) => {
+						setShoudlSearch( true );
+						debouncedSearch( text );
+					} }
+					onClose={ () => {
+						setSearchText( '' );
+						setSearchResults( [] );
+						setShoudlSearch( true );
+					} }
+				/>
+				{
+					searchResults.length ? (
+						<div className='classifai__classification-previewer-search-results'>
+							{ searchResultsHtml }
+						</div>
+					) : null
+				}
+			</div>
+			<Button size='compact' variant='primary'>{ __( 'Preview', 'classifai' ) }</Button>
+		</div>
+	);
+}
