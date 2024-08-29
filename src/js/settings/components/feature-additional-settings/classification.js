@@ -2,13 +2,14 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	RadioControl,
 	CheckboxControl,
-	Button,
+	BaseControl,
 	SearchControl,
 	TextHighlight,
 	Card,
 	CardHeader,
 	CardBody,
 	Spinner,
+	Notice,
 	__experimentalHeading as Heading
 } from '@wordpress/components';
 import { useState, useEffect, createContext, useContext } from '@wordpress/element';
@@ -96,6 +97,7 @@ export const ClassificationSettings = () => {
 
 	const previewerContextData = { 
 		isPreviewerOpen,
+		setIsPreviewerOpen,
 		selectedPostId,
 		setSelectedPostId,
 		isPreviewUnderProcess,
@@ -105,10 +107,10 @@ export const ClassificationSettings = () => {
 	return (
 		<>
 			<SettingsRow>
-				<Button variant='secondary' onClick={ () => setIsPreviewerOpen( ! isPreviewerOpen ) }>
-					{ isPreviewerOpen ? __( 'Close Previewer', 'classifai' ) : __( 'Open Previewer', 'classifai' ) }
-				</Button>
 				<PreviewerProvider value={ previewerContextData }>
+					<BaseControl help={ __( 'Used to preview the results for a particular post.', 'classifai' ) }>
+						<PostSelector showLabel={ false } />
+					</BaseControl>
 					<Previewer />
 				</PreviewerProvider>
 			</SettingsRow>
@@ -201,12 +203,11 @@ function Previewer() {
 	const {
 		isPreviewerOpen,
 		selectedPostId,
-		setSelectedPostId,
 	} = useContext( PreviewerProviderContext );
 
 	return (
 		<div className={ `classifai__classification-previewer ${ isPreviewerOpen ? 'classifai__classification-previewer--open' : '' }` }>
-			<PostSelector setSelectedPostId={ setSelectedPostId } />
+			<PostSelector placeholder={ __( 'Search a different post to preview...', 'classifai' ) } />
 			<PreviewInProcess />
 			<PreviewerResults selectedPostId={ selectedPostId } />
 		</div>
@@ -232,7 +233,8 @@ function PreviewInProcess() {
 	)
 }
 
-function PostSelector( { setSelectedPostId } ) {
+function PostSelector( { placeholder = '', showLabel = true } ) {
+	const { setSelectedPostId } = useContext( PreviewerProviderContext );
 	const [ searchText, setSearchText ] = useState( '' );
 	const [ searchResults, setSearchResults ] = useState( [] );
 	const [ shouldSearch, setShoudlSearch ] = useState( true );
@@ -286,9 +288,10 @@ function PostSelector( { setSelectedPostId } ) {
 			<div className='classifai__classification-previewer-search-and-results'>
 				<SearchControl
 					__nextHasNoMarginBottom
-					size="compact"
+					hideLabelFromVision={ showLabel }
 					value={ searchText }
-					placeholder={ __( 'Search for a post:', 'classifai' ) }
+					label={ __( 'Previewer:' ) }
+					placeholder={ placeholder || __( 'Search a post by title...', 'classifai' ) }
 					onChange={ ( text ) => {
 						setShoudlSearch( true );
 						debouncedSearch( text );
@@ -308,7 +311,6 @@ function PostSelector( { setSelectedPostId } ) {
 					) : null
 				}
 			</div>
-			{/* <Button size='compact' variant='primary'>{ __( 'Preview', 'classifai' ) }</Button> */}
 		</div>
 	);
 }
@@ -333,7 +335,8 @@ function PreviewerResults( { selectedPostId } ) {
 
 function AzureOpenAIEmbeddingsResults( { postId } ) {
 	const {
-		setPreviewUnderProcess
+		setPreviewUnderProcess,
+		setIsPreviewerOpen,
 	} = useContext( PreviewerProviderContext );
 
 	const [ responseData, setResponseData ] = useState( [] );
@@ -345,6 +348,7 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 		}
 
 		setPreviewUnderProcess( true );
+		setIsPreviewerOpen( true );
 
 		const formData = new FormData();
 
@@ -404,7 +408,14 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 		)
 	} );
 
-	return card.length ? card : null
+	return card.length ? (
+		<>
+			<Notice status='success' isDismissible={ false } className='classifai__classification-previewer-result-notice'>
+				{ __( 'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.', 'classifai' ) }
+			</Notice>
+			{ card }
+		</>
+	) : null
 }
 
 function normalizeScore( score ) {

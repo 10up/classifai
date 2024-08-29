@@ -416,9 +416,9 @@
 	max-width: 500px;
 	height: 100%;
 	box-shadow: 0 19px 28px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
-	backdrop-filter: blur(15px);
-	background-color: rgba(0, 0, 0, 0.2);
-	z-index: 99999;
+	backdrop-filter: blur(10px);
+	background-color: rgba(0, 0, 0, 0.15);
+	z-index: 9999;
 	padding: 4rem 1rem;
 	transform: translateX(500px);
 	transition: transform 0.2s ease-in-out;
@@ -427,6 +427,10 @@
 	&--open {
 		transform: translateX(0);
 	}
+}
+
+.classifai__classification-previewer-result-notice {
+	margin-bottom: 2rem !important;
 }
 
 .classifai__classification-previewer-search-control {
@@ -442,16 +446,23 @@
 .classifai__classification-previewer-search-and-results {
 	position: relative;
 	background-color: #fff;
+
+	.components-input-control__container {
+		border: 1px solid rgb(148 148 148);
+	}
 }
 
 .classifai__classification-previewer-search-results {
 	position: absolute;
-	top: 32px;
+	top: 64px;
 	left: 0;
 	width: 100%;
 	padding: 0.25rem 0;
 	height: auto;
 	background-color: #fff;
+	border: 1px solid rgb(148 148 148);
+    box-sizing: border-box;
+    z-index: 999;
 }
 
 .classifai__classification-previewer-processing {
