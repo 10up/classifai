@@ -470,9 +470,13 @@ class Embeddings extends Provider {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
@@ -683,7 +687,6 @@ class Embeddings extends Provider {
 		}
 
 		// Prepare the results.
-		$index   = 0;
 		$results = [];
 
 		foreach ( $sorted_results as $tax => $terms ) {
@@ -691,23 +694,22 @@ class Embeddings extends Provider {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Setup our taxonomy object.
-			$results[] = new \stdClass();
-
-			$results[ $index ]->{$tax_name} = [];
+			// Initialize the taxonomy bucket in results.
+			$results[ $tax ] = [
+				'label' => $tax_name,
+				'data'  => []
+			];
 
 			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $tax ]['data'][] = [
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
 			}
-
-			++$index;
 		}
 
 		return $results;

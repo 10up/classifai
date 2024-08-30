@@ -338,19 +338,28 @@ function PreviewerResults() {
 
 	return (
 		<div className='classifai__classification-previewer-search-result-container'>
-			{ 'azure_openai_embeddings' === activeProvider && <AzureOpenAIEmbeddingsResults postId={ selectedPostId } /> }
+			{ 'azure_openai_embeddings' === activeProvider || 'openai_embeddings' === activeProvider && <AzureOpenAIEmbeddingsResults postId={ selectedPostId } /> }
 		</div>
 	);
 }
 
 function AzureOpenAIEmbeddingsResults( { postId } ) {
 	const {
+		isPreviewUnderProcess,
 		setPreviewUnderProcess,
 		setIsPreviewerOpen,
 	} = useContext( PreviewerProviderContext );
 
 	const [ responseData, setResponseData ] = useState( [] );
+	const [ errorMessage, setErrorMessage ] = useState( '' );
 	const settings = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings() );
+
+	useEffect( () => {
+		// Reset previous results.
+		if ( isPreviewUnderProcess ) {
+			setResponseData( [] );
+		}
+	}, [ isPreviewUnderProcess ] );
 
 	useEffect( () => {
 		if ( ! postId ) {
@@ -359,6 +368,7 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 		setPreviewUnderProcess( true );
 		setIsPreviewerOpen( true );
+		setErrorMessage( '' );
 
 		const formData = new FormData();
 
@@ -384,6 +394,8 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 			if ( responseJSON.success ) {
 				setResponseData( responseJSON.data );
+			} else {
+				setErrorMessage( responseJSON.data );
 			}
 
 			setPreviewUnderProcess( false );
@@ -418,6 +430,14 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 			</Card>
 		)
 	} );
+
+	if ( errorMessage ) {
+		return (
+			<Notice status='error' isDismissible={ false } className='classifai__classification-previewer-result-notice'>
+				{ errorMessage }
+			</Notice>
+		);
+	}
 
 	return card.length ? (
 		<>

@@ -358,9 +358,13 @@ class Embeddings extends OpenAI {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
