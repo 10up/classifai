@@ -68,10 +68,11 @@ class Settings {
 		wp_set_script_translations( 'classifai-settings', 'classifai' );
 
 		$data = array(
-			'features' => $this->get_features(),
-			'services' => get_services_menu(),
-			'settings' => $this->get_settings(),
+			'features'     => $this->get_features(),
+			'services'     => get_services_menu(),
+			'settings'     => $this->get_settings(),
 			'dashboardUrl' => admin_url( '/' ),
+			'nonce'        => wp_create_nonce( 'classifai-previewer-action' ),
 		);
 
 		wp_add_inline_script(

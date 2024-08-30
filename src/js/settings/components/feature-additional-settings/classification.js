@@ -367,7 +367,8 @@ function AzureOpenAIEmbeddingsResults( { postId } ) {
 			'action',
 			'get_post_classifier_embeddings_preview_data'
 		);
-		// formData.append( 'nonce', previewerNonce );
+
+		formData.append( 'nonce', classifAISettings.nonce );
 
 		( async () => {
 			const response = await fetch( ajaxurl, {
