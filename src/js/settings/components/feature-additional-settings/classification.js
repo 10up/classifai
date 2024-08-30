@@ -10,6 +10,7 @@ import {
 	CardBody,
 	Spinner,
 	Notice,
+	Button,
 	__experimentalHeading as Heading
 } from '@wordpress/components';
 import { useState, useEffect, createContext, useContext } from '@wordpress/element';
@@ -202,6 +203,7 @@ export const ClassificationSettings = () => {
 function Previewer() {
 	const {
 		isPreviewerOpen,
+		setIsPreviewerOpen,
 		selectedPostId,
 	} = useContext( PreviewerProviderContext );
 
@@ -209,7 +211,14 @@ function Previewer() {
 		<div className={ `classifai__classification-previewer ${ isPreviewerOpen ? 'classifai__classification-previewer--open' : '' }` }>
 			<PostSelector placeholder={ __( 'Search a different post to preview...', 'classifai' ) } />
 			<PreviewInProcess />
-			<PreviewerResults selectedPostId={ selectedPostId } />
+			<PreviewerResults />
+			<Button
+				className='classifai__classification-previewer-close-button'
+				onClick={ () => setIsPreviewerOpen( ! isPreviewerOpen ) }
+				variant='link'
+			>
+				{ __( 'Close previewer', 'classifai' ) }
+			</Button>
 		</div>
 	);
 }
@@ -315,7 +324,8 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 	);
 }
 
-function PreviewerResults( { selectedPostId } ) {
+function PreviewerResults() {
+	const { selectedPostId } = useContext( PreviewerProviderContext );
 	const activeProvider = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings().provider );
 
 	if ( ! selectedPostId ) {
