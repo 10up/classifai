@@ -380,6 +380,23 @@
 			gap: 0;
 		}
 	}
+
+	.classifai-loading-settings {
+		text-align: center;
+		margin: 20vh 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.components-spinner {
+			float: none;
+		}
+
+		.description {
+			color: #777;
+			margin-top: 4px;
+		}
+	}
 }
 
 .classifai-onboarding {

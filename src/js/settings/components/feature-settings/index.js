@@ -73,7 +73,14 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
 
 	if ( ! isLoaded ) {
-		return <Spinner />; // TODO: Add proper styling for the spinner.
+		return (
+			<div className="classifai-loading-settings">
+				<Spinner />
+				<span className="description">
+					{ __( 'Loading settings…', 'classifai' ) }
+				</span>
+			</div>
+		);
 	}
 
 	return (
