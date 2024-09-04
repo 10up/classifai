@@ -160,12 +160,6 @@
 					&:focus {
 						background: #fff;
 					}
-
-					@media screen and (max-width: 782px) {
-						display: block;
-						width: 100%;
-						box-sizing: border-box;
-					}
 				}
 
 				@media screen and (max-width: 782px) {
@@ -174,7 +168,6 @@
 				}
 
 				@media screen and (max-width: 782px) {
-					display: block;
 					gap: 0;
 					width: 100%;
 				}

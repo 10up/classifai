@@ -5,18 +5,18 @@ import { __ } from '@wordpress/i18n';
 
 import { FeatureSettings } from '..';
 import { FeatureContext } from '../feature-settings/context';
-import { getFeature } from '../../utils/utils';
+import { getFeature, isFeatureActive } from '../../utils/utils';
 import { STORE_NAME } from '../../data/store';
 import { useSetupPage } from './hooks';
 import { useNavigate } from 'react-router-dom';
 
 export const ConfigureFeatures = () => {
-	const enabledFeatures = useSelect( ( select ) => {
-		const settings = select( STORE_NAME ).getSettings();
-		return Object.keys( settings ).filter(
-			( feature ) => settings[ feature ].status === '1'
-		);
-	} );
+	const settings = useSelect( ( select ) =>
+		select( STORE_NAME ).getSettings()
+	);
+	const enabledFeatures = Object.keys( settings ).filter(
+		( feature ) => settings[ feature ].status === '1'
+	);
 	const { nextStepPath } = useSetupPage();
 	const navigate = useNavigate();
 	const [ currentFeature, setCurrentFeature ] = useState(
@@ -42,17 +42,29 @@ export const ConfigureFeatures = () => {
 			</h1>
 			<div className="service-settings-wrapper classifai-onboarding__configure">
 				<div className="classifai-tabs" aria-orientation="vertical">
-					{ enabledFeatures.map( ( feature ) => (
-						<button
-							key={ feature }
-							onClick={ () => setCurrentFeature( feature ) }
-							className={ `classifai-tabs-item ${
-								feature === currentFeature && 'active-tab'
-							}` }
-						>
-							{ getFeature( feature ).label }
-						</button>
-					) ) }
+					{ enabledFeatures.map( ( feature, index ) => {
+						let icon = 'clock';
+						if ( isFeatureActive( settings[ feature ] ) ) {
+							icon = 'yes-alt';
+						} else if (
+							index < enabledFeatures.indexOf( currentFeature )
+						) {
+							icon = 'warning';
+						}
+
+						return (
+							<Button
+								key={ feature }
+								onClick={ () => setCurrentFeature( feature ) }
+								className={ `classifai-tabs-item ${
+									feature === currentFeature && 'active-tab'
+								}` }
+								icon={ icon }
+							>
+								{ getFeature( feature ).label }
+							</Button>
+						);
+					} ) }
 				</div>
 				<div className="feature-settings-wrapper">
 					<FeatureContext.Provider
