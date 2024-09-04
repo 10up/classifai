@@ -163,6 +163,8 @@
 
 					@media screen and (max-width: 782px) {
 						display: block;
+						width: 100%;
+						box-sizing: border-box;
 					}
 				}
 
@@ -174,6 +176,7 @@
 				@media screen and (max-width: 782px) {
 					display: block;
 					gap: 0;
+					width: 100%;
 				}
 			}
 
@@ -396,6 +399,10 @@
 			color: #777;
 			margin-top: 4px;
 		}
+	}
+
+	.classifai-setup__content {
+		margin-left: 0px;
 	}
 }
 
