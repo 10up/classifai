@@ -138,11 +138,28 @@ export const ClassifAISettings = () => {
 		} )();
 	}, [ setSettings, setIsLoaded ] );
 
+	// Render admin notices after the header.
+	useEffect( () => {
+		const notices = document.querySelectorAll(
+			'div.updated, div.error, div.notice'
+		);
+		const target = document.querySelector( '.classifai-admin-notices' );
+
+		notices.forEach( ( notice ) => {
+			if ( ! target ) {
+				return;
+			}
+
+			target.appendChild( notice );
+		} );
+	}, [] );
+
 	return (
 		<SlotFillProvider>
 			<HashRouter>
 				<Header />
 				<div className="classifai-settings-wrapper">
+					<div className="classifai-admin-notices wrap"></div>
 					<ServiceNavigation />
 					<Routes>
 						<Route
