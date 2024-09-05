@@ -28,5 +28,4 @@ settings_errors();
 	?>
 	<div class="classifai-setup__content__row__column">
 		<div class="<?php echo esc_attr( sprintf( 'classifai-step%d-content', $args['step'] ) ); ?>">
-			<div id="classifai-onboarding"></div>
 			<form method="POST" action="">
