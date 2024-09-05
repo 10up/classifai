@@ -1,39 +1,14 @@
-# ![ClassifAI](https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/logo.svg "ClassifAI")
+# ClassifAI
 
-> Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
+![ClassifAI](https://github.com/10up/classifai/blob/develop/assets/img/banner-1544x500.png)
 
 [![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.6%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
+> Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
+
 *You can learn more about ClassifAI's features at [ClassifAIPlugin.com](https://classifaiplugin.com/) and documentation at the [ClassifAI documentation site](https://10up.github.io/classifai/).*
-
-## Table of Contents
-
-* [Overview](#overview)
-* [Features](#features)
-* [Requirements](#requirements)
-* [Pricing](#pricing)
-* [Installation](#installation)
-* [Register ClassifAI account](#register-classifai-account)
-* [Set Up IBM Watson NLU Language Processing](#set-up-classification-via-ibm-watson)
-* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-features-via-openai-chatgpt)
-* [Set Up Azure OpenAI Language Processing](#set-up-language-processing-features-via-azure-openai)
-* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-features-via-google-ai-gemini-api)
-* [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
-* [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
-* [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
-* [Set Up OpenAI Text to Speech Processing](#set-up-text-to-speech-via-openai)
-* [Set Up AWS Language Processing](#set-up-text-to-speech-via-amazon-polly)
-* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
-* [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
-* [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
-* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
-* [WP CLI Commands](#wp-cli-commands)
-* [FAQs](#frequently-asked-questions)
-* [Support](#support-level)
-* [Changelog](#changelog)
-* [Contributing](#contributing)
 
 ## Overview
 
