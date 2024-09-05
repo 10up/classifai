@@ -246,7 +246,7 @@ class Settings {
 
 				// Update only status of the feature.
 				$current_settings['status'] = $feature_settings['status'] ?? $current_settings['status'];
-				$new_settings = $current_settings;
+				$new_settings               = $current_settings;
 			} else {
 				$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
 				if ( is_wp_error( $new_settings ) ) {

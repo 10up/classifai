@@ -452,10 +452,8 @@ class Embeddings extends Provider {
 	 * Get the data to preview terms.
 	 *
 	 * @since 2.5.0
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data(): void {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -697,7 +695,7 @@ class Embeddings extends Provider {
 			// Initialize the taxonomy bucket in results.
 			$results[ $tax ] = [
 				'label' => $tax_name,
-				'data'  => []
+				'data'  => [],
 			];
 
 			foreach ( $terms as $term ) {
