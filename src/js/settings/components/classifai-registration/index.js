@@ -35,7 +35,14 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 	}, [ setSettings, setIsLoaded ] );
 
 	if ( ! isLoaded ) {
-		return <Spinner />;
+		return (
+			<div className="classifai-loading-settings">
+				<Spinner />
+				<span className="description">
+					{ __( 'Loading settings…', 'classifai' ) }
+				</span>
+			</div>
+		);
 	}
 
 	return (

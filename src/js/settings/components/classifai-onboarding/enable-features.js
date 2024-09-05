@@ -6,6 +6,8 @@ import {
 	Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import apiFetch from '@wordpress/api-fetch';
+import { useState, useEffect } from '@wordpress/element';
 
 import { FeatureContext } from '../feature-settings/context';
 import { EnableToggleControl } from '../feature-settings/enable-feature';
@@ -14,11 +16,33 @@ import { useSetupPage } from './hooks';
 import { useNavigate } from 'react-router-dom';
 
 export const EnableFeatures = () => {
+	const [ registrationSettings, setRegistrationSettings ] = useState( {} );
 	const { features, services, dashboardUrl } = window.classifAISettings;
 	const { nextStepPath } = useSetupPage();
 	const navigate = useNavigate();
+
+	// Load the settings.
+	useEffect( () => {
+		( async () => {
+			const regSettings = await apiFetch( {
+				path: '/classifai/v1/registration',
+			} ); // TODO: handle error
+
+			setRegistrationSettings( regSettings );
+		} )();
+	}, [ setRegistrationSettings ] );
+
 	const onSaveSuccess = () => {
-		navigate( nextStepPath );
+		if ( registrationSettings?.valid_license ) {
+			navigate(
+				nextStepPath?.replace(
+					'/classifai_registration',
+					'/configure_features'
+				)
+			);
+		} else {
+			navigate( nextStepPath );
+		}
 	};
 
 	const featureToggles = Object.keys( services ).map(

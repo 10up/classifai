@@ -43,6 +43,9 @@ class Settings {
 	 */
 	public function render_settings_page() {
 		?>
+		<div style="display: none;">
+			<hr class="wp-header-end" />
+		</div>
 		<div class="classifai-content classifai-settings" id="classifai-settings"></div>
 		<?php
 	}
