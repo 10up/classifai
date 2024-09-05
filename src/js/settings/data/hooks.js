@@ -12,10 +12,12 @@ export const useFeatureSettings = () => {
 	}
 
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const getFeatureSettings = ( key ) =>
-		useSelect( ( select ) =>
-			select( STORE_NAME ).getFeatureSettings( key, featureName )
-		);
+
+	const getFeatureSettings = useSelect( ( select ) => {
+		const store = select( STORE_NAME );
+
+		return ( key ) => store.getFeatureSettings( key, featureName );
+	} );
 
 	return {
 		featureName,

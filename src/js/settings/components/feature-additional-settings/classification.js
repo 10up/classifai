@@ -8,14 +8,17 @@ import {
 	Spinner,
 	Button,
 } from '@wordpress/components';
-import { useState, useEffect, createContext, useContext } from '@wordpress/element';
+import { useState, useEffect, useContext } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { usePostTypes, usePostStatuses } from '../../utils/utils';
 import { NLUFeatureSettings } from './nlu-feature';
-import { AzureOpenAIEmbeddingsResults, IBMWatsonNLUResults } from './classification-previewers';
+import {
+	AzureOpenAIEmbeddingsResults,
+	IBMWatsonNLUResults,
+} from './classification-previewers';
 import { PreviewerProviderContext } from './classification-previewers/context';
 
 const ClassificationMethodSettings = () => {
@@ -74,7 +77,7 @@ function PreviewerProvider( { children, value } ) {
 		<PreviewerProviderContext.Provider value={ value }>
 			{ children }
 		</PreviewerProviderContext.Provider>
-	)
+	);
 }
 
 export const ClassificationSettings = () => {
@@ -89,7 +92,7 @@ export const ClassificationSettings = () => {
 	const { postTypesSelectOptions } = usePostTypes();
 	const { postStatusOptions } = usePostStatuses();
 
-	const previewerContextData = { 
+	const previewerContextData = {
 		isPreviewerOpen,
 		setIsPreviewerOpen,
 		selectedPostId,
@@ -102,7 +105,12 @@ export const ClassificationSettings = () => {
 		<>
 			<SettingsRow>
 				<PreviewerProvider value={ previewerContextData }>
-					<BaseControl help={ __( 'Used to preview the results for a particular post.', 'classifai' ) }>
+					<BaseControl
+						help={ __(
+							'Used to preview the results for a particular post.',
+							'classifai'
+						) }
+					>
 						<PostSelector showLabel={ false } />
 					</BaseControl>
 					<Previewer />
@@ -194,21 +202,30 @@ export const ClassificationSettings = () => {
 };
 
 function Previewer() {
-	const {
-		isPreviewerOpen,
-		setIsPreviewerOpen,
-		selectedPostId,
-	} = useContext( PreviewerProviderContext );
+	const { isPreviewerOpen, setIsPreviewerOpen } = useContext(
+		PreviewerProviderContext
+	);
 
 	return (
-		<div className={ `classifai__classification-previewer ${ isPreviewerOpen ? 'classifai__classification-previewer--open' : '' }` }>
-			<PostSelector placeholder={ __( 'Search a different post to preview...', 'classifai' ) } />
+		<div
+			className={ `classifai__classification-previewer ${
+				isPreviewerOpen
+					? 'classifai__classification-previewer--open'
+					: ''
+			}` }
+		>
+			<PostSelector
+				placeholder={ __(
+					'Search a different post to preview…',
+					'classifai'
+				) }
+			/>
 			<PreviewInProcess />
 			<PreviewerResults />
 			<Button
-				className='classifai__classification-previewer-close-button'
+				className="classifai__classification-previewer-close-button"
 				onClick={ () => setIsPreviewerOpen( ! isPreviewerOpen ) }
-				variant='link'
+				variant="link"
 			>
 				{ __( 'Close previewer', 'classifai' ) }
 			</Button>
@@ -224,7 +241,7 @@ function PreviewInProcess() {
 	}
 
 	return (
-		<div className='classifai__classification-previewer-processing'>
+		<div className="classifai__classification-previewer-processing">
 			<Spinner
 				style={ {
 					width: '48px',
@@ -232,7 +249,7 @@ function PreviewInProcess() {
 				} }
 			/>
 		</div>
-	)
+	);
 }
 
 function PostSelector( { placeholder = '', showLabel = true } ) {
@@ -260,40 +277,58 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 		}
 
 		( async () => {
-			const response = await wp.apiRequest({
+			const response = await wp.apiRequest( {
 				path: '/wp/v2/posts',
 				data: {
-					search: searchText
-				}
+					search: searchText,
+				},
 			} );
 
 			if ( Array.isArray( response ) ) {
 				setSearchResults(
-					response.map( post => ( { id: post.id, title: post.title.rendered } ) )
+					response.map( ( post ) => ( {
+						id: post.id,
+						title: post.title.rendered,
+					} ) )
 				);
 			}
-		} )()
+		} )();
 	}, [ searchText, shouldSearch ] );
 
-	const searchResultsHtml = searchResults.length ? searchResults.map( ( post ) => (
-		<div
-			key={ post.id }
-			onClick={ () => selectPost( post ) }
-			className='classifai__classification-previewer-search-item'
-		>
-			<TextHighlight text={ post.title } highlight={ searchText } />
-		</div>
-	) ) : [];
+	const searchResultsHtml = searchResults.length
+		? searchResults.map( ( post ) => (
+				<div
+					key={ post.id }
+					onClick={ () => selectPost( post ) }
+					onKeyDown={ ( event ) => {
+						if ( event.key === 'Enter' ) {
+							selectPost( post );
+						}
+					} }
+					className="classifai__classification-previewer-search-item"
+					tabIndex={ 0 }
+					role="button"
+				>
+					<TextHighlight
+						text={ post.title }
+						highlight={ searchText }
+					/>
+				</div>
+		  ) )
+		: [];
 
 	return (
-		<div className='classifai__classification-previewer-search-control'>
-			<div className='classifai__classification-previewer-search-and-results'>
+		<div className="classifai__classification-previewer-search-control">
+			<div className="classifai__classification-previewer-search-and-results">
 				<SearchControl
 					__nextHasNoMarginBottom
 					hideLabelFromVision={ showLabel }
 					value={ searchText }
 					label={ __( 'Previewer:' ) }
-					placeholder={ placeholder || __( 'Search a post by title...', 'classifai' ) }
+					placeholder={
+						placeholder ||
+						__( 'Search a post by title…', 'classifai' )
+					}
 					onChange={ ( text ) => {
 						setShoudlSearch( true );
 						debouncedSearch( text );
@@ -305,13 +340,11 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 						setShoudlSearch( true );
 					} }
 				/>
-				{
-					searchResults.length ? (
-						<div className='classifai__classification-previewer-search-results'>
-							{ searchResultsHtml }
-						</div>
-					) : null
-				}
+				{ searchResults.length ? (
+					<div className="classifai__classification-previewer-search-results">
+						{ searchResultsHtml }
+					</div>
+				) : null }
 			</div>
 		</div>
 	);
@@ -319,7 +352,9 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 
 function PreviewerResults() {
 	const { selectedPostId } = useContext( PreviewerProviderContext );
-	const activeProvider = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings().provider );
+	const activeProvider = useSelect(
+		( select ) => select( STORE_NAME ).getFeatureSettings().provider
+	);
 
 	if ( ! selectedPostId ) {
 		return null;
@@ -330,9 +365,14 @@ function PreviewerResults() {
 	}
 
 	return (
-		<div className='classifai__classification-previewer-search-result-container'>
-			{ 'azure_openai_embeddings' === activeProvider || 'openai_embeddings' === activeProvider && <AzureOpenAIEmbeddingsResults postId={ selectedPostId } /> }
-			{ 'ibm_watson_nlu' === activeProvider && <IBMWatsonNLUResults postId={ selectedPostId } /> }
+		<div className="classifai__classification-previewer-search-result-container">
+			{ 'azure_openai_embeddings' === activeProvider ||
+				( 'openai_embeddings' === activeProvider && (
+					<AzureOpenAIEmbeddingsResults postId={ selectedPostId } />
+				) ) }
+			{ 'ibm_watson_nlu' === activeProvider && (
+				<IBMWatsonNLUResults postId={ selectedPostId } />
+			) }
 		</div>
 	);
 }

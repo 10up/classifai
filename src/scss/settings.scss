@@ -504,7 +504,9 @@
 .classifai__classification-previewer-search-item {
 	padding: 0.25rem 0.5rem;
 
-	&:hover {
+	&:hover,
+	&:active,
+	&:focus {
 		background-color: #777;
 		color: #fff;
 		cursor: pointer;
@@ -517,6 +519,7 @@
 
 .classifai__classification-previewer-result-card-heading {
 	font-size: 1.15rem !important;
+	margin: 0;
 }
 
 .classifai__classification-previewer-result-tag {
