@@ -1,15 +1,9 @@
-import {
-	Card,
-	CardHeader,
-	CardBody,
-	Notice,
-	__experimentalHeading as Heading
-} from '@wordpress/components';
+import { Card, CardHeader, CardBody, Notice } from '@wordpress/components';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { normalizeScore } from './utils';
-import { PreviewerProviderContext } from './context'
-import { __ } from '@wordpress/i18n';
+import { PreviewerProviderContext } from './context';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { STORE_NAME } from '../../../data/store';
 
@@ -22,7 +16,9 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 	const [ responseData, setResponseData ] = useState( [] );
 	const [ errorMessage, setErrorMessage ] = useState( '' );
-	const settings = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings() );
+	const settings = useSelect( ( select ) =>
+		select( STORE_NAME ).getFeatureSettings()
+	);
 
 	useEffect( () => {
 		// Reset previous results.
@@ -69,41 +65,67 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 			}
 
 			setPreviewUnderProcess( false );
-		} )()
+		} )();
 	}, [ postId ] );
 
 	const card = Object.keys( responseData ).map( ( taxSlug ) => {
 		const tags = responseData[ taxSlug ].data.map( ( tag, _index ) => {
-			const threshold = settings[ `${ taxSlug}_threshold` ];
+			const threshold = settings[ `${ taxSlug }_threshold` ];
 			const score = normalizeScore( tag.score );
 
-			const scoreClass = score >= threshold ? 'classifai__classification-previewer-result-tag--exceeds-threshold' : '';
+			const scoreClass =
+				score >= threshold
+					? 'classifai__classification-previewer-result-tag--exceeds-threshold'
+					: '';
 
 			return (
-				<div className={ `classifai__classification-previewer-result-tag ${ scoreClass }` } key={ _index }>
-					<span className='classifai__classification-previewer-result-tag-score'>{ score }%</span>
-					<span className='classifai__classification-previewer-result-tag-label'>{ tag.label }</span>
+				<div
+					className={ `classifai__classification-previewer-result-tag ${ scoreClass }` }
+					key={ _index }
+				>
+					<span className="classifai__classification-previewer-result-tag-score">
+						{ score }%
+					</span>
+					<span className="classifai__classification-previewer-result-tag-label">
+						{ tag.label }
+					</span>
 				</div>
-			)
+			);
 		} );
 
 		return (
-			<Card className='classifai__classification-previewer-result-card' key={ taxSlug }>
+			<Card
+				className="classifai__classification-previewer-result-card"
+				key={ taxSlug }
+			>
 				<CardHeader>
-					<Heading className='classifai__classification-previewer-result-card-heading'>
+					<h2 className="classifai__classification-previewer-result-card-heading">
 						{ responseData[ taxSlug ].label }
-					</Heading>
+					</h2>
 				</CardHeader>
 				<CardBody>
-					{ tags.length ? tags : __( `No classification data found for ${ taxLabel }.`, 'classifai' ) }
+					{ tags.length
+						? tags
+						: sprintf(
+								/* translators: %s: taxonomy label */
+								__(
+									`No classification data found for %s.`,
+									'classifai'
+								),
+								responseData[ taxSlug ].label
+						  ) }
 				</CardBody>
 			</Card>
-		)
+		);
 	} );
 
 	if ( errorMessage ) {
 		return (
-			<Notice status='error' isDismissible={ false } className='classifai__classification-previewer-result-notice'>
+			<Notice
+				status="error"
+				isDismissible={ false }
+				className="classifai__classification-previewer-result-notice"
+			>
 				{ errorMessage }
 			</Notice>
 		);
@@ -111,10 +133,17 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 
 	return card.length ? (
 		<>
-			<Notice status='success' isDismissible={ false } className='classifai__classification-previewer-result-notice'>
-				{ __( 'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.', 'classifai' ) }
+			<Notice
+				status="success"
+				isDismissible={ false }
+				className="classifai__classification-previewer-result-notice"
+			>
+				{ __(
+					'Results for each taxonomy are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
+					'classifai'
+				) }
 			</Notice>
 			{ card }
 		</>
-	) : null
+	) : null;
 }

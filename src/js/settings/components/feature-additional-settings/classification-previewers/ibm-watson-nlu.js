@@ -1,15 +1,9 @@
-import {
-	Card,
-	CardHeader,
-	CardBody,
-	Notice,
-	__experimentalHeading as Heading
-} from '@wordpress/components';
+import { Card, CardHeader, CardBody, Notice } from '@wordpress/components';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { normalizeScore } from './utils';
 import { PreviewerProviderContext } from './context';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 import { STORE_NAME } from '../../../data/store';
 
@@ -22,7 +16,9 @@ export function IBMWatsonNLUResults( { postId } ) {
 
 	const [ responseData, setResponseData ] = useState( null );
 	const [ errorMessage, setErrorMessage ] = useState( '' );
-	const settings = useSelect( ( select ) => select( STORE_NAME ).getFeatureSettings() );
+	const settings = useSelect( ( select ) =>
+		select( STORE_NAME ).getFeatureSettings()
+	);
 
 	const taxMap = {
 		categories: 'category',
@@ -77,8 +73,8 @@ export function IBMWatsonNLUResults( { postId } ) {
 			}
 
 			setPreviewUnderProcess( false );
-		} )()
-	}, [] );
+		} )();
+	}, [ postId ] );
 
 	if ( ! responseData ) {
 		return null;
@@ -96,36 +92,77 @@ export function IBMWatsonNLUResults( { postId } ) {
 			const threshold = settings[ `${ taxMap[ taxSlug ] }_threshold` ];
 			const score = normalizeScore( tag.score || tag.relevance );
 
-			const scoreClass = score >= threshold ? 'classifai__classification-previewer-result-tag--exceeds-threshold' : '';
+			const scoreClass =
+				score >= threshold
+					? 'classifai__classification-previewer-result-tag--exceeds-threshold'
+					: '';
 
 			return (
-				<div className={ `classifai__classification-previewer-result-tag ${ scoreClass }` } key={ _index }>
-					<span className='classifai__classification-previewer-result-tag-score'>{ score }%</span>
-					<span className='classifai__classification-previewer-result-tag-label'>{ formatLabel( tag.label || tag.text ) }</span>
+				<div
+					className={ `classifai__classification-previewer-result-tag ${ scoreClass }` }
+					key={ _index }
+				>
+					<span className="classifai__classification-previewer-result-tag-score">
+						{ score }%
+					</span>
+					<span className="classifai__classification-previewer-result-tag-label">
+						{ formatLabel( tag.label || tag.text ) }
+					</span>
 				</div>
 			);
 		} );
 
 		return (
-			<Card className='classifai__classification-previewer-result-card' key={ taxSlug }>
+			<Card
+				className="classifai__classification-previewer-result-card"
+				key={ taxSlug }
+			>
 				<CardHeader>
-					<Heading className='classifai__classification-previewer-result-card-heading'>
+					<h2 className="classifai__classification-previewer-result-card-heading">
 						{ taxSlug }
-					</Heading>
+					</h2>
 				</CardHeader>
 				<CardBody>
-					{ tags.length ? tags : __( `No classification data found for ${ taxSlug }.`, 'classifai' ) }
+					{ tags.length
+						? tags
+						: sprintf(
+								/* translators: %s: taxonomy label */
+								__(
+									`No classification data found for %s.`,
+									'classifai'
+								),
+								taxSlug
+						  ) }
 				</CardBody>
 			</Card>
-		)
+		);
 	} );
+
+	if ( errorMessage ) {
+		return (
+			<Notice
+				status="error"
+				isDismissible={ false }
+				className="classifai__classification-previewer-result-notice"
+			>
+				{ errorMessage }
+			</Notice>
+		);
+	}
 
 	return card.length ? (
 		<>
-			<Notice status='success' isDismissible={ false } className='classifai__classification-previewer-result-notice'>
-				{ __( 'Results for each category are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.', 'classifai' ) }
+			<Notice
+				status="success"
+				isDismissible={ false }
+				className="classifai__classification-previewer-result-notice"
+			>
+				{ __(
+					'Results for each category are sorted in descending order, starting with the term that has the highest score, indicating the best match based on the embedding data.',
+					'classifai'
+				) }
 			</Notice>
 			{ card }
 		</>
-	) : null
+	) : null;
 }
