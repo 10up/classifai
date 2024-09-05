@@ -4,6 +4,7 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use function Classifai\should_use_legacy_settings_panel;
 
 class Notifications {
 
@@ -84,6 +85,11 @@ class Notifications {
 			return;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/classifai_setup' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		// Prevent showing the default WordPress "Plugin Activated" notice.
 		unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
 		?>
@@ -96,7 +102,7 @@ class Notifications {
 				<h3 class="classifai-activation-message">
 					<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
 				</h3>
-				<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
+				<a class="classifai-button" href="<?php echo esc_url( $setup_url ); ?>">
 					<?php esc_html_e( 'Start setup', 'classifai' ); ?>
 				</a>
 			</div>

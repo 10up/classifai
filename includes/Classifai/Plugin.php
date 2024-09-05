@@ -226,11 +226,16 @@ class Plugin {
 			return $links;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/classifai_setup' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		return array_merge(
 			array(
 				'setup'    => sprintf(
 					'<a href="%s"> %s </a>',
-					esc_url( admin_url( 'admin.php?page=classifai_setup' ) ),
+					esc_url( $setup_url ),
 					esc_html__( 'Set up', 'classifai' )
 				),
 				'settings' => sprintf(
