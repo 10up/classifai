@@ -52,6 +52,7 @@ abstract class Feature {
 	 */
 	public function setup() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
+		add_action( 'rest_api_init', [ $this, 'setup_roles' ] );
 		if ( should_use_legacy_settings_panel() ) {
 			add_action( 'admin_init', [ $this, 'register_setting' ] );
 			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
@@ -74,6 +75,10 @@ abstract class Feature {
 	 * Assigns user roles to the $roles array.
 	 */
 	public function setup_roles() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
+
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
