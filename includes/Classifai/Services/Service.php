@@ -137,7 +137,7 @@ abstract class Service {
 	public function render_settings_page() {
 		$base_url       = add_query_arg(
 			array(
-				'page' => 'classifai_old',
+				'page' => 'classifai',
 				'tab'  => $this->get_menu_slug(),
 			),
 			admin_url( 'tools.php' )

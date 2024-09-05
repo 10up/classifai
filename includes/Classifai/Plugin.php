@@ -58,13 +58,15 @@ class Plugin {
 		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		// Initialize the ClassifAI Settings.
-		$settings = new Admin\Settings();
-		$settings->init();
-
-		// Initialize the ClassifAI Onboarding.
-		$onboarding = new Admin\Onboarding();
-		$onboarding->init();
+		if ( ! should_use_legacy_settings_panel() ) {
+			// Initialize the ClassifAI Settings.
+			$settings = new Admin\Settings();
+			$settings->init();
+		} else {
+			// Initialize the ClassifAI Onboarding. This is only used for the legacy settings panel.
+			$onboarding = new Admin\Onboarding();
+			$onboarding->init();
+		}
 
 		// Initialize the ClassifAI User Profile.
 		$user_profile = new Admin\UserProfile();

@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use WP_REST_Request;
 use WP_Error;
 use function Classifai\find_provider_class;
+use function Classifai\should_use_legacy_settings_panel;
 
 abstract class Feature {
 	/**
@@ -51,8 +52,10 @@ abstract class Feature {
 	 */
 	public function setup() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
-		add_action( 'admin_init', [ $this, 'register_setting' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		if ( should_use_legacy_settings_panel() ) {
+			add_action( 'admin_init', [ $this, 'register_setting' ] );
+			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		}
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();

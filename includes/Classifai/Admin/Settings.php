@@ -28,10 +28,21 @@ class Settings {
 	 * Registers a hidden sub menu page for the onboarding wizard.
 	 */
 	public function register_settings_page() {
+		$registration_settings = get_option( 'classifai_settings' );
+		$page_title            = esc_attr__( 'ClassifAI', 'classifai' );
+		$menu_title            = $page_title;
+
+		if ( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] ) {
+			/*
+			 * Translators: Menu title.
+			 */
+			$menu_title = sprintf( __( 'ClassifAI %s', 'classifai' ), '<span class="update-plugins"><span class="update-count">!</span></span>' );
+		}
+
 		add_submenu_page(
 			'tools.php',
-			esc_attr__( 'ClassifAI', 'classifai' ),
-			esc_attr__( 'ClassifAI', 'classifai' ),
+			$page_title,
+			$menu_title,
 			'manage_options',
 			'classifai',
 			[ $this, 'render_settings_page' ]
