@@ -274,8 +274,8 @@ class Language extends Provider {
 						 *
 						 * @since 3.2.0
 						 * @hook classifai_azure_language_summary_length
-						 * @param string $summary_length The summary length.
-						 * @return string
+						 * @param {string} $summary_length The summary length.
+						 * @return {string} The summary length
 						 */
 						'summaryLength' => apply_filters( 'classifai_azure_language_summary_length', 'oneSentence' ),
 					],
