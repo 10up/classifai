@@ -38,7 +38,7 @@
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.3.0",
     "@wordpress/env": "^9.4.0",
-    "@wordpress/scripts": "^27.3.0",
+    "@wordpress/scripts": "^29.0.0",
     "cypress": "^13.6.4",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^3.8.1",
