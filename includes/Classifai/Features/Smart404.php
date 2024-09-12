@@ -48,17 +48,20 @@ class Smart404 extends Feature {
 	public function setup() {
 		// Ensure ElasticPress is installed before we proceed.
 		if ( ! is_elasticpress_installed() ) {
-			add_action(
-				'classifai_before_feature_settings_form',
-				function ( $active_feature ) {
-					if ( self::ID !== $active_feature ) {
-						return;
-					}
-
-					echo '<style>.classifai-nlu-sections .submit {display:none;}</style>';
-					echo '<h2>' . esc_html__( 'The Smart 404 Feature requires the ElasticPress plugin to be installed and active', 'classifai' ) . '</h2>';
+			$warning_notice_func = function ( $current_feature ) {
+				if ( self::ID !== $current_feature ) {
+					return;
 				}
-			);
+
+				echo '<style>.classifai-nlu-sections .submit {display:none;}</style>';
+				?>
+				<h2 class="notice notice-error">
+					<p><?php esc_html_e( 'The Smart 404 Feature requires the ElasticPress plugin to be installed and active prior to use.', 'classifai' ); ?></p>
+				</h2>
+				<?php
+			};
+			add_action( 'classifai_before_feature_settings_form', $warning_notice_func );
+			add_action( 'classifai_before_onboarding_feature_settings_form', $warning_notice_func );
 			return;
 		}
 
