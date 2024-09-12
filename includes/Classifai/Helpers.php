@@ -667,7 +667,7 @@ function get_classification_mode(): string {
 /**
  * Get all parts from the current URL.
  *
- * For instance, if the URL is `https://example.com/this/is/a/test`,
+ * For instance, if the URL is `https://example.com/this/is/a/test/`,
  * this function will return: `[ 'this', 'is', 'a', 'test' ]`.
  *
  * @return array
@@ -677,7 +677,7 @@ function get_url_slugs(): array {
 
 	$parts = explode( '/', $wp->request );
 
-	return $parts;
+	return array_filter( $parts );
 }
 
 /**
@@ -691,7 +691,7 @@ function get_url_slugs(): array {
 function get_last_url_slug(): string {
 	$parts = get_url_slugs();
 
-	return end( $parts );
+	return trim( end( $parts ) );
 }
 
 /**

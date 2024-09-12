@@ -293,7 +293,9 @@ class HelpersTest extends \WP_UnitTestCase {
 	public function test_get_url_slugs() {
 		global $wp;
 
-		$wp->request = 'https://example.com/this/is/a/test/';
+		// If URL is https://www.example.com/this/is/a/test/
+		// $wp->request will be 'this/is/a/test'.
+		$wp->request = 'this/is/a/test';
 
 		$slugs = get_url_slugs();
 		$this->assertEquals( [ 'this', 'is', 'a', 'test' ], $slugs );

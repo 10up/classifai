@@ -8,7 +8,19 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 		cy.login();
 	} );
 
+	it( "See error message if ElasticPress isn't activate", () => {
+		cy.disableElasticPress();
+
+		cy.visit(
+			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_smart_404'
+		);
+
+		cy.get( '.classifai-nlu-sections .notice-error' ).should( 'exist' );
+	} );
+
 	it( 'Can save Smart 404 settings', () => {
+		cy.enableElasticPress();
+
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_smart_404'
 		);
@@ -31,5 +43,7 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 
 		// Save settings.
 		cy.get( '#submit' ).click();
+
+		cy.disableElasticPress();
 	} );
 } );
