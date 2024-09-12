@@ -498,7 +498,7 @@ Examples:
 
 ```php
 // Render the results.
-Classifai\render_results(
+Classifai\render_smart_404_results(
   [
     'index'          => 'post',
     'num'            => 3,
@@ -512,7 +512,7 @@ Classifai\render_results(
 
 ```php
 // Get the results.
-$results = Classifai\get_results(
+$results = Classifai\get_smart_404_results(
   [
     'index'          => 'post',
     'num'            => 10,
@@ -521,9 +521,6 @@ $results = Classifai\get_results(
     'score_function' => 'cosine',
   ]
 );
-
-// Convert the results to normal WP_Post objects.
-$results = ( new \Classifai\Features\Smart404EPIntegration() )->convert_es_results_to_post_objects( $results );
 
 ob_start();
 

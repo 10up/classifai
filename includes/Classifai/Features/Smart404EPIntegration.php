@@ -5,6 +5,7 @@
 
 namespace Classifai\Features;
 
+use Classifai\Features\Smart404;
 use Classifai\Providers\OpenAI\Tokenizer;
 use ElasticPress\Indexables;
 use ElasticPress\Indexable;
@@ -45,7 +46,7 @@ class Smart404EPIntegration {
 	 *
 	 * @var string $embeddings_meta_key
 	 */
-	protected $embeddings_meta_key;
+	protected $embeddings_meta_key = '';
 
 	/**
 	 * Post content hash meta key.
@@ -61,13 +62,15 @@ class Smart404EPIntegration {
 	 */
 	public function __construct( $provider = null ) {
 		$this->embeddings_handler = $provider;
-		$this->es_version         = Elasticsearch::factory()->get_elasticsearch_version();
-		$this->tokenizer          = new Tokenizer( (int) $this->embeddings_handler->get_max_tokens() );
+		$this->es_version         = ! $provider ? '7.0' : Elasticsearch::factory()->get_elasticsearch_version();
+		$this->tokenizer          = ! $this->embeddings_handler ? new Tokenizer( 8191 ) : new Tokenizer( (int) $this->embeddings_handler->get_max_tokens() );
 
-		if ( 'openai_embeddings' === $provider::ID ) {
-			$this->embeddings_meta_key = 'classifai_openai_embeddings';
-		} elseif ( 'azure_openai_embeddings' === $provider::ID ) {
-			$this->embeddings_meta_key = 'classifai_azure_openai_embeddings';
+		if ( $provider ) {
+			if ( 'openai_embeddings' === $provider::ID ) {
+				$this->embeddings_meta_key = 'classifai_openai_embeddings';
+			} elseif ( 'azure_openai_embeddings' === $provider::ID ) {
+				$this->embeddings_meta_key = 'classifai_azure_openai_embeddings';
+			}
 		}
 	}
 
@@ -306,7 +309,7 @@ class Smart404EPIntegration {
 		}
 
 		// Generate the embedding.
-		$embedding = $this->embeddings_handler->generate_embedding( $text, new Feature() );
+		$embedding = $this->embeddings_handler->generate_embedding( $text, new Smart404() );
 
 		if ( is_wp_error( $embedding ) ) {
 			return $embedding;
@@ -328,7 +331,7 @@ class Smart404EPIntegration {
 	 */
 	public function get_embeddings( array $strings ) {
 		// Generate the embeddings.
-		$embeddings = $this->embeddings_handler->generate_embeddings( $strings, new Feature() );
+		$embeddings = $this->embeddings_handler->generate_embeddings( $strings, new Smart404() );
 
 		return $embeddings;
 	}

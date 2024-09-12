@@ -718,6 +718,9 @@ function get_smart_404_results( array $args = [] ): array {
 		return [];
 	}
 
+	// Convert the results to normal WP_Post objects.
+	$results = ( new Smart404EPIntegration() )->convert_es_results_to_post_objects( $results );
+
 	return $results;
 }
 
@@ -729,9 +732,6 @@ function get_smart_404_results( array $args = [] ): array {
 function render_smart_404_results( array $args = [] ) {
 	// Get the results.
 	$results = get_smart_404_results( $args );
-
-	// Convert the results to normal WP_Post objects.
-	$results = ( new Smart404EPIntegration() )->convert_es_results_to_post_objects( $results );
 
 	// Handle situation where we don't have results.
 	if ( empty( $results ) ) {

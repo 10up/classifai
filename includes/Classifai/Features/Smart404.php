@@ -9,7 +9,6 @@ use WP_Error;
 use WP_Query;
 
 use function Classifai\is_elasticpress_installed;
-use function Speedyseo\Utility\is_elasticpress_active;
 
 /**
  * Class Smart404
@@ -244,7 +243,7 @@ class Smart404 extends Feature {
 	 */
 	public function exact_knn_search( string $query, array $args = [] ) {
 		// Ensure the Feature is enabled and configured before trying to use it.
-		if ( ! is_elasticpress_active() || ! $this->is_configured() || ! $this->is_enabled() ) {
+		if ( ! is_elasticpress_installed() || ! $this->is_configured() || ! $this->is_enabled() ) {
 			return new WP_Error( 'not_enabled', __( 'Feature is not enabled.', 'classifai' ) );
 		}
 
@@ -284,7 +283,7 @@ class Smart404 extends Feature {
 			$args['post_type'] = [ $args['post_type'] ];
 		}
 
-		$integration = new Smart404EPIntegration();
+		$integration = new Smart404EPIntegration( $this->get_feature_provider_instance() );
 
 		// Run our search. Note that this will take our query and generate embeddings for it.
 		if ( 'no' === $args['rescore'] || false === $args['rescore'] ) {
