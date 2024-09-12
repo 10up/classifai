@@ -661,3 +661,12 @@ function get_classification_mode(): string {
 
 	return $value;
 }
+
+/**
+ * Check if ElasticPress is installed.
+ *
+ * @return bool
+ */
+function is_elasticpress_installed(): bool {
+	return class_exists( '\\ElasticPress\\Feature' );
+}
