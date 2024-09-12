@@ -3,6 +3,8 @@
 namespace Classifai;
 
 use Classifai\Features\Classification;
+use Classifai\Features\Smart404;
+use Classifai\Features\Smart404EPIntegration;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
@@ -663,10 +665,92 @@ function get_classification_mode(): string {
 }
 
 /**
+ * Get all parts from the current URL.
+ *
+ * For instance, if the URL is `https://example.com/this/is/a/test`,
+ * this function will return: `[ 'this', 'is', 'a', 'test' ]`.
+ *
+ * @return array
+ */
+function get_url_slugs(): array {
+	global $wp;
+
+	$parts = explode( '/', $wp->request );
+
+	return $parts;
+}
+
+/**
+ * Get the last part from the current URL.
+ *
+ * For instance, if the URL is `https://example.com/this/is/a/test`,
+ * this function will return: 'test'.
+ *
+ * @return string
+ */
+function get_last_url_slug(): string {
+	$parts = get_url_slugs();
+
+	return end( $parts );
+}
+
+/**
  * Check if ElasticPress is installed.
  *
  * @return bool
  */
 function is_elasticpress_installed(): bool {
 	return class_exists( '\\ElasticPress\\Feature' );
+}
+
+/**
+ * Get the Smart 404 results.
+ *
+ * @param array $args Arguments to pass to the search.
+ * @return array
+ */
+function get_smart_404_results( array $args = [] ): array {
+	// Run our query.
+	$results = ( new Smart404() )->exact_knn_search( get_last_url_slug(), $args );
+
+	// Ensure the query ran successfully.
+	if ( is_wp_error( $results ) ) {
+		return [];
+	}
+
+	return $results;
+}
+
+/**
+ * Render the Smart 404 results.
+ *
+ * @param array $args Arguments to pass to the search.
+ */
+function render_smart_404_results( array $args = [] ) {
+	// Get the results.
+	$results = get_smart_404_results( $args );
+
+	// Convert the results to normal WP_Post objects.
+	$results = ( new Smart404EPIntegration() )->convert_es_results_to_post_objects( $results );
+
+	// Handle situation where we don't have results.
+	if ( empty( $results ) ) {
+		return;
+	}
+
+	// Iterate through each result and render it.
+	echo '<ul>';
+	foreach ( $results as $result ) {
+		?>
+		<li>
+			<a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+				<?php echo esc_html( $result->post_title ); ?>
+			</a>
+			<p>
+				<?php echo esc_html( $result->post_excerpt ); ?>
+			</p>
+		</li>
+		<?php
+	}
+	echo '</ul>';
 }

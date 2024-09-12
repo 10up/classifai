@@ -617,4 +617,62 @@ class Smart404EPIntegration {
 
 		return $source;
 	}
+
+	/**
+	 * Convert Elasticsearch results to WP_Post objects.
+	 *
+	 * @param array $results Document results from Elasticsearch.
+	 * @return array
+	 */
+	public function convert_es_results_to_post_objects( array $results ): array {
+		$new_posts = [];
+
+		// Turn each ES result into a WP_Post object.
+		// Copied from ElasticPress\Indexable\Post\QueryIntegration::format_hits_as_posts.
+		foreach ( $results as $post_array ) {
+			// Don't convert if not needed.
+			if ( is_a( $post_array, 'WP_Post' ) ) {
+				$new_posts[] = $post_array;
+				continue;
+			}
+
+			$post = new \stdClass();
+
+			$post->ID      = $post_array['post_id'];
+			$post->site_id = get_current_blog_id();
+
+			if ( ! empty( $post_array['site_id'] ) ) {
+				$post->site_id = $post_array['site_id'];
+			}
+
+			$post_return_args = [
+				'post_type',
+				'post_author',
+				'post_name',
+				'post_status',
+				'post_title',
+				'post_content',
+				'post_excerpt',
+				'post_date',
+				'post_date_gmt',
+				'permalink',
+			];
+
+			foreach ( $post_return_args as $key ) {
+				if ( 'post_author' === $key ) {
+					$post->$key = $post_array[ $key ]['id'];
+				} elseif ( isset( $post_array[ $key ] ) ) {
+					$post->$key = $post_array[ $key ];
+				}
+			}
+
+			$post->elasticsearch = true;
+
+			if ( $post ) {
+				$new_posts[] = $post;
+			}
+		}
+
+		return $new_posts;
+	}
 }
