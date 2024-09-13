@@ -79,7 +79,7 @@ class Smart404EPIntegration {
 	 */
 	public function init() {
 		// Vector support was added in Elasticsearch 7.0.
-		if ( version_compare( $this->es_version, '7.0', '<=' ) ) {
+		if ( ! $this->es_version || version_compare( $this->es_version, '7.0', '<=' ) ) {
 			return;
 		}
 
