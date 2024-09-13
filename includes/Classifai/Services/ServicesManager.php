@@ -76,6 +76,7 @@ class ServicesManager {
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
 			'\Classifai\Features\Moderation',
+			'\Classifai\Features\Smart404',
 		];
 
 		foreach ( $core_features as $feature ) {

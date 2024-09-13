@@ -1,5 +1,5 @@
 {
-  "plugins": [".", "./tests/test-plugin", "https://downloads.wordpress.org/plugin/classic-editor.zip"],
+  "plugins": [".", "./tests/test-plugin", "https://downloads.wordpress.org/plugin/classic-editor.zip", "https://downloads.wordpress.org/plugin/elasticpress.zip"],
   "env": {
     "tests": {
       "mappings": {
