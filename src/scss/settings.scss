@@ -131,7 +131,7 @@
 			display: flex;
 			align-items: stretch;
 			flex-direction: row;
-			justify-content: start;
+			justify-content: flex-start;
 			border-bottom: 1px solid #ccd0d4;
 			padding-bottom: 0;
 			margin-right: 20px;
@@ -139,7 +139,7 @@
 			&[aria-orientation="vertical"] {
 				flex-direction: column;
 				border: 0px;
-				justify-content: start;
+				justify-content: flex-start;
 				flex-basis: 0;
 				flex-grow: 1;
 				margin-right: 0px;
