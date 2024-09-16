@@ -13,20 +13,16 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 	it( 'Can save Google AI (Gemini API) "Language Processing" title settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_title_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
 		);
-
-		cy.get( '#provider' ).select( 'googleai_gemini_api' );
-		cy.get(
-			'input[name="classifai_feature_title_generation[googleai_gemini_api][api_key]"]'
-		)
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.selectProvider( 'googleai_gemini_api' );
+		cy.get( 'input#googleai_gemini_api_api_key' )
 			.clear()
 			.type( 'password' );
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_title_generation_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see the generate titles button in a post', () => {
@@ -115,10 +111,10 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.enableClassicEditor();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_title_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		const data = getGeminiAPIData();
 
