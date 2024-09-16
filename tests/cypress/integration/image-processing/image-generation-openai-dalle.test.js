@@ -18,7 +18,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-
+		cy.selectProvider( 'openai_dalle' );
 		cy.get( '#openai_dalle_api_key' ).clear().type( 'password' );
 		cy.get( 'select#openai_dalle_number_of_images' ).select( '2' );
 		cy.get( 'select#openai_dalle_quality' ).select( 'hd' );
