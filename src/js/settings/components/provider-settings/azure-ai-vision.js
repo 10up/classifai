@@ -37,6 +37,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 						description={ <Description /> }
 					>
 						<InputControl
+							id={ `${ providerName }_endpoint_url` }
 							type="text"
 							value={ providerSettings.endpoint_url || '' }
 							onChange={ ( value ) =>
@@ -46,6 +47,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					</SettingsRow>
 					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
 						<InputControl
+							id={ `${ providerName }_api_key` }
 							type="password"
 							value={ providerSettings.api_key || '' }
 							onChange={ ( value ) =>
@@ -64,6 +66,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					) }
 				>
 					<InputControl
+						id={ `${ providerName }_descriptive_confidence_threshold` }
 						type="number"
 						value={
 							providerSettings.descriptive_confidence_threshold ||
@@ -86,6 +89,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					) }
 				>
 					<InputControl
+						id={ `${ providerName }_tag_confidence_threshold` }
 						type="number"
 						value={
 							providerSettings.tag_confidence_threshold || 70

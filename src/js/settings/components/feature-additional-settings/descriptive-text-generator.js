@@ -23,10 +23,12 @@ export const DescriptiveTextGeneratorSettings = () => {
 				'Choose image fields where the generated text should be applied.',
 				'classifai'
 			) }
+			className="classifai-descriptive-text-fields"
 		>
 			{ Object.keys( options ).map( ( option ) => {
 				return (
 					<CheckboxControl
+						id={ option }
 						key={ option }
 						checked={
 							featureSettings.descriptive_text_fields?.[
