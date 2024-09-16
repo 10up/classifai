@@ -17,7 +17,6 @@ import {
 	render,
 } from '@wordpress/element';
 import { getBlockContent, createBlock } from '@wordpress/blocks';
-import { create, toHTMLString } from '@wordpress/rich-text';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 
@@ -82,24 +81,21 @@ const InjectIframeStyles = ( { children } ) => {
 			}
 		} );
 
-		// Append a container to the iframe body for injecting the children.
-		const iframeContainer = iframeDocument.createElement( 'div' );
-		iframeDocument.body.appendChild( iframeContainer );
+		const intervalId = setInterval( () => {
+			if ( ! iframeDocument.body ) {
+				return;
+			}
 
-		// setTimeout( () => {
-		// 	iframeContainer.classList.add( 'block-editor-iframe__body', 'editor-styles-wrapper', 'post-type-post', 'admin-color-fresh', 'wp-embed-responsive' );
-		// 	iframeContainer.querySelector( '.is-root-container' ).classList.add( 'is-desktop-preview', 'is-layout-constrained', 'wp-block-post-content-is-layout-constrained', 'has-global-padding', 'alignfull', 'wp-block-post-content', 'block-editor-block-list__layout' );
+			iframeDocument.body.classList.add( 'block-editor-iframe__body', 'editor-styles-wrapper', 'post-type-post', 'admin-color-fresh', 'wp-embed-responsive' );
+			iframeDocument.body.querySelector( '.is-root-container' ).classList.add( 'is-desktop-preview', 'is-layout-constrained', 'wp-block-post-content-is-layout-constrained', 'has-global-padding', 'alignfull', 'wp-block-post-content', 'block-editor-block-list__layout' );
 
-		// 	console.log(
-		// 		[ 'block-editor-iframe__body', 'editor-styles-wrapper', 'post-type-post', 'admin-color-fresh', 'wp-embed-responsive' ].join( ' ' ),
-		// 		[ 'is-root-container', 'is-desktop-preview', 'is-layout-constrained', 'wp-block-post-content-is-layout-constrained', 'has-global-padding', 'alignfull', 'wp-block-post-content', 'block-editor-block-list__layout' ].join( ' ' )
-		// 	)
-		// }, 3500 );
+			clearInterval( intervalId );
+		}, 100 );
 
 		// Use React Portal to render the children into the iframe container.
 		// TODO: Might need to replace with `createPortal` due to React 18.
-		const portal = createPortal( children, iframeContainer );
-		render( portal, iframeContainer );
+		const portal = createPortal( children, iframeDocument.body );
+		render( portal, iframeDocument.body );
 	}, [ iframeCanvas ] );
 
 	if ( ! iframeCanvas ) {
@@ -314,6 +310,24 @@ const RewriteTonePlugin = () => {
 	}
 
 	/**
+	 * Returns HTML string without the outermost tags.
+	 *
+	 * @param {String} htmlContent HTML as string.
+	 * @returns {String} HTML string without outermost tags stripped.
+	 */
+	function removeOutermostTag( htmlContent ) {
+		// Parse the input HTML string into a DOM structure
+		const parser = new DOMParser();
+		const doc = parser.parseFromString( htmlContent, 'text/html' );
+	
+		// Get the first element within the body (this is the outermost element)
+		const outermostElement = doc.body.firstElementChild;
+	
+		// Return the innerHTML of the outermost element, which removes the outermost tag
+		return outermostElement ? outermostElement.innerHTML : htmlContent;
+	}
+
+	/**
 	 * Applies the result to the editor canvas when the user
 	 * accepts it.
 	 */
@@ -340,17 +354,22 @@ const RewriteTonePlugin = () => {
 				.select( blockEditorStore )
 				.getBlockAttributes( clientId );
 
-			// Generating and applying rich-text content to the new block.
-			const richText = create( { html: content } );
-			const blockContent = toHTMLString( { value: richText } );
+			let createdBlock = wp.blocks.rawHandler( { HTML: content } );
 
-			const newItemListBlock = createBlock( currentBlock.name, {
-				content: blockContent,
-			} );
+			if ( Array.isArray( createdBlock ) && 1 === createdBlock.length && 'core/html' === createdBlock[0].name ) {
+				createdBlock = createBlock( currentBlock.name, {
+					content: removeOutermostTag( content ),
+				} );
+
+				return {
+					clientId,
+					blocks: [ createdBlock ],
+				}
+			}
 
 			return {
 				clientId,
-				blocks: [ newItemListBlock ],
+				blocks: createdBlock,
 			};
 		} );
 
