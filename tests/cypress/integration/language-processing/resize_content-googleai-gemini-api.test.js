@@ -2,16 +2,12 @@ describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#provider' ).select( 'googleai_gemini_api' );
-		cy.get(
-			'input[name="classifai_feature_content_resizing[googleai_gemini_api][api_key]"]'
-		)
-			.clear()
-			.type( 'abc123' );
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.selectProvider( 'googleai_gemini_api' );
+		cy.get( 'input#googleai_gemini_api_api_key' ).clear().type( 'abc123' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -22,14 +18,12 @@ describe( '[Language processing] Resize Content Tests', () => {
 
 	it( 'Resize content feature can grow and shrink content', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_content_resizing_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.saveFeatureSettings();
 
 		cy.createPost( {
 			title: 'Resize content',

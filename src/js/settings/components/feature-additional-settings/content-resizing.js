@@ -15,6 +15,7 @@ export const ContentResizingSettings = () => {
 			<SettingsRow
 				label={ __( 'Condense text prompt', 'classifai' ) }
 				description={ __( 'Enter your custom prompt.', 'classifai' ) }
+				className="settings-condense-text-prompt"
 			>
 				<PromptRepeater
 					prompts={ featureSettings.condense_text_prompt }
@@ -28,6 +29,7 @@ export const ContentResizingSettings = () => {
 			<SettingsRow
 				label={ __( 'Expand text prompt', 'classifai' ) }
 				description={ __( 'Enter your custom prompt.', 'classifai' ) }
+				className="settings-expand-text-prompt"
 			>
 				<PromptRepeater
 					prompts={ featureSettings.expand_text_prompt }
