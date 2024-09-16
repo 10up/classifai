@@ -2,11 +2,11 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#provider' ).select( 'openai_dalle' );
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.selectProvider( 'openai_dalle' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -16,29 +16,18 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can save OpenAI "Image Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
 
-		cy.get( '#api_key' ).clear().type( 'password' );
-		cy.get(
-			'select[name="classifai_feature_image_generation[openai_dalle][number_of_images]"]'
-		).select( '2' );
-		cy.get(
-			'select[name="classifai_feature_image_generation[openai_dalle][quality]"]'
-		).select( 'hd' );
-		cy.get(
-			'select[name="classifai_feature_image_generation[openai_dalle][image_size]"]'
-		).select( '1024x1792' );
-		cy.get(
-			'select[name="classifai_feature_image_generation[openai_dalle][style]"]'
-		).select( 'natural' );
+		cy.get( '#openai_dalle_api_key' ).clear().type( 'password' );
+		cy.get( 'select#openai_dalle_number_of_images' ).select( '2' );
+		cy.get( 'select#openai_dalle_quality' ).select( 'hd' );
+		cy.get( 'select#openai_dalle_image_size' ).select( '1024x1792' );
+		cy.get( 'select#openai_dalle_style' ).select( 'natural' );
 
-		cy.get(
-			'#classifai_feature_image_generation_roles_administrator'
-		).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
 
-		cy.get( '#submit' ).click();
-		cy.get( '.notice' ).contains( 'Settings saved.' );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can generate images in the media modal', () => {
@@ -109,20 +98,20 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	it( 'Can enable/disable image generation feature', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyImageGenerationEnabled( false );
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyImageGenerationEnabled( true );
@@ -130,14 +119,12 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can generate image directly in media library', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_image_generation_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.saveFeatureSettings();
 
 		cy.visit( '/wp-admin/upload.php' );
 		cy.get(
@@ -159,10 +146,10 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	it( 'Can enable/disable image generation feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_generation'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_image_generation', [

@@ -37,6 +37,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 					description={ <Description /> }
 				>
 					<InputControl
+						id={ `${ providerName }_api_key` }
 						type="password"
 						value={ providerSettings.api_key || '' }
 						onChange={ ( value ) => onChange( { api_key: value } ) }
@@ -51,6 +52,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<SelectControl
+					id={ `${ providerName }_number_of_images` }
 					onChange={ ( value ) =>
 						onChange( { number_of_images: value } )
 					}
@@ -69,6 +71,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<SelectControl
+					id={ `${ providerName }_quality` }
 					onChange={ ( value ) => onChange( { quality: value } ) }
 					value={ providerSettings.quality || 'standard' }
 					options={ [
@@ -91,6 +94,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<SelectControl
+					id={ `${ providerName }_image_size` }
 					onChange={ ( value ) => onChange( { image_size: value } ) }
 					value={ providerSettings.image_size || '1024x1024' }
 					options={ [
@@ -117,6 +121,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<SelectControl
+					id={ `${ providerName }_style` }
 					onChange={ ( value ) => onChange( { style: value } ) }
 					value={ providerSettings.style || 'vivid' }
 					options={ [
