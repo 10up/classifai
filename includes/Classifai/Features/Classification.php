@@ -853,10 +853,10 @@ class Classification extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'post_statuses'         => [
-				'publish' => 1,
+				'publish' => 'publish',
 			],
 			'post_types'            => [
-				'post' => 1,
+				'post' => 'post',
 			],
 			'classification_mode'   => 'manual_review',
 			'classification_method' => 'recommended_terms',
