@@ -24,6 +24,7 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					id="openai_api_key"
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }

@@ -2,9 +2,9 @@ describe( '[Language processing] Moderation Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -15,16 +15,15 @@ describe( '[Language processing] Moderation Tests', () => {
 
 	it( 'Can save OpenAI Moderation "Language Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
 
-		cy.get( '#api_key' ).clear().type( 'password' );
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_moderation_content_types_comments'
-		).check();
-		cy.get( '#classifai_feature_moderation_roles_administrator' ).check();
-		cy.get( '#submit' ).click();
+		cy.selectProvider( 'openai_moderation' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-moderation-content-types input#comments' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can run moderation on a comment', () => {
@@ -43,20 +42,20 @@ describe( '[Language processing] Moderation Tests', () => {
 	it( 'Can enable/disable moderation feature', () => {
 		// Disable features.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyModerationEnabled( false );
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyModerationEnabled( true );
@@ -64,10 +63,10 @@ describe( '[Language processing] Moderation Tests', () => {
 
 	it( 'Can enable/disable moderation feature by role', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_moderation', [ 'administrator' ] );
@@ -84,10 +83,10 @@ describe( '[Language processing] Moderation Tests', () => {
 
 	it( 'Can enable/disable moderation feature by user', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_moderation', [ 'administrator' ] );
@@ -106,10 +105,10 @@ describe( '[Language processing] Moderation Tests', () => {
 
 	it( 'User can opt-out of moderation feature', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_moderation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Enable user based opt-out.
 		cy.enableFeatureOptOut( 'feature_moderation' );

@@ -21,10 +21,12 @@ export const ModerationSettings = () => {
 				'Choose what type of content to moderate.',
 				'classifai'
 			) }
+			className="settings-moderation-content-types"
 		>
 			{ Object.keys( contentTypes ).map( ( contentType ) => {
 				return (
 					<CheckboxControl
+						id={ contentType }
 						key={ contentType }
 						checked={
 							featureSettings.content_types?.[ contentType ] ===
