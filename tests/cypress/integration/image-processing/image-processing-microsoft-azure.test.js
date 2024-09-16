@@ -17,14 +17,15 @@ describe( 'Image processing Tests', () => {
 
 		imageProcessingFeatures.forEach( ( feature ) => {
 			cy.visit(
-				`/wp-admin/tools.php?page=classifai&tab=image_processing&feature=${ feature }`
+				`/wp-admin/tools.php?page=classifai#/image_processing/${ feature }`
 			);
-			cy.get( '#status' ).check();
-			cy.get( '#endpoint_url' )
+			cy.selectProvider( 'ms_computer_vision' );
+			cy.get( '.classifai-enable-feature-toggle input' ).check();
+			cy.get( '#ms_computer_vision_endpoint_url' )
 				.clear()
 				.type( 'http://e2e-test-image-processing.test' );
-			cy.get( '#api_key' ).clear().type( 'password' );
-			cy.get( '#submit' ).click();
+			cy.get( '#ms_computer_vision_api_key' ).clear().type( 'password' );
+			cy.saveFeatureSettings();
 		} );
 
 		cy.optInAllFeatures();
@@ -36,12 +37,10 @@ describe( 'Image processing Tests', () => {
 
 	it( 'Can see Azure AI Vision Image processing actions on edit media page and verify Generated data.', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
 		);
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-descriptive-text-fields input#alt' ).check();
+		cy.saveFeatureSettings();
 		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
@@ -114,75 +113,65 @@ describe( 'Image processing Tests', () => {
 
 		// Disable features
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
 		);
-		cy.wait( 1000 );
+		cy.get( '.classifai-descriptive-text-fields input#alt' ).uncheck();
+		cy.get( '.classifai-descriptive-text-fields input#caption' ).uncheck();
 		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
+			'.classifai-descriptive-text-fields input#description'
 		).uncheck();
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_caption'
-		).uncheck();
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_description'
-		).uncheck();
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_tags_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_tags_generator'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_cropping'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_cropping'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_to_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_to_text_generator'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyAIVisionEnabled( false, options );
 
 		// Enable features.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
 		);
-		cy.wait( 1000 );
+		cy.get( '.classifai-descriptive-text-fields input#alt' ).check();
+		cy.get( '.classifai-descriptive-text-fields input#caption' ).check();
 		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
+			'.classifai-descriptive-text-fields input#description'
 		).check();
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_caption'
-		).check();
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_description'
-		).check();
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_tags_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_tags_generator'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_cropping'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_cropping'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_image_to_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_to_text_generator'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyAIVisionEnabled( true, options );
@@ -196,14 +185,11 @@ describe( 'Image processing Tests', () => {
 
 		// Enable features.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_descriptive_text_generator'
+			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
 		);
-		cy.wait( 1000 );
-		cy.get(
-			'#classifai_feature_descriptive_text_generator_descriptive_text_fields_alt'
-		).check();
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-descriptive-text-fields input#alt' ).check();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Disable access to admin role.
 		cy.disableFeatureForRoles( 'feature_descriptive_text_generator', [
