@@ -62,6 +62,7 @@ export const PromptRepeater = ( props ) => {
 			{ prompts.map( ( prompt, index ) => (
 				<div
 					className="classifai-field-type-prompt-setting"
+					id={ `classifai-prompt-setting-${ index }` }
 					key={ index }
 				>
 					{ !! prompt.original && (
@@ -96,6 +97,7 @@ export const PromptRepeater = ( props ) => {
 									'Short description of prompt to use for identification.',
 									'classifai'
 								) }
+								className="classifai-prompt-title"
 							/>
 							<TextareaControl
 								value={ prompt.prompt }
@@ -106,6 +108,7 @@ export const PromptRepeater = ( props ) => {
 										prompt: value,
 									} );
 								} }
+								className="classifai-prompt-text"
 							/>
 						</>
 					) }

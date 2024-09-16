@@ -68,6 +68,7 @@ export const UserPermissions = () => {
 							user_based_opt_out: value ? '1' : 'no',
 						} );
 					} }
+					className="classifai-settings__user-based-opt-out"
 				/>
 			</SettingsRow>
 		</PanelBody>

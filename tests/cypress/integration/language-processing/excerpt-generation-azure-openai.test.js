@@ -6,6 +6,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
+		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.get( '.classifai-enable-feature-toggle input' ).check();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
@@ -21,7 +22,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-
+		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'azure_openai' );
 		cy.get( 'input#azure_openai_endpoint_url' )
 			.clear()
