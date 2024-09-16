@@ -86,8 +86,24 @@ const InjectIframeStyles = ( { children } ) => {
 				return;
 			}
 
-			iframeDocument.body.classList.add( 'block-editor-iframe__body', 'editor-styles-wrapper', 'post-type-post', 'admin-color-fresh', 'wp-embed-responsive' );
-			iframeDocument.body.querySelector( '.is-root-container' ).classList.add( 'is-desktop-preview', 'is-layout-constrained', 'wp-block-post-content-is-layout-constrained', 'has-global-padding', 'alignfull', 'wp-block-post-content', 'block-editor-block-list__layout' );
+			iframeDocument.body.classList.add(
+				'block-editor-iframe__body',
+				'editor-styles-wrapper',
+				'post-type-post',
+				'admin-color-fresh',
+				'wp-embed-responsive'
+			);
+			iframeDocument.body
+				.querySelector( '.is-root-container' )
+				.classList.add(
+					'is-desktop-preview',
+					'is-layout-constrained',
+					'wp-block-post-content-is-layout-constrained',
+					'has-global-padding',
+					'alignfull',
+					'wp-block-post-content',
+					'block-editor-block-list__layout'
+				);
 
 			clearInterval( intervalId );
 		}, 100 );
@@ -108,6 +124,7 @@ const InjectIframeStyles = ( { children } ) => {
 				<iframe
 					ref={ iframeRef }
 					style={ { width: '100%', height: '100%', border: 'none' } }
+					title={ __( 'Rewrite tone previewer', 'classifai' ) }
 				></iframe>
 			</div>
 		</>
@@ -312,17 +329,17 @@ const RewriteTonePlugin = () => {
 	/**
 	 * Returns HTML string without the outermost tags.
 	 *
-	 * @param {String} htmlContent HTML as string.
-	 * @returns {String} HTML string without outermost tags stripped.
+	 * @param {string} htmlContent HTML as string.
+	 * @return {string} HTML string without outermost tags stripped.
 	 */
 	function removeOutermostTag( htmlContent ) {
 		// Parse the input HTML string into a DOM structure
 		const parser = new DOMParser();
 		const doc = parser.parseFromString( htmlContent, 'text/html' );
-	
+
 		// Get the first element within the body (this is the outermost element)
 		const outermostElement = doc.body.firstElementChild;
-	
+
 		// Return the innerHTML of the outermost element, which removes the outermost tag
 		return outermostElement ? outermostElement.innerHTML : htmlContent;
 	}
@@ -356,7 +373,11 @@ const RewriteTonePlugin = () => {
 
 			let createdBlock = wp.blocks.rawHandler( { HTML: content } );
 
-			if ( Array.isArray( createdBlock ) && 1 === createdBlock.length && 'core/html' === createdBlock[0].name ) {
+			if (
+				Array.isArray( createdBlock ) &&
+				1 === createdBlock.length &&
+				'core/html' === createdBlock[ 0 ].name
+			) {
 				createdBlock = createBlock( currentBlock.name, {
 					content: removeOutermostTag( content ),
 				} );
@@ -364,7 +385,7 @@ const RewriteTonePlugin = () => {
 				return {
 					clientId,
 					blocks: [ createdBlock ],
-				}
+				};
 			}
 
 			return {
