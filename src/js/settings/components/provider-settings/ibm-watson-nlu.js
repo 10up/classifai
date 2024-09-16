@@ -74,7 +74,13 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 				<InputControl
 					type="password"
 					value={ providerSettings.password || '' }
-					onChange={ ( value ) => onChange( { password: value } ) }
+					onChange={ ( value ) => {
+						const data = { password: value };
+						if ( useAPIkey ) {
+							data.username = 'apikey';
+						}
+						onChange( data );
+					} }
 				/>
 			</SettingsRow>
 			<SettingsRow>
