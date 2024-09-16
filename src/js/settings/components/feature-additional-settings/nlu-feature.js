@@ -91,6 +91,7 @@ export const NLUFeatureSettings = () => {
 						className={ 'nlu-features' }
 					>
 						<CheckboxControl
+							id={ `${ feature }-enabled` }
 							label={ __( 'Enable', 'classifai' ) }
 							value={ feature }
 							checked={ featureSettings[ feature ] }
@@ -101,6 +102,7 @@ export const NLUFeatureSettings = () => {
 							} }
 						/>
 						<InputControl
+							id={ `${ feature }-threshold` }
 							label={ __( 'Threshold (%)', 'classifai' ) }
 							type="number"
 							value={
@@ -115,6 +117,7 @@ export const NLUFeatureSettings = () => {
 						/>
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl
+								id={ `${ feature }-taxonomy` }
 								label={ sprintf(
 									// translators: %s: feature label
 									__( '%s Taxonomy', 'classifai' ),

@@ -60,6 +60,7 @@ const ClassificationMethodSettings = () => {
 	return (
 		<SettingsRow label={ __( 'Classification method', 'classifai' ) }>
 			<RadioControl
+				className="classification-method-radio-control"
 				onChange={ ( value ) => {
 					setFeatureSettings( {
 						classification_method: value,
@@ -118,6 +119,7 @@ export const ClassificationSettings = () => {
 			</SettingsRow>
 			<SettingsRow label={ __( 'Classification mode', 'classifai' ) }>
 				<RadioControl
+					className="classification-mode-radio-control"
 					onChange={ ( value ) => {
 						setFeatureSettings( {
 							classification_mode: value,
@@ -147,11 +149,13 @@ export const ClassificationSettings = () => {
 					'Choose which post statuses are allowed to use this feature.',
 					'classifai'
 				) }
+				className="settings-allowed-post-statuses"
 			>
 				{ postStatusOptions.map( ( option ) => {
 					const { value: key, label } = option;
 					return (
 						<CheckboxControl
+							id={ key }
 							key={ key }
 							checked={
 								featureSettings.post_statuses?.[ key ] === key
@@ -175,11 +179,13 @@ export const ClassificationSettings = () => {
 					'Choose which post types are allowed to use this feature.',
 					'classifai'
 				) }
+				className="settings-allowed-post-types"
 			>
 				{ postTypesSelectOptions.map( ( option ) => {
 					const { value: key, label } = option;
 					return (
 						<CheckboxControl
+							id={ key }
 							key={ key }
 							checked={
 								featureSettings.post_types?.[ key ] === key

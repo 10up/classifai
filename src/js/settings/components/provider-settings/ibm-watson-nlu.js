@@ -45,6 +45,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 		<>
 			<SettingsRow label={ __( 'API URL', 'classifai' ) }>
 				<InputControl
+					id={ `${ providerName }_endpoint_url` }
 					type="url"
 					value={ providerSettings.endpoint_url || '' }
 					onChange={ ( value ) =>
@@ -55,6 +56,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 			{ ! useAPIkey && (
 				<SettingsRow label={ __( 'API Username', 'classifai' ) }>
 					<InputControl
+						id={ `${ providerName }_username` }
 						type="text"
 						value={ providerSettings.username || '' }
 						onChange={ ( value ) =>
@@ -72,6 +74,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					id={ `${ providerName }_password` }
 					type="password"
 					value={ providerSettings.password || '' }
 					onChange={ ( value ) => {
@@ -85,6 +88,7 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 			</SettingsRow>
 			<SettingsRow>
 				<Button
+					className="classifai-ibm-watson-toggle-api-key"
 					variant="link"
 					onClick={ () => {
 						setUseAPIkey( ! useAPIkey );
