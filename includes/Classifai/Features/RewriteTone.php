@@ -81,35 +81,35 @@ class RewriteTone extends Feature {
 					],
 					'content' => [
 						'type'              => 'array',
-						// 'sanitize_callback' => function ( $content_array ) {
-						// 	if ( is_array( $content_array ) ) {
-						// 		return array_map(
-						// 			function ( $item ) {
-						// 				$item['clientId'] = sanitize_text_field( $item['clientId'] );
-						// 				$item['content']  = wp_kses_post( $item['content'] );
-						// 				return $item;
-						// 			},
-						// 			$content_array
-						// 		);
-						// 	}
+						'sanitize_callback' => function ( $content_array ) {
+							if ( is_array( $content_array ) ) {
+								return array_map(
+									function ( $item ) {
+										$item['clientId'] = sanitize_text_field( $item['clientId'] );
+										$item['content']  = wp_kses_post( $item['content'] );
+										return $item;
+									},
+									$content_array
+								);
+							}
 
-						// 	return [];
-						// },
-						// 'validate_callback' => function ( $content_array ) {
-						// 	if ( is_array( $content_array ) ) {
-						// 		foreach ( $content_array as $item ) {
-						// 			if ( ! isset( $item['clientId'] ) || ! is_string( $item['clientId'] ) ) {
-						// 				return new WP_Error( 'rewrite_tone_invalid_client_id', __( 'Each item must have a valid clientId string.', 'classifai' ), [ 'status' => 400 ] );
-						// 			}
+							return [];
+						},
+						'validate_callback' => function ( $content_array ) {
+							if ( is_array( $content_array ) ) {
+								foreach ( $content_array as $item ) {
+									if ( ! isset( $item['clientId'] ) || ! is_string( $item['clientId'] ) ) {
+										return new WP_Error( 'rewrite_tone_invalid_client_id', __( 'Each item must have a valid clientId string.', 'classifai' ), [ 'status' => 400 ] );
+									}
 
-						// 			if ( ! isset( $item['content'] ) || ! is_string( $item['content'] ) ) {
-						// 				return new WP_Error( 'rewrite_tone_invalid_content', __( 'Each item must have valid content as a string.', 'classifai' ), [ 'status' => 400 ] );
-						// 			}
-						// 		}
-						// 		return true;
-						// 	}
-						// 	return new WP_Error( 'rewrite_tone_invalid_data_format', __( 'Content must be an array of objects.', 'classifai' ), [ 'status' => 400 ] );
-						// },
+									if ( ! isset( $item['content'] ) || ! is_string( $item['content'] ) ) {
+										return new WP_Error( 'rewrite_tone_invalid_content', __( 'Each item must have valid content as a string.', 'classifai' ), [ 'status' => 400 ] );
+									}
+								}
+								return true;
+							}
+							return new WP_Error( 'rewrite_tone_invalid_data_format', __( 'Content must be an array of objects.', 'classifai' ), [ 'status' => 400 ] );
+						},
 						'description'       => esc_html__( 'The content to resize.', 'classifai' ),
 					],
 				],
