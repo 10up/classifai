@@ -37,6 +37,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 					description={ <Description /> }
 				>
 					<InputControl
+						id={ `${ providerName }_api_key` }
 						type="password"
 						value={ providerSettings.api_key || '' }
 						onChange={ ( value ) => onChange( { api_key: value } ) }
@@ -64,6 +65,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				}
 			>
 				<SelectControl
+					id={ `${ providerName }_tts_model` }
 					onChange={ ( value ) => onChange( { tts_model: value } ) }
 					value={ providerSettings.tts_model || 'tts-1' }
 					options={ [
@@ -101,6 +103,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				}
 			>
 				<SelectControl
+					id={ `${ providerName }_voice` }
 					onChange={ ( value ) => onChange( { voice: value } ) }
 					value={ providerSettings.voice || 'alloy' }
 					options={ [
@@ -139,6 +142,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<SelectControl
+					id={ `${ providerName }_format` }
 					onChange={ ( value ) => onChange( { format: value } ) }
 					value={ providerSettings.format || '.mp3' }
 					options={ [
@@ -161,6 +165,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				) }
 			>
 				<InputControl
+					id={ `${ providerName }_speed` }
 					onChange={ ( value ) => onChange( { speed: value } ) }
 					value={ providerSettings.speed || 1 }
 					type="number"

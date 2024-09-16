@@ -44,6 +44,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 						description={ <Description /> }
 					>
 						<InputControl
+							id={ `${ providerName }_endpoint_url` }
 							type="text"
 							value={ providerSettings.endpoint_url || '' }
 							onChange={ ( value ) =>
@@ -53,6 +54,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 					</SettingsRow>
 					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
 						<InputControl
+							id={ `${ providerName }_api_key` }
 							type="password"
 							value={ providerSettings.api_key || '' }
 							onChange={ ( value ) =>
@@ -65,6 +67,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 			{ !! providerSettings.voices?.length && (
 				<SettingsRow label={ __( 'Voice', 'classifai' ) }>
 					<SelectControl
+						id={ `${ providerName }_voice` }
 						onChange={ ( value ) => onChange( { voice: value } ) }
 						value={ providerSettings.voice || '' }
 						options={ ( providerSettings.voices || [] ).map(

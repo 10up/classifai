@@ -2,19 +2,18 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get(
-			'#classifai_feature_text_to_speech_generation_post_types_post'
-		).check( 'post' );
-		cy.get( '#provider' ).select( 'openai_text_to_speech' );
-		cy.get( '#tts_model' ).select( 'tts-1' );
-		cy.get( '[name="classifai_feature_text_to_speech_generation[openai_text_to_speech][api_key]"]' ).type( 'password' );
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.selectProvider( 'openai_text_to_speech' );
+		cy.get( '#openai_text_to_speech_tts_model' ).select( 'tts-1' );
+		cy.get( '#openai_text_to_speech_api_key' ).clear().type( 'password' );
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
-		cy.get( '[name="classifai_feature_text_to_speech_generation[openai_text_to_speech][voice]"]' ).select( 'alloy' );
-		cy.get( '#submit' ).click();
+		cy.get( '#openai_text_to_speech_voice' ).select( 'alloy' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -112,12 +111,10 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 		cy.disableClassicEditor();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get(
-			'#classifai_feature_text_to_speech_generation_post_types_post'
-		).uncheck( 'post' );
-		cy.get( '#submit' ).click();
+		cy.get( '.settings-allowed-post-types input#post' ).uncheck();
+		cy.saveFeatureSettings();
 
 		cy.visit( '/text-to-speech-test/' );
 		cy.get( '.class-post-audio-controls' ).should( 'not.exist' );
@@ -126,23 +123,21 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 	it( 'Can enable/disable text to speech feature', () => {
 		// Disable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_text_to_speech_generation_post_types_post'
-		).check( 'post' );
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyTextToSpeechEnabled( true );
@@ -151,12 +146,10 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 	it( 'Can enable/disable text to speech feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get(
-			'#classifai_feature_text_to_speech_generation_post_types_post'
-		).check( 'post' );
-		cy.get( '#submit' ).click();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_text_to_speech_generation', [

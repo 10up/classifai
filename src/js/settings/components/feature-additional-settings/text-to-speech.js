@@ -20,11 +20,13 @@ export const TextToSpeechSettings = () => {
 				'Choose which post types support this feature.',
 				'classifai'
 			) }
+			className="settings-allowed-post-types"
 		>
 			{ postTypesSelectOptions.map( ( option ) => {
 				const { value: key, label } = option;
 				return (
 					<CheckboxControl
+						id={ key }
 						key={ key }
 						checked={ featureSettings.post_types?.[ key ] === key }
 						label={ label }

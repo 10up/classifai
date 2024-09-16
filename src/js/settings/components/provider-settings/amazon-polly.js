@@ -22,6 +22,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 				<>
 					<SettingsRow label={ __( 'Access key', 'classifai' ) }>
 						<InputControl
+							id={ `${ providerName }_access_key_id` }
 							type="text"
 							value={ providerSettings.access_key_id || '' }
 							onChange={ ( value ) =>
@@ -37,6 +38,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 						) }
 					>
 						<InputControl
+							id={ `${ providerName }_secret_access_key` }
 							type="password"
 							value={ providerSettings.secret_access_key || '' }
 							onChange={ ( value ) =>
@@ -62,6 +64,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 						}
 					>
 						<InputControl
+							id={ `${ providerName }_aws_region` }
 							type="text"
 							value={ providerSettings.aws_region || '' }
 							onChange={ ( value ) =>
@@ -101,6 +104,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 				}
 			>
 				<SelectControl
+					id={ `${ providerName }_voice_engine` }
 					onChange={ ( value ) =>
 						onChange( { voice_engine: value } )
 					}
@@ -123,6 +127,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 			</SettingsRow>
 			<SettingsRow label={ __( 'Voice', 'classifai' ) }>
 				<SelectControl
+					id={ `${ providerName }_voice` }
 					onChange={ ( value ) => onChange( { voice: value } ) }
 					value={ providerSettings.voice || '' }
 					options={ ( providerSettings.voices || [] )
