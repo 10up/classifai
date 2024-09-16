@@ -21,6 +21,9 @@ module.exports = {
 		'content-resizing-plugin': [
 			'./src/js/gutenberg-plugins/content-resizing-plugin.js',
 		],
+		'rewrite-tone-plugin': [
+			'./src/js/gutenberg-plugins/rewrite-tone-plugin.js',
+		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],

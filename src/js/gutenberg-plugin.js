@@ -9,9 +9,12 @@ import {
 	ToggleControl,
 	BaseControl,
 	Modal,
+	SlotFillProvider,
+	Slot,
+	Fill,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, PluginArea } from '@wordpress/plugins';
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { store as postAudioStore } from './store/register';
 import TaxonomyControls from './taxonomy-controls';
@@ -628,6 +631,10 @@ const ClassifAIPlugin = () => {
 				) }
 				{ classifaiTTSEnabled && <ClassifAITTS /> }
 			</>
+			<SlotFillProvider>
+				<Slot name="classifai-editor-settings-panel" />
+				<PluginArea />
+			</SlotFillProvider>
 		</PluginDocumentSettingPanel>
 	);
 };
@@ -663,3 +670,7 @@ subscribe( () => {
 } );
 
 registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );
+
+export const ClassifaiEditorSettingsPanel = ( { children } ) => {
+	return <Fill name="classifai-editor-settings-panel">{ children }</Fill>;
+};
