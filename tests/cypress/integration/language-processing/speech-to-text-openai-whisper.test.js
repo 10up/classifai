@@ -4,10 +4,10 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -18,16 +18,14 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
 		);
 
-		cy.get( '#api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_audio_transcripts_generation_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.saveFeatureSettings();
 	} );
 
 	let audioEditLink = '';
@@ -83,20 +81,20 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 		// Disable features
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifySpeechToTextEnabled( true, options );
@@ -105,10 +103,10 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	it( 'Can enable/disable speech to text feature by role', () => {
 		// Enable feature.
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		const options = {
 			audioEditLink,
