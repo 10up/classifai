@@ -4,13 +4,11 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_post_types_post'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -21,32 +19,20 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can save Azure OpenAI "Language Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
 
-		cy.get( '#provider' ).select( 'azure_openai' );
-		cy.get(
-			'input[name="classifai_feature_excerpt_generation[azure_openai][endpoint_url]"]'
-		)
+		cy.selectProvider( 'azure_openai' );
+		cy.get( 'input#azure_openai_endpoint_url' )
 			.clear()
 			.type( 'https://e2e-test-azure-openai.test/' );
-		cy.get(
-			'input[name="classifai_feature_excerpt_generation[azure_openai][api_key]"]'
-		)
-			.clear()
-			.type( 'password' );
-		cy.get(
-			'input[name="classifai_feature_excerpt_generation[azure_openai][deployment]"]'
-		)
-			.clear()
-			.type( 'test' );
+		cy.get( 'input#azure_openai_api_key' ).clear().type( 'password' );
+		cy.get( 'input#azure_openai_deployment' ).clear().type( 'test' );
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_roles_administrator'
-		).check();
-		cy.get( '#length' ).clear().type( 35 );
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.get( '#excerpt_length' ).clear().type( 35 );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see the generate excerpt button in a post', () => {
@@ -99,10 +85,10 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.enableClassicEditor();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		const data = getChatGPTData();
 

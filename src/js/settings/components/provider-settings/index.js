@@ -149,6 +149,7 @@ export const ProviderSettings = () => {
 						label={ __( 'Select a provider', 'classifai' ) }
 					>
 						<SelectControl
+							className="classifai-provider-select"
 							onChange={ ( value ) =>
 								setFeatureSettings( { provider: value } )
 							}

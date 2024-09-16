@@ -1,6 +1,9 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { CheckboxControl } from '@wordpress/components';
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	CheckboxControl,
+} from '@wordpress/components';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
@@ -38,11 +41,13 @@ export const ExcerptGenerationSettings = () => {
 					'Choose which post types support this feature.',
 					'classifai'
 				) }
+				className="settings-allowed-post-types"
 			>
 				{ ( excerptPostTypesOptions || [] ).map( ( option ) => {
 					const { value: key, label } = option;
 					return (
 						<CheckboxControl
+							id={ key }
 							key={ key }
 							checked={
 								featureSettings.post_types?.[ key ] === key
@@ -59,6 +64,22 @@ export const ExcerptGenerationSettings = () => {
 						/>
 					);
 				} ) }
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Excerpt length', 'classifai' ) }
+				description={ __(
+					'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.',
+					'classifai'
+				) }
+			>
+				<InputControl
+					id="excerpt_length"
+					type="number"
+					value={ featureSettings.length || 55 }
+					onChange={ ( value ) =>
+						setFeatureSettings( { length: value } )
+					}
+				/>
 			</SettingsRow>
 		</>
 	);

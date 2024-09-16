@@ -33,6 +33,7 @@ export const AllowedRoles = () => {
 			{ Object.keys( featureRoles ).map( ( role ) => {
 				return (
 					<CheckboxControl
+						id={ role }
 						key={ role }
 						checked={ roles?.[ role ] === role }
 						label={ featureRoles[ role ] }

@@ -38,6 +38,7 @@ export const EnableToggleControl = ( { children } ) => {
 			description={ enableDescription }
 		>
 			<ToggleControl
+				className="classifai-enable-feature-toggle"
 				checked={ status === '1' }
 				onChange={ ( value ) =>
 					setFeatureSettings( {

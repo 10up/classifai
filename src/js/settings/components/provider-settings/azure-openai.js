@@ -39,6 +39,7 @@ export const AzureOpenAISettings = ( {
 						description={ <Description /> }
 					>
 						<InputControl
+							id={ `${ providerName }_endpoint_url` }
 							type="text"
 							value={ providerSettings.endpoint_url || '' }
 							onChange={ ( value ) =>
@@ -48,6 +49,7 @@ export const AzureOpenAISettings = ( {
 					</SettingsRow>
 					<SettingsRow label={ __( 'API Key', 'classifai' ) }>
 						<InputControl
+							id={ `${ providerName }_api_key` }
 							type="password"
 							value={ providerSettings.api_key || '' }
 							onChange={ ( value ) =>
@@ -63,6 +65,7 @@ export const AzureOpenAISettings = ( {
 						) }
 					>
 						<InputControl
+							id={ `${ providerName }_deployment` }
 							type="text"
 							value={ providerSettings.deployment || '' }
 							onChange={ ( value ) =>
@@ -84,6 +87,7 @@ export const AzureOpenAISettings = ( {
 					) }
 				>
 					<InputControl
+						id={ `${ providerName }_number_of_suggestions` }
 						type="number"
 						value={ providerSettings.number_of_suggestions || 1 }
 						onChange={ ( value ) =>
