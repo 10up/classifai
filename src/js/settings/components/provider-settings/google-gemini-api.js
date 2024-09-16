@@ -38,6 +38,7 @@ export const GoogleAIGeminiAPISettings = ( { isConfigured = false } ) => {
 				description={ <Description /> }
 			>
 				<InputControl
+					id={ `${ providerName }_api_key` }
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }

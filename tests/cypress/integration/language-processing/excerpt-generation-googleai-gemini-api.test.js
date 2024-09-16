@@ -4,13 +4,12 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	before( () => {
 		cy.login();
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_post_types_post'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -21,21 +20,18 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can save Google AI (Gemini API) "Language Processing" settings', () => {
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#provider' ).select( 'googleai_gemini_api' );
-		cy.get(
-			'input[name="classifai_feature_excerpt_generation[googleai_gemini_api][api_key]"]'
-		)
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.selectProvider( 'googleai_gemini_api' );
+		cy.get( 'input#googleai_gemini_api_api_key' )
 			.clear()
 			.type( 'password' );
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_roles_administrator'
-		).check();
-		cy.get( '#length' ).clear().type( 35 );
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.get( '#excerpt_length' ).clear().type( 35 );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see the generate excerpt button in a post', () => {
@@ -88,10 +84,10 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.enableClassicEditor();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.saveFeatureSettings();
 
 		const data = getGeminiAPIData();
 
