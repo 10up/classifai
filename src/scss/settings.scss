@@ -12,12 +12,12 @@
 		position: sticky;
 		z-index: 1001;
 		margin-left: -20px;
-		padding: 0 10px;
+		padding: 0px;
 		box-shadow: 0px 10px 10px 0px #f0f0f1;
 
 		@media screen and (max-width: 782px) {
 			margin-left: -10px;
-			padding: 0 5px;
+			padding: 0px;
 		}
 
 		body.admin-bar & {
@@ -32,10 +32,14 @@
 
 		.classifai-header-layout {
 			justify-content: space-between;
-			padding: 18px;
+			padding: 18px 28px;
 			display: flex;
 			align-items: center;
 			margin: 0 auto;
+
+			@media screen and (max-width: 782px) {
+				padding: 18px;
+			}
 		}
 
 		#classifai-logo {
@@ -396,6 +400,10 @@
 
 	.classifai-setup__content {
 		margin-left: 0px;
+
+		@media screen and (max-width: 782px) {
+			margin-right: 10px;
+		}
 	}
 }
 
