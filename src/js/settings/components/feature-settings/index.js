@@ -51,6 +51,21 @@ const PersonalizerDeprecationNotice = () => (
 	</Notice>
 );
 
+const ElasticPressRequiredNotice = () => (
+	<Notice
+		status="error"
+		isDismissible={ false }
+		className="elasticpress-required-notice"
+	>
+		<p>
+			{ __(
+				'The Smart 404 Feature requires the ElasticPress plugin to be installed and active prior to use.',
+				'classifai'
+			) }
+		</p>
+	</Notice>
+);
+
 /**
  * Feature Settings component.
  *
@@ -81,6 +96,14 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 				</span>
 			</div>
 		);
+	}
+
+	// Show ElasticPress required notice if the feature is Smart 404 and ElasticPress is not active.
+	if (
+		'feature_smart_404' === featureName &&
+		! window.classifAISettings?.isEPinstalled
+	) {
+		return <ElasticPressRequiredNotice />;
 	}
 
 	return (
