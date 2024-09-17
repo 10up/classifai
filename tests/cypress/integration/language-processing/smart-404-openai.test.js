@@ -12,37 +12,39 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 		cy.disableElasticPress();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_smart_404'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_smart_404'
 		);
 
-		cy.get( '.classifai-nlu-sections .notice-error' ).should( 'exist' );
+		cy.get( '.elasticpress-required-notice.components-notice ' ).should(
+			'exist'
+		);
 	} );
 
 	it( 'Can save Smart 404 settings', () => {
 		cy.enableElasticPress();
 
 		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_smart_404'
+			'/wp-admin/tools.php?page=classifai#/language_processing/feature_smart_404'
 		);
 
 		// Enabled Feature.
-		cy.get( '#status' ).check();
+		cy.get( '.classifai-enable-feature-toggle input' ).check();
 
 		// Setup Provider.
-		cy.get( '#provider' ).select( 'openai_embeddings' );
-		cy.get( '#api_key' ).clear().type( 'password' );
+		cy.selectProvider( 'azure_openai_embeddings' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		// Change all settings.
-		cy.get( '#num' ).clear().type( 5 );
-		cy.get( '#num_search' ).clear().type( 8000 );
-		cy.get( '#threshold' ).clear().type( 2.55 );
-		cy.get( '#rescore' ).check();
-		cy.get( '#fallback' ).uncheck();
-		cy.get( '#score_function' ).select( 'dot_product' );
-		cy.get( '#classifai_feature_smart_404_roles_administrator' ).check();
+		cy.get( '#feature_smart_404_num' ).clear().type( 5 );
+		cy.get( '#feature_smart_404_num_search' ).clear().type( 8000 );
+		cy.get( '#feature_smart_404_threshold' ).clear().type( 2.55 );
+		cy.get( '#feature_smart_404_rescore' ).check();
+		cy.get( '#feature_smart_404_fallback' ).uncheck();
+		cy.get( '#feature_smart_404_score_function' ).select( 'dot_product' );
+		cy.get( '.settings-allowed-roles input#administrator' ).check();
 
 		// Save settings.
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 
 		cy.disableElasticPress();
 	} );
