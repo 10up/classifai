@@ -17,6 +17,7 @@ import { ContentResizingSettings } from './content-resizing';
 import { ExcerptGenerationSettings } from './excerpt-generation';
 import { ClassificationSettings } from './classification';
 import { ModerationSettings } from './moderation';
+import { Smart404Settings } from './smart-404';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -45,6 +46,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_moderation':
 			return <ModerationSettings />;
+
+		case 'feature_smart_404':
+			return <Smart404Settings />;
 
 		default:
 			return null;

@@ -19,8 +19,8 @@ describe( 'Image processing Tests', () => {
 			cy.visit(
 				`/wp-admin/tools.php?page=classifai#/image_processing/${ feature }`
 			);
-			cy.selectProvider( 'ms_computer_vision' );
 			cy.get( '.classifai-enable-feature-toggle input' ).check();
+			cy.selectProvider( 'ms_computer_vision' );
 			cy.get( '#ms_computer_vision_endpoint_url' )
 				.clear()
 				.type( 'http://e2e-test-image-processing.test' );
