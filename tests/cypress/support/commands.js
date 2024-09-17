@@ -584,3 +584,27 @@ Cypress.Commands.add( 'selectProvider', ( provider ) => {
 Cypress.Commands.add( 'saveFeatureSettings', () => {
 	cy.get( '.classifai-settings-footer button.save-settings-button' ).click();
 } );
+
+/**
+ * Activate the ElasticPress plugin.
+ */
+Cypress.Commands.add( 'enableElasticPress', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-elasticpress' ).length > 0 ) {
+			cy.get( '#activate-elasticpress' ).click();
+		}
+	} );
+} );
+
+/**
+ * Deactivate the Classic Editor plugin.
+ */
+Cypress.Commands.add( 'disableElasticPress', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-elasticpress' ).length > 0 ) {
+			cy.get( '#deactivate-elasticpress' ).click();
+		}
+	} );
+} );

@@ -526,7 +526,7 @@ class Embeddings extends Provider {
 
 		// Chunk the post content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $post_id, 'post' );
+		$content        = $this->get_normalized_content( $post_id, 'post' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -998,7 +998,7 @@ class Embeddings extends Provider {
 
 		// Chunk the term content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $term_id, 'term' );
+		$content        = $this->get_normalized_content( $term_id, 'term' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -1210,7 +1210,7 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ): string {
+	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
 
 		// Get the content depending on the type.

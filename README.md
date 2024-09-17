@@ -1,39 +1,14 @@
-# ![ClassifAI](https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/logo.svg "ClassifAI")
+# ClassifAI
 
-> Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
+![ClassifAI](https://github.com/10up/classifai/blob/develop/assets/img/banner-1544x500.png)
 
 [![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.6%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
+> Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
+
 *You can learn more about ClassifAI's features at [ClassifAIPlugin.com](https://classifaiplugin.com/) and documentation at the [ClassifAI documentation site](https://10up.github.io/classifai/).*
-
-## Table of Contents
-
-* [Overview](#overview)
-* [Features](#features)
-* [Requirements](#requirements)
-* [Pricing](#pricing)
-* [Installation](#installation)
-* [Register ClassifAI account](#register-classifai-account)
-* [Set Up IBM Watson NLU Language Processing](#set-up-classification-via-ibm-watson)
-* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-features-via-openai-chatgpt)
-* [Set Up Azure OpenAI Language Processing](#set-up-language-processing-features-via-azure-openai)
-* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-features-via-google-ai-gemini-api)
-* [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
-* [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
-* [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
-* [Set Up OpenAI Text to Speech Processing](#set-up-text-to-speech-via-openai)
-* [Set Up AWS Language Processing](#set-up-text-to-speech-via-amazon-polly)
-* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
-* [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
-* [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
-* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
-* [WP CLI Commands](#wp-cli-commands)
-* [FAQs](#frequently-asked-questions)
-* [Support](#support-level)
-* [Changelog](#changelog)
-* [Contributing](#contributing)
 
 ## Overview
 
@@ -49,6 +24,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+* Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
 * Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -80,6 +56,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
+* To utilize the Smart 404 feature, you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
 ## Pricing
 
@@ -136,10 +113,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "2.0.0",
+            "version": "3.1.1",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/2.0.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.1.1.zip",
                 "type": "zip"
             }
         }
@@ -151,7 +128,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.0.0"
+    "10up/classifai": "3.1.1"
 }
 ```
 
@@ -464,6 +441,125 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
 * Click the button to preview the generated speech audio for the post.
 * View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up the Smart 404 Feature
+
+### 1. Decide on Provider
+
+* This Feature is powered by either OpenAI or Azure OpenAI.
+* Once you've chosen a Provider, you'll need to create an account and get authentication details.
+  * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
+
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Smart 404
+
+* Select the proper Provider in the provider dropdown.
+* Enter your authentication details.
+* Configure any other settings as desired.
+
+### 3. ElasticPress configuration
+
+Once the Smart 404 Feature is configured, you can then proceed to get ElasticPress set up to index the data.
+
+If on a standard WordPress installation:
+
+* Install and activate the [ElasticPress](https://github.com/10up/elasticpress) plugin.
+* Set your Elasticsearch URL in the ElasticPress settings (`ElasticPress > Settings`).
+* Go to the `ElasticPress > Sync` settings page and trigger a sync, ensuring this is set to run a sync from scratch. This will send over the new schema to Elasticsearch and index all content, including creating vector embeddings for each post.
+
+If on a WordPress VIP hosted environment:
+
+* [Enable Enterprise Search](https://docs.wpvip.com/enterprise-search/enable/)
+* [Run the VIP-CLI `index` command](https://docs.wpvip.com/enterprise-search/index/). This sends the new schema to Elasticsearch and indexes all content, including creating vector embeddings for each post. Note you may need to use the `--setup` flag to ensure the schema is created correctly.
+
+At this point all of your content should be indexed, along with the embeddings data. You'll then need to update your 404 template to display the recommended results.
+
+### 4. Display the recommended results
+
+The Smart 404 Feature comes with a few helper functions that can be used to display the recommended results on your 404 page:
+
+* Directly display the results using the `Classifai\render_smart_404_results()` function.
+* Get the data and then display it in your own way using the `Classifai\get_smart_404_results()` function.
+
+You will need to directly integrate these functions into your 404 template where desired. The plugin does not automatically display the results on the 404 page for you.
+
+Both functions support the following arguments. If any argument is not provided, the default value set on the settings page will be used:
+
+* `$index` (string) - The ElasticPress index to search in. Default is `post`.
+* `$num` (int) - Maximum number of results to display. Default is `5`.
+* `$num_candidates` (int) - Maximum number of results to search over. Default is `5000`.
+* `$rescore` (bool) - Whether to run a rescore query or not. Can give better results but often is slower. Default is `false`.
+* `$score_function` (string) - The [vector scoring function](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-script-score-query.html#vector-functions) to use. Default is `cosine`. Options are `cosine`, `dot_product`, `l1_norm` and `l2_norm`.
+
+The `Classifai\render_smart_404_results()` function also supports the following additional arguments:
+
+* `$fallback` (bool) - Whether to run a fallback WordPress query if no results are found in Elasticsearch. These results will then be rendered. Default is `true`.
+
+Examples:
+
+```php
+// Render the results.
+Classifai\render_smart_404_results(
+  [
+    'index'          => 'post',
+    'num'            => 3,
+    'num_candidates' => 1000,
+    'rescore'        => true,
+    'fallback'       => true,
+    'score_function' => 'dot_product',
+  ]
+);
+```
+
+```php
+// Get the results.
+$results = Classifai\get_smart_404_results(
+  [
+    'index'          => 'post',
+    'num'            => 10,
+    'num_candidates' => 8000,
+    'rescore'        => false,
+    'score_function' => 'cosine',
+  ]
+);
+
+ob_start();
+
+// Render the results.
+foreach ( $results as $result ) {
+?>
+  <div>
+    <?php if ( has_post_thumbnail( $result->ID ) ) : ?>
+      <figure>
+        <a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+          <?php echo wp_kses_post( get_the_post_thumbnail( $result->ID ) ); ?>
+        </a>
+      </figure>
+    <?php endif; ?>
+    <a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+      <?php echo esc_html( $result->post_title ); ?>
+    </a>
+  </div>
+<?php
+}
+
+$output = ob_get_clean();
+echo $output;
+```
+
+### Local Quickstart
+
+If you want to quickly test things locally, ensure you have Docker installed (Docker Desktop recommended) and then run the following command:
+
+```bash
+docker run -p 9200:9200 -d --name elasticsearch \
+  -e "discovery.type=single-node" \
+  -e "xpack.security.enabled=false" \
+  -e "xpack.security.http.ssl.enabled=false" \
+  -e "xpack.license.self_generated.type=basic" \
+  docker.elastic.co/elasticsearch/elasticsearch:7.9.0
+```
+
+This will download, install and start Elasticsearch v7.9.0 to your local machine. You can then access Elasticsearch at `http://localhost:9200`, which is the same URL you can use to configure ElasticPress with. It is recommended that you change the `Content Items per Index Cycle` setting in ElasticPress to `20` to ensure indexing doesn't timeout. Also be aware of API rate limits on the OpenAI Embeddings API.
 
 ## Set Up Image Processing features (via Microsoft Azure)
 
