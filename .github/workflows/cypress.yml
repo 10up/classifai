@@ -5,9 +5,9 @@ on:
     branches:
       - develop
       - trunk
-  # pull_request:
-  #   branches:
-  #     - develop
+  pull_request:
+    branches:
+      - develop
 
 jobs:
   cypress:
