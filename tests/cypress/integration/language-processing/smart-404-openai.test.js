@@ -28,10 +28,10 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 		);
 
 		// Enabled Feature.
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 
 		// Setup Provider.
-		cy.selectProvider( 'azure_openai_embeddings' );
+		cy.selectProvider( 'openai_embeddings' );
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		// Change all settings.

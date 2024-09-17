@@ -20,7 +20,7 @@ describe( '[Language processing] Moderation Tests', () => {
 
 		cy.selectProvider( 'openai_moderation' );
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-moderation-content-types input#comments' ).check();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.saveFeatureSettings();
@@ -44,7 +44,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -54,7 +54,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
@@ -65,7 +65,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable admin role.
@@ -85,7 +85,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable admin role.
@@ -107,7 +107,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Enable user based opt-out.

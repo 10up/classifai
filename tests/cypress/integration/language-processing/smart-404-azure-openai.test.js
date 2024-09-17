@@ -28,7 +28,7 @@ describe( '[Language processing] Smart 404 - Azure OpenAI Tests', () => {
 		);
 
 		// Enabled Feature.
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 
 		// Setup Provider.
 		cy.selectProvider( 'azure_openai_embeddings' );

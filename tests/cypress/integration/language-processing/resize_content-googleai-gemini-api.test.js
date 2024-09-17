@@ -4,7 +4,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.selectProvider( 'googleai_gemini_api' );
 		cy.get( 'input#googleai_gemini_api_api_key' ).clear().type( 'abc123' );
 		cy.saveFeatureSettings();
@@ -21,7 +21,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.saveFeatureSettings();
 

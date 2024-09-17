@@ -4,7 +4,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.selectProvider( 'openai_dalle' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
@@ -100,7 +100,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -110,7 +110,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
@@ -122,7 +122,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.saveFeatureSettings();
 
@@ -148,7 +148,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable admin role.

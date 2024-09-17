@@ -13,7 +13,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 			'https://service.com'
 		);
 		cy.get( '#ms_azure_text_to_speech_api_key' ).type( 'password' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		cy.get( '#ms_azure_text_to_speech_voice' ).select(
@@ -133,7 +133,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -143,7 +143,7 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
 

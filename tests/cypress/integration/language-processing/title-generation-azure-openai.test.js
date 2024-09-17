@@ -24,7 +24,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( 'input#azure_openai_api_key' ).clear().type( 'password' );
 		cy.get( 'input#azure_openai_deployment' ).clear().type( 'test' );
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.get( '#azure_openai_number_of_suggestions' ).clear().type( 1 );
 		cy.saveFeatureSettings();
@@ -118,7 +118,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		const data = getChatGPTData();

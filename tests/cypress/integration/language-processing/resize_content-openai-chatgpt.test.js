@@ -4,7 +4,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.selectProvider( 'openai_chatgpt' );
 		cy.get( '#openai_chatgpt_api_key' ).type( 'abc123' );
 		cy.saveFeatureSettings();
@@ -21,7 +21,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.saveFeatureSettings();
 
@@ -248,7 +248,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -258,7 +258,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.

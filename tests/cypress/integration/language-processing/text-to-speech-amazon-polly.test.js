@@ -15,7 +15,7 @@ describe( '[Language Processing] Text to Speech (Amazon Polly) Tests', () => {
 		);
 		cy.get( '#aws_polly_aws_region' ).clear();
 		cy.get( '#aws_polly_aws_region' ).type( 'SAMPLE_SECRET_ACCESS_KEY' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		cy.get( '#aws_polly_voice' ).select( 'Aditi' );

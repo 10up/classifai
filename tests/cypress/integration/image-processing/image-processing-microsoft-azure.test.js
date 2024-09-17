@@ -19,12 +19,13 @@ describe( 'Image processing Tests', () => {
 			cy.visit(
 				`/wp-admin/tools.php?page=classifai#/image_processing/${ feature }`
 			);
-			cy.get( '.classifai-enable-feature-toggle input' ).check();
+			cy.enableFeature();
 			cy.selectProvider( 'ms_computer_vision' );
 			cy.get( '#ms_computer_vision_endpoint_url' )
 				.clear()
 				.type( 'http://e2e-test-image-processing.test' );
 			cy.get( '#ms_computer_vision_api_key' ).clear().type( 'password' );
+			cy.get( '.settings-allowed-roles input#administrator' ).check();
 			cy.saveFeatureSettings();
 		} );
 
@@ -125,19 +126,22 @@ describe( 'Image processing Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_tags_generator'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.wait( 1000 );
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_cropping'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.wait( 1000 );
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_to_text_generator'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.wait( 1000 );
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -152,25 +156,28 @@ describe( 'Image processing Tests', () => {
 		cy.get(
 			'.classifai-descriptive-text-fields input#description'
 		).check();
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_tags_generator'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.wait( 1000 );
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_cropping'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.wait( 1000 );
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_to_text_generator'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.wait( 1000 );
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
@@ -188,7 +195,7 @@ describe( 'Image processing Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
 		);
 		cy.get( '.classifai-descriptive-text-fields input#alt' ).check();
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable access to admin role.

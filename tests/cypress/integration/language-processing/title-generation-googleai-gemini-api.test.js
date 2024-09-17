@@ -20,7 +20,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( 'input#googleai_gemini_api_api_key' )
 			.clear()
 			.type( 'password' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.saveFeatureSettings();
 	} );
@@ -113,7 +113,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		const data = getGeminiAPIData();

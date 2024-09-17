@@ -7,7 +7,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
@@ -26,7 +26,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.selectProvider( 'openai_chatgpt' );
 		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
 		cy.get( '#excerpt_length' ).clear().type( 35 );
 		cy.saveFeatureSettings();
@@ -84,7 +84,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		const data = getChatGPTData();
@@ -209,7 +209,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -219,7 +219,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
@@ -230,7 +230,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable admin role.

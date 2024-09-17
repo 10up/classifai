@@ -6,7 +6,7 @@ describe( 'PDF read Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
@@ -25,7 +25,7 @@ describe( 'PDF read Tests', () => {
 			.clear()
 			.type( 'http://e2e-test-image-processing.test' );
 		cy.get( '#ms_computer_vision_api_key' ).clear().type( 'password' );
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 	} );
 
@@ -63,7 +63,7 @@ describe( 'PDF read Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -76,7 +76,7 @@ describe( 'PDF read Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
@@ -91,7 +91,7 @@ describe( 'PDF read Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Disable admin role.

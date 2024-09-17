@@ -586,6 +586,24 @@ Cypress.Commands.add( 'saveFeatureSettings', () => {
 } );
 
 /**
+ * Enable Feature.
+ */
+Cypress.Commands.add( 'enableFeature', () => {
+	cy.get( '.classifai-enable-feature-toggle input[type="checkbox"]' ).check( {
+		force: true,
+	} );
+} );
+
+/**
+ * Disable Feature.
+ */
+Cypress.Commands.add( 'disableFeature', () => {
+	cy.get( '.classifai-enable-feature-toggle input[type="checkbox"]' ).uncheck(
+		{ force: true }
+	);
+} );
+
+/**
  * Activate the ElasticPress plugin.
  */
 Cypress.Commands.add( 'enableElasticPress', () => {

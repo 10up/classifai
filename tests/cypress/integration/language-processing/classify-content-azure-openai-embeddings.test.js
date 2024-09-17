@@ -4,7 +4,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.selectProvider( 'azure_openai_embeddings' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
@@ -31,7 +31,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 			.clear()
 			.type( 'test' );
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.get(
 			'.settings-allowed-post-statuses input#post_status_publish'
@@ -108,7 +108,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Create test term.
@@ -165,7 +165,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
 		);
 
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.get(
 			'.settings-allowed-post-statuses input#post_status_publish'
@@ -192,7 +192,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).uncheck();
+		cy.disableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
@@ -202,7 +202,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.visit(
 			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
 		);
-		cy.get( '.classifai-enable-feature-toggle input' ).check();
+		cy.enableFeature();
 		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
