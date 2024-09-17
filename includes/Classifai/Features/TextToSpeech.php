@@ -776,7 +776,7 @@ class TextToSpeech extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'post_types' => [
-				'post' => 'post'
+				'post' => 'post',
 			],
 			'provider'   => Speech::ID,
 		];

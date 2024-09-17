@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
-import { createRoot } from '@wordpress/element';
+import { createRoot, render } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,7 +15,11 @@ domReady( () => {
 	const adminEl = document.getElementById( 'classifai-settings' );
 
 	if ( adminEl ) {
-		const settingsRoot = createRoot( adminEl );
-		settingsRoot.render( <ClassifAISettings /> );
+		if ( createRoot ) {
+			const settingsRoot = createRoot( adminEl );
+			settingsRoot.render( <ClassifAISettings /> );
+		} else {
+			render( <ClassifAISettings />, adminEl );
+		}
 	}
 } );

@@ -4,6 +4,7 @@
  */
 
 namespace Classifai\Services;
+
 use function Classifai\should_use_legacy_settings_panel;
 
 class ServicesManager {
