@@ -180,34 +180,42 @@ export const useTaxonomies = () => {
  */
 export const useUserPermissionsPreferences = () => {
 	let cache;
-	const { set, setPersistenceLayer } = useDispatch( 'core/preferences' );
-	setPersistenceLayer( {
-		async get() {
-			if ( cache ) {
-				return cache;
-			}
+	const { set, setPersistenceLayer } =
+		useDispatch( 'core/preferences' ) || {};
+	if ( setPersistenceLayer ) {
+		setPersistenceLayer( {
+			async get() {
+				if ( cache ) {
+					return cache;
+				}
 
-			const preferences = JSON.parse(
-				window.localStorage.getItem( 'CLASSIFAI_SETTINGS_PREFERENCES' )
-			);
-			if ( preferences ) {
+				const preferences = JSON.parse(
+					window.localStorage.getItem(
+						'CLASSIFAI_SETTINGS_PREFERENCES'
+					)
+				);
+				if ( preferences ) {
+					cache = preferences;
+				} else {
+					cache = {};
+				}
+				return cache;
+			},
+			set( preferences ) {
 				cache = preferences;
-			} else {
-				cache = {};
-			}
-			return cache;
-		},
-		set( preferences ) {
-			cache = preferences;
-			window.localStorage.setItem(
-				'CLASSIFAI_SETTINGS_PREFERENCES',
-				JSON.stringify( preferences )
-			);
-		},
-	} );
+				window.localStorage.setItem(
+					'CLASSIFAI_SETTINGS_PREFERENCES',
+					JSON.stringify( preferences )
+				);
+			},
+		} );
+	}
 
 	const isOpen = useSelect( ( select ) => {
-		const { get } = select( 'core/preferences' );
+		const { get } = select( 'core/preferences' ) || {};
+		if ( ! get ) {
+			return true;
+		}
 
 		const open = get( 'classifai/settings', 'user-permissions-panel-open' );
 		if ( open === undefined ) {
@@ -217,6 +225,10 @@ export const useUserPermissionsPreferences = () => {
 	}, [] );
 
 	const setIsOpen = ( value ) => {
+		if ( ! set ) {
+			return;
+		}
+
 		set( 'classifai/settings', 'user-permissions-panel-open', value );
 	};
 

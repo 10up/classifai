@@ -27,7 +27,8 @@ export const SaveSettingsButton = ( {
 } ) => {
 	const { featureName } = useFeatureSettings();
 	const { isSetupPage, step } = useSetupPage();
-	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
+	const { createErrorNotice, removeNotices, removeNotice } =
+		useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
@@ -43,7 +44,12 @@ export const SaveSettingsButton = ( {
 	 * Save settings for a feature.
 	 */
 	const saveSettings = () => {
-		removeNotices( notices.map( ( { id } ) => id ) );
+		// Remove existing notices.
+		if ( removeNotices ) {
+			removeNotices( notices.map( ( { id } ) => id ) );
+		} else if ( removeNotice ) {
+			notices.forEach( ( { id } ) => removeNotice( id ) );
+		}
 		setIsSaving( true );
 
 		const data = {
