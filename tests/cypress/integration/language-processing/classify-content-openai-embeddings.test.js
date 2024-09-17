@@ -24,7 +24,9 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
 		cy.get( '.classifai-enable-feature-toggle input' ).check();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 		cy.get( '#category-enabled' ).check();
 		cy.get( '#category-threshold' ).clear().type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
 		cy.saveFeatureSettings();
@@ -156,7 +158,9 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 
 		cy.get( '.classifai-enable-feature-toggle input' ).check();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 		cy.get( '#category-enabled' ).check();
 		cy.saveFeatureSettings();
 

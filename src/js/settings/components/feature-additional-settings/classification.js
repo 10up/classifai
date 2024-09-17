@@ -13,7 +13,7 @@ import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { usePostTypes, usePostStatuses } from '../../utils/utils';
+import { usePostTypes } from '../../utils/utils';
 import { NLUFeatureSettings } from './nlu-feature';
 import {
 	AzureOpenAIEmbeddingsResults,
@@ -91,7 +91,7 @@ export const ClassificationSettings = () => {
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const { postTypesSelectOptions } = usePostTypes();
-	const { postStatusOptions } = usePostStatuses();
+	const { postStatuses } = window.classifAISettings;
 
 	const previewerContextData = {
 		isPreviewerOpen,
@@ -151,16 +151,15 @@ export const ClassificationSettings = () => {
 				) }
 				className="settings-allowed-post-statuses"
 			>
-				{ postStatusOptions.map( ( option ) => {
-					const { value: key, label } = option;
+				{ Object.keys( postStatuses || {} ).map( ( key ) => {
 					return (
 						<CheckboxControl
-							id={ key }
+							id={ `post_status_${ key }` }
 							key={ key }
 							checked={
 								featureSettings.post_statuses?.[ key ] === key
 							}
-							label={ label }
+							label={ postStatuses?.[ key ] }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									post_statuses: {

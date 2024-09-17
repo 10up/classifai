@@ -15,7 +15,9 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get( '#ibm_watson_nlu_password' ).clear().type( 'password' );
 		cy.get( '.classifai-ibm-watson-toggle-api-key' ).click();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 		cy.get(
 			'.classification-method-radio-control input[value="recommended_terms"]'
 		).check();
@@ -45,10 +47,18 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.get( '.settings-allowed-post-types input#page' ).check();
 
-		cy.get( '.settings-allowed-post-statuses input#draft' ).check();
-		cy.get( '.settings-allowed-post-statuses input#pending' ).check();
-		cy.get( '.settings-allowed-post-statuses input#private' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_draft'
+		).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_pending'
+		).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_private'
+		).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 
 		cy.get( '#category-enabled' ).check();
 		cy.get( '#keyword-enabled' ).check();

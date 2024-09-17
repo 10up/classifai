@@ -7,6 +7,7 @@ use Classifai\Services\ServicesManager;
 use function Classifai\get_asset_info;
 use function Classifai\get_plugin;
 use function Classifai\get_services_menu;
+use function Classifai\get_post_statuses_for_language_settings;
 
 class Settings {
 
@@ -87,6 +88,7 @@ class Settings {
 			'settings'     => $this->get_settings(),
 			'dashboardUrl' => admin_url( '/' ),
 			'nonce'        => wp_create_nonce( 'classifai-previewer-action' ),
+			'postStatuses' => get_post_statuses_for_language_settings(),
 		);
 
 		wp_add_inline_script(

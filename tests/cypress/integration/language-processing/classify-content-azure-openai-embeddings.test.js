@@ -33,7 +33,9 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 
 		cy.get( '.classifai-enable-feature-toggle input' ).check();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 		cy.get( '#category-enabled' ).check();
 		cy.get( '#category-threshold' ).clear().type( 100 );
 		cy.saveFeatureSettings();
@@ -165,7 +167,9 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 
 		cy.get( '.classifai-enable-feature-toggle input' ).check();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
-		cy.get( '.settings-allowed-post-statuses input#publish' ).check();
+		cy.get(
+			'.settings-allowed-post-statuses input#post_status_publish'
+		).check();
 		cy.get( '#category-enabled' ).check();
 		cy.saveFeatureSettings();
 
