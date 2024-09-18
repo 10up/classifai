@@ -492,3 +492,14 @@ function my_feature_enqueue_admin_assets( $hook_suffix ) {
 }
 add_action( 'admin_enqueue_scripts', 'my_feature_enqueue_admin_assets' );
 ```
+
+## Use Legacy settings
+ClassifAI 3.2.0 introduces React-based settings and deprecates the PHP-based settings pages. If you have customizations in the legacy settings and would like to continue using the legacy settings panel, you can enable this by using the `classifai_use_legacy_settings_panel` filter hook.
+
+However, please note that legacy settings will be completely removed in future releases. We recommend updating your customizations to use the React-based settings panel. If you encounter any issues, feel free to report them on our [GitHub repository](https://github.com/10up/classifai/).
+
+Add the following snippet to your theme's `functions.php` file or a custom plugin.
+
+```php
+add_filter( 'classifai_use_legacy_settings_panel', '__return_true' );
+```
