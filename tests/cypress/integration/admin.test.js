@@ -25,9 +25,7 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 
 	it( 'Can visit "Language Processing" settings page.', () => {
 		// Check Selected Navigation menu
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 		cy.get( '.classifai-tabs' ).should( 'exist' );
 		cy.get( '.classifai-tabs a.active-tab' )
 			.first()
@@ -36,8 +34,8 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 
 	it( 'Can see "Image Processing" menu and Can visit "Image Processing" settings page.', () => {
 		// Check Selected Navigation menu
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_descriptive_text_generator'
+		cy.visitFeatureSettings(
+			'image_processing/feature_descriptive_text_generator'
 		);
 		cy.get( '.classifai-tabs' ).should( 'exist' );
 		cy.get( '.classifai-tabs a.active-tab' )

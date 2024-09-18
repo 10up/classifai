@@ -3,8 +3,8 @@ import { getGeminiAPIData } from '../../plugins/functions';
 describe( '[Language processing] Excerpt Generation Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.enableFeature();
@@ -19,8 +19,8 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	} );
 
 	it( 'Can save Google AI (Gemini API) "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'googleai_gemini_api' );
@@ -83,8 +83,8 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	it( 'Can see the generate excerpt button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

@@ -11,9 +11,7 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 	it( "See error message if ElasticPress isn't activate", () => {
 		cy.disableElasticPress();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_smart_404'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
 
 		cy.get( '.elasticpress-required-notice.components-notice ' ).should(
 			'exist'
@@ -23,9 +21,7 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 	it( 'Can save Smart 404 settings', () => {
 		cy.enableElasticPress();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_smart_404'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
 
 		// Enabled Feature.
 		cy.enableFeature();

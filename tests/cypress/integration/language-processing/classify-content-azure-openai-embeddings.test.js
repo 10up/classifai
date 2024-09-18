@@ -1,9 +1,7 @@
 describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 		cy.enableFeature();
 		cy.selectProvider( 'azure_openai_embeddings' );
 		cy.saveFeatureSettings();
@@ -16,9 +14,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	} );
 
 	it( 'Can save Azure OpenAI Embeddings "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.selectProvider( 'azure_openai_embeddings' );
 		cy.get( 'input#azure_openai_embeddings_endpoint_url' )
@@ -90,9 +86,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 
 	// TODO: Fix this test.
 	it.skip( 'Can see the preview on the settings page', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.saveFeatureSettings();
 
@@ -105,9 +99,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 		cy.disableFeature();
 		cy.saveFeatureSettings();
 
@@ -161,9 +153,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
@@ -189,9 +179,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.disableClassicEditor();
 
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 		cy.disableFeature();
 		cy.saveFeatureSettings();
 
@@ -199,9 +187,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.verifyClassifyContentEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
@@ -211,7 +197,7 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 
 	it( 'Can enable/disable content classification feature by role', () => {
 		// Remove custom taxonomies so those don't interfere with the test.
-		cy.visit( '/wp-admin/tools.php?page=classifai#/language_processing' );
+		cy.visitFeatureSettings( 'language_processing' );
 
 		// Disable access for all users.
 		cy.disableFeatureForUsers();

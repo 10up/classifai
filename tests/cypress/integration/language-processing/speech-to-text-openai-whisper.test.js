@@ -3,8 +3,8 @@ import { getWhisperData } from '../../plugins/functions';
 describe( '[Language processing] Speech to Text Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -17,8 +17,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 	} );
 
 	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
@@ -80,8 +80,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		};
 
 		// Disable features
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 		cy.disableFeature();
 		cy.saveFeatureSettings();
@@ -90,8 +90,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -102,8 +102,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable speech to text feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

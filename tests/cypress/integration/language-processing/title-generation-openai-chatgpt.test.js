@@ -12,8 +12,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can save OpenAI ChatGPT "Language Processing" title settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'openai_chatgpt' );
@@ -109,8 +109,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 	it( 'Can see the generate titles button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -135,8 +135,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 	it( 'Can set multiple custom title generation prompts, select one as the default and delete one.', () => {
 		cy.disableClassicEditor();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 
 		// Add three custom prompts.
@@ -268,8 +268,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 	it( 'Can enable/disable title generation feature', () => {
 		// Disable features.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.disableFeature();
 		cy.saveFeatureSettings();
@@ -278,8 +278,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.verifyTitleGenerationEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -290,8 +290,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 	it( 'Can enable/disable title generation feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

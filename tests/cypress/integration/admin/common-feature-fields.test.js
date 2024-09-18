@@ -22,9 +22,7 @@ describe( 'Common Feature Fields', () => {
 
 	Object.keys( features ).forEach( ( feature ) => {
 		it( `"${ features[ feature ] }" feature common fields`, () => {
-			cy.visit(
-				`/wp-admin/tools.php?page=classifai#/language_processing/${ feature }`
-			);
+			cy.visitFeatureSettings( `language_processing/${ feature }` );
 
 			cy.get( '.classifai-enable-feature-toggle input' ).should(
 				'exist'

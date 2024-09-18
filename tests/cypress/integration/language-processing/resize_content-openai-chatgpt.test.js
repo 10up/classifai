@@ -1,8 +1,8 @@
 describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 		cy.enableFeature();
 		cy.selectProvider( 'openai_chatgpt' );
@@ -17,8 +17,8 @@ describe( '[Language processing] Resize Content Tests', () => {
 	} );
 
 	it( 'Resize content feature can grow and shrink content', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 
 		cy.enableFeature();
@@ -74,8 +74,8 @@ describe( '[Language processing] Resize Content Tests', () => {
 	} );
 
 	it( 'Can set multiple custom resize generation prompts, select one as the default and delete one.', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 
 		// Add three custom shrink prompts.
@@ -245,8 +245,8 @@ describe( '[Language processing] Resize Content Tests', () => {
 
 	it( 'Can enable/disable resize content feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 		cy.disableFeature();
 		cy.saveFeatureSettings();
@@ -255,8 +255,8 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

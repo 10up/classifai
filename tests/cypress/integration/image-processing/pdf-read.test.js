@@ -3,8 +3,8 @@ import { getPDFData } from '../../plugins/functions';
 describe( 'PDF read Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -17,8 +17,8 @@ describe( 'PDF read Tests', () => {
 
 	let pdfEditLink = '';
 	it( 'Can save "PDF scanning" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
 		cy.selectProvider( 'ms_computer_vision' );
 		cy.get( '#ms_computer_vision_endpoint_url' )
@@ -60,8 +60,8 @@ describe( 'PDF read Tests', () => {
 
 	it( 'Can enable/disable PDF scanning feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
 		cy.disableFeature();
 		cy.saveFeatureSettings();
@@ -73,8 +73,8 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// Enable admin role.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();
@@ -88,8 +88,8 @@ describe( 'PDF read Tests', () => {
 
 	it( 'Can enable/disable PDF scanning feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

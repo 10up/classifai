@@ -1,9 +1,7 @@
 describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 		cy.enableFeature();
 		cy.selectProvider( 'openai_dalle' );
 		cy.saveFeatureSettings();
@@ -15,9 +13,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	} );
 
 	it( 'Can save OpenAI "Image Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 		cy.selectProvider( 'openai_dalle' );
 		cy.get( '#openai_dalle_api_key' ).clear().type( 'password' );
 		cy.get( 'select#openai_dalle_number_of_images' ).select( '2' );
@@ -97,9 +93,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can enable/disable image generation feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 		cy.disableFeature();
 		cy.saveFeatureSettings();
 
@@ -107,9 +101,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.verifyImageGenerationEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
@@ -118,9 +110,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 	} );
 
 	it( 'Can generate image directly in media library', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 
 		cy.enableFeature();
 		cy.get( '.settings-allowed-roles input#administrator' ).check();
@@ -145,9 +135,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 
 	it( 'Can enable/disable image generation feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/image_processing/feature_image_generation'
-		);
+		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 

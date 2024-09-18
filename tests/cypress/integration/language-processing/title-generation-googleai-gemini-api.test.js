@@ -12,8 +12,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can save Google AI (Gemini API) "Language Processing" title settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'googleai_gemini_api' );
@@ -110,8 +110,8 @@ describe( '[Language processing] Title Generation Tests', () => {
 	it( 'Can see the generate titles button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
 		cy.enableFeature();
 		cy.saveFeatureSettings();

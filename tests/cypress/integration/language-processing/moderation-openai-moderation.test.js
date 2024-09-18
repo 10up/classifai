@@ -1,9 +1,7 @@
 describe( '[Language processing] Moderation Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
@@ -14,9 +12,7 @@ describe( '[Language processing] Moderation Tests', () => {
 	} );
 
 	it( 'Can save OpenAI Moderation "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 
 		cy.selectProvider( 'openai_moderation' );
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
@@ -41,9 +37,7 @@ describe( '[Language processing] Moderation Tests', () => {
 
 	it( 'Can enable/disable moderation feature', () => {
 		// Disable features.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.disableFeature();
 		cy.saveFeatureSettings();
 
@@ -51,9 +45,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.verifyModerationEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
@@ -62,9 +54,7 @@ describe( '[Language processing] Moderation Tests', () => {
 	} );
 
 	it( 'Can enable/disable moderation feature by role', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
@@ -82,9 +72,7 @@ describe( '[Language processing] Moderation Tests', () => {
 	} );
 
 	it( 'Can enable/disable moderation feature by user', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
@@ -104,9 +92,7 @@ describe( '[Language processing] Moderation Tests', () => {
 	} );
 
 	it( 'User can opt-out of moderation feature', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_moderation'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_moderation' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 

@@ -1,8 +1,8 @@
 describe( '[Language Processing] Text to Speech (Amazon Polly) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.get( '.settings-allowed-post-types input#post' ).check();

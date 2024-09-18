@@ -25,6 +25,7 @@ export const ImageTagGeneratorSettings = () => {
 	return (
 		<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
 			<SelectControl
+				id="feature_image_tags_generator_tag_taxonomy"
 				onChange={ ( value ) => {
 					setFeatureSettings( {
 						tag_taxonomy: value,

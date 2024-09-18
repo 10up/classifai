@@ -1,8 +1,8 @@
 describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'ms_azure_text_to_speech' );
@@ -118,8 +118,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 	it( 'Disable support for post type Post', () => {
 		cy.disableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.get( '.settings-allowed-post-types input#post' ).uncheck();
 		cy.saveFeatureSettings();
@@ -130,8 +130,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 
 	it( 'Can enable/disable text to speech feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.disableFeature();
 		cy.saveFeatureSettings();
@@ -140,8 +140,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 		cy.verifyTextToSpeechEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.enableFeature();
 		cy.get( '.settings-allowed-post-types input#post' ).check();
@@ -153,8 +153,8 @@ describe( '[Language Processing] Text to Speech (Microsoft Azure) Tests', () => 
 
 	it( 'Can enable/disable text to speech feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai#/language_processing/feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
