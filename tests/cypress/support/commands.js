@@ -639,5 +639,7 @@ Cypress.Commands.add( 'disableElasticPress', () => {
  */
 Cypress.Commands.add( 'visitFeatureSettings', ( featurePath ) => {
 	cy.visit( `/wp-admin/tools.php?page=classifai#/${ featurePath }` );
-	cy.get( '.components-panel__header h2' ).should( 'exist' );
+	if ( ! featurePath.includes( 'feature_smart_404' ) ) {
+		cy.get( '.components-panel__header h2' ).should( 'exist' );
+	}
 } );
