@@ -261,11 +261,11 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 	const { setSelectedPostId } = useContext( PreviewerProviderContext );
 	const [ searchText, setSearchText ] = useState( '' );
 	const [ searchResults, setSearchResults ] = useState( [] );
-	const [ shouldSearch, setShoudlSearch ] = useState( true );
+	const [ shouldSearch, setShouldSearch ] = useState( true );
 	const debouncedSearch = useDebounce( setSearchText, 1000 );
 
 	function selectPost( post ) {
-		setShoudlSearch( false );
+		setShouldSearch( false );
 		setSelectedPostId( post.id );
 		setSearchText( post.title );
 		setSearchResults( [] );
@@ -335,14 +335,14 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 						__( 'Search a post by title…', 'classifai' )
 					}
 					onChange={ ( text ) => {
-						setShoudlSearch( true );
+						setShouldSearch( true );
 						debouncedSearch( text );
 					} }
 					onClose={ () => {
 						setSearchText( '' );
 						setSelectedPostId( 0 );
 						setSearchResults( [] );
-						setShoudlSearch( true );
+						setShouldSearch( true );
 					} }
 				/>
 				{ searchResults.length ? (
@@ -371,10 +371,10 @@ function PreviewerResults() {
 
 	return (
 		<div className="classifai__classification-previewer-search-result-container">
-			{ 'azure_openai_embeddings' === activeProvider ||
-				( 'openai_embeddings' === activeProvider && (
-					<AzureOpenAIEmbeddingsResults postId={ selectedPostId } />
-				) ) }
+			{ ( 'azure_openai_embeddings' === activeProvider ||
+				'openai_embeddings' === activeProvider ) && (
+				<AzureOpenAIEmbeddingsResults postId={ selectedPostId } />
+			) }
 			{ 'ibm_watson_nlu' === activeProvider && (
 				<IBMWatsonNLUResults postId={ selectedPostId } />
 			) }
