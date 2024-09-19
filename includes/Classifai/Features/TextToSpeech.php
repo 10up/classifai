@@ -118,20 +118,15 @@ class TextToSpeech extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
-			true
-		);
-
-		wp_add_inline_script(
-			'classifai-gutenberg-plugin',
-			sprintf(
-				'var classifaiTTSEnabled = %d;',
-				true
+			'classifai-plugin-text-to-speech',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-text-to-speech.js',
+			array_merge(
+				get_asset_info( 'classifai-plugin-text-to-speech', 'dependencies' ),
+				array( 'lodash' ),
+				array( Feature::PLUGIN_AREA_SCRIPT )
 			),
-			'before'
+			get_asset_info( 'classifai-plugin-text-to-speech', 'version' ),
+			true
 		);
 	}
 
