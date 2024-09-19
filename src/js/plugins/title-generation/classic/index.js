@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import '../../scss/openai/classic-editor-title-generator.scss';
+import '../../../../scss/openai/classic-editor-title-generator.scss';
 
 const ClassifAI = window.ClassifAI || {};
 const classifaiChatGPTData = window.classifaiChatGPTData || {};

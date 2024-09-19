@@ -24,12 +24,6 @@ module.exports = {
 		'inserter-media-category': [
 			'./src/js/gutenberg-plugins/inserter-media-category.js',
 		],
-		'generate-excerpt-classic': [
-			'./src/js/openai/classic-editor-excerpt-generator.js',
-		],
-		'generate-title-classic': [
-			'./src/js/openai/classic-editor-title-generator.js',
-		],
 		commands: [ './src/js/gutenberg-plugins/commands.js' ],
 		'generate-image-media-upload': [
 			'./src/js/media-modal/views/generate-image-media-upload.js',
@@ -41,7 +35,9 @@ module.exports = {
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
 		'classifai-plugin-content-resizing': './src/js/plugins/content-resizing/index.js',
 		'classifai-plugin-title-generation': './src/js/plugins/title-generation/index.js',
+		'classifai-plugin-classic-title-generation': './src/js/plugins/title-generation/classic/index.js',
 		'classifai-plugin-excerpt-generation': './src/js/plugins/excerpt-generation/index.js',
+		'classifai-plugin-classic-excerpt-generation': './src/js/plugins/excerpt-generation/classic/index.js',
 	},
 	module: {
 		rules: [

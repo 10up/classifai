@@ -220,23 +220,23 @@ class ExcerptGeneration extends Feature {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if ( post_type_supports( $screen->post_type, 'excerpt' ) ) {
 					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+						'classifai-plugin-classic-title-generation-css',
+						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
 						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
+						get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
 						'all'
 					);
 
 					wp_enqueue_script(
-						'classifai-generate-excerpt-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-						array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-excerpt-classic', 'version' ),
+						'classifai-plugin-classic-excerpt-generation-js',
+						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-excerpt-generation.js',
+						array_merge( get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'dependencies' ), array( 'wp-api' ) ),
+						get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'version' ),
 						true
 					);
 
 					wp_add_inline_script(
-						'classifai-generate-excerpt-classic-js',
+						'classifai-plugin-classic-excerpt-generation-js',
 						sprintf(
 							'var classifaiGenerateExcerpt = %s;',
 							wp_json_encode(
