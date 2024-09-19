@@ -20,14 +20,7 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
-		'media-modal': [ './src/js/media-modal/index.js' ],
-		'inserter-media-category': [
-			'./src/js/gutenberg-plugins/inserter-media-category.js',
-		],
 		commands: [ './src/js/gutenberg-plugins/commands.js' ],
-		'generate-image-media-upload': [
-			'./src/js/media-modal/views/generate-image-media-upload.js',
-		],
 		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
 
 		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
@@ -38,6 +31,9 @@ module.exports = {
 		'classifai-plugin-classic-title-generation': './src/js/plugins/title-generation/classic/index.js',
 		'classifai-plugin-excerpt-generation': './src/js/plugins/excerpt-generation/index.js',
 		'classifai-plugin-classic-excerpt-generation': './src/js/plugins/excerpt-generation/classic/index.js',
+		'classifai-plugin-inserter-media-category': './src/js/plugins/image-generation/inserter-media-category.js',
+		'classifai-plugin-image-generation-media-modal': './src/js/plugins/image-generation/media-modal/index.js',
+		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/plugins/image-generation/media-modal/views/generate-image-media-upload.js',
 	},
 	module: {
 		rules: [

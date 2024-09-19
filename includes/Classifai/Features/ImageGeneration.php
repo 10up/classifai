@@ -186,26 +186,26 @@ class ImageGeneration extends Feature {
 		wp_enqueue_media();
 
 		wp_enqueue_style(
-			'classifai-image-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
+			'classifai-plugin-image-generation-media-modal-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-media-modal.css',
 			[],
-			get_asset_info( 'media-modal', 'version' ),
+			get_asset_info( 'classifai-plugin-image-generation-media-modal', 'version' ),
 			'all'
 		);
 
 		wp_enqueue_script(
-			'classifai-generate-images',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
-			get_asset_info( 'media-modal', 'version' ),
+			'classifai-plugin-image-generation-media-modal-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-media-modal.js',
+			array_merge( get_asset_info( 'classifai-plugin-image-generation-media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
+			get_asset_info( 'classifai-plugin-image-generation-media-modal', 'version' ),
 			true
 		);
 
 		wp_enqueue_script(
-			'classifai-inserter-media-category',
-			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
-			get_asset_info( 'inserter-media-category', 'dependencies' ),
-			get_asset_info( 'inserter-media-category', 'version' ),
+			'classifai-plugin-inserter-media-category-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-inserter-media-category.js',
+			get_asset_info( 'classifai-plugin-inserter-media-category', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-inserter-media-category', 'version' ),
 			true
 		);
 
@@ -237,7 +237,7 @@ class ImageGeneration extends Feature {
 		);
 
 		wp_localize_script(
-			'classifai-generate-images',
+			'classifai-plugin-image-generation-media-modal-js',
 			'classifaiDalleData',
 			[
 				'endpoint'   => 'classifai/v1/generate-image',
@@ -253,15 +253,15 @@ class ImageGeneration extends Feature {
 
 			if ( 'classifai-generate-image' === $action ) {
 				wp_enqueue_script(
-					'classifai-generate-images-media-upload',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-					array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
-					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					'classifai-plugin-image-generation-generate-image-media-upload-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-generate-image-media-upload.js',
+					array_merge( get_asset_info( 'classifai-plugin-image-generation-generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
+					get_asset_info( 'classifai-plugin-image-generation-generate-image-media-upload', 'version' ),
 					true
 				);
 
 				wp_localize_script(
-					'classifai-generate-images-media-upload',
+					'classifai-plugin-image-generation-generate-image-media-upload-js',
 					'classifaiGenerateImages',
 					[
 						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
