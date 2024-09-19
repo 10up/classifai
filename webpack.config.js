@@ -14,12 +14,6 @@ module.exports = {
 		admin: [ './src/js/admin.js' ],
 		'language-processing': [ './src/js/language-processing.js' ],
 		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
-		'post-status-info': [
-			'./src/js/gutenberg-plugins/post-status-info.js',
-		],
-		'content-resizing-plugin': [
-			'./src/js/gutenberg-plugins/content-resizing-plugin.js',
-		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
@@ -46,6 +40,7 @@ module.exports = {
 		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
+		'classifai-plugin-content-resizing': './src/js/plugins/content-resizing/index.js',
 	},
 	module: {
 		rules: [

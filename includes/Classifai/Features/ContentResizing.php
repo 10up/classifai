@@ -189,18 +189,18 @@ class ContentResizing extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-content-resizing-plugin-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.js',
-			get_asset_info( 'content-resizing-plugin', 'dependencies' ),
-			get_asset_info( 'content-resizing-plugin', 'version' ),
+			'classifai-plugin-content-resizing-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.js',
+			get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-content-resizing-plugin-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/content-resizing-plugin.css',
+			'classifai-plugin-content-resizing-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.css',
 			[],
-			get_asset_info( 'content-resizing-plugin', 'version' ),
+			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
 			'all'
 		);
 	}
