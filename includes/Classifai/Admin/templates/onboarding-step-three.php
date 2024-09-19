@@ -58,6 +58,18 @@ require_once 'onboarding-header.php';
 		?>
 	</div>
 	<div class="classifai-setup-form">
+		<?php
+		/**
+		 * Fires before the settings form for a feature.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_before_onboarding_feature_settings_form
+		 *
+		 * @param {string} $current_feature Current feature.
+		 */
+		do_action( 'classifai_before_onboarding_feature_settings_form', $current_feature );
+		?>
+
 		<input name="classifai-setup-feature" type="hidden" value="<?php echo esc_attr( $current_feature ); ?>" />
 		<table class="form-table">
 			<?php
@@ -73,6 +85,17 @@ require_once 'onboarding-header.php';
 			}
 			?>
 		</table>
+		<?php
+		/**
+		 * Fires after the settings form for a feature.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_after_onboarding_feature_settings_form
+		 *
+		 * @param {string} $current_feature Current active feature.
+		 */
+		do_action( 'classifai_after_onboarding_feature_settings_form', $current_feature );
+		?>
 	</div>
 </div>
 

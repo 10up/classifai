@@ -907,11 +907,11 @@ class Embeddings extends OpenAI {
 	/**
 	 * Generate an embedding for a particular piece of text.
 	 *
-	 * @param string  $text    Text to generate the embedding for.
-	 * @param Feature $feature Feature instance.
+	 * @param string       $text    Text to generate the embedding for.
+	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embedding( string $text = '', Feature $feature = null ) {
+	public function generate_embedding( string $text = '', $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
