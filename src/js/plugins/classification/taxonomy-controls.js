@@ -10,7 +10,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import {
 	getEntitiesInfo,
 	useTaxonomies,
-} from '../../includes/Classifai/Blocks/recommended-content-block/utils';
+} from '../../../../includes/Classifai/Blocks/recommended-content-block/utils';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -274,7 +274,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					}
 
 					return (
-						<>
+						<React.Fragment key={ slug }>
 							<FormTokenField
 								key={ slug }
 								label={ name }
@@ -300,7 +300,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								</>
 							) }
 							<hr />
-						</>
+						</React.Fragment>
 					);
 				} ) }
 		</>

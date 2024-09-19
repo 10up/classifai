@@ -13,7 +13,6 @@ module.exports = {
 		media: [ './src/js/media.js' ],
 		admin: [ './src/js/admin.js' ],
 		'language-processing': [ './src/js/language-processing.js' ],
-		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
 		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
 		'post-status-info': [
 			'./src/js/gutenberg-plugins/post-status-info.js',
@@ -44,6 +43,7 @@ module.exports = {
 		],
 		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
 
+		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
 	},

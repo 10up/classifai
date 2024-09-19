@@ -1,71 +1,31 @@
-/* eslint-disable no-unused-vars */
-import { ReactComponent as icon } from '../../assets/img/block-icon.svg';
-import { handleClick } from './helpers';
-import { useSelect, useDispatch, subscribe } from '@wordpress/data';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import {
-	Button,
-	Icon,
-	ToggleControl,
-	Modal,
-} from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
-import { registerPlugin } from '@wordpress/plugins';
+/**
+ * External dependencies.
+ */
+import { select, dispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
+import { Button, Modal } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies.
+ */
 import TaxonomyControls from './taxonomy-controls';
-import PrePubClassifyPost from './gutenberg-plugins/pre-publish-classify-post';
-import { DisableFeatureButton } from './components';
-
-const { classifaiPostData } = window;
-
-/**
- * Create the ClassifAI icon
- */
-const ClassifAIIcon = ( { icon } ) => (
-	<Icon className="components-panel__icon" icon={ icon } size={ 24 } />
-);
-
-/**
- * ClassificationToggle Component.
- *
- * Used to toggle the classification process on or off.
- */
-const ClassificationToggle = () => {
-	// Use the datastore to retrieve all the meta for this post.
-	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
-			'classifai_process_content'
-		)
-	);
-
-	// Use the datastore to tell the post to update the meta.
-	const { editPost } = useDispatch( 'core/editor' );
-	const enabled = 'yes' === processContent ? 'yes' : 'no';
-
-	return (
-		<ToggleControl
-			label={ __( 'Automatically tag content on update', 'classifai' ) }
-			checked={ 'yes' === enabled }
-			onChange={ ( value ) => {
-				editPost( { classifai_process_content: value ? 'yes' : 'no' } );
-			} }
-		/>
-	);
-};
+import PrePubClassifyPost from './pre-publish-classify-post';
+import { DisableFeatureButton } from '../../components';
+import { handleClick } from '../../../js/helpers';
 
 /**
  * Classify button.
  *
  * Used to manually classify the content.
  */
-const ClassificationButton = () => {
+export const ClassificationButton = () => {
 	const processContent = useSelect( ( select ) =>
 		select( 'core/editor' ).getEditedPostAttribute(
 			'classifai_process_content'
 		)
 	);
 
-	const { select, dispatch } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
 	const postTypeLabel =
@@ -361,64 +321,3 @@ const ClassificationButton = () => {
 		</div>
 	);
 };
-
-/**
- * Add the ClassifAI panel to Gutenberg
- */
-const ClassifAIPlugin = () => {
-	const postType = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostType()
-	);
-	const postStatus = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostAttribute( 'status' )
-	);
-
-	// Ensure that at least one feature is enabled.
-	const isNLULanguageProcessingEnabled =
-		classifaiPostData && classifaiPostData.NLUEnabled;
-
-	// Ensure we are on a supported post type, checking settings from all features.
-	const isNLUPostTypeSupported =
-		classifaiPostData &&
-		classifaiPostData.supportedPostTypes &&
-		classifaiPostData.supportedPostTypes.includes( postType );
-
-	// Ensure we are on a supported post status, checking settings from all features.
-	const isNLUPostStatusSupported =
-		classifaiPostData &&
-		classifaiPostData.supportedPostStatues &&
-		classifaiPostData.supportedPostStatues.includes( postStatus );
-
-	// Ensure the user has permissions to use the feature.
-	const userHasNLUPermissions =
-		classifaiPostData &&
-		! (
-			classifaiPostData.noPermissions &&
-			1 === parseInt( classifaiPostData.noPermissions )
-		);
-
-	const nluPermissionCheck =
-		userHasNLUPermissions &&
-		isNLULanguageProcessingEnabled &&
-		isNLUPostTypeSupported &&
-		isNLUPostStatusSupported;
-
-	return (
-		<PluginDocumentSettingPanel
-			title={ __( 'ClassifAI', 'classifai' ) }
-			icon={ ClassifAIIcon }
-			className="classifai-panel"
-		>
-			<>
-				{ nluPermissionCheck && (
-					<>
-						<ClassificationToggle />
-						{ nluPermissionCheck && <ClassificationButton /> }
-					</>
-				) }
-			</>
-		</PluginDocumentSettingPanel>
-	);
-};
-
-registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );

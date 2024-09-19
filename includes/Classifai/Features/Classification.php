@@ -338,15 +338,15 @@ class Classification extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
+			'classifai-plugin-classification-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification', 'version' ),
 			true
 		);
 
 		wp_add_inline_script(
-			'classifai-gutenberg-plugin',
+			'classifai-plugin-classification-js',
 			sprintf(
 				'var classifaiPostData = %s;',
 				wp_json_encode(
