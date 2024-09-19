@@ -75,7 +75,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 		} );
 	} );
 
-	// TODO: Fix this test.
+	// TODO: Update this test to use new previewer.
 	it.skip( 'Can see the preview on the settings page', () => {
 		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 

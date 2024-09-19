@@ -42,7 +42,7 @@ export const EnableToggleControl = ( { children } ) => {
 				checked={ status === '1' }
 				onChange={ ( value ) =>
 					setFeatureSettings( {
-						status: value ? '1' : '0', // TODO: Use boolean, currently using string for compatibility.
+						status: value ? '1' : '0', // TODO: Use boolean, currently using string for backward compatibility.
 					} )
 				}
 			/>

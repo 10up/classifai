@@ -8,10 +8,11 @@ import {
 	Spinner,
 	Button,
 	Slot,
+	Notice,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { Notices } from '../feature-settings/notices';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
@@ -21,19 +22,37 @@ import { store as noticesStore } from '@wordpress/notices';
 export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 	const [ settings, setSettings ] = useState( {} );
 	const [ isLoaded, setIsLoaded ] = useState( false );
+	const [ error, setError ] = useState( null );
 
 	// Load the settings.
 	useEffect( () => {
 		( async () => {
-			const registrationSettings = await apiFetch( {
-				path: '/classifai/v1/registration',
-			} ); // TODO: handle error
+			let registrationSettings = {};
+			try {
+				registrationSettings = await apiFetch( {
+					path: '/classifai/v1/registration',
+				} );
+			} catch ( e ) {
+				console.error( e ); // eslint-disable-line no-console
+				setError(
+					sprintf(
+						/* translators: %s: error message */
+						__( 'Error: %s', 'classifai' ),
+						e.message ||
+							__(
+								'An error occurred while loading registration settings. Please try again.',
+								'classifai'
+							)
+					)
+				);
+			}
 
 			setSettings( registrationSettings );
 			setIsLoaded( true );
 		} )();
 	}, [ setSettings, setIsLoaded ] );
 
+	// If settings are not loaded yet, show a spinner.
 	if ( ! isLoaded ) {
 		return (
 			<div className="classifai-loading-settings">
@@ -42,6 +61,15 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 					{ __( 'Loading settings…', 'classifai' ) }
 				</span>
 			</div>
+		);
+	}
+
+	// If there is an error, show an error notice.
+	if ( error ) {
+		return (
+			<Notice status="error" isDismissible={ false }>
+				{ error }
+			</Notice>
 		);
 	}
 

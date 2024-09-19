@@ -9,6 +9,7 @@ const DEFAULT_STATE = {
 	settings: classifAISettings.settings || {},
 	isLoaded: false,
 	isSaving: false,
+	error: null,
 };
 
 /**
@@ -58,6 +59,12 @@ export const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				isSaving: action.payload,
+			};
+
+		case 'SET_ERROR':
+			return {
+				...state,
+				error: action.payload,
 			};
 
 		default:

@@ -24,9 +24,14 @@ export const EnableFeatures = () => {
 	// Load the settings.
 	useEffect( () => {
 		( async () => {
-			const regSettings = await apiFetch( {
-				path: '/classifai/v1/registration',
-			} ); // TODO: handle error
+			let regSettings = {};
+			try {
+				regSettings = await apiFetch( {
+					path: '/classifai/v1/registration',
+				} );
+			} catch ( error ) {
+				console.error( error ); // eslint-disable-line no-console
+			}
 
 			setRegistrationSettings( regSettings );
 		} )();

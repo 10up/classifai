@@ -80,13 +80,17 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 		setCurrentFeature( featureName );
 	}, [ featureName, setCurrentFeature ] );
 
-	const isLoaded = useSelect( ( select ) =>
-		select( STORE_NAME ).getIsLoaded()
-	);
+	const { isLoaded, error } = useSelect( ( select ) => {
+		return {
+			isLoaded: select( STORE_NAME ).getIsLoaded(),
+			error: select( STORE_NAME ).getError(),
+		};
+	} );
 
 	const feature = getFeature( featureName );
 	const featureTitle = feature?.label || __( 'Feature', 'classifai' );
 
+	// Show loading spinner if settings are not loaded yet.
 	if ( ! isLoaded ) {
 		return (
 			<div className="classifai-loading-settings">
@@ -95,6 +99,15 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 					{ __( 'Loading settings…', 'classifai' ) }
 				</span>
 			</div>
+		);
+	}
+
+	// Show error notice if settings failed to load.
+	if ( error ) {
+		return (
+			<Notice status="error" isDismissible={ false }>
+				{ error }
+			</Notice>
 		);
 	}
 

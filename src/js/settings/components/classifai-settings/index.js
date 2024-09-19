@@ -15,7 +15,7 @@ import {
  */
 import { useDispatch } from '@wordpress/data';
 import { SlotFillProvider } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -124,19 +124,33 @@ export const ServiceNavigation = () => {
 };
 
 export const ClassifAISettings = () => {
-	const { setSettings, setIsLoaded } = useDispatch( STORE_NAME );
+	const { setSettings, setIsLoaded, setError } = useDispatch( STORE_NAME );
 
 	// Load the settings.
 	useEffect( () => {
 		( async () => {
-			const classifAISettings = await apiFetch( {
-				path: '/classifai/v1/settings',
-			} ); // TODO: handle error
-
-			setSettings( classifAISettings );
+			try {
+				const classifAISettings = await apiFetch( {
+					path: '/classifai/v1/settings',
+				} );
+				setSettings( classifAISettings );
+			} catch ( e ) {
+				console.error( e ); // eslint-disable-line no-console
+				setError(
+					sprintf(
+						/* translators: %s: error message */
+						__( 'Error: %s', 'classifai' ),
+						e.message ||
+							__(
+								'An error occurred while loading the settings. Please try again.',
+								'classifai'
+							)
+					)
+				);
+			}
 			setIsLoaded( true );
 		} )();
-	}, [ setSettings, setIsLoaded ] );
+	}, [ setSettings, setIsLoaded, setError ] );
 
 	// Render admin notices after the header.
 	useEffect( () => {

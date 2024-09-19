@@ -56,3 +56,8 @@ export const setIsSaving = ( isSaving ) => ( {
 	type: 'SET_IS_SAVING',
 	payload: isSaving,
 } );
+
+export const setError = ( error ) => ( {
+	type: 'SET_ERROR',
+	payload: error,
+} );
