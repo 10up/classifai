@@ -198,10 +198,10 @@ class ExcerptGeneration extends Feature {
 
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
-			'classifai-post-excerpt',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-			array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
-			get_asset_info( 'post-excerpt', 'version' ),
+			'classifai-plugin-excerpt-generation-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-excerpt-generation.js',
+			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), [ 'lodash' ] ),
+			get_asset_info( 'classifai-plugin-excerpt-generation', 'version' ),
 			true
 		);
 	}

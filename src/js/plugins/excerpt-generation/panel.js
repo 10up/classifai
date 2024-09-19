@@ -7,7 +7,7 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { DisableFeatureButton } from '../components';
+import { DisableFeatureButton } from '../../components';
 
 /**
  * PostExcerpt component.

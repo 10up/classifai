@@ -20,7 +20,6 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
-		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
 		'media-modal': [ './src/js/media-modal/index.js' ],
 		'inserter-media-category': [
 			'./src/js/gutenberg-plugins/inserter-media-category.js',
@@ -42,6 +41,7 @@ module.exports = {
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
 		'classifai-plugin-content-resizing': './src/js/plugins/content-resizing/index.js',
 		'classifai-plugin-title-generation': './src/js/plugins/title-generation/index.js',
+		'classifai-plugin-excerpt-generation': './src/js/plugins/excerpt-generation/index.js',
 	},
 	module: {
 		rules: [
