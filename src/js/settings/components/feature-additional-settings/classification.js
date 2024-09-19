@@ -13,7 +13,7 @@ import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { usePostTypes } from '../../utils/utils';
+import { isFeatureActive, usePostTypes } from '../../utils/utils';
 import { NLUFeatureSettings } from './nlu-feature';
 import {
 	AzureOpenAIEmbeddingsResults,
@@ -89,6 +89,7 @@ export const ClassificationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
+	const isConfigured = isFeatureActive( featureSettings );
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const { postTypesSelectOptions } = usePostTypes();
 	const { postStatuses } = window.classifAISettings;
@@ -104,19 +105,21 @@ export const ClassificationSettings = () => {
 
 	return (
 		<>
-			<SettingsRow>
-				<PreviewerProvider value={ previewerContextData }>
-					<BaseControl
-						help={ __(
-							'Used to preview the results for a particular post.',
-							'classifai'
-						) }
-					>
-						<PostSelector showLabel={ false } />
-					</BaseControl>
-					<Previewer />
-				</PreviewerProvider>
-			</SettingsRow>
+			{ !! isConfigured && (
+				<SettingsRow>
+					<PreviewerProvider value={ previewerContextData }>
+						<BaseControl
+							help={ __(
+								'Used to preview the results for a particular post.',
+								'classifai'
+							) }
+						>
+							<PostSelector showLabel={ false } />
+						</BaseControl>
+						<Previewer />
+					</PreviewerProvider>
+				</SettingsRow>
+			) }
 			<SettingsRow label={ __( 'Classification mode', 'classifai' ) }>
 				<RadioControl
 					className="classification-mode-radio-control"
