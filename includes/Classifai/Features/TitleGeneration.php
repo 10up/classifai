@@ -200,15 +200,15 @@ class TitleGeneration extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-post-status-info',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-status-info.js',
-			get_asset_info( 'post-status-info', 'dependencies' ),
-			get_asset_info( 'post-status-info', 'version' ),
+			'classifai-plugin-title-generation-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-title-generation.js',
+			get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-title-generation', 'version' ),
 			true
 		);
 
 		wp_add_inline_script(
-			'classifai-post-status-info',
+			'classifai-plugin-title-generation-js',
 			sprintf(
 				'var classifaiChatGPTData = %s;',
 				wp_json_encode( $this->get_localised_vars() )

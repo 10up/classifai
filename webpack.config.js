@@ -41,6 +41,7 @@ module.exports = {
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
 		'classifai-plugin-content-resizing': './src/js/plugins/content-resizing/index.js',
+		'classifai-plugin-title-generation': './src/js/plugins/title-generation/index.js',
 	},
 	module: {
 		rules: [

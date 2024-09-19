@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { DisableFeatureButton } from '../components';
+import { DisableFeatureButton } from '../../components';
 
 const { classifaiChatGPTData } = window;
 
@@ -18,7 +18,7 @@ const RenderError = ( { error } ) => {
 	return <div className="error">{ error }</div>;
 };
 
-const TextGenerationPlugin = () => {
+const TitleGenerationPlugin = () => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
 	const [ error, setError ] = useState( false );
@@ -77,13 +77,12 @@ const TextGenerationPlugin = () => {
 						<div className="classifai-title" key={ i }>
 							<textarea
 								rows="5"
+								value={ item }
 								onChange={ ( e ) => {
 									dataToRender[ i ] = e.target.value;
 									setData( dataToRender );
 								} }
-							>
-								{ item }
-							</textarea>
+							/>
 							<Button
 								variant="secondary"
 								onClick={ async () => {
@@ -153,4 +152,4 @@ const TextGenerationPlugin = () => {
 	);
 };
 
-registerPlugin( 'classifai-plugin-text-generation', { render: TextGenerationPlugin } );
+registerPlugin( 'classifai-plugin-title-generation', { render: TitleGenerationPlugin } );
