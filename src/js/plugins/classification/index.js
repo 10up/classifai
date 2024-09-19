@@ -59,7 +59,7 @@ const ClassificationPlugin = () => {
 };
 
 registerPlugin(
-	'classifai-text-to-speech',
+	'classifai-plugin-classification',
 	{
 		render: ClassificationPlugin
 	}

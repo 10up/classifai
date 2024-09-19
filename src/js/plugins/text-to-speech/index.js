@@ -223,7 +223,7 @@ const TextToSpeechPlugin = () => {
 };
 
 registerPlugin(
-	'classifai-text-to-speech',
+	'classifai-plugin-text-to-speech',
 	{
 		render: TextToSpeechPlugin
 	}
