@@ -260,7 +260,7 @@ class Settings {
 				$current_settings = $feature->get_settings();
 
 				// Update only status of the feature.
-				$current_settings['status'] = $feature_settings['status'] ?? $current_settings['status'];
+				$current_settings['status'] = sanitize_text_field( $feature_settings['status'] ?? $current_settings['status'] );
 				$new_settings               = $current_settings;
 			} else {
 				$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
