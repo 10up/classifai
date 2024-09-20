@@ -19,9 +19,9 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
-		commands: [ './src/js/gutenberg-plugins/commands.js' ],
 		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
 
+		'classifai-plugin-commands': [ './src/js/plugins/commands.js' ],
 		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
