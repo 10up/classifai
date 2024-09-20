@@ -7,10 +7,15 @@ import {
 	TextHighlight,
 	Spinner,
 	Button,
+	Fill,
+	Notice,
 } from '@wordpress/components';
-import { useState, useEffect, useContext } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
+import { useState, useEffect, useContext, useRef } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
+
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { isFeatureActive, usePostTypes } from '../../utils/utils';
@@ -82,6 +87,8 @@ function PreviewerProvider( { children, value } ) {
 }
 
 export const ClassificationSettings = () => {
+	const [ embedInProgress, setEmbedInProgress ] = useState( false );
+	const isEmbeddingInProgress = useRef( false );
 	const [ isPreviewerOpen, setIsPreviewerOpen ] = useState( false );
 	const [ selectedPostId, setSelectedPostId ] = useState( 0 );
 	const [ isPreviewUnderProcess, setPreviewUnderProcess ] = useState( null );
@@ -89,10 +96,14 @@ export const ClassificationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
+	const isSaving = useSelect( ( select ) =>
+		select( STORE_NAME ).getIsSaving()
+	);
 	const isConfigured = isFeatureActive( featureSettings );
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const { postTypesSelectOptions } = usePostTypes();
 	const { postStatuses } = window.classifAISettings;
+	const { createSuccessNotice } = useDispatch( noticesStore );
 
 	const previewerContextData = {
 		isPreviewerOpen,
@@ -103,8 +114,55 @@ export const ClassificationSettings = () => {
 		setPreviewUnderProcess,
 	};
 
+	// Check if embeddings are in progress
+	useEffect( () => {
+		if ( ! isSaving ) {
+			const getEmbeddingsInProgress = async () => {
+				try {
+					const res = await apiFetch( {
+						path: '/classifai/v1/embeddings_in_progress',
+					} );
+					if ( res?.classifAIEmbedInProgress ) {
+						setEmbedInProgress( true );
+						isEmbeddingInProgress.current = true;
+					} else {
+						setEmbedInProgress( false );
+						clearInterval( intervalId );
+						if ( isEmbeddingInProgress.current ) {
+							createSuccessNotice(
+								__(
+									'Generation of embeddings is completed.',
+									'classifai'
+								),
+								{
+									id: 'success-feature_classification',
+								}
+							);
+						}
+						isEmbeddingInProgress.current = false;
+					}
+				} catch ( error ) {}
+			};
+
+			const intervalId = setInterval( getEmbeddingsInProgress, 10000 );
+			getEmbeddingsInProgress();
+
+			return () => clearInterval( intervalId );
+		}
+	}, [ isSaving, createSuccessNotice ] );
+
 	return (
 		<>
+			{ embedInProgress && (
+				<Fill name="ClassifAIBeforeFeatureSettingsPanel">
+					<Notice status="info" isDismissible={ false }>
+						{ __(
+							'Generation of embeddings is in progress.',
+							'classifai'
+						) }
+					</Notice>
+				</Fill>
+			) }
 			{ !! isConfigured && (
 				<SettingsRow>
 					<PreviewerProvider value={ previewerContextData }>

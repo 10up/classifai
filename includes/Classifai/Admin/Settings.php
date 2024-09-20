@@ -2,6 +2,7 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Features\Classification;
 use Classifai\Services\ServicesManager;
 
 use function Classifai\get_asset_info;
@@ -209,6 +210,18 @@ class Settings {
 				],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1',
+			'embeddings_in_progress',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'check_embedding_generation_status' ],
+					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
+				],
+			]
+		);
 	}
 
 	/**
@@ -380,5 +393,18 @@ class Settings {
 	 */
 	public function registration_settings_permissions_check() {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Callback for getting the registration settings.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function check_embedding_generation_status() {
+		$classification = new Classification();
+		$response       = array(
+			'classifAIEmbedInProgress' => $classification->is_embeddings_generation_in_progress(),
+		);
+		return rest_ensure_response( $response );
 	}
 }

@@ -1296,4 +1296,13 @@ class Embeddings extends Provider {
 			$this->feature_instance
 		);
 	}
+
+	/**
+	 * Get embeddings generation status.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress() {
+		return self::$scheduler_instance->is_embeddings_generation_in_progress();
+	}
 }

@@ -9,7 +9,9 @@ export const Notices = ( { feature } ) => {
 	);
 
 	const featureNotices = notices.filter(
-		( notice ) => notice.id === `error-${ feature }`
+		( notice ) =>
+			notice.id === `error-${ feature }` ||
+			notice.id === `success-${ feature }`
 	);
 
 	if ( featureNotices.length === 0 ) {

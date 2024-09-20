@@ -59,7 +59,8 @@
 			margin: 0;
 		}
 
-		&.personalizer-deprecation-notice {
+		&.personalizer-deprecation-notice,
+		&.is-info {
 			margin-bottom: 16px;
 		}
 	}
