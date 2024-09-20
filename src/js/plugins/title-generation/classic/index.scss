@@ -1,13 +1,13 @@
 #titlewrap {
 	display: flex;
 
-	#classifai-openai__title-generate-btn {
+	#classifai-title-generation__title-generate-btn {
 		position: relative;
 		margin-left: 0.5rem;
 		height: 2.348rem;
 		line-height: 2.348rem;
 
-		& > .classifai-openai__title-generate-btn--spinner {
+		& > .classifai-title-generation__title-generate-btn--spinner {
 			display: none;
 			position: absolute;
 			top: 50%;
@@ -18,38 +18,7 @@
 	}
 }
 
-#postexcerpt {
-	#classifai-openai__excerpt-generate-btn {
-		display: block;
-		width: 160px;
-		max-width: 100%;
-		margin: 1em 0 0 auto;
-		text-align: center;
-		position: relative;
-
-		& > .classifai-openai__excerpt-generate-btn--spinner {
-			display: none;
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate( -50%, -50% );
-			line-height: 29px;
-		}
-	}
-
-	.classifai-openai__excerpt-generate-error {
-		display: none;
-		color: #dc3232;
-		text-align: right;
-	}
-
-	.classifai-openai__excerpt-generate-disable-link {
-		text-align: right;
-		margin-top: 6px;
-	}
-}
-
-#classifai-openai {
+#classifai-title-generation {
 	&__overlay {
 		position: fixed;
 		top: 0;
@@ -114,7 +83,7 @@
 	}
 }
 
-.classifai-openai {
+.classifai-title-generation {
 	&__result-item {
 		flex-grow: 1;
 		flex-basis: 0;
@@ -132,12 +101,12 @@
 	}
 
 	&--fade-in {
-		#classifai-openai__overlay {
+		#classifai-title-generation__overlay {
 			opacity: 1 !important;
 			transition: opacity 0.3s ease !important;
 		}
 
-		#classifai-openai__modal {
+		#classifai-title-generation__modal {
 			opacity: 1 !important;
 			transform: translate(-50%, 0) !important;
 			transition: opacity 0.3s ease, transform 0.3s ease !important;

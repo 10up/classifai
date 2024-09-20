@@ -271,12 +271,12 @@ class TitleGeneration extends Feature {
 	 */
 	public function register_generated_titles_template() {
 		?>
-		<div id="classifai-openai__results" style="display: none;">
-			<div id="classifai-openai__overlay" style="opacity: 0;"></div>
-			<div id="classifai-openai__modal" style="opacity: 0;">
-				<h2 id="classifai-openai__results-title"></h2>
-				<div id="classifai-openai__close-modal-button"></div>
-				<div id="classifai-openai__results-content">
+		<div id="classifai-title-generation__results" style="display: none;">
+			<div id="classifai-title-generation__overlay" style="opacity: 0;"></div>
+			<div id="classifai-title-generation__modal" style="opacity: 0;">
+				<h2 id="classifai-title-generation__results-title"></h2>
+				<div id="classifai-title-generation__close-modal-button"></div>
+				<div id="classifai-title-generation__results-content">
 				</div>
 			</div>
 		</div>

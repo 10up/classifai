@@ -220,10 +220,10 @@ class ExcerptGeneration extends Feature {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if ( post_type_supports( $screen->post_type, 'excerpt' ) ) {
 					wp_enqueue_style(
-						'classifai-plugin-classic-title-generation-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
+						'classifai-plugin-classic-excerpt-generation-css',
+						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-excerpt-generation.css',
 						[],
-						get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
+						get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'version' ),
 						'all'
 					);
 

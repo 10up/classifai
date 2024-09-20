@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import '../../../../scss/openai/classic-editor-title-generator.scss';
+import './index.scss';
 
 const ClassifAI = window.ClassifAI || {};
 const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
@@ -27,23 +27,23 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			text: excerptContainer.value
 				? classifaiExcerptData?.regenerateText ?? ''
 				: classifaiExcerptData?.buttonText ?? '',
-			class: 'classifai-openai__excerpt-generate-btn--text',
+			class: 'classifai-excerpt-generation__excerpt-generate-btn--text',
 		} )
 			.wrap(
-				'<div class="button" id="classifai-openai__excerpt-generate-btn" />'
+				'<div class="button" id="classifai-excerpt-generation__excerpt-generate-btn" />'
 			)
 			.parent()
 			.append(
 				$( '<span />', {
-					class: 'classifai-openai__excerpt-generate-btn--spinner',
+					class: 'classifai-excerpt-generation__excerpt-generate-btn--spinner',
 				} )
 			)
 			.insertAfter( excerptContainer );
 
 		$( '<p>', {
-			class: 'classifai-openai__excerpt-generate-error',
+			class: 'classifai-excerpt-generation__excerpt-generate-error',
 		} ).insertAfter(
-			document.getElementById( 'classifai-openai__excerpt-generate-btn' )
+			document.getElementById( 'classifai-excerpt-generation__excerpt-generate-btn' )
 		);
 
 		// Append disable feature link.
@@ -60,12 +60,12 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 				class: 'classifai-disable-feature-link',
 			} )
 				.wrap(
-					`<div class="classifai-openai__excerpt-generate-disable-link" />`
+					`<div class="classifai-excerpt-generation__excerpt-generate-disable-link" />`
 				)
 				.parent()
 				.insertAfter(
 					document.getElementById(
-						'classifai-openai__excerpt-generate-btn'
+						'classifai-excerpt-generation__excerpt-generate-btn'
 					)
 				);
 		}
@@ -80,12 +80,12 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			}
 
 			const generateTextEl = $(
-				'.classifai-openai__excerpt-generate-btn--text'
+				'.classifai-excerpt-generation__excerpt-generate-btn--text'
 			);
 			const spinnerEl = $(
-				'.classifai-openai__excerpt-generate-btn--spinner'
+				'.classifai-excerpt-generation__excerpt-generate-btn--spinner'
 			);
-			const errorEl = $( '.classifai-openai__excerpt-generate-error' );
+			const errorEl = $( '.classifai-excerpt-generation__excerpt-generate-error' );
 
 			generateTextEl.css( 'opacity', '0' );
 			spinnerEl.show();
@@ -118,7 +118,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 		// Event handler registration to generate the excerpt.
 		$( document ).on(
 			'click',
-			'#classifai-openai__excerpt-generate-btn',
+			'#classifai-excerpt-generation__excerpt-generate-btn',
 			generateExcerpt
 		);
 	}
