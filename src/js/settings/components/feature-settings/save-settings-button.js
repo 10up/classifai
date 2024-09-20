@@ -113,9 +113,13 @@ export const SaveSettingsButton = ( {
 export const SaveButtonSlot = ( { children } ) => {
 	return (
 		<>
-			<Slot name="BeforeSaveButton">{ ( fills ) => <>{ fills }</> }</Slot>
+			<Slot name="ClassifAIBeforeSaveButton">
+				{ ( fills ) => <>{ fills }</> }
+			</Slot>
 			{ children }
-			<Slot name="AfterSaveButton">{ ( fills ) => <>{ fills }</> }</Slot>
+			<Slot name="ClassifAIAfterSaveButton">
+				{ ( fills ) => <>{ fills }</> }
+			</Slot>
 		</>
 	);
 };

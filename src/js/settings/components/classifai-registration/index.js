@@ -130,7 +130,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 				</PanelBody>
 			</Panel>
 			<div className="classifai-settings-footer">
-				<Slot name="BeforeRegisterSaveButton">
+				<Slot name="ClassifAIBeforeRegisterSaveButton">
 					{ ( fills ) => <>{ fills }</> }
 				</Slot>
 				<SaveSettingsButton

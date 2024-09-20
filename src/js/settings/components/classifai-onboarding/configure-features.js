@@ -72,7 +72,7 @@ export const ConfigureFeatures = () => {
 					>
 						<SlotFillProvider>
 							<FeatureSettings onSaveSuccess={ onSaveSuccess } />
-							<Fill name="BeforeSaveButton">
+							<Fill name="ClassifAIBeforeSaveButton">
 								<Button onClick={ onSaveSuccess }>
 									{ __( 'Skip for now', 'classifai' ) }
 								</Button>
