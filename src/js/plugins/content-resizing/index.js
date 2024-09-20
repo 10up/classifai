@@ -24,7 +24,7 @@ import {
 import { __, _nx } from '@wordpress/i18n';
 
 import { DisableFeatureButton } from '../../components';
-import '../../../scss/content-resizing-plugin.scss';
+import './index.scss';
 
 const aiIconSvg = (
 	<svg
