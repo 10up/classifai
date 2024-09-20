@@ -1,4 +1,4 @@
-import '../scss/post-audio-controls.scss';
+import './index.scss';
 
 const audioControlEl = document.querySelector( '.class-post-audio-controls' );
 const playBtn = document.querySelector( '.dashicons-controls-play' );

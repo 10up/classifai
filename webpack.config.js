@@ -13,7 +13,6 @@ module.exports = {
 		media: [ './src/js/media.js' ],
 		admin: [ './src/js/admin.js' ],
 		'language-processing': [ './src/js/language-processing.js' ],
-		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
@@ -26,6 +25,7 @@ module.exports = {
 		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
+		'classifai-plugin-text-to-speech-frontend': './src/js/plugins/text-to-speech/frontend/index.js',
 		'classifai-plugin-content-resizing': './src/js/plugins/content-resizing/index.js',
 		'classifai-plugin-title-generation': './src/js/plugins/title-generation/index.js',
 		'classifai-plugin-classic-title-generation': './src/js/plugins/title-generation/classic/index.js',

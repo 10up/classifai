@@ -657,18 +657,18 @@ class TextToSpeech extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-post-audio-player-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.js',
-			get_asset_info( 'post-audio-controls', 'dependencies' ),
-			get_asset_info( 'post-audio-controls', 'version' ),
+			'classifai-plugin-text-to-speech-frontend-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-text-to-speech-frontend.js',
+			get_asset_info( 'classifai-plugin-text-to-speech-frontend', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-text-to-speech-frontend', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-post-audio-player-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-audio-controls.css',
+			'classifai-plugin-text-to-speech-frontend-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-text-to-speech-frontend.css',
 			array( 'dashicons' ),
-			get_asset_info( 'post-audio-controls', 'version' ),
+			get_asset_info( 'classifai-plugin-text-to-speech-frontend', 'version' ),
 			'all'
 		);
 
