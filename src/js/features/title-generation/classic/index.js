@@ -125,7 +125,9 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 									class: 'button classifai-title-generation__select-title',
 								} )
 							)
-							.appendTo( '#classifai-title-generation__results-content' );
+							.appendTo(
+								'#classifai-title-generation__results-content'
+							);
 					} );
 
 					// Append disable feature link.
@@ -162,8 +164,12 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 
 					$( '<span class="error">' )
 						.text( error?.message )
-						.wrap( `<div class="classifai-title-generation__result-item" />` )
-						.appendTo( '#classifai-title-generation__results-content' );
+						.wrap(
+							`<div class="classifai-title-generation__result-item" />`
+						)
+						.appendTo(
+							'#classifai-title-generation__results-content'
+						);
 
 					$( '#classifai-title-generation__results' )
 						.show()
@@ -179,7 +185,11 @@ const scriptData = classifaiChatGPTData.enabledFeatures.reduce(
 		);
 
 		// Event handler registration to hide the popup.
-		$( document ).on( 'click', '#classifai-title-generation__overlay', hidePopup );
+		$( document ).on(
+			'click',
+			'#classifai-title-generation__overlay',
+			hidePopup
+		);
 		$( document ).on(
 			'click',
 			'#classifai-title-generation__close-modal-button',

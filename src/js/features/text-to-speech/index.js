@@ -1,12 +1,16 @@
-
 /**
  * External dependencies.
  */
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { ToggleControl, BaseControl, Button, Icon } from '@wordpress/components';
+import {
+	ToggleControl,
+	BaseControl,
+	Button,
+	Icon,
+} from '@wordpress/components';
 import { useSelect, subscribe } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies.
@@ -223,13 +227,9 @@ const TextToSpeechPlugin = () => {
 	);
 };
 
-registerPlugin(
-	'classifai-plugin-text-to-speech',
-	{
-		render: TextToSpeechPlugin
-	}
-);
-
+registerPlugin( 'classifai-plugin-text-to-speech', {
+	render: TextToSpeechPlugin,
+} );
 
 let saveHappened = false;
 let showingNotice = false;

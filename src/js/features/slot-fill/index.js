@@ -1,5 +1,5 @@
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { Icon, SlotFillProvider, Slot, Fill, } from '@wordpress/components';
+import { Icon, SlotFillProvider, Slot, Fill } from '@wordpress/components';
 import { PluginArea, registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 
@@ -22,12 +22,9 @@ const ClassifAIPluginArea = () => {
 	);
 };
 
-registerPlugin(
-	'classifai-plugin-area',
-	{
-		render: ClassifAIPluginArea
-	}
-);
+registerPlugin( 'classifai-plugin-area', {
+	render: ClassifAIPluginArea,
+} );
 
 window.ClassifaiEditorSettingPanel = ( { children } ) => {
 	return <Fill name="classifai-editor-setting-panel">{ children }</Fill>;

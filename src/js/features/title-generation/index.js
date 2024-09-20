@@ -152,4 +152,6 @@ const TitleGenerationPlugin = () => {
 	);
 };
 
-registerPlugin( 'classifai-plugin-title-generation', { render: TitleGenerationPlugin } );
+registerPlugin( 'classifai-plugin-title-generation', {
+	render: TitleGenerationPlugin,
+} );

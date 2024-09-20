@@ -1,10 +1,10 @@
 /**
  * External dependencies.
  */
-import { select, dispatch, useSelect } from '@wordpress/data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Internal dependencies.
@@ -26,10 +26,11 @@ export const ClassificationButton = () => {
 		)
 	);
 
-	const postId = select( 'core/editor' ).getCurrentPostId();
-	const postType = select( 'core/editor' ).getCurrentPostType();
+	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
+	const postType = wp.data.select( 'core/editor' ).getCurrentPostType();
 	const postTypeLabel =
-		select( 'core/editor' ).getPostTypeLabel() || __( 'Post', 'classifai' );
+		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
+		__( 'Post', 'classifai' );
 
 	const [ isLoading, setLoading ] = useState( false );
 	const [ resultReceived, setResultReceived ] = useState( false );
@@ -60,11 +61,9 @@ export const ClassificationButton = () => {
 			const taxTermsExisting = {};
 
 			// get current terms of the post
-			const currentTerms = select( 'core' ).getEntityRecord(
-				'postType',
-				postType,
-				postId
-			);
+			const currentTerms = wp.data
+				.select( 'core' )
+				.getEntityRecord( 'postType', postType, postId );
 
 			Object.keys( taxonomies ).forEach( ( taxonomy ) => {
 				let tax = taxonomy;
@@ -159,7 +158,9 @@ export const ClassificationButton = () => {
 		);
 
 		// If no edited values in post trigger save.
-		const isDirty = await select( 'core/editor' ).isEditedPostDirty();
+		const isDirty = await wp.data
+			.select( 'core/editor' )
+			.isEditedPostDirty();
 		if ( ! isDirty ) {
 			await dispatch( 'core' ).saveEditedEntityRecord(
 				'postType',

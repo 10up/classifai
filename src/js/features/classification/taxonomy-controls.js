@@ -11,7 +11,7 @@ import {
 	getEntitiesInfo,
 	useTaxonomies,
 } from '../../../../includes/Classifai/Blocks/recommended-content-block/utils';
-import { useState } from '@wordpress/element';
+import { useState, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 const termsPerPage = -1;
@@ -274,7 +274,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					}
 
 					return (
-						<React.Fragment key={ slug }>
+						<Fragment key={ slug }>
 							<FormTokenField
 								key={ slug }
 								label={ name }
@@ -300,7 +300,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								</>
 							) }
 							<hr />
-						</React.Fragment>
+						</Fragment>
 					);
 				} ) }
 		</>

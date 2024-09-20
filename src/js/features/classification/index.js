@@ -57,9 +57,6 @@ const ClassificationPlugin = () => {
 	);
 };
 
-registerPlugin(
-	'classifai-plugin-classification',
-	{
-		render: ClassificationPlugin
-	}
-);
+registerPlugin( 'classifai-plugin-classification', {
+	render: ClassificationPlugin,
+} );

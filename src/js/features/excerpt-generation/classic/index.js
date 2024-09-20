@@ -43,7 +43,9 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 		$( '<p>', {
 			class: 'classifai-excerpt-generation__excerpt-generate-error',
 		} ).insertAfter(
-			document.getElementById( 'classifai-excerpt-generation__excerpt-generate-btn' )
+			document.getElementById(
+				'classifai-excerpt-generation__excerpt-generate-btn'
+			)
 		);
 
 		// Append disable feature link.
@@ -85,7 +87,9 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			const spinnerEl = $(
 				'.classifai-excerpt-generation__excerpt-generate-btn--spinner'
 			);
-			const errorEl = $( '.classifai-excerpt-generation__excerpt-generate-error' );
+			const errorEl = $(
+				'.classifai-excerpt-generation__excerpt-generate-error'
+			);
 
 			generateTextEl.css( 'opacity', '0' );
 			spinnerEl.show();
