@@ -11,8 +11,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies.
  */
-import { ClassifaiEditorSettingPanel } from '../slot-fill';
 import { store as postAudioStore } from './store';
+
+const { ClassifaiEditorSettingPanel } = window;
 
 /**
  * ClassifAI Text to Audio component.

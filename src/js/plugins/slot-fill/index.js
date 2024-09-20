@@ -29,6 +29,6 @@ registerPlugin(
 	}
 );
 
-export const ClassifaiEditorSettingPanel = ( { children } ) => {
+window.ClassifaiEditorSettingPanel = ( { children } ) => {
 	return <Fill name="classifai-editor-setting-panel">{ children }</Fill>;
 };

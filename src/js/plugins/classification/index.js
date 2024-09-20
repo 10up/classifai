@@ -7,11 +7,10 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies.
  */
-import { ClassifaiEditorSettingPanel } from '../slot-fill';
 import { ClassificationToggle } from './classification-toggle';
 import { ClassificationButton } from './classification-button';
 
-const { classifaiPostData } = window;
+const { classifaiPostData, ClassifaiEditorSettingPanel } = window;
 
 const ClassificationPlugin = () => {
 	const postType = useSelect( ( select ) =>

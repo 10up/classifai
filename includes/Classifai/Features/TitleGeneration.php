@@ -256,13 +256,6 @@ class TitleGeneration extends Feature {
 					);
 				}
 			}
-
-			wp_enqueue_style(
-				'classifai-language-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-				[],
-				get_asset_info( 'language-processing', 'version' ),
-			);
 		}
 	}
 

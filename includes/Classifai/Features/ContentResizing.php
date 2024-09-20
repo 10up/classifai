@@ -85,7 +85,6 @@ class ContentResizing extends Feature {
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 	}
 
 	/**
@@ -203,23 +202,6 @@ class ContentResizing extends Feature {
 			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
 			'all'
 		);
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 *
-	 * @param string $hook_suffix The current admin page.
-	 */
-	public function enqueue_admin_assets( string $hook_suffix ) {
-		// Load asset in new post and edit post screens.
-		if ( 'post.php' === $hook_suffix || 'post-new.php' === $hook_suffix ) {
-			wp_enqueue_style(
-				'classifai-language-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-				[],
-				get_asset_info( 'language-processing', 'version' ),
-			);
-		}
 	}
 
 	/**

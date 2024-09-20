@@ -8,11 +8,9 @@ module.exports = {
 		path: path.resolve( __dirname, 'dist' ),
 	},
 	entry: {
-		editor: [ './src/js/editor.js' ],
 		'editor-ocr': [ './src/js/editor-ocr.js' ],
 		media: [ './src/js/media.js' ],
 		admin: [ './src/js/admin.js' ],
-		'language-processing': [ './src/js/language-processing.js' ],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
@@ -23,6 +21,8 @@ module.exports = {
 
 		'classifai-plugin-commands': [ './src/js/plugins/commands.js' ],
 		'classifai-plugin-classification': './src/js/plugins/classification/index.js',
+		'classifai-plugin-classification-previewer': './src/js/plugins/classification/previewer.js',
+		'classifai-plugin-classification-ibm-watson': './src/js/plugins/classification/ibm-watson.js',
 		'classifai-plugin-fill': './src/js/plugins/slot-fill/index.js',
 		'classifai-plugin-text-to-speech': './src/js/plugins/text-to-speech/index.js',
 		'classifai-plugin-text-to-speech-frontend': './src/js/plugins/text-to-speech/frontend/index.js',

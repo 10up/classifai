@@ -1,5 +1,5 @@
 import Choices from 'choices.js';
-import '../scss/language-processing.scss';
+import './previewer.scss';
 
 ( () => {
 	let featureStatuses = {};
