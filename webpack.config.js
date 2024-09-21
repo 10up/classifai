@@ -16,9 +16,9 @@ module.exports = {
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
 
-		'classifai-plugin-media-processing': [ './src/js/features/media-processing/media-upload.js' ],
-		'classifai-plugin-editor-ocr': [ './src/js/features/media-processing/editor-ocr.js' ],
-		'classifai-plugin-commands': [ './src/js/features/commands.js' ],
+		'classifai-plugin-media-processing': './src/js/features/media-processing/media-upload.js',
+		'classifai-plugin-editor-ocr': './src/js/features/media-processing/editor-ocr.js',
+		'classifai-plugin-commands': './src/js/features/commands.js',
 		'classifai-plugin-classification': './src/js/features/classification/index.js',
 		'classifai-plugin-classification-previewer': './src/js/features/classification/previewer.js',
 		'classifai-plugin-classification-ibm-watson': './src/js/features/classification/ibm-watson.js',
