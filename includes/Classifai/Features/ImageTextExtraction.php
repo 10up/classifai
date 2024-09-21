@@ -216,10 +216,10 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
-			'editor-ocr',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'editor-ocr', 'version' ),
+			'classifai-plugin-editor-ocr-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-editor-ocr.js',
+			array_merge( get_asset_info( 'classifai-plugin-editor-ocr', 'dependencies' ), array( 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-editor-ocr', 'version' ),
 			true
 		);
 	}
