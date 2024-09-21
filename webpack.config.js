@@ -17,7 +17,6 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
-		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
 
 		'classifai-plugin-commands': [ './src/js/features/commands.js' ],
 		'classifai-plugin-classification': './src/js/features/classification/index.js',
@@ -32,7 +31,10 @@ module.exports = {
 		'classifai-plugin-excerpt-generation': './src/js/features/excerpt-generation/index.js',
 		'classifai-plugin-classic-excerpt-generation': './src/js/features/excerpt-generation/classic/index.js',
 		'classifai-plugin-inserter-media-category': './src/js/features/image-generation/inserter-media-category.js',
-		'classifai-plugin-image-generation-media-modal': './src/js/features/image-generation/media-modal/index.js',
+		'classifai-plugin-image-generation-media-modal': [
+			'./src/js/features/image-generation/media-modal/index.js',
+			'./src/js/features/image-generation/extend-image-block-generate-image.js'
+		],
 		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
 	},
 	module: {
