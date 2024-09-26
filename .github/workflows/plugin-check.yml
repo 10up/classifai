@@ -10,33 +10,28 @@ on:
       - develop
 
 jobs:
+  build:
+    uses: 10up/classifai/.github/workflows/build-release-zip.yml@feature/plugin-check-action # TODO: Update branch before merge.
+
   test:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set PHP version
-        uses: shivammathur/setup-php@v2
+      - name: Download built zip
+        uses: actions/download-artifact@v4
         with:
-          php-version: '7.4'
-          coverage: none
-          tools: composer:v2
+          name: ${{ github.event.repository.name }}
+          path: ${{ github.event.repository.name }}
 
-      - name: Setup node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies and build
-        run: |
-          npm ci --no-optional
-          npm run build
-          composer install
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ github.event.repository.name }}
 
       - name: Run plugin check
         uses: wordpress/plugin-check-action@v1
         with:
-          exclude-directories: 'node_modules,vendor'
+          build-dir: ${{ github.event.repository.name }}
