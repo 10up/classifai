@@ -84,6 +84,7 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
+							/* translators: %s is replaced with the OpenAI Text to Speech models URL */
 							__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
 							[
 								'a' => [
@@ -120,7 +121,8 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
-							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
+							/* translators: %s is replaced with the OpenAI Text to Speech voice options URL */
+							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech voice options" target="_blank">voice</a>.', 'classifai' ),
 							[
 								'a' => [
 									'href'  => [],
@@ -144,8 +146,8 @@ class TextToSpeech extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'format',
 				'options'       => [
-					'mp3'  => __( '.mp3', 'classifai' ),
-					'wav'  => __( '.wav', 'classifai' ),
+					'mp3' => __( '.mp3', 'classifai' ),
+					'wav' => __( '.wav', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
 				'description'   => __( 'Select the desired audio format.', 'classifai' ),
@@ -349,9 +351,9 @@ class TextToSpeech extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			$debug_info[ __( 'Model', 'classifai' ) ]          = $provider_settings['tts_model'] ?? '';
-			$debug_info[ __( 'Voice', 'classifai' ) ]          = $provider_settings['voice'] ?? '';
-			$debug_info[ __( 'Audio format', 'classifai' ) ]   = $provider_settings['format'] ?? '';
+			$debug_info[ __( 'Model', 'classifai' ) ]        = $provider_settings['tts_model'] ?? '';
+			$debug_info[ __( 'Voice', 'classifai' ) ]        = $provider_settings['voice'] ?? '';
+			$debug_info[ __( 'Audio format', 'classifai' ) ] = $provider_settings['format'] ?? '';
 
 			// We don't save the response transient because WP does not support serialized binary data to be inserted to the options.
 		}

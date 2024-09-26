@@ -35,3 +35,5 @@ jobs:
         uses: wordpress/plugin-check-action@v1
         with:
           build-dir: ${{ github.event.repository.name }}
+          exclude-checks: 'plugin_readme,plugin_updater' # Plugin isn't on .org so excluding these for now.
+          exclude-directories: 'assets,dist,vendor'
