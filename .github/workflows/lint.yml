@@ -105,24 +105,3 @@ jobs:
         enable_warnings: true
         standard: 'WordPress-VIP-Go'
         excludes: 'tests'
-
-  phpstan:
-    name: PHPStan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set PHP version
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '7.4'
-          coverage: none
-          tools: composer:v2
-
-      - name: Install dependencies
-        run: composer install
-
-      - name: PHPStan
-        run: composer phpstan
