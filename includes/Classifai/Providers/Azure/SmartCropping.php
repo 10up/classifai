@@ -185,7 +185,7 @@ class SmartCropping {
 		if ( empty( $url ) ) {
 			$url = get_largest_acceptable_image_url(
 				get_attached_file( $attachment_id ),
-				wp_get_attachment_url( $attachment_id, 'full' ),
+				wp_get_attachment_url( $attachment_id ),
 				$size_data,
 				computer_vision_max_filesize()
 			);

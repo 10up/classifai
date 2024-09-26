@@ -191,7 +191,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 	/**
 	 * Get meta for a URL.
 	 *
-	 * @param $string $url The URL.
+	 * @param string $url The URL.
 	 */
 	public function get_url_meta( $url ) {
 		$options = [];
@@ -200,7 +200,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 			$options['headers'] = [];
 		}
 
-		$options['headers']['x-api-key'] = MERCURY_PARSER_API_KEY;
+		$options['headers']['x-api-key'] = defined( MERCURY_PARSER_API_KEY ) ?? ''; /** @phpstan-ignore constant.notFound (If constant not defined, will use empty string instead) */
 		$options['timeout']              = 60; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 
 		$request_url = 'https://mercury.postlight.com/parser?url=' . rawurlencode( $url );

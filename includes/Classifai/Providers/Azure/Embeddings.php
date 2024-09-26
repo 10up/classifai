@@ -184,9 +184,9 @@ class Embeddings extends OpenAI {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) ); /** @phpstan-ignore return.void (function is used in an ajax context and does need to return data) */
 	}
 
 	/**
@@ -197,7 +197,7 @@ class Embeddings extends OpenAI {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -1103,6 +1103,7 @@ class Embeddings extends OpenAI {
 	 */
 	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
+		$content    = '';
 
 		// Get the content depending on the type.
 		switch ( $type ) {
