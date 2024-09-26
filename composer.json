@@ -28,17 +28,22 @@
   },
   "require-dev": {
     "10up/phpcs-composer": "^3.0",
-    "yoast/phpunit-polyfills": "^1.0.0"
+    "yoast/phpunit-polyfills": "^1.0.0",
+    "szepeviktor/phpstan-wordpress": "dev-master",
+    "phpstan/extension-installer": "1.4.x-dev",
+    "php-stubs/wp-cli-stubs": "dev-master"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf .",
+    "phpstan": "phpstan analyse --memory-limit=2048M",
     "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
   },
   "minimum-stability": "dev",
   "config": {
     "allow-plugins": {
-      "dealerdirect/phpcodesniffer-composer-installer": true
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
     }
   },
   "archive": {
