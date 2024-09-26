@@ -21,18 +21,18 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Setup node v16 and npm cache
+    - name: Setup node
       uses: actions/setup-node@v4
       with:
         node-version-file: .nvmrc
         cache: npm
 
-    - name: Install Node dependencies
+    - name: Install node dependencies
       run: npm ci --no-optional
 
     - name: Get updated JS files
       id: changed-files
-      uses: tj-actions/changed-files@v42
+      uses: tj-actions/changed-files@v45
       with:
         files: |
           **/*.js
@@ -54,7 +54,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set standard 10up cache directories
+    - name: Set standard cache directories
       run: |
         composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
 
@@ -78,7 +78,7 @@ jobs:
 
     - name: Get updated PHP files
       id: changed-files
-      uses: tj-actions/changed-files@v42
+      uses: tj-actions/changed-files@v45
       with:
         files: |
           **/*.php
@@ -105,3 +105,24 @@ jobs:
         enable_warnings: true
         standard: 'WordPress-VIP-Go'
         excludes: 'tests'
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set PHP version
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+          coverage: none
+          tools: composer:v2
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: PHPStan
+        run: composer phpstan
