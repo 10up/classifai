@@ -1,0 +1,26 @@
+{
+	"landingPage": "/wp-admin/tools.php?page=classifai&tab=language_processing",
+	"preferredVersions": {
+		"php": "7.4",
+		"wp": "latest"
+	},
+	"phpExtensionBundles": [
+		"kitchen-sink"
+	],
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		},
+		{
+			"step": "installPlugin",
+			"pluginZipFile": {
+				"resource": "https://github.com/10up/classifai/archive/stable.zip"
+			},
+			"options": {
+				"activate": true
+			}
+		}
+	]
+}
