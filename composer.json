@@ -31,7 +31,9 @@
     "yoast/phpunit-polyfills": "^1.0.0",
     "szepeviktor/phpstan-wordpress": "dev-master",
     "phpstan/extension-installer": "1.4.x-dev",
-    "php-stubs/wp-cli-stubs": "dev-master"
+    "php-stubs/wp-cli-stubs": "dev-master",
+    "johnbillion/wp-compat": "dev-trunk",
+    "phpstan/phpstan-deprecation-rules": "1.2.x-dev"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",

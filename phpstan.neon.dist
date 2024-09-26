@@ -19,3 +19,5 @@ parameters:
 		# These constants are defined but we'd need to stub them for PHPStan to know.
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
+	WPCompat:
+		requiresAtLeast: '6.1'
