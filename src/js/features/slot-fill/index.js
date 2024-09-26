@@ -1,17 +1,21 @@
+/**
+ * External dependencies
+ */
 import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
 import { Icon, SlotFillProvider, Slot, Fill } from '@wordpress/components';
 import { PluginArea, registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 
-const ClassifAIIcon = ( { icon } ) => (
-	<Icon className="components-panel__icon" icon={ icon } size={ 24 } />
-);
+/**
+ * Internal dependencies
+ */
+import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 
 const ClassifAIPluginArea = () => {
 	return (
 		<PluginDocumentSettingPanel
 			title={ __( 'ClassifAI', 'classifai' ) }
-			icon={ ClassifAIIcon }
+			icon={ <Icon className="components-panel__icon" icon={ icon } size={ 24 } /> }
 			className="classifai-panel"
 		>
 			<SlotFillProvider>
