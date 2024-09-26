@@ -46,7 +46,6 @@ jobs:
       run: npm ci --no-optional
 
     - name: Install composer dependencies
-      if: steps.cache-composer.outputs.cache-hit != 'true'
       run: composer install --no-dev -o
 
     - name: Build
