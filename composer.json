@@ -38,7 +38,7 @@
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
     "lint-fix": "phpcbf .",
-    "phpstan": "phpstan analyse --memory-limit=2048M",
+    "phpstan": "phpstan analyse --memory-limit=2048M -v",
     "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
   },
   "minimum-stability": "dev",

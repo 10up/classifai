@@ -12,6 +12,7 @@ parameters:
 	ignoreErrors:
 		# The JSDoc standard we use on hooks is not compatible with PHPStan.
 		- '#One or more @param tags has an invalid name or invalid syntax#'
+		- '#PHPDoc tag @(.+) has invalid value \({(.+)}(.*)\): Unexpected token "{"#'
 		# Could look to fix this in the future.
 		- '#@param tag must not be named \$this. Choose a descriptive alias, for example \$instance#'
 		# Ignore ElasticPress for now, as we'll need to stub this.
