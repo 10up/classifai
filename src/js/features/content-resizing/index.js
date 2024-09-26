@@ -23,8 +23,8 @@ import {
 } from '@wordpress/wordcount';
 import { __, _nx } from '@wordpress/i18n';
 
-import { DisableFeatureButton } from '../components';
-import '../../scss/content-resizing-plugin.scss';
+import { DisableFeatureButton } from '../../components';
+import './index.scss';
 
 const aiIconSvg = (
 	<svg
@@ -453,7 +453,7 @@ function toPlainText( html ) {
 	return plainText.replace( /\n\n+/g, '\n\n' );
 }
 
-registerPlugin( 'tenup-openai-expand-reduce-content', {
+registerPlugin( 'classifai-plugin-content-resizing', {
 	render: ContentResizingPlugin,
 } );
 
