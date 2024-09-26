@@ -16,8 +16,8 @@
 		{
 			"step": "installPlugin",
 			"pluginZipFile": {
-				"resource": "https://github.com/10up",
-				"slug": "classifai/archive/stable.zip"
+				"resource": "url",
+				"url": "https://github.com/10up/classifai/archive/stable.zip"
 			},
 			"options": {
 				"activate": true
