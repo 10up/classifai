@@ -15,7 +15,13 @@ const ClassifAIPluginArea = () => {
 	return (
 		<PluginDocumentSettingPanel
 			title={ __( 'ClassifAI', 'classifai' ) }
-			icon={ <Icon className="components-panel__icon" icon={ icon } size={ 24 } /> }
+			icon={
+				<Icon
+					className="components-panel__icon"
+					icon={ icon }
+					size={ 24 }
+				/>
+			}
 			className="classifai-panel"
 		>
 			<SlotFillProvider>

@@ -4,7 +4,13 @@
 import { dispatch, select } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { PostTypeSupportCheck } from '@wordpress/editor';
-import { Button, Modal, Spinner, TextareaControl, BaseControl } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	Spinner,
+	TextareaControl,
+	BaseControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
