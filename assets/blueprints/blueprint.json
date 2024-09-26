@@ -17,7 +17,7 @@
 			"step": "installPlugin",
 			"pluginZipFile": {
 				"resource": "url",
-				"url": "https://github.com/10up/classifai/archive/refs/heads/stable.zip"
+				"url": "https://api.github.com/repos/10up/classifai/zipball/stable"
 			},
 			"options": {
 				"activate": true
