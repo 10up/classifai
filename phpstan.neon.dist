@@ -12,7 +12,7 @@ parameters:
 	ignoreErrors:
 		# The JSDoc standard we use on hooks is not compatible with PHPStan.
 		- '#One or more @param tags has an invalid name or invalid syntax#'
-		- '#PHPDoc tag @(.+) has invalid value \({(.+)}(.*)\): Unexpected token "{"#'
+		# - '#PHPDoc tag @(.+) has invalid value \({(.+)}(.*)\): Unexpected token "{"#'
 		# Could look to fix this in the future.
 		- '#@param tag must not be named \$this. Choose a descriptive alias, for example \$instance#'
 		# Ignore ElasticPress for now, as we'll need to stub this.
@@ -20,5 +20,6 @@ parameters:
 		# These constants are defined but we'd need to stub them for PHPStan to know.
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
+		- '#Constant MERCURY_PARSER_API_KEY not found#'
 	WPCompat:
 		requiresAtLeast: '6.1'
