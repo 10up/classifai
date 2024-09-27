@@ -23,12 +23,41 @@ class Moderation extends Provider {
 	protected $moderation_url = 'https://api.openai.com/v1/moderations';
 
 	/**
+	 * OpenAI Moderation model
+	 *
+	 * @var string
+	 */
+	protected $model = 'omni-moderation-latest';
+
+	/**
 	 * OpenAI Moderation constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to use a different model, like
+		 * text-moderation-latest.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_moderation_model
+		 *
+		 * @param {string} $model The default model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_moderation_model', $this->model );
 	}
 
 	/**
@@ -191,6 +220,7 @@ class Moderation extends Provider {
 			'classifai_openai_moderation_request_body',
 			[
 				'input' => $comment->comment_content,
+				'model' => $this->get_model(),
 			],
 			$comment_id
 		);
