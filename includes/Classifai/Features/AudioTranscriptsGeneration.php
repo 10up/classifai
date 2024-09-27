@@ -140,10 +140,10 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-media-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
-			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
-			get_asset_info( 'media', 'version' ),
+			'classifai-plugin-media-processing-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-media-processing.js',
+			array_merge( get_asset_info( 'classifai-plugin-media-processing', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-media-processing', 'version' ),
 			true
 		);
 	}

@@ -1,6 +1,6 @@
 /* global ClassifAI */
 
-import { handleClick } from './helpers';
+import { handleClick } from '../../helpers';
 import { __ } from '@wordpress/i18n';
 
 ( function( $ ) { // eslint-disable-line

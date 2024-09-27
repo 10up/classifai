@@ -6,6 +6,7 @@ use WP_REST_Request;
 use WP_Error;
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
+use function Classifai\get_asset_info;
 
 abstract class Feature {
 	/**
@@ -16,6 +17,16 @@ abstract class Feature {
 	 * @var string
 	 */
 	const ID = '';
+
+	/**
+	 * Plugin area script handle.
+	 *
+	 * Every feature that injects content into the plugin area
+	 * should add this script as a dependency.
+	 *
+	 * @var string
+	 */
+	const PLUGIN_AREA_SCRIPT = 'classifai-plugin-fill-js';
 
 	/**
 	 * Feature label.
@@ -57,6 +68,8 @@ abstract class Feature {
 			add_action( 'admin_init', [ $this, 'register_setting' ] );
 			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
 		}
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
@@ -128,6 +141,19 @@ abstract class Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
 			$this->label
+		);
+	}
+
+	/**
+	 * Registers the plugin area script.
+	 */
+	public function register_plugin_area_script() {
+		wp_register_script(
+			self::PLUGIN_AREA_SCRIPT,
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-fill.js',
+			get_asset_info( 'classifai-plugin-fill', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-fill', 'version' ),
+			true
 		);
 	}
 

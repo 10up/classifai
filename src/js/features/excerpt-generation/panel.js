@@ -1,5 +1,5 @@
 /**
- * WordPress dependencies
+ * External Dependencies.
  */
 import { __ } from '@wordpress/i18n';
 import { Button, ExternalLink, TextareaControl } from '@wordpress/components';
@@ -7,7 +7,11 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { DisableFeatureButton } from '../components';
+
+/**
+ * Internal Dependencies.
+ */
+import { DisableFeatureButton } from '../../components';
 
 /**
  * PostExcerpt component.
@@ -82,6 +86,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				variant={ 'secondary' }
 				disabled={ isLoading }
 				data-id={ postId }
+				style={ { marginTop: '1rem' } }
 				onClick={ () =>
 					buttonClick( '/classifai/v1/generate-excerpt/' )
 				}

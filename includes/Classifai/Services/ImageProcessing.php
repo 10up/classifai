@@ -67,16 +67,16 @@ class ImageProcessing extends Service {
 	 */
 	public function enqueue_media_scripts() {
 		wp_enqueue_script(
-			'classifai-media-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
-			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
-			get_asset_info( 'media', 'version' ),
+			'classifai-plugin-media-processing-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-media-processing.js',
+			array_merge( get_asset_info( 'classifai-plugin-media-processing', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-media-processing', 'version' ),
 			true
 		);
 
 		$feature = new DescriptiveTextGenerator();
 		wp_add_inline_script(
-			'classifai-media-script',
+			'classifai-plugin-media-processing-js',
 			'const classifaiMediaVars = ' . wp_json_encode(
 				array(
 					'enabledAltTextFields' => $feature->get_alt_text_settings() ? $feature->get_alt_text_settings() : array(),

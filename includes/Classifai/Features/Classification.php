@@ -303,18 +303,18 @@ class Classification extends Feature {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-language-processing-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			get_asset_info( 'language-processing', 'dependencies' ),
-			get_asset_info( 'language-processing', 'version' ),
+			'classifai-plugin-classification-previewer-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-previewer.js',
+			get_asset_info( 'classifai-plugin-classification-previewer', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classification-previewer', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			'classifai-plugin-classification-previewer-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-previewer.css',
 			array(),
-			get_asset_info( 'language-processing', 'version' ),
+			get_asset_info( 'classifai-plugin-classification-previewer', 'version' ),
 			'all'
 		);
 	}
@@ -326,10 +326,10 @@ class Classification extends Feature {
 		global $post;
 
 		wp_enqueue_script(
-			'classifai-editor',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			get_asset_info( 'editor', 'dependencies' ),
-			get_asset_info( 'editor', 'version' ),
+			'classifai-plugin-classification-ibm-watson-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-ibm-watson.js',
+			get_asset_info( 'classifai-plugin-classification-ibm-watson', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classification-ibm-watson', 'version' ),
 			true
 		);
 
@@ -338,15 +338,15 @@ class Classification extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
+			'classifai-plugin-classification-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification', 'version' ),
 			true
 		);
 
 		wp_add_inline_script(
-			'classifai-gutenberg-plugin',
+			'classifai-plugin-classification-js',
 			sprintf(
 				'var classifaiPostData = %s;',
 				wp_json_encode(
@@ -738,7 +738,7 @@ class Classification extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enables automatic content classification.', 'classifai' );
+		return esc_html__( 'Enables content classification.', 'classifai' );
 	}
 
 	/**

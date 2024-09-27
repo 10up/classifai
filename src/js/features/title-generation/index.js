@@ -1,12 +1,25 @@
+/**
+ * External Dependencies.
+ */
 import { dispatch, select } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { PostTypeSupportCheck } from '@wordpress/editor';
-import { Button, Modal, Spinner } from '@wordpress/components';
+import {
+	Button,
+	Modal,
+	Spinner,
+	TextareaControl,
+	BaseControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { DisableFeatureButton } from '../components';
+
+/**
+ * Internal Dependencies.
+ */
+import { DisableFeatureButton } from '../../components';
 
 const { classifaiChatGPTData } = window;
 
@@ -18,7 +31,7 @@ const RenderError = ( { error } ) => {
 	return <div className="error">{ error }</div>;
 };
 
-const PostStatusInfo = () => {
+const TitleGenerationPlugin = () => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
 	const [ error, setError ] = useState( false );
@@ -75,39 +88,42 @@ const PostStatusInfo = () => {
 				{ dataToRender.map( ( item, i ) => {
 					return (
 						<div className="classifai-title" key={ i }>
-							<textarea
-								rows="5"
-								onChange={ ( e ) => {
-									dataToRender[ i ] = e.target.value;
-									setData( dataToRender );
-								} }
-							>
-								{ item }
-							</textarea>
-							<Button
-								variant="secondary"
-								onClick={ async () => {
-									const isDirty =
-										select(
-											'core/editor'
-										).isEditedPostDirty();
-									dispatch( 'core/editor' ).editPost( {
-										title: data[ i ],
-									} );
-									closeModal();
-									if ( ! isDirty ) {
-										await dispatch(
-											'core'
-										).saveEditedEntityRecord(
-											'postType',
-											postType,
-											postId
-										);
-									}
-								} }
-							>
-								{ __( 'Select', 'classifai' ) }
-							</Button>
+							<BaseControl>
+								<TextareaControl
+									rows="5"
+									width="100%"
+									value={ item }
+									onChange={ ( e ) => {
+										dataToRender[ i ] = e.target.value;
+										setData( dataToRender );
+									} }
+								/>
+								<Button
+									variant="secondary"
+									onClick={ async () => {
+										const isDirty =
+											select(
+												'core/editor'
+											).isEditedPostDirty();
+										dispatch( 'core/editor' ).editPost( {
+											title: data[ i ],
+										} );
+										closeModal();
+										if ( ! isDirty ) {
+											await dispatch(
+												'core'
+											).saveEditedEntityRecord(
+												'postType',
+												postType,
+												postId
+											);
+										}
+									} }
+								>
+									{ __( 'Select', 'classifai' ) }
+								</Button>
+							</BaseControl>
+							<br />
 						</div>
 					);
 				} ) }
@@ -153,4 +169,6 @@ const PostStatusInfo = () => {
 	);
 };
 
-registerPlugin( 'classifai-status-info', { render: PostStatusInfo } );
+registerPlugin( 'classifai-plugin-title-generation', {
+	render: TitleGenerationPlugin,
+} );
