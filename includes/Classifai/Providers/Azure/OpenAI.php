@@ -238,7 +238,7 @@ class OpenAI extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( \Classifai\Features\Feature $feature = null ): string {
+	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
 		$settings   = $feature->get_settings( static::ID );
 		$endpoint   = $settings['endpoint_url'] ?? '';
 		$deployment = $settings['deployment'] ?? '';

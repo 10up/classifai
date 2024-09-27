@@ -597,7 +597,7 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature   Feature instance
 	 * @return bool|object|WP_Error
 	 */
-	protected function scan_image( string $image_url, \Classifai\Features\Feature $feature = null ) {
+	protected function scan_image( string $image_url, ?\Classifai\Features\Feature $feature = null ) {
 		$settings = $feature->get_settings( static::ID );
 
 		// Check if valid authentication is in place.
@@ -669,7 +669,7 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( \Classifai\Features\Feature $feature = null ): string {
+	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
 		$settings     = $feature->get_settings( static::ID );
 		$api_features = [];
 
