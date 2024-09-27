@@ -374,12 +374,10 @@ class Linker {
 	 * @return bool
 	 */
 	public function can_link_keyword( $keyword ): bool {
-		if ( ! empty( $keyword['text'] ) ) {
-			if ( ! empty( $keyword['relevance'] ) ) {
-				$relevance = floatval( $keyword['relevance'] );
-				$threshold = get_feature_threshold( 'keyword' );
-				return $relevance >= $threshold;
-			}
+		if ( ! empty( $keyword['text'] ) && ! empty( $keyword['relevance'] ) ) {
+			$relevance = floatval( $keyword['relevance'] );
+			$threshold = get_feature_threshold( 'keyword' );
+			return $relevance >= $threshold;
 		} else {
 			return false;
 		}
@@ -392,12 +390,10 @@ class Linker {
 	 * @return bool
 	 */
 	public function can_link_concept( $concept ): bool {
-		if ( ! empty( $concept['text'] ) ) {
-			if ( ! empty( $concept['relevance'] ) ) {
-				$relevance = floatval( $concept['relevance'] );
-				$threshold = get_feature_threshold( 'concept' );
-				return $relevance >= $threshold;
-			}
+		if ( ! empty( $concept['text'] ) && ! empty( $concept['relevance'] ) ) {
+			$relevance = floatval( $concept['relevance'] );
+			$threshold = get_feature_threshold( 'concept' );
+			return $relevance >= $threshold;
 		} else {
 			return false;
 		}
@@ -410,12 +406,10 @@ class Linker {
 	 * @return bool
 	 */
 	public function can_link_entity( $entity ): bool {
-		if ( ! empty( $entity['text'] ) ) {
-			if ( ! empty( $entity['relevance'] ) ) {
-				$relevance = floatval( $entity['relevance'] );
-				$threshold = get_feature_threshold( 'entity' );
-				return $relevance >= $threshold;
-			}
+		if ( ! empty( $entity['text'] ) && ! empty( $entity['relevance'] ) ) {
+			$relevance = floatval( $entity['relevance'] );
+			$threshold = get_feature_threshold( 'entity' );
+			return $relevance >= $threshold;
 		} else {
 			return false;
 		}

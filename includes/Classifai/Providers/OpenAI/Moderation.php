@@ -132,7 +132,7 @@ class Moderation extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'comment':
-				$return = $this->moderate_comment( $item_id, $args );
+				$return = $this->moderate_comment( $item_id );
 				break;
 			case 'post':
 				$return = [];

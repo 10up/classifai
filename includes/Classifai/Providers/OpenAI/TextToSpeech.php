@@ -144,8 +144,8 @@ class TextToSpeech extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'format',
 				'options'       => [
-					'mp3'  => __( '.mp3', 'classifai' ),
-					'wav'  => __( '.wav', 'classifai' ),
+					'mp3' => __( '.mp3', 'classifai' ),
+					'wav' => __( '.wav', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
 				'description'   => __( 'Select the desired audio format.', 'classifai' ),
@@ -254,7 +254,7 @@ class TextToSpeech extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'synthesize':
-				$return = $this->synthesize_speech( $post_id, $args );
+				$return = $this->synthesize_speech( $post_id );
 				break;
 		}
 
@@ -349,9 +349,9 @@ class TextToSpeech extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			$debug_info[ __( 'Model', 'classifai' ) ]          = $provider_settings['tts_model'] ?? '';
-			$debug_info[ __( 'Voice', 'classifai' ) ]          = $provider_settings['voice'] ?? '';
-			$debug_info[ __( 'Audio format', 'classifai' ) ]   = $provider_settings['format'] ?? '';
+			$debug_info[ __( 'Model', 'classifai' ) ]        = $provider_settings['tts_model'] ?? '';
+			$debug_info[ __( 'Voice', 'classifai' ) ]        = $provider_settings['voice'] ?? '';
+			$debug_info[ __( 'Audio format', 'classifai' ) ] = $provider_settings['format'] ?? '';
 
 			// We don't save the response transient because WP does not support serialized binary data to be inserted to the options.
 		}

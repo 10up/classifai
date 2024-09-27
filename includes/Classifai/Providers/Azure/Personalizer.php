@@ -394,6 +394,7 @@ class Personalizer extends Provider {
 
 		// phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$event_id        = $response->eventId;
+		$rewarded_post   = 0;
 		$number_of_posts = isset( $attributes['numberOfItems'] ) ? absint( $attributes['numberOfItems'] ) : 3;
 
 		if ( ! empty( $response ) && ! empty( $response->rewardActionId ) ) {
