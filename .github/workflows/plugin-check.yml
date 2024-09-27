@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    uses: 10up/classifai/.github/workflows/build-release-zip.yml@feature/plugin-check-action # TODO: Update branch before merge.
+    uses: 10up/classifai/.github/workflows/build-release-zip.yml@develop
 
   test:
     needs: build
