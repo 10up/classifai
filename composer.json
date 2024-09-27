@@ -48,7 +48,10 @@
   },
   "extra": {
     "aws/aws-sdk-php": [
-        "Polly"
+      "Personalize",
+      "PersonalizeEvents",
+      "PersonalizeRuntime",
+      "Polly"
     ]
   }
 }

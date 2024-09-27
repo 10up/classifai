@@ -37,6 +37,7 @@ class Personalizer extends Service {
 		return apply_filters(
 			'classifai_recommendation_service_providers',
 			[
+				'Classifai\Providers\AWS\AmazonPersonalize',
 				'Classifai\Providers\Azure\Personalizer',
 			]
 		);

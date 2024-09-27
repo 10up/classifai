@@ -39,7 +39,6 @@ class Personalizer extends Provider {
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
 
-		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
 		do_action( 'classifai_' . static::ID . '_init', $this );
 	}
 
@@ -48,13 +47,6 @@ class Personalizer extends Provider {
 	 */
 	public function register() {
 		add_action( 'classifai_before_feature_nav', [ $this, 'show_deprecation_message' ] );
-
-		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
-			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
-			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
-			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
-			Blocks\setup();
-		}
 	}
 
 	/**
@@ -63,7 +55,7 @@ class Personalizer extends Provider {
 	 * @param string $active_feature Feature currently shown.
 	 */
 	public function show_deprecation_message( string $active_feature ) {
-		if ( 'feature_recommended_content' !== $active_feature ) {
+		if ( 'feature_recommended_content' !== $active_feature || ( new RecommendedContent() )->get_settings( 'provider' ) !== static::ID ) {
 			return;
 		}
 		?>
@@ -744,117 +736,29 @@ class Personalizer extends Provider {
 	}
 
 	/**
-	 * Register the REST API endpoints.
-	 */
-	public function register_endpoints() {
-		register_rest_route(
-			'classifai/v1',
-			'personalizer/reward/(?P<eventId>[a-zA-Z0-9-]+)',
-			[
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'reward_endpoint_callback' ],
-				'args'                => [
-					'eventId'  => [
-						'required'          => true,
-						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
-						'description'       => esc_html__( 'Event ID to track', 'classifai' ),
-					],
-					'rewarded' => [
-						'required'          => false,
-						'type'              => 'string',
-						'enum'              => [
-							'0',
-							'1',
-						],
-						'default'           => '0',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Reward we want to send', 'classifai' ),
-					],
-					'route'    => [
-						'required'          => false,
-						'type'              => 'string',
-						'default'           => 'reward',
-						'sanitize_callback' => 'sanitize_text_field',
-						'validate_callback' => 'rest_validate_request_arg',
-						'description'       => esc_html__( 'Route we want to call', 'classifai' ),
-					],
-				],
-				'permission_callback' => [ $this, 'reward_permissions_check' ],
-			]
-		);
-	}
-
-	/**
-	 * Check if a given request has access to send reward.
+	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * This check ensures that we are properly authenticated.
-	 * TODO: add additional checks here, maybe a nonce check or rate limiting?
-	 *
-	 * @return WP_Error|bool
+	 * @param int    $post_id       The post ID we're processing.
+	 * @param string $route_to_call The name of the route we're going to be processing.
+	 * @param array  $args          Optional arguments to pass to the route.
+	 * @return array|string|WP_Error
 	 */
-	public function reward_permissions_check() {
-		// Check if valid authentication is in place.
-		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
-			return new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) );
+	public function rest_endpoint_callback( $post_id, string $route_to_call = '', array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
 
-		return true;
-	}
+		$route_to_call = strtolower( $route_to_call );
+		$return        = '';
 
-	/**
-	 * Render Recommended Content over AJAX.
-	 */
-	public function ajax_render_recommended_content() {
-		check_ajax_referer( 'classifai-recommended-block', 'security' );
-
-		if ( ! isset( $_POST['contentPostType'] ) || empty( $_POST['contentPostType'] ) ) {
-			esc_html_e( 'No results found.', 'classifai' );
-			exit();
+		// Handle all of our routes.
+		switch ( $route_to_call ) {
+			case 'reward':
+				$return = $this->personalizer_send_reward( $post_id, $args['rewarded'] );
+				break;
 		}
 
-		$attributes = array(
-			'displayLayout'          => isset( $_POST['displayLayout'] ) ? sanitize_text_field( wp_unslash( $_POST['displayLayout'] ) ) : 'grid',
-			'contentPostType'        => sanitize_text_field( wp_unslash( $_POST['contentPostType'] ) ),
-			'excludeId'              => isset( $_POST['excludeId'] ) ? absint( $_POST['excludeId'] ) : 0,
-			'displayPostExcerpt'     => isset( $_POST['displayPostExcerpt'] ) ? filter_var( wp_unslash( $_POST['displayPostExcerpt'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayAuthor'          => isset( $_POST['displayAuthor'] ) ? filter_var( wp_unslash( $_POST['displayAuthor'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayPostDate'        => isset( $_POST['displayPostDate'] ) ? filter_var( wp_unslash( $_POST['displayPostDate'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'displayFeaturedImage'   => isset( $_POST['displayFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['displayFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : true,
-			'addLinkToFeaturedImage' => isset( $_POST['addLinkToFeaturedImage'] ) ? filter_var( wp_unslash( $_POST['addLinkToFeaturedImage'] ), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : false,
-			'columns'                => isset( $_POST['columns'] ) ? absint( $_POST['columns'] ) : 3,
-			'numberOfItems'          => isset( $_POST['numberOfItems'] ) ? absint( $_POST['numberOfItems'] ) : 3,
-		);
-
-		if ( isset( $_POST['taxQuery'] ) && ! empty( $_POST['taxQuery'] ) ) {
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-			foreach ( $_POST['taxQuery'] as $key => $value ) {
-				$attributes['taxQuery'][ $key ] = array_map( 'absint', $value );
-			}
-		}
-
-		echo $this->render_recommended_content( $attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-
-		exit();
-	}
-
-	/**
-	 * Maybe clear transients for recent actions.
-	 *
-	 * @param int $post_id Post Id.
-	 */
-	public function maybe_clear_transient( int $post_id ) {
-		global $wpdb;
-		$post_type = get_post_type( $post_id );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$transients = $wpdb->get_col( $wpdb->prepare( "SELECT `option_name` FROM {$wpdb->options} WHERE  option_name LIKE %s", '_transient_classifai_actions_' . $post_type . '%' ) );
-		// Delete all transients
-		if ( ! empty( $transients ) ) {
-			foreach ( $transients as $transient ) {
-				delete_transient( str_replace( '_transient_', '', $transient ) );
-			}
-		}
+		return $return;
 	}
 
 	/**
