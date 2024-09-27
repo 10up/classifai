@@ -350,10 +350,6 @@ class Settings {
 		$settings        = $service_manager->get_settings();
 		$new_settings    = $service_manager->sanitize_settings( $request->get_json_params() );
 
-		if ( is_wp_error( $new_settings ) ) {
-			return $new_settings;
-		}
-
 		// Update the settings with the new values.
 		$new_settings = array_merge( $settings, $new_settings );
 		update_option( 'classifai_settings', $new_settings );
