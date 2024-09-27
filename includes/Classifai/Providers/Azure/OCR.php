@@ -192,7 +192,7 @@ class OCR {
 
 		$url = get_largest_size_and_dimensions_image_url(
 			get_attached_file( $attachment_id ),
-			wp_get_attachment_url( $attachment_id, 'full' ),
+			wp_get_attachment_url( $attachment_id ),
 			$metadata,
 			[ 50, 4200 ],
 			[ 50, 4200 ],

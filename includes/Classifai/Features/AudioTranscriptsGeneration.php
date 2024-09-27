@@ -53,8 +53,8 @@ class AudioTranscriptsGeneration extends Feature {
 	public function feature_setup() {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
-		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
 	}

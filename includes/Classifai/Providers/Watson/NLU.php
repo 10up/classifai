@@ -170,7 +170,7 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -264,10 +264,10 @@ class NLU extends Provider {
 	/**
 	 * Filter classifier preview based on the feature settings.
 	 *
-	 * @param array $classified_data The classified data.
+	 * @param array|WP_Error $classified_data The classified data.
 	 * @return array
 	 */
-	public function filter_classify_preview_data( array $classified_data ): array {
+	public function filter_classify_preview_data( $classified_data ): array {
 		if ( is_wp_error( $classified_data ) ) {
 			return $classified_data;
 		}
