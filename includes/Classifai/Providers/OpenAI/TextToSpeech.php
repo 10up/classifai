@@ -84,6 +84,7 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
+							/* translators: %s is replaced with the OpenAI Text to Speech models URL */
 							__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
 							[
 								'a' => [
@@ -120,7 +121,8 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
-							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
+							/* translators: %s is replaced with the OpenAI Text to Speech voice options URL */
+							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech voice options" target="_blank">voice</a>.', 'classifai' ),
 							[
 								'a' => [
 									'href'  => [],
