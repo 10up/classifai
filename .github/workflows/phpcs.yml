@@ -1,0 +1,68 @@
+name: PHP Linting
+
+on:
+  push:
+    branches:
+      - develop
+      - trunk
+    paths:
+      - "**.php"
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - "**.php"
+
+jobs:
+  phpcs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup proper PHP version
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.php
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
+
+      - name: Run PHP_CodeSniffer
+        run: |
+          HEAD_REF=$(git rev-parse HEAD)
+          git checkout $HEAD_REF
+          ./vendor/bin/phpcs-changed -s --git --git-base origin/${{ github.base_ref }} ${{ steps.changed-files.outputs.all_changed_files }}
+
+  vipcs:
+    name: vipcs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: VIPCS check
+      uses: 10up/wpcs-action@stable
+      with:
+        enable_warnings: true
+        standard: 'WordPress-VIP-Go'
+        excludes: 'tests'
