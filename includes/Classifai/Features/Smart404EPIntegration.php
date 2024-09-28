@@ -243,7 +243,7 @@ class Smart404EPIntegration {
 		}
 
 		// If we still don't have embeddings, return early.
-		if ( ! $embeddings || empty( $embeddings ) ) {
+		if ( empty( $embeddings ) ) {
 			if ( is_indexing_wpcli() ) {
 				WP_CLI::warning(
 					sprintf(

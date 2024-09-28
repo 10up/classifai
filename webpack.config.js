@@ -8,41 +8,34 @@ module.exports = {
 		path: path.resolve( __dirname, 'dist' ),
 	},
 	entry: {
-		editor: [ './src/js/editor.js' ],
-		'editor-ocr': [ './src/js/editor-ocr.js' ],
-		media: [ './src/js/media.js' ],
 		admin: [ './src/js/admin.js' ],
-		'language-processing': [ './src/js/language-processing.js' ],
-		'gutenberg-plugin': [ './src/js/gutenberg-plugin.js' ],
-		'post-audio-controls': [ './src/js/post-audio-controls.js' ],
-		'post-status-info': [
-			'./src/js/gutenberg-plugins/post-status-info.js',
-		],
-		'content-resizing-plugin': [
-			'./src/js/gutenberg-plugins/content-resizing-plugin.js',
-		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
-		'post-excerpt': [ './src/js/post-excerpt/index.js' ],
-		'media-modal': [ './src/js/media-modal/index.js' ],
-		'inserter-media-category': [
-			'./src/js/gutenberg-plugins/inserter-media-category.js',
+
+		'classifai-plugin-media-processing': './src/js/features/media-processing/media-upload.js',
+		'classifai-plugin-editor-ocr': './src/js/features/media-processing/editor-ocr.js',
+		'classifai-plugin-commands': './src/js/features/commands.js',
+		'classifai-plugin-classification': './src/js/features/classification/index.js',
+		'classifai-plugin-classification-previewer': './src/js/features/classification/previewer.js',
+		'classifai-plugin-classification-ibm-watson': './src/js/features/classification/ibm-watson.js',
+		'classifai-plugin-fill': './src/js/features/slot-fill/index.js',
+		'classifai-plugin-text-to-speech': './src/js/features/text-to-speech/index.js',
+		'classifai-plugin-text-to-speech-frontend': './src/js/features/text-to-speech/frontend/index.js',
+		'classifai-plugin-content-resizing': './src/js/features/content-resizing/index.js',
+		'classifai-plugin-title-generation': './src/js/features/title-generation/index.js',
+		'classifai-plugin-classic-title-generation': './src/js/features/title-generation/classic/index.js',
+		'classifai-plugin-excerpt-generation': './src/js/features/excerpt-generation/index.js',
+		'classifai-plugin-classic-excerpt-generation': './src/js/features/excerpt-generation/classic/index.js',
+		'classifai-plugin-inserter-media-category': './src/js/features/image-generation/inserter-media-category.js',
+		'classifai-plugin-image-generation-media-modal': [
+			'./src/js/features/image-generation/media-modal/index.js',
+			'./src/js/features/image-generation/extend-image-block-generate-image.js'
 		],
-		'generate-excerpt-classic': [
-			'./src/js/openai/classic-editor-excerpt-generator.js',
-		],
-		'generate-title-classic': [
-			'./src/js/openai/classic-editor-title-generator.js',
-		],
-		commands: [ './src/js/gutenberg-plugins/commands.js' ],
-		'generate-image-media-upload': [
-			'./src/js/media-modal/views/generate-image-media-upload.js',
-		],
-		'extend-image-blocks': './src/js/extend-image-block-generate-image.js',
+		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
 	},
 	module: {
 		rules: [

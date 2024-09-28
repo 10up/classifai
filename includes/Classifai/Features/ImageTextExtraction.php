@@ -180,8 +180,7 @@ class ImageTextExtraction extends Feature {
 		 *
 		 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
 		 * @param {int}    $attachment_id ID of the attachment post.
-		 * @param {object} $scan          The full scan results from the API.
-		 * @param {string} $text          The text data to be saved.
+		 * @param {object} $result        The full scan results from the API.
 		 *
 		 * @return {string} The filtered text data.
 		 */
@@ -216,10 +215,10 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
-			'editor-ocr',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'editor-ocr', 'version' ),
+			'classifai-plugin-editor-ocr-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-editor-ocr.js',
+			array_merge( get_asset_info( 'classifai-plugin-editor-ocr', 'dependencies' ), array( 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-editor-ocr', 'version' ),
 			true
 		);
 	}
@@ -230,6 +229,8 @@ class ImageTextExtraction extends Feature {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( \WP_Post $post ) {
+		global $wp_meta_boxes;
+
 		if ( ! wp_attachment_is_image( $post ) || ! $this->is_feature_enabled() ) {
 			return;
 		}

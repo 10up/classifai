@@ -724,7 +724,7 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id The attachment ID we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
 	 * @param array  $args          Optional arguments to pass to the route.
-	 * @return array|string|WP_Error
+	 * @return array|string|WP_Error|null
 	 */
 	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = [] ) {
 		// Check to be sure the post both exists and is an attachment.

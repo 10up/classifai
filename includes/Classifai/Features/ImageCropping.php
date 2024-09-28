@@ -230,6 +230,8 @@ class ImageCropping extends Feature {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( \WP_Post $post ) {
+		global $wp_meta_boxes;
+
 		if ( ! wp_attachment_is_image( $post ) || ! $this->is_feature_enabled() ) {
 			return;
 		}
