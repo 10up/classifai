@@ -670,7 +670,3 @@ subscribe( () => {
 } );
 
 registerPlugin( 'classifai-plugin', { render: ClassifAIPlugin } );
-
-export const ClassifaiEditorSettingsPanel = ( { children } ) => {
-	return <Fill name="classifai-editor-settings-panel">{ children }</Fill>;
-};

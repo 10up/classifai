@@ -53,8 +53,8 @@ class AudioTranscriptsGeneration extends Feature {
 	public function feature_setup() {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		add_action( 'add_meta_boxes_attachment', [ $this, 'setup_attachment_meta_box' ] );
-		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] );
-		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] );
+		add_action( 'edit_attachment', [ $this, 'maybe_transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'add_attachment', [ $this, 'transcribe_audio' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 
 		add_filter( 'attachment_fields_to_edit', [ $this, 'add_buttons_to_media_modal' ], 10, 2 );
 	}
@@ -140,10 +140,10 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-media-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/media.js',
-			array_merge( get_asset_info( 'media', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
-			get_asset_info( 'media', 'version' ),
+			'classifai-plugin-media-processing-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-media-processing.js',
+			array_merge( get_asset_info( 'classifai-plugin-media-processing', 'dependencies' ), array( 'jquery', 'media-editor', 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-media-processing', 'version' ),
 			true
 		);
 	}

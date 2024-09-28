@@ -10,8 +10,8 @@ import { store as coreStore } from '@wordpress/core-data';
 import {
 	getEntitiesInfo,
 	useTaxonomies,
-} from '../../includes/Classifai/Blocks/recommended-content-block/utils';
-import { useState } from '@wordpress/element';
+} from '../../../../includes/Classifai/Blocks/recommended-content-block/utils';
+import { useState, Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 const termsPerPage = -1;
@@ -274,7 +274,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 					}
 
 					return (
-						<>
+						<Fragment key={ slug }>
 							<FormTokenField
 								key={ slug }
 								label={ name }
@@ -300,7 +300,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								</>
 							) }
 							<hr />
-						</>
+						</Fragment>
 					);
 				} ) }
 		</>

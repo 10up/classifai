@@ -20,10 +20,7 @@ import { getBlockContent, createBlock } from '@wordpress/blocks';
 import { registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';
 
-/**
- * Internal dependencies.
- */
-import { ClassifaiEditorSettingsPanel } from '../gutenberg-plugin';
+const { ClassifaiEditorSettingPanel } = window;
 
 const InjectIframeStyles = ( { children } ) => {
 	// Stores the Gutenberg editor canvas iframe.
@@ -405,7 +402,7 @@ const RewriteTonePlugin = () => {
 	}, [ response ] );
 
 	return (
-		<ClassifaiEditorSettingsPanel>
+		<ClassifaiEditorSettingPanel>
 			<Button
 				variant="secondary"
 				onClick={ rewriteTone }
@@ -442,7 +439,7 @@ const RewriteTonePlugin = () => {
 					</InjectIframeStyles>
 				</Modal>
 			) }
-		</ClassifaiEditorSettingsPanel>
+		</ClassifaiEditorSettingPanel>
 	);
 };
 

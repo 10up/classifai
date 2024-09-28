@@ -25,5 +25,5 @@
 		"DOMParser": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
-	"ignorePatterns": ["*.json"]
+	"ignorePatterns": ["*.json", "webpack.config.js"]
 }

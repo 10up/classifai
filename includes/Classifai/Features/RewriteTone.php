@@ -182,10 +182,13 @@ class RewriteTone extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-rewrite-tone-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/rewrite-tone-plugin.js',
-			get_asset_info( 'rewrite-tone', 'dependencies' ),
-			get_asset_info( 'rewrite-tone', 'version' ),
+			'classifai-plugin-rewrite-tone-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-rewrite-tone.js',
+			array_merge(
+				get_asset_info( 'classifai-plugin-rewrite-tone', 'dependencies' ),
+				array( Feature::PLUGIN_AREA_SCRIPT )
+			),
+			get_asset_info( 'classifai-plugin-rewrite-tone', 'version' ),
 			true
 		);
 	}

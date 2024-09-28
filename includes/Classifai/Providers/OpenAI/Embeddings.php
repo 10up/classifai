@@ -308,9 +308,9 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) ); /** @phpstan-ignore return.void (function is called via ajax and does need to return data) */
 	}
 
 	/**
@@ -321,7 +321,7 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -522,7 +522,7 @@ class Embeddings extends Provider {
 
 		// Chunk the post content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $post_id, 'post' );
+		$content        = $this->get_normalized_content( $post_id, 'post' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -996,7 +996,7 @@ class Embeddings extends Provider {
 
 		// Chunk the term content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $term_id, 'term' );
+		$content        = $this->get_normalized_content( $term_id, 'term' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -1208,8 +1208,9 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ): string {
+	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
+		$content    = '';
 
 		// Get the content depending on the type.
 		switch ( $type ) {
