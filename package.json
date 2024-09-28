@@ -7,8 +7,8 @@
   "scripts": {
     "start": "wp-scripts start",
     "build": "wp-scripts build",
-    "lint:js": "wp-scripts lint-js",
-    "lint:js-fix": "wp-scripts lint-js --fix",
+    "lint:js": "wp-scripts lint-js ./src ./includes/Classifai/Blocks",
+    "lint:js-fix": "wp-scripts lint-js ./src ./includes/Classifai/Blocks --fix",
     "install_tests": "./bin/install-wp-tests.sh classifai_unit_tests root password 127.0.0.1",
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",

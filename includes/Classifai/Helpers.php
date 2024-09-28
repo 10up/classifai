@@ -589,10 +589,7 @@ function sanitize_number_of_responses_field( string $key, array $new_settings, a
 function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
-	return filter_var(
-		isset( $settings[ $classify_by ] ) ?? false,
-		FILTER_VALIDATE_BOOLEAN
-	);
+	return ( ! empty( $settings[ $classify_by ] ) );
 }
 
 /**

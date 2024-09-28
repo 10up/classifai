@@ -205,10 +205,10 @@ class Plugin {
 
 		if ( wp_script_is( 'wp-commands', 'registered' ) ) {
 			wp_enqueue_script(
-				'classifai-commands',
-				CLASSIFAI_PLUGIN_URL . 'dist/commands.js',
-				get_asset_info( 'commands', 'dependencies' ),
-				get_asset_info( 'commands', 'version' ),
+				'classifai-plugin-commands-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-commands.js',
+				get_asset_info( 'classifai-plugin-commands', 'dependencies' ),
+				get_asset_info( 'classifai-plugin-commands', 'version' ),
 				true
 			);
 		}

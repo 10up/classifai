@@ -45,7 +45,7 @@ function addImageGenerationLink( Component ) {
 					{ ...rest }
 					mode="generate"
 					render={ ( { open } ) => (
-						<Button variant="tertiary" onClick={ open }>
+						<Button variant="secondary" onClick={ open }>
 							{ _nx(
 								'Generate image',
 								'Generate images',

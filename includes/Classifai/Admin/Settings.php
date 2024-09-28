@@ -2,6 +2,7 @@
 
 namespace Classifai\Admin;
 
+use Classifai\Features\Classification;
 use Classifai\Services\ServicesManager;
 
 use function Classifai\get_asset_info;
@@ -209,6 +210,18 @@ class Settings {
 				],
 			]
 		);
+
+		register_rest_route(
+			'classifai/v1',
+			'embeddings_in_progress',
+			[
+				[
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => [ $this, 'check_embedding_generation_status' ],
+					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
+				],
+			]
+		);
 	}
 
 	/**
@@ -260,7 +273,7 @@ class Settings {
 				$current_settings = $feature->get_settings();
 
 				// Update only status of the feature.
-				$current_settings['status'] = $feature_settings['status'] ?? $current_settings['status'];
+				$current_settings['status'] = sanitize_text_field( $feature_settings['status'] ?? $current_settings['status'] );
 				$new_settings               = $current_settings;
 			} else {
 				$new_settings = $feature->sanitize_settings( $settings[ $feature_key ] );
@@ -337,10 +350,6 @@ class Settings {
 		$settings        = $service_manager->get_settings();
 		$new_settings    = $service_manager->sanitize_settings( $request->get_json_params() );
 
-		if ( is_wp_error( $new_settings ) ) {
-			return $new_settings;
-		}
-
 		// Update the settings with the new values.
 		$new_settings = array_merge( $settings, $new_settings );
 		update_option( 'classifai_settings', $new_settings );
@@ -380,5 +389,18 @@ class Settings {
 	 */
 	public function registration_settings_permissions_check() {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Callback for getting the registration settings.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function check_embedding_generation_status() {
+		$classification = new Classification();
+		$response       = array(
+			'classifAIEmbedInProgress' => $classification->is_embeddings_generation_in_progress(),
+		);
+		return rest_ensure_response( $response );
 	}
 }

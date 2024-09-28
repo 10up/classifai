@@ -120,15 +120,15 @@ describe( '[Language processing] Title Generation Tests', () => {
 
 		cy.visit( '/wp-admin/post-new.php' );
 
-		cy.get( '#classifai-openai__title-generate-btn' ).click();
-		cy.get( '#classifai-openai__modal' ).should( 'be.visible' );
-		cy.get( '.classifai-openai__result-item' )
+		cy.get( '#classifai-title-generation__title-generate-btn' ).click();
+		cy.get( '#classifai-title-generation__modal' ).should( 'be.visible' );
+		cy.get( '.classifai-title-generation__result-item' )
 			.first()
 			.find( 'textarea' )
 			.should( 'have.value', data );
 
-		cy.get( '.classifai-openai__select-title' ).first().click();
-		cy.get( '#classifai-openai__modal' ).should( 'not.be.visible' );
+		cy.get( '.classifai-title-generation__select-title' ).first().click();
+		cy.get( '#classifai-title-generation__modal' ).should( 'not.be.visible' );
 		cy.get( '#title' ).should( 'have.value', data );
 
 		cy.disableClassicEditor();

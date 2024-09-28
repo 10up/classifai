@@ -18,7 +18,7 @@ export const ClassifAIRegistrationStep = () => {
 					<ClassifAIRegistrationForm
 						onSaveSuccess={ () => navigate( nextStepPath ) }
 					/>
-					<Fill name="BeforeRegisterSaveButton">
+					<Fill name="ClassifAIBeforeRegisterSaveButton">
 						<Button onClick={ () => navigate( nextStepPath ) }>
 							{ __( 'Skip for now', 'classifai' ) }
 						</Button>

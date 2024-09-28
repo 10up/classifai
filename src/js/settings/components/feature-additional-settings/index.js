@@ -18,6 +18,7 @@ import { ExcerptGenerationSettings } from './excerpt-generation';
 import { ClassificationSettings } from './classification';
 import { ModerationSettings } from './moderation';
 import { Smart404Settings } from './smart-404';
+import { RecommendedContentSettings } from './recommended-content';
 
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
@@ -49,6 +50,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_smart_404':
 			return <Smart404Settings />;
+
+		case 'feature_recommended_content':
+			return <RecommendedContentSettings />;
 
 		default:
 			return null;

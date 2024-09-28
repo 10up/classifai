@@ -102,10 +102,10 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#postexcerpt-hide' ).check( { force: true } );
 
 		// Verify button exists.
-		cy.get( '#classifai-openai__excerpt-generate-btn' ).should( 'exist' );
+		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should( 'exist' );
 
 		// Click on button and verify data loads in.
-		cy.get( '#classifai-openai__excerpt-generate-btn' ).click();
+		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).click();
 		cy.get( '#excerpt' ).should( 'have.value', data );
 
 		cy.disableClassicEditor();

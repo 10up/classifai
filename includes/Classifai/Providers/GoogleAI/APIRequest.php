@@ -87,6 +87,7 @@ class APIRequest {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_api_response_get
 		 *
+		 * @param {array|WP_Error} $response API response.
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
 		 * @param {string} $this->feature Feature name.
@@ -153,6 +154,7 @@ class APIRequest {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_api_response_post
 		 *
+		 * @param {array|WP_Error} $response API response.
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
 		 * @param {string} $this->feature Feature name.

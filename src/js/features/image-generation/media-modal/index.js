@@ -1,7 +1,7 @@
 /* eslint object-shorthand: 0 */
 
 import Prompt from './views/prompt';
-import '../../scss/media-modal.scss';
+import './index.scss';
 
 const currentMediaSelectFrame = wp.media.view.MediaFrame.Select;
 const currentPostFrame = wp.media.view.MediaFrame.Post;

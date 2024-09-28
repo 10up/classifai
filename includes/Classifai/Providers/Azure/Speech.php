@@ -430,7 +430,7 @@ class Speech extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'synthesize':
-				$return = $this->synthesize_speech( $post_id, $args );
+				$return = $this->synthesize_speech( $post_id );
 				break;
 		}
 

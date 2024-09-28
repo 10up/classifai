@@ -5,6 +5,7 @@
  * @package ClassifAI
  */
 
+/** @var array $args Arguments coming from the included file. */
 ?>
 <h1 class="classifai-setup-heading">
 	<?php echo esc_html( $args['title'] ?? __( 'Welcome to ClassifAI', 'classifai' ) ); ?>
