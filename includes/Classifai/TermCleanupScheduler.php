@@ -5,8 +5,6 @@ namespace Classifai;
 use Classifai\Features\TermCleanup;
 use ActionScheduler_Store;
 
-use function as_enqueue_async_action;
-
 class TermCleanupScheduler {
 
 	/**
@@ -30,8 +28,6 @@ class TermCleanupScheduler {
 	 */
 	public function init() {
 		add_action( 'classifai_schedule_term_cleanup_job', [ $this, 'run' ] );
-		// add_filter( 'heartbeat_send', [ $this, 'check_embedding_generation_status' ] );
-		// add_action( 'classifai_before_feature_nav', [ $this, 'render_embeddings_generation_status' ] );
 	}
 
 	/**
@@ -162,5 +158,34 @@ class TermCleanupScheduler {
 		);
 
 		return ! empty( $action_id );
+	}
+
+	/**
+	 * Get the arguments for the current job.
+	 *
+	 * @return array|bool
+	 */
+	public function get_args() {
+		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
+			return false;
+		}
+
+		$store = ActionScheduler_Store::instance();
+
+		$action_id = $store->find_action(
+			$this->job_name,
+			array(
+				'status' => ActionScheduler_Store::STATUS_PENDING,
+			)
+		);
+
+		if ( empty( $action_id ) ) {
+			return false;
+		}
+
+		$action = $store->fetch_action( $action_id );
+		$args   = $action->get_args();
+
+		return $args;
 	}
 }

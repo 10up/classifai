@@ -21,7 +21,8 @@
 		"Headers": "readonly",
 		"requestAnimationFrame": "readonly",
 		"React": "readonly",
-		"Block": "readonly"
+		"Block": "readonly",
+		"classifai_term_cleanup_params": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
 	"ignorePatterns": ["*.json", "webpack.config.js"]

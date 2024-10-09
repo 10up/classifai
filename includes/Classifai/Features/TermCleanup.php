@@ -96,6 +96,8 @@ class TermCleanup extends Feature {
 	 * This will only fire if the Feature is enabled.
 	 */
 	public function feature_setup() {
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+
 		// Register the settings page for the Feature.
 		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
 		add_action( 'admin_post_classifai_init_term_cleanup', [ $this, 'start_term_cleanup_process' ] );
@@ -108,6 +110,26 @@ class TermCleanup extends Feature {
 
 		// Admin notices
 		add_action( 'admin_notices', [ $this, 'render_notices' ] );
+	}
+
+	/**
+	 * Enqueue the admin scripts.
+	 *
+	 * @param string $hook_suffix The current admin page.
+	 */
+	public function enqueue_admin_assets( string $hook_suffix ) {
+		if ( 'tools_page_classifai-term-cleanup' !== $hook_suffix ) {
+			return;
+		}
+
+		wp_localize_script(
+			'classifai-admin-script',
+			'classifai_term_cleanup_params',
+			array(
+				'ajax_url'   => esc_url( admin_url( 'admin-ajax.php' ) ),
+				'ajax_nonce' => wp_create_nonce( 'classifai-term-cleanup-status' ),
+			)
+		);
 	}
 
 	/**
@@ -831,16 +853,12 @@ class TermCleanup extends Feature {
 			return [];
 		}
 
-		// TODO
-		// $batches = $this->background_process->get_batches();
-		$batches = [];
+		$args = $this->background_process->get_args();
 
-		if ( ! empty( $batches ) ) {
-			foreach ( $batches as $batch ) {
-				foreach ( $batch->data as $key => $value ) {
-					if ( 'term_cleanup' === $value['action'] && $taxonomy === $value['taxonomy'] ) {
-						return $value;
-					}
+		if ( ! empty( $args ) ) {
+			foreach ( $args as $arg ) {
+				if ( 'term_cleanup' === $arg['action'] && $taxonomy === $arg['taxonomy'] ) {
+					return $arg;
 				}
 			}
 		}
@@ -854,7 +872,6 @@ class TermCleanup extends Feature {
 	 * @param string $taxonomy Taxonomy to process.
 	 */
 	public function render_background_processing_status( $taxonomy ) {
-		// TODO
 		$status = $this->get_background_processing_status( $taxonomy );
 
 		if ( empty( $status ) ) {
@@ -877,7 +894,7 @@ class TermCleanup extends Feature {
 		$label                   = strtolower( $this->get_taxonomy_label( $taxonomy, true ) );
 		?>
 
-		<div class="classifai-process-status" data-taxonomy="<?php echo esc_attr( $taxonomy ); ?>">
+		<div class="classifai-term-cleanup-process-status" data-taxonomy="<?php echo esc_attr( $taxonomy ); ?>">
 			<h4 style="font-size: 1.1em;">
 				<?php
 				// translators: %s: Taxonomy name.
@@ -1005,13 +1022,8 @@ class TermCleanup extends Feature {
 	 * Ajax handler for refresh compare status.
 	 */
 	public function get_term_cleanup_status() {
-		// TODO
-		if ( ! $this->background_process ) {
-			wp_send_json_error( [ 'error' => __( 'Background processing not enabled.', 'classifai' ) ] );
-		}
-
 		// Check the nonce for security
-		check_ajax_referer( 'classifai-status', 'nonce' );
+		check_ajax_referer( 'classifai-term-cleanup-status', 'nonce' );
 
 		$data     = array(
 			'is_running' => false,

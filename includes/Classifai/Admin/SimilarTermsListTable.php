@@ -56,7 +56,7 @@ class SimilarTermsListTable extends WP_List_Table {
 		return array(
 			'term'         => $label,
 			// translators: %s: Singular label of the taxonomy.
-			'similar_term' => sprintf( __( 'Similar %s' ), $label ),
+			'similar_term' => sprintf( __( 'Similar %s', 'classifai' ), $label ),
 			'actions'      => __( 'Actions', 'classifai' ),
 		);
 	}
