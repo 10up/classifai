@@ -923,3 +923,135 @@ div.classifai-openai__result-disable-link {
     display: block;
     padding: 0 1em 1.5em 1em;
 }
+
+.classifai-content .classifai-term-consolidation {
+	margin-top: 20px;
+}
+
+.classifai-term-consolidation .classifai-tabs.tabs-center {
+	margin-bottom: 24px
+}
+
+.classifai-term-consolidation .classifai-tabs.tabs-justify {
+	table-layout: fixed;
+	width: 100%
+}
+
+.classifai-term-consolidation .classifai-tabs a.tab {
+	color: #1d2327;
+	cursor: pointer;
+	display: block;
+	font-size: 14px;
+	padding: 16px 12px;
+	position: relative;
+	text-decoration: none;
+	transform: translateZ(0);
+	transition: all .3s ease;
+	margin-bottom: 4px;
+	background: #f9f9f9;
+}
+
+.classifai-term-consolidation .classifai-tabs a.tab:focus {
+	box-shadow: none
+}
+
+.classifai-term-consolidation .classifai-tabs a.tab:hover {
+	color: var(--classifai-admin-theme-color)
+}
+
+.classifai-term-consolidation .classifai-tabs a.tab.active {
+	background: #f0f0f0;
+	border-radius: 4px;
+	box-shadow: none;
+	font-weight: 600
+}
+
+.classifai-term-consolidation .classifai-tabs a.tab.active:after {
+	opacity: 1;
+	transform: scale(1)
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-wrapper {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	margin-top: 20px;
+}
+
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper .classifai-term-consolidation-content-wrapper-field-label {
+	text-align: left
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper .classifai-term-consolidation-content-wrapper-field {
+	padding: 0
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper .classifai-term-consolidation-content-wrapper-field-label>label {
+	display: block;
+	font-weight: 700;
+	margin-bottom: 0;
+	text-transform: uppercase
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper input[type=password],
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper input[type=text] {
+	font-size: 14px;
+	height: 38px;
+	margin-bottom: 4px;
+	width: 100%
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper .classifai-setup-footer {
+	margin-top: 40px
+}
+
+@media screen and (max-width: 782px) {
+	.classifai-term-consolidation .classifai-term-consolidation-content-wrapper {
+		padding-left: 18px
+	}
+}
+
+@media screen and (max-width: 600px) {
+	.classifai-term-consolidation .classifai-term-consolidation-content-wrapper {
+		margin-bottom: 20px;
+		padding-left: 0;
+		width: 100%
+	}
+}
+
+.classifai-term-consolidation-process-status p{
+	font-size: 14px;
+}
+
+.classifai-term-consolidation-process-status .dashicons-yes-alt{
+    color: #48be1e;
+}
+
+.classifai-term-consolidation .classifai-term-consolidation-content-wrapper input[type=text].current-page{
+	width: auto;
+	height: auto;
+}
+
+table.similar_terms {
+	border-collapse: collapse;
+	border: 2px solid #c3c4c7;
+}
+
+table.similar_terms tbody tr.border {
+	border-left: 2px solid #c3c4c7;
+	border-right: 2px solid #c3c4c7;
+	border-top: 2px solid #c3c4c7;
+}
+
+table.similar_terms tbody tr.border.skip {
+	border-top: 0px;
+}
+
+table.similar_terms tbody tr.border:last-child {
+	 border-bottom: 2px solid #c3c4c7;
+}
+
+table.similar_terms th#actions {
+    width: 15%;
+}

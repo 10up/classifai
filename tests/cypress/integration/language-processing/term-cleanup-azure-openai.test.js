@@ -15,7 +15,7 @@ describe( '[Language processing] Term Cleanup - Azure OpenAI Tests', () => {
 			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_term_cleanup'
 		);
 
-		cy.get( '#use_ep' ).should( 'be:hidden' );
+		cy.get( '#use_ep' ).should( 'be.hidden' );
 	} );
 
 	it( 'Can save Term Cleanup settings', () => {

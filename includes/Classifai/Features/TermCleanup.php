@@ -1,6 +1,6 @@
 <?php
 
-namespace ClassifAI\Features;
+namespace Classifai\Features;
 
 use Classifai\Admin\SimilarTermsListTable;
 use Classifai\Services\LanguageProcessing;
@@ -83,7 +83,7 @@ class TermCleanup extends Feature {
 			}
 		}
 
-		$this->setting_page_url   = admin_url( 'tools.php?page=classifai-term-cleanup' );
+		$this->setting_page_url = admin_url( 'tools.php?page=classifai-term-cleanup' );
 		// $this->background_process = new TermCleanupBackgroundProcess(); // TODO: Implement this class.
 	}
 
@@ -93,8 +93,6 @@ class TermCleanup extends Feature {
 	 * This will only fire if the Feature is enabled.
 	 */
 	public function feature_setup() {
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
-
 		// Register the settings page for the Feature.
 		add_action( 'admin_menu', [ $this, 'register_admin_menu_item' ] );
 		add_action( 'admin_post_classifai_init_term_cleanup', [ $this, 'start_term_cleanup_process' ] );
@@ -218,42 +216,6 @@ class TermCleanup extends Feature {
 			</div>
 		</div>
 		<?php
-	}
-
-	/**
-	 * Enqueue the admin scripts.
-	 *
-	 * @param string $hook_suffix The current admin page.
-	 */
-	public function enqueue_admin_assets( string $hook_suffix ) {
-		if ( 'tools_page_classifai-term-cleanup' !== $hook_suffix ) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'classifai-style',
-			CLASSIFAI_PLUGIN_URL . 'assets/css/admin.css',
-			array(),
-			CLASSIFAI_PLUGIN_VERSION,
-			'all'
-		);
-
-		wp_enqueue_script(
-			'classifai-script',
-			CLASSIFAI_PLUGIN_URL . 'assets/js/admin.js',
-			array( 'jquery' ),
-			CLASSIFAI_PLUGIN_VERSION,
-			true
-		);
-
-		wp_localize_script(
-			'classifai-script',
-			'classifai_term_cleanup_params',
-			array(
-				'ajax_url'   => esc_url( admin_url( 'admin-ajax.php' ) ),
-				'ajax_nonce' => wp_create_nonce( 'classifai-status' ),
-			)
-		);
 	}
 
 	/**

@@ -74,8 +74,6 @@ class SimilarTermsListTable extends WP_List_Table {
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
-		$this->process_bulk_action();
-
 		$terms = get_terms(
 			[
 				'taxonomy'     => $this->taxonomy,
