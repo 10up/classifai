@@ -529,11 +529,6 @@ class TermCleanup extends Feature {
 	 * Cancel the term cleanup process.
 	 */
 	public function cancel_term_cleanup_process() {
-		// TODO
-		if ( ! $this->background_process ) {
-			wp_die( esc_html__( 'Background processing not enabled.', 'classifai' ) );
-		}
-
 		// Check the nonce for security
 		if (
 			empty( $_GET['_wpnonce'] ) ||
@@ -543,9 +538,10 @@ class TermCleanup extends Feature {
 		}
 
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : '';
-		$this->background_process->cancel();
 
-		if ( $this->background_process->is_cancelled() ) {
+		$unschedule = $this->background_process->unschedule();
+
+		if ( $unschedule ) {
 			// Add a notice to inform the user that the process will be cancelled soon.
 			$this->add_notice(
 				__( 'Process for the finding similar terms will be cancelled soon.', 'classifai' ),

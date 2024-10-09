@@ -450,12 +450,13 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	const statusWrapper = $( '.classifai-term-cleanup-process-status' );
 	const processRunning = statusWrapper.length;
 	const taxonomy = statusWrapper.data( 'taxonomy' );
-	const ajaxUrl = classifai_term_cleanup_params.ajax_url; // eslint-disable-line camelcase
-	const ajaxNonce = classifai_term_cleanup_params.ajax_nonce; // eslint-disable-line camelcase
 
 	if ( ! processRunning || ! taxonomy ) {
 		return;
 	}
+
+	const ajaxUrl = classifai_term_cleanup_params?.ajax_url; // eslint-disable-line camelcase
+	const ajaxNonce = classifai_term_cleanup_params?.ajax_nonce; // eslint-disable-line camelcase
 
 	const intervalId = setInterval( function () {
 		$.ajax( {

@@ -27,7 +27,7 @@ class TermCleanupScheduler {
 	 * Initialize the class.
 	 */
 	public function init() {
-		add_action( 'classifai_schedule_term_cleanup_job', [ $this, 'run' ] );
+		add_action( $this->job_name, [ $this, 'run' ] );
 	}
 
 	/**
@@ -134,8 +134,23 @@ class TermCleanupScheduler {
 	 */
 	public function schedule( array $args = [] ) {
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			as_enqueue_async_action( 'classifai_schedule_term_cleanup_job', $args );
+			as_enqueue_async_action( $this->job_name, $args );
 		}
+	}
+
+	/**
+	 * Unschedule the term cleanup job.
+	 *
+	 * @return bool
+	 */
+	public function unschedule() {
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			$action_id = as_unschedule_all_actions( $this->job_name );
+
+			return $action_id ? true : false;
+		}
+
+		return false;
 	}
 
 	/**
