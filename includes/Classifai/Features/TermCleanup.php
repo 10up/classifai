@@ -7,6 +7,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
+use Classifai\TermCleanupScheduler;
 use WP_Error;
 
 use function Classifai\is_elasticpress_installed;
@@ -33,7 +34,7 @@ class TermCleanup extends Feature {
 	/**
 	 * Background process instance.
 	 *
-	 * @var TermCleanupBackgroundProcess
+	 * @var TermCleanupScheduler
 	 */
 	private $background_process;
 
@@ -84,7 +85,9 @@ class TermCleanup extends Feature {
 		}
 
 		$this->setting_page_url = admin_url( 'tools.php?page=classifai-term-cleanup' );
-		// $this->background_process = new TermCleanupBackgroundProcess(); // TODO: Implement this class.
+
+		$this->background_process = new TermCleanupScheduler( 'classifai_schedule_term_cleanup_job' );
+		$this->background_process->init();
 	}
 
 	/**
@@ -179,7 +182,7 @@ class TermCleanup extends Feature {
 					<div class="classifai-content-wrapper">
 						<h3 class="screen-reader-text"><?php echo esc_html( $all_taxonomies[ $active_tax ] ); ?></h3>
 					<?php
-					if ( $this->background_process && $this->background_process->is_queued() ) {
+					if ( $this->background_process && $this->background_process->in_progress() ) {
 						$this->render_background_processing_status( $active_tax );
 					} else {
 						$plural_label   = strtolower( $this->get_taxonomy_label( $active_tax, true ) );
@@ -439,10 +442,6 @@ class TermCleanup extends Feature {
 	 * Start the term cleanup process.
 	 */
 	public function start_term_cleanup_process() {
-		if ( ! $this->background_process ) {
-			wp_die( esc_html__( 'Background processing not enabled.', 'classifai' ) );
-		}
-
 		if (
 			empty( $_POST['classifai_term_cleanup_nonce'] ) ||
 			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_nonce'] ) ), 'classifai_term_cleanup' )
@@ -479,8 +478,8 @@ class TermCleanup extends Feature {
 			}
 		}
 
-		$this->background_process->push_to_queue(
-			array(
+		$job_args = [
+			[
 				'taxonomy'             => $taxonomy,
 				'thresold'             => $thresold,
 				'action'               => 'term_cleanup',
@@ -489,15 +488,15 @@ class TermCleanup extends Feature {
 				'term_id'              => 0,
 				'offset'               => 0,
 				'started_by'           => get_current_user_id(),
-			)
-		);
+			],
+		];
+
+		$this->background_process->schedule( $job_args );
 
 		$this->add_notice(
 			__( 'Process for finding similar terms has started.', 'classifai' ),
 			'info'
 		);
-
-		$this->background_process->save()->dispatch();
 
 		// Redirect back to the settings page.
 		wp_safe_redirect( add_query_arg( 'tax', $taxonomy, $this->setting_page_url ) );
@@ -508,6 +507,7 @@ class TermCleanup extends Feature {
 	 * Cancel the term cleanup process.
 	 */
 	public function cancel_term_cleanup_process() {
+		// TODO
 		if ( ! $this->background_process ) {
 			wp_die( esc_html__( 'Background processing not enabled.', 'classifai' ) );
 		}
@@ -549,9 +549,9 @@ class TermCleanup extends Feature {
 	 * Generate embeddings for the terms.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @return bool True if embeddings were generated, false otherwise.
+	 * @return bool|WP_Error True if embeddings were generated, false otherwise.
 	 */
-	public function generate_embeddings( string $taxonomy ): bool {
+	public function generate_embeddings( string $taxonomy ) {
 		$exclude = [];
 
 		// Exclude the uncategorized term.
@@ -586,7 +586,11 @@ class TermCleanup extends Feature {
 
 		// Generate embedding data for each term.
 		foreach ( $terms as $term_id ) {
-			$provider->generate_embeddings_for_term( $term_id, false, $this );
+			$result = $provider->generate_embeddings_for_term( $term_id, false, $this );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
 
 		return true;
@@ -598,7 +602,7 @@ class TermCleanup extends Feature {
 	 * @param string $taxonomy Taxonomy to process.
 	 * @param int    $thresold Thresold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
-	 * @return array|bool
+	 * @return array|bool|WP_Error
 	 */
 	public function get_similar_terms( string $taxonomy, int $thresold, array $args = [] ) {
 		if ( class_exists( '\\ElasticPress\\Feature' ) && '1' === $this->get_settings( 'use_ep' ) ) {
@@ -827,7 +831,9 @@ class TermCleanup extends Feature {
 			return [];
 		}
 
-		$batches = $this->background_process->get_batches();
+		// TODO
+		// $batches = $this->background_process->get_batches();
+		$batches = [];
 
 		if ( ! empty( $batches ) ) {
 			foreach ( $batches as $batch ) {
@@ -848,6 +854,7 @@ class TermCleanup extends Feature {
 	 * @param string $taxonomy Taxonomy to process.
 	 */
 	public function render_background_processing_status( $taxonomy ) {
+		// TODO
 		$status = $this->get_background_processing_status( $taxonomy );
 
 		if ( empty( $status ) ) {
@@ -998,6 +1005,7 @@ class TermCleanup extends Feature {
 	 * Ajax handler for refresh compare status.
 	 */
 	public function get_term_cleanup_status() {
+		// TODO
 		if ( ! $this->background_process ) {
 			wp_send_json_error( [ 'error' => __( 'Background processing not enabled.', 'classifai' ) ] );
 		}
@@ -1016,7 +1024,7 @@ class TermCleanup extends Feature {
 			wp_send_json_error( $data );
 		}
 
-		if ( $this->background_process->is_queued() ) {
+		if ( $this->background_process->in_progress() ) {
 			$data['is_running'] = true;
 			ob_start();
 			$this->render_background_processing_status( $taxonomy );
