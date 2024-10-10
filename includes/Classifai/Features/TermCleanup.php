@@ -510,6 +510,7 @@ class TermCleanup extends Feature {
 				'term_id'              => 0,
 				'offset'               => 0,
 				'started_by'           => get_current_user_id(),
+				'job_id'               => str_replace( '-', '', wp_generate_uuid4() ),
 			],
 		];
 

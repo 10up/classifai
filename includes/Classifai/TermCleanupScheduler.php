@@ -55,6 +55,12 @@ class TermCleanupScheduler {
 				// Set the user to the one who started the process, to avoid permission issues.
 				wp_set_current_user( (int) $started_by );
 
+				// Check if cancel request is made.
+				if ( isset( $item['job_id'] ) && get_transient( 'classifai_cancel_term_cleanup_process' ) === $item['job_id'] ) {
+					delete_transient( 'classifai_cancel_term_cleanup_process' );
+					return;
+				}
+
 				// Generate embeddings if not already generated.
 				if ( ! $embeddings_generated ) {
 					$results = $term_cleanup->generate_embeddings( $taxonomy );
@@ -145,9 +151,34 @@ class TermCleanupScheduler {
 	 */
 	public function unschedule() {
 		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			$action_id = as_unschedule_all_actions( $this->job_name );
+			as_unschedule_all_actions( $this->job_name );
 
-			return $action_id ? true : false;
+			if ( ! class_exists( 'ActionScheduler_Store' ) ) {
+				return false;
+			}
+
+			$store = ActionScheduler_Store::instance();
+
+			// Check if the job is still in progress.
+			$action_id = $store->find_action(
+				$this->job_name,
+				array(
+					'status' => ActionScheduler_Store::STATUS_RUNNING,
+				)
+			);
+
+			// If no action running, return true.
+			if ( empty( $action_id ) ) {
+				return true;
+			}
+
+			$action = $store->fetch_action( $action_id );
+			$args   = $action->get_args();
+			if ( ! empty( $args ) && isset( $args[0]['job_id'] ) ) {
+				set_transient( 'classifai_cancel_term_cleanup_process', $args[0]['job_id'], 300 );
+			}
+
+			return true;
 		}
 
 		return false;
@@ -181,14 +212,14 @@ class TermCleanupScheduler {
 		$running_action_id = $store->find_action(
 			$this->job_name,
 			array(
-				'status' => ActionScheduler_Store::STATUS_PENDING,
+				'status' => ActionScheduler_Store::STATUS_RUNNING,
 			)
 		);
 
 		$pending_action_id = $store->find_action(
 			$this->job_name,
 			array(
-				'status' => ActionScheduler_Store::STATUS_RUNNING,
+				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)
 		);
 
