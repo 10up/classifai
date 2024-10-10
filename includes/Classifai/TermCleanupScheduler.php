@@ -159,20 +159,11 @@ class TermCleanupScheduler {
 	 * @return bool
 	 */
 	public function in_progress(): bool {
-		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
-			return false;
+		if ( function_exists( 'as_has_scheduled_action' ) ) {
+			return as_has_scheduled_action( $this->job_name );
 		}
 
-		$store = ActionScheduler_Store::instance();
-
-		$action_id = $store->find_action(
-			$this->job_name,
-			array(
-				'status' => ActionScheduler_Store::STATUS_PENDING,
-			)
-		);
-
-		return ! empty( $action_id );
+		return false;
 	}
 
 	/**
@@ -187,19 +178,27 @@ class TermCleanupScheduler {
 
 		$store = ActionScheduler_Store::instance();
 
-		$action_id = $store->find_action(
+		$running_action_id = $store->find_action(
 			$this->job_name,
 			array(
 				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)
 		);
 
-		if ( empty( $action_id ) ) {
+		$pending_action_id = $store->find_action(
+			$this->job_name,
+			array(
+				'status' => ActionScheduler_Store::STATUS_RUNNING,
+			)
+		);
+
+		if ( empty( $running_action_id ) && empty( $pending_action_id ) ) {
 			return false;
 		}
 
-		$action = $store->fetch_action( $action_id );
-		$args   = $action->get_args();
+		$action_id = ! empty( $running_action_id ) ? $running_action_id : $pending_action_id;
+		$action    = $store->fetch_action( $action_id );
+		$args      = $action->get_args();
 
 		return $args;
 	}
