@@ -151,6 +151,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			'to'       => $term->term_id,
 		);
 		$merge_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_merge_term' ) );
+		$score     = $score ? ( $score > 1 ? $score - 1 : $score ) : '';
 
 		return sprintf(
 			// translators: %s: Term name, %d: Term ID.
@@ -171,7 +172,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			esc_html( $term->slug ),
 			esc_html( $term->count ),
 			esc_html( $term->parent > 0 ? get_term( $term->parent )->name : 'None' ),
-			$score ? esc_html( round( ( $score - 1 ) * 100, 2 ) . '%' ) : '',
+			$score ? esc_html( round( $score * 100, 2 ) . '%' ) : '',
 			esc_html( $term->description ),
 			esc_url( $merge_url ),
 			esc_html__( 'Merge and keep this', 'classifai' )
