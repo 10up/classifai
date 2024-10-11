@@ -341,7 +341,7 @@ class Embeddings extends OpenAI {
 	/**
 	 * Get the data to preview terms.
 	 */
-	public function get_post_classifier_embeddings_preview_data(): void {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -1194,7 +1194,7 @@ class Embeddings extends OpenAI {
 	 *
 	 * @return bool
 	 */
-	public function is_embeddings_generation_in_progress() {
+	public function is_embeddings_generation_in_progress(): bool {
 		return self::$scheduler_instance->is_embeddings_generation_in_progress();
 	}
 }

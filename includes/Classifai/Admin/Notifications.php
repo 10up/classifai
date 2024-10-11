@@ -380,7 +380,7 @@ EOD;
 	 * @param string $message The notice message.
 	 * @param string $type    The notice type.
 	 */
-	public function set_notice( $message, $type = 'info' ) {
+	public function set_notice( string $message, string $type = 'info' ) {
 		$notices = get_transient( 'classifai_notices' );
 		if ( ! is_array( $notices ) ) {
 			$notices = [];

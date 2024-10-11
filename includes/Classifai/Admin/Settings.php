@@ -116,8 +116,9 @@ class Settings {
 	 * Get features for the settings page.
 	 *
 	 * @param bool $with_instance Whether to include the instance of the feature.
+	 * @return array
 	 */
-	public function get_features( $with_instance = false ) {
+	public function get_features( bool $with_instance = false ): array {
 		$services = get_plugin()->services;
 		if ( empty( $services ) || empty( $services['service_manager'] ) || ! $services['service_manager'] instanceof ServicesManager ) {
 			return [];
@@ -137,6 +138,7 @@ class Settings {
 					$services[ $feature::ID ] = $feature;
 				}
 			}
+
 			return $services;
 		}
 
@@ -152,6 +154,7 @@ class Settings {
 				);
 			}
 		}
+
 		return $services;
 	}
 
@@ -160,7 +163,7 @@ class Settings {
 	 *
 	 * @return array The settings.
 	 */
-	public function get_settings() {
+	public function get_settings(): array {
 		$features = $this->get_features( true );
 		$settings = [];
 
@@ -173,8 +176,6 @@ class Settings {
 
 	/**
 	 * Register the REST API routes for the settings.
-	 *
-	 * @return void
 	 */
 	public function register_routes() {
 		register_rest_route(
@@ -229,7 +230,7 @@ class Settings {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_settings_callback() {
+	public function get_settings_callback(): \WP_REST_Response {
 		$settings = $this->get_settings();
 		return rest_ensure_response( $settings );
 	}
@@ -237,9 +238,9 @@ class Settings {
 	/**
 	 * Check if a given request has access to get settings.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool
 	 */
-	public function get_settings_permissions_check() {
+	public function get_settings_permissions_check(): bool {
 		return current_user_can( 'manage_options' );
 	}
 
@@ -249,7 +250,7 @@ class Settings {
 	 * @param \WP_REST_Request $request Full data about the request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function update_settings_callback( $request ) {
+	public function update_settings_callback( \WP_REST_Request $request ) {
 		$params   = $request->get_json_params();
 		$settings = $params['settings'] ?? [];
 		$is_setup = $params['is_setup'] ?? false;
@@ -317,9 +318,9 @@ class Settings {
 	/**
 	 * Check if a given request has access to update settings.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool
 	 */
-	public function update_settings_permissions_check() {
+	public function update_settings_permissions_check(): bool {
 		return current_user_can( 'manage_options' );
 	}
 
@@ -328,7 +329,7 @@ class Settings {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function get_registration_settings_callback() {
+	public function get_registration_settings_callback(): \WP_REST_Response {
 		$service_manager = new ServicesManager();
 		$settings        = $service_manager->get_settings();
 		return rest_ensure_response( $settings );
@@ -340,7 +341,7 @@ class Settings {
 	 * @param \WP_REST_Request $request Full data about the request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function update_registration_settings_callback( $request ) {
+	public function update_registration_settings_callback( \WP_REST_Request $request ) {
 		// Load settings error functions.
 		if ( ! function_exists( 'add_settings_error' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/template.php';
@@ -385,9 +386,9 @@ class Settings {
 	/**
 	 * Check if a given request has access to get/update registration settings.
 	 *
-	 * @return bool|\WP_Error
+	 * @return bool
 	 */
-	public function registration_settings_permissions_check() {
+	public function registration_settings_permissions_check(): bool {
 		return current_user_can( 'manage_options' );
 	}
 
@@ -396,7 +397,7 @@ class Settings {
 	 *
 	 * @return \WP_REST_Response
 	 */
-	public function check_embedding_generation_status() {
+	public function check_embedding_generation_status(): \WP_REST_Response {
 		$classification = new Classification();
 		$response       = array(
 			'classifAIEmbedInProgress' => $classification->is_embeddings_generation_in_progress(),

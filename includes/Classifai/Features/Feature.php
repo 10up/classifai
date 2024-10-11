@@ -118,7 +118,7 @@ abstract class Feature {
 	 *
 	 * @return array Array of roles.
 	 */
-	public function get_roles() {
+	public function get_roles(): array {
 		return $this->roles;
 	}
 
