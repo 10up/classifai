@@ -1055,3 +1055,18 @@ table.similar_terms tbody tr.border:last-child {
 table.similar_terms th#actions {
     width: 15%;
 }
+
+table.similar_terms .term-merge-button {
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+table.similar_terms.widefat td,
+table.similar_terms.widefat th {
+	padding: 14px;
+	font-size: 14px;
+}
+
+table.similar_terms.widefat thead th {
+	font-weight: bold;
+}

@@ -57,7 +57,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			'term'         => $label,
 			// translators: %s: Singular label of the taxonomy.
 			'similar_term' => sprintf( __( 'Similar %s', 'classifai' ), $label ),
-			'actions'      => __( 'Actions', 'classifai' ),
+			'actions'      => __( 'Action', 'classifai' ),
 		);
 	}
 
@@ -155,25 +155,22 @@ class SimilarTermsListTable extends WP_List_Table {
 
 		return sprintf(
 			// translators: %s: Term name, %d: Term ID.
-			__( '<span><strong>%1$s</strong> (ID: %2$d)</span><br/><br/>', 'classifai' ) .
+			__( '<span><strong>%1$s</strong> (ID: %2$s)</span><br/><br/>', 'classifai' ) .
 			// translators: %s: Term slug.
 			__( '<span><strong>Slug:</strong> %3$s</span><br/>', 'classifai' ) .
 			// translators: %s: Term count.
-			__( '<span><strong>Count:</strong> %4$s</span><br/>', 'classifai' ) .
+			__( '<span><strong>Used:</strong> %4$s</span><br/>', 'classifai' ) .
 			// translators: %s: Term parent name.
 			__( '<span><strong>Parent:</strong> %5$s</span><br/>', 'classifai' ) .
 			// translators: %s: Similarity score.
 			( $score ? __( '<span><strong>Similarity:</strong> %6$s</span><br/>', 'classifai' ) : '%6$s' ) .
-			// translators: %s: Term description.
-			__( '<span><strong>Description:</strong> %7$s</span><br/><br/>', 'classifai' ) .
-			'<a href="%8$s" class="button button-primary">%9$s</a>',
+			'<a href="%7$s" class="button button-primary term-merge-button">%8$s</a>',
 			esc_html( $term->name ),
-			esc_html( $term->term_id ),
+			'<a href="' . esc_url( get_edit_term_link( $term->term_id, $term->taxonomy ) ) . '" target="_blank">' . esc_html( $term->term_id ) . '</a>',
 			esc_html( $term->slug ),
-			esc_html( $term->count ),
+			'<a href="' . esc_url( admin_url( 'edit.php?tag=' . $term->slug ) ) . '" target="_blank">' . esc_html( sprintf( _n( '%d time', '%d times', $term->count, 'classifai' ), $term->count ) )  . '</a>',
 			esc_html( $term->parent > 0 ? get_term( $term->parent )->name : 'None' ),
 			$score ? esc_html( round( $score * 100, 2 ) . '%' ) : '',
-			esc_html( $term->description ),
 			esc_url( $merge_url ),
 			esc_html__( 'Merge and keep this', 'classifai' )
 		);
