@@ -66,13 +66,33 @@ class SimilarTermsListTable extends WP_List_Table {
 	 */
 	public function prepare_items() {
 		$per_page = $this->get_items_per_page( 'edit_post_per_page' );
-		$current  = $this->get_pagenum();
-		$offset   = ( $current - 1 ) * $per_page;
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
+		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
+
+		$total = wp_count_terms(
+			[
+				'taxonomy'     => $this->taxonomy,
+				'hide_empty'   => false,
+				'meta_key'     => 'classifai_similar_terms', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare' => 'EXISTS',
+				'search'       => $search,
+			]
+		);
+
+		$this->set_pagination_args(
+			array(
+				'total_items' => $total,  // WE have to calculate the total number of items.
+				'per_page'    => $per_page, // WE have to determine how many items to show on a page.
+				'total_pages' => ceil( $total / $per_page ), // WE have to calculate the total number of pages.
+			)
+		);
+
+		$current  = $this->get_pagenum();
+		$offset   = ( $current - 1 ) * $per_page;
 
 		$terms = get_terms(
 			[
@@ -85,6 +105,7 @@ class SimilarTermsListTable extends WP_List_Table {
 				'meta_compare' => 'EXISTS',
 				'number'       => $per_page,
 				'offset'       => $offset,
+				'search'       => $search,
 			]
 		);
 
@@ -116,23 +137,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			}
 		}
 
-		$total = wp_count_terms(
-			[
-				'taxonomy'     => $this->taxonomy,
-				'hide_empty'   => false,
-				'meta_key'     => 'classifai_similar_terms', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare' => 'EXISTS',
-			]
-		);
-
 		$this->items = $items;
-		$this->set_pagination_args(
-			array(
-				'total_items' => $total,  // WE have to calculate the total number of items.
-				'per_page'    => $per_page, // WE have to determine how many items to show on a page.
-				'total_pages' => ceil( $total / $per_page ), // WE have to calculate the total number of pages.
-			)
-		);
 	}
 
 	/**
@@ -149,6 +154,8 @@ class SimilarTermsListTable extends WP_List_Table {
 			'taxonomy' => $this->taxonomy,
 			'from'     => $similar_term->term_id,
 			'to'       => $term->term_id,
+			'paged'     => $this->get_pagenum(),
+			's'        => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false,
 		);
 		$merge_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_merge_term' ) );
 		$score     = $score ? ( $score > 1 ? $score - 1 : $score ) : '';
@@ -215,6 +222,8 @@ class SimilarTermsListTable extends WP_List_Table {
 			'taxonomy'     => $this->taxonomy,
 			'term'         => $term->term_id,
 			'similar_term' => $similar_term->term_id,
+			'paged'        => $this->get_pagenum(),
+			's'            => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false,
 		);
 		$skip_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_skip_similar_term' ) );
 

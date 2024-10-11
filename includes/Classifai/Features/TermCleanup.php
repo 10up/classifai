@@ -988,10 +988,17 @@ class TermCleanup extends Feature {
 				printf( esc_html__( 'Similar %s', 'classifai' ), esc_html( $label ) );
 				?>
 			</h3>
+			<form id="import-history" method="get">
+				<input type="hidden" name="page" value="classifai-term-cleanup">
+				<input type="hidden" name="tax" value="<?php echo esc_attr( $taxonomy ); ?>">
+				<?php
+				$list_table = new SimilarTermsListTable( $taxonomy );
+				$list_table->prepare_items();
+				$list_table->search_box( esc_html__( 'Search', 'classifai' ), 'search-term' );
+				$list_table->display();
+				?>
+			</form>
 			<?php
-			$list_table = new SimilarTermsListTable( $taxonomy );
-			$list_table->prepare_items();
-			$list_table->display();
 		}
 	}
 
@@ -1060,7 +1067,12 @@ class TermCleanup extends Feature {
 		$from      = isset( $_GET['from'] ) ? absint( wp_unslash( $_GET['from'] ) ) : 0;
 		$to_term   = get_term( $to, $taxonomy );
 		$from_term = get_term( $from, $taxonomy );
-		$redirect  = add_query_arg( 'tax', $taxonomy, $this->setting_page_url );
+		$args      = [
+			'tax'   => $taxonomy,
+			's'     => isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false,
+			'paged' => isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : false,
+		];
+		$redirect  = add_query_arg( $args, $this->setting_page_url );
 
 		if ( empty( $taxonomy ) || empty( $to ) || empty( $from ) ) {
 			$this->add_notice(
@@ -1127,7 +1139,12 @@ class TermCleanup extends Feature {
 		$taxonomy     = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : '';
 		$term         = isset( $_GET['term'] ) ? absint( wp_unslash( $_GET['term'] ) ) : 0;
 		$similar_term = isset( $_GET['similar_term'] ) ? absint( wp_unslash( $_GET['similar_term'] ) ) : 0;
-		$redirect     = add_query_arg( 'tax', $taxonomy, $this->setting_page_url );
+		$args         = [
+			'tax'   => $taxonomy,
+			's'     => isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : false,
+			'paged' => isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : false,
+		];
+		$redirect     = add_query_arg( $args, $this->setting_page_url );
 
 		// SKip/Ignore the similar term.
 		$term_meta = get_term_meta( $term, 'classifai_similar_terms', true );
