@@ -69,7 +69,7 @@ class SimilarTermsListTable extends WP_List_Table {
 		$columns  = $this->get_columns();
 		$hidden   = array();
 		$sortable = $this->get_sortable_columns();
-		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : '';
+		$search   = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 
@@ -91,8 +91,8 @@ class SimilarTermsListTable extends WP_List_Table {
 			)
 		);
 
-		$current  = $this->get_pagenum();
-		$offset   = ( $current - 1 ) * $per_page;
+		$current = $this->get_pagenum();
+		$offset  = ( $current - 1 ) * $per_page;
 
 		$terms = get_terms(
 			[
@@ -154,8 +154,8 @@ class SimilarTermsListTable extends WP_List_Table {
 			'taxonomy' => $this->taxonomy,
 			'from'     => $similar_term->term_id,
 			'to'       => $term->term_id,
-			'paged'     => $this->get_pagenum(),
-			's'        => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false,
+			'paged'    => $this->get_pagenum(),
+			's'        => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		$merge_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_merge_term' ) );
 		$score     = $score ? ( $score > 1 ? $score - 1 : $score ) : '';
@@ -175,7 +175,8 @@ class SimilarTermsListTable extends WP_List_Table {
 			esc_html( $term->name ),
 			'<a href="' . esc_url( get_edit_term_link( $term->term_id, $term->taxonomy ) ) . '" target="_blank">' . esc_html( $term->term_id ) . '</a>',
 			esc_html( $term->slug ),
-			'<a href="' . esc_url( admin_url( 'edit.php?tag=' . $term->slug ) ) . '" target="_blank">' . esc_html( sprintf( _n( '%d time', '%d times', $term->count, 'classifai' ), $term->count ) )  . '</a>',
+			// translators: %d: Term count.
+			'<a href="' . esc_url( admin_url( 'edit.php?tag=' . $term->slug ) ) . '" target="_blank">' . esc_html( sprintf( _n( '%d time', '%d times', $term->count, 'classifai' ), $term->count ) ) . '</a>',
 			esc_html( $term->parent > 0 ? get_term( $term->parent )->name : 'None' ),
 			$score ? esc_html( round( $score * 100, 2 ) . '%' ) : '',
 			esc_url( $merge_url ),
@@ -223,7 +224,7 @@ class SimilarTermsListTable extends WP_List_Table {
 			'term'         => $term->term_id,
 			'similar_term' => $similar_term->term_id,
 			'paged'        => $this->get_pagenum(),
-			's'            => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false,
+			's'            => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		$skip_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_skip_similar_term' ) );
 
