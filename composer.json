@@ -12,7 +12,9 @@
   "require": {
     "php": ">=7.4",
     "yahnis-elsts/plugin-update-checker": "5.1",
-    "ua-parser/uap-php": "dev-master"
+    "ua-parser/uap-php": "dev-master",
+    "aws/aws-sdk-php": "^3.300",
+    "woocommerce/action-scheduler": "3.8.1"
   },
   "autoload": {
     "psr-4": {
@@ -30,7 +32,8 @@
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
-    "lint-fix": "phpcbf ."
+    "lint-fix": "phpcbf .",
+    "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices"
   },
   "minimum-stability": "dev",
   "config": {
@@ -41,6 +44,11 @@
   "archive": {
     "exclude": [
       "!/vendor/"
+    ]
+  },
+  "extra": {
+    "aws/aws-sdk-php": [
+        "Polly"
     ]
   }
 }

@@ -202,7 +202,7 @@ import '../scss/language-processing.scss';
 	previewWatson();
 
 	const previewEmbeddings = () => {
-		if ( 'openai_embeddings' !== provider ) {
+		if ( 'ibm_watson_nlu' === provider ) {
 			return;
 		}
 

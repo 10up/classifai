@@ -92,7 +92,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 		const data = getChatGPTData();
 
-		cy.createClassicPost( {
+		cy.classicCreatePost( {
 			title: 'Excerpt test classic',
 			content: 'Test GPT content.',
 			postType: 'post',

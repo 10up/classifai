@@ -6,7 +6,6 @@
 namespace Classifai\Providers\Azure;
 
 use Classifai\Providers\Provider;
-use Classifai\Normalizer;
 use Classifai\Features\TextToSpeech;
 use stdClass;
 use WP_Http;
@@ -29,14 +28,6 @@ class Speech extends Provider {
 	 * @var string
 	 */
 	const API_PATH = 'cognitiveservices/v1';
-
-	/**
-	 * Meta key to get/set the audio hash that helps to indicate if there is any need
-	 * for the audio file to be regenerated or not.
-	 *
-	 * @var string
-	 */
-	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
 
 	/**
 	 * Azure Text to Speech constructor.
@@ -66,7 +57,9 @@ class Speech extends Provider {
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
-				'description'   => __( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Text to Speech region endpoint, e.g., <code>https://LOCATION.tts.speech.microsoft.com/</code>. Replace <code>LOCATION</code> with the Location/Region you selected for the resource in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
@@ -337,12 +330,10 @@ class Speech extends Provider {
 			);
 		}
 
-		$normalizer          = new Normalizer();
 		$feature             = new TextToSpeech();
 		$settings            = $feature->get_settings();
-		$post                = get_post( $post_id );
-		$post_content        = $normalizer->normalize_content( $post->post_content, $post->post_title, $post_id );
-		$content_hash        = get_post_meta( $post_id, self::AUDIO_HASH_KEY, true );
+		$post_content        = $feature->normalize_post_content( $post_id );
+		$content_hash        = get_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, true );
 		$saved_attachment_id = (int) get_post_meta( $post_id, $feature::AUDIO_ID_KEY, true );
 
 		// Don't regenerate the audio file it it already exists and the content hasn't changed.
@@ -415,7 +406,7 @@ class Speech extends Provider {
 			);
 		}
 
-		update_post_meta( $post_id, self::AUDIO_HASH_KEY, md5( $post_content ) );
+		update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
 
 		return $response_body;
 	}

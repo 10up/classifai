@@ -63,19 +63,21 @@ class GeminiAPI extends Provider {
 				'input_type'    => 'password',
 				'default_value' => $settings['api_key'],
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						/* translators: %1$s is replaced with the OpenAI sign up URL */
-						__( 'Don\'t have an Google AI (Gemini API) key? <a title="Get an API key" href="%1$s">Get an API key</a> now.', 'classifai' ),
-						[
-							'a' => [
-								'href'  => [],
-								'title' => [],
-							],
-						]
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					sprintf(
+						wp_kses(
+							/* translators: %1$s is replaced with the OpenAI sign up URL */
+							__( 'Don\'t have an Google AI (Gemini API) key? <a title="Get an API key" href="%1$s">Get an API key</a> now.', 'classifai' ),
+							[
+								'a' => [
+									'href'  => [],
+									'title' => [],
+								],
+							]
+						),
+						esc_url( 'https://makersuite.google.com/app/apikey' )
 					),
-					esc_url( 'https://makersuite.google.com/app/apikey' )
-				),
 			]
 		);
 

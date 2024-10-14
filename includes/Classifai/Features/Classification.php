@@ -4,7 +4,8 @@ namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Watson\NLU;
-use Classifai\Providers\OpenAI\Embeddings;
+use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
+use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -39,8 +40,9 @@ class Classification extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			NLU::ID        => __( 'IBM Watson NLU', 'classifai' ),
-			Embeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
+			NLU::ID              => __( 'IBM Watson NLU', 'classifai' ),
+			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
+			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 		];
 	}
 
@@ -227,11 +229,27 @@ class Classification extends Feature {
 	public function save( int $post_id, array $results, bool $link = true ) {
 		$provider_instance = $this->get_feature_provider_instance();
 
+		/**
+		 * Filter results to be saved.
+		 *
+		 * @since 3.1.0
+		 * @hook classifai_feature_classification_pre_save_results
+		 *
+		 * @param {array} $supported Term results.
+		 * @param {int} $post_id Post ID.
+		 * @param {bool} $link Whether to link the terms or not.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Term results.
+		 */
+		$results = apply_filters( 'classifai_' . static::ID . '_pre_save_results', $results, $post_id, $link, $this );
+
 		switch ( $provider_instance::ID ) {
 			case NLU::ID:
 				$results = $provider_instance->link( $post_id, $results, $link );
 				break;
-			case Embeddings::ID:
+			case AzureEmbeddings::ID:
+			case OpenAIEmbeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results, $link );
 				break;
 		}
@@ -764,7 +782,7 @@ class Classification extends Feature {
 		);
 
 		// Embeddings only supports existing terms.
-		if ( isset( $settings['provider'] ) && Embeddings::ID === $settings['provider'] ) {
+		if ( isset( $settings['provider'] ) && ( OpenAIEmbeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] ) ) {
 			unset( $method_options['recommended_terms'] );
 			$settings['classification_method'] = 'existing_terms';
 		}
@@ -861,7 +879,7 @@ class Classification extends Feature {
 		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Embeddings only supports existing terms.
-		if ( isset( $new_settings['provider'] ) && Embeddings::ID === $new_settings['provider'] ) {
+		if ( isset( $new_settings['provider'] ) && ( OpenAIEmbeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] ) ) {
 			$new_settings['classification_method'] = 'existing_terms';
 		}
 

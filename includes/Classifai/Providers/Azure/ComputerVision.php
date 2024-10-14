@@ -53,7 +53,9 @@ class ComputerVision extends Provider {
 				'label_for'     => 'endpoint_url',
 				'input_type'    => 'text',
 				'default_value' => $settings['endpoint_url'],
-				'description'   => __( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
+				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
+					'' :
+					__( 'Supported protocol and hostname endpoints, e.g., <code>https://REGION.api.cognitive.microsoft.com</code> or <code>https://EXAMPLE.cognitiveservices.azure.com</code>. This can look different based on your setting choices in Azure.', 'classifai' ),
 				'class'         => 'large-text classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
@@ -204,6 +206,16 @@ class ComputerVision extends Provider {
 
 				if ( is_wp_error( $auth_check ) ) {
 					$new_settings[ static::ID ]['authenticated'] = false;
+
+					$error_message = $auth_check->get_error_message();
+
+					// Add an error message.
+					add_settings_error(
+						'api_key',
+						'classifai-auth',
+						$error_message,
+						'error'
+					);
 				} else {
 					$new_settings[ static::ID ]['authenticated'] = true;
 				}
@@ -610,6 +622,22 @@ class ComputerVision extends Provider {
 					'Ocp-Apim-Subscription-Key' => $settings['api_key'],
 					'Content-Type'              => 'application/json',
 				],
+				/**
+				 * Filters the timeout for the image scan request.
+				 *
+				 * Default: 60 seconds.
+				 *
+				 * @since 3.1.0
+				 * @hook classifai_ms_computer_vision_scan_image_timeout
+				 *
+				 * @param {int} $timeout Timeout in seconds.
+				 *
+				 * @return {int} Timeout in seconds.
+				 */
+				'timeout' => apply_filters(
+					'classifai_' . self::ID . '_scan_image_timeout',
+					60
+				),
 				'body'    => '{"url":"' . $image_url . '"}',
 			]
 		);
@@ -674,7 +702,7 @@ class ComputerVision extends Provider {
 					'Ocp-Apim-Subscription-Key' => $api_key,
 					'Content-Type'              => 'application/json',
 				],
-				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/classifai-theme/assets/img/header.png"}',
+				'body'    => '{"url":"https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/header.png"}',
 			]
 		);
 
