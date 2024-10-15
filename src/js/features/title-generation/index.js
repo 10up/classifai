@@ -65,7 +65,23 @@ const TitleGenerationPlugin = () => {
 			method: 'POST',
 			data: { id: postId, content: postContent },
 		} ).then(
-			( res ) => {
+			async ( res ) => {
+				// Support calling a function from the response for browser AI.
+				if ( typeof res === 'object' ) {
+					if ( res.hasOwnProperty( 'func' ) ) {
+						res =
+							'undefined' !== typeof window[ res.func ]
+								? await window[ res.func ](
+										res?.prompt,
+										res?.content
+								  )
+								: [];
+						res = [ res.trim() ];
+					} else {
+						res = [];
+					}
+				}
+
 				setData( res );
 				setError( false );
 				setIsLoading( false );

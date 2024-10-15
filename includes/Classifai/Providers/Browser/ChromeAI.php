@@ -49,7 +49,6 @@ class ChromeAI extends Provider {
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:
-			case TitleGeneration::ID:
 				add_settings_field(
 					static::ID . '_number_of_suggestions',
 					esc_html__( 'Number of suggestions', 'classifai' ),
@@ -88,7 +87,6 @@ class ChromeAI extends Provider {
 		 */
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:
-			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
 		}
@@ -107,7 +105,6 @@ class ChromeAI extends Provider {
 
 		switch ( $this->feature_instance::ID ) {
 			case ContentResizing::ID:
-			case TitleGeneration::ID:
 				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
 				break;
 		}
@@ -122,6 +119,7 @@ class ChromeAI extends Provider {
 	 */
 	public function output_excerpt_script() {
 		// TODO: ensure this only loads on single admin content.
+		// TODO: support classic editor.
 		?>
 		<script type="text/javascript">
 			async function classifaiChromeAITextGeneration( prompt = '', content = '' ) {
@@ -174,6 +172,9 @@ class ChromeAI extends Provider {
 		switch ( $route_to_call ) {
 			case 'excerpt':
 				$return = $this->generate_excerpt( $post_id, $args );
+				break;
+			case 'title':
+				$return = $this->generate_title( $post_id, $args );
 				break;
 		}
 
@@ -246,6 +247,73 @@ class ChromeAI extends Provider {
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 				'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ),
+				'func'    => 'classifaiChromeAITextGeneration',
+			],
+			$post_id
+		);
+
+		return $body;
+	}
+
+	/**
+	 * Generate a title using Chrome AI.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_title( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
+		}
+
+		$feature  = new TitleGeneration();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+			]
+		);
+
+		// These checks happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+
+		/**
+		 * Filter the prompt we will send to Chrome AI.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chrome_ai_title_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chrome_ai_title_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the request body before sending to Azure OpenAI.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chrome_ai_title_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chrome_ai_title_request_body',
+			[
+				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				'content' => $this->get_content( $post_id, 0, false, $args['content'] ),
 				'func'    => 'classifaiChromeAITextGeneration',
 			],
 			$post_id
