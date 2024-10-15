@@ -47,8 +47,23 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			method: 'POST',
 			data: { id: postId, content: postContent, title: postTitle },
 		} ).then(
-			( res ) => {
-				onUpdateExcerpt( res );
+			async ( res ) => {
+				// Support calling a function from the response for browser AI.
+				if ( typeof res === 'object' ) {
+					if ( res.hasOwnProperty( 'func' ) ) {
+						res =
+							'undefined' !== typeof window[ res.func ]
+								? await window[ res.func ](
+										res?.prompt,
+										res?.content
+								  )
+								: '';
+					} else {
+						res = '';
+					}
+				}
+
+				onUpdateExcerpt( res.trim() );
 				setError( false );
 				setIsLoading( false );
 			},
