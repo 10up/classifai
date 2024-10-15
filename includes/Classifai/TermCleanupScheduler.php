@@ -94,6 +94,18 @@ class TermCleanupScheduler {
 				);
 				$res  = $term_cleanup->get_similar_terms( $taxonomy, $thresold, $args );
 
+				/**
+				 * Fires when a batch of similar terms are calculated.
+				 *
+				 * @since x.x.x
+				 * @hook classifai_feature_term_cleanup_get_similar_terms
+				 *
+				 * @param {array|bool|WP_Error} $res      Response from the get_similar_terms method.
+				 * @param {string}              $taxonomy Taxonomy of terms we are comparing.
+				 * @param {array}               $args     Arguments used for getting similar terms.
+				 */
+				do_action( 'classifai_feature_term_cleanup_get_similar_terms', $res, $taxonomy, $args );
+
 				// Restore original user.
 				wp_set_current_user( $original_user_id );
 

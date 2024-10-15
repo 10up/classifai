@@ -607,6 +607,18 @@ class TermCleanup extends Feature {
 		foreach ( $terms as $term_id ) {
 			$result = $provider->generate_embeddings_for_term( $term_id, false, $this );
 
+			/**
+			 * Fires when an embedding is generated for a term.
+			 *
+			 * @since x.x.x
+			 * @hook classifai_feature_term_cleanup_generate_embedding
+			 *
+			 * @param {int}            $term_id ID of term.
+			 * @param {array|WP_Error} $result  Result of embedding generation.
+			 * @param {TermCleanup}    $this    Feature instance.
+			 */
+			do_action( 'classifai_feature_term_cleanup_generate_embedding', $term_id, $result, $this );
+
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
@@ -1096,6 +1108,18 @@ class TermCleanup extends Feature {
 			exit;
 		}
 
+		/**
+		 * Fires before terms are merged together.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_term_cleanup_pre_merge_term
+		 *
+		 * @param {int}    $from     Term ID being merged.
+		 * @param {int}    $to       Term ID we're merging into.
+		 * @param {string} $taxonomy Taxonomy of terms being merged.
+		 */
+		do_action( 'classifai_feature_term_cleanup_pre_merge_term', $from, $to, $taxonomy );
+
 		$ret = wp_delete_term(
 			$from,
 			$taxonomy,
@@ -1104,6 +1128,19 @@ class TermCleanup extends Feature {
 				'force_default' => true,
 			)
 		);
+
+		/**
+		 * Fires after terms are merged together.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_term_cleanup_post_merge_term
+		 *
+		 * @param {int}               $from     Term ID being merged.
+		 * @param {int}               $to       Term ID we're merging into.
+		 * @param {string}            $taxonomy Taxonomy of terms being merged.
+		 * @param {bool|int|WP_Error} $ret      Result of merge process.
+		 */
+		do_action( 'classifai_feature_term_cleanup_post_merge_term', $from, $to, $taxonomy, $ret );
 
 		if ( is_wp_error( $ret ) ) {
 			$this->add_notice(
@@ -1146,6 +1183,18 @@ class TermCleanup extends Feature {
 		];
 		$redirect     = add_query_arg( $args, $this->setting_page_url );
 
+		/**
+		 * Fires before a term is skipped.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_term_cleanup_pre_skip_term
+		 *
+		 * @param {int}    $term         Term ID being skipped.
+		 * @param {int}    $similar_term Term ID that matched.
+		 * @param {string} $taxonomy     Taxonomy of terms being merged.
+		 */
+		do_action( 'classifai_feature_term_cleanup_pre_skip_term', $term, $similar_term, $taxonomy );
+
 		// SKip/Ignore the similar term.
 		$term_meta = get_term_meta( $term, 'classifai_similar_terms', true );
 		if ( is_array( $term_meta ) && isset( $term_meta[ $similar_term ] ) ) {
@@ -1156,6 +1205,18 @@ class TermCleanup extends Feature {
 				update_term_meta( $term, 'classifai_similar_terms', $term_meta );
 			}
 		}
+
+		/**
+		 * Fires after a term is skipped.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_term_cleanup_post_skip_term
+		 *
+		 * @param {int}    $term         Term ID being skipped.
+		 * @param {int}    $similar_term Term ID that matched.
+		 * @param {string} $taxonomy     Taxonomy of terms being merged.
+		 */
+		do_action( 'classifai_feature_term_cleanup_post_skip_term', $term, $similar_term, $taxonomy );
 
 		$this->add_notice(
 			esc_html__( 'Skipped similar term.', 'classifai' ),
