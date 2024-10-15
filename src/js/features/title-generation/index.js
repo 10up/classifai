@@ -75,7 +75,7 @@ const TitleGenerationPlugin = () => {
 										res?.prompt,
 										res?.content
 								  )
-								: [];
+								: '';
 						res = [ res.trim() ];
 					} else {
 						res = [];

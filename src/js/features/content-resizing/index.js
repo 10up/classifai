@@ -250,6 +250,21 @@ const ContentResizingPlugin = () => {
 
 		if ( 200 === response.status ) {
 			__textArray = await response.json();
+
+			// Support calling a function from the response for browser AI.
+			if (
+				typeof __textArray === 'object' &&
+				__textArray.hasOwnProperty( 'func' )
+			) {
+				const res =
+					'undefined' !== typeof window[ __textArray.func ]
+						? await window[ __textArray.func ](
+								__textArray?.prompt,
+								__textArray?.content
+						  )
+						: '';
+				__textArray = [ res.trim() ];
+			}
 		} else {
 			dispatch( resizeContentStore ).setIsResizing( false );
 			dispatch( resizeContentStore ).setClientId( '' );

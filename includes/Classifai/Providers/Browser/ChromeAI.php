@@ -45,30 +45,6 @@ class ChromeAI extends Provider {
 	 * Render the provider fields.
 	 */
 	public function render_provider_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
-				add_settings_field(
-					static::ID . '_number_of_suggestions',
-					esc_html__( 'Number of suggestions', 'classifai' ),
-					[ $this->feature_instance, 'render_input' ],
-					$this->feature_instance->get_option_name(),
-					$this->feature_instance->get_option_name() . '_section',
-					[
-						'option_index'  => static::ID,
-						'label_for'     => 'number_of_suggestions',
-						'input_type'    => 'number',
-						'min'           => 1,
-						'step'          => 1,
-						'default_value' => $settings['number_of_suggestions'],
-						'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-						'description'   => esc_html__( 'Number of suggestions that will be generated in one request.', 'classifai' ),
-					]
-				);
-				break;
-		}
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -82,15 +58,6 @@ class ChromeAI extends Provider {
 			'authenticated' => true,
 		];
 
-		/**
-		 * Default values for feature specific settings.
-		 */
-		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
-				$common_settings['number_of_suggestions'] = 1;
-				break;
-		}
-
 		return $common_settings;
 	}
 
@@ -101,14 +68,6 @@ class ChromeAI extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings = $this->feature_instance->get_settings();
-
-		switch ( $this->feature_instance::ID ) {
-			case ContentResizing::ID:
-				$new_settings[ static::ID ]['number_of_suggestions'] = sanitize_number_of_responses_field( 'number_of_suggestions', $new_settings[ static::ID ], $settings[ static::ID ] );
-				break;
-		}
-
 		return $new_settings;
 	}
 
@@ -175,6 +134,9 @@ class ChromeAI extends Provider {
 				break;
 			case 'title':
 				$return = $this->generate_title( $post_id, $args );
+				break;
+			case 'resize_content':
+				$return = $this->resize_content( $post_id, $args );
 				break;
 		}
 
@@ -314,6 +276,65 @@ class ChromeAI extends Provider {
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 				'content' => $this->get_content( $post_id, 0, false, $args['content'] ),
+				'func'    => 'classifaiChromeAITextGeneration',
+			],
+			$post_id
+		);
+
+		return $body;
+	}
+
+	/**
+	 * Resizes content.
+	 *
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function resize_content( int $post_id, array $args = array() ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to resize content.', 'classifai' ) );
+		}
+
+		$feature  = new ContentResizing();
+		$settings = $feature->get_settings();
+
+		if ( 'shrink' === $args['resize_type'] ) {
+			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['expand_text_prompt'] ) ?? $feature->expand_prompt );
+		}
+
+		/**
+		 * Filter the resize prompt we will send to Chrome AI.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chrome_ai_' . $args['resize_type'] . '_content_prompt
+		 *
+		 * @param {string} $prompt Resize prompt we are sending. Gets added as a system prompt.
+		 * @param {int} $post_id ID of post.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chrome_ai_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
+
+		/**
+		 * Filter the resize request body before sending to Chrome AI.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chrome_ai_resize_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 * @param {int}   $post_id ID of post.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chrome_ai_resize_content_request_body',
+			[
+				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				'content' => esc_html( $args['content'] ),
 				'func'    => 'classifaiChromeAITextGeneration',
 			],
 			$post_id
