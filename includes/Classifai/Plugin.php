@@ -240,18 +240,20 @@ class Plugin {
 	 * Load the Action Scheduler library.
 	 */
 	public function load_action_scheduler() {
-		$feature                  = new \Classifai\Features\Classification();
+		$features                 = [ new \Classifai\Features\Classification(), new \Classifai\Features\TermCleanup() ];
 		$is_feature_being_enabled = false;
 
-		if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		}
+		foreach ( $features as $feature ) {
+			if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			}
 
-		if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
-			return;
-		}
+			if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
+				continue;
+			}
 
-		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+			require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+		}
 	}
 
 	/**

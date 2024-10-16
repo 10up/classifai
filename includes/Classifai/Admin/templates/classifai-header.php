@@ -8,7 +8,7 @@
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $active_page = isset( $_GET['tab'] ) ? sanitize_text_field( wp_unslash( $_GET['tab'] ) ) : 'classifai_settings';
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$is_setup_page = isset( $_GET['page'] ) && 'classifai_setup' === sanitize_text_field( wp_unslash( $_GET['page'] ) );
+$is_setup_page = isset( $_GET['page'] ) && ( 'classifai_setup' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) || 'classifai-term-cleanup' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) );
 ?>
 <header id="classifai-header">
 	<div class="classifai-header-layout">

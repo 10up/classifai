@@ -25,6 +25,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
+* Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
 * Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -56,7 +57,8 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
-* To utilize the Smart 404 feature, you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
 ## Pricing
 
@@ -560,6 +562,46 @@ docker run -p 9200:9200 -d --name elasticsearch \
 ```
 
 This will download, install and start Elasticsearch v7.9.0 to your local machine. You can then access Elasticsearch at `http://localhost:9200`, which is the same URL you can use to configure ElasticPress with. It is recommended that you change the `Content Items per Index Cycle` setting in ElasticPress to `20` to ensure indexing doesn't timeout. Also be aware of API rate limits on the OpenAI Embeddings API.
+
+## Set Up the Term Cleanup Feature
+
+### 1. Decide on Provider
+
+* This Feature is powered by either OpenAI or Azure OpenAI.
+* Once you've chosen a Provider, you'll need to create an account and get authentication details.
+  * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
+
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Term Cleanup
+
+* Select the proper Provider in the provider dropdown.
+* Enter your authentication details.
+* Configure any other settings as desired.
+
+### 3. ElasticPress configuration
+
+It is recommended to use ElasticPress with this Feature, especially if processing more than 500 terms, as performance will be significantly better. Once the Term Cleanup Feature is configured, you can then proceed to get ElasticPress set up to index the data.
+
+If on a standard WordPress installation:
+
+* Install and activate the [ElasticPress](https://github.com/10up/elasticpress) plugin.
+* Set your Elasticsearch URL in the ElasticPress settings (`ElasticPress > Settings`).
+* Enable the [term index](https://www.elasticpress.io/blog/2023/03/enabling-comments-and-terms-in-elasticpress-5-0/) feature.
+* Go to the `ElasticPress > Sync` settings page and trigger a sync, ensuring this is set to run a sync from scratch. This will send over the new schema to Elasticsearch and index all content, including creating vector embeddings for each term.
+
+If on a WordPress VIP hosted environment:
+
+* [Enable Enterprise Search](https://docs.wpvip.com/enterprise-search/enable/).
+* [Enable the term index](https://docs.wpvip.com/enterprise-search/enable-features/#h-terms). Example command: `vip @example-app.develop -- wp vip-search activate-feature terms`.
+* [Run the VIP-CLI `index` command](https://docs.wpvip.com/enterprise-search/index/). This sends the new schema to Elasticsearch and indexes all content, including creating vector embeddings for each term. Note you may need to use the `--setup` flag to ensure the schema is created correctly.
+
+### 4. Start the Term Cleanup Process
+
+Once configured, the plugin will add a new submenu under the Tools menu called Term Cleanup.
+
+* Go to the Term Cleanup page, click on your desired taxonomy, then click on the "Find similar" button.
+* This initializes a background process that will compare each term to find ones that are similar.
+* Once done, all the results will be displayed.
+* You can then skip or merge the potential duplicate terms from the settings page.
 
 ## Set Up Image Processing features (via Microsoft Azure)
 
