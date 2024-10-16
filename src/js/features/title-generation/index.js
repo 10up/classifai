@@ -68,17 +68,13 @@ const TitleGenerationPlugin = () => {
 		} ).then(
 			async ( res ) => {
 				// Support calling a function from the response for browser AI.
-				if ( typeof res === 'object' ) {
-					if ( res.hasOwnProperty( 'func' ) ) {
-						res = await browserAITextGeneration(
-							res.func,
-							res?.prompt,
-							res?.content
-						);
-						res = [ res.trim() ];
-					} else {
-						res = [];
-					}
+				if ( typeof res === 'object' && res.hasOwnProperty( 'func' ) ) {
+					res = await browserAITextGeneration(
+						res.func,
+						res?.prompt,
+						res?.content
+					);
+					res = [ res.trim() ];
 				}
 
 				setData( res );
