@@ -97,7 +97,8 @@ export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 		return result;
 	}
 
-	const supportsTextGeneration = await window.ai.languageModel.capabilities();
+	const supportsTextGeneration =
+		await window.ai.languageModel?.capabilities();
 
 	if (
 		supportsTextGeneration &&
