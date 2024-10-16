@@ -19,6 +19,7 @@ on:
 jobs:
   Validate:
     runs-on: ubuntu-latest
+
     steps:
       - uses: 10up/action-repo-automator@trunk
         with:

@@ -245,7 +245,7 @@ class Embeddings extends OpenAI {
 	 * @param Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( Feature $feature = null ): string {
+	protected function prep_api_url( ?Feature $feature = null ): string {
 		$settings   = $feature->get_settings( static::ID );
 		$endpoint   = $settings['endpoint_url'] ?? '';
 		$deployment = $settings['deployment'] ?? '';
@@ -824,7 +824,7 @@ class Embeddings extends OpenAI {
 	 * @param Feature $feature The feature instance.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_term( int $term_id, bool $force = false, Feature $feature = null ) {
+	public function generate_embeddings_for_term( int $term_id, bool $force = false, ?Feature $feature = null ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );

@@ -14,4 +14,12 @@
 	</rule>
 
 	<exclude-pattern>*/tests/*</exclude-pattern>
+
+	<config name="minimum_supported_wp_version" value="6.1"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<!-- Exclude the PHPCompatibilityWP ruleset -->
+	<rule ref="PHPCompatibilityWP">
+		<exclude name="PHPCompatibilityWP"/>
+	</rule>
 </ruleset>

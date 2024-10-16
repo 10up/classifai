@@ -1,0 +1,49 @@
+name: JS Linting
+
+on:
+  push:
+    branches:
+      - develop
+      - trunk
+    paths:
+      - '**.js'
+      - '**.json'
+  pull_request:
+    branches:
+      - develop
+    paths:
+      - '**.js'
+      - '**.json'
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup node and npm cache
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+
+    - name: Install Node dependencies
+      run: npm ci --omit=optional
+
+    - name: Get updated JS files
+      id: changed-files
+      uses: tj-actions/changed-files@v45
+      with:
+        files: |
+          **/*.js
+          **/*.json
+
+    - name: Run JS linting
+      run: |
+        if [[ "${{ steps.changed-files.outputs.any_changed }}" == 'true' && "${{ github.event_name }}" == "pull_request" ]]; then
+          npx wp-scripts lint-js ${{ steps.changed-files.outputs.all_changed_files }}
+        elif [[ "${{ github.event_name }}" == "push" ]]; then
+          npm run lint:js
+        fi
