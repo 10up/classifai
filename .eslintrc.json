@@ -21,7 +21,8 @@
 		"Headers": "readonly",
 		"requestAnimationFrame": "readonly",
 		"React": "readonly",
-		"Block": "readonly"
+		"Block": "readonly",
+		"DOMParser": "readonly"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
 	"ignorePatterns": ["*.json", "webpack.config.js"]

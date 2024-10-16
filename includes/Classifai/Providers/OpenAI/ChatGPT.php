@@ -7,6 +7,7 @@ namespace Classifai\Providers\OpenAI;
 
 use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
+use Classifai\Features\RewriteTone;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
@@ -181,7 +182,7 @@ class ChatGPT extends Provider {
 	 */
 	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required.', 'classifai' ) );
 		}
 
 		$route_to_call = strtolower( $route_to_call );
@@ -197,6 +198,9 @@ class ChatGPT extends Provider {
 				break;
 			case 'resize_content':
 				$return = $this->resize_content( $post_id, $args );
+				break;
+			case 'rewrite_tone':
+				$return = $this->rewrite_tone( $post_id, $args );
 				break;
 		}
 
@@ -410,6 +414,80 @@ class ChatGPT extends Provider {
 			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
 				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+			}
+		}
+
+		return $return;
+	}
+
+	/**
+	 * Rewrite the tone of the content.
+	 *
+	 * @param int   $post_id The Post Id we're processing
+	 * @param array $args Arguments passed in.
+	 */
+	public function rewrite_tone( int $post_id, array $args = [] ) {
+		$feature  = new RewriteTone();
+		$settings = $feature->get_settings();
+		$request  = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		$prompt   = esc_textarea( get_default_prompt( $settings['rewrite_tone_prompt'] ) ?? $feature->prompt );
+
+		/**
+		 * Filter the prompt we will send to ChatGPT.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_rewrite_tone_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chatgpt_rewrite_tone_prompt', $prompt, $post_id, $args );
+
+		$body = apply_filters(
+			'classifai_chatgpt_resize_content_request_body',
+			[
+				'model'    => $this->chatgpt_model,
+				'messages' => [
+					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
+						'role'    => 'system',
+						'content' => "Please return each modified content with its corresponding 'clientId'.",
+					],
+					[
+						'role'    => 'system',
+						'content' => 'The inline styles and HTML attributes should be preserved in the response.',
+					],
+					[
+						'role'    => 'system',
+						'content' => 'The HTML in the input should be preserved in the response.',
+					],
+					[
+						'role'    => 'user',
+						'content' => wp_json_encode( $args['content'] ),
+					],
+				],
+			],
+		);
+
+		$response = $request->post(
+			$this->chatgpt_url,
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		$return = [];
+
+		foreach ( $response['choices'] as $choice ) {
+			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+				$return[] = trim( $choice['message']['content'], ' "\'' );
 			}
 		}
 
