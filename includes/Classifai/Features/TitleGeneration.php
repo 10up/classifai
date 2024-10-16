@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Browser\ChromeAI;
 use Classifai\Services\LanguageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -45,6 +46,7 @@ class TitleGeneration extends Feature {
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
+			ChromeAI::ID  => __( 'Chrome AI', 'classifai' ),
 		];
 	}
 

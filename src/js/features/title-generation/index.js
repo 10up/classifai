@@ -20,6 +20,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal Dependencies.
  */
 import { DisableFeatureButton } from '../../components';
+import { browserAITextGeneration } from '../../helpers';
 
 const { classifaiChatGPTData } = window;
 
@@ -65,7 +66,17 @@ const TitleGenerationPlugin = () => {
 			method: 'POST',
 			data: { id: postId, content: postContent },
 		} ).then(
-			( res ) => {
+			async ( res ) => {
+				// Support calling a function from the response for browser AI.
+				if ( typeof res === 'object' && res.hasOwnProperty( 'func' ) ) {
+					res = await browserAITextGeneration(
+						res.func,
+						res?.prompt,
+						res?.content
+					);
+					res = [ res.trim() ];
+				}
+
 				setData( res );
 				setError( false );
 				setIsLoading( false );

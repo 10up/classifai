@@ -63,3 +63,57 @@ export const handleClick = ( {
 		}
 	);
 };
+
+/**
+ * Make a request to a browser AI to generate text.
+ *
+ * @param {string} provider Provider to use.
+ * @param {string} prompt   Prompt to send to the API.
+ * @param {string} content  Content to add in addition to the prompt.
+ */
+export const browserAITextGeneration = async (
+	provider = '',
+	prompt = '',
+	content = ''
+) => {
+	switch ( provider ) {
+		case 'chrome_ai':
+			return chromeAITextGeneration( prompt, content );
+		default:
+			return '';
+	}
+};
+
+/**
+ * Make a request to the Chrome AI API to generate text.
+ *
+ * @param {string} prompt  Prompt to send to the API.
+ * @param {string} content Content to add in addition to the prompt.
+ */
+export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
+	let result = '';
+
+	if ( ! window.ai ) {
+		return result;
+	}
+
+	const supportsTextGeneration =
+		await window.ai.languageModel?.capabilities();
+
+	if (
+		supportsTextGeneration &&
+		supportsTextGeneration.available === 'readily'
+	) {
+		const session = await window.ai.languageModel.create( {
+			initialPrompts: [
+				{
+					role: 'system',
+					content: prompt,
+				},
+			],
+		} );
+		result = await session.prompt( `"""${ content }"""` );
+	}
+
+	return result;
+};

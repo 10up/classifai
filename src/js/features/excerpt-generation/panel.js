@@ -12,6 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
  * Internal Dependencies.
  */
 import { DisableFeatureButton } from '../../components';
+import { browserAITextGeneration } from '../../helpers';
 
 /**
  * PostExcerpt component.
@@ -47,8 +48,21 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			method: 'POST',
 			data: { id: postId, content: postContent, title: postTitle },
 		} ).then(
-			( res ) => {
-				onUpdateExcerpt( res );
+			async ( res ) => {
+				// Support calling a function from the response for browser AI.
+				if ( typeof res === 'object' ) {
+					if ( res.hasOwnProperty( 'func' ) ) {
+						res = await browserAITextGeneration(
+							res.func,
+							res?.prompt,
+							res?.content
+						);
+					} else {
+						res = '';
+					}
+				}
+
+				onUpdateExcerpt( res.trim() );
 				setError( false );
 				setIsLoading( false );
 			},
