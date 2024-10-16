@@ -13,7 +13,6 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
-use function Classifai\sanitize_number_of_responses_field;
 
 class ChromeAI extends Provider {
 
@@ -31,14 +30,6 @@ class ChromeAI extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
-	}
-
-	/**
-	 * Register what we need for the plugin.
-	 */
-	public function register() {
-		// TODO: find a better hook for this.
-		add_action( 'wp_print_scripts', [ $this, 'output_excerpt_script' ] );
 	}
 
 	/**
@@ -69,46 +60,6 @@ class ChromeAI extends Provider {
 	 */
 	public function sanitize_settings( array $new_settings ): array {
 		return $new_settings;
-	}
-
-	/**
-	 * Output the excerpt script.
-	 *
-	 * This will make a request to the Chrome AI API to generate an excerpt.
-	 */
-	public function output_excerpt_script() {
-		// TODO: ensure this only loads on single admin content.
-		// TODO: support classic editor.
-		?>
-		<script type="text/javascript">
-			async function classifaiChromeAITextGeneration( prompt = '', content = '' ) {
-				let result = '';
-
-				if ( ! window.ai ) {
-					return result;
-				}
-
-				const supportsTextGeneration = await window.ai.languageModel.capabilities();
-
-				if (
-					supportsTextGeneration &&
-					supportsTextGeneration.available === 'readily'
-				) {
-					const session = await window.ai.languageModel.create( {
-						initialPrompts: [
-							{
-								role: 'system',
-								content: prompt,
-							},
-						]
-					} );
-					result = await session.prompt( `"""${content}"""` );
-				}
-
-				return result;
-			}
-		</script>
-		<?php
 	}
 
 	/**
@@ -209,7 +160,7 @@ class ChromeAI extends Provider {
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 				'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ),
-				'func'    => 'classifaiChromeAITextGeneration',
+				'func'    => static::ID,
 			],
 			$post_id
 		);
@@ -276,7 +227,7 @@ class ChromeAI extends Provider {
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 				'content' => $this->get_content( $post_id, 0, false, $args['content'] ),
-				'func'    => 'classifaiChromeAITextGeneration',
+				'func'    => static::ID,
 			],
 			$post_id
 		);
@@ -335,7 +286,7 @@ class ChromeAI extends Provider {
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
 				'content' => esc_html( $args['content'] ),
-				'func'    => 'classifaiChromeAITextGeneration',
+				'func'    => static::ID,
 			],
 			$post_id
 		);
