@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Admin\Notifications;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
@@ -13,6 +14,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use function Classifai\should_use_legacy_settings_panel;
 
 class Embeddings extends Provider {
 
@@ -241,32 +243,6 @@ class Embeddings extends Provider {
 			]
 		);
 
-		// If embeddings regeneration is being requested, run that.
-		if (
-			isset( $_GET['feature'] ) &&
-			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) )
-		) {
-			if ( isset( $_GET['embedding_regen_completed'] ) ) {
-				add_action(
-					'admin_notices',
-					function () {
-						?>
-						<div class="notice notice-success is-dismissible">
-							<p><?php esc_html_e( 'Embeddings have been regenerated.', 'classifai' ); ?></p>
-						</div>
-						<?php
-					}
-				);
-			}
-
-			if (
-				isset( $_GET['embeddings_nonce'] ) &&
-				wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
-			) {
-				$this->regenerate_embeddings();
-			}
-		}
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -310,7 +286,8 @@ class Embeddings extends Provider {
 
 		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) ); /** @phpstan-ignore return.void (function is called via ajax and does need to return data) */
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
 	}
 
 	/**
@@ -443,8 +420,19 @@ class Embeddings extends Provider {
 		// Hide the admin notice.
 		update_option( 'classifai_hide_embeddings_notice', true, false );
 
+		// Set a notice to let the user know the embeddings have been regenerated.
+		$notifications = new Notifications();
+		$notifications->set_notice(
+			esc_html__( 'Embeddings have been regenerated.', 'classifai' ),
+			'success',
+		);
+
 		// Redirect to the same page but remove the nonce so we don't run this again.
-		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification&embedding_regen_completed' ) );
+		$redirect_url = admin_url( 'tools.php?page=classifai#/language_processing/feature_classification' );
+		if ( should_use_legacy_settings_panel() ) {
+			$redirect_url = admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' );
+		}
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 
@@ -452,10 +440,8 @@ class Embeddings extends Provider {
 	 * Get the data to preview terms.
 	 *
 	 * @since 2.5.0
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -470,9 +456,27 @@ class Embeddings extends Provider {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
+	}
+
+	/**
+	 * Regenerate embeddings.
+	 */
+	public function classifai_regen_embeddings() {
+		if (
+			! isset( $_GET['embeddings_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
+		) {
+			wp_die( esc_html__( 'You do not have permission to perform this operation.', 'classifai' ) );
+		}
+
+		$this->regenerate_embeddings();
 	}
 
 	/**
@@ -683,7 +687,6 @@ class Embeddings extends Provider {
 		}
 
 		// Prepare the results.
-		$index   = 0;
 		$results = [];
 
 		foreach ( $sorted_results as $tax => $terms ) {
@@ -691,23 +694,22 @@ class Embeddings extends Provider {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Setup our taxonomy object.
-			$results[] = new \stdClass();
-
-			$results[ $index ]->{$tax_name} = [];
+			// Initialize the taxonomy bucket in results.
+			$results[ $tax ] = [
+				'label' => $tax_name,
+				'data'  => [],
+			];
 
 			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $tax ]['data'][] = [
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
 			}
-
-			++$index;
 		}
 
 		return $results;
@@ -1294,5 +1296,14 @@ class Embeddings extends Provider {
 			$settings,
 			$this->feature_instance
 		);
+	}
+
+	/**
+	 * Get embeddings generation status.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		return self::$scheduler_instance->is_embeddings_generation_in_progress();
 	}
 }

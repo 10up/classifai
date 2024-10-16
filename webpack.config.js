@@ -36,6 +36,7 @@ module.exports = {
 			'./src/js/features/image-generation/extend-image-block-generate-image.js'
 		],
 		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
+		settings: './src/js/settings/index.js',
 	},
 	module: {
 		rules: [

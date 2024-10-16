@@ -143,12 +143,11 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 	if ( imageProcessingFeatures.includes( feature ) ) {
 		tab = 'image_processing';
 	}
-	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
-	);
+	cy.visitFeatureSettings( `${ tab }/${ feature }` );
+	cy.get( '#classifai-logo' ).should( 'exist' );
 
 	// Disable access for all roles.
-	cy.get( '.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+	cy.get( '.settings-allowed-roles input[type="checkbox"]' ).uncheck( {
 		multiple: true,
 	} );
 
@@ -156,10 +155,10 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 	cy.disableFeatureForUsers();
 
 	roles.forEach( ( role ) => {
-		cy.get( `#classifai_${ feature }_roles_${ role }` ).check();
+		cy.get( `.settings-allowed-roles input#${ role }` ).check();
 	} );
-	cy.get( '#submit' ).click();
-	cy.get( '.notice' ).contains( 'Settings saved.' );
+	cy.wait( 100 );
+	cy.saveFeatureSettings();
 } );
 
 /**
@@ -173,20 +172,20 @@ Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
 	if ( imageProcessingFeatures.includes( feature ) ) {
 		tab = 'image_processing';
 	}
-	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
-	);
-	cy.get( '#status' ).check();
+	cy.visitFeatureSettings( `${ tab }/${ feature }` );
+	cy.wait( 100 );
+	cy.enableFeature();
 
 	roles.forEach( ( role ) => {
-		cy.get( `#classifai_${ feature }_roles_${ role }` ).uncheck();
+		cy.get( `.settings-allowed-roles input#${ role }` ).uncheck( {
+			force: true,
+		} );
 	} );
 
 	// Disable access for all users.
 	cy.disableFeatureForUsers();
 
-	cy.get( '#submit' ).click();
-	cy.get( '.notice' ).contains( 'Settings saved.' );
+	cy.saveFeatureSettings();
 } );
 
 /**
@@ -200,12 +199,10 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 	if ( imageProcessingFeatures.includes( feature ) ) {
 		tab = 'image_processing';
 	}
-	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
-	);
+	cy.visitFeatureSettings( `${ tab }/${ feature }` );
 
 	// Disable access for all roles.
-	cy.get( 'tr.allowed_roles_row input[type="checkbox"]' ).uncheck( {
+	cy.get( '.settings-allowed-roles input[type="checkbox"]' ).uncheck( {
 		multiple: true,
 	} );
 
@@ -214,13 +211,12 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 
 	users.forEach( ( user ) => {
 		cy.get(
-			`.allowed_users_row input.components-form-token-field__input`
+			`.classifai-settings__users input.components-form-token-field__input`
 		).type( user );
 
 		cy.get( '[aria-label="admin (admin)"]' ).click();
 	} );
-	cy.get( '#submit' ).click();
-	cy.get( '.notice' ).contains( 'Settings saved.' );
+	cy.saveFeatureSettings();
 } );
 
 /**
@@ -228,7 +224,7 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
  */
 Cypress.Commands.add( 'disableFeatureForUsers', () => {
 	// Disable access for all users.
-	cy.get( '.allowed_users_row' ).then( ( $body ) => {
+	cy.get( '.classifai-settings__users' ).then( ( $body ) => {
 		if (
 			$body.find( `.components-form-token-field__remove-token` ).length >
 			0
@@ -250,14 +246,12 @@ Cypress.Commands.add( 'enableFeatureOptOut', ( feature ) => {
 	if ( imageProcessingFeatures.includes( feature ) ) {
 		tab = 'image_processing';
 	}
-	cy.visit(
-		`/wp-admin/tools.php?page=classifai&tab=${ tab }&feature=${ feature }`
-	);
-	cy.get( `#classifai_${ feature }_roles_administrator` ).check();
-	cy.get( `#user_based_opt_out` ).check();
+	cy.visitFeatureSettings( `${ tab }/${ feature }` );
+	cy.wait( 100 );
+	cy.get( '.settings-allowed-roles input#administrator' ).check();
+	cy.get( '.classifai-settings__user-based-opt-out input' ).check();
 
-	cy.get( '#submit' ).click();
-	cy.get( '.notice' ).contains( 'Settings saved.' );
+	cy.saveFeatureSettings();
 } );
 
 /**
@@ -576,6 +570,47 @@ Cypress.Commands.add( 'enableClassicEditor', () => {
 } );
 
 /**
+ * Select feature Provider.
+ */
+Cypress.Commands.add( 'selectProvider', ( provider ) => {
+	cy.get( '#classifai-logo' ).should( 'exist' );
+	cy.get( '.classifai-loading-settings' ).should( 'not.exist' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '.classifai-settings-edit-provider' ).length > 0 ) {
+			cy.get( '.classifai-settings-edit-provider' ).click();
+		}
+	} );
+	cy.get( '.classifai-provider-select select' ).select( provider );
+} );
+
+/**
+ * Save the feature settings.
+ */
+Cypress.Commands.add( 'saveFeatureSettings', () => {
+	cy.intercept( 'POST', '/wp-json/classifai/v1/settings/*' ).as(
+		'saveSettings'
+	);
+	cy.get( '.classifai-settings-footer button.save-settings-button' ).click();
+	cy.wait( '@saveSettings' );
+} );
+
+/**
+ * Enable Feature.
+ */
+Cypress.Commands.add( 'enableFeature', () => {
+	cy.get( '.classifai-enable-feature-toggle input[type="checkbox"]' ).check();
+} );
+
+/**
+ * Disable Feature.
+ */
+Cypress.Commands.add( 'disableFeature', () => {
+	cy.get(
+		'.classifai-enable-feature-toggle input[type="checkbox"]'
+	).uncheck();
+} );
+
+/**
  * Activate the ElasticPress plugin.
  */
 Cypress.Commands.add( 'enableElasticPress', () => {
@@ -597,4 +632,14 @@ Cypress.Commands.add( 'disableElasticPress', () => {
 			cy.get( '#deactivate-elasticpress' ).click();
 		}
 	} );
+} );
+
+/**
+ * Visit the settings page for a feature.
+ */
+Cypress.Commands.add( 'visitFeatureSettings', ( featurePath ) => {
+	cy.visit( `/wp-admin/tools.php?page=classifai#/${ featurePath }` );
+	if ( ! featurePath.includes( 'feature_smart_404' ) ) {
+		cy.get( '.components-panel__header h2' ).should( 'exist' );
+	}
 } );
