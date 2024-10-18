@@ -468,6 +468,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visitFeatureSettings( 'language_processing&provider=watson_nlu' );
 
 		// Disable access for all roles.
+		cy.openUserPermissionsPanel();
 		cy.get( '.settings-allowed-roles input[type="checkbox"]' ).uncheck( {
 			multiple: true,
 		} );
@@ -517,6 +518,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		cy.visitFeatureSettings( 'language_processing&provider=watson_nlu' );
 
 		// Enable access for all roles.
+		cy.openUserPermissionsPanel();
 		cy.get( '.settings-allowed-roles input[type="checkbox"]' ).check( {
 			multiple: true,
 		} );
@@ -531,6 +533,7 @@ describe( '[Language processing] Classify content (IBM Watson - NLU) Tests', () 
 		// Opt Out from feature.
 		cy.visitFeatureSettings( 'language_processing&provider=watson_nlu' );
 		// Enable access for all roles.
+		cy.openUserPermissionsPanel();
 		cy.get( '.settings-allowed-roles input[type="checkbox"]' ).check( {
 			multiple: true,
 		} );
