@@ -214,12 +214,12 @@ export const useUserPermissionsPreferences = () => {
 	const isOpen = useSelect( ( select ) => {
 		const { get } = select( 'core/preferences' ) || {};
 		if ( ! get ) {
-			return true;
+			return false;
 		}
 
 		const open = get( 'classifai/settings', 'user-permissions-panel-open' );
 		if ( open === undefined ) {
-			return true;
+			return false;
 		}
 		return open;
 	}, [] );
