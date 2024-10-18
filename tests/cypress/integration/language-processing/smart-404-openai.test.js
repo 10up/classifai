@@ -37,7 +37,7 @@ describe( '[Language processing] Smart 404 - OpenAI Tests', () => {
 		cy.get( '#feature_smart_404_rescore' ).check();
 		cy.get( '#feature_smart_404_fallback' ).uncheck();
 		cy.get( '#feature_smart_404_score_function' ).select( 'dot_product' );
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 
 		// Save settings.
 		cy.saveFeatureSettings();

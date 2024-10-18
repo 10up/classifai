@@ -45,7 +45,7 @@ describe( '[Language processing] Smart 404 - Azure OpenAI Tests', () => {
 		cy.get( '#feature_smart_404_rescore' ).uncheck();
 		cy.get( '#feature_smart_404_fallback' ).check();
 		cy.get( '#feature_smart_404_score_function' ).select( 'l1_norm' );
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 
 		// Save settings.
 		cy.saveFeatureSettings();

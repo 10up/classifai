@@ -146,6 +146,8 @@ Cypress.Commands.add( 'enableFeatureForRoles', ( feature, roles ) => {
 	cy.visitFeatureSettings( `${ tab }/${ feature }` );
 	cy.get( '#classifai-logo' ).should( 'exist' );
 
+	cy.openUserPermissionsPanel();
+
 	// Disable access for all roles.
 	cy.get( '.settings-allowed-roles input[type="checkbox"]' ).uncheck( {
 		multiple: true,
@@ -175,6 +177,7 @@ Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
 	cy.visitFeatureSettings( `${ tab }/${ feature }` );
 	cy.wait( 100 );
 	cy.enableFeature();
+	cy.openUserPermissionsPanel();
 
 	roles.forEach( ( role ) => {
 		cy.get( `.settings-allowed-roles input#${ role }` ).uncheck( {
@@ -200,6 +203,7 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
 		tab = 'image_processing';
 	}
 	cy.visitFeatureSettings( `${ tab }/${ feature }` );
+	cy.openUserPermissionsPanel();
 
 	// Disable access for all roles.
 	cy.get( '.settings-allowed-roles input[type="checkbox"]' ).uncheck( {
@@ -223,6 +227,7 @@ Cypress.Commands.add( 'enableFeatureForUsers', ( feature, users ) => {
  * Disable user based access of all users for a feature.
  */
 Cypress.Commands.add( 'disableFeatureForUsers', () => {
+	cy.openUserPermissionsPanel();
 	// Disable access for all users.
 	cy.get( '.classifai-settings__users' ).then( ( $body ) => {
 		if (
@@ -248,6 +253,7 @@ Cypress.Commands.add( 'enableFeatureOptOut', ( feature ) => {
 	}
 	cy.visitFeatureSettings( `${ tab }/${ feature }` );
 	cy.wait( 100 );
+	cy.openUserPermissionsPanel();
 	cy.get( '.settings-allowed-roles input#administrator' ).check();
 	cy.get( '.classifai-settings__user-based-opt-out input' ).check();
 
@@ -642,4 +648,23 @@ Cypress.Commands.add( 'visitFeatureSettings', ( featurePath ) => {
 	if ( ! featurePath.includes( 'feature_smart_404' ) ) {
 		cy.get( '.components-panel__header h2' ).should( 'exist' );
 	}
+} );
+
+Cypress.Commands.add( 'openUserPermissionsPanel', () => {
+	cy.get(
+		'.components-panel__body.classifai-settings__user-permissions button'
+	).then( ( $panelButton ) => {
+		// Find the panel container.
+		const $panel = $panelButton.parents( '.components-panel__body' );
+
+		// Open panel.
+		if ( ! $panel.hasClass( 'is-opened' ) ) {
+			cy.wrap( $panelButton ).click();
+		}
+	} );
+} );
+
+Cypress.Commands.add( 'allowFeatureToAdmin', () => {
+	cy.openUserPermissionsPanel();
+	cy.get( '.settings-allowed-roles input#administrator' ).check();
 } );

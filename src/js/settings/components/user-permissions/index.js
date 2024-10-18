@@ -39,6 +39,7 @@ export const UserPermissions = () => {
 			onToggle={ ( opened ) => {
 				setIsOpen( opened );
 			} }
+			className="classifai-settings__user-permissions"
 		>
 			<AllowedRoles />
 

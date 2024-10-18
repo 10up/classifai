@@ -25,7 +25,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.get( 'input#azure_openai_deployment' ).clear().type( 'test' );
 
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.get( '#azure_openai_number_of_suggestions' ).clear().type( 1 );
 		cy.saveFeatureSettings();
 	} );

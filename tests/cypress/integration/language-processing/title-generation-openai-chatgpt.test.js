@@ -19,7 +19,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		cy.selectProvider( 'openai_chatgpt' );
 		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.get( '#openai_chatgpt_number_of_suggestions' ).type( 1 );
 		cy.saveFeatureSettings();
 	} );

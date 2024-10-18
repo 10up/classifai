@@ -21,7 +21,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.get( 'select#openai_dalle_image_size' ).select( '1024x1792' );
 		cy.get( 'select#openai_dalle_style' ).select( 'natural' );
 
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 
 		cy.saveFeatureSettings();
 	} );
@@ -113,7 +113,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.visitFeatureSettings( 'image_processing/feature_image_generation' );
 
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 
 		cy.visit( '/wp-admin/upload.php' );

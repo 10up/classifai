@@ -29,7 +29,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 			.type( 'password' );
 
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.get( '#excerpt_length' ).clear().type( 35 );
 		cy.saveFeatureSettings();
 	} );

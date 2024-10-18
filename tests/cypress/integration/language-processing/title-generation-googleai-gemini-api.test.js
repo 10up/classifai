@@ -21,7 +21,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 			.clear()
 			.type( 'password' );
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 	} );
 

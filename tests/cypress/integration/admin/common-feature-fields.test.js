@@ -27,6 +27,7 @@ describe( 'Common Feature Fields', () => {
 			cy.get( '.classifai-enable-feature-toggle input' ).should(
 				'exist'
 			);
+			cy.openUserPermissionsPanel();
 			cy.get(
 				'.classifai-settings__user-based-opt-out input[type="checkbox"]'
 			).should( 'exist' );

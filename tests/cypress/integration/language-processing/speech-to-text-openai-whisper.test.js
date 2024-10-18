@@ -24,7 +24,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
 
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 	} );
 

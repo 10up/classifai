@@ -23,7 +23,7 @@ describe( 'Image processing Tests', () => {
 				.clear()
 				.type( 'http://e2e-test-image-processing.test' );
 			cy.get( '#ms_computer_vision_api_key' ).clear().type( 'password' );
-			cy.get( '.settings-allowed-roles input#administrator' ).check();
+			cy.allowFeatureToAdmin();
 			cy.get( '.classifai-settings__user-based-opt-out input' ).uncheck();
 			// Disable access for all users.
 			cy.disableFeatureForUsers();

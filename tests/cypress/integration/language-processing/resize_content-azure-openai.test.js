@@ -26,7 +26,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		);
 
 		cy.enableFeature();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 
 		cy.createPost( {

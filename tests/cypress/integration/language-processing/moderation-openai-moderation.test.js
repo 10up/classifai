@@ -18,7 +18,7 @@ describe( '[Language processing] Moderation Tests', () => {
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
 		cy.enableFeature();
 		cy.get( '.settings-moderation-content-types input#comments' ).check();
-		cy.get( '.settings-allowed-roles input#administrator' ).check();
+		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
 	} );
 
