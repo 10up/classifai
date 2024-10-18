@@ -4,3 +4,4 @@ tests/*
 vendor/*
 bin/*
 hookdocs/*
+docs/*

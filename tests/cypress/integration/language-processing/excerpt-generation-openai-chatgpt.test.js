@@ -3,14 +3,13 @@ import { getChatGPTData } from '../../plugins/functions';
 describe( '[Language processing] Excerpt Generation Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_post_types_post'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.enableFeature();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -20,19 +19,17 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	} );
 
 	it( 'Can save OpenAI ChatGPT "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.selectProvider( 'openai_chatgpt' );
+		cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
 
-		cy.get( '#provider' ).select( 'openai_chatgpt' );
-		cy.get( '#api_key' ).clear().type( 'password' );
-
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_excerpt_generation_roles_administrator'
-		).check();
-		cy.get( '#length' ).clear().type( 35 );
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.allowFeatureToAdmin();
+		cy.get( '#excerpt_length' ).clear().type( 35 );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see the generate excerpt button in a post', () => {
@@ -84,11 +81,11 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	it( 'Can see the generate excerpt button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		const data = getChatGPTData();
 
@@ -115,85 +112,55 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 	it( 'Can set multiple custom excerpt generation prompts, select one as the default and delete one.', () => {
 		cy.disableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
 
 		// Add three custom prompts.
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset' )
+		cy.get( 'button.components-button.action__add_prompt' )
 			.click()
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
-		)
-			.parents( 'td' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 4 );
+			'.classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 4 );
 
 		// Set the data for each prompt.
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][1][title]"]'
-		)
+		cy.get( '#classifai-prompt-setting-1 .classifai-prompt-title input' )
 			.clear()
 			.type( 'First custom prompt' );
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][1][prompt]"]'
-		)
+		cy.get( '#classifai-prompt-setting-1 .classifai-prompt-text textarea' )
 			.clear()
 			.type( 'This is our first custom excerpt prompt' );
 
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][title]"]'
-		)
+		cy.get( '#classifai-prompt-setting-2 .classifai-prompt-title input' )
 			.clear()
 			.type( 'Second custom prompt' );
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][prompt]"]'
-		)
+		cy.get( '#classifai-prompt-setting-2 .classifai-prompt-text textarea' )
 			.clear()
 			.type( 'This prompt should be deleted' );
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][title]"]'
-		)
+		cy.get( '#classifai-prompt-setting-3 .classifai-prompt-title input' )
 			.clear()
 			.type( 'Third custom prompt' );
-		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][prompt]"]'
-		)
+		cy.get( '#classifai-prompt-setting-3 .classifai-prompt-text textarea' )
 			.clear()
 			.type( 'This is a custom excerpt prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][3][default]"]'
-		)
-			.parent()
-			.find( 'a.action__set_default' )
-			.click( { force: true } );
+			'#classifai-prompt-setting-3 .actions-rows button.action__set_default'
+		).click( { force: true } );
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][2][default]"]'
-		)
-			.parent()
-			.find( 'a.action__remove_prompt' )
-			.click( { force: true } );
-		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
-			.find( '.button-primary' )
-			.click();
+			'#classifai-prompt-setting-2 .actions-rows button.action__remove_prompt'
+		).click( { force: true } );
+		cy.get( 'div.components-confirm-dialog button.is-primary' ).click();
 		cy.get(
-			'[name="classifai_feature_excerpt_generation[generate_excerpt_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 3 );
+			'.classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 3 );
 
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 
 		const data = getChatGPTData( 'excerpt' );
 
@@ -239,32 +206,32 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 
 	it( 'Can enable/disable excerpt generation feature', () => {
 		// Disable features.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyExcerptGenerationEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyExcerptGenerationEnabled( true );
 	} );
 
 	it( 'Can enable/disable excerpt generation feature by role', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_excerpt_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_excerpt_generation', [

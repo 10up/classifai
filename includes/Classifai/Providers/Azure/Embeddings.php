@@ -186,7 +186,7 @@ class Embeddings extends OpenAI {
 
 		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) ); /** @phpstan-ignore return.void (function is used in an ajax context and does need to return data) */
+		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
 	/**
@@ -340,10 +340,8 @@ class Embeddings extends OpenAI {
 
 	/**
 	 * Get the data to preview terms.
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -358,9 +356,13 @@ class Embeddings extends OpenAI {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
@@ -571,7 +573,6 @@ class Embeddings extends OpenAI {
 		}
 
 		// Prepare the results.
-		$index   = 0;
 		$results = [];
 
 		foreach ( $sorted_results as $tax => $terms ) {
@@ -579,23 +580,22 @@ class Embeddings extends OpenAI {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Setup our taxonomy object.
-			$results[] = new \stdClass();
-
-			$results[ $index ]->{$tax_name} = [];
+			// Initialize the taxonomy bucket in results.
+			$results[ $tax ] = [
+				'label' => $tax_name,
+				'data'  => [],
+			];
 
 			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $tax ]['data'][] = [
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
 			}
-
-			++$index;
 		}
 
 		return $results;
@@ -1187,5 +1187,14 @@ class Embeddings extends OpenAI {
 			$settings,
 			$this->feature_instance
 		);
+	}
+
+	/**
+	 * Get embeddings generation status.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		return self::$scheduler_instance->is_embeddings_generation_in_progress();
 	}
 }

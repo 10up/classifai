@@ -373,7 +373,7 @@ class DescriptiveTextGenerator extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'descriptive_text_fields' => [
-				'alt'         => 0,
+				'alt'         => 'alt',
 				'caption'     => 0,
 				'description' => 0,
 			],

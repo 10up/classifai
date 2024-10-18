@@ -76,7 +76,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 				'users' => [],
 				'user_based_opt_out' => 'no',
 				'descriptive_text_fields' => [
-					'alt' => 0,
+					'alt' => 'alt',
 					'caption' => 0,
 					'description' => 0,
 				],

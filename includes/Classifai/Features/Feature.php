@@ -5,6 +5,7 @@ namespace Classifai\Features;
 use WP_REST_Request;
 use WP_Error;
 use function Classifai\find_provider_class;
+use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\get_asset_info;
 
 abstract class Feature {
@@ -62,8 +63,12 @@ abstract class Feature {
 	 */
 	public function setup() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
-		add_action( 'admin_init', [ $this, 'register_setting' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		add_action( 'rest_api_init', [ $this, 'setup_roles' ] );
+		if ( should_use_legacy_settings_panel() ) {
+			add_action( 'admin_init', [ $this, 'register_setting' ] );
+			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		}
+
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
 
 		if ( $this->is_feature_enabled() ) {
@@ -83,6 +88,10 @@ abstract class Feature {
 	 * Assigns user roles to the $roles array.
 	 */
 	public function setup_roles() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
+
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
@@ -102,6 +111,15 @@ abstract class Feature {
 		 * @return {array} Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $this->roles, $default_settings );
+	}
+
+	/**
+	 * Returns the roles for the feature.
+	 *
+	 * @return array Array of roles.
+	 */
+	public function get_roles(): array {
+		return $this->roles;
 	}
 
 	/**
@@ -435,10 +453,9 @@ abstract class Feature {
 	/**
 	 * Returns the providers supported by the feature.
 	 *
-	 * @internal
 	 * @return array
 	 */
-	protected function get_providers(): array {
+	public function get_providers(): array {
 		/**
 		 * Filter the feature providers.
 		 *
@@ -460,6 +477,22 @@ abstract class Feature {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Updates the settings for the feature.
+	 *
+	 * @param array $new_settings New settings to update.
+	 */
+	public function update_settings( array $new_settings ) {
+		$settings = $this->get_settings();
+		if ( empty( $new_settings ) ) {
+			return;
+		}
+
+		// Update the settings with the new values.
+		$new_settings = array_merge( $settings, $new_settings );
+		update_option( $this->get_option_name(), $new_settings );
 	}
 
 	/**

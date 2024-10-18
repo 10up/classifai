@@ -262,9 +262,9 @@ import './previewer.scss';
 						return;
 					}
 
-					const htmlData = buildPreviewUI( data.data );
+					const fragment = buildPreviewUIForEmbeddings( data.data );
 					previewWrapper.style.display = 'block';
-					previewWrapper.innerHTML = htmlData;
+					previewWrapper.replaceChildren( fragment );
 
 					// remove all .tax-row--hide
 					document
@@ -282,6 +282,68 @@ import './previewer.scss';
 		}
 	};
 	previewEmbeddings();
+
+	function buildPreviewUIForEmbeddings( filteredItems ) {
+		// Create a document fragment to hold the generated DOM elements.
+		const fragment = document.createDocumentFragment();
+
+		// Iterate over the categories in filteredItems.
+		Object.keys( filteredItems ).forEach( ( categoryKey ) => {
+			const category = filteredItems[ categoryKey ];
+
+			// Create the category row container.
+			const taxRowDiv = document.createElement( 'div' );
+			taxRowDiv.className = `tax-row tax-row--${ categoryKey } ${
+				featureStatuses[ `${ categoryKey }Status` ]
+					? ''
+					: 'tax-row--hide'
+			}`;
+
+			// Create and append the category label div.
+			const taxTypeDiv = document.createElement( 'div' );
+			taxTypeDiv.className = `tax-type tax-type--${ categoryKey }`;
+			taxTypeDiv.textContent = category.label;
+			taxRowDiv.appendChild( taxTypeDiv );
+
+			// Iterate over the items in the category.
+			category.data.forEach( ( item ) => {
+				let rating = item?.score || 0;
+				let name = item?.label || '';
+
+				const width = 300 + 300 * rating;
+				rating = ( rating * 100 ).toFixed( 2 );
+				name = name
+					.split( '/' )
+					.filter( ( i ) => '' !== i )
+					.join( ', ' );
+
+				// Create the item cell.
+				const taxCellDiv = document.createElement( 'div' );
+				taxCellDiv.className = 'tax-cell';
+				taxCellDiv.style.width = `${ width }px`;
+
+				// Create and append the rating span.
+				const taxScoreSpan = document.createElement( 'span' );
+				taxScoreSpan.className = 'tax-score';
+				taxScoreSpan.textContent = `${ rating }%`;
+				taxCellDiv.appendChild( taxScoreSpan );
+
+				// Create and append the label span.
+				const taxLabelSpan = document.createElement( 'span' );
+				taxLabelSpan.className = 'tax-label';
+				taxLabelSpan.textContent = name;
+				taxCellDiv.appendChild( taxLabelSpan );
+
+				// Append the cell to the category row.
+				taxRowDiv.appendChild( taxCellDiv );
+			} );
+
+			// Append the category row to the fragment.
+			fragment.appendChild( taxRowDiv );
+		} );
+
+		return fragment;
+	}
 
 	/**
 	 * Builds user readable HTML data from the response by NLU.

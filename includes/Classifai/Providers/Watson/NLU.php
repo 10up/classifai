@@ -209,7 +209,7 @@ class NLU extends Provider {
 		$common_settings = [
 			'endpoint_url' => '',
 			'apikey'       => '',
-			'username'     => '',
+			'username'     => 'apikey',
 			'password'     => '',
 		];
 

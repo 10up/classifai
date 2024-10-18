@@ -336,7 +336,9 @@ class ExcerptGeneration extends Feature {
 					'original' => 1,
 				],
 			],
-			'post_types'              => [],
+			'post_types'              => [
+				'post' => 'post',
+			],
 			'length'                  => absint( apply_filters( 'excerpt_length', 55 ) ),
 			'provider'                => ChatGPT::ID,
 		];

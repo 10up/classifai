@@ -46,19 +46,6 @@ class MyProvider extends Provider {
     }
 
     /**
-     * This method will be called by the feature to render the fields
-     * required by the provider, such as API key, endpoint URL, etc.
-     *
-     * This should also register settings that are required for the feature
-     * to work.
-     */
-    public function render_provider_fields() {
-        $settings = $this->feature_instance->get_settings( static::ID );
-
-        $this->add_api_key_field();
-    }
-
-    /**
      * Returns the default settings for this provider.
      *
      * @return array
@@ -185,6 +172,87 @@ add_filter(
 );
 ```
 
+5. **Add required provider fields to the settings**
+ClassifAI uses a React-based settings panel. To add the necessary provider fields, include the following code in a JavaScript file, and save it within your plugin's directory.
+
+_**Note:** The provided code snippet uses modern JavaScript (ESNext and JSX), which requires a build step to compile it into a browser-compatible format. We recommend using the [@wordpress/scripts](https://www.npmjs.com/package/@wordpress/scripts) package to manage the build process. For a step-by-step guide on how to install and use this package, check out this tutorial: [Get started with wp-scripts](https://developer.wordpress.org/block-editor/getting-started/devenv/get-started-with-wp-scripts/)._
+
+```js
+/**
+ * WordPress dependencies
+ */
+import { registerPlugin } from '@wordpress/plugins';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { Fill, TextControl } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+const MyProviderSettings = () => {
+	const providerName = 'my_provider';
+	const featureSettings = useSelect( ( select ) =>
+		select( 'classifai-settings' ).getFeatureSettings()
+	);
+	const { setFeatureSettings } = useDispatch( 'classifai-settings' );
+	const providerSettings = featureSettings[ providerName ] || {};
+	const setProviderSettings = ( data ) =>
+		setFeatureSettings( {
+			[ providerName ]: {
+				...providerSettings,
+				...data,
+			},
+		} );
+
+	return (
+		<Fill name="ClassifAIProviderSettings">
+            <div className="settings-row">
+                <div className="settings-label">{ __( 'API Key', 'classifai' ) }</div>
+                <div className="settings-control">
+                    <TextControl
+                        value={ providerSettings.api_key || '' }
+                        onChange={ ( value ) =>
+                            setProviderSettings( { api_key: value } )
+                        }
+                    />
+                    <div className="settings-description">
+                    { __( 'Enter the provider API key.', 'classifai' ) }
+                    </div>
+                </div>
+            </div>
+		</Fill>
+	);
+};
+
+registerPlugin( 'classifai-provider-my-provider', {
+	scope: 'my-provider', // Provider settings scope. replace "_" with "-" in your provider ID.
+	render: MyProviderSettings,
+} );
+```
+
+6. **Enqueue Javascript assets**
+To display the provider fields added in the previous step within the settings panel, we need to enqueue the corresponding JavaScript file. For guidance on enqueuing files in the admin area, refer to the "[Enqueue Script](https://developer.wordpress.org/plugins/javascript/enqueuing/#enqueue-script)" guide, but here’s a typical implementation.
+```php
+/**
+ * Enqueue the admin scripts.
+ *
+ * @param string $hook_suffix The current admin page.
+ */
+function my_provider_enqueue_admin_assets( $hook_suffix ) {
+    // Enqueue assets only on the ClassifAI settings page.
+    if ( 'tools_page_classifai' !== $hook_suffix ) {
+        return;
+    }
+
+    $asset_file = include( plugin_dir_path( __FILE__ ) . 'build/index.asset.php');
+
+    wp_enqueue_script(
+        'my-provider-scripts',
+        plugins_url( 'build/index.js', __FILE__ ),
+        $asset_file['dependencies'],
+        $asset_file['version']
+    );
+}
+add_action( 'admin_enqueue_scripts', 'my_provider_enqueue_admin_assets' );
+```
+
 ## Add a new Feature
 
 Starting in ClassifAI 3.0.0, it is easier to add your own Features. Most of the implementation details are left to you but there are a few key steps that need to be followed:
@@ -297,27 +365,6 @@ class MyFeature extends Feature {
     }
 
     /**
-     * Add any needed custom fields.
-     */
-    public function add_custom_settings_fields() {
-        $settings = $this->get_settings();
-
-        add_settings_field(
-            'custom_setting',
-            esc_html__( 'Custom setting', 'classifai' ),
-            [ $this, 'render_input' ],
-            $this->get_option_name(),
-            $this->get_option_name() . '_section',
-            [
-                'label_for'     => 'custom_setting',
-                'placeholder'   => esc_html__( 'Custom setting', 'text-domain' ),
-                'default_value' => $settings['custom_setting'],
-                'description'   => esc_html__( 'Add a custom setting.', 'text-domain' ),
-            ]
-        );
-    }
-
-    /**
      * Returns the default settings for the feature.
      *
      * @return array
@@ -371,4 +418,88 @@ add_filter(
         return $features;
     }
 );
+```
+
+4. **Add additional featured fields to the settings**
+ClassifAI uses a React-based settings panel. To add the necessary additional feature fields, include the following code in a JavaScript file, and save it within your plugin's directory.
+
+_**Note:** The provided code snippet uses modern JavaScript (ESNext and JSX), which requires a build step to compile it into a browser-compatible format. We recommend using the [@wordpress/scripts](https://www.npmjs.com/package/@wordpress/scripts) package to manage the build process. For a step-by-step guide on how to install and use this package, check out this tutorial: [Get started with wp-scripts](https://developer.wordpress.org/block-editor/getting-started/devenv/get-started-with-wp-scripts/)._
+
+```js
+/**
+ * WordPress dependencies
+ */
+import { TextControl, Fill } from '@wordpress/components';
+import { registerPlugin } from '@wordpress/plugins';
+import { __ } from '@wordpress/i18n';
+import { useSelect, useDispatch } from '@wordpress/data';
+
+const MyFeatureSettings = () => {
+	const featureSettings = useSelect( ( select ) =>
+		select( 'classifai-settings' ).getFeatureSettings()
+	);
+	const { setFeatureSettings } = useDispatch( 'classifai-settings' );
+	return (
+		<>
+			<Fill name="ClassifAIFeatureSettings">
+                <div className="settings-row">
+                    <div className="settings-label">{ __( 'Custom setting', 'classifai' ) }</div>
+                    <div className="settings-control">
+                        <TextControl
+                            value={ featureSettings.custom_setting || '' }
+                            onChange={ ( value ) =>
+                                setFeatureSettings( { custom_setting: value } )
+                            }
+                        />
+                        <div className="settings-description">
+                        { __( 'Choose what type of content to moderate.', 'classifai' ) }
+                        </div>
+                    </div>
+                </div>
+			</Fill>
+		</>
+	);
+};
+
+registerPlugin( 'classifai-feature-custom', {
+	scope: 'feature-custom', // Feature settings scope. replace "_" with "-" in your feature ID.
+	render: MyFeatureSettings,
+} );
+```
+
+5. **Enqueue Javascript assets**
+To display the addition feature fields added in the previous step within the settings panel, we need to enqueue the corresponding JavaScript file. For guidance on enqueuing files in the admin area, refer to the "[Enqueue Script](https://developer.wordpress.org/plugins/javascript/enqueuing/#enqueue-script)" guide, but here’s a typical implementation.
+```php
+/**
+ * Enqueue the admin scripts.
+ *
+ * @param string $hook_suffix The current admin page.
+ */
+function my_feature_enqueue_admin_assets( $hook_suffix ) {
+    // Enqueue assets only on the ClassifAI settings page.
+    if ( 'tools_page_classifai' !== $hook_suffix ) {
+        return;
+    }
+
+    $asset_file = include( plugin_dir_path( __FILE__ ) . 'build/index.asset.php');
+
+    wp_enqueue_script(
+        'my-feature-scripts',
+        plugins_url( 'build/index.js', __FILE__ ),
+        $asset_file['dependencies'],
+        $asset_file['version']
+    );
+}
+add_action( 'admin_enqueue_scripts', 'my_feature_enqueue_admin_assets' );
+```
+
+## Use Legacy settings
+ClassifAI 3.2.0 introduces React-based settings and deprecates the PHP-based settings pages. If you have customizations in the legacy settings and would like to continue using the legacy settings panel, you can enable this by using the `classifai_use_legacy_settings_panel` filter hook.
+
+However, please note that legacy settings will be completely removed in future releases. We recommend updating your customizations to use the React-based settings panel. If you encounter any issues, feel free to report them on our [GitHub repository](https://github.com/10up/classifai/).
+
+Add the following snippet to your theme's `functions.php` file or a custom plugin.
+
+```php
+add_filter( 'classifai_use_legacy_settings_panel', '__return_true' );
 ```

@@ -58,9 +58,15 @@ class Plugin {
 		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		// Initialize the ClassifAI Onboarding.
-		$onboarding = new Admin\Onboarding();
-		$onboarding->init();
+		if ( ! should_use_legacy_settings_panel() ) {
+			// Initialize the ClassifAI Settings.
+			$settings = new Admin\Settings();
+			$settings->init();
+		} else {
+			// Initialize the ClassifAI Onboarding. This is only used for the legacy settings panel.
+			$onboarding = new Admin\Onboarding();
+			$onboarding->init();
+		}
 
 		// Initialize the ClassifAI User Profile.
 		$user_profile = new Admin\UserProfile();
@@ -188,6 +194,7 @@ class Plugin {
 			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
 			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
+			'plugin_url'               => CLASSIFAI_PLUGIN_URL,
 		];
 
 		wp_localize_script(
@@ -219,11 +226,16 @@ class Plugin {
 			return $links;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/classifai_setup' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		return array_merge(
 			array(
 				'setup'    => sprintf(
 					'<a href="%s"> %s </a>',
-					esc_url( admin_url( 'admin.php?page=classifai_setup' ) ),
+					esc_url( $setup_url ),
 					esc_html__( 'Set up', 'classifai' )
 				),
 				'settings' => sprintf(

@@ -12,37 +12,22 @@ describe( '[Language processing] Title Generation Tests', () => {
 	} );
 
 	it( 'Can save Azure OpenAI "Language Processing" title settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
+		cy.get( '#classifai-logo' ).should( 'exist' );
 
-		cy.get( '#provider' ).select( 'azure_openai' );
-		cy.get(
-			'input[name="classifai_feature_title_generation[azure_openai][endpoint_url]"]'
-		)
+		cy.selectProvider( 'azure_openai' );
+		cy.get( 'input#azure_openai_endpoint_url' )
 			.clear()
 			.type( 'https://e2e-test-azure-openai.test/' );
-		cy.get(
-			'input[name="classifai_feature_title_generation[azure_openai][api_key]"]'
-		)
-			.clear()
-			.type( 'password' );
-		cy.get(
-			'input[name="classifai_feature_title_generation[azure_openai][deployment]"]'
-		)
-			.clear()
-			.type( 'test' );
+		cy.get( 'input#azure_openai_api_key' ).clear().type( 'password' );
+		cy.get( 'input#azure_openai_deployment' ).clear().type( 'test' );
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_title_generation_roles_administrator'
-		).check();
-		cy.get(
-			'input[name="classifai_feature_title_generation[azure_openai][number_of_suggestions]"]'
-		)
-			.clear()
-			.type( 1 );
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.allowFeatureToAdmin();
+		cy.get( '#azure_openai_number_of_suggestions' ).clear().type( 1 );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see the generate titles button in a post', () => {
@@ -130,11 +115,11 @@ describe( '[Language processing] Title Generation Tests', () => {
 	it( 'Can see the generate titles button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_title_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_title_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		const data = getChatGPTData();
 

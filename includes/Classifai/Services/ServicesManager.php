@@ -5,6 +5,8 @@
 
 namespace Classifai\Services;
 
+use function Classifai\should_use_legacy_settings_panel;
+
 class ServicesManager {
 
 	/**
@@ -52,8 +54,10 @@ class ServicesManager {
 			}
 		}
 
-		// Do the settings pages.
-		$this->do_settings();
+		if ( should_use_legacy_settings_panel() ) {
+			// Do the settings pages.
+			$this->do_settings();
+		}
 
 		// Register the functionality
 		$this->register_services();

@@ -4,6 +4,7 @@ namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use function Classifai\should_use_legacy_settings_panel;
 
 class Notifications {
 
@@ -44,6 +45,7 @@ class Notifications {
 		$this->thresholds_update_notice();
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
+		$this->render_notices();
 	}
 
 	/**
@@ -84,6 +86,11 @@ class Notifications {
 			return;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/classifai_setup' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		// Prevent showing the default WordPress "Plugin Activated" notice.
 		unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
 		?>
@@ -96,7 +103,7 @@ class Notifications {
 				<h3 class="classifai-activation-message">
 					<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
 				</h3>
-				<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
+				<a class="classifai-button" href="<?php echo esc_url( $setup_url ); ?>">
 					<?php esc_html_e( 'Start setup', 'classifai' ); ?>
 				</a>
 			</div>
@@ -252,7 +259,7 @@ class Notifications {
 					sprintf(
 						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
 						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make multiple API requests to OpenAI.', 'classifai' ),
-						wp_nonce_url( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ), 'regen_embeddings', 'embeddings_nonce' )
+						wp_nonce_url( admin_url( 'admin-post.php?action=classifai_regen_embeddings' ), 'regen_embeddings', 'embeddings_nonce' )
 					)
 				);
 				?>
@@ -330,5 +337,59 @@ EOD;
 		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
 
 		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+	}
+
+	/**
+	 * Render any saved notices to display.
+	 */
+	public function render_notices() {
+		$notices = $this->get_notices();
+		if ( empty( $notices ) ) {
+			return;
+		}
+
+		foreach ( $notices as $notice ) {
+			if ( ! empty( $notice['message'] ) ) {
+				?>
+				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?> is-dismissible">
+					<p><?php echo esc_html( $notice['message'] ); ?></p>
+				</div>
+				<?php
+			}
+		}
+	}
+
+	/**
+	 * Get any saved notices to display.
+	 *
+	 * @return mixed
+	 */
+	public function get_notices() {
+		$notices = get_transient( 'classifai_notices' );
+		delete_transient( 'classifai_notices' );
+
+		return $notices;
+	}
+
+	/**
+	 * Set a notice to be displayed.
+	 *
+	 * This will be displayed on the next page load.
+	 * The notice will be stored in a transient.
+	 *
+	 * @param string $message The notice message.
+	 * @param string $type    The notice type.
+	 */
+	public function set_notice( string $message, string $type = 'info' ) {
+		$notices = get_transient( 'classifai_notices' );
+		if ( ! is_array( $notices ) ) {
+			$notices = [];
+		}
+
+		$notices[] = [
+			'type'    => $type,
+			'message' => $message,
+		];
+		set_transient( 'classifai_notices', $notices );
 	}
 }

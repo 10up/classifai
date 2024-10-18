@@ -3,11 +3,11 @@ import { getPDFData } from '../../plugins/functions';
 describe( 'PDF read Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -17,18 +17,16 @@ describe( 'PDF read Tests', () => {
 
 	let pdfEditLink = '';
 	it( 'Can save "PDF scanning" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
-
-		cy.get( '#endpoint_url' )
+		cy.selectProvider( 'ms_computer_vision' );
+		cy.get( '#ms_computer_vision_endpoint_url' )
 			.clear()
 			.type( 'http://e2e-test-image-processing.test' );
-		cy.get( '#api_key' ).clear().type( 'password' );
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
-
-		cy.get( '.notice' ).contains( 'Settings saved.' );
+		cy.get( '#ms_computer_vision_api_key' ).clear().type( 'password' );
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can see PDF scanning actions on edit media page and verify PDF read data.', () => {
@@ -62,11 +60,11 @@ describe( 'PDF read Tests', () => {
 
 	it( 'Can enable/disable PDF scanning feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.visit( pdfEditLink );
@@ -75,11 +73,11 @@ describe( 'PDF read Tests', () => {
 		);
 
 		// Enable admin role.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.visit( pdfEditLink );
@@ -90,11 +88,11 @@ describe( 'PDF read Tests', () => {
 
 	it( 'Can enable/disable PDF scanning feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=image_processing&feature=feature_pdf_to_text_generation'
+		cy.visitFeatureSettings(
+			'image_processing/feature_pdf_to_text_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_pdf_to_text_generation', [
