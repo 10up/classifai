@@ -3,6 +3,9 @@
  */
 import { NavLink } from 'react-router-dom';
 
+/**
+ * WordPress dependencies
+ */
 import {
 	DropdownMenu,
 	MenuGroup,
@@ -19,6 +22,13 @@ import { __ } from '@wordpress/i18n';
 import { ClassifAILogo } from '../../utils/icons';
 import { useSetupPage } from '../classifai-onboarding/hooks';
 
+/**
+ * Header component for the ClassifAI settings.
+ *
+ * This component renders the header for the ClassifAI settings page and the onboarding process.
+ *
+ * @return {React.ReactElement} Header component.
+ */
 export const Header = () => {
 	const { isSetupPage, step } = useSetupPage();
 	const onBoardingSteps = {

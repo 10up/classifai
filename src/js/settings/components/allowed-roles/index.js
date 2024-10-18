@@ -1,5 +1,5 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CheckboxControl } from '@wordpress/components';
@@ -13,6 +13,14 @@ import { STORE_NAME } from '../../data/store';
 import { SettingsRow } from '../settings-row';
 import { useFeatureContext } from '../feature-settings/context';
 
+/**
+ * React Component for selecting user roles to provide access to a specific feature.
+ *
+ * This component is utilized in the feature settings page under the "User Permissions" section.
+ * It allows administrators to specify which user roles are permitted to access the feature.
+ *
+ * @return {React.ReactElement} AllowedRoles component.
+ */
 export const AllowedRoles = () => {
 	const { featureName } = useFeatureContext();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );

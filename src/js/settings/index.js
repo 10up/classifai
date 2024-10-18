@@ -11,6 +11,9 @@ import './data/store';
 import '../../scss/settings.scss';
 import { ClassifAISettings } from './components';
 
+/**
+ * Render the ClassifAI settings component.
+ */
 domReady( () => {
 	const adminEl = document.getElementById( 'classifai-settings' );
 

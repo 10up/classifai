@@ -1,11 +1,29 @@
+/**
+ * External dependencies
+ */
+import { useNavigate } from 'react-router-dom';
+
+/**
+ * WordPress dependencies
+ */
 import { Icon, Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import { STORE_NAME } from '../../data/store';
 import { isFeatureActive, getFeature } from '../../utils/utils';
-import { useNavigate } from 'react-router-dom';
 
+/**
+ * React Component for the final step in the onboarding process.
+ *
+ * This component displays a summary of the features that have been enabled during the onboarding process.
+ * It provides users with a clear overview of their selected settings before completing the onboarding.
+ *
+ * @return {React.ReactElement} FinishStep component.
+ */
 export const FinishStep = () => {
 	const {
 		features: __settings,

@@ -1,9 +1,20 @@
+/**
+ * WordPress dependencies
+ */
 import { useContext } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { STORE_NAME } from '../data/store';
 
+/**
+ * Internal dependencies
+ */
+import { STORE_NAME } from '../data/store';
 import { FeatureContext } from '../components/feature-settings/context';
 
+/**
+ * Custom hook to get and set feature settings.
+ *
+ * @return {Object} The feature settings.
+ */
 export const useFeatureSettings = () => {
 	let { featureName } = useContext( FeatureContext );
 

@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
@@ -5,9 +8,20 @@ import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
+/**
+ * Component for Smart 404 feature settings.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the Smart 404 feature.
+ *
+ * @return {React.ReactElement} Smart404Settings component.
+ */
 export const Smart404Settings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()

@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo } from '@wordpress/element';
 import { store as coreStore } from '@wordpress/core-data';
@@ -23,11 +26,23 @@ export const updateUrl = ( key, value ) => {
 	}
 };
 
+/**
+ * Get the feature settings for the given feature name.
+ *
+ * @param {string} featureName The feature name.
+ * @return {Object} The feature settings.
+ */
 export const getFeature = ( featureName ) => {
 	const features = getFeatures();
 	return features[ featureName ];
 };
 
+/**
+ * Get the features object.
+ * The features object is a combination of all the features from all the services.
+ *
+ * @return {Object} The features object.
+ */
 export const getFeatures = () => {
 	let features = {};
 	for ( const key in window.classifAISettings?.features || {} ) {

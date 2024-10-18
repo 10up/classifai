@@ -1,15 +1,32 @@
+/**
+ * External dependencies
+ */
+import { useNavigate } from 'react-router-dom';
+
+/**
+ * WordPress dependencies
+ */
 import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { Fill, SlotFillProvider, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
 import { FeatureSettings } from '..';
 import { FeatureContext } from '../feature-settings/context';
 import { getFeature, isFeatureActive } from '../../utils/utils';
 import { STORE_NAME } from '../../data/store';
 import { useSetupPage } from './hooks';
-import { useNavigate } from 'react-router-dom';
 
+/**
+ * React Component for configuring the AI providers step in the onboarding process.
+ *
+ * This component uses the FeatureSettings component to render the settings for each AI provider feature.
+ *
+ * @return {React.ReactElement} ConfigureFeatures component.
+ */
 export const ConfigureFeatures = () => {
 	const settings = useSelect( ( select ) =>
 		select( STORE_NAME ).getSettings()

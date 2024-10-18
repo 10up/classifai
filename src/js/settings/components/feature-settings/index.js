@@ -19,6 +19,11 @@ import { Notices } from './notices';
 import { useFeatureContext } from './context';
 import { FeatureAdditionalSettings } from '../feature-additional-settings';
 
+/**
+ * Component to display a notice when the Smart 404 feature is enabled but ElasticPress is not active.
+ *
+ * @return {React.ReactElement} The ElasticPressRequiredNotice component.
+ */
 const ElasticPressRequiredNotice = () => (
 	<Notice
 		status="error"
@@ -36,6 +41,8 @@ const ElasticPressRequiredNotice = () => (
 
 /**
  * Feature Settings component.
+ *
+ * This is the main component for the feature settings page. It renders the settings panel for the selected feature.
  *
  * @param {Object}   props               Component props.
  * @param {Function} props.onSaveSuccess Callback function to be executed after saving settings.

@@ -1,10 +1,24 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
+/**
+ * Component for Moderation feature settings.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the Moderation feature.
+ *
+ * @return {React.ReactElement} ModerationSettings component.
+ */
 export const ModerationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()

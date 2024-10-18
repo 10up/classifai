@@ -12,10 +12,14 @@ import * as actions from './actions';
 
 export const STORE_NAME = 'classifai-settings';
 
+/**
+ * Store for the settings data.
+ */
 export const store = createReduxStore( STORE_NAME, {
 	reducer,
 	selectors,
 	actions,
 } );
 
+// Register the store.
 register( store );

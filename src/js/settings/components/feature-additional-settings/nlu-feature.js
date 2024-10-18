@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	CheckboxControl,
@@ -5,10 +8,21 @@ import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useTaxonomies } from '../../utils/utils';
 
+/**
+ * Component for render settings fields when IBM Watson NLU is selected as the provider.
+ *
+ * This component is used within the ClassificationSettings component.
+ *
+ * @return {React.ReactElement} NLUFeatureSettings component.
+ */
 export const NLUFeatureSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()

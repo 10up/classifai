@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import {
 	Button,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
@@ -7,6 +10,15 @@ import {
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Component for the Prompt.
+ *
+ * This component allows users to add or remove prompts for various features such as Title Generation, Excerpt Generation and Descriptive Text Generation.
+ *
+ * @param {Object} props Component props.
+ *
+ * @return {React.ReactElement} PromptRepeater component.
+ */
 export const PromptRepeater = ( props ) => {
 	const [ showConfirmDialog, setShowConfirmDialog ] = useState( false );
 	const [ activeIndex, setActiveIndex ] = useState( null );

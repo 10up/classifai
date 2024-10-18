@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	RadioControl,
@@ -16,6 +19,9 @@ import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { isFeatureActive, usePostTypes } from '../../utils/utils';
@@ -26,6 +32,13 @@ import {
 } from './classification-previewers';
 import { PreviewerProviderContext } from './classification-previewers/context';
 
+/**
+ * Component for the Classification Method settings.
+ *
+ * This component is used within the ClassificationSettings component to allow users to configure the Classification Method.
+ *
+ * @return {React.ReactElement} The ClassificationMethodSettings component.
+ */
 const ClassificationMethodSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
@@ -78,6 +91,17 @@ const ClassificationMethodSettings = () => {
 	);
 };
 
+/**
+ * Provider component for the Classification Previewer.
+ *
+ * This component is used to provide the context for the Classification Previewer.
+ *
+ * @param {Object} props          The component props.
+ * @param {Object} props.children The child components.
+ * @param {Object} props.value    The context value.
+ *
+ * @return {React.ReactElement} The PreviewerProvider component.
+ */
 function PreviewerProvider( { children, value } ) {
 	return (
 		<PreviewerProviderContext.Provider value={ value }>
@@ -86,6 +110,13 @@ function PreviewerProvider( { children, value } ) {
 	);
 }
 
+/**
+ * React Component for configuring the Classification feature settings.
+ *
+ * This component is used within the ClassifAI settings to allow users to configure the Classification feature.
+ *
+ * @return {React.ReactElement} The ClassificationSettings component.
+ */
 export const ClassificationSettings = () => {
 	const [ embedInProgress, setEmbedInProgress ] = useState( false );
 	const isEmbeddingInProgress = useRef( false );
@@ -267,6 +298,11 @@ export const ClassificationSettings = () => {
 	);
 };
 
+/**
+ * Component for the Classification Previewer.
+ *
+ * @return {React.ReactElement} The Previewer component.
+ */
 function Previewer() {
 	const { isPreviewerOpen, setIsPreviewerOpen } = useContext(
 		PreviewerProviderContext
@@ -299,6 +335,11 @@ function Previewer() {
 	);
 }
 
+/**
+ * Component for displaying a spinner when the preview is in process.
+ *
+ * @return {React.ReactElement} The PreviewInProcess component.
+ */
 function PreviewInProcess() {
 	const { isPreviewUnderProcess } = useContext( PreviewerProviderContext );
 
@@ -318,6 +359,15 @@ function PreviewInProcess() {
 	);
 }
 
+/**
+ * Component for selecting a post to preview.
+ *
+ * @param {Object}  props             The component props.
+ * @param {string}  props.placeholder The placeholder text for the search control.
+ * @param {boolean} props.showLabel   Whether to show the label for the search control.
+ *
+ * @return {React.ReactElement} The PostSelector component.
+ */
 function PostSelector( { placeholder = '', showLabel = true } ) {
 	const { setSelectedPostId } = useContext( PreviewerProviderContext );
 	const [ searchText, setSearchText ] = useState( '' );
@@ -416,6 +466,11 @@ function PostSelector( { placeholder = '', showLabel = true } ) {
 	);
 }
 
+/**
+ * Component for displaying the results of the previewer.
+ *
+ * @return {React.ReactElement} The PreviewerResults component.
+ */
 function PreviewerResults() {
 	const { selectedPostId } = useContext( PreviewerProviderContext );
 	const activeProvider = useSelect(

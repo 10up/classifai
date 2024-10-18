@@ -28,6 +28,15 @@ import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
 
+/**
+ * Component for rendering provider setting fields based on the selected provider.
+ *
+ * @param {Object}  props              Component props.
+ * @param {string}  props.provider     The selected provider.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} ProviderFields component.
+ */
 const ProviderFields = ( { provider, isConfigured } ) => {
 	switch ( provider ) {
 		case 'openai_chatgpt':
@@ -81,7 +90,11 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 };
 
 /**
- * Feature Settings component.
+ * Provider Settings component.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the provider settings.
+ *
+ * @return {React.ReactElement} ProviderSettings component.
  */
 export const ProviderSettings = () => {
 	const [ editProvider, setEditProvider ] = useState( false );

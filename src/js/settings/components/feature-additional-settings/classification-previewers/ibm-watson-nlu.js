@@ -1,12 +1,29 @@
+/**
+ * WordPress dependencies
+ */
 import { Card, CardHeader, CardBody, Notice } from '@wordpress/components';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { normalizeScore } from './utils';
-import { PreviewerProviderContext } from './context';
 import { __, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { normalizeScore } from './utils';
+import { PreviewerProviderContext } from './context';
 import { STORE_NAME } from '../../../data/store';
 
+/**
+ * React Component for displaying IBM Watson NLU classification results.
+ *
+ * This component is responsible for rendering the classification results obtained from the IBM Watson NLU service.
+ * It displays detailed classification data including categories, concepts, entities, and keywords for a specific post.
+ *
+ * @param {Object} props        The component props.
+ * @param {number} props.postId The ID of the post for which to display the classification results.
+ *
+ * @return {React.ReactElement} The IBMWatsonNLUResults component.
+ */
 export function IBMWatsonNLUResults( { postId } ) {
 	const {
 		isPreviewUnderProcess,

@@ -3,6 +3,11 @@
  */
 import { SVG, Path } from '@wordpress/components';
 
+/**
+ * ClassifAI Logo SVG component.
+ *
+ * @return {React.ReactElement} ClassifAI Logo SVG component.
+ */
 export const ClassifAILogo = (
 	<SVG xmlns="http://www.w3.org/2000/svg" viewBox="0 0 197 32" fill="none">
 		<Path d="M138.103 0H196.007V32H138.103V0Z" fill="#F82C2C" />

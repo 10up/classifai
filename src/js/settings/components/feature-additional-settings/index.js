@@ -20,6 +20,14 @@ import { ModerationSettings } from './moderation';
 import { Smart404Settings } from './smart-404';
 import { RecommendedContentSettings } from './recommended-content';
 
+/**
+ * Component for additional settings fields for individual features.
+ *
+ * This component is used to render additional settings fields for a feature.
+ * It determines which feature is current and renders the corresponding settings fields.
+ *
+ * @return {React.ReactElement} AdditionalSettingsFields component.
+ */
 const AdditionalSettingsFields = () => {
 	const { featureName } = useFeatureContext();
 
@@ -60,7 +68,12 @@ const AdditionalSettingsFields = () => {
 };
 
 /**
- * Feature Additional Settings component.
+ * Component for additional settings fields for a feature.
+ *
+ * This component is used to add additional settings for a feature.
+ * It also provides a slot for Third-party plugins to add additional settings for a feature.
+ *
+ * @return {React.ReactElement} FeatureAdditionalSettings component.
  */
 export const FeatureAdditionalSettings = () => {
 	const { featureName } = useFeatureContext();

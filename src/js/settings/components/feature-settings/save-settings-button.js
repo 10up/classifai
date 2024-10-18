@@ -17,6 +17,9 @@ import { useSetupPage } from '../classifai-onboarding/hooks';
 /**
  * Save Settings Button component.
  *
+ * This component renders a button that allows users to save the settings for a feature.
+ * It also handles the saving of settings via the REST API.
+ *
  * @param {Object}   props               Component props.
  * @param {Function} props.onSaveSuccess Callback function to be executed after saving settings.
  * @param {string}   props.label         Button label.

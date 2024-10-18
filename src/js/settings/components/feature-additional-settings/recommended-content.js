@@ -1,6 +1,16 @@
+/**
+ * WordPress dependencies
+ */
 import { Fill, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Component for Notice about the deprecation of the Personalizer provider.
+ *
+ * This component displays a notice to inform users about the deprecation of the Personalizer provider.
+ *
+ * @return {React.ReactElement} The PersonalizerDeprecationNotice component.
+ */
 const PersonalizerDeprecationNotice = () => (
 	<Notice
 		status="warning"
@@ -33,6 +43,13 @@ const PersonalizerDeprecationNotice = () => (
 	</Notice>
 );
 
+/**
+ * Component for the Recommended Content settings.
+ *
+ * This component displays a notice to inform users about the deprecation of the Personalizer provider.
+ *
+ * @return {React.ReactElement} The RecommendedContentSettings component.
+ */
 export const RecommendedContentSettings = () => {
 	return (
 		<Fill name="ClassifAIBeforeFeatureSettingsPanel">

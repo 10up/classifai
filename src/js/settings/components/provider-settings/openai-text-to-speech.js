@@ -1,12 +1,29 @@
+/**
+ * WordPress dependencies
+ */
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	SelectControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_NAME } from '../../data/store';
 
+/**
+ * Component for OpenAI Text to Speech Provider settings.
+ *
+ * This component is used within the ProviderSettings component to allow users to configure the OpenAI Text to Speech Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} OpenAITextToSpeachSettings component.
+ */
 export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_text_to_speech';
 	const providerSettings = useSelect(

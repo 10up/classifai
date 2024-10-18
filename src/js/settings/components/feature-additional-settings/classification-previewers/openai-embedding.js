@@ -1,12 +1,29 @@
+/**
+ * WordPress dependencies
+ */
 import { Card, CardHeader, CardBody, Notice } from '@wordpress/components';
 import { useState, useEffect, useContext } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { normalizeScore } from './utils';
-import { PreviewerProviderContext } from './context';
 import { __, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { normalizeScore } from './utils';
+import { PreviewerProviderContext } from './context';
 import { STORE_NAME } from '../../../data/store';
 
+/**
+ * React Component for displaying Azure OpenAI Embeddings classification results.
+ *
+ * This component is responsible for rendering the classification results obtained from the Azure OpenAI Embeddings service.
+ * It displays detailed classification data including categories and tags for a specific post.
+ *
+ * @param {Object} props        The component props.
+ * @param {number} props.postId The ID of the post for which to display the classification results.
+ *
+ * @return {React.ReactElement} The AzureOpenAIEmbeddingsResults component.
+ */
 export function AzureOpenAIEmbeddingsResults( { postId } ) {
 	const {
 		isPreviewUnderProcess,

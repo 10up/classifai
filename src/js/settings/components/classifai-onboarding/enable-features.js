@@ -1,3 +1,11 @@
+/**
+ * External dependencies
+ */
+import { useNavigate } from 'react-router-dom';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	ToggleControl,
 	Flex,
@@ -9,12 +17,22 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
 
+/**
+ * Internal dependencies
+ */
 import { FeatureContext } from '../feature-settings/context';
 import { EnableToggleControl } from '../feature-settings/enable-feature';
 import { SaveSettingsButton } from '../../components/feature-settings/save-settings-button';
 import { useSetupPage } from './hooks';
-import { useNavigate } from 'react-router-dom';
 
+/**
+ * React Component for the feature enabling step in the onboarding process.
+ *
+ * This component renders the initial step of the onboarding process, allowing users to enable or disable various features.
+ * It utilizes the EnableToggleControl component to display the settings for each feature.
+ *
+ * @return {React.ReactElement} EnableFeatures component.
+ */
 export const EnableFeatures = () => {
 	const [ registrationSettings, setRegistrationSettings ] = useState( {} );
 	const { features, services, dashboardUrl } = window.classifAISettings;

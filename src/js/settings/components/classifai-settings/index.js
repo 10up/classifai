@@ -44,6 +44,8 @@ const { services, features } = window.classifAISettings;
 /**
  * DefaultFeatureSettings component to navigate to the default feature settings.
  * If no feature is selected, it will redirect to the first feature.
+ *
+ * @return {React.ReactElement} The DefaultFeatureSettings component.
  */
 const DefaultFeatureSettings = () => {
 	const { service } = useParams();
@@ -53,7 +55,9 @@ const DefaultFeatureSettings = () => {
 
 /**
  * FeatureSettingsWrapper component to render the feature settings.
- * If the feature is not available, it will redirect to the first feature.
+ * If the feature is not available from URL parameters, it will redirect to the first feature of selected service.
+ *
+ * @return {React.ReactElement} The FeatureSettingsWrapper component.
  */
 const FeatureSettingsWrapper = () => {
 	const { service, feature } = useParams();
@@ -70,6 +74,12 @@ const FeatureSettingsWrapper = () => {
 	);
 };
 
+/**
+ * ServiceSettingsWrapper component to render the service settings.
+ * If the service is not available from URL parameters, it will redirect to the language processing page.
+ *
+ * @return {React.ReactElement} The ServiceSettingsWrapper component.
+ */
 const ServiceSettingsWrapper = () => {
 	const { service } = useParams();
 
@@ -84,7 +94,9 @@ const ServiceSettingsWrapper = () => {
 /**
  * ServiceNavigation component to render the service navigation tabs.
  *
- * @return {Object} The ServiceNavigation component.
+ * This component renders the service navigation tabs based on the available services.
+ *
+ * @return {React.ReactElement} The ServiceNavigation component.
  */
 export const ServiceNavigation = () => {
 	const { isSetupPage } = useSetupPage();
@@ -123,6 +135,14 @@ export const ServiceNavigation = () => {
 	);
 };
 
+/**
+ * Main ClassifAI Settings Component.
+ *
+ * This component serves as the primary entry point for the ClassifAI settings interface.
+ * It is responsible for rendering the header, service navigation, feature navigation, and feature settings based on the current URL path.
+ *
+ * @return {React.ReactElement} The ClassifAISettings component.
+ */
 export const ClassifAISettings = () => {
 	const { setSettings, setIsLoaded, setError } = useDispatch( STORE_NAME );
 

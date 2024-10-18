@@ -3,6 +3,18 @@ import { __experimentalInputControl as InputControl } from '@wordpress/component
 import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 
+/**
+ * Component for OpenAI Provider settings.
+ *
+ * This component is used within the ProviderSettings component to allow users to configure the OpenAI Provider settings.
+ * This is the base component for OpenAI settings.
+ *
+ * @param {Object}   props                  Component props.
+ * @param {Object}   props.providerSettings The provider settings.
+ * @param {Function} props.onChange         Function to call when the provider settings change.
+ *
+ * @return {React.ReactElement} OpenAISettings component.
+ */
 export const OpenAISettings = ( { providerSettings, onChange } ) => {
 	const Description = () => (
 		<>

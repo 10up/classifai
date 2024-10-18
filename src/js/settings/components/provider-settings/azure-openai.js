@@ -1,11 +1,29 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 import { __experimentalInputControl as InputControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 
+/**
+ * Component for Azure OpenAI Provider settings.
+ *
+ * This component is used within the ProviderSettings component to allow users to configure the Azure OpenAI Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {string}  props.providerName The provider name.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} AzureOpenAISettings component.
+ */
 export const AzureOpenAISettings = ( {
 	providerName = 'azure_openai',
 	isConfigured = false,

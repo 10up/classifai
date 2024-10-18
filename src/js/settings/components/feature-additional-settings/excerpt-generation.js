@@ -1,14 +1,28 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	CheckboxControl,
 } from '@wordpress/components';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
 import { usePostTypes } from '../../utils/utils';
 
+/**
+ * Component for Excerpt Generation feature settings.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the Excerpt Generation feature.
+ *
+ * @return {React.ReactElement} ExcerptGenerationSettings component.
+ */
 export const ExcerptGenerationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()

@@ -1,12 +1,29 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	SelectControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
+/**
+ * Component for Amazon Polly Provider settings.
+ *
+ * This component is used within the ProviderSettings component to allow users to configure the Amazon Polly Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} AmazonPollySettings component.
+ */
 export const AmazonPollySettings = ( { isConfigured = false } ) => {
 	const providerName = 'aws_polly';
 	const providerSettings = useSelect(

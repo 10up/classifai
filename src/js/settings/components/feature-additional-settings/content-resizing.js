@@ -1,9 +1,23 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
 
+/**
+ * Component for the Content Resizing feature settings.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the Content Resizing feature.
+ *
+ * @return {React.ReactElement} ContentResizingSettings component.
+ */
 export const ContentResizingSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()

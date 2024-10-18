@@ -1,5 +1,5 @@
 /**
- * External dependencies
+ * WordPress dependencies
  */
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -14,6 +14,13 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useUserPermissionsPreferences } from '../../utils/utils';
 
+/**
+ * Component for User Permissions settings.
+ *
+ * This component is used within the FeatureSettings component to allow users to configure the User Permissions settings.
+ *
+ * @return {React.ReactElement} UserPermissions component.
+ */
 export const UserPermissions = () => {
 	const { isOpen, setIsOpen } = useUserPermissionsPreferences();
 	const { setFeatureSettings } = useDispatch( STORE_NAME );

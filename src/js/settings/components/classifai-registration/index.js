@@ -2,6 +2,10 @@
  * External dependencies
  */
 import { NavLink } from 'react-router-dom';
+
+/**
+ * WordPress dependencies
+ */
 import {
 	Panel,
 	PanelBody,
@@ -11,14 +15,28 @@ import {
 	Notice,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
-import { Notices } from '../feature-settings/notices';
 import { __, sprintf } from '@wordpress/i18n';
-import { SettingsRow } from '../settings-row';
 import apiFetch from '@wordpress/api-fetch';
 import { useState, useEffect } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 
+/**
+ * Internal dependencies
+ */
+import { SettingsRow } from '../settings-row';
+import { Notices } from '../feature-settings/notices';
+
+/**
+ * ClassifAI Registration Form Component.
+ *
+ * This component renders the registration settings form for ClassifAI, allowing users to input and save their registration details.
+ *
+ * @param {Object}   props               The component props.
+ * @param {Function} props.onSaveSuccess The callback function to be executed after successfully saving the settings.
+ *
+ * @return {React.ReactElement} The rendered ClassifAIRegistrationForm component.
+ */
 export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 	const [ settings, setSettings ] = useState( {} );
 	const [ isLoaded, setIsLoaded ] = useState( false );
@@ -146,6 +164,8 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 /**
  * Save Settings Button component.
  *
+ * This component renders a button that allows users to save the settings for the ClassifAI registration form.
+ *
  * @param {Object}   props               Component props.
  * @param {Object}   props.settings      Settings object.
  * @param {Function} props.setSettings   Set settings function.
@@ -219,6 +239,13 @@ export const SaveSettingsButton = ( {
 	);
 };
 
+/**
+ * ClassifAI Registration Component.
+ *
+ * This component serves as a wrapper for the ClassifAIRegistrationForm component.
+ *
+ * @return {React.ReactElement} The ClassifAIRegistration component.
+ */
 export const ClassifAIRegistration = () => {
 	return (
 		<div className="service-settings-wrapper">

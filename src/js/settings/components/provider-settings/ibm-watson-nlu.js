@@ -1,3 +1,6 @@
+/**
+ * WordPress dependencies
+ */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import {
@@ -5,9 +8,23 @@ import {
 	Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
+/**
+ * Component for IBM Watson NLU Provider settings.
+ *
+ * This component is used within the ProviderSettings component to allow users to configure the IBM Watson NLU Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} IBMWatsonNLUSettings component.
+ */
 export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 	const providerName = 'ibm_watson_nlu';
 	const providerSettings = useSelect(
