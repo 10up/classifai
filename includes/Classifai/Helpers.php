@@ -662,6 +662,27 @@ function get_classification_mode(): string {
 }
 
 /**
+ * Determine if the legacy settings panel should be used.
+ *
+ * @since x.x.x
+ *
+ * @return bool
+ */
+function should_use_legacy_settings_panel(): bool {
+	/**
+	 * Filter to determine if the legacy settings panel should be used.'
+	 *
+	 * @since x.x.x
+	 * @hook classifai_use_legacy_settings_panel
+	 *
+	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
+	 *
+	 * @return {bool} Whether to use the legacy settings panel.
+	 */
+	return apply_filters( 'classifai_use_legacy_settings_panel', false );
+}
+
+/**
  * Get all parts from the current URL.
  *
  * For instance, if the URL is `https://example.com/this/is/a/test/`,

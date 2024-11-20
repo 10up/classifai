@@ -1,4 +1,4 @@
-describe('Common Feature Fields', () => {
+describe( 'Common Feature Fields', () => {
 	beforeEach( () => {
 		cy.login();
 	} );
@@ -22,25 +22,23 @@ describe('Common Feature Fields', () => {
 
 	Object.keys( features ).forEach( ( feature ) => {
 		it( `"${ features[ feature ] }" feature common fields`, () => {
-			cy.visit(
-				`/wp-admin/tools.php?page=classifai&tab=language_processing&feature=${ feature }`
-			);
+			cy.visitFeatureSettings( `language_processing/${ feature }` );
 
-			cy.get( '#status' ).should(
-				'have.attr',
-				'name',
-				`classifai_${ feature }[status]`
+			cy.get( '.classifai-enable-feature-toggle input' ).should(
+				'exist'
 			);
-			cy.get( '#user_based_opt_out' ).should(
-				'have.attr',
-				'name',
-				`classifai_${ feature }[user_based_opt_out]`
-			);
-			cy.get( '#provider' ).should(
-				'have.attr',
-				'name',
-				`classifai_${ feature }[provider]`
-			);
+			cy.openUserPermissionsPanel();
+			cy.get(
+				'.classifai-settings__user-based-opt-out input[type="checkbox"]'
+			).should( 'exist' );
+			cy.get( 'body' ).then( ( $body ) => {
+				if (
+					$body.find( '.classifai-settings-edit-provider' ).length > 0
+				) {
+					cy.get( '.classifai-settings-edit-provider' ).click();
+				}
+			} );
+			cy.get( '.classifai-provider-select select' ).should( 'exist' );
 
 			for ( const role of allowedRoles ) {
 				if (
@@ -51,19 +49,13 @@ describe('Common Feature Fields', () => {
 				}
 
 				const roleField = cy.get(
-					`#classifai_${ feature }_roles_${ role }`
+					`.settings-allowed-roles input#${ role }`
 				);
 				roleField.should( 'be.visible' );
-				roleField.should( 'have.value', role );
-				roleField.should(
-					'have.attr',
-					'name',
-					`classifai_${ feature }[roles][${ role }]`
-				);
+				roleField.should( 'have.value', 1 );
 			}
 
-			cy.get( '.allowed_users_row' ).should( 'be.visible' );
-
+			cy.get( '.classifai-settings__users' ).should( 'be.visible' );
 		} );
 	} );
 } );

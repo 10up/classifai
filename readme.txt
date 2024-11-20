@@ -1,8 +1,8 @@
 === ClassifAI ===
 Contributors:      10up, jeffpaul, dkotter
 Tags:              AI, Artificial Intelligence, ML, Machine Learning, Microsoft Azure, IBM Watson, OpenAI, ChatGPT, DALL·E, Content Tagging, Classification, Smart Cropping, Alt Text
-Requires at least: 6.1
-Tested up to:      6.6
+Requires at least: 6.5
+Tested up to:      6.7
 Requires PHP:      7.4
 Stable tag:        3.1.1
 License:           GPLv2 or later

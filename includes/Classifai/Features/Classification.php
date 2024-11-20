@@ -853,10 +853,10 @@ class Classification extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'post_statuses'         => [
-				'publish' => 1,
+				'publish' => 'publish',
 			],
 			'post_types'            => [
-				'post' => 1,
+				'post' => 'post',
 			],
 			'classification_mode'   => 'manual_review',
 			'classification_method' => 'recommended_terms',
@@ -1189,5 +1189,19 @@ class Classification extends Feature {
 		}
 
 		return $new_settings;
+	}
+
+	/**
+	 * Get status of embeddings generation process.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		$is_in_progress    = false;
+		$provider_instance = $this->get_feature_provider_instance();
+		if ( $provider_instance && method_exists( $provider_instance, 'is_embeddings_generation_in_progress' ) ) {
+			$is_in_progress = $provider_instance->is_embeddings_generation_in_progress();
+		}
+		return $is_in_progress;
 	}
 }

@@ -21,7 +21,11 @@
 		"Headers": "readonly",
 		"requestAnimationFrame": "readonly",
 		"React": "readonly",
-		"Block": "readonly"
+		"Block": "readonly",
+		"classifAISettings": "readonly"
+	},
+	"rules": {
+		"react/jsx-no-undef": "off"
 	},
 	"extends": ["plugin:@wordpress/eslint-plugin/recommended"],
 	"ignorePatterns": ["*.json", "webpack.config.js"]

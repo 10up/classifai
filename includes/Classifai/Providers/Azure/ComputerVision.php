@@ -767,7 +767,7 @@ class ComputerVision extends Provider {
 		}
 
 		if ( empty( $image_url ) ) {
-			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is less than 4MB.' ) );
+			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is less than 4MB.', 'classifai' ) );
 		}
 
 		switch ( $route_to_call ) {
