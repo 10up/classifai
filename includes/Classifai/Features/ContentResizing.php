@@ -192,7 +192,7 @@ class ContentResizing extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-content-resizing-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.js',
-			get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ),
+			array_merge( get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
 			true
 		);
