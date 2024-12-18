@@ -204,7 +204,7 @@ class TitleGeneration extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-title-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-title-generation.js',
-			get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ),
+			array_merge( get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'classifai-plugin-title-generation', 'version' ),
 			true
 		);
