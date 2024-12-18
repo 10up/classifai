@@ -1,0 +1,23 @@
+{
+  "$schema": "https://playground.wordpress.net/blueprint-schema.json",
+  "landingPage": "/wp-admin/tools.php?page=classifai#/language_processing?welcome_guide=1",
+  "preferredVersions": {
+    "php": "7.4",
+    "wp": "latest"
+  },
+  "features": {
+    "networking": true
+  },
+  "steps": [
+    {
+      "step": "installPlugin",
+      "pluginData": {
+        "resource": "url",
+        "url": "https://github-proxy.com/proxy/?repo=10up/classifai&branch=stable"
+      },
+      "options": {
+        "activate": true
+      }
+    }
+  ]
+}

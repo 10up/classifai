@@ -154,6 +154,8 @@ class BulkActions {
 			return $redirect_to;
 		}
 
+		$action = '';
+
 		foreach ( $post_ids as $post_id ) {
 			switch ( $doaction ) {
 				case Classification::ID:
@@ -262,6 +264,8 @@ class BulkActions {
 		) {
 			return $redirect_to;
 		}
+
+		$action = '';
 
 		foreach ( $comment_ids as $comment_id ) {
 			switch ( $doaction ) {
@@ -573,6 +577,7 @@ class BulkActions {
 	public function bulk_action_admin_notice() {
 		$post_count      = 0;
 		$action          = '';
+		$action_text     = '';
 		$post_type       = ! empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'post'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$all_feature_ids = array_map(
 			function ( $feature ) {
@@ -580,6 +585,10 @@ class BulkActions {
 			},
 			array_merge( $this->language_processing_features, $this->media_processing_features )
 		);
+
+		if ( empty( $all_feature_ids ) ) {
+			return;
+		}
 
 		foreach ( $all_feature_ids as $feature_id ) {
 			$post_count = ! empty( $_GET[ "bulk_{$feature_id}" ] ) ? intval( wp_unslash( $_GET[ "bulk_{$feature_id}" ] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended

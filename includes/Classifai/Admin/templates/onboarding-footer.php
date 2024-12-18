@@ -5,6 +5,7 @@
  * @package ClassifAI
  */
 
+/** @var array $args Arguments coming from the included file. */
 ?>
 				<div class="classifai-setup-footer">
 					<span class="classifai-setup-footer__left">

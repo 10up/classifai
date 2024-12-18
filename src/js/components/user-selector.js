@@ -125,6 +125,7 @@ export const UserSelector = ( { value, onChange } ) => {
 				remove: __( 'Remove user', 'classifai' ),
 				__experimentalInvalid: __( 'Invalid user', 'classifai' ),
 			} }
+			__nextHasNoMarginBottom
 		/>
 	);
 };

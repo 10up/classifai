@@ -49,7 +49,7 @@ class Classifier {
 	 * @param string $text The plain text to classify
 	 * @param array  $options NLU classification options
 	 * @param array  $request_options Extra options to pass to the underlying HTTP request
-	 * @return array|WP_Error
+	 * @return array|\WP_Error
 	 */
 	public function classify( string $text, array $options = [], array $request_options = [] ) {
 		$body = $this->get_body( $text, $options );

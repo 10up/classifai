@@ -4,6 +4,54 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.2.0] - 2024-12-18
+
+**Prior to updating, please read: this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/tutorial-useful-snippets.html) for examples.**
+
+**Also note that this release bumps the WordPress minimum from 6.1 to 6.5.**
+
+### Added
+
+- New Feature, Smart 404, which provides the ability to render recommended content on a 404 page, based on the URL path someone is trying to access (props [@dkotter](https://github.com/dkotter), [@berkod](https://github.com/berkod), [@iamdharmesh](https://github.com/iamdharmesh) via [#801](https://github.com/10up/classifai/pull/801)).
+- New Feature, Term Cleanup, which provides the ability to compare all terms from specific taxonomies and provide recommendations for similar terms that can be merged together (props [@dkotter](https://github.com/dkotter), [@berkod](https://github.com/berkod), [@iamdharmesh](https://github.com/iamdharmesh) via [#815](https://github.com/10up/classifai/pull/815)).
+- New feature and service provider onboarding process implemented in React (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9), [Kate Rickard](https://uk.linkedin.com/in/katerickard), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#771](https://github.com/10up/classifai/pull/771), [#824](https://github.com/10up/classifai/pull/824)).
+- OpenAI ChatGPT as a Provider for the Descriptive Text Generator Feature (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#828](https://github.com/10up/classifai/pull/828)).
+- Chrome AI as a new text generation Provider, allowing completely on-device AI usage. Note this is still an experimental feature in Chrome (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi) via [#819](https://github.com/10up/classifai/pull/819)).
+- New filter, `classifai_openai_moderation_model`, allowing you to change the moderation model (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#811](https://github.com/10up/classifai/pull/811)).
+
+### Changed
+
+- Update the enable helper text for most of the Features to be more descriptive (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#807](https://github.com/10up/classifai/pull/807)).
+- Use the new OpenAI Moderation model, `omni-moderation-latest`, in our moderation Feature (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#811](https://github.com/10up/classifai/pull/811)).
+- Migrate from the Azure AI Vision v3.2 API to the v4.0 API for the Descriptive Text Generator, Image Tags Generator and Image Text Extraction Features (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#829](https://github.com/10up/classifai/pull/829)).
+- Bump WordPress "tested up to" version to 6.7 (props [@s3rgiosan](https://github.com/s3rgiosan), [@jeffpaul](https://github.com/jeffpaul) via [#823](https://github.com/10up/classifai/pull/823)).
+- Bump WordPress minimum from 6.1 to 6.5 (props [@s3rgiosan](https://github.com/s3rgiosan), [@jeffpaul](https://github.com/jeffpaul) via [#823](https://github.com/10up/classifai/pull/823)).
+
+### Fixed
+
+- Ensure that the Classification Feature suggests or sets terms for enabled taxonomies only (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#805](https://github.com/10up/classifai/pull/805)).
+- Ensure all strings have translator comments (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#806](https://github.com/10up/classifai/pull/806)).
+- Ensure post type and taxonomy options are filterable via existing filters in the new React settings (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#831](https://github.com/10up/classifai/pull/831)).
+- Addressed all issues raised by running PHPStan (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#808](https://github.com/10up/classifai/pull/808)).
+
+### Security
+
+- Bump `axios` from 1.6.7 to 1.7.4 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#792](https://github.com/10up/classifai/pull/792)).
+- Bump `webpack` from 5.90.3 to 5.94.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@faisal-alvi](https://github.com/faisal-alvi) via [#796](https://github.com/10up/classifai/pull/796)).
+- Bump `body-parser` from 1.20.2 to 1.20.3, `express` from 4.19.2 to 4.21.0, `ws` from 7.5.10 to 8.18.0, `send` from 0.18.0 to 0.19.0 and `serve-static` from 1.15.0 to 1.16.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#809](https://github.com/10up/classifai/pull/809)).
+- Bump `@wordpress/scripts` from 27.9.0 to 30.6.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#830](https://github.com/10up/classifai/pull/830)).
+- Bump `express` from 4.21.0 to 4.21.2, `@wordpress/e2e-test-utils-playwright` from 0.26.0 to 1.14.0 and removes `cookie` (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#832](https://github.com/10up/classifai/pull/832)).
+
+### Developer
+
+- Deprecate the old settings panel in favor of the new React-based approach (props [@iamdharmesh](https://github.com/iamdharmesh), [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#771](https://github.com/10up/classifai/pull/771)).
+- Re-organize the `assets` directory (props [@Sidsector9](https://github.com/Sidsector9), [@iamdharmesh](https://github.com/iamdharmesh) via [#804](https://github.com/10up/classifai/pull/804)).
+- Added support for WordPress Playground for easy testing of the plugin (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#814](https://github.com/10up/classifai/pull/814)).
+- Added PHPStan into our workflow with the ability to run that locally and in a GitHub Action (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#808](https://github.com/10up/classifai/pull/808)).
+- Add the WordPress Plugin Check GitHub Action (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#806](https://github.com/10up/classifai/pull/806)).
+- Update GitHub Action Workflows to be more efficient and ensure all Actions are up-to-date (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#810](https://github.com/10up/classifai/pull/810)).
+- Add plugin banner image to the README; remove table of contents (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#798](https://github.com/10up/classifai/pull/798)).
+
 ## [3.1.1] - 2024-08-06
 
 ### Changed
@@ -610,6 +658,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.2.0]: https://github.com/10up/classifai/compare/3.1.1...3.2.0
 [3.1.1]: https://github.com/10up/classifai/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/10up/classifai/compare/3.0.1...3.1.0
 [3.0.1]: https://github.com/10up/classifai/compare/3.0.0...3.0.1

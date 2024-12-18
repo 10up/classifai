@@ -1,0 +1,55 @@
+#postexcerpt {
+	#classifai-excerpt-generation__excerpt-generate-btn {
+		display: block;
+		width: 160px;
+		max-width: 100%;
+		margin: 1em 0 0 auto;
+		text-align: center;
+		position: relative;
+
+		& > .classifai-excerpt-generation__excerpt-generate-btn--spinner {
+			display: none;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate( -50%, -50% );
+			line-height: 29px;
+		}
+	}
+
+	.classifai-excerpt-generation__excerpt-generate-error {
+		display: none;
+		color: #dc3232;
+		text-align: right;
+	}
+
+	.classifai-excerpt-generation__excerpt-generate-disable-link {
+		text-align: right;
+		margin-top: 6px;
+	}
+}
+
+.classifai-excerpt-generation {
+	&__excerpt-generate-btn--spinner {
+		&:before {
+			display: block;
+			animation: rotation 2s infinite linear;
+			content: "\f463";
+			font-family: dashicons;
+			font-size: 1.75rem;
+
+			width: 1.75rem;
+			height: 1.75rem;
+		}
+	}
+}
+
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
+}

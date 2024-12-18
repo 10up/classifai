@@ -114,7 +114,7 @@ class Read {
 			return $this->log_error( new WP_Error( 'auth', esc_html__( 'Please set up valid authentication with Azure.', 'classifai' ) ) );
 		}
 
-		if ( ! $this->should_process( $this->attachment_id ) ) {
+		if ( ! $this->should_process() ) {
 			return $this->log_error( new WP_Error( 'process_error', esc_html__( 'Document does not meet processing requirements.', 'classifai' ) ) );
 		}
 
@@ -277,7 +277,7 @@ class Read {
 	 * Update document description using text received from Read API.
 	 *
 	 * @param array $data Read result.
-	 * @return WP_Error|array
+	 * @return WP_Error|array|null
 	 */
 	public function update_document_description( array $data ) {
 		if ( empty( $data['analyzeResult'] ) || empty( $data['analyzeResult']['readResults'] ) ) {
