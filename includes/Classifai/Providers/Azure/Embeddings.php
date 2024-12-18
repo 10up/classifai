@@ -184,8 +184,8 @@ class Embeddings extends OpenAI {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 	}
 
@@ -197,7 +197,7 @@ class Embeddings extends OpenAI {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -245,7 +245,7 @@ class Embeddings extends OpenAI {
 	 * @param Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( Feature $feature = null ): string {
+	protected function prep_api_url( ?Feature $feature = null ): string {
 		$settings   = $feature->get_settings( static::ID );
 		$endpoint   = $settings['endpoint_url'] ?? '';
 		$deployment = $settings['deployment'] ?? '';
@@ -340,10 +340,8 @@ class Embeddings extends OpenAI {
 
 	/**
 	 * Get the data to preview terms.
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -358,9 +356,13 @@ class Embeddings extends OpenAI {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
 	}
 
 	/**
@@ -571,7 +573,6 @@ class Embeddings extends OpenAI {
 		}
 
 		// Prepare the results.
-		$index   = 0;
 		$results = [];
 
 		foreach ( $sorted_results as $tax => $terms ) {
@@ -579,23 +580,22 @@ class Embeddings extends OpenAI {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Setup our taxonomy object.
-			$results[] = new \stdClass();
-
-			$results[ $index ]->{$tax_name} = [];
+			// Initialize the taxonomy bucket in results.
+			$results[ $tax ] = [
+				'label' => $tax_name,
+				'data'  => [],
+			];
 
 			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $tax ]['data'][] = [
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
 			}
-
-			++$index;
 		}
 
 		return $results;
@@ -824,7 +824,7 @@ class Embeddings extends OpenAI {
 	 * @param Feature $feature The feature instance.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_term( int $term_id, bool $force = false, Feature $feature = null ) {
+	public function generate_embeddings_for_term( int $term_id, bool $force = false, ?Feature $feature = null ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
@@ -907,11 +907,11 @@ class Embeddings extends OpenAI {
 	/**
 	 * Generate an embedding for a particular piece of text.
 	 *
-	 * @param string  $text    Text to generate the embedding for.
-	 * @param Feature $feature Feature instance.
+	 * @param string       $text    Text to generate the embedding for.
+	 * @param Feature|null $feature Feature instance.
 	 * @return array|boolean|WP_Error
 	 */
-	public function generate_embedding( string $text = '', Feature $feature = null ) {
+	public function generate_embedding( string $text = '', $feature = null ) {
 		if ( ! $feature ) {
 			$feature = new Classification();
 		}
@@ -1103,6 +1103,7 @@ class Embeddings extends OpenAI {
 	 */
 	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
+		$content    = '';
 
 		// Get the content depending on the type.
 		switch ( $type ) {
@@ -1186,5 +1187,14 @@ class Embeddings extends OpenAI {
 			$settings,
 			$this->feature_instance
 		);
+	}
+
+	/**
+	 * Get embeddings generation status.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		return self::$scheduler_instance->is_embeddings_generation_in_progress();
 	}
 }

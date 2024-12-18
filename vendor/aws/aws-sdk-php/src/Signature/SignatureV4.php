@@ -508,7 +508,7 @@ class SignatureV4 implements SignatureInterface
         CredentialsInterface $credentials,
         RequestInterface $request,
         $signingService,
-        SigningConfigAWS $signingConfig = null
+        ?SigningConfigAWS $signingConfig = null
     ){
         $this->verifyCRTLoaded();
         $signingConfig = $signingConfig ?? new SigningConfigAWS([
@@ -518,7 +518,7 @@ class SignatureV4 implements SignatureInterface
             'signed_body_value' => $this->getPayload($request),
             'should_normalize_uri_path' => true,
             'use_double_uri_encode' => true,
-            'region' => "*",
+            'region' => $this->region,
             'service' => $signingService,
             'date' => time(),
         ]);

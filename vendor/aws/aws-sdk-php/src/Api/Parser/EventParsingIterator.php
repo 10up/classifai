@@ -28,35 +28,67 @@ class EventParsingIterator implements Iterator
         StructureShape $shape,
         AbstractParser $parser
     ) {
-        $this->decodingIterator = new DecodingEventStreamIterator($stream);
+        $this->decodingIterator = $this->chooseDecodingIterator($stream);
         $this->shape = $shape;
         $this->parser = $parser;
     }
 
+    /**
+     * This method choose a decoding iterator implementation based on if the stream
+     * is seekable or not.
+     *
+     * @param $stream
+     *
+     * @return Iterator
+     */
+    private function chooseDecodingIterator($stream)
+    {
+        if ($stream->isSeekable()) {
+            return new DecodingEventStreamIterator($stream);
+        } else {
+            return new NonSeekableStreamDecodingEventStreamIterator($stream);
+        }
+    }
+
+    /**
+     * @return mixed
+     */
     #[\ReturnTypeWillChange]
     public function current()
     {
         return $this->parseEvent($this->decodingIterator->current());
     }
 
+    /**
+     * @return mixed
+     */
     #[\ReturnTypeWillChange]
     public function key()
     {
         return $this->decodingIterator->key();
     }
 
+    /**
+     * @return void
+     */
     #[\ReturnTypeWillChange]
     public function next()
     {
         $this->decodingIterator->next();
     }
 
+    /**
+     * @return void
+     */
     #[\ReturnTypeWillChange]
     public function rewind()
     {
         $this->decodingIterator->rewind();
     }
 
+    /**
+     * @return bool
+     */
     #[\ReturnTypeWillChange]
     public function valid()
     {
@@ -80,8 +112,12 @@ class EventParsingIterator implements Iterator
             throw new ParserException('Failed to parse without event type.');
         }
 
-        $eventShape = $this->shape->getMember($eventType);
         $eventPayload = $event['payload'];
+        if ($eventType === 'initial-response') {
+            return $this->parseInitialResponseEvent($eventPayload);
+        }
+
+        $eventShape = $this->shape->getMember($eventType);
 
         return [
             $eventType => array_merge(
@@ -152,5 +188,10 @@ class EventParsingIterator implements Iterator
             $event['headers'][':error-code'],
             $event['headers'][':error-message']
         );
+    }
+
+    private function parseInitialResponseEvent($payload): array
+    {
+        return ['initial-response' => json_decode($payload, true)];
     }
 }

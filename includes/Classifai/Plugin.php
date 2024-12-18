@@ -58,9 +58,15 @@ class Plugin {
 		// Initialize the services; each service handles their features.
 		$this->init_services();
 
-		// Initialize the ClassifAI Onboarding.
-		$onboarding = new Admin\Onboarding();
-		$onboarding->init();
+		if ( ! should_use_legacy_settings_panel() ) {
+			// Initialize the ClassifAI Settings.
+			$settings = new Admin\Settings();
+			$settings->init();
+		} else {
+			// Initialize the ClassifAI Onboarding. This is only used for the legacy settings panel.
+			$onboarding = new Admin\Onboarding();
+			$onboarding->init();
+		}
 
 		// Initialize the ClassifAI User Profile.
 		$user_profile = new Admin\UserProfile();
@@ -188,6 +194,7 @@ class Plugin {
 			'ajax_nonce'               => wp_create_nonce( 'classifai' ),
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
 			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
+			'plugin_url'               => CLASSIFAI_PLUGIN_URL,
 		];
 
 		wp_localize_script(
@@ -198,10 +205,10 @@ class Plugin {
 
 		if ( wp_script_is( 'wp-commands', 'registered' ) ) {
 			wp_enqueue_script(
-				'classifai-commands',
-				CLASSIFAI_PLUGIN_URL . 'dist/commands.js',
-				get_asset_info( 'commands', 'dependencies' ),
-				get_asset_info( 'commands', 'version' ),
+				'classifai-plugin-commands-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-commands.js',
+				get_asset_info( 'classifai-plugin-commands', 'dependencies' ),
+				get_asset_info( 'classifai-plugin-commands', 'version' ),
 				true
 			);
 		}
@@ -219,12 +226,17 @@ class Plugin {
 			return $links;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/language_processing?welcome_guide=1' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		return array_merge(
 			array(
 				'setup'    => sprintf(
 					'<a href="%s"> %s </a>',
-					esc_url( admin_url( 'admin.php?page=classifai_setup' ) ),
-					esc_html__( 'Set up', 'classifai' )
+					esc_url( $setup_url ),
+					esc_html__( 'Welcome', 'classifai' )
 				),
 				'settings' => sprintf(
 					'<a href="%s"> %s </a>',
@@ -240,18 +252,20 @@ class Plugin {
 	 * Load the Action Scheduler library.
 	 */
 	public function load_action_scheduler() {
-		$feature                  = new \Classifai\Features\Classification();
+		$features                 = [ new \Classifai\Features\Classification(), new \Classifai\Features\TermCleanup() ];
 		$is_feature_being_enabled = false;
 
-		if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		}
+		foreach ( $features as $feature ) {
+			if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+				$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			}
 
-		if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
-			return;
-		}
+			if ( ! ( $feature->is_enabled() || '1' === $is_feature_being_enabled ) ) {
+				continue;
+			}
 
-		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+			require_once CLASSIFAI_PLUGIN_DIR . '/vendor/woocommerce/action-scheduler/action-scheduler.php';
+		}
 	}
 
 	/**
