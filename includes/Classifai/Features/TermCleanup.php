@@ -359,8 +359,8 @@ class TermCleanup extends Feature {
 			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings( 'taxonomies' );
-		$taxonomy = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
+		$settings  = $this->get_settings( 'taxonomies' );
+		$taxonomy  = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
 		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? absint( $settings[ $taxonomy . '_threshold' ] ) : 75;
 
 		if ( empty( $taxonomy ) ) {
