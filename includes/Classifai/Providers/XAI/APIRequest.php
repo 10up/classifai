@@ -188,7 +188,7 @@ class APIRequest {
 				} else {
 					$message = $json['error']['message'] ?? '';
 					if ( empty( $message ) ) {
-						$message = $json['error'] ?? esc_html__( 'An error occured', 'classifai' );
+						$message = $json['error'] ?? esc_html__( 'An error occurred', 'classifai' );
 					}
 					return new WP_Error( $code, $message );
 				}

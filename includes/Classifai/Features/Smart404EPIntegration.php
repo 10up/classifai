@@ -75,7 +75,7 @@ class Smart404EPIntegration {
 	}
 
 	/**
-	 * Inintialize the class and register the needed hooks.
+	 * Initialize the class and register the needed hooks.
 	 */
 	public function init() {
 		// Vector support was added in Elasticsearch 7.0.
