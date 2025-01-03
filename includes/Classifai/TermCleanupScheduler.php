@@ -46,7 +46,7 @@ class TermCleanupScheduler {
 			case 'term_cleanup':
 				$started_by           = absint( $item['started_by'] );
 				$taxonomy             = $item['taxonomy'];
-				$threshold             = $item['threshold'];
+				$threshold            = $item['threshold'];
 				$term_cleanup         = new TermCleanup();
 				$embeddings_generated = (bool) $item['embeddings_generated'];
 
