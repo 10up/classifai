@@ -387,7 +387,7 @@ class TermCleanup extends Feature {
 		$job_args = [
 			[
 				'taxonomy'             => $taxonomy,
-				'threshold'             => $threshold,
+				'threshold'            => $threshold,
 				'action'               => 'term_cleanup',
 				'embeddings_generated' => false,
 				'processed'            => 0,
