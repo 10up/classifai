@@ -1,9 +1,11 @@
 <?php
+/* phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 
 namespace Classifai\Admin;
 
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\Classification;
+use function Classifai\should_use_legacy_settings_panel;
 
 class Notifications {
 
@@ -44,6 +46,7 @@ class Notifications {
 		$this->thresholds_update_notice();
 		$this->v3_migration_completed_notice();
 		$this->render_embeddings_notice();
+		$this->render_notices();
 	}
 
 	/**
@@ -84,6 +87,11 @@ class Notifications {
 			return;
 		}
 
+		$setup_url = admin_url( 'tools.php?page=classifai#/language_processing?welcome_guide=1' );
+		if ( should_use_legacy_settings_panel() ) {
+			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
+		}
+
 		// Prevent showing the default WordPress "Plugin Activated" notice.
 		unset( $_GET['activate'] ); // phpcs:ignore WordPress.Security.NonceVerification
 		?>
@@ -93,11 +101,12 @@ class Notifications {
 				<div class="classifai-logo">
 					<img src="<?php echo esc_url( CLASSIFAI_PLUGIN_URL . 'assets/img/classifai.png' ); ?>" alt="<?php esc_attr_e( 'ClassifAI', 'classifai' ); ?>" />
 				</div>
-				<h3 class="classifai-activation-message">
-					<?php esc_html_e( 'Congratulations, the ClassifAI plugin is now activated.', 'classifai' ); ?>
-				</h3>
-				<a class="classifai-button" href="<?php echo esc_url( admin_url( 'admin.php?page=classifai_setup' ) ); ?>">
-					<?php esc_html_e( 'Start setup', 'classifai' ); ?>
+				<div class="classifai-activation-message">
+					<p><?php esc_html_e( 'Thanks for downloading ClassifAI.', 'classifai' ); ?></p>
+					<p><?php esc_html_e( 'Choose your Features, connect your AI Provider accounts, and you’re ready to go.', 'classifai' ); ?></p>
+				</div>
+				<a class="components-button is-primary" href="<?php echo esc_url( $setup_url ); ?>">
+					<?php esc_html_e( 'Get started', 'classifai' ); ?>
 				</a>
 			</div>
 		</div>
@@ -109,8 +118,8 @@ class Notifications {
 	/**
 	 * Display a dismissable admin notice when a threshold may need updating.
 	 *
-	 * We used to recommend thresholds between 70-75% but in the latest
-	 * version of the AI Vision API, seems 55% is a better threshold.
+	 * We used to recommend thresholds between 50-55% but in the latest
+	 * version of the AI Vision API, seems 70% is a better threshold.
 	 */
 	public function thresholds_update_notice() {
 		$features = [
@@ -136,7 +145,7 @@ class Notifications {
 			switch ( $feature_instance::ID ) {
 				case DescriptiveTextGenerator::ID:
 					$key     = 'descriptive_confidence_threshold';
-					$message = __( 'The previous recommended threshold for descriptive text generation was 75% but we find better results now at around 55%.', 'classifai' );
+					$message = __( 'The previous recommended threshold for descriptive text generation was 55% but we find better results now at around 70%.', 'classifai' );
 					break;
 			}
 
@@ -145,8 +154,8 @@ class Notifications {
 				continue;
 			}
 
-			// Don't show the notice if the threshold is already at 55% or lower.
-			if ( $key && isset( $settings[ $key ] ) && $settings[ $key ] <= 55 ) {
+			// Don't show the notice if the threshold is already at 70% or higher.
+			if ( $key && isset( $settings[ $key ] ) && $settings[ $key ] >= 70 ) {
 				continue;
 			}
 			?>
@@ -157,9 +166,9 @@ class Notifications {
 					echo wp_kses_post(
 						sprintf(
 							// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
-							__( 'ClassifAI has updated to the v3.2 of the Azure AI Vision API. %1$s <a href="%2$s">Click here to adjust those settings</a>.', 'classifai' ),
+							__( 'ClassifAI has updated to the v4.0 of the Azure AI Vision API. %1$s <a href="%2$s">Click here to adjust those settings</a>.', 'classifai' ),
 							esc_html( $message ),
-							esc_url( admin_url( "tools.php?page=classifai&tab=image_processing&feature=$name" ) )
+							esc_url( admin_url( "tools.php?page=classifai#/image_processing/$name" ) )
 						)
 					);
 					?>
@@ -252,7 +261,7 @@ class Notifications {
 					sprintf(
 						// translators: %1$s: Feature specific message; %2$s: URL to Feature settings.
 						__( 'ClassifAI has updated to the <code>text-embedding-3-small</code> embeddings model. <br>This requires regenerating any stored embeddings for functionality to work properly. <br><a href="%1$s">Click here to do that</a>, noting this will make multiple API requests to OpenAI.', 'classifai' ),
-						wp_nonce_url( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' ), 'regen_embeddings', 'embeddings_nonce' )
+						wp_nonce_url( admin_url( 'admin-post.php?action=classifai_regen_embeddings' ), 'regen_embeddings', 'embeddings_nonce' )
 					)
 				);
 				?>
@@ -273,6 +282,7 @@ class Notifications {
 		$nonce          = wp_create_nonce( 'classifai_dismissible_notice' );
 		$admin_ajax_url = esc_url( admin_url( 'admin-ajax.php' ) );
 
+		/* phpcs:disable Squiz.PHP.Heredoc.NotAllowed */
 		$script = <<<EOD
 jQuery( function() {
 	const dismissNotices = document.querySelectorAll( '.classifai-dismissible-notice' );
@@ -307,6 +317,7 @@ jQuery( function() {
 	});
 });
 EOD;
+		/* phpcs:enable Squiz.PHP.Heredoc.NotAllowed */
 
 		wp_add_inline_script( 'common', $script, 'after' );
 	}
@@ -330,5 +341,59 @@ EOD;
 		$notice_id = sanitize_text_field( wp_unslash( $_POST['notice_id'] ) );
 
 		update_user_meta( get_current_user_id(), "classifai_dismissed_{$notice_id}", true );
+	}
+
+	/**
+	 * Render any saved notices to display.
+	 */
+	public function render_notices() {
+		$notices = $this->get_notices();
+		if ( empty( $notices ) ) {
+			return;
+		}
+
+		foreach ( $notices as $notice ) {
+			if ( ! empty( $notice['message'] ) ) {
+				?>
+				<div class="notice notice-<?php echo esc_attr( $notice['type'] ); ?> is-dismissible">
+					<p><?php echo esc_html( $notice['message'] ); ?></p>
+				</div>
+				<?php
+			}
+		}
+	}
+
+	/**
+	 * Get any saved notices to display.
+	 *
+	 * @return mixed
+	 */
+	public function get_notices() {
+		$notices = get_transient( 'classifai_notices' );
+		delete_transient( 'classifai_notices' );
+
+		return $notices;
+	}
+
+	/**
+	 * Set a notice to be displayed.
+	 *
+	 * This will be displayed on the next page load.
+	 * The notice will be stored in a transient.
+	 *
+	 * @param string $message The notice message.
+	 * @param string $type    The notice type.
+	 */
+	public function set_notice( string $message, string $type = 'info' ) {
+		$notices = get_transient( 'classifai_notices' );
+		if ( ! is_array( $notices ) ) {
+			$notices = [];
+		}
+
+		$notices[] = [
+			'type'    => $type,
+			'message' => $message,
+		];
+		set_transient( 'classifai_notices', $notices );
 	}
 }

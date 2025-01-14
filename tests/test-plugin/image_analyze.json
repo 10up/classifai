@@ -1,81 +1,173 @@
 {
-  "tags": [
-    {
-      "name": "text",
-      "confidence": 0.9854570031166077
-    },
-    {
-      "name": "design",
-      "confidence": 0.9676092863082886
-    },
-    {
-      "name": "screenshot",
-      "confidence": 0.9044408798217773
-    },
-    {
-      "name": "graphic",
-      "confidence": 0.8791931867599487
-    },
-    {
-      "name": "red",
-      "confidence": 0.8448371887207031
-    },
-    {
-      "name": "font",
-      "confidence": 0.8189171552658081
-    },
-    {
-      "name": "graphics",
-      "confidence": 0.7044017314910889
-    },
-    {
-      "name": "logo",
-      "confidence": 0.6639798283576965
-    },
-    {
-      "name": "typography",
-      "confidence": 0.6407877802848816
-    },
-    {
-      "name": "maroon",
-      "confidence": 0.6387392282485962
-    },
-    {
-      "name": "illustration",
-      "confidence": 0.6350329518318176
-    },
-    {
-      "name": "carmine",
-      "confidence": 0.6345877647399902
-    },
-    {
-      "name": "abstract",
-      "confidence": 0.624541163444519
-    },
-    {
-      "name": "vector graphics",
-      "confidence": 0.21607014536857605
-    },
-    {
-      "name": "clipart",
-      "confidence": 0.20682862401008606
-    }
-  ],
-  "description": {
-    "tags": [
-      "text"
-    ],
-    "captions": [
+  "modelVersion": "2023-10-01",
+  "metadata": {
+    "height": 250,
+    "width": 772
+  },
+  "tagsResult": {
+    "values": [
       {
-        "text": "text",
-        "confidence": 0.8448402285575867
+        "name": "text",
+        "confidence": 0.9854570031166077
+      },
+      {
+        "name": "design",
+        "confidence": 0.9676092863082886
+      },
+      {
+        "name": "screenshot",
+        "confidence": 0.9044408798217773
+      },
+      {
+        "name": "graphic",
+        "confidence": 0.8791931867599487
+      },
+      {
+        "name": "red",
+        "confidence": 0.8448371887207031
+      },
+      {
+        "name": "font",
+        "confidence": 0.8189171552658081
+      },
+      {
+        "name": "graphics",
+        "confidence": 0.7044017314910889
+      },
+      {
+        "name": "logo",
+        "confidence": 0.6639798283576965
+      },
+      {
+        "name": "typography",
+        "confidence": 0.6407877802848816
+      },
+      {
+        "name": "maroon",
+        "confidence": 0.6387392282485962
+      },
+      {
+        "name": "illustration",
+        "confidence": 0.6350329518318176
+      },
+      {
+        "name": "carmine",
+        "confidence": 0.6345877647399902
+      },
+      {
+        "name": "abstract",
+        "confidence": 0.624541163444519
+      },
+      {
+        "name": "vector graphics",
+        "confidence": 0.21607014536857605
+      },
+      {
+        "name": "clipart",
+        "confidence": 0.20682862401008606
       }
     ]
   },
-  "requestId": "50fdeac0-9ef5-4e81-9e05-d392d15907ca",
-  "metadata": {
-    "height": 250,
-    "width": 772,
-    "format": "Png"
+  "captionResult": {
+    "text": "Text",
+    "confidence": 0.8448402285575867
+  },
+  "readResult": {
+    "blocks": [
+      {
+        "lines": [
+          {
+            "text": "CLASSIFAI_",
+            "boundingPolygon": [
+              {
+                "x": 193,
+                "y": 337
+              },
+              {
+                "x": 614,
+                "y": 348
+              },
+              {
+                "x": 617,
+                "y": 507
+              },
+              {
+                "x": 187,
+                "y": 510
+              }
+            ],
+            "words": [
+              {
+                "text": "CLASSIFAI_",
+                "boundingPolygon": [
+                  {
+                    "x": 188,
+                    "y": 337
+                  },
+                  {
+                    "x": 600,
+                    "y": 341
+                  },
+                  {
+                    "x": 599,
+                    "y": 511
+                  },
+                  {
+                    "x": 187,
+                    "y": 510
+                  }
+                ],
+                "confidence": 0.991
+              }
+            ]
+          },
+          {
+            "text": "Test",
+            "boundingPolygon": [
+              {
+                "x": 193,
+                "y": 337
+              },
+              {
+                "x": 614,
+                "y": 348
+              },
+              {
+                "x": 617,
+                "y": 507
+              },
+              {
+                "x": 187,
+                "y": 510
+              }
+            ],
+            "words": [
+              {
+                "text": "Test",
+                "boundingPolygon": [
+                  {
+                    "x": 188,
+                    "y": 337
+                  },
+                  {
+                    "x": 600,
+                    "y": 341
+                  },
+                  {
+                    "x": 599,
+                    "y": 511
+                  },
+                  {
+                    "x": 187,
+                    "y": 510
+                  }
+                ],
+                "confidence": 0.991
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

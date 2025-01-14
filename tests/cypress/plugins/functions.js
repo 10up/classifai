@@ -3,7 +3,6 @@ import * as chatgptData from '../../test-plugin/chatgpt.json';
 import * as chatgptCustomExcerptData from '../../test-plugin/chatgpt-custom-excerpt-prompt.json';
 import * as chatgptCustomTitleData from '../../test-plugin/chatgpt-custom-title-prompt.json';
 import * as dalleData from '../../test-plugin/dalle.json';
-import * as ocrData from '../../test-plugin/ocr.json';
 import * as whisperData from '../../test-plugin/whisper.json';
 import * as imageData from '../../test-plugin/image_analyze.json';
 import * as pdfData from '../../test-plugin/pdf.json';
@@ -99,7 +98,7 @@ export const getWhisperData = () => {
  */
 export const getOCRData = () => {
 	const words = [];
-	ocrData.regions.forEach( ( el ) => {
+	imageData.readResult.blocks.forEach( ( el ) => {
 		el.lines.forEach( ( el2 ) => {
 			el2.words.forEach( ( el3 ) => {
 				words.push( el3.text );
@@ -116,10 +115,8 @@ export const getOCRData = () => {
  */
 export const getImageData = () => {
 	const data = {
-		altText: imageData.description.captions.filter(
-			( el ) => el.confidence > 0.75
-		)[ 0 ].text,
-		tags: imageData.tags
+		altText: imageData.captionResult.text,
+		tags: imageData.tagsResult.values
 			.filter( ( el ) => el.confidence > 0.7 )
 			.map( ( el ) => el.name ),
 	};

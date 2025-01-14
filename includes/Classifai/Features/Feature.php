@@ -5,6 +5,8 @@ namespace Classifai\Features;
 use WP_REST_Request;
 use WP_Error;
 use function Classifai\find_provider_class;
+use function Classifai\should_use_legacy_settings_panel;
+use function Classifai\get_asset_info;
 
 abstract class Feature {
 	/**
@@ -15,6 +17,16 @@ abstract class Feature {
 	 * @var string
 	 */
 	const ID = '';
+
+	/**
+	 * Plugin area script handle.
+	 *
+	 * Every feature that injects content into the plugin area
+	 * should add this script as a dependency.
+	 *
+	 * @var string
+	 */
+	const PLUGIN_AREA_SCRIPT = 'classifai-plugin-fill-js';
 
 	/**
 	 * Feature label.
@@ -51,8 +63,13 @@ abstract class Feature {
 	 */
 	public function setup() {
 		add_action( 'admin_init', [ $this, 'setup_roles' ] );
-		add_action( 'admin_init', [ $this, 'register_setting' ] );
-		add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		add_action( 'rest_api_init', [ $this, 'setup_roles' ] );
+		if ( should_use_legacy_settings_panel() ) {
+			add_action( 'admin_init', [ $this, 'register_setting' ] );
+			add_action( 'admin_init', [ $this, 'setup_fields_sections' ] );
+		}
+
+		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
@@ -71,6 +88,10 @@ abstract class Feature {
 	 * Assigns user roles to the $roles array.
 	 */
 	public function setup_roles() {
+		if ( ! function_exists( 'get_editable_roles' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/user.php';
+		}
+
 		$default_settings = $this->get_default_settings();
 		$this->roles      = get_editable_roles() ?? [];
 		$this->roles      = array_combine( array_keys( $this->roles ), array_column( $this->roles, 'name' ) );
@@ -93,6 +114,15 @@ abstract class Feature {
 	}
 
 	/**
+	 * Returns the roles for the feature.
+	 *
+	 * @return array Array of roles.
+	 */
+	public function get_roles(): array {
+		return $this->roles;
+	}
+
+	/**
 	 * Returns the label of the feature.
 	 *
 	 * @return string
@@ -111,6 +141,19 @@ abstract class Feature {
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
 			$this->label
+		);
+	}
+
+	/**
+	 * Registers the plugin area script.
+	 */
+	public function register_plugin_area_script() {
+		wp_register_script(
+			self::PLUGIN_AREA_SCRIPT,
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-fill.js',
+			get_asset_info( 'classifai-plugin-fill', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-fill', 'version' ),
+			true
 		);
 	}
 
@@ -318,6 +361,11 @@ abstract class Feature {
 		$settings = get_option( $this->get_option_name(), [] );
 		$settings = $this->merge_settings( (array) $settings, (array) $defaults );
 
+		// If saved provider is not supported anymore, reset it.
+		if ( ! in_array( $settings['provider'], array_keys( $this->get_providers() ), true ) ) {
+			$settings['provider'] = '';
+		}
+
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
 		}
@@ -410,10 +458,9 @@ abstract class Feature {
 	/**
 	 * Returns the providers supported by the feature.
 	 *
-	 * @internal
 	 * @return array
 	 */
-	protected function get_providers(): array {
+	public function get_providers(): array {
 		/**
 		 * Filter the feature providers.
 		 *
@@ -435,6 +482,22 @@ abstract class Feature {
 	 */
 	public function reset_settings() {
 		update_option( $this->get_option_name(), $this->get_default_settings() );
+	}
+
+	/**
+	 * Updates the settings for the feature.
+	 *
+	 * @param array $new_settings New settings to update.
+	 */
+	public function update_settings( array $new_settings ) {
+		$settings = $this->get_settings();
+		if ( empty( $new_settings ) ) {
+			return;
+		}
+
+		// Update the settings with the new values.
+		$new_settings = array_merge( $settings, $new_settings );
+		update_option( $this->get_option_name(), $new_settings );
 	}
 
 	/**
@@ -1062,6 +1125,46 @@ abstract class Feature {
 		$post_statuses = apply_filters( 'classifai_' . static::ID . '_post_statuses', $post_statuses );
 
 		return $post_statuses;
+	}
+
+	/**
+	 * Return the list of taxonomies for the feature settings.
+	 *
+	 * @param array $post_types Array of post types to filter taxonomies by, leave empty to get all taxonomies.
+	 * @return array
+	 */
+	public function get_taxonomies( array $post_types = [] ): array {
+		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			// Remove this taxonomy if it doesn't support at least one of our post types.
+			if (
+				(
+					! empty( $post_types ) &&
+					empty( array_intersect( $post_types, $taxonomy->object_type ) )
+				) ||
+				'post_format' === $taxonomy->name
+			) {
+				continue;
+			}
+
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_setting_taxonomies
+		 *
+		 * @param {array} $supported Array of supported taxonomies.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
 	}
 
 	/**

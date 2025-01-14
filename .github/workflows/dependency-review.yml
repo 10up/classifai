@@ -16,8 +16,9 @@ jobs:
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v4
+
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v4.3.3
         with:
           license-check: true
           vulnerability-check: false

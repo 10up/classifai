@@ -347,7 +347,9 @@ class Moderation extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'content_types' => [],
+			'content_types' => [
+				'comments' => 'comments',
+			],
 			'provider'      => ModerationProvider::ID,
 		];
 	}

@@ -1,13 +1,13 @@
 describe( '[Language processing] Resize Content Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#provider' ).select( 'openai_chatgpt' );
-		cy.get( '#api_key' ).type( 'abc123' );
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.selectProvider( 'openai_chatgpt' );
+		cy.get( '#openai_chatgpt_api_key' ).type( 'abc123' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -17,15 +17,13 @@ describe( '[Language processing] Resize Content Tests', () => {
 	} );
 
 	it( 'Resize content feature can grow and shrink content', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_content_resizing_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.allowFeatureToAdmin();
+		cy.saveFeatureSettings();
 
 		cy.createPost( {
 			title: 'Resize content',
@@ -76,154 +74,126 @@ describe( '[Language processing] Resize Content Tests', () => {
 	} );
 
 	it( 'Can set multiple custom resize generation prompts, select one as the default and delete one.', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
 
 		// Add three custom shrink prompts.
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
+			'.settings-condense-text-prompt button.components-button.action__add_prompt'
 		)
-			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset' )
 			.click()
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 4 );
+			'.settings-condense-text-prompt .classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 4 );
 
 		// Add three custom grow prompts.
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
+			'.settings-expand-text-prompt button.components-button.action__add_prompt'
 		)
-			.parents( 'td:first' )
-			.find( 'button.js-classifai-add-prompt-fieldset:first' )
 			.click()
 			.click()
 			.click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 4 );
+			'.settings-expand-text-prompt .classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 4 );
 
 		// Set the data for each prompt.
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][1][title]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-1 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][1][prompt]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-1 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This is our first custom shrink prompt' );
 
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][2][title]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-2 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][2][prompt]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-2 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
+
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][3][title]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-3 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][3][prompt]"]'
+			'.settings-condense-text-prompt #classifai-prompt-setting-3 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This is a custom shrink prompt' );
+
+		// Expand prompts.
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][1][title]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-1 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'First custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][1][prompt]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-1 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This is our first custom grow prompt' );
 
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][2][title]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-2 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'Second custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][2][prompt]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-2 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This prompt should be deleted' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][3][title]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-3 .classifai-prompt-title input'
 		)
 			.clear()
 			.type( 'Third custom prompt' );
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][3][prompt]"]'
+			'.settings-expand-text-prompt #classifai-prompt-setting-3 .classifai-prompt-text textarea'
 		)
 			.clear()
 			.type( 'This is a custom grow prompt' );
 
 		// Set the third prompt as our default.
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][3][default]"]'
-		)
-			.parent()
-			.find( 'a.action__set_default' )
-			.click( { force: true } );
+			'.settings-condense-text-prompt #classifai-prompt-setting-3 .actions-rows button.action__set_default'
+		).click( { force: true } );
+
 		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][3][default]"]'
-		)
-			.parent()
-			.find( 'a.action__set_default' )
-			.click( { force: true } );
+			'.settings-expand-text-prompt #classifai-prompt-setting-3 .actions-rows button.action__set_default'
+		).click( { force: true } );
 
 		// Delete the second prompt.
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][2][default]"]'
-		)
-			.parent()
-			.find( 'a.action__remove_prompt' )
-			.click( { force: true } );
-		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
-			.find( '.button-primary' )
-			.click();
+			'.settings-condense-text-prompt #classifai-prompt-setting-2 .actions-rows button.action__remove_prompt'
+		).click( { force: true } );
+		cy.get( 'div.components-confirm-dialog button.is-primary' ).click();
 		cy.get(
-			'[name="classifai_feature_content_resizing[condense_text_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 3 );
-		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][2][default]"]'
-		)
-			.parent()
-			.find( 'a.action__remove_prompt' )
-			.click( { force: true } );
-		cy.get( 'div[aria-describedby="js-classifai--delete-prompt-modal"]' )
-			.first()
-			.find( '.button-primary' )
-			.click();
-		cy.get(
-			'[name="classifai_feature_content_resizing[expand_text_prompt][0][default]"]'
-		)
-			.parents( 'td:first' )
-			.find( '.classifai-field-type-prompt-setting' )
-			.should( 'have.length', 3 );
+			'.settings-condense-text-prompt .classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 3 );
 
-		cy.get( '#submit' ).click();
+		cy.get(
+			'.settings-expand-text-prompt #classifai-prompt-setting-2 .actions-rows button.action__remove_prompt'
+		).click( { force: true } );
+		cy.get( 'div.components-confirm-dialog button.is-primary' ).click();
+		cy.get(
+			'.settings-expand-text-prompt .classifai-prompts div.classifai-field-type-prompt-setting'
+		).should( 'have.length', 3 );
+
+		cy.saveFeatureSettings();
 
 		cy.createPost( {
 			title: 'Resize content',
@@ -275,21 +245,21 @@ describe( '[Language processing] Resize Content Tests', () => {
 
 	it( 'Can enable/disable resize content feature', () => {
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyResizeContentEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_content_resizing'
+		cy.visitFeatureSettings(
+			'language_processing/feature_content_resizing'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyResizeContentEnabled( true );

@@ -6,6 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Azure\OpenAI;
+use Classifai\Providers\Browser\ChromeAI;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -45,6 +46,7 @@ class ExcerptGeneration extends Feature {
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
+			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 		];
 	}
 
@@ -198,10 +200,10 @@ class ExcerptGeneration extends Feature {
 
 		// This script removes the core excerpt panel and replaces it with our own.
 		wp_enqueue_script(
-			'classifai-post-excerpt',
-			CLASSIFAI_PLUGIN_URL . 'dist/post-excerpt.js',
-			array_merge( get_asset_info( 'post-excerpt', 'dependencies' ), [ 'lodash' ] ),
-			get_asset_info( 'post-excerpt', 'version' ),
+			'classifai-plugin-excerpt-generation-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-excerpt-generation.js',
+			array_merge( get_asset_info( 'classifai-plugin-excerpt-generation', 'dependencies' ), [ 'lodash' ] ),
+			get_asset_info( 'classifai-plugin-excerpt-generation', 'version' ),
 			true
 		);
 	}
@@ -220,23 +222,23 @@ class ExcerptGeneration extends Feature {
 			if ( $screen && ! $screen->is_block_editor() ) {
 				if ( post_type_supports( $screen->post_type, 'excerpt' ) ) {
 					wp_enqueue_style(
-						'classifai-generate-title-classic-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-title-classic.css',
+						'classifai-plugin-classic-excerpt-generation-css',
+						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-excerpt-generation.css',
 						[],
-						get_asset_info( 'generate-title-classic', 'version' ),
+						get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'version' ),
 						'all'
 					);
 
 					wp_enqueue_script(
-						'classifai-generate-excerpt-classic-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/generate-excerpt-classic.js',
-						array_merge( get_asset_info( 'generate-excerpt-classic', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-excerpt-classic', 'version' ),
+						'classifai-plugin-classic-excerpt-generation-js',
+						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-excerpt-generation.js',
+						array_merge( get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'dependencies' ), array( 'wp-api' ) ),
+						get_asset_info( 'classifai-plugin-classic-excerpt-generation', 'version' ),
 						true
 					);
 
 					wp_add_inline_script(
-						'classifai-generate-excerpt-classic-js',
+						'classifai-plugin-classic-excerpt-generation-js',
 						sprintf(
 							'var classifaiGenerateExcerpt = %s;',
 							wp_json_encode(
@@ -251,13 +253,6 @@ class ExcerptGeneration extends Feature {
 					);
 				}
 			}
-
-			wp_enqueue_style(
-				'classifai-language-processing-style',
-				CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
-				[],
-				get_asset_info( 'language-processing', 'version' ),
-			);
 		}
 	}
 
@@ -343,10 +338,34 @@ class ExcerptGeneration extends Feature {
 					'original' => 1,
 				],
 			],
-			'post_types'              => [],
+			'post_types'              => [
+				'post' => 'post',
+			],
 			'length'                  => absint( apply_filters( 'excerpt_length', 55 ) ),
 			'provider'                => ChatGPT::ID,
 		];
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings['generate_excerpt_prompt'] ) ) {
+			foreach ( $settings['generate_excerpt_prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings['generate_excerpt_prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

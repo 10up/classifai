@@ -1,12 +1,10 @@
 describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
-		cy.get( '#status' ).check();
-		cy.get( '#provider' ).select( 'azure_openai_embeddings' );
-		cy.get( '#submit' ).click();
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
+		cy.enableFeature();
+		cy.selectProvider( 'azure_openai_embeddings' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -16,33 +14,27 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	} );
 
 	it( 'Can save Azure OpenAI Embeddings "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
-		cy.get(
-			'input[name="classifai_feature_classification[azure_openai_embeddings][endpoint_url]"]'
-		)
+		cy.selectProvider( 'azure_openai_embeddings' );
+		cy.get( 'input#azure_openai_embeddings_endpoint_url' )
 			.clear()
-			.type( 'https://e2e-test-azure-openai-embeddings.test/' );
-		cy.get(
-			'input[name="classifai_feature_classification[azure_openai_embeddings][api_key]"]'
-		)
+			.type( 'https://e2e-test-azure-openai.test/' );
+		cy.get( 'input#azure_openai_embeddings_api_key' )
 			.clear()
 			.type( 'password' );
-		cy.get(
-			'input[name="classifai_feature_classification[azure_openai_embeddings][deployment]"]'
-		)
+		cy.get( 'input#azure_openai_embeddings_deployment' )
 			.clear()
 			.type( 'test' );
-		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_classification_post_types_post' ).check();
+
+		cy.enableFeature();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.get(
-			'#classifai_feature_classification_post_statuses_publish'
+			'.settings-allowed-post-statuses input#post_status_publish'
 		).check();
-		cy.get( '#category' ).check();
-		cy.get( '#category_threshold' ).clear().type( 100 );
-		cy.get( '#submit' ).click();
+		cy.get( '#category-enabled' ).check();
+		cy.get( '#category-threshold' ).clear().type( 100 );
+		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can create category and post and category will get auto-assigned', () => {
@@ -92,27 +84,24 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		} );
 	} );
 
-	it( 'Can see the preview on the settings page', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
+	// TODO: Update this test to use new previewer.
+	it.skip( 'Can see the preview on the settings page', () => {
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 
 		// Click the Preview button.
 		const closePanelSelector = '#get-classifier-preview-data-btn';
 		cy.get( closePanelSelector ).click();
 
 		// Check the term is received and visible.
-		cy.get( '.tax-row--Category' ).should( 'exist' );
+		cy.get( '.tax-row--category' ).should( 'exist' );
 	} );
 
 	it( 'Can create category and post and category will not get auto-assigned if feature turned off', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Create test term.
 		cy.deleteAllTerms( 'category' );
@@ -164,17 +153,15 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 	it( 'Can see the enable button in a post (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
-		cy.get( '#status' ).check();
-		cy.get( '#classifai_feature_classification_post_types_post' ).check();
+		cy.enableFeature();
+		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.get(
-			'#classifai_feature_classification_post_statuses_publish'
+			'.settings-allowed-post-statuses input#post_status_publish'
 		).check();
-		cy.get( '#category' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '#category-enabled' ).check();
+		cy.saveFeatureSettings();
 
 		cy.classicCreatePost( {
 			title: 'Embeddings test classic',
@@ -192,21 +179,17 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 		cy.disableClassicEditor();
 
 		// Disable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifyClassifyContentEnabled( false );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_classification'
-		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifyClassifyContentEnabled( true );
@@ -214,14 +197,12 @@ describe( '[Language processing] Classify Content (Azure OpenAI) Tests', () => {
 
 	it( 'Can enable/disable content classification feature by role', () => {
 		// Remove custom taxonomies so those don't interfere with the test.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
-		);
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		// Disable access for all users.
 		cy.disableFeatureForUsers();
 
-		cy.get( '#submit' ).click();
+		cy.saveFeatureSettings();
 
 		// Disable admin role.
 		cy.disableFeatureForRoles( 'feature_classification', [

@@ -18,22 +18,28 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 
 		// Check Heading
 		cy.visit( '/wp-admin/tools.php?page=classifai' );
-		cy.get( '#wpbody h2' ).contains( 'ClassifAI Settings' );
-		cy.get( 'label[for="email"]' ).contains( 'Registered Email' );
-		cy.get( 'label[for="license_key"]' ).contains( 'Registration Key' );
+		cy.get( '.classifai-settings-wrapper' ).should( 'exist' );
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a' ).first().contains( 'Language Processing' );
 	} );
 
 	it( 'Can visit "Language Processing" settings page.', () => {
-		// Check Heading
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing'
-		);
-		cy.get( '#wpbody h2' ).contains( 'Language Processing' );
+		// Check Selected Navigation menu
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a.active-tab' )
+			.first()
+			.contains( 'Language Processing' );
 	} );
 
 	it( 'Can see "Image Processing" menu and Can visit "Image Processing" settings page.', () => {
-		// Check Heading
-		cy.visit( '/wp-admin/tools.php?page=classifai&tab=image_processing' );
-		cy.get( '#wpbody h2' ).contains( 'Image Processing' );
+		// Check Selected Navigation menu
+		cy.visitFeatureSettings(
+			'image_processing/feature_descriptive_text_generator'
+		);
+		cy.get( '.classifai-tabs' ).should( 'exist' );
+		cy.get( '.classifai-tabs a.active-tab' )
+			.first()
+			.contains( 'Image Processing' );
 	} );
 } );

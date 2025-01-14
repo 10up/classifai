@@ -1,0 +1,39 @@
+name: WordPress Plugin Checks
+
+on:
+  push:
+    branches:
+      - develop
+      - trunk
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    uses: 10up/classifai/.github/workflows/build-release-zip.yml@develop
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download built zip
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}
+          path: ${{ github.event.repository.name }}
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ github.event.repository.name }}
+
+      - name: Run plugin check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ${{ github.event.repository.name }}
+          exclude-checks: 'plugin_readme,plugin_updater' # Plugin isn't on .org so excluding these for now.
+          exclude-directories: 'assets,dist,vendor'
