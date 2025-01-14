@@ -77,6 +77,7 @@ export const UserPermissions = () => {
 						} );
 					} }
 					className="classifai-settings__user-based-opt-out"
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</PanelBody>

@@ -152,7 +152,7 @@ function computer_vision_max_filesize(): int {
 	 *
 	 * @return {int} Filtered filesize in bytes.
 	 */
-	return apply_filters( 'classifai_computer_vision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+	return apply_filters( 'classifai_computer_vision_max_filesize', 20 * MB_IN_BYTES ); // 20MB default.
 }
 
 /**
@@ -302,7 +302,7 @@ function attachment_is_pdf( $post ): bool {
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
  * @return string|array
  */
-function get_asset_info( string $slug, string $attribute = null ) {
+function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
 		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
@@ -664,15 +664,15 @@ function get_classification_mode(): string {
 /**
  * Determine if the legacy settings panel should be used.
  *
- * @since x.x.x
+ * @since 3.2.0
  *
  * @return bool
  */
 function should_use_legacy_settings_panel(): bool {
 	/**
-	 * Filter to determine if the legacy settings panel should be used.'
+	 * Filter to determine if the legacy settings panel should be used.
 	 *
-	 * @since x.x.x
+	 * @since 3.2.0
 	 * @hook classifai_use_legacy_settings_panel
 	 *
 	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.

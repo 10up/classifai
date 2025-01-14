@@ -717,7 +717,7 @@ class TextToSpeech extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enables speech generation for post content.', 'classifai' );
+		return esc_html__( 'Generate an audio file from post content and output a "Read to Me" component.', 'classifai' );
 	}
 
 	/**

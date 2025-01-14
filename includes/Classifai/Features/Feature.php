@@ -361,6 +361,11 @@ abstract class Feature {
 		$settings = get_option( $this->get_option_name(), [] );
 		$settings = $this->merge_settings( (array) $settings, (array) $defaults );
 
+		// If saved provider is not supported anymore, reset it.
+		if ( ! in_array( $settings['provider'], array_keys( $this->get_providers() ), true ) ) {
+			$settings['provider'] = '';
+		}
+
 		if ( $index && isset( $settings[ $index ] ) ) {
 			return $settings[ $index ];
 		}
@@ -1120,6 +1125,46 @@ abstract class Feature {
 		$post_statuses = apply_filters( 'classifai_' . static::ID . '_post_statuses', $post_statuses );
 
 		return $post_statuses;
+	}
+
+	/**
+	 * Return the list of taxonomies for the feature settings.
+	 *
+	 * @param array $post_types Array of post types to filter taxonomies by, leave empty to get all taxonomies.
+	 * @return array
+	 */
+	public function get_taxonomies( array $post_types = [] ): array {
+		$taxonomies = get_taxonomies( [], 'objects' );
+		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
+		$supported  = [];
+
+		foreach ( $taxonomies as $taxonomy ) {
+			// Remove this taxonomy if it doesn't support at least one of our post types.
+			if (
+				(
+					! empty( $post_types ) &&
+					empty( array_intersect( $post_types, $taxonomy->object_type ) )
+				) ||
+				'post_format' === $taxonomy->name
+			) {
+				continue;
+			}
+
+			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
+		}
+
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since 3.0.0
+		 * @hook classifai_{feature}_setting_taxonomies
+		 *
+		 * @param {array} $supported Array of supported taxonomies.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
 	}
 
 	/**

@@ -33,7 +33,7 @@ export const ContentResizingSettings = () => {
 			>
 				<PromptRepeater
 					prompts={ featureSettings.condense_text_prompt }
-					setPromts={ ( prompts ) => {
+					setPrompts={ ( prompts ) => {
 						setFeatureSettings( {
 							condense_text_prompt: prompts,
 						} );
@@ -47,7 +47,7 @@ export const ContentResizingSettings = () => {
 			>
 				<PromptRepeater
 					prompts={ featureSettings.expand_text_prompt }
-					setPromts={ ( prompts ) => {
+					setPrompts={ ( prompts ) => {
 						setFeatureSettings( {
 							expand_text_prompt: prompts,
 						} );

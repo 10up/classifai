@@ -24,7 +24,7 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { isFeatureActive, usePostTypes } from '../../utils/utils';
+import { isFeatureActive } from '../../utils/utils';
 import { NLUFeatureSettings } from './nlu-feature';
 import {
 	AzureOpenAIEmbeddingsResults,
@@ -45,35 +45,44 @@ const ClassificationMethodSettings = () => {
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 
-	const classifaicationMethodOptions = [
-		{
+	const classificationMethodOptions = [];
+	if ( featureSettings.provider === 'ibm_watson_nlu' ) {
+		classificationMethodOptions.push( {
 			label: __(
 				'Recommend terms even if they do not exist on the site',
 				'classifai'
 			),
 			value: 'recommended_terms',
-		},
-		{
-			label: __(
-				'Only recommend terms that already exist on the site',
-				'classifai'
-			),
-			value: 'existing_terms',
-		},
-	];
-
-	if (
-		[ 'openai_embeddings', 'azure_openai_embeddings' ].includes(
-			featureSettings.provider
-		)
-	) {
-		delete classifaicationMethodOptions[ 0 ];
-		if ( featureSettings.classification_method === 'recommended_terms' ) {
-			setFeatureSettings( {
-				classification_method: 'existing_terms',
-			} );
-		}
+		} );
 	}
+
+	classificationMethodOptions.push( {
+		label: __(
+			'Only recommend terms that already exist on the site',
+			'classifai'
+		),
+		value: 'existing_terms',
+	} );
+
+	useEffect( () => {
+		if (
+			[ 'openai_embeddings', 'azure_openai_embeddings' ].includes(
+				featureSettings.provider
+			)
+		) {
+			if (
+				featureSettings.classification_method === 'recommended_terms'
+			) {
+				setFeatureSettings( {
+					classification_method: 'existing_terms',
+				} );
+			}
+		}
+	}, [
+		featureSettings.provider,
+		featureSettings.classification_method,
+		setFeatureSettings,
+	] );
 
 	return (
 		<SettingsRow label={ __( 'Classification method', 'classifai' ) }>
@@ -84,7 +93,7 @@ const ClassificationMethodSettings = () => {
 						classification_method: value,
 					} );
 				} }
-				options={ classifaicationMethodOptions }
+				options={ classificationMethodOptions }
 				selected={ featureSettings.classification_method }
 			/>
 		</SettingsRow>
@@ -132,8 +141,7 @@ export const ClassificationSettings = () => {
 	);
 	const isConfigured = isFeatureActive( featureSettings );
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const { postTypesSelectOptions } = usePostTypes();
-	const { postStatuses } = window.classifAISettings;
+	const { postTypes, postStatuses } = window.classifAISettings;
 	const { createSuccessNotice } = useDispatch( noticesStore );
 
 	const previewerContextData = {
@@ -202,6 +210,7 @@ export const ClassificationSettings = () => {
 								'Used to preview the results for a particular post.',
 								'classifai'
 							) }
+							__nextHasNoMarginBottom
 						>
 							<PostSelector showLabel={ false } />
 						</BaseControl>
@@ -260,6 +269,7 @@ export const ClassificationSettings = () => {
 									},
 								} );
 							} }
+							__nextHasNoMarginBottom
 						/>
 					);
 				} ) }
@@ -272,8 +282,7 @@ export const ClassificationSettings = () => {
 				) }
 				className="settings-allowed-post-types"
 			>
-				{ postTypesSelectOptions.map( ( option ) => {
-					const { value: key, label } = option;
+				{ Object.keys( postTypes || {} ).map( ( key ) => {
 					return (
 						<CheckboxControl
 							id={ key }
@@ -281,7 +290,7 @@ export const ClassificationSettings = () => {
 							checked={
 								featureSettings.post_types?.[ key ] === key
 							}
-							label={ label }
+							label={ postTypes?.[ key ] }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									post_types: {
@@ -290,6 +299,7 @@ export const ClassificationSettings = () => {
 									},
 								} );
 							} }
+							__nextHasNoMarginBottom
 						/>
 					);
 				} ) }

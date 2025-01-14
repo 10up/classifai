@@ -394,7 +394,7 @@ class ImageTextExtraction extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'OCR detects text in images (e.g., handwritten notes) and saves that as post content.', 'classifai' );
+		return esc_html__( 'OCR detects text in images (e.g., handwritten notes) and saves that as content with the image.', 'classifai' );
 	}
 
 	/**

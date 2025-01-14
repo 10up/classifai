@@ -86,7 +86,7 @@ export function AzureOpenAIEmbeddingsResults( { postId } ) {
 	}, [ postId ] );
 
 	const card = Object.keys( responseData ).map( ( taxSlug ) => {
-		const tags = responseData[ taxSlug ].data.map( ( tag, _index ) => {
+		const tags = responseData[ taxSlug ]?.data.map( ( tag, _index ) => {
 			const threshold = settings[ `${ taxSlug }_threshold` ];
 			const score = normalizeScore( tag.score );
 

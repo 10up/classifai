@@ -2,10 +2,12 @@
 
 namespace Classifai\Features;
 
+use Classifai\Providers\XAI\Grok;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Azure\OpenAI;
+use Classifai\Providers\Browser\ChromeAI;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -45,6 +47,8 @@ class ExcerptGeneration extends Feature {
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
+			Grok::ID      => __( 'xAI Grok', 'classifai' ),
+			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 		];
 	}
 
@@ -342,6 +346,28 @@ class ExcerptGeneration extends Feature {
 			'length'                  => absint( apply_filters( 'excerpt_length', 55 ) ),
 			'provider'                => ChatGPT::ID,
 		];
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings['generate_excerpt_prompt'] ) ) {
+			foreach ( $settings['generate_excerpt_prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings['generate_excerpt_prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

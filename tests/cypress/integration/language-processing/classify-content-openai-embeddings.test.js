@@ -188,7 +188,7 @@ describe( '[Language processing] Classify Content (OpenAI) Tests', () => {
 
 	it( 'Can enable/disable content classification feature by role', () => {
 		// Remove custom taxonomies so those don't interfere with the test.
-		cy.visitFeatureSettings( 'language_processing' );
+		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		// Disable access for all users.
 		cy.disableFeatureForUsers();

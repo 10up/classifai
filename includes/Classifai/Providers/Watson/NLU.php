@@ -265,9 +265,9 @@ class NLU extends Provider {
 	 * Filter classifier preview based on the feature settings.
 	 *
 	 * @param array|WP_Error $classified_data The classified data.
-	 * @return array
+	 * @return array|WP_Error
 	 */
-	public function filter_classify_preview_data( $classified_data ): array {
+	public function filter_classify_preview_data( $classified_data ) {
 		if ( is_wp_error( $classified_data ) ) {
 			return $classified_data;
 		}

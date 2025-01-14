@@ -6,6 +6,7 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Features\ContentResizing;
+use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
 use Classifai\Providers\Provider;
@@ -14,6 +15,8 @@ use WP_Error;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
+use function Classifai\get_modified_image_source_url;
+use function Classifai\get_largest_size_and_dimensions_image_url;
 
 class ChatGPT extends Provider {
 
@@ -132,6 +135,17 @@ class ChatGPT extends Provider {
 			case TitleGeneration::ID:
 				$common_settings['number_of_suggestions'] = 1;
 				break;
+
+			case DescriptiveTextGenerator::ID:
+				$common_settings['prompt'] = [
+					[
+						'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
+						'prompt'   => $this->feature_instance->prompt,
+						'original' => 1,
+						'default'  => 1,
+					],
+				];
+				break;
 		}
 
 		return $common_settings;
@@ -189,6 +203,9 @@ class ChatGPT extends Provider {
 
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
+			case 'descriptive_text':
+				$return = $this->generate_descriptive_text( $post_id, $args );
+				break;
 			case 'excerpt':
 				$return = $this->generate_excerpt( $post_id, $args );
 				break;
@@ -201,6 +218,130 @@ class ChatGPT extends Provider {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Generate descriptive text of an image.
+	 *
+	 * @param int   $post_id The attachment ID we're processing.
+	 * @param array $args Optional arguments.
+	 * @return string|WP_Error
+	 */
+	public function generate_descriptive_text( int $post_id = 0, array $args = [] ) {
+		// Check to be sure the attachment exists and is an image.
+		if ( ! wp_attachment_is_image( $post_id ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
+		}
+
+		$metadata = wp_get_attachment_metadata( $post_id );
+
+		if ( ! $metadata || ! is_array( $metadata ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
+		}
+
+		$image_url = get_modified_image_source_url( $post_id );
+
+		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
+			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
+				$image_url = get_largest_size_and_dimensions_image_url(
+					get_attached_file( $post_id ),
+					wp_get_attachment_url( $post_id ),
+					$metadata,
+					[ 512, 2000 ],
+					[ 512, 2000 ],
+					100 * MB_IN_BYTES
+				);
+			} else {
+				$image_url = wp_get_attachment_url( $post_id );
+			}
+		}
+
+		if ( empty( $image_url ) ) {
+			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is bigger than 512x512px.', 'classifai' ) );
+		}
+
+		$feature  = new DescriptiveTextGenerator();
+		$settings = $feature->get_settings();
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Descriptive text generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+
+		/**
+		 * Filter the prompt we will send to ChatGPT.
+		 *
+		 * @since 3.2.0
+		 * @hook classifai_chatgpt_descriptive_text_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to ChatGPT.
+		 * @param {int} $post_id ID of attachment we are describing.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_chatgpt_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $post_id );
+
+		/**
+		 * Filter the request body before sending to ChatGPT.
+		 *
+		 * @since 3.2.0
+		 * @hook classifai_chatgpt_descriptive_text_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to ChatGPT.
+		 * @param {int} $post_id ID of attachment we are describing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_chatgpt_descriptive_text_request_body',
+			[
+				'model'       => $this->chatgpt_model,
+				'messages'    => [
+					[
+						'role'    => 'system',
+						'content' => $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => [
+							[
+								'type'      => 'image_url',
+								'image_url' => [
+									'url'    => $image_url,
+									'detail' => 'auto',
+								],
+							],
+						],
+					],
+				],
+				'temperature' => 0.2,
+				'max_tokens'  => 300,
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$response = $request->post(
+			$this->chatgpt_url,
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		// Extract out the text response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
+			foreach ( $response['choices'] as $choice ) {
+				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
+					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+				}
+			}
+		}
+
+		return $response;
 	}
 
 	/**

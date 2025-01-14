@@ -58,6 +58,7 @@ export const DescriptiveTextGeneratorSettings = () => {
 								},
 							} );
 						} }
+						__nextHasNoMarginBottom
 					/>
 				);
 			} ) }

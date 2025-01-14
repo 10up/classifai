@@ -78,7 +78,7 @@ class Smart404 extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enable Smart 404 functionality.', 'classifai' );
+		return esc_html__( 'Adds a Smart 404 component that can be used to recommend content on a 404 page.', 'classifai' );
 	}
 
 	/**

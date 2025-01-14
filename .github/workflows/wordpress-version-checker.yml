@@ -1,4 +1,5 @@
 name: "WordPress version checker"
+
 on:
   push:
     branches:
@@ -18,6 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: WordPress version checker
-        uses: skaut/wordpress-version-checker@v2.0.0
+        uses: skaut/wordpress-version-checker@v2.2.1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

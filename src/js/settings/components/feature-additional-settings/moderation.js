@@ -55,6 +55,7 @@ export const ModerationSettings = () => {
 								},
 							} );
 						} }
+						__nextHasNoMarginBottom
 					/>
 				);
 			} ) }

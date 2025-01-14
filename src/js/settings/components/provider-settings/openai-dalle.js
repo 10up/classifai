@@ -78,6 +78,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 						label: i + 1,
 						value: i + 1,
 					} ) ) }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -101,6 +102,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 							value: 'hd',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -128,6 +130,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 							value: '1024x1792',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -151,6 +154,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 							value: 'natural',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

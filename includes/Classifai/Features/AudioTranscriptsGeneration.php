@@ -260,7 +260,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enabling this will automatically generate transcripts for supported audio files.', 'classifai' );
+		return esc_html__( 'Automatically generate transcripts for supported audio files.', 'classifai' );
 	}
 
 	/**

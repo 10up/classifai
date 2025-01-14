@@ -11,7 +11,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { usePostTypes } from '../../utils/utils';
 
 /**
  * Component for Text to Speech feature settings.
@@ -25,7 +24,7 @@ export const TextToSpeechSettings = () => {
 		select( STORE_NAME ).getFeatureSettings()
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const { postTypesSelectOptions } = usePostTypes();
+	const { postTypes } = window.classifAISettings;
 
 	return (
 		<SettingsRow
@@ -36,14 +35,13 @@ export const TextToSpeechSettings = () => {
 			) }
 			className="settings-allowed-post-types"
 		>
-			{ postTypesSelectOptions.map( ( option ) => {
-				const { value: key, label } = option;
+			{ Object.keys( postTypes || {} ).map( ( key ) => {
 				return (
 					<CheckboxControl
 						id={ key }
 						key={ key }
 						checked={ featureSettings.post_types?.[ key ] === key }
-						label={ label }
+						label={ postTypes?.[ key ] }
 						onChange={ ( value ) => {
 							setFeatureSettings( {
 								post_types: {
@@ -52,6 +50,7 @@ export const TextToSpeechSettings = () => {
 								},
 							} );
 						} }
+						__nextHasNoMarginBottom
 					/>
 				);
 			} ) }

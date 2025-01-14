@@ -21,5 +21,7 @@ parameters:
 		- '#Constant CLASSIFAI_.+ not found#'
 		- '#Constant WATSON_.+ not found#'
 		- '#Constant MERCURY_PARSER_API_KEY not found#'
+		# Flags these require statements even though they are fine.
+		- '#Path in require_once\(\) "\.\/wp-admin\/includes\/.+\.php" is not a file or it does not exist#'
 	WPCompat:
-		requiresAtLeast: '6.1'
+		requiresAtLeast: '6.5'

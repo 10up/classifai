@@ -93,6 +93,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 								value: `${ ele.ShortName }|${ ele.Gender }`,
 							} )
 						) }
+						__nextHasNoMarginBottom
 					/>
 				</SettingsRow>
 			) }

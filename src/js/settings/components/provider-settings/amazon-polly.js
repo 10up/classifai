@@ -140,6 +140,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 							value: 'long-form',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow label={ __( 'Voice', 'classifai' ) }>
@@ -159,6 +160,7 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 								label: `${ voice?.LanguageName } - ${ voice?.Name } (${ voice?.Gender })`,
 							};
 						} ) }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

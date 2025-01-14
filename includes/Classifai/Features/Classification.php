@@ -738,7 +738,7 @@ class Classification extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enables content classification.', 'classifai' );
+		return esc_html__( 'Classify your content automatically or when manually triggered.', 'classifai' );
 	}
 
 	/**
@@ -1015,37 +1015,7 @@ class Classification extends Feature {
 			}
 		}
 
-		$taxonomies = get_taxonomies( [], 'objects' );
-		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
-		$supported  = [];
-
-		foreach ( $taxonomies as $taxonomy ) {
-			// Remove this taxonomy if it doesn't support at least one of our post types.
-			if (
-				(
-					! empty( $supported_post_types ) &&
-					empty( array_intersect( $supported_post_types, $taxonomy->object_type ) )
-				) ||
-				'post_format' === $taxonomy->name
-			) {
-				continue;
-			}
-
-			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
-		}
-
-		/**
-		 * Filter taxonomies shown in settings.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_feature_classification_setting_taxonomies
-		 *
-		 * @param {array} $supported Array of supported taxonomies.
-		 * @param {object} $this Current instance of the class.
-		 *
-		 * @return {array} Array of taxonomies.
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
+		return $this->get_taxonomies( $supported_post_types );
 	}
 
 	/**

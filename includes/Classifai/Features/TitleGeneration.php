@@ -5,6 +5,8 @@ namespace Classifai\Features;
 use Classifai\Providers\Azure\OpenAI;
 use Classifai\Providers\GoogleAI\GeminiAPI;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Browser\ChromeAI;
+use Classifai\Providers\XAI\Grok;
 use Classifai\Services\LanguageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -45,6 +47,8 @@ class TitleGeneration extends Feature {
 			ChatGPT::ID   => __( 'OpenAI ChatGPT', 'classifai' ),
 			GeminiAPI::ID => __( 'Google AI (Gemini API)', 'classifai' ),
 			OpenAI::ID    => __( 'Azure OpenAI', 'classifai' ),
+			Grok::ID      => __( 'xAI Grok', 'classifai' ),
+			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 		];
 	}
 
@@ -202,7 +206,7 @@ class TitleGeneration extends Feature {
 		wp_enqueue_script(
 			'classifai-plugin-title-generation-js',
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-title-generation.js',
-			get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ),
+			array_merge( get_asset_info( 'classifai-plugin-title-generation', 'dependencies' ), [ 'lodash' ] ),
 			get_asset_info( 'classifai-plugin-title-generation', 'version' ),
 			true
 		);
@@ -342,6 +346,28 @@ class TitleGeneration extends Feature {
 			],
 			'provider'              => ChatGPT::ID,
 		];
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings['generate_title_prompt'] ) ) {
+			foreach ( $settings['generate_title_prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings['generate_title_prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

@@ -22,6 +22,7 @@
 		"requestAnimationFrame": "readonly",
 		"React": "readonly",
 		"Block": "readonly",
+		"classifai_term_cleanup_params": "readonly",
 		"classifAISettings": "readonly"
 	},
 	"rules": {

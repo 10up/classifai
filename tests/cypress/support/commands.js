@@ -188,6 +188,7 @@ Cypress.Commands.add( 'disableFeatureForRoles', ( feature, roles ) => {
 	// Disable access for all users.
 	cy.disableFeatureForUsers();
 
+	cy.wait( 100 );
 	cy.saveFeatureSettings();
 } );
 

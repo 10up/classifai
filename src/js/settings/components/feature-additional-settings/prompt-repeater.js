@@ -22,14 +22,14 @@ import { __ } from '@wordpress/i18n';
 export const PromptRepeater = ( props ) => {
 	const [ showConfirmDialog, setShowConfirmDialog ] = useState( false );
 	const [ activeIndex, setActiveIndex ] = useState( null );
-	const { prompts = [], setPromts } = props;
+	const { prompts = [], setPrompts } = props;
 
 	const placeholder =
 		prompts?.filter( ( prompt ) => prompt.original )[ 0 ]?.prompt || '';
 
 	// Add a new prompt.
 	const addPrompt = () => {
-		setPromts( [
+		setPrompts( [
 			...prompts,
 			{ default: 0, original: 0, prompt: '', title: '' },
 		] );
@@ -42,7 +42,7 @@ export const PromptRepeater = ( props ) => {
 		if ( prompt[ 0 ]?.default ) {
 			prompts[ 0 ].default = 1;
 		}
-		setPromts( [ ...prompts ] );
+		setPrompts( [ ...prompts ] );
 	};
 
 	// Update prompt.
@@ -60,7 +60,7 @@ export const PromptRepeater = ( props ) => {
 			...prompts[ index ],
 			...changes,
 		};
-		setPromts( [ ...prompts ] );
+		setPrompts( [ ...prompts ] );
 	};
 
 	// Confirm dialog to remove prompt.
@@ -121,6 +121,7 @@ export const PromptRepeater = ( props ) => {
 									} );
 								} }
 								className="classifai-prompt-text"
+								__nextHasNoMarginBottom
 							/>
 						</>
 					) }

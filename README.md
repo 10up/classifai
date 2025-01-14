@@ -25,6 +25,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
+* Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
 * Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -49,14 +50,15 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.1+
+* [WordPress](http://wordpress.org) 6.5+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, Text to Speech or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
-* To utilize the Smart 404 feature, you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
 ## Pricing
 
@@ -113,10 +115,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.1.1",
+            "version": "3.2.0",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.1.1.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.2.0.zip",
                 "type": "zip"
             }
         }
@@ -128,7 +130,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.1.1"
+    "10up/classifai": "3.2.0"
 }
 ```
 
@@ -146,7 +148,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-### 2. Configure ClassifAI Registration Key under Tools > ClassifAI
+### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > ClassifAI Registration
 
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
@@ -162,7 +164,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification
+### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification > Settings
 
 - Select **IBM Watson NLU** in the provider dropdown.
 
@@ -189,7 +191,7 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 
 IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) can each be stored in existing WordPress taxonomies or a custom Watson taxonomy.
 
-### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > Classification
+### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > Classification > Settings
 
 - Choose which public post types to classify when saved.
 - Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
@@ -205,7 +207,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
 
 * Select **OpenAI ChatGPT** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -213,7 +215,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 ### 3. Enable specific Language Processing feature settings
 
 * For each feature, set any options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -239,7 +241,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Click `Keys and Endpoint` in the left hand Resource Management menu to get the endpoint for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
 
 * Select **Azure OpenAI** in the provider dropdown.
 * Enter your endpoint you copied from the above step into the `Endpoint URL` field.
@@ -248,9 +250,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 ### 3. Enable specific Language Processing features
 
-* Check the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -274,16 +276,16 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Note that if this page doesn't work, it's likely that Gemini is not enabled in your workspace. Contact your workspace administrator to get this enabled.
 * Click `Create API key` and copy the key that is shown.
 
-### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
 
 * Select **Google AI (Gemini API)** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Language Processing features
 
-* Check the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -307,7 +309,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification > Settings
 
 * Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -316,7 +318,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 * Choose to automatically classify content.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content item
 
@@ -338,7 +340,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation > Settings
 
 * Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -347,7 +349,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 * Choose to enable the ability to automatically generate transcripts from supported audio files.
 * Choose which user roles have access to this ability.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Upload a new audio file
 
@@ -363,12 +365,12 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Location/Region` for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **Microsoft Azure AI Speech** in the provider dropdown.
 * In the `Endpoint URL` field, enter the following URL, replacing `LOCATION` with the `Location/Region` you found above: `https://LOCATION.tts.speech.microsoft.com/`.
 * In the `API Key` field, enter your `KEY 1` copied from above.
-* Click **Save Changes** (the page will reload).
+* Click **Save Settings**.
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice as per your choice.
 * Select a post type that should use this service.
@@ -389,7 +391,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **OpenAI Text to Speech** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -423,14 +425,14 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * On the **Retrieve access key** page, choose **Show** to reveal the value of your user's secret access key.
 * Copy and save the credentials in a secure location on your computer or click "Download .csv file" to save the access key ID and secret access key to a `.csv` file.
 
-### 2. Configure AWS credentials under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure AWS credentials under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **Amazon Polly** in the provider dropdown.
 * In the `AWS access key` field, enter the `Access key
 ` copied from above.
 * In the `AWS secret access key` field, enter your `Secret access key` copied from above.
 * In the `AWS Region` field, enter your AWS region value eg: `us-east-1`
-* Click **Save Changes** (the page will reload).
+* Click **Save Settings**.
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice and voice engine as per your choice.
 * Select a post type that should use this service.
@@ -450,7 +452,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Once you've chosen a Provider, you'll need to create an account and get authentication details.
   * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
 
-### 2. Configure Settings under Tools > ClassifAI > Language Processing > Smart 404
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Smart 404 > Settings
 
 * Select the proper Provider in the provider dropdown.
 * Enter your authentication details.
@@ -561,6 +563,46 @@ docker run -p 9200:9200 -d --name elasticsearch \
 
 This will download, install and start Elasticsearch v7.9.0 to your local machine. You can then access Elasticsearch at `http://localhost:9200`, which is the same URL you can use to configure ElasticPress with. It is recommended that you change the `Content Items per Index Cycle` setting in ElasticPress to `20` to ensure indexing doesn't timeout. Also be aware of API rate limits on the OpenAI Embeddings API.
 
+## Set Up the Term Cleanup Feature
+
+### 1. Decide on Provider
+
+* This Feature is powered by either OpenAI or Azure OpenAI.
+* Once you've chosen a Provider, you'll need to create an account and get authentication details.
+  * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
+
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Term Cleanup > Settings
+
+* Select the proper Provider in the provider dropdown.
+* Enter your authentication details.
+* Configure any other settings as desired.
+
+### 3. ElasticPress configuration
+
+It is recommended to use ElasticPress with this Feature, especially if processing more than 500 terms, as performance will be significantly better. Once the Term Cleanup Feature is configured, you can then proceed to get ElasticPress set up to index the data.
+
+If on a standard WordPress installation:
+
+* Install and activate the [ElasticPress](https://github.com/10up/elasticpress) plugin.
+* Set your Elasticsearch URL in the ElasticPress settings (`ElasticPress > Settings`).
+* Enable the [term index](https://www.elasticpress.io/blog/2023/03/enabling-comments-and-terms-in-elasticpress-5-0/) feature.
+* Go to the `ElasticPress > Sync` settings page and trigger a sync, ensuring this is set to run a sync from scratch. This will send over the new schema to Elasticsearch and index all content, including creating vector embeddings for each term.
+
+If on a WordPress VIP hosted environment:
+
+* [Enable Enterprise Search](https://docs.wpvip.com/enterprise-search/enable/).
+* [Enable the term index](https://docs.wpvip.com/enterprise-search/enable-features/#h-terms). Example command: `vip @example-app.develop -- wp vip-search activate-feature terms`.
+* [Run the VIP-CLI `index` command](https://docs.wpvip.com/enterprise-search/index/). This sends the new schema to Elasticsearch and indexes all content, including creating vector embeddings for each term. Note you may need to use the `--setup` flag to ensure the schema is created correctly.
+
+### 4. Start the Term Cleanup Process
+
+Once configured, the plugin will add a new submenu under the Tools menu called Term Cleanup.
+
+* Go to the Term Cleanup page, click on your desired taxonomy, then click on the "Find similar" button.
+* This initializes a background process that will compare each term to find ones that are similar.
+* Once done, all the results will be displayed.
+* You can then skip or merge the potential duplicate terms from the settings page.
+
 ## Set Up Image Processing features (via Microsoft Azure)
 
 Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-services/computer-vision/home#image-requirements) can analyze and crop images that meet the following requirements:
@@ -576,7 +618,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing > Descriptive Text Generator, Image Tags Generator, Image Cropping, Image Text Extraction or PDF Text Extraction
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing > Descriptive Text Generator, Image Tags Generator, Image Cropping, Image Text Extraction or PDF Text Extraction > Settings
 
 - Select **Microsoft Azure AI Vision** in the provider dropdown.
 - In the `Endpoint URL` field, enter your `API endpoint`.
@@ -598,7 +640,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
 
 * Select **OpenAI DALL·E 3** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -607,7 +649,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 * Choose to add the ability to generate images.
 * If image generation is configured, set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Trigger the media flow within a content item
 
@@ -627,14 +669,14 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation >  > Settings
 
 * Select **OpenAI Moderation** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable Comment Moderation
 
-* Select the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Select "Comments" in the "Content to moderate" section.
 
 ## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
@@ -655,7 +697,7 @@ Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-se
 
 For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content Service > Settings
 
 - In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
 - In the `API Key` field, enter your `KEY 1` from Step 1 above.

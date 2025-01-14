@@ -32,13 +32,17 @@
 
 		.classifai-header-layout {
 			justify-content: space-between;
-			padding: 18px 28px;
+			padding: 18px 20px;
 			display: flex;
 			align-items: center;
 			margin: 0 auto;
+			padding: 18px 20px;
+			max-width: 1260px;
+    		box-sizing: content-box;
+			position: relative;
 
 			@media screen and (max-width: 782px) {
-				padding: 18px;
+				padding: 18px 10px;
 			}
 		}
 
@@ -61,6 +65,7 @@
 
 		&.personalizer-deprecation-notice,
 		&.is-info {
+			margin-top: 16px;
 			margin-bottom: 16px;
 		}
 	}
@@ -70,9 +75,12 @@
 		flex-direction: column;
 		gap: 8px;
 		margin-block-end: 16px;
+		margin-top: 16px;
 	}
 
 	.settings-panel {
+		margin-top: 16px;
+
 		.settings-row {
 			display: flex;
 			justify-content: flex-start;
@@ -90,13 +98,13 @@
 			align-items: center;
 			font-weight: bold;
 			flex-shrink: 0;
-			flex: 30%;
+			flex: 20%;
 			padding: 12px 0px;
 		}
 
 		.settings-control {
 			align-items: center;
-			flex: 70%;
+			flex: 80%;
 			padding: 12px 10px;
 		}
 
@@ -113,24 +121,21 @@
 			display: none;
 		}
 
-		@media screen and (max-width: 782px) {
-			margin-top: 16px;
+		.components-base-control.components-checkbox-control {
+			margin-bottom: 8px;
 		}
-	}
 
-	.save-settings-button{
-		margin-top: 16px;
-		display: block;
-		width: 100%;
-		padding: 10px 0;
-		height: auto;
-		font-size: 15px;
+		.classifai-panel-header-close {
+			margin-right: -10px;
+		}
 	}
 
 	.classifai-settings-wrapper {
 		width: 100%;
 		max-width: 1280px;
 		margin: 0 auto;
+		padding-right: 20px;
+		box-sizing: border-box;
 
 		.classifai-tabs {
 			display: flex;
@@ -139,7 +144,6 @@
 			justify-content: flex-start;
 			border-bottom: 1px solid #ccd0d4;
 			padding-bottom: 0;
-			margin-right: 20px;
 
 			&[aria-orientation="vertical"] {
 				flex-direction: column;
@@ -184,8 +188,7 @@
 			}
 
 			@media screen and (max-width: 782px) {
-				margin-right: 10px;
-				margin-top: 12px;
+				margin-top: 16px;
 			}
 
 			.classifai-tabs-item {
@@ -195,8 +198,9 @@
 				border: none;
 				box-shadow: none;
 				cursor: pointer;
-				padding: 14px 16px;
+				padding: 14px 12px;
 				margin-left: 0;
+				margin-right: 1rem;
 				font-weight: 500;
 				text-decoration: none;
 				font-size: 15px;
@@ -233,6 +237,10 @@
 				}
 
 				// Active.
+				&.active-tab {
+					color:var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+				}
+
 				&.active-tab::after {
 					height: calc(1 * var(--wp-admin-border-width-focus));
 
@@ -272,6 +280,10 @@
 			color: #46b450;
 		}
 
+		span.dashicons.dashicons-dismiss {
+			color: #cc0000;
+		}
+
 		.classifai-settings-edit-provider {
 			cursor: pointer;
 
@@ -286,7 +298,6 @@
 			position: relative;
 			display: flex;
 			flex-direction:column;
-			max-width: 600px;
 
 			&:first-child {
 				> input,
@@ -359,6 +370,10 @@
 		.components-radio-control__option {
 			margin-bottom: 4px;
 		}
+
+		@media screen and (max-width: 782px) {
+			padding-right: 10px;
+		}
 	}
 
 	.service-settings-wrapper {
@@ -401,9 +416,28 @@
 
 	.classifai-setup__content {
 		margin-left: 0px;
+		margin-right: 0px;
+	}
 
-		@media screen and (max-width: 782px) {
-			margin-right: 10px;
+	.classifai-configure-provider-notice {
+		margin-top: 0.5rem;
+	}
+
+	.classifai-settings-footer {
+		margin: 16px 0px;
+	}
+
+	.classifai-admin-notices {
+		margin-right: 0px;
+	}
+
+	.classifai-settings-snackbar-notices {
+		position: fixed;
+		left: auto;
+		bottom: 40px;
+
+		@media screen and (max-width: 600px) {
+			padding: 0px 20px 0px 0px;
 		}
 	}
 }
@@ -430,6 +464,18 @@
 
 	&__welcome-to-classifai {
 		text-align: center;
+	}
+
+	&__welcome-note {
+
+		p {
+			font-size: 14px;
+    		margin: 1.2em 0;
+		}
+
+		li {
+			margin-bottom: 12px;
+		}
 	}
 }
 
@@ -571,4 +617,20 @@
 	position: relative;
 	margin: 0 auto;
 	top: 1rem;
+}
+
+.classifai-settings-dashboard {
+	margin-top: 16px;
+}
+
+.classifai-feature-status {
+	margin-bottom: 0 !important;
+
+	.components-flex {
+		gap: 0 !important;
+	}
+}
+
+.classifai-settings__main-title {
+	margin-top: 2.5rem;
 }

@@ -1,8 +1,13 @@
 /**
+ * External dependencies
+ */
+import { useNavigate } from 'react-router-dom';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Slot } from '@wordpress/components';
+import { Button, Slot, Flex, FlexItem, Icon } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import apiFetch from '@wordpress/api-fetch';
@@ -12,7 +17,6 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { STORE_NAME } from '../../data/store';
 import { useFeatureSettings } from '../../data/hooks';
-import { useSetupPage } from '../classifai-onboarding/hooks';
 
 /**
  * Save Settings Button component.
@@ -29,9 +33,12 @@ export const SaveSettingsButton = ( {
 	label = __( 'Save Settings', 'classifai' ),
 } ) => {
 	const { featureName } = useFeatureSettings();
-	const { isSetupPage, step } = useSetupPage();
-	const { createErrorNotice, removeNotices, removeNotice } =
-		useDispatch( noticesStore );
+	const {
+		createSuccessNotice,
+		createErrorNotice,
+		removeNotices,
+		removeNotice,
+	} = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
@@ -42,6 +49,7 @@ export const SaveSettingsButton = ( {
 	const settings = useSelect( ( select ) =>
 		select( STORE_NAME ).getSettings()
 	);
+	const navigate = useNavigate();
 
 	/**
 	 * Save settings for a feature.
@@ -61,11 +69,6 @@ export const SaveSettingsButton = ( {
 				: settings,
 		};
 
-		if ( isSetupPage ) {
-			data.is_setup = true;
-			data.step = step;
-		}
-
 		apiFetch( {
 			path: '/classifai/v1/settings/',
 			method: 'POST',
@@ -80,9 +83,19 @@ export const SaveSettingsButton = ( {
 					} );
 					setSettings( res.settings );
 					setIsSaving( false );
+					window.scrollTo( {
+						top: 0,
+						behavior: 'smooth',
+					} );
 					return;
 				}
 				onSaveSuccess();
+				createSuccessNotice(
+					__( 'Settings saved successfully.', 'classifai' ),
+					{
+						type: 'snackbar',
+					}
+				);
 				setSettings( res.settings );
 				setIsSaving( false );
 			} )
@@ -98,18 +111,38 @@ export const SaveSettingsButton = ( {
 					}
 				);
 				setIsSaving( false );
+				window.scrollTo( {
+					top: 0,
+					behavior: 'smooth',
+				} );
 			} );
 	};
 
 	return (
-		<Button
-			className="save-settings-button"
-			variant="primary"
-			onClick={ saveSettings }
-			isBusy={ isSaving }
-		>
-			{ isSaving ? __( 'Saving…', 'classifai' ) : label }
-		</Button>
+		<Flex justify="end" expanded={ false }>
+			<FlexItem>
+				<Button
+					icon={ <Icon icon="arrow-left-alt2" /> }
+					iconSize={ 16 }
+					onClick={ () => navigate( -1 ) }
+					className="classifai-back-button"
+					variant="secondary"
+				>
+					{ __( 'Back to dashboard', 'classifai' ) }
+				</Button>
+			</FlexItem>
+
+			<FlexItem>
+				<Button
+					variant="primary"
+					onClick={ saveSettings }
+					isBusy={ isSaving }
+					className="save-settings-button"
+				>
+					{ isSaving ? __( 'Saving…', 'classifai' ) : label }
+				</Button>
+			</FlexItem>
+		</Flex>
 	);
 };
 

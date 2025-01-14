@@ -19,6 +19,7 @@ import { ClassificationSettings } from './classification';
 import { ModerationSettings } from './moderation';
 import { Smart404Settings } from './smart-404';
 import { RecommendedContentSettings } from './recommended-content';
+import { TermCleanupSettings } from './term-cleanup';
 
 /**
  * Component for additional settings fields for individual features.
@@ -61,6 +62,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_recommended_content':
 			return <RecommendedContentSettings />;
+
+		case 'feature_term_cleanup':
+			return <TermCleanupSettings />;
 
 		default:
 			return null;

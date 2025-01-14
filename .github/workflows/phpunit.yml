@@ -1,19 +1,17 @@
 name: PHPUnit Tests
 
-env:
-  COMPOSER_VERSION: "2"
-  COMPOSER_CACHE: "${{ github.workspace }}/.composer-cache"
-
 on:
-  schedule:
-    - cron:  '0 0 * * *'
   push:
     branches:
       - develop
       - trunk
+    paths:
+      - "**.php"
   pull_request:
     branches:
       - develop
+    paths:
+      - "**.php"
 
 jobs:
   phpunit:
@@ -29,19 +27,20 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Set standard 10up cache directories
-      run: |
-        composer config -g cache-dir "${{ env.COMPOSER_CACHE }}"
+    - name: Get composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
 
-    - name: Prepare composer cache
+    - name: Cache dependencies
+      id: cache-composer
       uses: actions/cache@v4
+      env:
+        cache-name: cache-composer
       with:
-        path: ${{ env.COMPOSER_CACHE }}
-        key: composer-${{ env.COMPOSER_VERSION }}-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          composer-${{ env.COMPOSER_VERSION }}-
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/composer.lock') }}
 
-    - uses: getong/mariadb-action@v1.1
+    - uses: getong/mariadb-action@v1
 
     - name: Set PHP version
       uses: shivammathur/setup-php@v2

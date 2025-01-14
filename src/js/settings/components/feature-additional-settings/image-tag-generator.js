@@ -11,6 +11,8 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { useFeatureContext } from '../feature-settings/context';
+import { getFeature } from '../../utils/utils';
 
 /**
  * Component for the Image Tag Generator feature settings.
@@ -20,20 +22,17 @@ import { STORE_NAME } from '../../data/store';
  * @return {React.ReactElement} ImageTagGeneratorSettings component.
  */
 export const ImageTagGeneratorSettings = () => {
+	const { featureName } = useFeatureContext();
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
+	const { taxonomies } = getFeature( featureName );
 
-	const attachmentTaxonomies = useSelect( ( select ) => {
-		const { getTaxonomies } = select( 'core' );
-		return getTaxonomies( { type: 'attachment' } ) || [];
-	}, [] );
-
-	const options = attachmentTaxonomies.map( ( taxonomy ) => {
+	const options = Object.keys( taxonomies || {} ).map( ( slug ) => {
 		return {
-			value: taxonomy.slug,
-			label: taxonomy.labels.name,
+			value: slug,
+			label: taxonomies[ slug ],
 		};
 	} );
 	return (
@@ -47,6 +46,7 @@ export const ImageTagGeneratorSettings = () => {
 				} }
 				value={ featureSettings.tag_taxonomy || 'classifai-image-tags' }
 				options={ options }
+				__nextHasNoMarginBottom
 			/>
 		</SettingsRow>
 	);

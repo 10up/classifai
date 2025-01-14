@@ -5,6 +5,8 @@
  * @package ClassifAI
  */
 
+/* phpcs:disable PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
+
 /** @var array $args Arguments coming from the included file. */
 ?>
 <h1 class="classifai-setup-heading">

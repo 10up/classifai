@@ -5,8 +5,10 @@ namespace Classifai\Admin;
 use Classifai\Features\Classification;
 use Classifai\Services\ServicesManager;
 
+use Classifai\Taxonomy\TaxonomyFactory;
 use function Classifai\get_asset_info;
 use function Classifai\get_plugin;
+use function Classifai\get_post_types_for_language_settings;
 use function Classifai\get_services_menu;
 use function Classifai\get_post_statuses_for_language_settings;
 use function Classifai\is_elasticpress_installed;
@@ -84,14 +86,27 @@ class Settings {
 
 		wp_set_script_translations( 'classifai-settings', 'classifai' );
 
+		$post_types         = get_post_types_for_language_settings();
+		$excerpt_post_types = array();
+		$post_type_options  = array();
+		foreach ( $post_types as $post_type ) {
+			$post_type_options[ $post_type->name ] = $post_type->label;
+			if ( post_type_supports( $post_type->name, 'excerpt' ) ) {
+				$excerpt_post_types[ $post_type->name ] = $post_type->label;
+			}
+		}
+
 		$data = array(
-			'features'      => $this->get_features(),
-			'services'      => get_services_menu(),
-			'settings'      => $this->get_settings(),
-			'dashboardUrl'  => admin_url( '/' ),
-			'nonce'         => wp_create_nonce( 'classifai-previewer-action' ),
-			'postStatuses'  => get_post_statuses_for_language_settings(),
-			'isEPinstalled' => is_elasticpress_installed(),
+			'features'         => $this->get_features(),
+			'services'         => get_services_menu(),
+			'settings'         => $this->get_settings(),
+			'dashboardUrl'     => admin_url( '/' ),
+			'nonce'            => wp_create_nonce( 'classifai-previewer-action' ),
+			'postTypes'        => $post_type_options,
+			'excerptPostTypes' => $excerpt_post_types,
+			'postStatuses'     => get_post_statuses_for_language_settings(),
+			'isEPinstalled'    => is_elasticpress_installed(),
+			'nluTaxonomies'    => $this->get_nlu_taxonomies(),
 		);
 
 		wp_add_inline_script(
@@ -142,6 +157,7 @@ class Settings {
 			return $services;
 		}
 
+		$post_types = get_post_types_for_language_settings();
 		foreach ( $service_manager->service_classes as $service ) {
 			$services[ $service->get_menu_slug() ] = array();
 
@@ -151,12 +167,54 @@ class Settings {
 					'providers'          => $feature->get_providers(),
 					'roles'              => $feature->get_roles(),
 					'enable_description' => $feature->get_enable_description(),
+					'taxonomies'         => $feature->get_taxonomies(),
 				);
+
+				// Add taxonomies under post types for language processing features to allow filtering by post type.
+				if ( 'language_processing' === $service->get_menu_slug() && ! empty( $post_types ) ) {
+					$post_types_taxonomies = array();
+					foreach ( $post_types as $post_type ) {
+						$post_types_taxonomies[ $post_type->name ] = $feature->get_taxonomies( [ $post_type->name ] );
+					}
+					$services[ $service->get_menu_slug() ][ $feature::ID ]['taxonomiesByPostTypes'] = $post_types_taxonomies;
+				}
 			}
 		}
 
 		return $services;
 	}
+
+	/**
+	 * Return the list of NLU taxonomies for the Classification feature settings.
+	 *
+	 * @return array
+	 */
+	public function get_nlu_taxonomies(): array {
+		$taxonomies       = [];
+		$taxonomy_factory = new TaxonomyFactory();
+		$nlu_taxonomies   = $taxonomy_factory->get_supported_taxonomies();
+		foreach ( $nlu_taxonomies as $taxonomy ) {
+			$taxonomy_instance = $taxonomy_factory->build( $taxonomy );
+			if ( ! $taxonomy_instance ) {
+				continue;
+			}
+
+			$taxonomies[ $taxonomy_instance->get_name() ] = $taxonomy_instance->get_singular_label();
+		}
+
+		/**
+		 * Filter IBM Watson NLU taxonomies shown in settings.
+		 *
+		 * @since 3.2.0
+		 * @hook classifai_settings_ibm_watson_nlu_taxonomies
+		 *
+		 * @param {array} $taxonomies Array of IBM Watson NLU taxonomies.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_settings_ibm_watson_nlu_taxonomies', $taxonomies );
+	}
+
 
 	/**
 	 * Get the settings.

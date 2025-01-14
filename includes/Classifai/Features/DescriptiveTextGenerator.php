@@ -3,6 +3,8 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\XAI\Grok;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -22,6 +24,13 @@ class DescriptiveTextGenerator extends Feature {
 	const ID = 'feature_descriptive_text_generator';
 
 	/**
+	 * Prompt for generating descriptive text.
+	 *
+	 * @var string
+	 */
+	public $prompt = 'You are an assistant that generates descriptions of images that are used on a website. You will be provided with an image and will describe the main item you see in the image, giving details but staying concise. There is no need to say "the image contains" or similar, just describe what is actually in the image. This text will be important for screen readers, so make sure it is descriptive and accurate but not overly verbose. Before returning the text, re-evaluate your response and ensure you are following the above points, in particular ensuring the text is concise.';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -33,6 +42,8 @@ class DescriptiveTextGenerator extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			ChatGPT::ID        => __( 'OpenAI', 'classifai' ),
+			Grok::ID           => __( 'xAI Grok', 'classifai' ),
 		];
 	}
 
@@ -336,7 +347,7 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enable this to generate descriptive text for images.', 'classifai' );
+		return esc_html__( 'Automatically generate descriptive text for images, storing this as image alt text, caption or description.', 'classifai' );
 	}
 
 	/**
@@ -379,6 +390,37 @@ class DescriptiveTextGenerator extends Feature {
 			],
 			'provider'                => ComputerVision::ID,
 		];
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
+			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ Grok::ID ]['prompt'] ) ) {
+			foreach ( $settings[ Grok::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ Grok::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

@@ -1,10 +1,25 @@
 /**
+ * External dependencies
+ */
+import { useNavigate } from 'react-router-dom';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Panel, PanelBody, Spinner, Notice, Slot } from '@wordpress/components';
+import {
+	Panel,
+	PanelBody,
+	Spinner,
+	Notice,
+	Slot,
+	PanelHeader,
+	Icon,
+	Button,
+} from '@wordpress/components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
+import { close } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -50,6 +65,7 @@ const ElasticPressRequiredNotice = () => (
 export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 	const { featureName } = useFeatureContext();
 	const { setCurrentFeature } = useDispatch( STORE_NAME );
+	const navigate = useNavigate();
 
 	useEffect( () => {
 		setCurrentFeature( featureName );
@@ -100,13 +116,22 @@ export const FeatureSettings = ( { onSaveSuccess = () => {} } ) => {
 			<Slot name="ClassifAIBeforeFeatureSettingsPanel">
 				{ ( fills ) => <>{ fills }</> }
 			</Slot>
-			<Panel
-				header={
-					// translators: %s: Feature title
-					sprintf( __( '%s Settings', 'classifai' ), featureTitle )
-				}
-				className="settings-panel"
-			>
+			<Panel className="settings-panel">
+				<PanelHeader
+					label={ sprintf(
+						// translators: %s: Feature title
+						__( '%s Settings', 'classifai' ),
+						featureTitle
+					) }
+				>
+					<Button
+						icon={ <Icon icon={ close } /> }
+						onClick={ () => navigate( -1 ) }
+						className="classifai-panel-header-close"
+						label={ __( 'Back to dashboard', 'classifai' ) }
+						showTooltip={ true }
+					/>
+				</PanelHeader>
 				<PanelBody>
 					<EnableToggleControl />
 					<ProviderSettings />

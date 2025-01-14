@@ -23,7 +23,7 @@ export const TitleGenerationSettings = () => {
 		select( STORE_NAME ).getFeatureSettings()
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const setPromts = ( prompts ) => {
+	const setPrompts = ( prompts ) => {
 		setFeatureSettings( {
 			generate_title_prompt: prompts,
 		} );
@@ -39,7 +39,7 @@ export const TitleGenerationSettings = () => {
 		>
 			<PromptRepeater
 				prompts={ featureSettings.generate_title_prompt }
-				setPromts={ setPromts }
+				setPrompts={ setPrompts }
 			/>
 		</SettingsRow>
 	);

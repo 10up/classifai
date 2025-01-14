@@ -29,11 +29,13 @@
   "require-dev": {
     "10up/phpcs-composer": "^3.0",
     "yoast/phpunit-polyfills": "^1.0.0",
-    "szepeviktor/phpstan-wordpress": "dev-master",
+    "szepeviktor/phpstan-wordpress": "^2.0.1",
     "phpstan/extension-installer": "1.4.x-dev",
     "php-stubs/wp-cli-stubs": "dev-master",
-    "johnbillion/wp-compat": "dev-trunk",
-    "phpstan/phpstan-deprecation-rules": "1.2.x-dev"
+    "johnbillion/wp-compat": "^1.1.0",
+    "phpstan/phpstan-deprecation-rules": "^2.0.1",
+    "sirbrillig/phpcs-changed": "^2.11",
+    "phpcompatibility/php-compatibility": "dev-develop as 9.99.99"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",

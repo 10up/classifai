@@ -1,5 +1,8 @@
 /* eslint-disable @wordpress/no-unsafe-wp-apis */
 /* eslint-disable no-shadow */
+/**
+ * External Dependencies.
+ */
 import { registerPlugin } from '@wordpress/plugins';
 import {
 	store as blockEditorStore,
@@ -23,7 +26,11 @@ import {
 } from '@wordpress/wordcount';
 import { __, _nx } from '@wordpress/i18n';
 
+/**
+ * Internal Dependencies.
+ */
 import { DisableFeatureButton } from '../../components';
+import { browserAITextGeneration } from '../../helpers';
 import './index.scss';
 
 const aiIconSvg = (
@@ -250,6 +257,19 @@ const ContentResizingPlugin = () => {
 
 		if ( 200 === response.status ) {
 			__textArray = await response.json();
+
+			// Support calling a function from the response for browser AI.
+			if (
+				typeof __textArray === 'object' &&
+				__textArray.hasOwnProperty( 'func' )
+			) {
+				const res = await browserAITextGeneration(
+					__textArray.func,
+					__textArray?.prompt,
+					__textArray?.content
+				);
+				__textArray = [ res.trim() ];
+			}
 		} else {
 			dispatch( resizeContentStore ).setIsResizing( false );
 			dispatch( resizeContentStore ).setClientId( '' );

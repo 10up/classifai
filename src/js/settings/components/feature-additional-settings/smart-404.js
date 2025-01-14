@@ -102,6 +102,7 @@ export const Smart404Settings = () => {
 							rescore: value ? '1' : '0',
 						} );
 					} }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -119,6 +120,7 @@ export const Smart404Settings = () => {
 							fallback: value ? '1' : '0',
 						} );
 					} }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -151,6 +153,7 @@ export const Smart404Settings = () => {
 							value: 'l2_norm',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>

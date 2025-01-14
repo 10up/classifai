@@ -14,7 +14,6 @@ import {
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
-import { usePostTypes } from '../../utils/utils';
 
 /**
  * Component for Excerpt Generation feature settings.
@@ -27,9 +26,9 @@ export const ExcerptGenerationSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
-	const { excerptPostTypesOptions } = usePostTypes();
+	const { excerptPostTypes } = window.classifAISettings;
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const setPromts = ( prompts ) => {
+	const setPrompts = ( prompts ) => {
 		setFeatureSettings( {
 			generate_excerpt_prompt: prompts,
 		} );
@@ -46,7 +45,7 @@ export const ExcerptGenerationSettings = () => {
 			>
 				<PromptRepeater
 					prompts={ featureSettings.generate_excerpt_prompt }
-					setPromts={ setPromts }
+					setPrompts={ setPrompts }
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -57,8 +56,7 @@ export const ExcerptGenerationSettings = () => {
 				) }
 				className="settings-allowed-post-types"
 			>
-				{ ( excerptPostTypesOptions || [] ).map( ( option ) => {
-					const { value: key, label } = option;
+				{ Object.keys( excerptPostTypes || {} ).map( ( key ) => {
 					return (
 						<CheckboxControl
 							id={ key }
@@ -66,7 +64,7 @@ export const ExcerptGenerationSettings = () => {
 							checked={
 								featureSettings.post_types?.[ key ] === key
 							}
-							label={ label }
+							label={ excerptPostTypes?.[ key ] }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									post_types: {
@@ -75,6 +73,7 @@ export const ExcerptGenerationSettings = () => {
 									},
 								} );
 							} }
+							__nextHasNoMarginBottom
 						/>
 					);
 				} ) }

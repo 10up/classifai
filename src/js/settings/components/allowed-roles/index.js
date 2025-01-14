@@ -53,6 +53,7 @@ export const AllowedRoles = () => {
 								},
 							} );
 						} }
+						__nextHasNoMarginBottom
 					/>
 				);
 			} ) }

@@ -2,8 +2,6 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useMemo } from '@wordpress/element';
-import { store as coreStore } from '@wordpress/core-data';
 
 // Update URL based on the current tab and feature selected
 export const updateUrl = ( key, value ) => {
@@ -117,76 +115,6 @@ export const isProviderConfigured = ( featureSettings ) => {
 };
 
 /**
- * Returns a helper object that contains:
- * An `options` object from the available post types, to be passed to a `SelectControl`.
- *
- * @return {Object} The helper object related to post types.
- */
-export const usePostTypes = () => {
-	const postTypes = useSelect( ( select ) => {
-		const { getPostTypes } = select( coreStore );
-		const excludedPostTypes = [ 'attachment' ];
-		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
-			( { viewable, slug } ) =>
-				viewable && ! excludedPostTypes.includes( slug )
-		);
-		return filteredPostTypes;
-	}, [] );
-
-	const postTypesSelectOptions = useMemo(
-		() =>
-			( postTypes || [] ).map( ( { labels, slug } ) => ( {
-				label: labels.singular_name,
-				value: slug,
-			} ) ),
-		[ postTypes ]
-	);
-
-	const excerptPostTypes = useSelect( ( select ) => {
-		const { getPostTypes } = select( coreStore );
-		const filteredPostTypes = getPostTypes( { per_page: -1 } )?.filter(
-			( { viewable, supports } ) => viewable && supports?.excerpt
-		);
-		return filteredPostTypes;
-	}, [] );
-
-	const excerptPostTypesOptions = useMemo( () => {
-		return ( excerptPostTypes || [] ).map( ( { labels, slug } ) => ( {
-			label: labels.singular_name,
-			value: slug,
-		} ) );
-	}, [ excerptPostTypes ] );
-
-	return { postTypesSelectOptions, postTypes, excerptPostTypesOptions };
-};
-
-/**
- * Post Statuses Hook.
- * Returns a helper object that contains:
- * An `options` object from the available post statuses.
- *
- * @return {Object} The helper object related to post statuses.
- */
-export const useTaxonomies = () => {
-	const taxonomyOptions = useSelect( ( select ) => {
-		// Remove the NLUs taxonomies from the list of taxonomies
-		const excludedTaxonomies = [
-			'watson-category',
-			'watson-keyword',
-			'watson-concept',
-			'watson-entity',
-		];
-		return select( 'core' )
-			.getTaxonomies()
-			?.filter( ( { slug } ) => ! excludedTaxonomies.includes( slug ) );
-	}, [] );
-
-	const taxonomies = useMemo( () => taxonomyOptions, [ taxonomyOptions ] );
-
-	return { taxonomies };
-};
-
-/**
  * User Permissions Preferences Hook.
  *
  * Exports a hook that returns the user permissions preferences.
@@ -259,33 +187,21 @@ export const useUserPermissionsPreferences = () => {
 export const isFeatureActive = ( feature ) => {
 	const isEnabled = '1' === feature.status;
 	const provider = feature?.provider;
-	const authenticated = feature[ provider ].authenticated;
+	const authenticated = feature[ provider ]?.authenticated;
 
 	return isEnabled && authenticated;
 };
 
 /**
- * Returns the onboarding steps.
+ * Returns true if a provider configuration is needed.
  *
- * @return {Array} Array of onboarding steps.
+ * @param {Object} feature The feature object.
+ * @return {boolean} True if the feature is enabled and provider configuration is needed, false otherwise.
  */
-export const getOnboardingSteps = () => {
-	return [
-		'enable_features',
-		'classifai_registration',
-		'configure_features',
-		'finish',
-	];
-};
+export const isProviderConfigurationNeeded = ( feature ) => {
+	const isEnabled = '1' === feature.status;
+	const provider = feature?.provider;
+	const authenticated = feature[ provider ]?.authenticated;
 
-/**
- * Get the next step in the onboarding process.
- *
- * @param {string} currentStep
- * @return {string} The next step in the onboarding process.
- */
-export const getNextOnboardingStep = ( currentStep ) => {
-	const steps = getOnboardingSteps();
-	const currentIndex = steps.indexOf( currentStep );
-	return steps[ currentIndex + 1 ];
+	return isEnabled && ! authenticated;
 };

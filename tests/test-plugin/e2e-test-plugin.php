@@ -23,12 +23,13 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false ) {
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false || strpos( $url, 'https://api.x.ai/v1/models' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/models.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false || strpos( $url, 'https://api.x.ai/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif (
 		strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ||
+		strpos( $url, 'https://api.x.ai/v1/chat/completions' ) !== false ||
 		strpos( $url, 'https://e2e-test-azure-openai.test/openai/deployments' ) !== false
 	) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
@@ -80,10 +81,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		strpos( $url, 'https://e2e-test-azure-openai-embeddings.test/openai/deployments' ) !== false
 	) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/analyze' ) !== false ) {
+	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/computervision/imageanalysis:analyze?api-version=2024-02-01' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/image_analyze.json' );
-	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/ocr' ) !== false ) {
-		$response = file_get_contents( __DIR__ . '/ocr.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/vision/v3.2/generateThumbnail' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '../classifai/assets/img/icon256x256.png' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/pdf-read-result' ) !== false ) {

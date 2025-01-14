@@ -8,50 +8,30 @@ import {
 	HashRouter,
 	useParams,
 	NavLink,
+	useLocation,
 } from 'react-router-dom';
 
 /**
  * WordPress dependencies
  */
-import { useDispatch } from '@wordpress/data';
-import { SlotFillProvider } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { SlotFillProvider, SnackbarList } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { store as noticeStore } from '@wordpress/notices';
 
 /**
  * Internal dependencies
  */
-import {
-	ClassifAIOnboarding,
-	FeatureSettings,
-	Header,
-	ServiceSettings,
-} from '..';
+import { FeatureSettings, Header, ServiceSettings } from '..';
 import { STORE_NAME } from '../../data/store';
 import { FeatureContext } from '../feature-settings/context';
 import { ClassifAIRegistration } from '../classifai-registration';
-import {
-	ConfigureFeatures,
-	EnableFeatures,
-	FinishStep,
-	ClassifAIRegistrationStep,
-} from '../classifai-onboarding';
-import { useSetupPage } from '../classifai-onboarding/hooks';
+import { ClassifAIWelcomeGuide } from './welcome-guide';
+import { Notices } from '../feature-settings/notices';
 
 const { services, features } = window.classifAISettings;
-
-/**
- * DefaultFeatureSettings component to navigate to the default feature settings.
- * If no feature is selected, it will redirect to the first feature.
- *
- * @return {React.ReactElement} The DefaultFeatureSettings component.
- */
-const DefaultFeatureSettings = () => {
-	const { service } = useParams();
-	const feature = Object.keys( features[ service ] || {} )[ 0 ];
-	return <Navigate to={ feature } replace />;
-};
 
 /**
  * FeatureSettingsWrapper component to render the feature settings.
@@ -99,39 +79,84 @@ const ServiceSettingsWrapper = () => {
  * @return {React.ReactElement} The ServiceNavigation component.
  */
 export const ServiceNavigation = () => {
-	const { isSetupPage } = useSetupPage();
-	if ( isSetupPage ) {
-		return null;
-	}
+	const location = useLocation();
+	const queryParams = new URLSearchParams( location.search );
+	const [ showWelcomeGuide, setShowWelcomeGuide ] = useState(
+		() => '1' === queryParams.get( 'welcome_guide' )
+	);
 
 	const serviceKeys = Object.keys( services || {} );
 	return (
-		<div className="classifai-tabs" aria-orientation="horizontal">
-			{ serviceKeys.map( ( service ) => (
+		<>
+			{ !! showWelcomeGuide && (
+				<ClassifAIWelcomeGuide
+					closeWelcomeGuide={ () => setShowWelcomeGuide( false ) }
+				/>
+			) }
+			<div className="classifai-tabs" aria-orientation="horizontal">
+				{ serviceKeys.map( ( service ) => (
+					<NavLink
+						to={ service }
+						key={ service }
+						className={ ( { isActive } ) =>
+							isActive
+								? 'active-tab classifai-tabs-item'
+								: 'classifai-tabs-item'
+						}
+					>
+						{ services[ service ] }
+					</NavLink>
+				) ) }
 				<NavLink
-					to={ service }
-					key={ service }
+					to="classifai_registration"
+					key="classifai_registration"
 					className={ ( { isActive } ) =>
 						isActive
 							? 'active-tab classifai-tabs-item'
 							: 'classifai-tabs-item'
 					}
 				>
-					{ services[ service ] }
+					{ __( 'ClassifAI Registration', 'classifai' ) }
 				</NavLink>
-			) ) }
-			<NavLink
-				to="classifai_registration"
-				key="classifai_registration"
-				className={ ( { isActive } ) =>
-					isActive
-						? 'active-tab classifai-tabs-item'
-						: 'classifai-tabs-item'
-				}
-			>
-				{ __( 'ClassifAI Registration', 'classifai' ) }
-			</NavLink>
-		</div>
+			</div>
+		</>
+	);
+};
+
+/**
+ * Snackbar component to render the snackbar notifications.
+ *
+ * @return {React.ReactElement} The Snackbar component.
+ */
+export const SnackbarNotifications = () => {
+	const { removeNotice, removeNotices } = useDispatch( noticeStore );
+	const location = useLocation();
+
+	const { notices } = useSelect( ( select ) => {
+		const allNotices = select( noticeStore ).getNotices();
+		return {
+			notices: allNotices.filter(
+				( notice ) => notice.type === 'snackbar'
+			),
+		};
+	}, [] );
+
+	useEffect( () => {
+		// Remove existing snackbar notices on location change.
+		if ( removeNotices ) {
+			removeNotices( notices.map( ( { id } ) => id ) );
+		} else if ( removeNotice ) {
+			notices.forEach( ( { id } ) => removeNotice( id ) );
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ location, removeNotice, removeNotices ] );
+
+	return (
+		<SnackbarList
+			className="classifai-settings-snackbar-notices"
+			notices={ notices }
+			onRemove={ ( notice ) => removeNotice( notice ) }
+		/>
 	);
 };
 
@@ -174,6 +199,14 @@ export const ClassifAISettings = () => {
 
 	// Render admin notices after the header.
 	useEffect( () => {
+		const isWelcomePage =
+			document.location?.hash?.includes( 'classifai_setup' );
+
+		// Ignore showing notices on the welcome page.
+		if ( isWelcomePage ) {
+			return;
+		}
+
 		const notices = document.querySelectorAll(
 			'div.updated, div.error, div.notice'
 		);
@@ -194,51 +227,17 @@ export const ClassifAISettings = () => {
 				<Header />
 				<div className="classifai-settings-wrapper">
 					<div className="classifai-admin-notices wrap"></div>
+					<Notices feature={ 'generic-notices' } />
 					<ServiceNavigation />
 					<Routes>
 						<Route
 							path=":service"
 							element={ <ServiceSettingsWrapper /> }
-						>
-							<Route
-								index
-								element={ <DefaultFeatureSettings /> }
-							/>
-							<Route
-								path=":feature"
-								element={ <FeatureSettingsWrapper /> }
-							/>
-						</Route>
+						/>
 						<Route
-							path="classifai_setup"
-							element={ <ClassifAIOnboarding /> }
-						>
-							<Route
-								index
-								element={
-									<Navigate to="enable_features" replace />
-								}
-							/>
-							<Route
-								path="enable_features"
-								element={ <EnableFeatures /> }
-							/>
-							<Route
-								path="classifai_registration"
-								element={ <ClassifAIRegistrationStep /> }
-							/>
-							<Route
-								path="configure_features"
-								element={ <ConfigureFeatures /> }
-							/>
-							<Route path="finish" element={ <FinishStep /> } />
-							<Route
-								path="*"
-								element={
-									<Navigate to="enable_features" replace />
-								}
-							/>
-						</Route>
+							path=":service/:feature"
+							element={ <FeatureSettingsWrapper /> }
+						/>
 						<Route
 							path="classifai_registration"
 							element={ <ClassifAIRegistration /> }
@@ -252,6 +251,7 @@ export const ClassifAISettings = () => {
 						/>
 					</Routes>
 				</div>
+				<SnackbarNotifications />
 			</HashRouter>
 		</SlotFillProvider>
 	);

@@ -78,7 +78,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }
 					description={ __(
-						'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 55.',
+						'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.',
 						'classifai'
 					) }
 				>
@@ -87,7 +87,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 						type="number"
 						value={
 							providerSettings.descriptive_confidence_threshold ||
-							55
+							70
 						}
 						onChange={ ( value ) =>
 							onChange( {

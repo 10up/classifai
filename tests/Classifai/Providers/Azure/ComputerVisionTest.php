@@ -61,40 +61,6 @@ class ComputerVisionTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Ensure that settings returns default settings array if the `classifai_computer_vision` is not set.
-	 */
-	public function test_no_computer_vision_option_set() {
-		delete_option( 'classifai_computer_vision' );
-
-		$defaults = [];
-
-		$expected = array_merge(
-			$defaults,
-			[
-				'status' => '0',
-				'roles' => [],
-				'users' => [],
-				'user_based_opt_out' => 'no',
-				'descriptive_text_fields' => [
-					'alt' => 'alt',
-					'caption' => 0,
-					'description' => 0,
-				],
-				'provider' => 'ms_computer_vision',
-				'ms_computer_vision' => [
-					'endpoint_url' => '',
-					'api_key' => '',
-					'authenticated' => false,
-					'descriptive_confidence_threshold' => 55,
-				],
-			]
-		);
-		$settings = ( new \Classifai\Features\DescriptiveTextGenerator() )->get_settings();
-
-		$this->assertSame( $expected, $settings );
-	}
-
-	/**
 	 * Ensure that attachment meta is being set.
 	 */
 	public function test_set_image_meta_data() {

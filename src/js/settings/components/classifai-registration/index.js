@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { NavLink } from 'react-router-dom';
-
-/**
  * WordPress dependencies
  */
 import {
@@ -13,6 +8,8 @@ import {
 	Button,
 	Slot,
 	Notice,
+	Flex,
+	FlexItem,
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
@@ -177,7 +174,8 @@ export const SaveSettingsButton = ( {
 	setSettings,
 	onSaveSuccess = () => {},
 } ) => {
-	const { createErrorNotice, removeNotices } = useDispatch( noticesStore );
+	const { createErrorNotice, createSuccessNotice, removeNotices } =
+		useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
@@ -203,11 +201,21 @@ export const SaveSettingsButton = ( {
 					);
 					setSettings( res.settings );
 					setIsSaving( false );
+					window.scrollTo( {
+						top: 0,
+						behavior: 'smooth',
+					} );
 					return;
 				}
 
 				setSettings( res.settings );
 				onSaveSuccess();
+				createSuccessNotice(
+					__( 'Settings saved successfully.', 'classifai' ),
+					{
+						type: 'snackbar',
+					}
+				);
 				setIsSaving( false );
 			} )
 			.catch( ( error ) => {
@@ -222,20 +230,27 @@ export const SaveSettingsButton = ( {
 					}
 				);
 				setIsSaving( false );
+				window.scrollTo( {
+					top: 0,
+					behavior: 'smooth',
+				} );
 			} );
 	};
 
 	return (
-		<Button
-			className="save-settings-button"
-			variant="primary"
-			onClick={ saveSettings }
-			isBusy={ isSaving }
-		>
-			{ isSaving
-				? __( 'Saving…', 'classifai' )
-				: __( 'Save Settings', 'classifai' ) }
-		</Button>
+		<Flex justify="end" expanded={ false }>
+			<FlexItem>
+				<Button
+					variant="primary"
+					onClick={ saveSettings }
+					isBusy={ isSaving }
+				>
+					{ isSaving
+						? __( 'Saving…', 'classifai' )
+						: __( 'Save Settings', 'classifai' ) }
+				</Button>
+			</FlexItem>
+		</Flex>
 	);
 };
 
@@ -248,15 +263,8 @@ export const SaveSettingsButton = ( {
  */
 export const ClassifAIRegistration = () => {
 	return (
-		<div className="service-settings-wrapper">
-			<div className="classifai-tabs" aria-orientation="vertical">
-				<NavLink className={ 'active-tab classifai-tabs-item' }>
-					{ __( 'ClassifAI Registration', 'classifai' ) }
-				</NavLink>
-			</div>
-			<div className="feature-settings-wrapper">
-				<ClassifAIRegistrationForm />
-			</div>
+		<div className="classifai-settings-dashboard">
+			<ClassifAIRegistrationForm />
 		</div>
 	);
 };

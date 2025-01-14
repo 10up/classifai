@@ -48,6 +48,8 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\Azure\OpenAI',
 				'Classifai\Providers\AWS\AmazonPolly',
 				'Classifai\Providers\Azure\Embeddings',
+				'Classifai\Providers\Browser\ChromeAI',
+				'Classifai\Providers\XAI\Grok',
 			]
 		);
 	}

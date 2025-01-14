@@ -27,6 +27,8 @@ import { OpenAIDallESettings } from './openai-dalle';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
+import { ChromeAISettings } from './chrome-ai';
+import { XAIGrokSettings } from './xai-grok';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -84,6 +86,12 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 		case 'openai_text_to_speech':
 			return <OpenAITextToSpeachSettings isConfigured={ isConfigured } />;
 
+		case 'xai_grok':
+			return <XAIGrokSettings isConfigured={ isConfigured } />;
+
+		case 'chrome_ai':
+			return <ChromeAISettings />;
+
 		default:
 			return null;
 	}
@@ -109,6 +117,11 @@ export const ProviderSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
+
+	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
+	if ( feature?.providers?.chrome_ai && ! window.ai ) {
+		delete feature.providers.chrome_ai;
+	}
 
 	const providerLabel = feature.providers[ provider ] || '';
 	const providers = Object.keys( feature?.providers || {} ).map(
@@ -168,6 +181,7 @@ export const ProviderSettings = () => {
 							}
 							value={ provider }
 							options={ providers }
+							__nextHasNoMarginBottom
 						/>
 					</SettingsRow>
 				) }

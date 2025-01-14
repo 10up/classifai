@@ -101,6 +101,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 							value: 'tts-1-hd',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -149,6 +150,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 							value: 'shimmer',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow
@@ -172,6 +174,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 							value: 'wav',
 						},
 					] }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 			<SettingsRow

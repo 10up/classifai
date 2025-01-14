@@ -331,7 +331,7 @@ class ImageGeneration extends Feature {
 
 		<?php
 		// Template for a single generated image.
-		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation */
+		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation,PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 		?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
@@ -382,7 +382,7 @@ class ImageGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'When enabled, a new Generate images tab will be shown in the media upload flow, allowing you to generate and import images.', 'classifai' );
+		return esc_html__( 'Add a new "Generate images" tab in the media upload flow, allowing you to generate and import images.', 'classifai' );
 	}
 
 	/**

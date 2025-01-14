@@ -45,6 +45,7 @@ export const EnableToggleControl = ( { children } ) => {
 						status: value ? '1' : '0', // TODO: Use boolean, currently using string for backward compatibility.
 					} )
 				}
+				__nextHasNoMarginBottom
 			/>
 		</SettingsRow>
 	);

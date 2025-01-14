@@ -14,7 +14,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { useTaxonomies } from '../../utils/utils';
+import { getFeature } from '../../utils/utils';
 
 /**
  * Component for render settings fields when IBM Watson NLU is selected as the provider.
@@ -28,7 +28,9 @@ export const NLUFeatureSettings = () => {
 		select( STORE_NAME ).getFeatureSettings()
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
-	const { taxonomies = [] } = useTaxonomies();
+	const classificationFeature = getFeature( 'feature_classification' );
+	const taxonomies = classificationFeature.taxonomiesByPostTypes || {};
+	const { nluTaxonomies = {} } = window.classifAISettings;
 
 	const nluFeatures = {
 		category: {
@@ -49,42 +51,37 @@ export const NLUFeatureSettings = () => {
 		},
 	};
 
+	const optionsObjects = {};
+	Object.keys( taxonomies ).forEach( ( postType ) => {
+		if ( featureSettings.post_types?.[ postType ] === postType ) {
+			const postTypeTaxonomies = taxonomies[ postType ] || {};
+			Object.keys( postTypeTaxonomies ).forEach( ( taxonomy ) => {
+				optionsObjects[ taxonomy ] = postTypeTaxonomies[ taxonomy ];
+			} );
+		}
+	} );
+
+	/*
+	 * Add NLU-specific taxonomies to the list if IBM Watson NLU is selected as the provider.
+	 *
+	 * This ensures that the NLU taxonomies are available in the settings,
+	 * as NLU-specific taxonomies are registered only if the Classification feature is enabled and IBM Watson NLU is selected as the provider.
+	 */
+	if ( 'ibm_watson_nlu' === featureSettings.provider ) {
+		Object.keys( nluTaxonomies ).forEach( ( taxonomy ) => {
+			optionsObjects[ taxonomy ] = nluTaxonomies[ taxonomy ];
+		} );
+	}
+
 	const options =
-		taxonomies
-			?.filter( ( taxonomy ) => {
-				const intersection = ( taxonomy.types || [] ).filter(
-					( type ) => featureSettings.post_types?.[ type ] === type
-				);
-				return intersection.length > 0;
-			} )
-			?.map( ( taxonomy ) => ( {
-				label: taxonomy.name,
-				value: taxonomy.slug,
-			} ) ) || [];
+		Object.keys( optionsObjects || {} ).map( ( taxonomy ) => ( {
+			label: optionsObjects[ taxonomy ],
+			value: taxonomy,
+		} ) ) || [];
 
 	let features = {};
 	if ( 'ibm_watson_nlu' === featureSettings.provider ) {
 		features = nluFeatures;
-		if ( options ) {
-			options.push(
-				{
-					label: __( 'Watson Category', 'classifai' ),
-					value: 'watson-category',
-				},
-				{
-					label: __( 'Watson Keyword', 'classifai' ),
-					value: 'watson-keyword',
-				},
-				{
-					label: __( 'Watson Entity', 'classifai' ),
-					value: 'watson-entity',
-				},
-				{
-					label: __( 'Watson Concept', 'classifai' ),
-					value: 'watson-concept',
-				}
-			);
-		}
 	} else {
 		options?.forEach( ( taxonomy ) => {
 			features[ taxonomy.value ] = {
@@ -108,12 +105,13 @@ export const NLUFeatureSettings = () => {
 							id={ `${ feature }-enabled` }
 							label={ __( 'Enable', 'classifai' ) }
 							value={ feature }
-							checked={ featureSettings[ feature ] }
+							checked={ !! featureSettings[ feature ] }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									[ feature ]: value ? 1 : 0,
 								} );
 							} }
+							__nextHasNoMarginBottom
 						/>
 						<InputControl
 							id={ `${ feature }-threshold` }
@@ -153,6 +151,7 @@ export const NLUFeatureSettings = () => {
 										[ `${ feature }_taxonomy` ]: value,
 									} );
 								} }
+								__nextHasNoMarginBottom
 							/>
 						) }
 					</SettingsRow>

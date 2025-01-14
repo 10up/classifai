@@ -42,7 +42,7 @@ class ComputerVisionTest extends WP_UnitTestCase {
 		$this->assertEquals(
 			[
 				'Generate descriptive text' => '0, 0, 0',
-				'Confidence threshold'      => 55,
+				'Confidence threshold'      => 70,
 				'Latest response:'          => 'N/A',
 			],
 			$this->provider->get_debug_information(

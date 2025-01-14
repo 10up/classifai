@@ -1,5 +1,5 @@
 /* global lodash */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 const { get } = lodash;
 
 /**
@@ -62,4 +62,82 @@ export const handleClick = ( {
 			errorContainer.textContent = `Error: ${ errorObj.message }`;
 		}
 	);
+};
+
+/**
+ * Make a request to a browser AI to generate text.
+ *
+ * @param {string} provider Provider to use.
+ * @param {string} prompt   Prompt to send to the API.
+ * @param {string} content  Content to add in addition to the prompt.
+ */
+export const browserAITextGeneration = async (
+	provider = '',
+	prompt = '',
+	content = ''
+) => {
+	switch ( provider ) {
+		case 'chrome_ai':
+			return chromeAITextGeneration( prompt, content );
+		default:
+			return '';
+	}
+};
+
+/**
+ * Make a request to the Chrome AI API to generate text.
+ *
+ * @param {string} prompt  Prompt to send to the API.
+ * @param {string} content Content to add in addition to the prompt.
+ */
+export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
+	let result = '';
+	const errorMessage = __(
+		'Your browser does not support Chrome AI or the language model is not available. Please see setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
+		'classifai'
+	);
+
+	if ( ! window.ai ) {
+		// eslint-disable-next-line no-alert
+		window.alert( errorMessage );
+		return result;
+	}
+
+	const supportsTextGeneration =
+		await window.ai.languageModel?.capabilities();
+
+	if (
+		supportsTextGeneration &&
+		supportsTextGeneration.available === 'readily'
+	) {
+		try {
+			const session = await window.ai.languageModel.create( {
+				initialPrompts: [
+					{
+						role: 'system',
+						content: prompt,
+					},
+				],
+			} );
+
+			result = await session.prompt( `"""${ content }"""` );
+		} catch ( e ) {
+			// eslint-disable-next-line no-alert
+			window.alert(
+				sprintf(
+					/* translators: %s: error message */
+					__(
+						'Error occured during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
+						'classifai'
+					),
+					e?.message
+				)
+			);
+		}
+	} else {
+		// eslint-disable-next-line no-alert
+		window.alert( errorMessage );
+	}
+
+	return result;
 };
