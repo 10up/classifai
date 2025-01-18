@@ -1,1 +1,2 @@
-export { useSelectedBlocks } from './useSelectedBlocks';
+export * from './useSelectedBlocks';
+export * from './useEditorCanvas';
