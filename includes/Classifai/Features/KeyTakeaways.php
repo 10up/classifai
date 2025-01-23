@@ -83,6 +83,16 @@ class KeyTakeaways extends Feature {
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_assets', [ $this, 'enqueue_editor_assets' ] );
+		$this->register_block();
+	}
+
+	/**
+	 * Register the block used for this feature.
+	 */
+	public function register_block() {
+		register_block_type_from_metadata(
+			CLASSIFAI_PLUGIN_DIR . '/includes/Classifai/Blocks/key-takeaways', // this is the directory where the block.json is found.
+		);
 	}
 
 	/**
@@ -191,6 +201,14 @@ class KeyTakeaways extends Feature {
 		if ( empty( $post ) || ! is_admin() ) {
 			return;
 		}
+
+		wp_register_script(
+			'key-takeaways-editor-script',
+			CLASSIFAI_PLUGIN_URL . 'dist/key-takeaways-block.js',
+			get_asset_info( 'key-takeaways', 'dependencies' ),
+			get_asset_info( 'key-takeaways', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -215,9 +233,6 @@ class KeyTakeaways extends Feature {
 					'prompt'   => $this->prompt,
 					'original' => 1,
 				],
-			],
-			'post_types'           => [
-				'post' => 'post',
 			],
 			'render'               => 'list',
 			'provider'             => ChatGPT::ID,
@@ -256,8 +271,6 @@ class KeyTakeaways extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['key_takeaways_prompt'] = sanitize_prompts( 'key_takeaways_prompt', $new_settings );
-
-		$new_settings['post_types'] = isset( $new_settings['post_types'] ) ? array_map( 'sanitize_text_field', $new_settings['post_types'] ) : $settings['post_types'];
 
 		$new_settings['render'] = sanitize_text_field( $new_settings['render'] ?? $settings['render'] );
 

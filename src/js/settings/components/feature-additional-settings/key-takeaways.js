@@ -24,7 +24,6 @@ export const KeyTakeawaysSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
-	const { postTypes } = window.classifAISettings;
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const setPrompts = ( prompts ) => {
 		setFeatureSettings( {
@@ -42,36 +41,6 @@ export const KeyTakeawaysSettings = () => {
 					prompts={ featureSettings.key_takeaways_prompt }
 					setPrompts={ setPrompts }
 				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Allowed post types', 'classifai' ) }
-				description={ __(
-					'Choose which post types support this feature.',
-					'classifai'
-				) }
-				className="settings-allowed-post-types"
-			>
-				{ Object.keys( postTypes || {} ).map( ( key ) => {
-					return (
-						<CheckboxControl
-							id={ key }
-							key={ key }
-							checked={
-								featureSettings.post_types?.[ key ] === key
-							}
-							label={ postTypes?.[ key ] }
-							onChange={ ( value ) => {
-								setFeatureSettings( {
-									post_types: {
-										...featureSettings.post_types,
-										[ key ]: value ? key : '0',
-									},
-								} );
-							} }
-							__nextHasNoMarginBottom
-						/>
-					);
-				} ) }
 			</SettingsRow>
 			<SettingsRow
 				label={ __( 'Render', 'classifai' ) }

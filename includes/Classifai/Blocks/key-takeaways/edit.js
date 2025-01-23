@@ -3,33 +3,33 @@
  */
 import { useBlockProps, BlockControls } from '@wordpress/block-editor';
 import { ToolbarGroup } from '@wordpress/components';
-import { list, grid } from '@wordpress/icons';
+import { postList, paragraph } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 
 const BlockEdit = ( props ) => {
 	const { attributes, setAttributes } = props;
-	const { layout } = attributes;
+	const { render } = attributes;
 	const blockProps = useBlockProps();
 
-	const layoutControls = [
+	const renderControls = [
 		{
-			icon: list,
+			icon: postList,
 			title: __( 'List view', 'classifai' ),
-			onClick: () => setAttributes( { layout: 'list' } ),
-			isActive: layout === 'list',
+			onClick: () => setAttributes( { render: 'list' } ),
+			isActive: render === 'list',
 		},
 		{
-			icon: grid,
+			icon: paragraph,
 			title: __( 'Paragraph view', 'classifai' ),
-			onClick: () => setAttributes( { layout: 'paragraph' } ),
-			isActive: layout === 'paragraph',
+			onClick: () => setAttributes( { render: 'paragraph' } ),
+			isActive: render === 'paragraph',
 		},
 	];
 
 	return (
 		<>
 			<BlockControls>
-				<ToolbarGroup controls={ layoutControls } />
+				<ToolbarGroup controls={ renderControls } />
 			</BlockControls>
 			<article { ...blockProps }>
 				<div className="wp-block-classifai-key-takeways__content">
