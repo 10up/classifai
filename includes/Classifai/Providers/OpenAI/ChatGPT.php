@@ -668,7 +668,7 @@ class ChatGPT extends Provider {
 	}
 
 	/**
-	 * Generated key takeaways from content.
+	 * Generate key takeaways from content.
 	 *
 	 * @param int   $post_id The Post ID we're processing
 	 * @param array $args Arguments passed in.
