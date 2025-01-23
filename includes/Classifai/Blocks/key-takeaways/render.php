@@ -7,16 +7,28 @@
  * @var WP_Block $block      Block instance.
  */
 
-$layout = $attributes['render'] ?? 'list';
+$layout    = $attributes['render'] ?? 'list';
+$takeaways = $attributes['takeaways'] ?? [];
 ?>
 
 <div <?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-	<?php if ( 'list' === $layout ) : ?>
-		<ul>
-			<li>Point 1</li>
-			<li>Point 2</li>
-		</ul>
-	<?php else : ?>
-		This is a summary.
-	<?php endif; ?>
+	<?php
+	if ( 'list' === $layout ) {
+		echo '<ul>';
+		foreach ( (array) $takeaways as $takeaway ) {
+			printf(
+				'<li>%s</li>',
+				esc_html( $takeaway )
+			);
+		}
+		echo '</ul>';
+	} else {
+		foreach ( (array) $takeaways as $takeaway ) {
+			printf(
+				'<p>%s</p>',
+				esc_html( $takeaway )
+			);
+		}
+	}
+	?>
 </div>

@@ -32,7 +32,7 @@ class KeyTakeaways extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'The content you will be provided with is from an already written article. This article has the title of: {{TITLE}}. Your task is to carefully read through this article and provide a summary that captures all the important points. This summary should be concise and limited to about 2-4 points but should also be detailed enough to allow someone to quickly grasp the full article. Read the article a few times before providing the summary and trim the summary down to be as concise as possible.';
+	public $prompt = 'The content you will be provided with is from an already written article. This article has the title of: {{TITLE}}. Your task is to carefully read through this article and provide a summary that captures all the important points. This summary should be concise and limited to about 2-4 points but should also be detailed enough to allow someone to quickly grasp the full article. Read the article a few times before providing the summary and trim each point down to be as concise as possible.';
 
 	/**
 	 * Constructor.
