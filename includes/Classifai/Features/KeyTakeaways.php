@@ -262,7 +262,6 @@ class KeyTakeaways extends Feature {
 					'original' => 1,
 				],
 			],
-			'render'               => 'list',
 			'provider'             => ChatGPT::ID,
 		];
 	}
@@ -296,11 +295,7 @@ class KeyTakeaways extends Feature {
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings = $this->get_settings();
-
 		$new_settings['key_takeaways_prompt'] = sanitize_prompts( 'key_takeaways_prompt', $new_settings );
-
-		$new_settings['render'] = sanitize_text_field( $new_settings['render'] ?? $settings['render'] );
 
 		return $new_settings;
 	}

@@ -3,7 +3,6 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { CheckboxControl, RadioControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -40,33 +39,6 @@ export const KeyTakeawaysSettings = () => {
 				<PromptRepeater
 					prompts={ featureSettings.key_takeaways_prompt }
 					setPrompts={ setPrompts }
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Render', 'classifai' ) }
-				description={ __(
-					'Choose how you want the Key Takeaways to render.',
-					'classifai'
-				) }
-			>
-				<RadioControl
-					className="render-radio-control"
-					onChange={ ( value ) => {
-						setFeatureSettings( {
-							render: value,
-						} );
-					} }
-					options={ [
-						{
-							label: __( 'List', 'classifai' ),
-							value: 'list',
-						},
-						{
-							label: __( 'Paragraph', 'classifai' ),
-							value: 'paragraph',
-						},
-					] }
-					selected={ featureSettings.render }
 				/>
 			</SettingsRow>
 		</>

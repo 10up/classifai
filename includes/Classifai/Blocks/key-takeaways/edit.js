@@ -1,9 +1,19 @@
 /**
  * WordPress dependencies
  */
-import { useBlockProps, BlockControls } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	BlockControls,
+	InspectorControls,
+} from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import { Placeholder, ToolbarGroup, Spinner } from '@wordpress/components';
+import {
+	Placeholder,
+	ToolbarGroup,
+	Spinner,
+	PanelBody,
+	Button,
+} from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { postList, paragraph } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
@@ -16,18 +26,20 @@ import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 
 const BlockEdit = ( props ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
+	const [ run, setRun ] = useState( false );
 	const { attributes, setAttributes } = props;
 	const { render, takeaways } = attributes;
 	const blockProps = useBlockProps();
 
 	useEffect( () => {
-		if ( ! isLoading && takeaways.length === 0 ) {
+		if ( ( ! isLoading && takeaways.length === 0 ) || run ) {
 			const postId = select( 'core/editor' ).getCurrentPostId();
 			const postContent =
 				select( 'core/editor' ).getEditedPostAttribute( 'content' );
 			const postTitle =
 				select( 'core/editor' ).getEditedPostAttribute( 'title' );
 
+			setRun( false );
 			setIsLoading( true );
 
 			apiFetch( {
@@ -57,7 +69,7 @@ const BlockEdit = ( props ) => {
 				}
 			);
 		}
-	}, [] );
+	}, [ run ] );
 
 	const renderControls = [
 		{
@@ -79,6 +91,18 @@ const BlockEdit = ( props ) => {
 			<BlockControls>
 				<ToolbarGroup controls={ renderControls } />
 			</BlockControls>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'classifai' ) }>
+					<Button
+						label={ __( 'Re-generate key takeaways', 'classifai' ) }
+						text={ __( 'Refresh results', 'classifai' ) }
+						variant={ 'secondary' }
+						onClick={ () => setRun( true ) }
+						isBusy={ isLoading }
+					/>
+				</PanelBody>
+			</InspectorControls>
+
 			{ isLoading && (
 				<Placeholder
 					icon={ icon }
@@ -92,24 +116,27 @@ const BlockEdit = ( props ) => {
 					/>
 				</Placeholder>
 			) }
-			<div { ...blockProps }>
-				<div className="wp-block-classifai-key-takeways__content">
-					{ render === 'list' && (
-						<ul>
-							{ takeaways.map( ( takeaway, index ) => (
-								<li key={ index }>{ takeaway }</li>
-							) ) }
-						</ul>
-					) }
-					{ render === 'paragraph' && (
-						<>
-							{ takeaways.map( ( takeaway, index ) => (
-								<p key={ index }>{ takeaway }</p>
-							) ) }
-						</>
-					) }
+
+			{ ! isLoading && (
+				<div { ...blockProps }>
+					<div className="wp-block-classifai-key-takeways__content">
+						{ render === 'list' && (
+							<ul>
+								{ takeaways.map( ( takeaway, index ) => (
+									<li key={ index }>{ takeaway }</li>
+								) ) }
+							</ul>
+						) }
+						{ render === 'paragraph' && (
+							<>
+								{ takeaways.map( ( takeaway, index ) => (
+									<p key={ index }>{ takeaway }</p>
+								) ) }
+							</>
+						) }
+					</div>
 				</div>
-			</div>
+			) }
 		</>
 	);
 };
