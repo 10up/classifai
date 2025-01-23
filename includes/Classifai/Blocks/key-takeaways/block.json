@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "title": "Key Takeaways",
+  "description": "Generate a list of key takeaways from a post",
+  "textdomain": "classifai",
+  "name": "classifai/key-takeaways",
+  "category": "classifai-blocks",
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "default": "list"
+    }
+  },
+  "supports": {
+    "html": false
+  },
+  "editorScript": "key-takeaways-editor-script",
+  "style": "key-takeaways-style"
+}
