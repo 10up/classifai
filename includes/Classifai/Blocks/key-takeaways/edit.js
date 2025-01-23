@@ -5,6 +5,7 @@ import {
 	useBlockProps,
 	BlockControls,
 	InspectorControls,
+	RichText,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 import {
@@ -28,7 +29,7 @@ const BlockEdit = ( props ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ run, setRun ] = useState( false );
 	const { attributes, setAttributes } = props;
-	const { render, takeaways } = attributes;
+	const { render, takeaways, title } = attributes;
 	const blockProps = useBlockProps();
 
 	useEffect( () => {
@@ -119,6 +120,15 @@ const BlockEdit = ( props ) => {
 
 			{ ! isLoading && (
 				<div { ...blockProps }>
+					<RichText
+						tagName="h2"
+						className="wp-block-heading wp-block-classifai-key-takeaways__title"
+						value={ title }
+						onChange={ ( value ) =>
+							setAttributes( { title: value } )
+						}
+						placeholder="Key Takeaways"
+					/>
 					<div className="wp-block-classifai-key-takeways__content">
 						{ render === 'list' && (
 							<ul>

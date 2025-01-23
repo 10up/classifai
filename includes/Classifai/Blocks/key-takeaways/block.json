@@ -11,6 +11,10 @@
       "type": "string",
       "default": "list"
     },
+    "title": {
+      "type": "string",
+      "default": "Key Takeaways"
+    },
     "takeaways": {
       "type": "array",
       "default": []
