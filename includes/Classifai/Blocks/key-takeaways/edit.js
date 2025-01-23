@@ -3,11 +3,16 @@
  */
 import { useBlockProps, BlockControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import { ToolbarGroup } from '@wordpress/components';
+import { Placeholder, ToolbarGroup, Spinner } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { postList, paragraph } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 
 const BlockEdit = ( props ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -74,6 +79,19 @@ const BlockEdit = ( props ) => {
 			<BlockControls>
 				<ToolbarGroup controls={ renderControls } />
 			</BlockControls>
+			{ isLoading && (
+				<Placeholder
+					icon={ icon }
+					label={ __( 'Generating Key Takeaways', 'classifai' ) }
+				>
+					<Spinner
+						style={ {
+							height: 'calc(4px * 10)',
+							width: 'calc(4px * 10)',
+						} }
+					/>
+				</Placeholder>
+			) }
 			<div { ...blockProps }>
 				<div className="wp-block-classifai-key-takeways__content">
 					{ render === 'list' && (
