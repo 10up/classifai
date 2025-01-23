@@ -28,11 +28,11 @@ class KeyTakeaways extends Feature {
 	const ID = 'feature_key_takeaways';
 
 	/**
-	 * Prompt for generating a key takeaway.
+	 * Prompt for generating the key takeaways.
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words.';
+	public $prompt = 'The content you will be provided with is from an already written article. This article has the title of: {{TITLE}}. Your task is to carefully read through this article and provide a summary that captures all the important points. This summary should be concise and limited to about 2-4 points but should also be detailed enough to allow someone to quickly grasp the full article. Read the article a few times before providing the summary and trim the summary down to be as concise as possible.';
 
 	/**
 	 * Constructor.
@@ -107,11 +107,21 @@ class KeyTakeaways extends Feature {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'rest_endpoint_callback' ],
 					'args'                => [
-						'id' => [
+						'id'     => [
 							'required'          => true,
 							'type'              => 'integer',
 							'sanitize_callback' => 'absint',
 							'description'       => esc_html__( 'Post ID to generate key takeaways for.', 'classifai' ),
+						],
+						'render' => [
+							'type'              => 'string',
+							'enum'              => [
+								'list',
+								'paragraph',
+							],
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
 						],
 					],
 					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
@@ -126,6 +136,22 @@ class KeyTakeaways extends Feature {
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Content to generate key takeaways from.', 'classifai' ),
+						],
+						'title'   => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Title of content to generate key takeaways from.', 'classifai' ),
+						],
+						'render'  => [
+							'type'              => 'string',
+							'enum'              => [
+								'list',
+								'paragraph',
+							],
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
 						],
 					],
 					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
@@ -181,9 +207,11 @@ class KeyTakeaways extends Feature {
 			return rest_ensure_response(
 				$this->run(
 					$request->get_param( 'id' ),
-					'key-takeaways',
+					'key_takeaways',
 					[
 						'content' => $request->get_param( 'content' ),
+						'title'   => $request->get_param( 'title' ),
+						'render'  => $request->get_param( 'render' ),
 					]
 				)
 			);
