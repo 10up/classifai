@@ -45,7 +45,7 @@ if ( ! classifai_site_meets_php_requirements() ) {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: Minimum required PHP version */
-							__( 'ClassifAI requires PHP version %s or later. Please upgrade PHP or disable the plugin!', 'classifai' ),
+							__( 'ClassifAI requires PHP version %s or later. Please upgrade PHP or disable the plugin.', 'classifai' ),
 							esc_html( classifai_minimum_php_requirement() )
 						)
 					);
