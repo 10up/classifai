@@ -129,7 +129,10 @@ const BlockEdit = ( props ) => {
 						}
 						placeholder="Key Takeaways"
 					/>
-					<div className="wp-block-classifai-key-takeways__content">
+					<div
+						className="wp-block-classifai-key-takeways__content"
+						style={ { fontStyle: 'italic' } }
+					>
 						{ render === 'list' && (
 							<ul>
 								{ takeaways.map( ( takeaway, index ) => (

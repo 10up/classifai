@@ -25,6 +25,6 @@
     "multiple": false
   },
   "editorScript": "key-takeaways-editor-script",
-  "style": "key-takeaways-style",
+  "style": "file:./style.css",
   "render": "file:./render.php"
 }
