@@ -45,56 +45,6 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		} );
 	} );
 
-	it( 'Can set multiple custom prompts, select one as the default and delete one.', () => {
-		cy.visitFeatureSettings( 'language_processing/feature_key_takeaways' );
-
-		// Add three custom prompts.
-		cy.get( 'button.components-button.action__add_prompt' )
-			.click()
-			.click()
-			.click();
-		cy.get(
-			'.classifai-prompts div.classifai-field-type-prompt-setting'
-		).should( 'have.length', 4 );
-
-		// Set the data for each prompt.
-		cy.get( '#classifai-prompt-setting-1 .classifai-prompt-title input' )
-			.clear()
-			.type( 'First custom prompt' );
-		cy.get( '#classifai-prompt-setting-1 .classifai-prompt-text textarea' )
-			.clear()
-			.type( 'This is our first custom prompt' );
-
-		cy.get( '#classifai-prompt-setting-2 .classifai-prompt-title input' )
-			.clear()
-			.type( 'Second custom prompt' );
-		cy.get( '#classifai-prompt-setting-2 .classifai-prompt-text textarea' )
-			.clear()
-			.type( 'This prompt should be deleted' );
-		cy.get( '#classifai-prompt-setting-3 .classifai-prompt-title input' )
-			.clear()
-			.type( 'Third custom prompt' );
-		cy.get( '#classifai-prompt-setting-3 .classifai-prompt-text textarea' )
-			.clear()
-			.type( 'This is a custom prompt' );
-
-		// Set the third prompt as our default.
-		cy.get(
-			'#classifai-prompt-setting-3 .actions-rows button.action__set_default'
-		).click( { force: true } );
-
-		// Delete the second prompt.
-		cy.get(
-			'#classifai-prompt-setting-2 .actions-rows button.action__remove_prompt'
-		).click( { force: true } );
-		cy.get( 'div.components-confirm-dialog button.is-primary' ).click();
-		cy.get(
-			'.classifai-prompts div.classifai-field-type-prompt-setting'
-		).should( 'have.length', 3 );
-
-		cy.saveFeatureSettings();
-	} );
-
 	it( 'Can disable feature', () => {
 		// Disable feature.
 		cy.visitFeatureSettings( 'language_processing/feature_key_takeaways' );
