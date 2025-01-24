@@ -87,6 +87,20 @@ const BlockEdit = ( props ) => {
 		},
 	];
 
+	const editTakeaways = ( index, value ) => {
+		const newTakeaways = [ ...takeaways ];
+
+		if ( ! value ) {
+			newTakeaways.splice( index, 1 );
+		} else {
+			newTakeaways[ index ] = value;
+		}
+
+		setAttributes( {
+			takeaways: newTakeaways,
+		} );
+	};
+
 	return (
 		<>
 			<BlockControls>
@@ -136,14 +150,28 @@ const BlockEdit = ( props ) => {
 						{ render === 'list' && (
 							<ul>
 								{ takeaways.map( ( takeaway, index ) => (
-									<li key={ index }>{ takeaway }</li>
+									<RichText
+										tagName="li"
+										value={ takeaway }
+										key={ index }
+										onChange={ ( value ) =>
+											editTakeaways( index, value )
+										}
+									/>
 								) ) }
 							</ul>
 						) }
 						{ render === 'paragraph' && (
 							<>
 								{ takeaways.map( ( takeaway, index ) => (
-									<p key={ index }>{ takeaway }</p>
+									<RichText
+										tagName="p"
+										value={ takeaway }
+										key={ index }
+										onChange={ ( value ) =>
+											editTakeaways( index, value )
+										}
+									/>
 								) ) }
 							</>
 						) }
