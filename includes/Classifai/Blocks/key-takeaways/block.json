@@ -6,6 +6,7 @@
   "textdomain": "classifai",
   "name": "classifai/key-takeaways",
   "category": "text",
+  "keywords": [ "tldr", "summary", "takeaways", "abstract" ],
   "attributes": {
     "render": {
       "type": "string",
