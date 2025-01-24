@@ -251,7 +251,8 @@ class OpenAI extends Provider {
 		if (
 			( $feature instanceof ContentResizing ||
 			$feature instanceof ExcerptGeneration ||
-			$feature instanceof TitleGeneration ) &&
+			$feature instanceof TitleGeneration ||
+			$feature instanceof KeyTakeaways ) &&
 			$deployment
 		) {
 			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
@@ -788,13 +789,17 @@ class OpenAI extends Provider {
 							},
 							$takeaways['takeaways']
 						);
+					} else {
+						return new WP_Error( 'refusal', esc_html__( 'Request failed', 'classifai' ) );
 					}
+				} else {
+					return new WP_Error( 'refusal', esc_html__( 'Request failed', 'classifai' ) );
 				}
 
 				// If the request was refused, return an error.
 				if ( isset( $choice['message'], $choice['message']['refusal'] ) ) {
 					// translators: %s: error message.
-					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), esc_html( $choice['message']['refusal'] ) ) );
+					return new WP_Error( 'refusal', sprintf( esc_html__( 'Request failed: %s', 'classifai' ), esc_html( $choice['message']['refusal'] ) ) );
 				}
 			}
 		}

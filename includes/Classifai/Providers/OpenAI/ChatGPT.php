@@ -790,7 +790,11 @@ class ChatGPT extends Provider {
 							},
 							$takeaways['takeaways']
 						);
+					} else {
+						return new WP_Error( 'refusal', esc_html__( 'OpenAI request failed', 'classifai' ) );
 					}
+				} else {
+					return new WP_Error( 'refusal', esc_html__( 'OpenAI request failed', 'classifai' ) );
 				}
 
 				// If the request was refused, return an error.
