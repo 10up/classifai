@@ -30,6 +30,7 @@ import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
 import { OllamaSettings } from './ollama';
+import { OllamaMultimodalSettings } from './ollama-multimodal';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -95,6 +96,9 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'ollama':
 			return <OllamaSettings />;
+
+		case 'ollama_multimodal':
+			return <OllamaMultimodalSettings />;
 
 		default:
 			return null;
