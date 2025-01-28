@@ -29,6 +29,7 @@ import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
+import { OllamaSettings } from './ollama';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -91,6 +92,9 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'chrome_ai':
 			return <ChromeAISettings />;
+
+		case 'ollama':
+			return <OllamaSettings />;
 
 		default:
 			return null;
