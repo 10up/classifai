@@ -58,25 +58,6 @@ class OllamaMultimodal extends Ollama {
 	}
 
 	/**
-	 * Register what we need for the Provider.
-	 *
-	 * This only fires if can_register returns true.
-	 */
-	public function register() {
-		$feature = new DescriptiveTextGenerator();
-
-		if (
-			( $this->feature_instance && DescriptiveTextGenerator::ID !== $this->feature_instance::ID ) ||
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
-		) {
-			return;
-		}
-
-		add_filter( 'posts_clauses', [ $this, 'filter_attachment_query_keywords' ], 10, 1 );
-	}
-
-	/**
 	 * Returns the default settings for this provider.
 	 *
 	 * @return array
@@ -408,34 +389,5 @@ class OllamaMultimodal extends Ollama {
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );
 		}
-	}
-
-	/**
-	 * Filter the SQL clauses of an attachment query to include tags and alt text.
-	 *
-	 * @param array $clauses An array including WHERE, GROUP BY, JOIN, ORDER BY,
-	 *                       DISTINCT, fields (SELECT), and LIMITS clauses.
-	 * @return array The modified clauses.
-	 */
-	public function filter_attachment_query_keywords( array $clauses ): array {
-		global $wpdb;
-		remove_filter( 'posts_clauses', __FUNCTION__ );
-
-		if ( ! preg_match( "/\({$wpdb->posts}.post_content (NOT LIKE|LIKE) (\'[^']+\')\)/", $clauses['where'] ) ) {
-			return $clauses;
-		}
-
-		// Add a LEFT JOIN of the postmeta table so we don't trample existing JOINs.
-		$clauses['join'] .= " LEFT JOIN {$wpdb->postmeta} AS classifai_postmeta ON ( {$wpdb->posts}.ID = classifai_postmeta.post_id AND ( classifai_postmeta.meta_key = 'classifai_computer_vision_image_tags' OR classifai_postmeta.meta_key = '_wp_attachment_image_alt' ) )";
-
-		$clauses['groupby'] = "{$wpdb->posts}.ID";
-
-		$clauses['where'] = preg_replace(
-			"/\({$wpdb->posts}.post_content (NOT LIKE|LIKE) (\'[^']+\')\)/",
-			'$0 OR ( classifai_postmeta.meta_value $1 $2 )',
-			$clauses['where']
-		);
-
-		return $clauses;
 	}
 }

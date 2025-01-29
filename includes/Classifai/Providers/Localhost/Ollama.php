@@ -543,7 +543,7 @@ class Ollama extends Provider {
 				array_slice(
 					$words,
 					max( $i - $overlap_size, 0 ),
-					$i + $chunk_size
+					$chunk_size + $overlap_size
 				)
 			);
 
@@ -580,7 +580,7 @@ class Ollama extends Provider {
 	 * @return string
 	 */
 	public function get_api_embeddings_url( string $endpoint_url ): string {
-		return sprintf( '%s%s', trailingslashit( $endpoint_url ), 'api/embeddings' );
+		return sprintf( '%s%s', trailingslashit( $endpoint_url ), 'api/embed' );
 	}
 
 	/**

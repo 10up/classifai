@@ -51,6 +51,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\Browser\ChromeAI',
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\Ollama',
+				'Classifai\Providers\Localhost\OllamaEmbeddings',
 			]
 		);
 	}

@@ -10,18 +10,18 @@ import { STORE_NAME } from '../../data/store';
 import { OllamaBaseSettings } from './ollama-base';
 
 /**
- * Component for Ollama Provider settings.
+ * React Component for Ollama Embeddings settings.
  *
  * This component is used within the ProviderSettings component to
- * allow users to configure the Ollama Provider settings.
+ * allow users to configure the Ollama Embeddings settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OllamaSettings component.
+ * @return {React.ReactElement} OllamaEmbeddingsSettings component.
  */
-export const OllamaSettings = ( { isConfigured = false } ) => {
-	const providerName = 'ollama';
+export const OllamaEmbeddingsSettings = ( { isConfigured = false } ) => {
+	const providerName = 'ollama_embeddings';
 	const providerSettings = useSelect(
 		( select ) =>
 			select( STORE_NAME ).getFeatureSettings( providerName ) || {}

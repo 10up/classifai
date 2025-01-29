@@ -2,10 +2,6 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	SelectControl,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -13,6 +9,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { OllamaBaseSettings } from './ollama-base';
 import { useFeatureContext } from '../feature-settings/context';
 import { PromptRepeater } from '../feature-additional-settings/prompt-repeater';
 
@@ -42,23 +39,6 @@ export const OllamaMultimodalSettings = ( { isConfigured = false } ) => {
 		} );
 	};
 
-	const Description = () => (
-		<>
-			{ __(
-				'URL of the locally hosted Ollama instance. Defaults to http://localhost:11434/. ',
-				'classifai'
-			) }
-			{ __( "Don't have Ollama installed yet? ", 'classifai' ) }
-			<a
-				title={ __( 'Install Ollama', 'classifai' ) }
-				href="https://ollama.com/"
-				target="_blank"
-				rel="noopener noreferrer"
-			>
-				{ __( 'Download Ollama', 'classifai' ) }
-			</a>
-		</>
-	);
 	const promptExamples = (
 		<>
 			{ __( 'Add a custom prompt, if desired. ', 'classifai' ) }
@@ -77,57 +57,14 @@ export const OllamaMultimodalSettings = ( { isConfigured = false } ) => {
 		</>
 	);
 
-	const models = [
-		{ label: __( '-- Choose Model --', 'classifai' ), value: '' },
-	];
-
-	// Convert providerSettings.models to an array from an object.
-	if (
-		providerSettings?.models &&
-		! Array.isArray( providerSettings.models )
-	) {
-		for ( const [ key, value ] of Object.entries(
-			providerSettings.models
-		) ) {
-			models.push( { label: value, value: key } );
-		}
-	}
-
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<SettingsRow
-						label={ __( 'Endpoint URL', 'classifai' ) }
-						description={ <Description /> }
-					>
-						<InputControl
-							id={ `${ providerName }_endpoint_url` }
-							type="text"
-							value={ providerSettings?.endpoint_url || '' }
-							onChange={ ( value ) =>
-								onChange( { endpoint_url: value } )
-							}
-						/>
-					</SettingsRow>
-					<SettingsRow
-						label={ __( 'Model', 'classifai' ) }
-						description={ __(
-							'Choose the model you want to use for requests. If no models are shown or you want to use a different model, please ensure this is installed in Ollama first.',
-							'classifai'
-						) }
-					>
-						<SelectControl
-							id={ `${ providerName }_model` }
-							onChange={ ( value ) =>
-								onChange( { model: value } )
-							}
-							value={ providerSettings?.model || '' }
-							options={ models }
-							__nextHasNoMarginBottom
-						/>
-					</SettingsRow>
-				</>
+				<OllamaBaseSettings
+					providerSettings={ providerSettings }
+					providerName
+					onChange={ onChange }
+				/>
 			) }
 			{ [
 				'feature_descriptive_text_generator',
