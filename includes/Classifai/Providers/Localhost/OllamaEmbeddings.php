@@ -271,7 +271,7 @@ class OllamaEmbeddings extends Ollama {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -410,10 +410,8 @@ class OllamaEmbeddings extends Ollama {
 
 	/**
 	 * Get the data to preview terms.
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -434,7 +432,7 @@ class OllamaEmbeddings extends Ollama {
 			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
 	}
 
 	/**

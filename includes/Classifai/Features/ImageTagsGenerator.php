@@ -23,6 +23,7 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
 	/**
 	 * Prompt for generating tags.
 	 *
@@ -34,6 +35,7 @@ You are an assistant that generates image tags. You will be provided with an ima
 - Another tag
 - ...
 EOD;
+	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
 
 	/**
 	 * Constructor.
