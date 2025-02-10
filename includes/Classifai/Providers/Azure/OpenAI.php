@@ -721,7 +721,7 @@ class OpenAI extends Provider {
 			if ( empty( $json['error'] ) ) {
 				return $json;
 			} else {
-				$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
+				$message = $json['error']['message'] ?? esc_html__( 'An error occurred', 'classifai' );
 				return new WP_Error( $code, $message );
 			}
 		} elseif ( ! empty( wp_remote_retrieve_response_message( $response ) ) ) {

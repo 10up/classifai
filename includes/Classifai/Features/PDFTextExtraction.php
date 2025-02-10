@@ -73,7 +73,7 @@ class PDFTextExtraction extends Feature {
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
-						'description'       => esc_html__( 'Attachment ID to extact text from the PDF file.', 'classifai' ),
+						'description'       => esc_html__( 'Attachment ID to extract text from the PDF file.', 'classifai' ),
 					],
 				],
 				'permission_callback' => [ $this, 'read_pdf_permissions_check' ],

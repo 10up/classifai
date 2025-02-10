@@ -105,9 +105,9 @@ class UserProfile {
 			return;
 		}
 
-		$opted_out_feautures = isset( $_POST['classifai_opted_out_features'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['classifai_opted_out_features'] ) ) : array();
+		$opted_out_features = isset( $_POST['classifai_opted_out_features'] ) ? array_map( 'sanitize_text_field', wp_unslash( $_POST['classifai_opted_out_features'] ) ) : array();
 
-		update_user_meta( $user_id, $this->opt_out_key, $opted_out_feautures );
+		update_user_meta( $user_id, $this->opt_out_key, $opted_out_features );
 	}
 
 	/**

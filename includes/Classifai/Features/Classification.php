@@ -458,7 +458,7 @@ class Classification extends Feature {
 			</label>
 		</p>
 
-		<div class="classifai-clasify-post-wrapper" style="display: none;">
+		<div class="classifai-classify-post-wrapper" style="display: none;">
 			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
 				<?php esc_html_e( 'Suggest terms & tags', 'classifai' ); ?>
 			</a>

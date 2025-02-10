@@ -26,7 +26,7 @@ import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIDallESettings } from './openai-dalle';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
-import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
+import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
 
@@ -84,7 +84,7 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <AzureTextToSpeechSettings isConfigured={ isConfigured } />;
 
 		case 'openai_text_to_speech':
-			return <OpenAITextToSpeachSettings isConfigured={ isConfigured } />;
+			return <OpenAITextToSpeechSettings isConfigured={ isConfigured } />;
 
 		case 'xai_grok':
 			return <XAIGrokSettings isConfigured={ isConfigured } />;
