@@ -158,7 +158,7 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								// Append newTerm to taxoInfo.terms.
 								const terms = {
 									...taxoInfo.terms,
-									entitites: [
+									entities: [
 										...taxoInfo.terms.entities,
 										newTerm,
 									],

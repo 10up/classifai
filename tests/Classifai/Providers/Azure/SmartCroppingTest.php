@@ -85,7 +85,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 	 */
 	public function test_should_crop() {
 		global $_wp_additional_image_sizes;
-		$saved_additonal_image_sizes = $_wp_additional_image_sizes;;
+		$saved_additional_image_sizes = $_wp_additional_image_sizes;;
 
 		add_image_size( 'test-cropped-image-size', 600, 500, true );
 		add_image_size( 'test-position-cropped-image-size', 600, 400, [ 'right', 'bottom' ] );
@@ -98,7 +98,7 @@ class SmartCroppingTest extends WP_UnitTestCase {
 		$this->assertFalse( $smart_cropping->should_crop( 'test-position-cropped-image-size' ) );
 
 		// Reset.
-		$_wp_additional_image_sizes = $saved_additonal_image_sizes;
+		$_wp_additional_image_sizes = $saved_additional_image_sizes;
 	}
 
 	/**

@@ -22,9 +22,9 @@ import { STORE_NAME } from '../../data/store';
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OpenAITextToSpeachSettings component.
+ * @return {React.ReactElement} OpenAITextToSpeechSettings component.
  */
-export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
+export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_text_to_speech';
 	const providerSettings = useSelect(
 		( select ) =>

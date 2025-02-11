@@ -463,7 +463,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - `classifai_post_statuses_for_post_type_or_id` filter; allows post statuses for content classification to be changed as required based on post type / post ID (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
 - Implement `can_register()` method for `Classifai/Providers/Watson/NLU.php` (props [@thrijith](https://github.com/thrijith) via [#313](https://github.com/10up/classifai/pull/313)).
 - Notice for deprecated IBM Watson `watsonplatform.net` NLU API endpoint (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jeffpaul](https://github.com/jeffpaul) via [#320](https://github.com/10up/classifai/pull/320)).
-- CodeQL Analaysis code scanning and Dependency security scanning actions (props [@jeffpaul](https://github.com/jeffpaul) via [#314](https://github.com/10up/classifai/pull/314), [#336](https://github.com/10up/classifai/pull/336)).
+- CodeQL Analysis code scanning and Dependency security scanning actions (props [@jeffpaul](https://github.com/jeffpaul) via [#314](https://github.com/10up/classifai/pull/314), [#336](https://github.com/10up/classifai/pull/336)).
 
 ### Changed
 - Bump WordPress "tested up to" version 5.9 (props [@s3rgiosan](https://github.com/s3rgiosan), [@jeffpaul](https://github.com/jeffpaul) via [#327](https://github.com/10up/classifai/pull/327)).

@@ -804,7 +804,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
@@ -891,7 +891,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {

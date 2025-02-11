@@ -21,7 +21,7 @@ class Settings {
 	public function __construct() {}
 
 	/**
-	 * Inintialize the class and register the actions needed.
+	 * Initialize the class and register the actions needed.
 	 */
 	public function init() {
 		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
