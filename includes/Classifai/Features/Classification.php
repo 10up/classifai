@@ -6,6 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Localhost\OllamaEmbeddings;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -43,6 +44,7 @@ class Classification extends Feature {
 			NLU::ID              => __( 'IBM Watson NLU', 'classifai' ),
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
+			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -250,6 +252,7 @@ class Classification extends Feature {
 				break;
 			case AzureEmbeddings::ID:
 			case OpenAIEmbeddings::ID:
+			case OllamaEmbeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results, $link );
 				break;
 		}
@@ -782,7 +785,7 @@ class Classification extends Feature {
 		);
 
 		// Embeddings only supports existing terms.
-		if ( isset( $settings['provider'] ) && ( OpenAIEmbeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] ) ) {
+		if ( isset( $settings['provider'] ) && ( OpenAIEmbeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] || OllamaEmbeddings::ID === $settings['provider'] ) ) {
 			unset( $method_options['recommended_terms'] );
 			$settings['classification_method'] = 'existing_terms';
 		}
@@ -879,7 +882,7 @@ class Classification extends Feature {
 		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Embeddings only supports existing terms.
-		if ( isset( $new_settings['provider'] ) && ( OpenAIEmbeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] ) ) {
+		if ( isset( $new_settings['provider'] ) && ( OpenAIEmbeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] || OllamaEmbeddings::ID === $settings['provider'] ) ) {
 			$new_settings['classification_method'] = 'existing_terms';
 		}
 

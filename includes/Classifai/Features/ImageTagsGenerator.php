@@ -3,6 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -22,6 +23,20 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	/**
+	 * Prompt for generating tags.
+	 *
+	 * @var string
+	 */
+	public $prompt = <<<EOD
+You are an assistant that generates image tags. You will be provided with an image and will generate a list of tags that best represent the image. Ensure the tags are short. Return at most the best 5 tags and return these in the following format:
+- Tag
+- Another tag
+- ...
+EOD;
+	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+
 	/**
 	 * Constructor.
 	 */
@@ -34,6 +49,7 @@ class ImageTagsGenerator extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -45,6 +61,28 @@ class ImageTagsGenerator extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
+			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**

@@ -29,6 +29,9 @@ import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
+import { OllamaSettings } from './ollama';
+import { OllamaMultimodalSettings } from './ollama-multimodal';
+import { OllamaEmbeddingsSettings } from './ollama-embeddings';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -91,6 +94,15 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'chrome_ai':
 			return <ChromeAISettings />;
+
+		case 'ollama':
+			return <OllamaSettings isConfigured={ isConfigured } />;
+
+		case 'ollama_multimodal':
+			return <OllamaMultimodalSettings isConfigured={ isConfigured } />;
+
+		case 'ollama_embeddings':
+			return <OllamaEmbeddingsSettings isConfigured={ isConfigured } />;
 
 		default:
 			return null;
