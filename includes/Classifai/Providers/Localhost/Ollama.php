@@ -519,7 +519,7 @@ class Ollama extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+						'content' => '"""' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
 					],
 				],
 				'format'   => 'json',
