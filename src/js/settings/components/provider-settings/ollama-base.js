@@ -32,16 +32,16 @@ export const OllamaBaseSettings = ( {
 	const Description = () => (
 		<>
 			{ __(
-				'URL of the locally hosted Ollama instance. Defaults to http://localhost:11434/. ',
+				"URL of the locally hosted Ollama instance. Defaults to http://localhost:11434/. Don't have Ollama installed yet?",
 				'classifai'
 			) }
-			{ __( "Don't have Ollama installed yet? ", 'classifai' ) }
 			<a
 				title={ __( 'Install Ollama', 'classifai' ) }
 				href="https://ollama.com/"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
+				{ ' ' }
 				{ __( 'Download Ollama', 'classifai' ) }
 			</a>
 		</>
