@@ -58,21 +58,6 @@ class KeyTakeaways extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
-		add_action(
-			'admin_footer',
-			static function () {
-				if (
-					( isset( $_GET['tab'], $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					&& 'language_processing' === sanitize_text_field( wp_unslash( $_GET['tab'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					&& self::ID === sanitize_text_field( wp_unslash( $_GET['feature'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				) {
-					printf(
-						'<div id="js-classifai--delete-prompt-modal" style="display:none;"><p>%1$s</p></div>',
-						esc_html__( 'Are you sure you want to delete the prompt?', 'classifai' ),
-					);
-				}
-			}
-		);
 	}
 
 	/**
