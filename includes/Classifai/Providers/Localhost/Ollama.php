@@ -10,6 +10,7 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
+use Classifai\Features\KeyTakeaways;
 use Classifai\Normalizer;
 use WP_Error;
 
@@ -448,6 +449,120 @@ class Ollama extends Provider {
 	}
 
 	/**
+	 * Generate key takeaways from content.
+	 *
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_key_takeaways( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate key takeaways.', 'classifai' ) );
+		}
+
+		$feature  = new KeyTakeaways();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'content' => '',
+				'title'   => get_the_title( $post_id ),
+				'render'  => 'list',
+			]
+		);
+
+		// These checks (and the one above) happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
+
+		// Replace our variables in the prompt.
+		$prompt_search  = array( '{{TITLE}}' );
+		$prompt_replace = array( $args['title'] );
+		$prompt         = str_replace( $prompt_search, $prompt_replace, $prompt );
+
+		/**
+		 * Filter the prompt we will send to Ollama.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_ollama_key_takeaways_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_ollama_key_takeaways_prompt', $prompt, $post_id );
+
+		/**
+		 * Filter the request body before sending to Ollama.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_ollama_key_takeaways_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to Ollama.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_ollama_key_takeaways_request_body',
+			[
+				'model'    => $settings[ static::ID ]['model'] ?? '',
+				'messages' => [
+					[
+						'role'    => 'system',
+						'content' => 'You will be provided with content delimited by triple quotes. Ensure the response you return is valid JSON, in the structure {"takeaways":["first","second"]}. ' . $prompt,
+					],
+					[
+						'role'    => 'user',
+						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+					],
+				],
+				'format'   => 'json',
+				'stream'   => false,
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$request  = new APIRequest( 'test' );
+		$response = $request->post(
+			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// Parse out the response and return it.
+		if ( isset( $response['message'], $response['message']['content'] ) ) {
+			$takeaways = json_decode( $response['message']['content'], true );
+
+			if ( isset( $takeaways['takeaways'] ) && is_array( $takeaways['takeaways'] ) ) {
+				$response = array_map(
+					function ( $takeaway ) {
+						return sanitize_text_field( trim( $takeaway, ' "\'' ) );
+					},
+					$takeaways['takeaways']
+				);
+			} else {
+				return new WP_Error( 'refusal', esc_html__( 'Ollama request failed', 'classifai' ) );
+			}
+		} else {
+			return new WP_Error( 'refusal', esc_html__( 'Ollama request failed', 'classifai' ) );
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
 	 * @param int    $post_id       The post ID we're processing.
@@ -473,6 +588,9 @@ class Ollama extends Provider {
 				break;
 			case 'resize_content':
 				$return = $this->resize_content( $post_id, $args );
+				break;
+			case 'key_takeaways':
+				$return = $this->generate_key_takeaways( $post_id, $args );
 				break;
 		}
 
