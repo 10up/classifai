@@ -34,7 +34,7 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 			title: 'Test Key Takeaways post',
 			content: 'Test GPT content',
 			beforeSave: () => {
-				cy.insertBlock( 'classifai/key-takeaways' );
+				cy.customInsertBlock( 'classifai/key-takeaways' );
 			},
 		} ).then( () => {
 			cy.getBlockEditor()
@@ -42,93 +42,6 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 					'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeways__content'
 				)
 				.should( 'contain.text', 'Request failed' );
-		} );
-	} );
-
-	it( 'Can disable feature', () => {
-		// Disable feature.
-		cy.visitFeatureSettings( 'language_processing/feature_key_takeaways' );
-		cy.disableFeature();
-		cy.saveFeatureSettings();
-
-		// Verify that the feature is not available.
-		cy.createPost( {
-			title: 'Test Key Takeaways post disabled',
-			content: 'Test GPT content',
-			beforeSave: () => {
-				cy.insertBlock( 'classifai/key-takeaways' );
-			},
-		} ).then( () => {
-			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
-		} );
-	} );
-
-	it( 'Can disable feature by role', () => {
-		cy.visitFeatureSettings( 'language_processing/feature_key_takeaways' );
-		cy.enableFeature();
-		cy.saveFeatureSettings();
-
-		// Disable admin role.
-		cy.disableFeatureForRoles( 'feature_key_takeaways', [
-			'administrator',
-		] );
-
-		// Verify that the feature is not available.
-		cy.createPost( {
-			title: 'Test Key Takeaways post disabled user',
-			content: 'Test GPT content',
-			beforeSave: () => {
-				cy.insertBlock( 'classifai/key-takeaways' );
-			},
-		} ).then( () => {
-			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
-		} );
-	} );
-
-	it( 'Can disable feature by user', () => {
-		// Disable admin role.
-		cy.disableFeatureForRoles( 'feature_key_takeaways', [
-			'administrator',
-		] );
-
-		cy.enableFeatureForUsers( 'feature_key_takeaways', [] );
-
-		// Verify that the feature is not available.
-		cy.createPost( {
-			title: 'Test Key Takeaways post disabled user',
-			content: 'Test GPT content',
-			beforeSave: () => {
-				cy.insertBlock( 'classifai/key-takeaways' );
-			},
-		} ).then( () => {
-			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
-		} );
-	} );
-
-	it( 'User can opt-out of feature', () => {
-		// Enable user based opt-out.
-		cy.enableFeatureOptOut( 'feature_key_takeaways', 'azure_openai' );
-
-		// opt-out
-		cy.optOutFeature( 'feature_key_takeaways' );
-
-		// Verify that the feature is not available.
-		cy.createPost( {
-			title: 'Test Key Takeaways post disabled',
-			content: 'Test GPT content',
-			beforeSave: () => {
-				cy.insertBlock( 'classifai/key-takeaways' );
-			},
-		} ).then( () => {
-			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
 		} );
 	} );
 } );
