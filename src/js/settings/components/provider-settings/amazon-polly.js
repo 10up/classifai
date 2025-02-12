@@ -67,16 +67,11 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 						label={ __( 'Region', 'classifai' ) }
 						description={
 							<>
-								{ ' ' }
 								{ __(
-									'Enter the AWS Region. eg: ',
+									'Enter the AWS Region. eg:',
 									'classifai'
-								) }
-								<code>
-									{ ' ' }
-									{ __( 'us-east-1', 'classifai' ) }{ ' ' }
-								</code>
-								.
+								) }{ ' ' }
+								<code>{ __( 'us-east-1', 'classifai' ) }</code>.
 							</>
 						}
 					>
@@ -95,18 +90,18 @@ export const AmazonPollySettings = ( { isConfigured = false } ) => {
 				label={ __( 'Engine', 'classifai' ) }
 				description={
 					<>
-						{ __( 'Amazon Polly offers ', 'classifai' ) }
+						{ __( 'Amazon Polly offers', 'classifai' ) }{ ' ' }
 						<a href="https://docs.aws.amazon.com/polly/latest/dg/long-form-voice-overview.html">
 							{ __( 'Long-Form', 'classifai' ) }
 						</a>
 						,{ ' ' }
 						<a href="https://docs.aws.amazon.com/polly/latest/dg/NTTS-main.html">
 							{ __( 'Neural', 'classifai' ) }{ ' ' }
-						</a>
+						</a>{ ' ' }
 						{ __(
-							' and Standard text-to-speech voices. Please check the ',
+							'and Standard text-to-speech voices. Please check the',
 							'classifai'
-						) }
+						) }{ ' ' }
 						<a
 							href="https://aws.amazon.com/polly/pricing/"
 							title="Pricing"

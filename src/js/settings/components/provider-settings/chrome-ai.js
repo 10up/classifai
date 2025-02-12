@@ -58,17 +58,17 @@ export const ChromeAISettings = () => {
 		return (
 			<>
 				{ __(
-					'Chrome built-in AI is not available on your browser. Please follow the steps ',
+					'Chrome built-in AI is not available on your browser. Please follow the steps',
 					'classifai'
-				) }
+				) }{ ' ' }
 				<a
 					href="https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html"
 					target="_blank"
 					rel="noopener noreferrer"
 				>
 					{ __( 'here', 'classifai' ) }
-				</a>
-				{ __( ' to enable it.', 'classifai' ) }
+				</a>{ ' ' }
+				{ __( 'to enable it.', 'classifai' ) }
 			</>
 		);
 	};
@@ -80,10 +80,10 @@ export const ChromeAISettings = () => {
 				description={ <Description hasSupport={ supported } /> }
 			>
 				{ supported && <Icon icon="yes-alt" /> }
-				{ ! supported && <Icon icon="dismiss" /> }
+				{ ! supported && <Icon icon="dismiss" /> }{ ' ' }
 				{ supported
-					? __( ' Supported', 'classifai' )
-					: __( ' Not Supported', 'classifai' ) }
+					? __( 'Supported', 'classifai' )
+					: __( 'Not Supported', 'classifai' ) }
 			</SettingsRow>
 		</>
 	);
