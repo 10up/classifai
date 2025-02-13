@@ -323,6 +323,9 @@ class ChatGPT extends Provider {
 				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
 					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+
+					// Save full results for later.
+					update_post_meta( $post_id, 'classifai_computer_vision_captions', $response );
 				}
 			}
 		}
@@ -426,8 +429,11 @@ class ChatGPT extends Provider {
 					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
 					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
 
-					if ( 'none' === $response ) {
+					if ( ! $response || 'none' === $response ) {
 						$response = new WP_Error( 'no_choices', esc_html__( 'No text found.', 'classifai' ) );
+					} else {
+						// Save all the results for later
+						update_post_meta( $post_id, 'classifai_computer_vision_ocr', $response );
 					}
 				}
 			}
@@ -533,6 +539,9 @@ class ChatGPT extends Provider {
 				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
 					$response = array_filter( explode( '- ', $choice['message']['content'] ) );
 					$response = array_map( 'trim', $response );
+
+					// Save all the tags for later.
+					update_post_meta( $post_id, 'classifai_computer_vision_image_tags', $response );
 				}
 			}
 		} else {
