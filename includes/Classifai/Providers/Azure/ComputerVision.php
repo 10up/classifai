@@ -749,7 +749,7 @@ class ComputerVision extends Provider {
 	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn     = false;
 		$request = wp_remote_post(
-			trailingslashit( $url ) . $this->analyze_url,
+			trailingslashit( $url ) . $this->analyze_url . '&features=caption',
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $api_key,
