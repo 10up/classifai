@@ -3,6 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\ChatGPT;
 use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
@@ -49,6 +50,7 @@ EOD;
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			ChatGPT::ID        => __( 'OpenAI ChatGPT', 'classifai' ),
 			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
@@ -73,6 +75,15 @@ EOD;
 		$settings = parent::get_settings( $index );
 
 		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
+			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
 		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
 			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {

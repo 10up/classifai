@@ -104,9 +104,11 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 					/>
 				</SettingsRow>
 			) }
-			{ [ 'feature_descriptive_text_generator' ].includes(
-				featureName
-			) && (
+			{ [
+				'feature_descriptive_text_generator',
+				'feature_image_to_text_generator',
+				'feature_image_tags_generator',
+			].includes( featureName ) && (
 				<SettingsRow
 					label={ __( 'Prompt', 'classifai' ) }
 					description={ promptExamples }
