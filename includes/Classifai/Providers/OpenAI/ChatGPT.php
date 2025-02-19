@@ -361,7 +361,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_ocr_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT.
@@ -374,7 +374,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_ocr_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
@@ -472,7 +472,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_image_tag_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT.
@@ -485,7 +485,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_image_tag_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.
@@ -911,7 +911,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_key_takeaways_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
@@ -924,7 +924,7 @@ class ChatGPT extends Provider {
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_chatgpt_key_takeaways_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to ChatGPT.

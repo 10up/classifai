@@ -137,7 +137,7 @@ class OllamaEmbeddings extends Ollama {
 		 * Useful if you want to increase or decrease the length
 		 * of each embedding.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_dimensions
 		 *
 		 * @param {int} $dimensions The default dimensions.
@@ -168,7 +168,7 @@ class OllamaEmbeddings extends Ollama {
 		 * that uses a different number of tokens, or be more
 		 * strict on the amount of tokens that can be used.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_max_tokens
 		 *
 		 * @param {int} $model The default maximum tokens.
@@ -191,7 +191,7 @@ class OllamaEmbeddings extends Ollama {
 		 * this, either decreasing to help with performance or increasing
 		 * to ensure we consider more terms.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_max_terms
 		 *
 		 * @param {int} $terms The default maximum terms.
@@ -458,7 +458,7 @@ class OllamaEmbeddings extends Ollama {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
@@ -787,7 +787,7 @@ class OllamaEmbeddings extends Ollama {
 		/**
 		 * Filter the number of terms to process in a batch.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_terms_per_job
 		 *
 		 * @param {int} $number Number of terms to process per job.
@@ -934,7 +934,7 @@ class OllamaEmbeddings extends Ollama {
 		 *
 		 * Default is true, return false to skip classifying.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_should_classify
 		 *
 		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
@@ -1002,7 +1002,7 @@ class OllamaEmbeddings extends Ollama {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -1076,7 +1076,7 @@ class OllamaEmbeddings extends Ollama {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -1155,7 +1155,7 @@ class OllamaEmbeddings extends Ollama {
 		/**
 		 * Filter content that will get sent to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_embeddings_content
 		 *
 		 * @param {string} $content Content that will be sent to Ollama.

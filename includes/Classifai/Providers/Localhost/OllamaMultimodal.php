@@ -147,7 +147,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama.
@@ -160,7 +160,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -215,7 +215,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama.
@@ -228,7 +228,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -288,7 +288,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama.
@@ -301,7 +301,7 @@ class OllamaMultimodal extends Ollama {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
