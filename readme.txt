@@ -49,6 +49,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 == Upgrade Notice ==
 
+= 3.3.0 =
+**Note that this release bumps the WordPress minimum from 6.5 to 6.6.**
+
 = 3.2.0 =
 **Note that this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/tutorial-useful-snippets.html) for examples.**
 
