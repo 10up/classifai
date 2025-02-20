@@ -65,8 +65,8 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
+            0 => __DIR__ . '/..' . '/psr/http-factory/src',
+            1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -450,6 +450,7 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Features\\ImageGeneration' => __DIR__ . '/../..' . '/includes/Classifai/Features/ImageGeneration.php',
         'Classifai\\Features\\ImageTagsGenerator' => __DIR__ . '/../..' . '/includes/Classifai/Features/ImageTagsGenerator.php',
         'Classifai\\Features\\ImageTextExtraction' => __DIR__ . '/../..' . '/includes/Classifai/Features/ImageTextExtraction.php',
+        'Classifai\\Features\\KeyTakeaways' => __DIR__ . '/../..' . '/includes/Classifai/Features/KeyTakeaways.php',
         'Classifai\\Features\\Moderation' => __DIR__ . '/../..' . '/includes/Classifai/Features/Moderation.php',
         'Classifai\\Features\\PDFTextExtraction' => __DIR__ . '/../..' . '/includes/Classifai/Features/PDFTextExtraction.php',
         'Classifai\\Features\\RecommendedContent' => __DIR__ . '/../..' . '/includes/Classifai/Features/RecommendedContent.php',
@@ -472,6 +473,9 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Providers\\Browser\\ChromeAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Browser/ChromeAI.php',
         'Classifai\\Providers\\GoogleAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/APIRequest.php',
         'Classifai\\Providers\\GoogleAI\\GeminiAPI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/GeminiAPI.php',
+        'Classifai\\Providers\\Localhost\\Ollama' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/Ollama.php',
+        'Classifai\\Providers\\Localhost\\OllamaEmbeddings' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/OllamaEmbeddings.php',
+        'Classifai\\Providers\\Localhost\\OllamaMultimodal' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/OllamaMultimodal.php',
         'Classifai\\Providers\\OpenAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/APIRequest.php',
         'Classifai\\Providers\\OpenAI\\ChatGPT' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/ChatGPT.php',
         'Classifai\\Providers\\OpenAI\\DallE' => __DIR__ . '/../..' . '/includes/Classifai/Providers/OpenAI/DallE.php',
@@ -488,6 +492,8 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Providers\\Watson\\Linker' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/Linker.php',
         'Classifai\\Providers\\Watson\\NLU' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/NLU.php',
         'Classifai\\Providers\\Watson\\PostClassifier' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Watson/PostClassifier.php',
+        'Classifai\\Providers\\XAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/XAI/APIRequest.php',
+        'Classifai\\Providers\\XAI\\Grok' => __DIR__ . '/../..' . '/includes/Classifai/Providers/XAI/Grok.php',
         'Classifai\\Services\\ImageProcessing' => __DIR__ . '/../..' . '/includes/Classifai/Services/ImageProcessing.php',
         'Classifai\\Services\\LanguageProcessing' => __DIR__ . '/../..' . '/includes/Classifai/Services/LanguageProcessing.php',
         'Classifai\\Services\\Personalizer' => __DIR__ . '/../..' . '/includes/Classifai/Services/Personalizer.php',

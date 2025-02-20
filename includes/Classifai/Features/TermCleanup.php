@@ -314,7 +314,7 @@ class TermCleanup extends Feature {
 		/**
 		 * Filter the meta key for embeddings.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_feature_term_cleanup_embeddings_meta_key
 		 *
 		 * @param {string}      $meta_key Meta key for embeddings.
@@ -359,9 +359,9 @@ class TermCleanup extends Feature {
 			wp_die( esc_html__( 'You don\'t have permission to perform this operation.', 'classifai' ) );
 		}
 
-		$settings = $this->get_settings( 'taxonomies' );
-		$taxonomy = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
-		$thresold = isset( $settings[ $taxonomy . '_threshold' ] ) ? absint( $settings[ $taxonomy . '_threshold' ] ) : 75;
+		$settings  = $this->get_settings( 'taxonomies' );
+		$taxonomy  = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
+		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? absint( $settings[ $taxonomy . '_threshold' ] ) : 75;
 
 		if ( empty( $taxonomy ) ) {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'classifai' ) );
@@ -387,7 +387,7 @@ class TermCleanup extends Feature {
 		$job_args = [
 			[
 				'taxonomy'             => $taxonomy,
-				'thresold'             => $thresold,
+				'threshold'            => $threshold,
 				'action'               => 'term_cleanup',
 				'embeddings_generated' => false,
 				'processed'            => 0,
@@ -494,7 +494,7 @@ class TermCleanup extends Feature {
 			/**
 			 * Fires when an embedding is generated for a term.
 			 *
-			 * @since x.x.x
+			 * @since 3.2.0
 			 * @hook classifai_feature_term_cleanup_generate_embedding
 			 *
 			 * @param {int}            $term_id ID of term.
@@ -515,16 +515,16 @@ class TermCleanup extends Feature {
 	 * Get similar terms.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $thresold Thresold to consider terms as duplicates.
+	 * @param int    $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms( string $taxonomy, int $thresold, array $args = [] ) {
+	public function get_similar_terms( string $taxonomy, int $threshold, array $args = [] ) {
 		if ( class_exists( '\\ElasticPress\\Feature' ) && '1' === $this->get_settings( 'use_ep' ) ) {
-			return $this->get_similar_terms_using_elasticpress( $taxonomy, $thresold, $args );
+			return $this->get_similar_terms_using_elasticpress( $taxonomy, $threshold, $args );
 		}
 
-		return $this->get_similar_terms_using_wpdb( $taxonomy, $thresold, $args );
+		return $this->get_similar_terms_using_wpdb( $taxonomy, $threshold, $args );
 	}
 
 	/**
@@ -535,11 +535,11 @@ class TermCleanup extends Feature {
 	 * when ElasticPress is not installed or not in use.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $thresold Thresold to consider terms as duplicates.
+	 * @param int    $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool
 	 */
-	public function get_similar_terms_using_wpdb( string $taxonomy, int $thresold, array $args = [] ) {
+	public function get_similar_terms_using_wpdb( string $taxonomy, int $threshold, array $args = [] ) {
 		$processed = $args['processed'] ?? 0;
 		$term_id   = $args['term_id'] ?? 0;
 		$offset    = $args['offset'] ?? 0;
@@ -625,7 +625,7 @@ class TermCleanup extends Feature {
 			}
 
 			$similarity = $calculations->cosine_similarity( $term_embedding, $compare_embedding );
-			if ( false !== $similarity && ( 1 - $similarity ) >= ( $thresold / 100 ) ) {
+			if ( false !== $similarity && ( 1 - $similarity ) >= ( $threshold / 100 ) ) {
 				$similar_terms[ $compare_term_id ] = 1 - $similarity;
 			}
 		}
@@ -655,11 +655,11 @@ class TermCleanup extends Feature {
 	 * Get similar terms using Elasticsearch via ElasticPress.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $thresold Thresold to consider terms as duplicates.
+	 * @param int    $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms_using_elasticpress( string $taxonomy, int $thresold, array $args = [] ) {
+	public function get_similar_terms_using_elasticpress( string $taxonomy, int $threshold, array $args = [] ) {
 		$processed = $args['processed'] ?? 0;
 		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
 
@@ -691,7 +691,7 @@ class TermCleanup extends Feature {
 
 		foreach ( $terms as $term_id ) {
 			// Find similar terms for the term.
-			$search_results = $this->ep_integration->exact_knn_search( $term_id, 'term', 500, $thresold );
+			$search_results = $this->ep_integration->exact_knn_search( $term_id, 'term', 500, $threshold );
 
 			if ( is_wp_error( $search_results ) ) {
 				return $search_results;
@@ -995,7 +995,7 @@ class TermCleanup extends Feature {
 		/**
 		 * Fires before terms are merged together.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_feature_term_cleanup_pre_merge_term
 		 *
 		 * @param {int}    $from     Term ID being merged.
@@ -1016,7 +1016,7 @@ class TermCleanup extends Feature {
 		/**
 		 * Fires after terms are merged together.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_feature_term_cleanup_post_merge_term
 		 *
 		 * @param {int}               $from     Term ID being merged.
@@ -1070,7 +1070,7 @@ class TermCleanup extends Feature {
 		/**
 		 * Fires before a term is skipped.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_feature_term_cleanup_pre_skip_term
 		 *
 		 * @param {int}    $term         Term ID being skipped.
@@ -1093,7 +1093,7 @@ class TermCleanup extends Feature {
 		/**
 		 * Fires after a term is skipped.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_feature_term_cleanup_post_skip_term
 		 *
 		 * @param {int}    $term         Term ID being skipped.

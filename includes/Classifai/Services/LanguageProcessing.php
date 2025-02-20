@@ -49,6 +49,9 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\AWS\AmazonPolly',
 				'Classifai\Providers\Azure\Embeddings',
 				'Classifai\Providers\Browser\ChromeAI',
+				'Classifai\Providers\XAI\Grok',
+				'Classifai\Providers\Localhost\Ollama',
+				'Classifai\Providers\Localhost\OllamaEmbeddings',
 			]
 		);
 	}

@@ -4,6 +4,8 @@ namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
 use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\XAI\Grok;
+use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -42,6 +44,8 @@ class DescriptiveTextGenerator extends Feature {
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
 			ChatGPT::ID        => __( 'OpenAI', 'classifai' ),
+			Grok::ID           => __( 'xAI Grok', 'classifai' ),
+			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -404,6 +408,24 @@ class DescriptiveTextGenerator extends Feature {
 			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
 				if ( 1 === intval( $prompt['original'] ) ) {
 					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ Grok::ID ]['prompt'] ) ) {
+			foreach ( $settings[ Grok::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ Grok::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
+			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
 					break;
 				}
 			}
