@@ -33,10 +33,7 @@ export const ContentGenerationSettings = () => {
 		<>
 			<SettingsRow
 				label={ __( 'Prompt', 'classifai' ) }
-				description={ __(
-					"Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{TITLE}} will be replaced with the item's title.",
-					'classifai'
-				) }
+				description={ __( 'Add a custom prompt.', 'classifai' ) }
 			>
 				<PromptRepeater
 					prompts={ featureSettings.prompt }

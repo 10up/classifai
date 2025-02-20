@@ -32,7 +32,7 @@ class ContentGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Given the following summary, write a full length article to be shown on a website.';
+	public $prompt = 'Given the title and summary of an article, write a full length article to be used on a website. Only return the contents of the article, not the title. Separate each paragraph with double line breaks.';
 
 	/**
 	 * Constructor.
@@ -96,6 +96,12 @@ class ContentGeneration extends Feature {
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The summary that will be used to generate the full article.', 'classifai' ),
 					],
+					'title'   => [
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
+						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
+					],
 				],
 			]
 		);
@@ -146,6 +152,7 @@ class ContentGeneration extends Feature {
 					$request->get_param( 'id' ),
 					'create_content',
 					[
+						'title'   => $request->get_param( 'title' ),
 						'summary' => $request->get_param( 'summary' ),
 					]
 				)
@@ -166,19 +173,11 @@ class ContentGeneration extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-plugin-content-resizing-js',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.js',
-			array_merge( get_asset_info( 'classifai-plugin-content-resizing', 'dependencies' ), [ 'lodash' ] ),
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
+			'classifai-plugin-content-generation-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-generation.js',
+			get_asset_info( 'classifai-plugin-content-generation', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-content-generation', 'version' ),
 			true
-		);
-
-		wp_enqueue_style(
-			'classifai-plugin-content-resizing-css',
-			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-content-resizing.css',
-			[],
-			get_asset_info( 'classifai-plugin-content-resizing', 'version' ),
-			'all'
 		);
 	}
 

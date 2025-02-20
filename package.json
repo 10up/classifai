@@ -53,6 +53,7 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
+    "@wordpress/autop": "^4.18.0",
     "@wordpress/icons": "^10.17.0",
     "choices.js": "^11.0.3",
     "classnames": "^2.5.1",
