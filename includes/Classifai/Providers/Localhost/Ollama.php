@@ -198,7 +198,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
@@ -212,7 +212,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_excerpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -291,7 +291,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_title_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
@@ -305,7 +305,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_title_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -385,7 +385,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the resize prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_' . $args['resize_type'] . '_content_prompt
 		 *
 		 * @param {string} $prompt Resize prompt we are sending to Ollama. Gets added as a system prompt.
@@ -399,7 +399,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the resize request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_resize_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -487,7 +487,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before post content.
@@ -500,7 +500,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_key_takeaways_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
@@ -624,7 +624,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter content that will get sent to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_ollama_content
 		 *
 		 * @param {string} $content Content that will be sent to Ollama.

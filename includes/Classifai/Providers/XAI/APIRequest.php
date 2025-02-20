@@ -54,7 +54,7 @@ class APIRequest {
 		/**
 		 * Filter the URL for the get request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_request_get_url
 		 *
 		 * @param {string} $url The URL for the request.
@@ -68,7 +68,7 @@ class APIRequest {
 		/**
 		 * Filter the options for the get request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_request_get_options
 		 *
 		 * @param {array} $options The options for the request.
@@ -84,7 +84,7 @@ class APIRequest {
 		/**
 		 * Filter the response from xAI for a get request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_response_get
 		 *
 		 * @param {array|WP_Error} $response The API response.
@@ -121,7 +121,7 @@ class APIRequest {
 		/**
 		 * Filter the URL for the post request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_request_post_url
 		 *
 		 * @param {string} $url The URL for the request.
@@ -135,7 +135,7 @@ class APIRequest {
 		/**
 		 * Filter the options for the post request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_request_post_options
 		 *
 		 * @param {array} $options The options for the request.
@@ -151,7 +151,7 @@ class APIRequest {
 		/**
 		 * Filter the response from xAI for a post request.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_api_response_post
 		 *
 		 * @param {array|WP_Error} $response The API response.
