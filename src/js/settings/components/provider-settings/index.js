@@ -26,8 +26,12 @@ import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIDallESettings } from './openai-dalle';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
-import { OpenAITextToSpeachSettings } from './openai-text-to-speech';
+import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
+import { XAIGrokSettings } from './xai-grok';
+import { OllamaSettings } from './ollama';
+import { OllamaMultimodalSettings } from './ollama-multimodal';
+import { OllamaEmbeddingsSettings } from './ollama-embeddings';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -83,10 +87,22 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <AzureTextToSpeechSettings isConfigured={ isConfigured } />;
 
 		case 'openai_text_to_speech':
-			return <OpenAITextToSpeachSettings isConfigured={ isConfigured } />;
+			return <OpenAITextToSpeechSettings isConfigured={ isConfigured } />;
+
+		case 'xai_grok':
+			return <XAIGrokSettings isConfigured={ isConfigured } />;
 
 		case 'chrome_ai':
 			return <ChromeAISettings />;
+
+		case 'ollama':
+			return <OllamaSettings isConfigured={ isConfigured } />;
+
+		case 'ollama_multimodal':
+			return <OllamaMultimodalSettings isConfigured={ isConfigured } />;
+
+		case 'ollama_embeddings':
+			return <OllamaEmbeddingsSettings isConfigured={ isConfigured } />;
 
 		default:
 			return null;

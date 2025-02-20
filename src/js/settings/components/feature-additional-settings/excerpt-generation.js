@@ -81,7 +81,7 @@ export const ExcerptGenerationSettings = () => {
 			<SettingsRow
 				label={ __( 'Excerpt length', 'classifai' ) }
 				description={ __(
-					'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.',
+					'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10–15 words.',
 					'classifai'
 				) }
 			>

@@ -141,7 +141,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the prompt we will send to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_excerpt_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
@@ -155,7 +155,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the request body before sending to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_excerpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent.
@@ -208,7 +208,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the prompt we will send to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_title_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending. Gets added before post content.
@@ -222,7 +222,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_title_request_body
 		 *
 		 * @param {array} $body Request body that will be sent.
@@ -267,7 +267,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the resize prompt we will send to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_' . $args['resize_type'] . '_content_prompt
 		 *
 		 * @param {string} $prompt Resize prompt we are sending. Gets added as a system prompt.
@@ -281,7 +281,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter the resize request body before sending to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_resize_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent.
@@ -353,7 +353,7 @@ class ChromeAI extends Provider {
 		/**
 		 * Filter content that will get sent to Chrome AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_chrome_ai_content
 		 *
 		 * @param {string} $content Content that will be sent.

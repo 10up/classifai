@@ -50,7 +50,7 @@ class Moderation extends Provider {
 		 * Useful if you want to use a different model, like
 		 * text-moderation-latest.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_openai_moderation_model
 		 *
 		 * @param {string} $model The default model to use.

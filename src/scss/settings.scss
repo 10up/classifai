@@ -430,6 +430,16 @@
 	.classifai-admin-notices {
 		margin-right: 0px;
 	}
+
+	.classifai-settings-snackbar-notices {
+		position: fixed;
+		left: auto;
+		bottom: 40px;
+
+		@media screen and (max-width: 600px) {
+			padding: 0px 20px 0px 0px;
+		}
+	}
 }
 
 .classifai-onboarding {

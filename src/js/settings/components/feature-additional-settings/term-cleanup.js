@@ -57,7 +57,7 @@ export const TermCleanupSettings = () => {
 
 		return (
 			<>
-				{ __( 'Install and activate the ', 'classifai' ) }
+				{ __( 'Install and activate the', 'classifai' ) }{ ' ' }
 				<a
 					title={ __( 'Download ElasticPress', 'classifai' ) }
 					href="https://wordpress.org/plugins/elasticpress/"
@@ -65,9 +65,9 @@ export const TermCleanupSettings = () => {
 					rel="noreferrer"
 				>
 					{ __( 'ElasticPress', 'classifai' ) }
-				</a>
+				</a>{ ' ' }
 				{ __(
-					' plugin to use Elasticsearch for finding similar terms.',
+					'plugin to use Elasticsearch for finding similar terms.',
 					'classifai'
 				) }
 			</>

@@ -46,7 +46,7 @@ class TermCleanupScheduler {
 			case 'term_cleanup':
 				$started_by           = absint( $item['started_by'] );
 				$taxonomy             = $item['taxonomy'];
-				$thresold             = $item['thresold'];
+				$threshold            = $item['threshold'];
 				$term_cleanup         = new TermCleanup();
 				$embeddings_generated = (bool) $item['embeddings_generated'];
 
@@ -92,12 +92,12 @@ class TermCleanupScheduler {
 					'term_id'   => $item['term_id'] ?? 0,
 					'offset'    => $item['offset'] ?? 0,
 				);
-				$res  = $term_cleanup->get_similar_terms( $taxonomy, $thresold, $args );
+				$res  = $term_cleanup->get_similar_terms( $taxonomy, $threshold, $args );
 
 				/**
 				 * Fires when a batch of similar terms are calculated.
 				 *
-				 * @since x.x.x
+				 * @since 3.2.0
 				 * @hook classifai_feature_term_cleanup_get_similar_terms
 				 *
 				 * @param {array|bool|WP_Error} $res      Response from the get_similar_terms method.

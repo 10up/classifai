@@ -19,8 +19,9 @@ import {
 	Notice,
 	Icon,
 } from '@wordpress/components';
-import { useEffect, useRef } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { store as noticesStore } from '@wordpress/notices';
 
 /**
  * Internal dependencies
@@ -54,8 +55,18 @@ const ConfigureProviderNotice = () => (
  * @return {Object} The ServiceSettings component.
  */
 export const ServiceSettings = () => {
+	const [ enabled, setEnabled ] = useState( false );
 	const { setCurrentService, setIsSaving, setSettings } =
 		useDispatch( STORE_NAME );
+	const {
+		createSuccessNotice,
+		createErrorNotice,
+		removeNotices,
+		removeNotice,
+	} = useDispatch( noticesStore );
+	const notices = useSelect( ( select ) =>
+		select( noticesStore ).getNotices()
+	);
 
 	const { service } = useParams();
 	const isInitialPageLoad = useRef( true );
@@ -77,6 +88,13 @@ export const ServiceSettings = () => {
 	const serviceFeatures = features[ service ] || {};
 
 	const saveSettings = () => {
+		// Remove existing notices.
+		if ( removeNotices ) {
+			removeNotices( notices.map( ( { id } ) => id ) );
+		} else if ( removeNotice ) {
+			notices.forEach( ( { id } ) => removeNotice( id ) );
+		}
+
 		setIsSaving( true );
 		apiFetch( {
 			path: '/classifai/v1/settings/',
@@ -86,15 +104,49 @@ export const ServiceSettings = () => {
 				is_setup: true,
 				step: 'enable_features',
 			},
-		} ).then( ( res ) => {
-			if ( res.errors && res.errors.length ) {
-				setIsSaving( false );
-				return;
-			}
+		} )
+			.then( ( res ) => {
+				if ( res.errors && res.errors.length ) {
+					res.errors.forEach( ( error ) => {
+						createErrorNotice( error.message, {
+							id: 'error-generic-notices',
+						} );
+					} );
+					setIsSaving( false );
+					window.scrollTo( {
+						top: 0,
+						behavior: 'smooth',
+					} );
+					return;
+				}
 
-			setSettings( res.settings );
-			setIsSaving( false );
-		} );
+				const message = enabled
+					? __( 'Feature enabled successfully.', 'classifai' )
+					: __( 'Feature disabled successfully.', 'classifai' );
+
+				createSuccessNotice( message, {
+					type: 'snackbar',
+				} );
+				setSettings( res.settings );
+				setIsSaving( false );
+			} )
+			.catch( ( error ) => {
+				createErrorNotice(
+					error.message ||
+						__(
+							'An error occurred while saving settings.',
+							'classifai'
+						),
+					{
+						id: 'error-generic-notices',
+					}
+				);
+				setIsSaving( false );
+				window.scrollTo( {
+					top: 0,
+					behavior: 'smooth',
+				} );
+			} );
 	};
 
 	const statuses = Object.keys( settings )
@@ -126,7 +178,8 @@ export const ServiceSettings = () => {
 												feature
 											)
 										}
-										onChange={ ( value ) =>
+										onChange={ ( value ) => {
+											setEnabled( value );
 											wp.data
 												.dispatch( STORE_NAME )
 												.setFeatureSettings(
@@ -136,8 +189,8 @@ export const ServiceSettings = () => {
 															: '0',
 													},
 													feature
-												)
-										}
+												);
+										} }
 										__nextHasNoMarginBottom
 									/>
 								</Flex>

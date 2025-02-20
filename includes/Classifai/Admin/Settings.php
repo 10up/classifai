@@ -21,7 +21,7 @@ class Settings {
 	public function __construct() {}
 
 	/**
-	 * Inintialize the class and register the actions needed.
+	 * Initialize the class and register the actions needed.
 	 */
 	public function init() {
 		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
@@ -205,7 +205,7 @@ class Settings {
 		/**
 		 * Filter IBM Watson NLU taxonomies shown in settings.
 		 *
-		 * @since x.x.x
+		 * @since 3.2.0
 		 * @hook classifai_settings_ibm_watson_nlu_taxonomies
 		 *
 		 * @param {array} $taxonomies Array of IBM Watson NLU taxonomies.

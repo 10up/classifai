@@ -127,7 +127,7 @@ export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 				sprintf(
 					/* translators: %s: error message */
 					__(
-						'Error occured during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
+						'Error occurred during AI text generation: %1$s. Please ensure you have followed the setup instructions at https://10up.github.io/classifai/tutorial-chrome-built-in-ai.html',
 						'classifai'
 					),
 					e?.message

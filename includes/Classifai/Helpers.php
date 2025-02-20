@@ -216,8 +216,8 @@ function get_largest_acceptable_image_url( string $full_image, string $full_url,
  * @param string $full_image The path to the full-sized image source file.
  * @param string $full_url   The URL of the full-sized image.
  * @param array  $metadata   Attachment metadata, including intermediate sizes.
- * @param array  $width      Array of minimimum and maximum width values. Default 0, 4200.
- * @param array  $height     Array of minimimum and maximum height values. Default 0, 4200.
+ * @param array  $width      Array of minimum and maximum width values. Default 0, 4200.
+ * @param array  $height     Array of minimum and maximum height values. Default 0, 4200.
  * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
  * @return string|null The image URL, or null if no acceptable image found.
  */
@@ -456,7 +456,7 @@ function check_term_permissions( string $tax = '' ) {
 	$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
 
 	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
-		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
+		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not allowed to create or assign to this taxonomy.', 'classifai' ) );
 	}
 
 	return true;
@@ -664,15 +664,15 @@ function get_classification_mode(): string {
 /**
  * Determine if the legacy settings panel should be used.
  *
- * @since x.x.x
+ * @since 3.2.0
  *
  * @return bool
  */
 function should_use_legacy_settings_panel(): bool {
 	/**
-	 * Filter to determine if the legacy settings panel should be used.'
+	 * Filter to determine if the legacy settings panel should be used.
 	 *
-	 * @since x.x.x
+	 * @since 3.2.0
 	 * @hook classifai_use_legacy_settings_panel
 	 *
 	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
