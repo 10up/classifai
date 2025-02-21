@@ -4,6 +4,7 @@
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	SelectControl,
+	ToggleControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -155,6 +156,21 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 						},
 					] }
 					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Per Image Settings', 'classifai' ) }
+				description={ __(
+					'Enable this to allow users to select the quality, size, and style of the generated image.',
+					'classifai'
+				) }
+			>
+				<ToggleControl
+					id={ `${ providerName }_per_image_settings` }
+					onChange={ ( value ) =>
+						onChange( { per_image_settings: value } )
+					}
+					checked={ providerSettings.per_image_settings || false }
 				/>
 			</SettingsRow>
 		</>
