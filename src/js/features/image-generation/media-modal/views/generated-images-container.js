@@ -28,7 +28,12 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 		this.listenTo( this.collection, 'reset', this.renderAll );
 		this.listenTo( this.collection, 'error', this.error );
 
-		this.collection.makeRequest( this.prompt, this.quality, this.size, this.style );
+		this.collection.makeRequest(
+			this.prompt,
+			this.quality,
+			this.size,
+			this.style
+		);
 		this.render();
 	},
 

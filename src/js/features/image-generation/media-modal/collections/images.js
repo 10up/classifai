@@ -17,6 +17,9 @@ const Images = Backbone.Collection.extend( {
 	 * Send a request to our API endpoint.
 	 *
 	 * @param {string} prompt Prompt used in generating images.
+	 * @param {string} quality Quality of the image.
+	 * @param {string} size Size of the image.
+	 * @param {string} style Style of the image.
 	 */
 	makeRequest: function ( prompt, quality, size, style ) {
 		this.fetch( {
