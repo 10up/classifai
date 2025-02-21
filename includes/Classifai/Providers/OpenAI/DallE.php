@@ -142,10 +142,7 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'style',
-				'options'       => [
-					'vivid'   => __( 'Vivid', 'classifai' ),
-					'natural' => __( 'Natural', 'classifai' ),
-				],
+				'options'       => self::get_image_style_options(),
 				'default_value' => $settings['style'],
 				'description'   => __( 'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
@@ -175,6 +172,18 @@ class DallE extends Provider {
 			'1024x1024' => '1024x1024 (square)',
 			'1792x1024' => '1792x1024 (landscape)',
 			'1024x1792' => '1024x1792 (portrait)',
+		);
+	}
+
+	/**
+	 * Returns the style options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_style_options() {
+		return array(
+			'vivid'   => __( 'Vivid', 'classifai' ),
+			'natural' => __( 'Natural', 'classifai' ),
 		);
 	}
 
