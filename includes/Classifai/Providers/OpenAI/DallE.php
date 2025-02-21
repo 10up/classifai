@@ -110,10 +110,7 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'quality',
-				'options'       => [
-					'standard' => __( 'Standard', 'classifai' ),
-					'hd'       => __( 'High Definition', 'classifai' ),
-				],
+				'options'       => self::get_image_quality_options(),
 				'default_value' => $settings['quality'],
 				'description'   => __( 'The quality of the image that will be generated. High Definition creates images with finer details and greater consistency across the image but costs more.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
@@ -157,6 +154,18 @@ class DallE extends Provider {
 				'description'   => __( 'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
+		);
+	}
+
+	/**
+	 * Returns the quality options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_quality_options() {
+		return array(
+			'standard' => __( 'Standard', 'classifai' ),
+			'hd'       => __( 'High Definition', 'classifai' ),
 		);
 	}
 
