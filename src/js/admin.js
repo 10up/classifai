@@ -491,18 +491,3 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		} );
 	}, 30000 ); // 30000 milliseconds = 30 seconds
 } )( jQuery );
-
-(function ($) {
-	$( document ).ready( function () {
-		// Toggle the additional settings section when the checkbox is clicked
-		$( '.view-additional-image-generation-settings' ).on( 'change', function () {
-			var additionalSettings = $( '.additional-image-generation-settings' );
-
-			if ( $( this ).prop( 'checked' ) ) {
-				additionalSettings.removeClass( 'hidden' );
-			} else {
-				additionalSettings.addClass( 'hidden' );
-			}
-		} );
-	} );    
-} )( jQuery );
