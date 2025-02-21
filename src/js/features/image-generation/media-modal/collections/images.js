@@ -18,7 +18,7 @@ const Images = Backbone.Collection.extend( {
 	 *
 	 * @param {string} prompt Prompt used in generating images.
 	 */
-	makeRequest: function ( prompt ) {
+	makeRequest: function ( prompt, quality, size, style ) {
 		this.fetch( {
 			type: 'get',
 			beforeSend: function ( xhr ) {
@@ -26,6 +26,9 @@ const Images = Backbone.Collection.extend( {
 			},
 			data: {
 				prompt: prompt,
+				quality: quality,
+				size: size,
+				style: style,
 				format: 'b64_json',
 			},
 			reset: true,
