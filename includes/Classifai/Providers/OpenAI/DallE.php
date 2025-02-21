@@ -126,11 +126,7 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'image_size',
-				'options'       => [
-					'1024x1024' => '1024x1024 (square)',
-					'1792x1024' => '1792x1024 (landscape)',
-					'1024x1792' => '1024x1792 (portrait)',
-				],
+				'options'       => self::get_image_size_options(),
 				'default_value' => $settings['image_size'],
 				'description'   => __( 'Size of generated images. Larger sizes cost more.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
@@ -166,6 +162,19 @@ class DallE extends Provider {
 		return array(
 			'standard' => __( 'Standard', 'classifai' ),
 			'hd'       => __( 'High Definition', 'classifai' ),
+		);
+	}
+
+	/**
+	 * Returns the image size options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_size_options() {
+		return array(
+			'1024x1024' => '1024x1024 (square)',
+			'1792x1024' => '1792x1024 (landscape)',
+			'1024x1792' => '1024x1792 (portrait)',
 		);
 	}
 
