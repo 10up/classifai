@@ -35,6 +35,9 @@ const Prompt = wp.media.View.extend( {
 	 */
 	promptRequest: function ( event ) {
 		let prompt = '';
+		let quality = '';
+		let size = '';
+		let style = '';
 
 		if ( event.which === 13 ) {
 			prompt = event.target.value.trim();
@@ -42,10 +45,21 @@ const Prompt = wp.media.View.extend( {
 			prompt = event.target.parentElement
 				.querySelector( '.prompt' )
 				.value.trim();
+			quality = event.target.parentElement
+				.querySelector( '.quality' )
+				.value.trim();
+
+			size = event.target.parentElement
+				.querySelector( '.size' )
+				.value.trim();
+
+			style = event.target.parentElement
+				.querySelector( '.style' )
+				.value.trim();
 		}
 
 		if ( prompt ) {
-			new GeneratedImagesContainer( { prompt } );
+			new GeneratedImagesContainer( { prompt, quality, size, style } );
 		}
 	},
 } );
