@@ -311,11 +311,11 @@ class ImageGeneration extends Feature {
 							<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
 							<select class="quality" name="quality">
 								<?php
-									$quality_options = DallE::get_image_quality_options();
-									$quality         = $settings[ $provider_id ]['quality'];
-									foreach ( $quality_options as $key => $value ) {
-										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
-									}
+								$quality_options = DallE::get_image_quality_options();
+								$quality         = $settings[ $provider_id ]['quality'];
+								foreach ( $quality_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
 								?>
 							</select>
 						</label>
@@ -323,11 +323,11 @@ class ImageGeneration extends Feature {
 							<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
 							<select class="size" name="size">
 								<?php
-									$size_options = DallE::get_image_size_options();
-									$size         = $settings[ $provider_id ]['image_size'];
-									foreach ( $size_options as $key => $value ) {
-										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
-									}
+								$size_options = DallE::get_image_size_options();
+								$size         = $settings[ $provider_id ]['image_size'];
+								foreach ( $size_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
 								?>
 							</select>
 						</label>
@@ -335,11 +335,11 @@ class ImageGeneration extends Feature {
 							<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
 							<select class="style" name="style">
 								<?php
-									$style_options = DallE::get_image_style_options();
-									$style         = $settings[ $provider_id ]['style'];
-									foreach ( $style_options as $key => $value ) {
-										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
-									}
+								$style_options = DallE::get_image_style_options();
+								$style         = $settings[ $provider_id ]['style'];
+								foreach ( $style_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
 								?>
 							</select>
 						</label>
