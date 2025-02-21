@@ -159,7 +159,7 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 				/>
 			</SettingsRow>
 			<SettingsRow
-				label={ __( 'Per Image Settings', 'classifai' ) }
+				label={ __( 'Enable per-image settings', 'classifai' ) }
 				description={ __(
 					'Enable this to allow users to select the quality, size, and style of the generated image.',
 					'classifai'
