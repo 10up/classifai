@@ -95,4 +95,35 @@
 			padding: 10px 0;
 		}
 	}
+
+	#view-additional-image-generation-settings {
+		margin: 10px 3px 15px 0;
+		display: inline-block;
+
+		&:checked ~ .additional-image-generation-settings.hidden {
+			display: block;
+		}
+	}
+
+	#view-additional-image-generation-settings-label {
+		display: inline-block;
+		margin: 10px 0 15px;
+		cursor: pointer;
+	}
+
+	.additional-image-generation-settings {
+		label {
+			display: block;
+			margin-top: 10px;
+		}
+
+		span {
+			display: inline-block;
+			min-width: 60px;
+		}
+
+		select {
+			min-width: 200px;
+		}
+	}
 }
