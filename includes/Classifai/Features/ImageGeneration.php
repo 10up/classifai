@@ -302,16 +302,13 @@ class ImageGeneration extends Feature {
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
 				<?php if ( $per_image_settings ) : ?>
 					<br>
-					<div class="prompt-options">
-						<!-- View Additional Settings check box -->
-						<label>
-							<input type="checkbox" class="view-additional-image-generation-settings" />
-							<?php esc_html_e( 'View Additional Settings', 'classifai' ); ?>
-						</label>
-					</div>
+					<input type="checkbox" id="view-additional-image-generation-settings" />
+					<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
+						<?php esc_html_e( 'View Additional Settings', 'classifai' ); ?>
+					</label>
 					<div class="additional-image-generation-settings hidden">
 						<label>
-							<?php esc_html_e( 'Quality:', 'classifai' ); ?>
+							<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
 							<select class="quality" name="quality">
 								<?php
 									$quality_options = DallE::get_image_quality_options();
@@ -323,7 +320,7 @@ class ImageGeneration extends Feature {
 							</select>
 						</label>
 						<label>
-							<?php esc_html_e( 'Size:', 'classifai' ); ?>
+							<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
 							<select class="size" name="size">
 								<?php
 									$size_options = DallE::get_image_size_options();
@@ -335,11 +332,11 @@ class ImageGeneration extends Feature {
 							</select>
 						</label>
 						<label>
-							<?php esc_html_e( 'Style:', 'classifai' ); ?>
+							<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
 							<select class="style" name="style">
 								<?php
 									$style_options = DallE::get_image_style_options();
-									$style         = $settings[ $provider_id ]['image_style'];
+									$style         = $settings[ $provider_id ]['style'];
 									foreach ( $style_options as $key => $value ) {
 										echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
 									}
