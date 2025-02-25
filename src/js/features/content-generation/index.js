@@ -47,6 +47,12 @@ const ContentGenerationPlugin = () => {
 		setOpen( false );
 	};
 
+	const startOver = () => {
+		setContents( '' );
+		setSummary( '' );
+		setError( false );
+	};
+
 	const postId = select( 'core/editor' ).getCurrentPostId();
 
 	const buttonClick = async () => {
@@ -85,7 +91,7 @@ const ContentGenerationPlugin = () => {
 						<RawHTML>{ dataToRender }</RawHTML>
 					</CardBody>
 					<CardFooter justify="flex-end" isBorderless={ true }>
-						<Button variant="tertiary" onClick={ closeModal }>
+						<Button variant="tertiary" onClick={ startOver }>
 							{ __( 'Start over', 'classifai' ) }
 						</Button>
 						<Button variant="tertiary" onClick={ closeModal }>
@@ -130,6 +136,7 @@ const ContentGenerationPlugin = () => {
 						rows="5"
 						label={ __( 'Summary', 'classifai' ) }
 						onChange={ ( value ) => setSummary( value ) }
+						value={ summary }
 					/>
 					{ ! contents && (
 						<Flex justify="flex-end">
