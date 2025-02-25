@@ -39,6 +39,7 @@ const ContentGenerationPlugin = () => {
 	const [ error, setError ] = useState( false );
 	const [ summary, setSummary ] = useState( '' );
 	const [ contents, setContents ] = useState( '' );
+
 	const openModal = () => setOpen( true );
 	const closeModal = () => {
 		setContents( '' );
@@ -55,8 +56,10 @@ const ContentGenerationPlugin = () => {
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
 
-	const buttonClick = async () => {
+	const getContent = async () => {
 		const title = select( 'core/editor' ).getEditedPostAttribute( 'title' );
+
+		// TODO: look to use streaming to make it seem faster.
 
 		setIsLoading( true );
 		apiFetch( {
@@ -84,6 +87,8 @@ const ContentGenerationPlugin = () => {
 
 		dataToRender = autop( dataToRender );
 
+		// TODO: add an iterate button, allowing you to request changes to the generated content while keeping context.
+
 		return (
 			<>
 				<Card>
@@ -93,9 +98,6 @@ const ContentGenerationPlugin = () => {
 					<CardFooter justify="flex-end" isBorderless={ true }>
 						<Button variant="tertiary" onClick={ startOver }>
 							{ __( 'Start over', 'classifai' ) }
-						</Button>
-						<Button variant="tertiary" onClick={ closeModal }>
-							{ __( 'Iterate', 'classifai' ) }
 						</Button>
 						<Button variant="secondary" onClick={ closeModal }>
 							{ __( 'Cancel', 'classifai' ) }
@@ -137,6 +139,7 @@ const ContentGenerationPlugin = () => {
 						label={ __( 'Summary', 'classifai' ) }
 						onChange={ ( value ) => setSummary( value ) }
 						value={ summary }
+						disabled={ contents }
 					/>
 					{ ! contents && (
 						<Flex justify="flex-end">
@@ -152,7 +155,7 @@ const ContentGenerationPlugin = () => {
 							<FlexItem>
 								<Button
 									variant="primary"
-									onClick={ buttonClick }
+									onClick={ getContent }
 									isBusy={ isLoading }
 								>
 									{ __( 'Submit', 'classifai' ) }
