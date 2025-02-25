@@ -18,6 +18,7 @@ import { registerPlugin } from '@wordpress/plugins';
 import { useState, RawHTML } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { autop } from '@wordpress/autop';
+import { rawHandler } from '@wordpress/blocks';
 
 /**
  * Internal Dependencies.
@@ -84,6 +85,12 @@ const ContentGenerationPlugin = () => {
 						<RawHTML>{ dataToRender }</RawHTML>
 					</CardBody>
 					<CardFooter justify="flex-end" isBorderless={ true }>
+						<Button variant="tertiary" onClick={ closeModal }>
+							{ __( 'Start over', 'classifai' ) }
+						</Button>
+						<Button variant="tertiary" onClick={ closeModal }>
+							{ __( 'Iterate', 'classifai' ) }
+						</Button>
 						<Button variant="secondary" onClick={ closeModal }>
 							{ __( 'Cancel', 'classifai' ) }
 						</Button>
@@ -91,8 +98,13 @@ const ContentGenerationPlugin = () => {
 							variant="primary"
 							onClick={ () => {
 								dispatch( 'core/editor' ).editPost( {
-									content: dataToRender,
+									content: '',
 								} );
+								dispatch( 'core/block-editor' ).insertBlocks(
+									rawHandler( {
+										HTML: dataToRender,
+									} )
+								);
 								closeModal();
 							} }
 						>
