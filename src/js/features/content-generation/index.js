@@ -123,8 +123,16 @@ const ContentGenerationPlugin = () => {
 	const RenderCardBody = ( { item } ) => {
 		return (
 			<CardBody>
-				{ <h2>{ item.prompt }</h2> }
-				<RawHTML>{ autop( item.completion ) }</RawHTML>
+				<Flex justify="flex-end" direction="column">
+					<FlexItem style={ { alignSelf: 'flex-end' } }>
+						<h2>{ __( 'User', 'classifai' ) }</h2>
+						<p>{ item.prompt }</p>
+					</FlexItem>
+					<FlexItem style={ { alignSelf: 'flex-start' } }>
+						<h2>{ __( 'AI', 'classifai' ) }</h2>
+						<RawHTML>{ autop( item.completion ) }</RawHTML>
+					</FlexItem>
+				</Flex>
 			</CardBody>
 		);
 	};
@@ -133,6 +141,9 @@ const ContentGenerationPlugin = () => {
 		return (
 			<CardFooter justify="flex-end" isBorderless={ true }>
 				<Button variant="tertiary" onClick={ startOver }>
+					{ __( 'Request changes', 'classifai' ) }
+				</Button>
+				<Button variant="tertiary" isDestructive onClick={ startOver }>
 					{ __( 'Start over', 'classifai' ) }
 				</Button>
 				<Button variant="secondary" onClick={ closeModal }>
@@ -171,15 +182,18 @@ const ContentGenerationPlugin = () => {
 					size="large"
 					className="content-modal"
 				>
-					<TextareaControl
-						rows="5"
-						label={ __( 'Article Summary', 'classifai' ) }
-						onChange={ ( value ) => {
-							setSummary( value );
-						} }
-						value={ summary }
-						disabled={ conversation.length >= 1 }
-					/>
+					{ conversation.length < 1 && (
+						<TextareaControl
+							rows="5"
+							label={ __( 'Article Summary', 'classifai' ) }
+							onChange={ ( value ) => {
+								setSummary( value );
+							} }
+							value={ summary }
+							disabled={ conversation.length >= 1 }
+						/>
+					) }
+
 					{ conversation.length < 1 && (
 						<Flex justify="flex-end">
 							<FlexItem>
@@ -196,16 +210,20 @@ const ContentGenerationPlugin = () => {
 									variant="primary"
 									onClick={ getContent }
 									isBusy={ isLoading }
+									disabled={ isLoading || ! summary }
 								>
 									{ __( 'Submit', 'classifai' ) }
 								</Button>
 							</FlexItem>
 						</Flex>
 					) }
+
 					{ ! isLoading && conversation.length >= 1 && (
 						<RenderData data={ conversation } />
 					) }
+
 					{ ! isLoading && error && <RenderError error={ error } /> }
+
 					{ ! isLoading && (
 						<DisableFeatureButton feature="feature_content_generation" />
 					) }
