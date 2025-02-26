@@ -23,3 +23,21 @@ export const getClientIdToBlockContentMapping = ( blocks = [] ) => blocks.map( (
 	clientId: block.clientId,
 	content: getBlockContent( block ),
 } ) );
+
+/**
+ * Returns HTML string without the outermost tags.
+ *
+ * @param {string} htmlContent HTML as string.
+ * @return {string} HTML string without outermost tags stripped.
+ */
+export function stripOutermostTag( htmlContent = '' ) {
+	// Parse the input HTML string into a DOM structure
+	const parser = new DOMParser();
+	const doc = parser.parseFromString( htmlContent, 'text/html' );
+
+	// Get the first element within the body (this is the outermost element)
+	const outermostElement = doc.body.firstElementChild;
+
+	// Return the innerHTML of the outermost element, which removes the outermost tag
+	return outermostElement ? outermostElement.innerHTML : htmlContent;
+}
