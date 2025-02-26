@@ -580,8 +580,9 @@ class Ollama extends Provider {
 		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
-				'title'   => '',
-				'summary' => '',
+				'title'        => '',
+				'summary'      => '',
+				'conversation' => [],
 			]
 		);
 
@@ -606,9 +607,48 @@ class Ollama extends Provider {
 		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
 		// Set up the content we are sending to the LLM.
-		$content = 'Summary: ' . $args['summary'];
+		if ( ! empty( $args['conversation'] ) ) {
+			$content = 'Summary: ' . $args['conversation'][0]['prompt'];
+		} else {
+			$content = 'Summary: ' . $args['summary'];
+		}
+
 		if ( ! empty( $args['title'] ) ) {
 			$content = 'Title: ' . $args['title'] . "\n" . $content;
+		}
+
+		// Set up our messages.
+		$messages = [
+			[
+				'role'    => 'system',
+				'content' => $prompt,
+			],
+			[
+				'role'    => 'user',
+				'content' => $content,
+			],
+		];
+
+		// If we have an existing conversation, add it to the messages.
+		if ( ! empty( $args['conversation'] ) ) {
+			foreach ( $args['conversation'] as $i => $conversation ) {
+				if ( $i > 0 ) {
+					$messages[] = [
+						'role'    => 'user',
+						'content' => $conversation['prompt'],
+					];
+				}
+
+				$messages[] = [
+					'role'    => 'assistant',
+					'content' => $conversation['completion'],
+				];
+			}
+
+			$messages[] = [
+				'role'    => 'user',
+				'content' => $args['summary'],
+			];
 		}
 
 		/**
@@ -626,16 +666,7 @@ class Ollama extends Provider {
 			'classifai_ollama_content_request_body',
 			[
 				'model'    => $settings[ static::ID ]['model'] ?? '',
-				'messages' => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with some content delimited by triple quotes. Use this content with the given prompt: ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $content . '"""',
-					],
-				],
+				'messages' => $messages,
 				'stream'   => false,
 			],
 			$post_id

@@ -32,7 +32,7 @@ class ContentGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Given the title and summary of an article, write a full length article to be used on a website. Only return the contents of the article, not the title. Separate each paragraph with double line breaks.';
+	public $prompt = 'Given the title and summary of an article, write a full length article to be used on a website. Only return the contents of the article, not the title. Separate each paragraph with double line breaks.'; // TODO: iterate on this to make it better.
 
 	/**
 	 * Constructor.
@@ -83,24 +83,42 @@ class ContentGeneration extends Feature {
 				'callback'            => [ $this, 'rest_endpoint_callback' ],
 				'permission_callback' => [ $this, 'create_content_permissions_check' ],
 				'args'                => [
-					'id'      => [
+					'id'           => [
 						'required'          => true,
 						'type'              => 'integer',
 						'sanitize_callback' => 'absint',
 						'description'       => esc_html__( 'Post ID where content should be stored.', 'classifai' ),
 					],
-					'summary' => [
+					'summary'      => [
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The summary that will be used to generate the full article.', 'classifai' ),
 					],
-					'title'   => [
+					'title'        => [
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
+					],
+					'conversation' => [
+						'type'        => 'object',
+						'properties'  => [
+							'prompt'   => [
+								'type'              => 'string',
+								'sanitize_callback' => 'sanitize_text_field',
+								'validate_callback' => 'rest_validate_request_arg',
+								'description'       => esc_html__( 'The prompt a user sent.', 'classifai' ),
+							],
+							'response' => [
+								'type'              => 'string',
+								'sanitize_callback' => 'sanitize_text_field',
+								'validate_callback' => 'rest_validate_request_arg',
+								'description'       => esc_html__( 'The response from the assistant to the prompt.', 'classifai' ),
+							],
+						],
+						'description' => esc_html__( 'Any previous conversation between a user and assistant.', 'classifai' ),
 					],
 				],
 			]
@@ -152,8 +170,9 @@ class ContentGeneration extends Feature {
 					$request->get_param( 'id' ),
 					'create_content',
 					[
-						'title'   => $request->get_param( 'title' ),
-						'summary' => $request->get_param( 'summary' ),
+						'title'        => $request->get_param( 'title' ),
+						'summary'      => $request->get_param( 'summary' ),
+						'conversation' => $request->get_param( 'conversation' ),
 					]
 				)
 			);

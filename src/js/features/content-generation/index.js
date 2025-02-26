@@ -33,18 +33,175 @@ const RenderError = ( { error } ) => {
 	return <div className="error">{ error }</div>;
 };
 
+const RenderData = ( {
+	data: dataToRender,
+	closeModal,
+	startOver,
+	iterating,
+	iterate,
+	setSummary,
+	summary,
+	isLoading,
+	getContent,
+} ) => {
+	if ( dataToRender.length < 1 ) {
+		return null;
+	}
+
+	return (
+		<>
+			{ dataToRender.map( ( item, i ) => {
+				if ( ! item.completion ) {
+					return null;
+				}
+
+				return (
+					<RenderCard
+						key={ i }
+						item={ item }
+						i={ i }
+						footer={ i === dataToRender.length - 1 }
+						iterating={ iterating }
+						iterate={ iterate }
+						startOver={ startOver }
+						closeModal={ closeModal }
+					/>
+				);
+			} ) }
+
+			{ iterating && (
+				<>
+					<TextareaControl
+						rows="5"
+						label={ __( 'Requested changes', 'classifai' ) }
+						onChange={ ( value ) => {
+							setSummary( value );
+						} }
+						value={ summary }
+						disabled={ isLoading }
+					/>
+					<Flex justify="flex-end">
+						<FlexItem>
+							<Button
+								variant="secondary"
+								onClick={ closeModal }
+								disabled={ isLoading }
+							>
+								{ __( 'Cancel', 'classifai' ) }
+							</Button>
+						</FlexItem>
+						<FlexItem>
+							<Button
+								variant="primary"
+								onClick={ getContent }
+								isBusy={ isLoading }
+								disabled={ isLoading || ! summary }
+							>
+								{ __( 'Submit', 'classifai' ) }
+							</Button>
+						</FlexItem>
+					</Flex>
+				</>
+			) }
+		</>
+	);
+};
+
+const RenderCard = ( {
+	item,
+	i,
+	footer,
+	iterating,
+	iterate,
+	startOver,
+	closeModal,
+} ) => {
+	return (
+		<Card key={ i } style={ { marginBottom: '1rem' } }>
+			<RenderCardBody item={ item } />
+			{ footer && ! iterating && (
+				<RenderCardFooter
+					item={ item }
+					iterate={ iterate }
+					startOver={ startOver }
+					closeModal={ closeModal }
+				/>
+			) }
+		</Card>
+	);
+};
+
+const RenderCardBody = ( { item } ) => {
+	return (
+		<CardBody>
+			<Flex justify="flex-end" direction="column">
+				<FlexItem style={ { alignSelf: 'flex-end' } }>
+					<h2>{ __( 'User', 'classifai' ) }</h2>
+					<p>{ item.prompt }</p>
+				</FlexItem>
+				<FlexItem style={ { alignSelf: 'flex-start' } }>
+					<h2>{ __( 'AI', 'classifai' ) }</h2>
+					<RawHTML>{ autop( item.completion ) }</RawHTML>
+				</FlexItem>
+			</Flex>
+		</CardBody>
+	);
+};
+
+const RenderCardFooter = ( { item, iterate, startOver, closeModal } ) => {
+	return (
+		<CardFooter justify="flex-end" isBorderless={ true }>
+			<Button variant="tertiary" onClick={ iterate }>
+				{ __( 'Request changes', 'classifai' ) }
+			</Button>
+			<Button variant="tertiary" isDestructive onClick={ startOver }>
+				{ __( 'Start over', 'classifai' ) }
+			</Button>
+			<Button variant="secondary" onClick={ closeModal }>
+				{ __( 'Cancel', 'classifai' ) }
+			</Button>
+			<Button
+				variant="primary"
+				onClick={ () => {
+					dispatch( 'core/editor' )
+						.editPost( {
+							content: '',
+						} )
+						.then( () => {
+							dispatch( 'core/block-editor' ).insertBlocks(
+								rawHandler( {
+									HTML: autop( item.completion ),
+								} )
+							);
+							closeModal();
+						} );
+				} }
+			>
+				{ __( 'Insert content', 'classifai' ) }
+			</Button>
+		</CardFooter>
+	);
+};
+
 const ContentGenerationPlugin = () => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
 	const [ error, setError ] = useState( false );
 	const [ summary, setSummary ] = useState( '' );
 	const [ conversation, setConversation ] = useState( [] );
+	const [ iterating, setIterating ] = useState( false );
+
+	const iterate = () => {
+		setIterating( true );
+		setSummary( '' );
+	};
 
 	const openModal = () => setOpen( true );
 	const closeModal = () => {
 		setConversation( [] );
 		setSummary( '' );
 		setError( false );
+		setIterating( false );
 		setOpen( false );
 	};
 
@@ -63,7 +220,7 @@ const ContentGenerationPlugin = () => {
 		apiFetch( {
 			path: '/classifai/v1/create-content',
 			method: 'POST',
-			data: { id: postId, summary, title },
+			data: { id: postId, summary, title, conversation },
 		} ).then(
 			async ( res ) => {
 				setConversation( [
@@ -74,101 +231,13 @@ const ContentGenerationPlugin = () => {
 					},
 				] );
 				setError( false );
+				setIterating( false );
 				setIsLoading( false );
 			},
 			( err ) => {
 				setError( err?.message );
-				setConversation( [] );
 				setIsLoading( false );
 			}
-		);
-	};
-
-	const RenderData = ( { data: dataToRender } ) => {
-		if ( dataToRender.length < 1 ) {
-			return null;
-		}
-
-		// TODO: add an iterate button, allowing you to request changes to the generated content while keeping context.
-
-		return (
-			<>
-				{ dataToRender.map( ( item, i ) => {
-					if ( ! item.completion ) {
-						return null;
-					}
-
-					return (
-						<RenderCard
-							key={ i }
-							item={ item }
-							i={ i }
-							footer={ i === dataToRender.length - 1 }
-						/>
-					);
-				} ) }
-			</>
-		);
-	};
-
-	const RenderCard = ( { item, i, footer } ) => {
-		return (
-			<Card key={ i }>
-				<RenderCardBody item={ item } />
-				{ footer && <RenderCardFooter item={ item } /> }
-			</Card>
-		);
-	};
-
-	const RenderCardBody = ( { item } ) => {
-		return (
-			<CardBody>
-				<Flex justify="flex-end" direction="column">
-					<FlexItem style={ { alignSelf: 'flex-end' } }>
-						<h2>{ __( 'User', 'classifai' ) }</h2>
-						<p>{ item.prompt }</p>
-					</FlexItem>
-					<FlexItem style={ { alignSelf: 'flex-start' } }>
-						<h2>{ __( 'AI', 'classifai' ) }</h2>
-						<RawHTML>{ autop( item.completion ) }</RawHTML>
-					</FlexItem>
-				</Flex>
-			</CardBody>
-		);
-	};
-
-	const RenderCardFooter = ( { item } ) => {
-		return (
-			<CardFooter justify="flex-end" isBorderless={ true }>
-				<Button variant="tertiary" onClick={ startOver }>
-					{ __( 'Request changes', 'classifai' ) }
-				</Button>
-				<Button variant="tertiary" isDestructive onClick={ startOver }>
-					{ __( 'Start over', 'classifai' ) }
-				</Button>
-				<Button variant="secondary" onClick={ closeModal }>
-					{ __( 'Cancel', 'classifai' ) }
-				</Button>
-				<Button
-					variant="primary"
-					onClick={ () => {
-						dispatch( 'core/editor' )
-							.editPost( {
-								content: '',
-							} )
-							.then( () => {
-								dispatch( 'core/block-editor' ).insertBlocks(
-									rawHandler( {
-										HTML: autop( item.completion ),
-									} )
-								);
-								closeModal();
-							} );
-					} }
-				>
-					{ __( 'Insert content', 'classifai' ) }
-				</Button>
-			</CardFooter>
 		);
 	};
 
@@ -185,12 +254,12 @@ const ContentGenerationPlugin = () => {
 					{ conversation.length < 1 && (
 						<TextareaControl
 							rows="5"
-							label={ __( 'Article Summary', 'classifai' ) }
+							label={ __( 'Article summary', 'classifai' ) }
 							onChange={ ( value ) => {
 								setSummary( value );
 							} }
 							value={ summary }
-							disabled={ conversation.length >= 1 }
+							disabled={ isLoading }
 						/>
 					) }
 
@@ -218,8 +287,18 @@ const ContentGenerationPlugin = () => {
 						</Flex>
 					) }
 
-					{ ! isLoading && conversation.length >= 1 && (
-						<RenderData data={ conversation } />
+					{ conversation.length >= 1 && (
+						<RenderData
+							data={ conversation }
+							closeModal={ closeModal }
+							startOver={ startOver }
+							iterating={ iterating }
+							iterate={ iterate }
+							setSummary={ setSummary }
+							summary={ summary }
+							isLoading={ isLoading }
+							getContent={ getContent }
+						/>
 					) }
 
 					{ ! isLoading && error && <RenderError error={ error } /> }
