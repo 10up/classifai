@@ -38,18 +38,18 @@ const ContentGenerationPlugin = () => {
 	const [ isOpen, setOpen ] = useState( false );
 	const [ error, setError ] = useState( false );
 	const [ summary, setSummary ] = useState( '' );
-	const [ contents, setContents ] = useState( '' );
+	const [ conversation, setConversation ] = useState( [] );
 
 	const openModal = () => setOpen( true );
 	const closeModal = () => {
-		setContents( '' );
+		setConversation( [] );
 		setSummary( '' );
 		setError( false );
 		setOpen( false );
 	};
 
 	const startOver = () => {
-		setContents( '' );
+		setConversation( [] );
 		setSummary( '' );
 		setError( false );
 	};
@@ -59,8 +59,6 @@ const ContentGenerationPlugin = () => {
 	const getContent = async () => {
 		const title = select( 'core/editor' ).getEditedPostAttribute( 'title' );
 
-		// TODO: look to use streaming to make it seem faster.
-
 		setIsLoading( true );
 		apiFetch( {
 			path: '/classifai/v1/create-content',
@@ -68,59 +66,98 @@ const ContentGenerationPlugin = () => {
 			data: { id: postId, summary, title },
 		} ).then(
 			async ( res ) => {
-				setContents( res );
+				setConversation( [
+					...conversation,
+					{
+						prompt: summary,
+						completion: res,
+					},
+				] );
 				setError( false );
 				setIsLoading( false );
 			},
 			( err ) => {
 				setError( err?.message );
-				setContents( '' );
+				setConversation( [] );
 				setIsLoading( false );
 			}
 		);
 	};
 
 	const RenderData = ( { data: dataToRender } ) => {
-		if ( ! dataToRender ) {
+		if ( dataToRender.length < 1 ) {
 			return null;
 		}
-
-		dataToRender = autop( dataToRender );
 
 		// TODO: add an iterate button, allowing you to request changes to the generated content while keeping context.
 
 		return (
 			<>
-				<Card>
-					<CardBody>
-						<RawHTML>{ dataToRender }</RawHTML>
-					</CardBody>
-					<CardFooter justify="flex-end" isBorderless={ true }>
-						<Button variant="tertiary" onClick={ startOver }>
-							{ __( 'Start over', 'classifai' ) }
-						</Button>
-						<Button variant="secondary" onClick={ closeModal }>
-							{ __( 'Cancel', 'classifai' ) }
-						</Button>
-						<Button
-							variant="primary"
-							onClick={ () => {
-								dispatch( 'core/editor' ).editPost( {
-									content: '',
-								} );
+				{ dataToRender.map( ( item, i ) => {
+					if ( ! item.completion ) {
+						return null;
+					}
+
+					return (
+						<RenderCard
+							key={ i }
+							item={ item }
+							i={ i }
+							footer={ i === dataToRender.length - 1 }
+						/>
+					);
+				} ) }
+			</>
+		);
+	};
+
+	const RenderCard = ( { item, i, footer } ) => {
+		return (
+			<Card key={ i }>
+				<RenderCardBody item={ item } />
+				{ footer && <RenderCardFooter item={ item } /> }
+			</Card>
+		);
+	};
+
+	const RenderCardBody = ( { item } ) => {
+		return (
+			<CardBody>
+				{ <h2>{ item.prompt }</h2> }
+				<RawHTML>{ autop( item.completion ) }</RawHTML>
+			</CardBody>
+		);
+	};
+
+	const RenderCardFooter = ( { item } ) => {
+		return (
+			<CardFooter justify="flex-end" isBorderless={ true }>
+				<Button variant="tertiary" onClick={ startOver }>
+					{ __( 'Start over', 'classifai' ) }
+				</Button>
+				<Button variant="secondary" onClick={ closeModal }>
+					{ __( 'Cancel', 'classifai' ) }
+				</Button>
+				<Button
+					variant="primary"
+					onClick={ () => {
+						dispatch( 'core/editor' )
+							.editPost( {
+								content: '',
+							} )
+							.then( () => {
 								dispatch( 'core/block-editor' ).insertBlocks(
 									rawHandler( {
-										HTML: dataToRender,
+										HTML: autop( item.completion ),
 									} )
 								);
 								closeModal();
-							} }
-						>
-							{ __( 'Insert content', 'classifai' ) }
-						</Button>
-					</CardFooter>
-				</Card>
-			</>
+							} );
+					} }
+				>
+					{ __( 'Insert content', 'classifai' ) }
+				</Button>
+			</CardFooter>
 		);
 	};
 
@@ -136,12 +173,14 @@ const ContentGenerationPlugin = () => {
 				>
 					<TextareaControl
 						rows="5"
-						label={ __( 'Summary', 'classifai' ) }
-						onChange={ ( value ) => setSummary( value ) }
+						label={ __( 'Article Summary', 'classifai' ) }
+						onChange={ ( value ) => {
+							setSummary( value );
+						} }
 						value={ summary }
-						disabled={ contents }
+						disabled={ conversation.length >= 1 }
 					/>
-					{ ! contents && (
+					{ conversation.length < 1 && (
 						<Flex justify="flex-end">
 							<FlexItem>
 								<Button
@@ -163,8 +202,8 @@ const ContentGenerationPlugin = () => {
 							</FlexItem>
 						</Flex>
 					) }
-					{ ! isLoading && contents && (
-						<RenderData data={ contents } />
+					{ ! isLoading && conversation.length >= 1 && (
+						<RenderData data={ conversation } />
 					) }
 					{ ! isLoading && error && <RenderError error={ error } /> }
 					{ ! isLoading && (
