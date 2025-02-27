@@ -781,7 +781,7 @@ class OllamaEmbeddings extends Ollama {
 						 * @param {string} $tax Taxonomy of term.
 						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
 						 */
-						do_action( 'classifai_ollama_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax );
+						do_action( 'classifai_ollama_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
 
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
