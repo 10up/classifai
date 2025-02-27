@@ -481,6 +481,19 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
+		/**
+		 * Fires after the embeddings similarity has been run but before results are sorted.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_embeddings_pre_sort_embeddings_similarity
+		 *
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_azure_openai_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
+
 		// Sort the results by similarity.
 		usort(
 			$embeddings_similarity,
@@ -499,6 +512,20 @@ class Embeddings extends OpenAI {
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
+
+		/**
+		 * Fires after the embeddings similarity has been run and sorted.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_embeddings_post_sort_embeddings_similarity
+		 *
+		 * @param {array} $sorted_results The sorted embeddings similarity results.
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_azure_openai_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
 		$return = [];
 
