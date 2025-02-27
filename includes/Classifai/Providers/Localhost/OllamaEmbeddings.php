@@ -768,6 +768,21 @@ class OllamaEmbeddings extends Ollama {
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
 
+						/**
+						 * Fires after the embeddings similarity has been run for a single chunk.
+						 *
+						 * @since x.x.x
+						 * @hook classifai_ollama_embeddings_single_embedding_similarity
+						 *
+						 * @param {bool|float} $similarity The embeddings similarity result.
+						 * @param {array} $embedding Post embedding data.
+						 * @param {array} $chunk Term chunk embedding data.
+						 * @param {int} $term_id ID of term we're comparing.
+						 * @param {string} $tax Taxonomy of term.
+						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+						 */
+						do_action( 'classifai_ollama_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax );
+
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
 								'taxonomy'   => $tax,
