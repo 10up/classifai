@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 import { Icon, SlotFillProvider, Slot, Fill } from '@wordpress/components';
 import { PluginArea, registerPlugin } from '@wordpress/plugins';
 import { __ } from '@wordpress/i18n';

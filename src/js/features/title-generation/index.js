@@ -2,8 +2,7 @@
  * External Dependencies.
  */
 import { dispatch, select } from '@wordpress/data';
-import { PluginPostStatusInfo } from '@wordpress/edit-post';
-import { PostTypeSupportCheck } from '@wordpress/editor';
+import { PluginPostStatusInfo, PostTypeSupportCheck } from '@wordpress/editor';
 import {
 	Button,
 	Modal,

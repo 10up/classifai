@@ -38,8 +38,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		'' === excerpt
 			? __( 'Generate excerpt', 'classifai' )
 			: __( 'Re-generate excerpt', 'classifai' );
-	const isPublishPanelOpen =
-		select( 'core/edit-post' ).isPublishSidebarOpened();
+	const isPublishPanelOpen = select( 'core/editor' ).isPublishSidebarOpened();
 
 	const buttonClick = async ( path ) => {
 		setIsLoading( true );
