@@ -345,9 +345,6 @@ class ImageGeneration extends Feature {
 						</select>
 					</label>
 				</div>
-				<?php if ( $per_image_settings ) : ?>
-					<br>
-				<?php endif; ?>
 				<button type="button" class="button button-secondary button-large button-generate">
 					<?php
 					if ( $number_of_images > 1 ) {
