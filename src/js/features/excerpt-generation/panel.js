@@ -31,9 +31,6 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 
 	const { select } = wp.data;
 	const postId = select( 'core/editor' ).getCurrentPostId();
-	const postContent =
-		select( 'core/editor' ).getEditedPostAttribute( 'content' );
-	const postTitle = select( 'core/editor' ).getEditedPostAttribute( 'title' );
 	const buttonText =
 		'' === excerpt
 			? __( 'Generate excerpt', 'classifai' )
@@ -41,6 +38,11 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const isPublishPanelOpen = select( 'core/editor' ).isPublishSidebarOpened();
 
 	const buttonClick = async ( path ) => {
+		const postContent =
+			select( 'core/editor' ).getEditedPostAttribute( 'content' );
+		const postTitle =
+			select( 'core/editor' ).getEditedPostAttribute( 'title' );
+
 		setIsLoading( true );
 		apiFetch( {
 			path,

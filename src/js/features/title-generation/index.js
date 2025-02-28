@@ -52,13 +52,15 @@ const TitleGenerationPlugin = () => {
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
-	const postContent =
-		select( 'core/editor' ).getEditedPostAttribute( 'content' );
+
 	const openModal = () => setOpen( true );
 	const closeModal = () =>
 		setOpen( false ) && setData( [] ) && setError( false );
 
 	const buttonClick = async ( path ) => {
+		const postContent =
+			select( 'core/editor' ).getEditedPostAttribute( 'content' );
+
 		setIsLoading( true );
 		openModal();
 		apiFetch( {
