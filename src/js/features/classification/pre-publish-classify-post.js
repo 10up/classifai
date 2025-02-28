@@ -34,7 +34,7 @@ class PrePubClassifyPost extends Component {
 	 * Render the component.
 	 */
 	render() {
-		// retun null if popupOpened is true
+		// return null if popupOpened is true
 		if ( this.props.popupOpened ) {
 			return null;
 		}

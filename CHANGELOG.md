@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.3.0] - 2025-02-20
+
+**Note that this release bumps the WordPress minimum from 6.5 to 6.6.**
+
+### Added
+
+- New Feature, Key Takeaways, that adds a new block that will generate and output the key takeaways for that post, allowing visitors to get a quick overview of the content without having to read it all (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#843](https://github.com/10up/classifai/pull/843)).
+- Integration with Ollama as a Provider, allowing the following Features to use locally hosted LLMs: Classification; Title Generation; Excerpt Generation; Content Resizing; Key Takeaways; Descriptive Text Generator; Image Tags Generator; Image Text Extraction (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#845](https://github.com/10up/classifai/pull/845)).
+- Grok (xAI) as a Provider for the Title Generation, Excerpt Generation, Content resizing, and Descriptive Text Generator Features (props [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#836](https://github.com/10up/classifai/pull/836)).
+- OpenAI ChatGPT as a Provider for the Image Tags Generator and Image Text Extraction Features (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#851](https://github.com/10up/classifai/pull/851)).
+- Snackbar notice to inform users that settings have been saved successfully (props [@iamdharmesh](https://github.com/iamdharmesh), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#838](https://github.com/10up/classifai/pull/838)).
+
+### Changed
+
+- Bump WordPress minimum from 6.5 to 6.6 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#845](https://github.com/10up/classifai/pull/845)).
+
+### Fixed
+
+- Ensure the Azure AI Vision Provider authenticates properly (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#852](https://github.com/10up/classifai/pull/852)).
+- Ensure the ClassifAI Registration settings save correctly (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#853](https://github.com/10up/classifai/pull/853)).
+- Handle a number of typos (props [@szepeviktor](https://github.com/szepeviktor), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#839](https://github.com/10up/classifai/pull/839)).
+
+### Security
+
+- Bump `serialize-javascript` from 6.0.0 to 6.0.2 and `mocha` from 10.3.0 to 11.1.0 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#850](https://github.com/10up/classifai/pull/850)).
+
+### Developer
+
+- Skip the Repo Automator GitHub Action for pull requests from forks (props [@szepeviktor](https://github.com/szepeviktor), [@iamdharmesh](https://github.com/iamdharmesh) via [#840](https://github.com/10up/classifai/pull/840)).
+- Ensure our PHPUnit workflow doesn't rely on SVN (props [@dkotter](https://github.com/dkotter), [@felipeelia](https://github.com/felipeelia) via [#844](https://github.com/10up/classifai/pull/844)).
+
 ## [3.2.0] - 2024-12-18
 
 **Prior to updating, please read: this release of ClassifAI rearchitects how the settings pages are built, from a standard PHP approach to using React components. If you've created custom Features or Providers or added your own custom settings, you'll need to update your code to work in this new structure. See our [documentation](https://10up.github.io/classifai/tutorial-useful-snippets.html) for examples.**
@@ -463,7 +494,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - `classifai_post_statuses_for_post_type_or_id` filter; allows post statuses for content classification to be changed as required based on post type / post ID (props [@jamesmorrison](https://github.com/jamesmorrison), [@dkotter](https://github.com/dkotter) via [#310](https://github.com/10up/classifai/pull/310)).
 - Implement `can_register()` method for `Classifai/Providers/Watson/NLU.php` (props [@thrijith](https://github.com/thrijith) via [#313](https://github.com/10up/classifai/pull/313)).
 - Notice for deprecated IBM Watson `watsonplatform.net` NLU API endpoint (props [@rahulsprajapati](https://github.com/rahulsprajapati), [@jeffpaul](https://github.com/jeffpaul) via [#320](https://github.com/10up/classifai/pull/320)).
-- CodeQL Analaysis code scanning and Dependency security scanning actions (props [@jeffpaul](https://github.com/jeffpaul) via [#314](https://github.com/10up/classifai/pull/314), [#336](https://github.com/10up/classifai/pull/336)).
+- CodeQL Analysis code scanning and Dependency security scanning actions (props [@jeffpaul](https://github.com/jeffpaul) via [#314](https://github.com/10up/classifai/pull/314), [#336](https://github.com/10up/classifai/pull/336)).
 
 ### Changed
 - Bump WordPress "tested up to" version 5.9 (props [@s3rgiosan](https://github.com/s3rgiosan), [@jeffpaul](https://github.com/jeffpaul) via [#327](https://github.com/10up/classifai/pull/327)).
@@ -658,6 +689,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.3.0]: https://github.com/10up/classifai/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/10up/classifai/compare/3.1.1...3.2.0
 [3.1.1]: https://github.com/10up/classifai/compare/3.1.0...3.1.1
 [3.1.0]: https://github.com/10up/classifai/compare/3.0.1...3.1.0

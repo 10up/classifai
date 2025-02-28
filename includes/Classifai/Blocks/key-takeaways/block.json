@@ -1,0 +1,31 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "title": "Key Takeaways",
+  "description": "Generate a list of key takeaways from post content",
+  "textdomain": "classifai",
+  "name": "classifai/key-takeaways",
+  "category": "text",
+  "keywords": [ "tldr", "summary", "takeaways", "abstract" ],
+  "attributes": {
+    "render": {
+      "type": "string",
+      "default": "list"
+    },
+    "title": {
+      "type": "string",
+      "default": "Key Takeaways"
+    },
+    "takeaways": {
+      "type": "array",
+      "default": []
+    }
+  },
+  "supports": {
+    "html": false,
+    "multiple": false
+  },
+  "editorScript": "key-takeaways-editor-script",
+  "style": "file:./style.css",
+  "render": "file:./render.php"
+}

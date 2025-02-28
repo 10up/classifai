@@ -18,11 +18,19 @@ WP_TESTS_DIR=${WP_TESTS_DIR-$TMPDIR/wordpress-tests-lib}
 WP_CORE_DIR=${WP_CORE_DIR-$TMPDIR/wordpress/}
 
 download() {
-    if [ `which curl` ]; then
-        curl -s "$1" > "$2";
-    elif [ `which wget` ]; then
-        wget -nv -O "$2" "$1"
-    fi
+	if [ `which curl` ]; then
+		curl -s "$1" > "$2";
+	elif [ `which wget` ]; then
+		wget -nv -O "$2" "$1"
+	fi
+}
+
+# Check if git is installed
+check_git_installed() {
+	if ! command -v git > /dev/null; then
+		echo "Error: git is not installed. Please install git and try again."
+		exit 1
+	fi
 }
 
 if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
@@ -35,6 +43,7 @@ elif [[ $WP_VERSION =~ [0-9]+\.[0-9]+\.[0-9]+ ]]; then
 		WP_TESTS_TAG="tags/$WP_VERSION"
 	fi
 elif [[ $WP_VERSION == 'nightly' || $WP_VERSION == 'trunk' ]]; then
+	WP_BRANCH="trunk"
 	WP_TESTS_TAG="trunk"
 else
 	# http serves a single offer, whereas https serves multiple. we only want one
@@ -45,6 +54,7 @@ else
 		echo "Latest WordPress version could not be found"
 		exit 1
 	fi
+	WP_BRANCH=$LATEST_VERSION
 	WP_TESTS_TAG="tags/$LATEST_VERSION"
 fi
 
@@ -104,12 +114,16 @@ install_test_suite() {
 	if [ ! -d $WP_TESTS_DIR ]; then
 		# set up testing suite
 		mkdir -p $WP_TESTS_DIR
-		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/includes/ $WP_TESTS_DIR/includes
-		svn co --quiet https://develop.svn.wordpress.org/${WP_TESTS_TAG}/tests/phpunit/data/ $WP_TESTS_DIR/data
+		check_git_installed
+		git clone --depth 1 --branch $WP_BRANCH https://github.com/wordpress/wordpress-develop $TMPDIR/wordpress-develop
+		rm -r $TMPDIR/wordpress-develop/.git
+		mv $TMPDIR/wordpress-develop/tests/phpunit/includes/ $WP_TESTS_DIR/includes
+		mv $TMPDIR/wordpress-develop/tests/phpunit/data/ $WP_TESTS_DIR/data
+		rm -r $TMPDIR/wordpress-develop
 	fi
 
 	if [ ! -f wp-tests-config.php ]; then
-		download https://develop.svn.wordpress.org/${WP_TESTS_TAG}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
+		download https://raw.githubusercontent.com/wordpress/wordpress-develop/${WP_BRANCH}/wp-tests-config-sample.php "$WP_TESTS_DIR"/wp-tests-config.php
 		# remove all forward slashes in the end
 		WP_CORE_DIR=$(echo $WP_CORE_DIR | sed "s:/\+$::")
 		sed $ioption "s:dirname( __FILE__ ) . '/src/':'$WP_CORE_DIR/':" "$WP_TESTS_DIR"/wp-tests-config.php
@@ -144,12 +158,12 @@ install_db() {
 	fi
 
 	# create database
-  if [ -z $DB_PASS ] ; then
-    echo 'No DB password'
-    mysqladmin create $DB_NAME --user="$DB_USER" $EXTRA
-  else
-    mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
-  fi
+	if [ -z $DB_PASS ] ; then
+		echo 'No DB password'
+		mysqladmin create $DB_NAME --user="$DB_USER" $EXTRA
+	else
+		mysqladmin create $DB_NAME --user="$DB_USER" --password="$DB_PASS"$EXTRA
+	fi
 }
 
 install_wp

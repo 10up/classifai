@@ -83,7 +83,7 @@ class MyProvider extends Provider {
      *
      * All Features will end up calling the rest_endpoint_callback method for their assigned Provider.
      * This method should validate the route that is being called and then call the appropriate method
-     * for that route. This method typically will validate we have all the requried data and if so,
+     * for that route. This method typically will validate we have all the required data and if so,
      * make a request to the appropriate API endpoint.
      *
      * @param int    $post_id The Post ID we're processing.

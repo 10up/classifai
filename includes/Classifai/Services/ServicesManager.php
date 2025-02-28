@@ -77,6 +77,7 @@ class ServicesManager {
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
 			'\Classifai\Features\ContentResizing',
+			'\Classifai\Features\KeyTakeaways',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
 			'\Classifai\Features\Moderation',
@@ -139,7 +140,7 @@ class ServicesManager {
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
-		$settings = get_option( 'classifai_settings' );
+		$settings = get_option( 'classifai_settings', [] );
 
 		// Special handling polyfill for pre-1.3 settings which were nested
 		if ( ! isset( $settings['email'] ) && isset( $settings['registration']['email'] ) ) {

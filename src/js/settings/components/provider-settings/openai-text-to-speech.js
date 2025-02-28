@@ -22,9 +22,9 @@ import { STORE_NAME } from '../../data/store';
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OpenAITextToSpeachSettings component.
+ * @return {React.ReactElement} OpenAITextToSpeechSettings component.
  */
-export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
+export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_text_to_speech';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -35,7 +35,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 
 	const Description = () => (
 		<>
-			{ __( "Don't have an OpenAI account yet? ", 'classifai' ) }
+			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
 			<a
 				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
 				href="https://platform.openai.com/signup"
@@ -65,7 +65,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				label={ __( 'TTS model', 'classifai' ) }
 				description={
 					<>
-						{ __( 'Select a ', 'classifai' ) }
+						{ __( 'Select a', 'classifai' ) }{ ' ' }
 						<a
 							href="https://platform.openai.com/docs/models/tts"
 							title={ __(
@@ -76,8 +76,8 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 							rel="noreferrer"
 						>
 							{ __( 'model', 'classifai' ) }
-						</a>
-						{ __( ' depending on your requirement.', 'classifai' ) }
+						</a>{ ' ' }
+						{ __( 'depending on your requirement.', 'classifai' ) }
 					</>
 				}
 			>
@@ -108,7 +108,7 @@ export const OpenAITextToSpeachSettings = ( { isConfigured = false } ) => {
 				label={ __( 'Voice', 'classifai' ) }
 				description={
 					<>
-						{ __( 'Select the speech ', 'classifai' ) }
+						{ __( 'Select the speech', 'classifai' ) }{ ' ' }
 						<a
 							href="https://platform.openai.com/docs/models/tts"
 							target="_blank"
