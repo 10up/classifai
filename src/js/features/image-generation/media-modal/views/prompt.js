@@ -38,24 +38,21 @@ const Prompt = wp.media.View.extend( {
 		let quality = '';
 		let size = '';
 		let style = '';
-		let parent = event.target.parentElement;
+		const parent = event.target.parentElement;
 
 		if ( event.which === 13 ) {
 			prompt = event.target.value.trim();
 		} else if ( event.target.nodeName === 'BUTTON' ) {
-			prompt = parent
-				.querySelector( '.prompt' )
-				.value.trim();
-			quality = parent
-				.querySelector( '.quality' )
+			prompt = parent.querySelector( '.prompt' )
 				.value.trim();
 
-			size = parent
-				.querySelector( '.size' )
+			quality = parent.querySelector( '.quality' )
 				.value.trim();
 
-			style = parent
-				.querySelector( '.style' )
+			size = parent.querySelector( '.size' )
+				.value.trim();
+
+			style = parent.querySelector( '.style' )
 				.value.trim();
 		}
 
