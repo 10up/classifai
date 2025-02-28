@@ -43,19 +43,10 @@ const Prompt = wp.media.View.extend( {
 		if ( event.which === 13 ) {
 			prompt = event.target.value.trim();
 		} else if ( event.target.nodeName === 'BUTTON' ) {
-			// Ensure parent exists before querying elements.
-			if ( parent ) {
-				const promptEl = parent.querySelector( '.prompt' );
-				const qualityEl = parent.querySelector( '.quality' );
-				const sizeEl = parent.querySelector( '.size' );
-				const styleEl = parent.querySelector( '.style' );
-
-				// Check if elements exist before accessing .value
-				prompt = promptEl ? promptEl.value.trim() : '';
-				quality = qualityEl ? qualityEl.value.trim() : '';
-				size = sizeEl ? sizeEl.value.trim() : '';
-				style = styleEl ? styleEl.value.trim() : '';
-			}
+			prompt = parent.querySelector( '.prompt' ).value.trim();
+			quality = parent.querySelector( '.quality' ).value.trim();
+			size = parent.querySelector( '.size' ).value.trim();
+			style = parent.querySelector( '.style' ).value.trim();
 		}
 
 		if ( prompt ) {
