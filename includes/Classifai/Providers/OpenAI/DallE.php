@@ -148,22 +148,6 @@ class DallE extends Provider {
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
 		);
-
-		add_settings_field(
-			static::ID . '_per_image_settings',
-			esc_html__( 'Enable per-image settings for quality, size, and style', 'classifai' ),
-			[ $this, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'per_image_settings',
-				'input_type'    => 'checkbox',
-				'default_value' => $settings['per_image_settings'] ?? false,
-				'description'   => __( 'Enable this to allow users to select the quality, size, and style of the generated image.', 'classifai' ),
-				'class'         => 'classifai-user-based-opt-out',
-			]
-		);
 	}
 
 	/**

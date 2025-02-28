@@ -274,7 +274,7 @@ class ImageGeneration extends Feature {
 		$settings           = $this->get_settings();
 		$provider_id        = $settings['provider'];
 		$number_of_images   = absint( $settings[ $provider_id ]['number_of_images'] );
-		$per_image_settings = isset( $settings[ $provider_id ]['per_image_settings'] ) ? $settings[ $provider_id ]['per_image_settings'] : false;
+		$per_image_settings = $settings[ $provider_id ]['per_image_settings'] ?? false;
 		$provider_instance  = $this->get_feature_provider_instance( $provider_id );
 		?>
 
@@ -304,7 +304,7 @@ class ImageGeneration extends Feature {
 					<br>
 					<input type="checkbox" id="view-additional-image-generation-settings" />
 					<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
-						<?php esc_html_e( 'View Additional Settings', 'classifai' ); ?>
+						<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
 					</label>
 					<div class="additional-image-generation-settings hidden">
 						<label>
