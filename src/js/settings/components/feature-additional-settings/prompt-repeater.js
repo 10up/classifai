@@ -82,10 +82,10 @@ export const PromptRepeater = ( props ) => {
 							<p className="classifai-original-prompt">
 								<strong>
 									{ __(
-										'ClassifAI default prompt: ',
+										'ClassifAI default prompt:',
 										'classifai'
 									) }
-								</strong>
+								</strong>{ ' ' }
 								{ prompt.prompt }
 							</p>
 						</>

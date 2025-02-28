@@ -35,7 +35,7 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 
 	const Description = () => (
 		<>
-			{ __( 'Text to Speech region endpoint, e.g. ', 'classifai' ) }
+			{ __( 'Text to Speech region endpoint, e.g.', 'classifai' ) }{ ' ' }
 			<code>
 				{ __(
 					'https://LOCATION.tts.speech.microsoft.com/',
@@ -43,10 +43,10 @@ export const AzureTextToSpeechSettings = ( { isConfigured = false } ) => {
 				) }
 			</code>
 			{ '. ' }
-			{ __( ' Replace ', 'classifai' ) }
-			<code>{ __( 'LOCATION', 'classifai' ) }</code>
+			{ __( 'Replace', 'classifai' ) }{ ' ' }
+			<code>{ __( 'LOCATION', 'classifai' ) }</code>{ ' ' }
 			{ __(
-				' with the Location/Region you selected for the resource in Azure.',
+				'with the Location/Region you selected for the resource in Azure.',
 				'classifai'
 			) }
 		</>

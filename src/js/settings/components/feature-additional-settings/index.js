@@ -15,6 +15,7 @@ import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
 import { ExcerptGenerationSettings } from './excerpt-generation';
+import { KeyTakeawaysSettings } from './key-takeaways';
 import { ClassificationSettings } from './classification';
 import { ModerationSettings } from './moderation';
 import { Smart404Settings } from './smart-404';
@@ -44,6 +45,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_content_resizing':
 			return <ContentResizingSettings />;
+
+		case 'feature_key_takeaways':
+			return <KeyTakeawaysSettings />;
 
 		case 'feature_descriptive_text_generator':
 			return <DescriptiveTextGeneratorSettings />;

@@ -83,7 +83,7 @@ class Grok extends Provider {
 		 * Useful if you want to use a different model, like
 		 * grok-beta
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_model
 		 *
 		 * @param {string} $model The default model to use.
@@ -105,7 +105,7 @@ class Grok extends Provider {
 		 * Useful if you want to use a different model, like
 		 * grok-vision-beta
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_vision_model
 		 *
 		 * @param {string} $model The default model to use.
@@ -317,7 +317,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the prompt we will send to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to xAI Grok.
@@ -330,7 +330,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the request body before sending to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to xAI Grok.
@@ -428,7 +428,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the prompt we will send to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
@@ -442,7 +442,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the request body before sending to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to xAI Grok.
@@ -527,7 +527,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the prompt we will send to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
@@ -541,7 +541,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the request body before sending to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to xAI Grok.
@@ -632,7 +632,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the resize prompt we will send to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_' . $args['resize_type'] . '_content_prompt
 		 *
 		 * @param {string} $prompt Resize prompt we are sending to xAI Grok. Gets added as a system prompt.
@@ -646,7 +646,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the resize request body before sending to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_resize_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to xAI Grok.
@@ -757,7 +757,7 @@ class Grok extends Provider {
 		/**
 		 * Filter content that will get sent to xAI Grok.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.0
 		 * @hook classifai_xai_grok_content
 		 *
 		 * @param {string} $content Content that will be sent to xAI Grok.

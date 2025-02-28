@@ -9,6 +9,9 @@ module.exports = {
 	},
 	entry: {
 		admin: [ './src/js/admin.js' ],
+		'key-takeaways-block': [
+			'./includes/Classifai/Blocks/key-takeaways/index.js',
+		],
 		'recommended-content-block': [
 			'./includes/Classifai/Blocks/recommended-content-block/index.js',
 		],

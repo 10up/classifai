@@ -78,7 +78,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }
 					description={ __(
-						'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.',
+						'Minimum confidence score for automatically added generated text, numeric value from 0–100. Recommended to be set to at least 70.',
 						'classifai'
 					) }
 				>
@@ -101,7 +101,7 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 				<SettingsRow
 					label={ __( 'Confidence threshold', 'classifai' ) }
 					description={ __(
-						'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.',
+						'Minimum confidence score for automatically added image tags, numeric value from 0–100. Recommended to be set to at least 70.',
 						'classifai'
 					) }
 				>
