@@ -203,10 +203,11 @@ class DallE extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'number_of_images' => 1,
-						'quality'          => 'standard',
-						'image_size'       => '1024x1024',
-						'style'            => 'vivid',
+						'number_of_images'   => 1,
+						'quality'            => 'standard',
+						'image_size'         => '1024x1024',
+						'style'              => 'vivid',
+						'per_image_settings' => false,
 					]
 				);
 		}
