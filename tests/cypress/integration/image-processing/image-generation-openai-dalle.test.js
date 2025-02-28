@@ -84,7 +84,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 			cy.get( '.prompt-view .prompt' ).type(
 				'A sunset over the mountains'
 			);
-			cy.get( '.prompt-view button' ).click();
+			cy.get( '.prompt-view .button-generate' ).click();
 
 			// Verify images show up.
 			cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
@@ -127,7 +127,7 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		// Click into the tab and submit a prompt.
 		cy.get( '#menu-item-generate' ).click();
 		cy.get( '.prompt-view .prompt' ).type( 'A sunset over the mountains' );
-		cy.get( '.prompt-view button' ).click();
+		cy.get( '.prompt-view .button-generate' ).click();
 
 		// Verify images show up.
 		cy.get( '.generated-images ul li' ).should( 'have.length', 2 );
