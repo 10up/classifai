@@ -227,6 +227,7 @@ class ChatGPT extends Provider {
 				break;
 			case 'rewrite_tone':
 				$return = $this->rewrite_tone( $post_id, $args );
+				break;
 			case 'key_takeaways':
 				$return = $this->generate_key_takeaways( $post_id, $args );
 				break;
@@ -883,21 +884,12 @@ class ChatGPT extends Provider {
 		$feature  = new RewriteTone();
 		$settings = $feature->get_settings();
 		$request  = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-		$prompt   = esc_textarea( get_default_prompt( $settings['rewrite_tone_prompt'] ) ?? $feature->prompt );
 
-		/**
-		 * Filter the prompt we will send to ChatGPT.
-		 *
-		 * @since x.x.x
-		 * @hook classifai_chatgpt_rewrite_tone_prompt
-		 *
-		 * @param {string} $prompt Prompt we are sending to ChatGPT. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {array} $args Arguments passed to endpoint.
-		 *
-		 * @return {string} Prompt.
-		 */
-		$prompt = apply_filters( 'classifai_chatgpt_rewrite_tone_prompt', $prompt, $post_id, $args );
+		$emotion   = sanitize_text_field( $args['emotion'] ?? 'happy' );
+		$formality = sanitize_text_field( $args['formality'] ?? 'formal' );
+		$intent    = sanitize_text_field( $args['intent'] ?? 'storytelling' );
+		$audience  = sanitize_text_field( $args['audience'] ?? 'general' );
+		$prompt    = "Rewrite the following content with the following tone attributes: Emotion: {$emotion}, Formality: {$formality}, Intent: {$intent}, Audience: {$audience}. Ensure that the rewritten content aligns with the selected attributes. Keep it {$formality} and make it {$intent}. The tone should reflect a {$emotion} sentiment while ensuring it resonates well with a {$audience} audience.";
 
 		$body = apply_filters(
 			'classifai_chatgpt_resize_content_request_body',
@@ -910,7 +902,11 @@ class ChatGPT extends Provider {
 					],
 					[
 						'role'    => 'system',
-						'content' => "Please return each modified content with its corresponding 'clientId'.",
+						'content' => "Rewrite the above content while maintaining its original meaning but transforming it according to the specified tone attributes.",
+					],
+					[
+						'role'    => 'system',
+						'content' => "Please return each modified content with its corresponding 'clientId'. This is extremely important.",
 					],
 					[
 						'role'    => 'system',

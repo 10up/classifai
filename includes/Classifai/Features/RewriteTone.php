@@ -23,13 +23,6 @@ class RewriteTone extends Feature {
 	const ID = 'feature_rewrite_tone';
 
 	/**
-	 * Prompt for rewriting tone.
-	 *
-	 * @var string
-	 */
-	public $prompt = 'You are modifying the tone and lingo of the following text to Renaissance English.';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -162,7 +155,11 @@ class RewriteTone extends Feature {
 					$request->get_param( 'id' ),
 					'rewrite_tone',
 					[
-						'content' => $request->get_param( 'content' ),
+						'content'   => $request->get_param( 'content' ),
+						'emotion'   => $request->get_param( 'emotion' ),
+						'formality' => $request->get_param( 'formality' ),
+						'intent'    => $request->get_param( 'intent' ),
+						'audience'  => $request->get_param( 'audience' ),
 					]
 				)
 			);
@@ -233,7 +230,6 @@ class RewriteTone extends Feature {
 			'rewrite_tone_prompt' => [
 				[
 					'title'    => esc_html__( 'ClassifAI default', 'classifai' ),
-					'prompt'   => $this->prompt,
 					'original' => 1,
 				],
 			],
