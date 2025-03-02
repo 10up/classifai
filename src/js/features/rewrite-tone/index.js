@@ -289,10 +289,12 @@ const RewriteTonePlugin = () => {
 						<div style={ {
 							display: 'flex',
 							flexFlow: 'row nowrap',
-							justifyContent: 'flex-center',
+							justifyContent: 'center',
 							gap: '1rem',
 							marginTop: '2rem',
 							marginRight: '1rem',
+							borderTop: '1px solid #dbdbdb',
+							paddingTop: '1rem',
 						} }>
 							<Button variant="secondary" onClick={ applyResult }>
 								{ __( 'Apply this result', 'classifai' ) }
