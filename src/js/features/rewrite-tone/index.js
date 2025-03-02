@@ -110,6 +110,10 @@ const RewriteTonePlugin = () => {
 				body: JSON.stringify( {
 					id: wp.data.select( editorStore ).getCurrentPostId(),
 					content: filteredBlocks,
+					emotion,
+					formality,
+					intent,
+					audience,
 				} ),
 			} );
 
@@ -282,7 +286,14 @@ const RewriteTonePlugin = () => {
 						>
 							<BlockList />
 						</BlockEditorProvider>
-						<div>
+						<div style={ {
+							display: 'flex',
+							flexFlow: 'row nowrap',
+							justifyContent: 'flex-center',
+							gap: '1rem',
+							marginTop: '2rem',
+							marginRight: '1rem',
+						} }>
 							<Button variant="secondary" onClick={ applyResult }>
 								{ __( 'Apply this result', 'classifai' ) }
 							</Button>
