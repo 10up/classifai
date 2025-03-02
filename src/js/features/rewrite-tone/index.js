@@ -4,11 +4,20 @@ import { useDispatch } from '@wordpress/data';
 import { store as blockEditorStore, BlockEditorProvider, BlockList } from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { createBlock } from '@wordpress/blocks';
-import { Modal, Button } from '@wordpress/components';
+import {
+	Modal,
+	Button,
+	Panel,
+	PanelBody,
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	SelectControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 import { useSelectedBlocks } from '../../hooks';
 import { InjectIframeStyles } from '../../components';
+import { tones } from './tones';
 import {
 	filterAndFlattenAllowedBlocks,
 	getClientIdToBlockContentMapping,
@@ -16,7 +25,6 @@ import {
 	replaceBlocksInSource,
 } from '../../utils';
 
-const { ClassifaiEditorSettingPanel } = window;
 const apiUrl = `${ wpApiSettings.root }classifai/v1/rewrite-tone`;
 const allowedTextBlocks = [
 	'core/paragraph',
@@ -25,12 +33,24 @@ const allowedTextBlocks = [
 	'core/list-item',
 ];
 
+function defaultToneAttribute( toneAttribute = '', value = null ) {
+	if ( ! toneAttribute ) {
+		return '';
+	}
+
+	if ( ! value ) {
+		return window.localStorage.getItem( `classifai-tone-attribute-${ toneAttribute }` ) || '';
+	}
+
+	window.localStorage.setItem( `classifai-tone-attribute-${ toneAttribute }`, value );
+}
+
 const RewriteTonePlugin = () => {
 	// Holds a reference to the original, unmodified editor blocks.
 	const blocksBackup = useRef( null );
 
 	// Flag indicating if the previewer modal is open.
-	const [ isPopupVisible, setIsPopupVisible ] = useState( false );
+	const [ isPreviewVisible, setIsPreviewVisible ] = useState( false );
 
 	// Flag indicating if a rewrite is in progress.
 	const [ isRewriteInProgress, setIsRewriteInProgress ] = useState( false );
@@ -47,7 +67,20 @@ const RewriteTonePlugin = () => {
 	// We use this to replace blocks if the user is happy with the result.
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
+	// Selected blocks in the block editor.
 	const allSelectedBlocks = useSelectedBlocks();
+
+	// Tone attributes from local storage.
+	const __defaultEmotion = defaultToneAttribute( 'emotion' );
+	const __defaultFormality = defaultToneAttribute( 'formality' );
+	const __defaultIntent = defaultToneAttribute( 'intent' );
+	const __defaultAudience = defaultToneAttribute( 'audience' );
+
+	// Local states for tone attributes.
+	const [ emotion, setEmotion ] = useState( __defaultEmotion || 'happy' );
+	const [ formality, setFormality ] = useState( __defaultFormality || 'formal' );
+	const [ intent, setIntent ] = useState( __defaultIntent || 'storytelling' );
+	const [ audience, setAudience ] = useState( __defaultAudience || 'general' );
 
 	/**
 	 * Performs rewrite when triggered by the user on Button click.
@@ -61,7 +94,7 @@ const RewriteTonePlugin = () => {
 				.select( blockEditorStore )
 				.getBlocks();
 
-			setIsPopupVisible( false );
+			setIsPreviewVisible( false );
 			setIsRewriteInProgress( true );
 			setBlocksForPreview( [] );
 
@@ -102,7 +135,7 @@ const RewriteTonePlugin = () => {
 			replaceBlock( clientId, blocks );
 		} );
 
-		setIsPopupVisible( false );
+		setIsPreviewVisible( false );
 	};
 
 	useEffect( function reactToResponse() {
@@ -149,8 +182,6 @@ const RewriteTonePlugin = () => {
 				};
 			}
 
-			console.log( newBlock )
-
 			return {
 				clientId,
 				blocks: newBlock,
@@ -164,44 +195,101 @@ const RewriteTonePlugin = () => {
 
 		setBlocksForPreview( __blocksForPreview );
 		setModifiedBlocks( __modifiedBlocks );
-		setIsPopupVisible( true );
+		setIsPreviewVisible( true );
 	}, [ response ] );
 
 	return (
 		<>
-		<ClassifaiEditorSettingPanel>
-			<button onClick={ rewriteTone }>Rewrite</button>
-		</ClassifaiEditorSettingPanel>
+			<ClassifaiEditorHeaderSettingPanel>
+				<Panel>
+					<PanelBody title={ __( 'Tone Rewriting', 'classifai' ) }>
+						<ToggleGroupControl
+							isBlock
+							label={ tones.emotion.label }
+							value={ emotion }
+							onChange={ ( newEmotion ) => {
+								setEmotion( newEmotion );
+								defaultToneAttribute( 'emotion', newEmotion );
+							} }
+						>
+							{ tones.emotion.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+						</ToggleGroupControl>
 
-		{ isPopupVisible && (
-			<Modal
-				isFullScreen={ true }
-				onRequestClose={ () => setIsPopupVisible( false ) }
-			>
-				<InjectIframeStyles>
-					<BlockEditorProvider
-						value={ blocksForPreview }
-						settings={ {
-							...wp.data
-								.select( 'core/block-editor' )
-								.getSettings(),
-							inserter: false,
-							templateLock: 'all',
-						} }
-					>
-						<BlockList />
-					</BlockEditorProvider>
-					<div>
-						<Button variant="secondary" onClick={ applyResult }>
-							{ __( 'Apply this result', 'classifai' ) }
+						<ToggleGroupControl
+							isBlock
+							label={ tones.formality.label }
+							value={ formality }
+							onChange={ ( newFormality ) => {
+								setFormality( newFormality );
+								defaultToneAttribute( 'formality', newFormality );
+							} }
+						>
+							{ tones.formality.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+						</ToggleGroupControl>
+
+						<ToggleGroupControl
+							isBlock
+							label={ tones.intent.label }
+							value={ intent }
+							onChange={ ( newIntent ) => {
+								setIntent( newIntent );
+								defaultToneAttribute( 'intent', newIntent );
+							} }
+						>
+							{ tones.intent.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+						</ToggleGroupControl>
+
+						<SelectControl
+							label={ tones.audience.label }
+							options={ tones.audience.value }
+							value={ audience }
+							onChange={ ( newAudience ) => {
+								setAudience( newAudience );
+								defaultToneAttribute( 'audience', newAudience );
+							} }
+						/>
+
+						<Button
+							variant="secondary"
+							size="small"
+							onClick={ rewriteTone }
+							isBusy={ isRewriteInProgress }
+						>
+							{ __( 'Rewrite', 'classifai' ) }
 						</Button>
-						<Button variant="link" onClick={ rewriteTone }>
-							{ __( 'Regenerate', 'classifai' ) }
-						</Button>
-					</div>
-				</InjectIframeStyles>
-			</Modal>
-		) }
+					</PanelBody>
+				</Panel>
+			</ClassifaiEditorHeaderSettingPanel>
+
+			{ isPreviewVisible && (
+				<Modal
+					isFullScreen={ true }
+					onRequestClose={ () => setIsPreviewVisible( false ) }
+				>
+					<InjectIframeStyles>
+						<BlockEditorProvider
+							value={ blocksForPreview }
+							settings={ {
+								...wp.data
+									.select( 'core/block-editor' )
+									.getSettings(),
+								inserter: false,
+								templateLock: 'all',
+							} }
+						>
+							<BlockList />
+						</BlockEditorProvider>
+						<div>
+							<Button variant="secondary" onClick={ applyResult }>
+								{ __( 'Apply this result', 'classifai' ) }
+							</Button>
+							<Button variant="link" onClick={ rewriteTone }>
+								{ __( 'Regenerate', 'classifai' ) }
+							</Button>
+						</div>
+					</InjectIframeStyles>
+				</Modal>
+			) }
 		</>
 	);
 };

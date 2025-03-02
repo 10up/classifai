@@ -3,36 +3,36 @@ import { __ } from '@wordpress/i18n';
 export const tones = {
 	emotion: {
 		label: __( 'Emotion', 'classifai' ),
-		values: [
+		value: [
 			{
-				key: 'happy',
+				value: 'happy',
 				label: __( 'Happy', 'classifai' ),
 			},
 			{
-				key: 'neutral',
+				value: 'neutral',
 				label: __( 'Neutral', 'classifai' ),
 			},
 			{
-				key: 'sad',
+				value: 'sad',
 				label: __( 'Sad', 'classifai' ),
 			},
 		],
 	},
 	formality: {
 		label: __( 'Formality', 'classifai' ),
-		values: [
+		value: [
 			{
-				key: 'formal',
+				value: 'formal',
 				label: __( 'Formal', 'classifai' ),
 				description: __( 'Professional, structured, business-like.', 'classifai' ),
 			},
 			{
-				key: 'informal',
+				value: 'informal',
 				label: __( 'Informal', 'classifai' ),
 				description: __( 'Conversational, relaxed.', 'classifai' ),
 			},
 			{
-				key: 'supportive',
+				value: 'supportive',
 				label: __( 'Supportive', 'classifai' ),
 				description: __( 'Reassuring, helpful.', 'classifai' ),
 			},
@@ -42,17 +42,17 @@ export const tones = {
 		label: __( 'Intent', 'classifai' ),
 		value: [
 			{
-				key: 'dramatic',
+				value: 'dramatic',
 				label: __( 'Dramatic', 'classifai' ),
 				description: __( 'Intense, theatrical.', 'classifai' ),
 			},
 			{
-				key: 'persuasive',
+				value: 'persuasive',
 				label: __( 'Persuasive', 'classifai' ),
 				description: __( 'Convincing, compelling.', 'classifai' ),
 			},
 			{
-				key: 'storytelling',
+				value: 'storytelling',
 				label: __( 'Storytelling', 'classifai' ),
 				description: __( 'Engaging, immersive.', 'classifai' ),
 			},
@@ -62,22 +62,22 @@ export const tones = {
 		label: __( 'Audience', 'classifai' ),
 		value: [
 			{
-				key: 'educational',
+				value: 'educational',
 				label: __( 'Educational', 'classifai' ),
 				description: __( 'Clear, instructive.', 'classifai' ),
 			},
 			{
-				key: 'general',
+				value: 'general',
 				label: __( 'General Audience', 'classifai' ),
 				description: __( 'Balanced, universally understandable.', 'classifai' ),
 			},
 			{
-				key: 'maketing',
+				value: 'maketing',
 				label: __( 'Marketing & Sales', 'classifai' ),
 				description: __( 'Promotional, action-driven.', 'classifai' ),
 			},
 			{
-				key: 'professional',
+				value: 'professional',
 				label: __( 'Business & Professional', 'classifai' ),
 				description: __( 'Corporate, industry-focused.', 'classifai' ),
 			},

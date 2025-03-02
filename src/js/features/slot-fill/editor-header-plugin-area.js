@@ -55,8 +55,9 @@ function RenderClassifAIEditorHeaderPluginArea() {
 					<Popover
 						onClose={ () => setIsOpen( false ) }
 						onFocusOutside={ () => setIsOpen( false ) }
+						placement="top-end"
 					>
-						<div style={ { width: '200px' } }>
+						<div style={ { minWidth: '250px' } }>
 							<Slot name="classifai-editor-header-setting-panel" />
 							<PluginArea />
 						</div>
