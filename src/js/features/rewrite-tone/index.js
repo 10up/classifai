@@ -219,6 +219,7 @@ const RewriteTonePlugin = () => {
 							isBlock
 							label={ tones.formality.label }
 							value={ formality }
+							help={ tones.formality.value.find( el => el.value === formality )?.description }
 							onChange={ ( newFormality ) => {
 								setFormality( newFormality );
 								defaultToneAttribute( 'formality', newFormality );
@@ -231,6 +232,7 @@ const RewriteTonePlugin = () => {
 							isBlock
 							label={ tones.intent.label }
 							value={ intent }
+							help={ tones.intent.value.find( el => el.value === intent )?.description }
 							onChange={ ( newIntent ) => {
 								setIntent( newIntent );
 								defaultToneAttribute( 'intent', newIntent );
@@ -243,6 +245,7 @@ const RewriteTonePlugin = () => {
 							label={ tones.audience.label }
 							options={ tones.audience.value }
 							value={ audience }
+							help={ tones.audience.value.find( el => el.value === audience )?.description }
 							onChange={ ( newAudience ) => {
 								setAudience( newAudience );
 								defaultToneAttribute( 'audience', newAudience );
