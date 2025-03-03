@@ -1,7 +1,12 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 import { registerPlugin } from '@wordpress/plugins';
 import { useRef, useState, useEffect } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
-import { store as blockEditorStore, BlockEditorProvider, BlockList } from '@wordpress/block-editor';
+import {
+	store as blockEditorStore,
+	BlockEditorProvider,
+	BlockList,
+} from '@wordpress/block-editor';
 import { store as editorStore } from '@wordpress/editor';
 import { createBlock } from '@wordpress/blocks';
 import {
@@ -39,10 +44,17 @@ function defaultToneAttribute( toneAttribute = '', value = null ) {
 	}
 
 	if ( ! value ) {
-		return window.localStorage.getItem( `classifai-tone-attribute-${ toneAttribute }` ) || '';
+		return (
+			window.localStorage.getItem(
+				`classifai-tone-attribute-${ toneAttribute }`
+			) || ''
+		);
 	}
 
-	window.localStorage.setItem( `classifai-tone-attribute-${ toneAttribute }`, value );
+	window.localStorage.setItem(
+		`classifai-tone-attribute-${ toneAttribute }`,
+		value
+	);
 }
 
 const RewriteTonePlugin = () => {
@@ -78,9 +90,13 @@ const RewriteTonePlugin = () => {
 
 	// Local states for tone attributes.
 	const [ emotion, setEmotion ] = useState( __defaultEmotion || 'happy' );
-	const [ formality, setFormality ] = useState( __defaultFormality || 'formal' );
+	const [ formality, setFormality ] = useState(
+		__defaultFormality || 'formal'
+	);
 	const [ intent, setIntent ] = useState( __defaultIntent || 'storytelling' );
-	const [ audience, setAudience ] = useState( __defaultAudience || 'general' );
+	const [ audience, setAudience ] = useState(
+		__defaultAudience || 'general'
+	);
 
 	/**
 	 * Performs rewrite when triggered by the user on Button click.
@@ -99,7 +115,10 @@ const RewriteTonePlugin = () => {
 			setBlocksForPreview( [] );
 
 			const filteredBlocks = getClientIdToBlockContentMapping(
-				filterAndFlattenAllowedBlocks( allSelectedBlocks, allowedTextBlocks )
+				filterAndFlattenAllowedBlocks(
+					allSelectedBlocks,
+					allowedTextBlocks
+				)
 			);
 
 			let __response = await fetch( apiUrl, {
@@ -142,65 +161,70 @@ const RewriteTonePlugin = () => {
 		setIsPreviewVisible( false );
 	};
 
-	useEffect( function reactToResponse() {
-		if ( ! Array.isArray( response ) ) {
-			return;
-		}
-
-		const __modifiedBlocks = response.map( ( { clientId, content } ) => {
-			// We get the same block clientID in the response.
-			// Get the block using the clientID from the block editor data store.
-			const currentBlock = wp.data
-				.select( blockEditorStore )
-				.getBlock( clientId );
-
-			// We apply the original block attributes to the current iterated block.
-			currentBlock.attributes = wp.data
-				.select( blockEditorStore )
-				.getBlockAttributes( clientId );
-
-			// This will automatically create a new block by detecting the HTML.
-			let newBlock = wp.blocks.rawHandler( { HTML: content } );
-
-			if (
-				Array.isArray( newBlock ) &&
-				1 === newBlock.length &&
-				'core/html' === newBlock[ 0 ].name
-			) {
-				// If a List item block is selected (without selecting the List block), and
-				// sent in the request, the response also returns the HTML with <li> ...content...</li>.
-				// Gutenberg does not recognise <li> without <ul>, and hence rawHandler() returns a
-				// generic `core/html` block instead of a `core/list-item` block.
-				//
-				// We handle this separately by using `createBlock()` isntead.
-				newBlock = createBlock( currentBlock.name, {
-					// The response contains `<li></li>` tags, which we remove here as they are added
-					// by `createBlock()`. If we don't do this, then nested List item blocks will be
-					// created.
-					content: stripOutermostTag( content ),
-				} );
-
-				return {
-					clientId,
-					blocks: [ newBlock ],
-				};
+	useEffect(
+		function reactToResponse() {
+			if ( ! Array.isArray( response ) ) {
+				return;
 			}
 
-			return {
-				clientId,
-				blocks: newBlock,
-			};
-		} );
+			const __modifiedBlocks = response.map(
+				( { clientId, content } ) => {
+					// We get the same block clientID in the response.
+					// Get the block using the clientID from the block editor data store.
+					const currentBlock = wp.data
+						.select( blockEditorStore )
+						.getBlock( clientId );
 
-		const __blocksForPreview = replaceBlocksInSource(
-			blocksBackup.current,
-			__modifiedBlocks
-		);
+					// We apply the original block attributes to the current iterated block.
+					currentBlock.attributes = wp.data
+						.select( blockEditorStore )
+						.getBlockAttributes( clientId );
 
-		setBlocksForPreview( __blocksForPreview );
-		setModifiedBlocks( __modifiedBlocks );
-		setIsPreviewVisible( true );
-	}, [ response ] );
+					// This will automatically create a new block by detecting the HTML.
+					let newBlock = wp.blocks.rawHandler( { HTML: content } );
+
+					if (
+						Array.isArray( newBlock ) &&
+						1 === newBlock.length &&
+						'core/html' === newBlock[ 0 ].name
+					) {
+						// If a List item block is selected (without selecting the List block), and
+						// sent in the request, the response also returns the HTML with <li> ...content...</li>.
+						// Gutenberg does not recognise <li> without <ul>, and hence rawHandler() returns a
+						// generic `core/html` block instead of a `core/list-item` block.
+						//
+						// We handle this separately by using `createBlock()` isntead.
+						newBlock = createBlock( currentBlock.name, {
+							// The response contains `<li></li>` tags, which we remove here as they are added
+							// by `createBlock()`. If we don't do this, then nested List item blocks will be
+							// created.
+							content: stripOutermostTag( content ),
+						} );
+
+						return {
+							clientId,
+							blocks: [ newBlock ],
+						};
+					}
+
+					return {
+						clientId,
+						blocks: newBlock,
+					};
+				}
+			);
+
+			const __blocksForPreview = replaceBlocksInSource(
+				blocksBackup.current,
+				__modifiedBlocks
+			);
+
+			setBlocksForPreview( __blocksForPreview );
+			setModifiedBlocks( __modifiedBlocks );
+			setIsPreviewVisible( true );
+		},
+		[ response ]
+	);
 
 	return (
 		<>
@@ -216,40 +240,79 @@ const RewriteTonePlugin = () => {
 								defaultToneAttribute( 'emotion', newEmotion );
 							} }
 						>
-							{ tones.emotion.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+							{ tones.emotion.value.map(
+								( { value, label }, index ) => (
+									<ToggleGroupControlOption
+										key={ index }
+										label={ label }
+										value={ value }
+									/>
+								)
+							) }
 						</ToggleGroupControl>
 
 						<ToggleGroupControl
 							isBlock
 							label={ tones.formality.label }
 							value={ formality }
-							help={ tones.formality.value.find( el => el.value === formality )?.description }
+							help={
+								tones.formality.value.find(
+									( el ) => el.value === formality
+								)?.description
+							}
 							onChange={ ( newFormality ) => {
 								setFormality( newFormality );
-								defaultToneAttribute( 'formality', newFormality );
+								defaultToneAttribute(
+									'formality',
+									newFormality
+								);
 							} }
 						>
-							{ tones.formality.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+							{ tones.formality.value.map(
+								( { value, label }, index ) => (
+									<ToggleGroupControlOption
+										key={ index }
+										label={ label }
+										value={ value }
+									/>
+								)
+							) }
 						</ToggleGroupControl>
 
 						<ToggleGroupControl
 							isBlock
 							label={ tones.intent.label }
 							value={ intent }
-							help={ tones.intent.value.find( el => el.value === intent )?.description }
+							help={
+								tones.intent.value.find(
+									( el ) => el.value === intent
+								)?.description
+							}
 							onChange={ ( newIntent ) => {
 								setIntent( newIntent );
 								defaultToneAttribute( 'intent', newIntent );
 							} }
 						>
-							{ tones.intent.value.map( ( { value, label } ) => <ToggleGroupControlOption label={ label } value={ value } /> ) }
+							{ tones.intent.value.map(
+								( { value, label }, index ) => (
+									<ToggleGroupControlOption
+										key={ index }
+										label={ label }
+										value={ value }
+									/>
+								)
+							) }
 						</ToggleGroupControl>
 
 						<SelectControl
 							label={ tones.audience.label }
 							options={ tones.audience.value }
 							value={ audience }
-							help={ tones.audience.value.find( el => el.value === audience )?.description }
+							help={
+								tones.audience.value.find(
+									( el ) => el.value === audience
+								)?.description
+							}
 							onChange={ ( newAudience ) => {
 								setAudience( newAudience );
 								defaultToneAttribute( 'audience', newAudience );
@@ -286,16 +349,18 @@ const RewriteTonePlugin = () => {
 						>
 							<BlockList />
 						</BlockEditorProvider>
-						<div style={ {
-							display: 'flex',
-							flexFlow: 'row nowrap',
-							justifyContent: 'center',
-							gap: '1rem',
-							marginTop: '2rem',
-							marginRight: '1rem',
-							borderTop: '1px solid #dbdbdb',
-							paddingTop: '1rem',
-						} }>
+						<div
+							style={ {
+								display: 'flex',
+								flexFlow: 'row nowrap',
+								justifyContent: 'center',
+								gap: '1rem',
+								marginTop: '2rem',
+								marginRight: '1rem',
+								borderTop: '1px solid #dbdbdb',
+								paddingTop: '1rem',
+							} }
+						>
 							<Button variant="secondary" onClick={ applyResult }>
 								{ __( 'Apply this result', 'classifai' ) }
 							</Button>

@@ -12,7 +12,8 @@ export const useEditorCanvas = () => {
 		 * @return {boolean} True if the iframe is found, false otherwise.
 		 */
 		const checkForCanvas = () => {
-			const __iframeCanvas = document.getElementsByName( 'editor-canvas' );
+			const __iframeCanvas =
+				document.getElementsByName( 'editor-canvas' );
 			if ( __iframeCanvas.length > 0 ) {
 				setIframeCanvas( __iframeCanvas[ 0 ] );
 				return true;

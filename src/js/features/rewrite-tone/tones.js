@@ -24,7 +24,10 @@ export const tones = {
 			{
 				value: 'formal',
 				label: __( 'Formal', 'classifai' ),
-				description: __( 'Professional, structured, business-like.', 'classifai' ),
+				description: __(
+					'Professional, structured, business-like.',
+					'classifai'
+				),
 			},
 			{
 				value: 'informal',
@@ -69,7 +72,10 @@ export const tones = {
 			{
 				value: 'general',
 				label: __( 'General Audience', 'classifai' ),
-				description: __( 'Balanced, universally understandable.', 'classifai' ),
+				description: __(
+					'Balanced, universally understandable.',
+					'classifai'
+				),
 			},
 			{
 				value: 'maketing',
@@ -82,5 +88,5 @@ export const tones = {
 				description: __( 'Corporate, industry-focused.', 'classifai' ),
 			},
 		],
-	}
+	},
 };

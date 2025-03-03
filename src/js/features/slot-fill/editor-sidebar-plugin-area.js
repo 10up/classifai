@@ -37,5 +37,7 @@ registerPlugin( 'classifai-editor-sidebar-plugin-area', {
 } );
 
 window.ClassifaiEditorSettingPanel = ( { children } ) => {
-	return <Fill name="classifai-editor-sidebar-setting-panel">{ children }</Fill>;
+	return (
+		<Fill name="classifai-editor-sidebar-setting-panel">{ children }</Fill>
+	);
 };
