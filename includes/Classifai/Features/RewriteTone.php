@@ -213,7 +213,6 @@ class RewriteTone extends Feature {
 			$this->get_option_name() . '_section',
 			[
 				'label_for'     => 'rewrite_tone_prompt',
-				'placeholder'   => $this->prompt,
 				'default_value' => $settings['rewrite_tone_prompt'],
 				'description'   => esc_html__( 'Add a custom prompt, if desired.', 'classifai' ),
 			]

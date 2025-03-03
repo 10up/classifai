@@ -902,7 +902,7 @@ class ChatGPT extends Provider {
 					],
 					[
 						'role'    => 'system',
-						'content' => "Rewrite the above content while maintaining its original meaning but transforming it according to the specified tone attributes.",
+						'content' => 'Rewrite the above content while maintaining its original meaning but transforming it according to the specified tone attributes.',
 					],
 					[
 						'role'    => 'system',
