@@ -13,6 +13,7 @@ import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { ImageCroppingSettings } from './image-cropping';
 import { ImageToTextGeneratorSettings } from './image-to-text-generator';
+import { PDFToTextGenerationSettings } from './pdf-to-text-generation';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
@@ -62,6 +63,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_image_cropping':
 			return <ImageCroppingSettings />;
+
+		case 'feature_pdf_to_text_generation':
+			return <PDFToTextGenerationSettings />;
 
 		case 'feature_text_to_speech_generation':
 			return <TextToSpeechSettings />;
