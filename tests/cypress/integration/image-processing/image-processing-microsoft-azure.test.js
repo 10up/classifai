@@ -109,6 +109,83 @@ describe( 'Image processing Tests', () => {
 		cy.get( '#classifai-rescan-smart-crop' ).should( 'exist' );
 	} );
 
+	it( 'Can turn on manual mode and image uploads will not be processed', () => {
+		// Turn on manual processing mode.
+		cy.visitFeatureSettings(
+			'image_processing/feature_descriptive_text_generator'
+		);
+		cy.wait( 1000 );
+		cy.get(
+			'.processing-mode-radio-control input[value="manual"]'
+		).check();
+		cy.saveFeatureSettings();
+
+		cy.visitFeatureSettings(
+			'image_processing/feature_image_tags_generator'
+		);
+		cy.wait( 1000 );
+		cy.get(
+			'.processing-mode-radio-control input[value="manual"]'
+		).check();
+		cy.saveFeatureSettings();
+
+		cy.visitFeatureSettings( 'image_processing/feature_image_cropping' );
+		cy.wait( 1000 );
+		cy.get(
+			'.processing-mode-radio-control input[value="manual"]'
+		).check();
+		cy.saveFeatureSettings();
+
+		cy.visitFeatureSettings(
+			'image_processing/feature_image_to_text_generator'
+		);
+		cy.wait( 1000 );
+		cy.get(
+			'.processing-mode-radio-control input[value="manual"]'
+		).check();
+		cy.saveFeatureSettings();
+
+		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
+		cy.visit( '/wp-admin/media-new.php' );
+		cy.get( '#plupload-upload-ui' ).should( 'exist' );
+		cy.get( '#plupload-upload-ui input[type=file]' ).attachFile(
+			'../../../assets/img/banner-772x250.png'
+		);
+
+		cy.get( '#media-items .media-item a.edit-attachment', {
+			timeout: 20000,
+		} ).should( 'exist' );
+		cy.get( '#media-items .media-item a.edit-attachment' )
+			.invoke( 'attr', 'href' )
+			.then( ( editLink ) => {
+				cy.visit( editLink );
+			} );
+
+		// Verify Metabox with Image processing actions.
+		cy.get( '.postbox-header h2, #classifai_image_processing h2' )
+			.first()
+			.contains( 'ClassifAI Image Processing' );
+		cy.get(
+			'#classifai_image_processing label[for=rescan-captions]'
+		).contains( 'Generate descriptive text' );
+		cy.get( '#classifai_image_processing label[for=rescan-tags]' ).contains(
+			'Generate image tags'
+		);
+		cy.get( '#classifai_image_processing label[for=rescan-ocr]' ).contains(
+			'Scan image for text'
+		);
+		cy.get(
+			'#classifai_image_processing label[for=rescan-smart-crop]'
+		).contains( 'Regenerate smart thumbnail' );
+
+		// Verify generated Data.
+		cy.get( '#attachment_alt' ).should( 'have.value', '' );
+		cy.get( '#attachment_content' ).should( 'have.value', '' );
+		cy.get( '#classifai-image-tags ul.tagchecklist li' ).should(
+			'not.exist'
+		);
+	} );
+
 	it( 'Can disable Azure AI Vision Image processing features', () => {
 		const options = {
 			imageEditLink,
