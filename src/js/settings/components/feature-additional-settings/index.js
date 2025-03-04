@@ -11,6 +11,7 @@ import { getScope } from '../../utils/utils';
 import { useFeatureContext } from '../feature-settings/context';
 import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
+import { ImageCroppingSettings } from './image-cropping';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
@@ -54,6 +55,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_image_tags_generator':
 			return <ImageTagGeneratorSettings />;
+
+		case 'feature_image_cropping':
+			return <ImageCroppingSettings />;
 
 		case 'feature_text_to_speech_generation':
 			return <TextToSpeechSettings />;
