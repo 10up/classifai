@@ -150,7 +150,10 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return array
 	 */
 	public function generate_image_alt_tags( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -341,6 +344,18 @@ class DescriptiveTextGenerator extends Feature {
 		}
 
 		return $enabled_fields;
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**
