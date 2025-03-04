@@ -184,7 +184,10 @@ class ImageTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function generate_ocr_text( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -446,8 +449,35 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => ComputerVision::ID,
+			'processing_mode' => 'automatic',
+			'provider'        => ComputerVision::ID,
 		];
+	}
+
+	/**
+	 * Sanitizes the default feature settings.
+	 *
+	 * @param array $new_settings Settings being saved.
+	 * @return array
+	 */
+	public function sanitize_default_feature_settings( array $new_settings ): array {
+		$settings = $this->get_settings();
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+
+		return $new_settings;
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**

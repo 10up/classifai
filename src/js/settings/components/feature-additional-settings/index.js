@@ -12,6 +12,7 @@ import { useFeatureContext } from '../feature-settings/context';
 import { DescriptiveTextGeneratorSettings } from './descriptive-text-generator';
 import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { ImageCroppingSettings } from './image-cropping';
+import { ImageToTextGeneratorSettings } from './image-to-text-generator';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
@@ -55,6 +56,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_image_tags_generator':
 			return <ImageTagGeneratorSettings />;
+
+		case 'feature_image_to_text_generator':
+			return <ImageToTextGeneratorSettings />;
 
 		case 'feature_image_cropping':
 			return <ImageCroppingSettings />;

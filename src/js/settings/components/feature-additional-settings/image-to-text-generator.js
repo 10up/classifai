@@ -13,11 +13,11 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 
 /**
- * Component for the Image Cropping Feature settings.
+ * Component for the Image To Text Generator (OCR) settings.
  *
  * @return {React.ReactElement} ImageCroppingSettings component.
  */
-export const ImageCroppingSettings = () => {
+export const ImageToTextGeneratorSettings = () => {
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
