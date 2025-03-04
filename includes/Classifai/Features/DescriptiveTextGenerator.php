@@ -390,6 +390,7 @@ class DescriptiveTextGenerator extends Feature {
 				'caption'     => 0,
 				'description' => 0,
 			],
+			'processing_mode'         => 'automatic',
 			'provider'                => ComputerVision::ID,
 		];
 	}
@@ -444,6 +445,8 @@ class DescriptiveTextGenerator extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['descriptive_text_fields'] = array_map( 'sanitize_text_field', $new_settings['descriptive_text_fields'] ?? $settings['descriptive_text_fields'] );
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
 
 		return $new_settings;
 	}
