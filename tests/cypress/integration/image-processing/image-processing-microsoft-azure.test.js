@@ -145,11 +145,12 @@ describe( 'Image processing Tests', () => {
 		).check();
 		cy.saveFeatureSettings();
 
+		cy.wait( 1000 );
 		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
 		cy.get( '#plupload-upload-ui input[type=file]' ).attachFile(
-			'../../../assets/img/banner-772x250.png'
+			'../../../assets/img/onboarding-1.png'
 		);
 
 		cy.get( '#media-items .media-item a.edit-attachment', {
