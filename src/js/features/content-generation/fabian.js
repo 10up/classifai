@@ -3,6 +3,10 @@ import { createRoot, useEffect, useState, useRef } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { TextareaControl, Button, SVG, Path } from '@wordpress/components';
 import { motion, AnimatePresence } from 'motion/react';
+import apiFetch from '@wordpress/api-fetch';
+import { select, dispatch } from '@wordpress/data';
+import { autop } from '@wordpress/autop';
+import { rawHandler } from '@wordpress/blocks';
 
 function ReturnIcon() {
 	return (
@@ -28,9 +32,59 @@ function SparkleIcon() {
 	);
 }
 
+function LoadingDots() {
+	return (
+		<div style={ { display: 'inline-flex', alignItems: 'center' } }>
+			<motion.span
+				initial={ { opacity: 0.3 } }
+				animate={ { opacity: 1 } }
+				exit={ { opacity: 0.3 } }
+				transition={ {
+					duration: 0.5,
+					repeat: Infinity,
+					repeatType: 'reverse',
+				} }
+				style={ { marginRight: '4px' } }
+			>
+				.
+			</motion.span>
+			<motion.span
+				initial={ { opacity: 0.3 } }
+				animate={ { opacity: 1 } }
+				exit={ { opacity: 0.3 } }
+				transition={ {
+					duration: 0.5,
+					repeat: Infinity,
+					repeatType: 'reverse',
+					delay: 0.2,
+				} }
+				style={ { marginRight: '4px' } }
+			>
+				.
+			</motion.span>
+			<motion.span
+				initial={ { opacity: 0.3 } }
+				animate={ { opacity: 1 } }
+				exit={ { opacity: 0.3 } }
+				transition={ {
+					duration: 0.5,
+					repeat: Infinity,
+					repeatType: 'reverse',
+					delay: 0.4,
+				} }
+			>
+				.
+			</motion.span>
+		</div>
+	);
+}
+
 function ChatUI() {
 	const [ inputValue, setInputValue ] = useState( '' );
 	const [ isExpanded, setIsExpanded ] = useState( false );
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ error, setError ] = useState( false );
+	const [ conversation, setConversation ] = useState( [] );
 	const chatContainerRef = useRef( null );
 
 	// Function to handle clicks outside the chat UI
@@ -91,18 +145,97 @@ function ChatUI() {
 
 	const handleSubmit = ( event ) => {
 		event.preventDefault();
-		// Handle form submission logic here
-		// TODO: Process the user's message and generate a response
+		if ( ! inputValue.trim() ) {
+			return;
+		}
+
+		const userMessage = inputValue;
 		setInputValue( '' );
+
+		// Get post data
+		const postId = select( 'core/editor' ).getCurrentPostId();
+		const title = select( 'core/editor' ).getEditedPostAttribute( 'title' );
+
+		// Update conversation immediately with user message
+		const updatedConversation = [
+			...conversation,
+			{
+				prompt: userMessage,
+				completion: null, // Will be filled in once API response is received
+			},
+		];
+		setConversation( updatedConversation );
+
+		// Call API
+		setIsLoading( true );
+		apiFetch( {
+			path: '/classifai/v1/create-content',
+			method: 'POST',
+			data: {
+				id: postId,
+				summary: userMessage,
+				title,
+				conversation: updatedConversation.slice( 0, -1 ), // Exclude the message we just added
+			},
+		} ).then(
+			( res ) => {
+				// Update conversation with response
+				setConversation( [
+					...updatedConversation.slice( 0, -1 ),
+					{
+						prompt: userMessage,
+						completion: res,
+					},
+				] );
+				setError( false );
+				setIsLoading( false );
+			},
+			( err ) => {
+				setError( err?.message || 'An error occurred' );
+				setIsLoading( false );
+			}
+		);
+	};
+
+	const handleKeyDown = ( event ) => {
+		// Submit on Enter key, but not when Shift is pressed
+		if ( event.key === 'Enter' && ! event.shiftKey ) {
+			event.preventDefault();
+			handleSubmit( event );
+		}
+		// Shift+Enter will add a new line by default (no action needed)
 	};
 
 	const toggleChatUI = () => {
 		setIsExpanded( ! isExpanded );
 	};
 
+	const startOver = () => {
+		setConversation( [] );
+		setError( false );
+	};
+
+	const insertContent = ( content ) => {
+		dispatch( 'core/editor' )
+			.editPost( {
+				content: '',
+			} )
+			.then( () => {
+				dispatch( 'core/block-editor' ).insertBlocks(
+					rawHandler( {
+						HTML: autop( content ),
+					} )
+				);
+				// Close the chat UI after inserting content
+				setIsExpanded( false );
+				// Clear the conversation
+				setConversation( [] );
+			} );
+	};
+
 	return (
 		<div
-			className="classifai-fabian-chat-container"
+			className="classifai-chat-container"
 			style={ {
 				position: 'absolute',
 				bottom: '20px',
@@ -119,31 +252,199 @@ function ChatUI() {
 						animate={ { opacity: 1 } }
 						exit={ { opacity: 0 } }
 						transition={ { duration: 0.3, type: 'spring' } }
-						className="classifai-fabian-chat-ui"
+						className="classifai-chat-ui"
 						style={ {
-							width: '300px',
+							width: '400px',
+							maxHeight: '600px',
 							backgroundColor: 'white',
-							padding: '12px',
+							padding: '16px',
 							boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
 							borderRadius: '8px',
 							overflow: 'hidden',
+							display: 'flex',
+							flexDirection: 'column',
 						} }
 					>
 						<motion.div
 							initial={ { opacity: 0, y: 10 } }
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { delay: 0.1 } }
+							style={ {
+								display: 'flex',
+								flexDirection: 'column',
+								height: '100%',
+								maxHeight: '600px',
+								overflow: 'hidden',
+							} }
 						>
+							<div
+								style={ {
+									marginBottom: '12px',
+									fontWeight: 'bold',
+									fontSize: '16px',
+								} }
+							>
+								Classifai AI Assistant
+							</div>
 							<form onSubmit={ handleSubmit }>
 								<div style={ { position: 'relative' } }>
+									{ /* Conversation history display */ }
+									{ conversation.length > 0 && (
+										<div
+											className="classifai-chat-history"
+											style={ {
+												marginBottom: '10px',
+												maxHeight: '400px',
+												overflowY: 'auto',
+												paddingRight: '5px',
+												flex: '1',
+											} }
+										>
+											{ conversation.map(
+												( entry, index ) => (
+													<div
+														key={ index }
+														style={ {
+															marginBottom:
+																'15px',
+														} }
+													>
+														<div
+															style={ {
+																fontWeight:
+																	'bold',
+																marginBottom:
+																	'5px',
+															} }
+														>
+															You:
+														</div>
+														<div
+															style={ {
+																marginBottom:
+																	'10px',
+																whiteSpace:
+																	'pre-wrap',
+																wordBreak:
+																	'break-word',
+															} }
+														>
+															{ entry.prompt }
+														</div>
+
+														{ entry.completion !==
+														null ? (
+															<>
+																<div
+																	style={ {
+																		fontWeight:
+																			'bold',
+																		marginBottom:
+																			'5px',
+																	} }
+																>
+																	Classifai
+																	AI:
+																</div>
+																<div
+																	style={ {
+																		whiteSpace:
+																			'pre-wrap',
+																		wordBreak:
+																			'break-word',
+																		marginBottom:
+																			'12px',
+																	} }
+																>
+																	{
+																		entry.completion
+																	}
+																</div>
+
+																{ /* Action buttons for AI response */ }
+																<div
+																	style={ {
+																		display:
+																			'flex',
+																		justifyContent:
+																			'flex-end',
+																		gap: '8px',
+																		marginBottom:
+																			'16px',
+																		flexWrap:
+																			'wrap',
+																	} }
+																>
+																	<Button
+																		variant="tertiary"
+																		isDestructive
+																		onClick={
+																			startOver
+																		}
+																		size="small"
+																	>
+																		Start
+																		Over
+																	</Button>
+
+																	<Button
+																		variant="primary"
+																		onClick={ () =>
+																			insertContent(
+																				entry.completion
+																			)
+																		}
+																		size="small"
+																	>
+																		Insert
+																		Content
+																	</Button>
+																</div>
+															</>
+														) : (
+															<div
+																style={ {
+																	fontStyle:
+																		'italic',
+																	display:
+																		'flex',
+																	alignItems:
+																		'center',
+																} }
+															>
+																Waiting for
+																response
+																<LoadingDots />
+															</div>
+														) }
+													</div>
+												)
+											) }
+										</div>
+									) }
+
+									{ /* Error message */ }
+									{ error && (
+										<div
+											style={ {
+												color: 'red',
+												marginBottom: '10px',
+											} }
+										>
+											Error: { error }
+										</div>
+									) }
+
 									<TextareaControl
 										__nextHasNoMarginBottom
-										className="classifai-fabian-chat-input"
-										placeholder="Ask Fabian anything..."
+										className="classifai-chat-input"
+										placeholder="What do you want to write about?"
 										value={ inputValue }
 										onChange={ ( value ) =>
 											setInputValue( value )
 										}
+										onKeyDown={ handleKeyDown }
+										disabled={ isLoading }
 										style={ {
 											width: '100%',
 											height: '80px',
@@ -154,6 +455,7 @@ function ChatUI() {
 											padding: '10px',
 											paddingBottom: '40px',
 											resize: 'none',
+											opacity: isLoading ? 0.7 : 1,
 										} }
 									/>
 									<Button
@@ -169,8 +471,9 @@ function ChatUI() {
 										} }
 										variant="primary"
 										size="small"
+										disabled={ isLoading }
 									>
-										Send
+										{ isLoading ? 'Sending...' : 'Send' }
 									</Button>
 								</div>
 							</form>
@@ -210,8 +513,8 @@ function ChatUI() {
 								onClick={ toggleChatUI }
 								variant="primary"
 								size="small"
-								aria-label="Open Fabian AI assistant"
-								className="classifai-fabian-chat-button"
+								aria-label="Open Classifai AI assistant"
+								className="classifai-chat-button"
 								style={ {
 									width: '100%',
 									height: '100%',
@@ -253,7 +556,7 @@ function RenderChatUI() {
 }
 
 domReady( () => {
-	registerPlugin( 'classifai-fabian', {
+	registerPlugin( 'classifai', {
 		render: RenderChatUI,
 	} );
 } );
