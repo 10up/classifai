@@ -8,6 +8,7 @@ import { select, dispatch } from '@wordpress/data';
 import { autop } from '@wordpress/autop';
 import { rawHandler } from '@wordpress/blocks';
 
+// Icon Components
 function ReturnIcon() {
 	return (
 		<SVG height="16px" viewBox="0 -960 960 960" width="16px">
@@ -32,6 +33,7 @@ function SparkleIcon() {
 	);
 }
 
+// Loading Dots Component
 function LoadingDots() {
 	return (
 		<div style={ { display: 'inline-flex', alignItems: 'center' } }>
@@ -79,6 +81,256 @@ function LoadingDots() {
 	);
 }
 
+// User Message Bubble Component
+function UserMessage( { message } ) {
+	return (
+		<div
+			style={ {
+				display: 'flex',
+				justifyContent: 'flex-end',
+				marginBottom: '8px',
+			} }
+		>
+			<div
+				style={ {
+					backgroundColor: '#e0f2ff',
+					padding: '10px 14px',
+					borderRadius: '18px 18px 0 18px',
+					maxWidth: '85%',
+					boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+					position: 'relative',
+					color: '#333',
+					fontWeight: '400',
+					whiteSpace: 'pre-wrap',
+					wordBreak: 'break-word',
+				} }
+			>
+				{ message }
+			</div>
+		</div>
+	);
+}
+
+// Chat Action Buttons Component
+function ChatActionButtons( { onStartOver, onInsertContent, content } ) {
+	return (
+		<div
+			style={ {
+				display: 'flex',
+				justifyContent: 'flex-start',
+				gap: '8px',
+				marginTop: '4px',
+				marginBottom: '8px',
+				flexWrap: 'wrap',
+			} }
+		>
+			<Button
+				variant="tertiary"
+				isDestructive
+				onClick={ onStartOver }
+				size="small"
+			>
+				Start Over
+			</Button>
+
+			<Button
+				variant="secondary"
+				onClick={ () => onInsertContent( content ) }
+				size="small"
+			>
+				Insert Content
+			</Button>
+		</div>
+	);
+}
+
+// AI Response Bubble Component
+function AIResponse( { content } ) {
+	return (
+		<div
+			style={ {
+				backgroundColor: '#f0f0f0',
+				padding: '10px 14px',
+				borderRadius: '18px 18px 18px 0',
+				boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+				marginBottom: '8px',
+				color: '#333',
+				whiteSpace: 'pre-wrap',
+				wordBreak: 'break-word',
+			} }
+		>
+			{ content }
+		</div>
+	);
+}
+
+// Loading Response Component
+function LoadingResponse() {
+	return (
+		<div
+			style={ {
+				display: 'flex',
+				justifyContent: 'flex-start',
+				marginBottom: '8px',
+			} }
+		>
+			<div
+				style={ {
+					backgroundColor: '#f0f0f0',
+					padding: '10px 14px',
+					borderRadius: '18px 18px 18px 0',
+					color: '#666',
+					fontStyle: 'italic',
+					display: 'flex',
+					alignItems: 'center',
+				} }
+			>
+				Waiting for response
+				<LoadingDots />
+			</div>
+		</div>
+	);
+}
+
+// Conversation Item Component
+function ConversationItem( { entry, onStartOver, onInsertContent } ) {
+	return (
+		<div style={ { marginBottom: '20px' } }>
+			{ /* User message */ }
+			<UserMessage message={ entry.prompt } />
+
+			{ /* AI response or loading state */ }
+			{ entry.completion !== null ? (
+				<div
+					style={ {
+						display: 'flex',
+						justifyContent: 'flex-start',
+						marginBottom: '8px',
+						alignItems: 'flex-start',
+					} }
+				>
+					<div
+						style={ {
+							display: 'flex',
+							flexDirection: 'column',
+							maxWidth: '85%',
+						} }
+					>
+						<AIResponse content={ entry.completion } />
+						<ChatActionButtons
+							onStartOver={ onStartOver }
+							onInsertContent={ onInsertContent }
+							content={ entry.completion }
+						/>
+					</div>
+				</div>
+			) : (
+				<LoadingResponse />
+			) }
+		</div>
+	);
+}
+
+// Chat History Component
+function ChatHistory( { conversation, onStartOver, onInsertContent } ) {
+	if ( conversation.length === 0 ) {
+		return null;
+	}
+
+	return (
+		<div
+			className="classifai-chat-history"
+			style={ {
+				marginBottom: '10px',
+				maxHeight: '400px',
+				overflowY: 'auto',
+				paddingRight: '5px',
+				flex: '1',
+			} }
+		>
+			{ conversation.map( ( entry, index ) => (
+				<ConversationItem
+					key={ index }
+					entry={ entry }
+					onStartOver={ onStartOver }
+					onInsertContent={ onInsertContent }
+				/>
+			) ) }
+		</div>
+	);
+}
+
+// Chat Input Component
+function ChatInput( {
+	value,
+	onChange,
+	onKeyDown,
+	isLoading,
+	placeholderText,
+} ) {
+	return (
+		<div style={ { position: 'relative' } }>
+			<TextareaControl
+				__nextHasNoMarginBottom
+				className="classifai-chat-input"
+				placeholder={ placeholderText }
+				value={ value }
+				onChange={ onChange }
+				onKeyDown={ onKeyDown }
+				disabled={ isLoading }
+				style={ {
+					width: '100%',
+					height: '80px',
+					maxHeight: '200px',
+					minHeight: '80px',
+					borderRadius: '4px',
+					border: '1px solid #ccc',
+					padding: '10px',
+					paddingBottom: '40px',
+					resize: 'none',
+					opacity: isLoading ? 0.7 : 1,
+				} }
+			/>
+			<Button
+				icon={ ReturnIcon }
+				iconPosition="right"
+				type="submit"
+				style={ {
+					position: 'absolute',
+					bottom: '8px',
+					right: '8px',
+					paddingInline: '4px',
+					paddingInlineStart: '6px',
+				} }
+				variant="primary"
+				size="small"
+				disabled={ isLoading }
+			>
+				{ isLoading ? 'Sending...' : 'Send' }
+			</Button>
+		</div>
+	);
+}
+
+// Error Message Component
+function ErrorMessage( { error } ) {
+	if ( ! error ) {
+		return null;
+	}
+
+	return (
+		<div
+			style={ {
+				color: 'red',
+				marginBottom: '10px',
+			} }
+		>
+			Error: { error }
+		</div>
+	);
+}
+
+// Main Chat UI Component
 function ChatUI() {
 	const [ inputValue, setInputValue ] = useState( '' );
 	const [ isExpanded, setIsExpanded ] = useState( false );
@@ -97,16 +349,16 @@ function ChatUI() {
 		}
 	};
 
-	// Set up and clean up click outside listener
+	// Add event listeners for clicks outside
 	useEffect( () => {
+		// Only add event listeners when the chat UI is expanded
 		if ( isExpanded ) {
 			// Add event listener to main document
 			document.addEventListener( 'mousedown', handleClickOutside );
 
-			// Add event listeners to all iframes in the document
+			// Add event listeners to all iframes
 			const iframes = document.querySelectorAll( 'iframe' );
 			iframes.forEach( ( iframe ) => {
-				// Try-catch to handle cross-origin iframe issues
 				try {
 					if ( iframe.contentDocument ) {
 						iframe.contentDocument.addEventListener(
@@ -233,6 +485,14 @@ function ChatUI() {
 			} );
 	};
 
+	// Determine placeholder text based on conversation state
+	const getPlaceholderText = () => {
+		return conversation.length > 0 &&
+			conversation[ conversation.length - 1 ].completion !== null
+			? 'Ask a follow-up or request changes to the content...'
+			: 'What do you want to write about?';
+	};
+
 	return (
 		<div
 			className="classifai-chat-container"
@@ -287,259 +547,26 @@ function ChatUI() {
 								ClassifAI Assistant
 							</div>
 							<form onSubmit={ handleSubmit }>
-								<div style={ { position: 'relative' } }>
-									{ /* Conversation history display */ }
-									{ conversation.length > 0 && (
-										<div
-											className="classifai-chat-history"
-											style={ {
-												marginBottom: '10px',
-												maxHeight: '400px',
-												overflowY: 'auto',
-												paddingRight: '5px',
-												flex: '1',
-											} }
-										>
-											{ conversation.map(
-												( entry, index ) => (
-													<div
-														key={ index }
-														style={ {
-															marginBottom:
-																'20px',
-														} }
-													>
-														{ /* User message */ }
-														<div
-															style={ {
-																display: 'flex',
-																justifyContent:
-																	'flex-end',
-																marginBottom:
-																	'8px',
-															} }
-														>
-															<div
-																style={ {
-																	backgroundColor:
-																		'#e0f2ff',
-																	padding:
-																		'10px 14px',
-																	borderRadius:
-																		'18px 18px 0 18px',
-																	maxWidth:
-																		'85%',
-																	boxShadow:
-																		'0 1px 2px rgba(0,0,0,0.1)',
-																	position:
-																		'relative',
-																	color: '#333',
-																	fontWeight:
-																		'400',
-																	whiteSpace:
-																		'pre-wrap',
-																	wordBreak:
-																		'break-word',
-																} }
-															>
-																{ entry.prompt }
-															</div>
-														</div>
+								{ /* Chat history */ }
+								<ChatHistory
+									conversation={ conversation }
+									onStartOver={ startOver }
+									onInsertContent={ insertContent }
+								/>
 
-														{ /* AI response */ }
-														{ entry.completion !==
-														null ? (
-															<div
-																style={ {
-																	display:
-																		'flex',
-																	justifyContent:
-																		'flex-start',
-																	marginBottom:
-																		'8px',
-																	alignItems:
-																		'flex-start',
-																} }
-															>
-																<div
-																	style={ {
-																		display:
-																			'flex',
-																		flexDirection:
-																			'column',
-																		maxWidth:
-																			'85%',
-																	} }
-																>
-																	<div
-																		style={ {
-																			backgroundColor:
-																				'#f0f0f0',
-																			padding:
-																				'10px 14px',
-																			borderRadius:
-																				'18px 18px 18px 0',
-																			boxShadow:
-																				'0 1px 2px rgba(0,0,0,0.1)',
-																			marginBottom:
-																				'8px',
-																			color: '#333',
-																			whiteSpace:
-																				'pre-wrap',
-																			wordBreak:
-																				'break-word',
-																		} }
-																	>
-																		{
-																			entry.completion
-																		}
-																	</div>
+								{ /* Error message */ }
+								<ErrorMessage error={ error } />
 
-																	{ /* Action buttons */ }
-																	<div
-																		style={ {
-																			display:
-																				'flex',
-																			justifyContent:
-																				'flex-start',
-																			gap: '8px',
-																			marginTop:
-																				'4px',
-																			marginBottom:
-																				'8px',
-																			flexWrap:
-																				'wrap',
-																		} }
-																	>
-																		<Button
-																			variant="tertiary"
-																			isDestructive
-																			onClick={
-																				startOver
-																			}
-																			size="small"
-																		>
-																			Start
-																			Over
-																		</Button>
-
-																		<Button
-																			variant="primary"
-																			onClick={ () =>
-																				insertContent(
-																					entry.completion
-																				)
-																			}
-																			size="small"
-																		>
-																			Insert
-																			Content
-																		</Button>
-																	</div>
-																</div>
-															</div>
-														) : (
-															<div
-																style={ {
-																	display:
-																		'flex',
-																	justifyContent:
-																		'flex-start',
-																	marginBottom:
-																		'8px',
-																	alignItems:
-																		'flex-start',
-																} }
-															>
-																<div
-																	style={ {
-																		backgroundColor:
-																			'#f0f0f0',
-																		padding:
-																			'10px 14px',
-																		borderRadius:
-																			'18px 18px 18px 0',
-																		color: '#666',
-																		fontStyle:
-																			'italic',
-																		display:
-																			'flex',
-																		alignItems:
-																			'center',
-																	} }
-																>
-																	Waiting for
-																	response
-																	<LoadingDots />
-																</div>
-															</div>
-														) }
-													</div>
-												)
-											) }
-										</div>
-									) }
-
-									{ /* Error message */ }
-									{ error && (
-										<div
-											style={ {
-												color: 'red',
-												marginBottom: '10px',
-											} }
-										>
-											Error: { error }
-										</div>
-									) }
-
-									<TextareaControl
-										__nextHasNoMarginBottom
-										className="classifai-chat-input"
-										placeholder={
-											conversation.length > 0 &&
-											conversation[
-												conversation.length - 1
-											].completion !== null
-												? 'Ask a follow-up or request changes to the content...'
-												: 'What do you want to write about?'
-										}
-										value={ inputValue }
-										onChange={ ( value ) =>
-											setInputValue( value )
-										}
-										onKeyDown={ handleKeyDown }
-										disabled={ isLoading }
-										style={ {
-											width: '100%',
-											height: '80px',
-											maxHeight: '200px',
-											minHeight: '80px',
-											borderRadius: '4px',
-											border: '1px solid #ccc',
-											padding: '10px',
-											paddingBottom: '40px',
-											resize: 'none',
-											opacity: isLoading ? 0.7 : 1,
-										} }
-									/>
-									<Button
-										icon={ ReturnIcon }
-										iconPosition="right"
-										type="submit"
-										style={ {
-											position: 'absolute',
-											bottom: '8px',
-											right: '8px',
-											paddingInline: '4px',
-											paddingInlineStart: '6px',
-										} }
-										variant="primary"
-										size="small"
-										disabled={ isLoading }
-									>
-										{ isLoading ? 'Sending...' : 'Send' }
-									</Button>
-								</div>
+								{ /* Chat input */ }
+								<ChatInput
+									value={ inputValue }
+									onChange={ ( value ) =>
+										setInputValue( value )
+									}
+									onKeyDown={ handleKeyDown }
+									isLoading={ isLoading }
+									placeholderText={ getPlaceholderText() }
+								/>
 							</form>
 						</motion.div>
 					</motion.div>
@@ -555,8 +582,8 @@ function ChatUI() {
 							justifyContent: 'center',
 							alignItems: 'center',
 							backgroundColor: 'white',
-							borderRadius: '50%',
 							boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+							borderRadius: '50%',
 							padding: '0',
 							width: '48px',
 							height: '48px',
@@ -577,7 +604,7 @@ function ChatUI() {
 								onClick={ toggleChatUI }
 								variant="primary"
 								size="small"
-								aria-label="Open Classifai AI assistant"
+								aria-label="Open ClassifAI assistant"
 								className="classifai-chat-button"
 								style={ {
 									width: '100%',
