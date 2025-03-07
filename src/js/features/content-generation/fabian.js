@@ -284,7 +284,7 @@ function ChatUI() {
 									fontSize: '16px',
 								} }
 							>
-								Classifai AI Assistant
+								ClassifAI Assistant
 							</div>
 							<form onSubmit={ handleSubmit }>
 								<div style={ { position: 'relative' } }>
@@ -306,115 +306,172 @@ function ChatUI() {
 														key={ index }
 														style={ {
 															marginBottom:
-																'15px',
+																'20px',
 														} }
 													>
+														{ /* User message */ }
 														<div
 															style={ {
-																fontWeight:
-																	'bold',
+																display: 'flex',
+																justifyContent:
+																	'flex-end',
 																marginBottom:
-																	'5px',
+																	'8px',
 															} }
 														>
-															You:
-														</div>
-														<div
-															style={ {
-																marginBottom:
-																	'10px',
-																whiteSpace:
-																	'pre-wrap',
-																wordBreak:
-																	'break-word',
-															} }
-														>
-															{ entry.prompt }
+															<div
+																style={ {
+																	backgroundColor:
+																		'#e0f2ff',
+																	padding:
+																		'10px 14px',
+																	borderRadius:
+																		'18px 18px 0 18px',
+																	maxWidth:
+																		'85%',
+																	boxShadow:
+																		'0 1px 2px rgba(0,0,0,0.1)',
+																	position:
+																		'relative',
+																	color: '#333',
+																	fontWeight:
+																		'400',
+																	whiteSpace:
+																		'pre-wrap',
+																	wordBreak:
+																		'break-word',
+																} }
+															>
+																{ entry.prompt }
+															</div>
 														</div>
 
+														{ /* AI response */ }
 														{ entry.completion !==
 														null ? (
-															<>
-																<div
-																	style={ {
-																		fontWeight:
-																			'bold',
-																		marginBottom:
-																			'5px',
-																	} }
-																>
-																	Classifai
-																	AI:
-																</div>
-																<div
-																	style={ {
-																		whiteSpace:
-																			'pre-wrap',
-																		wordBreak:
-																			'break-word',
-																		marginBottom:
-																			'12px',
-																	} }
-																>
-																	{
-																		entry.completion
-																	}
-																</div>
-
-																{ /* Action buttons for AI response */ }
+															<div
+																style={ {
+																	display:
+																		'flex',
+																	justifyContent:
+																		'flex-start',
+																	marginBottom:
+																		'8px',
+																	alignItems:
+																		'flex-start',
+																} }
+															>
 																<div
 																	style={ {
 																		display:
 																			'flex',
-																		justifyContent:
-																			'flex-end',
-																		gap: '8px',
-																		marginBottom:
-																			'16px',
-																		flexWrap:
-																			'wrap',
+																		flexDirection:
+																			'column',
+																		maxWidth:
+																			'85%',
 																	} }
 																>
-																	<Button
-																		variant="tertiary"
-																		isDestructive
-																		onClick={
-																			startOver
-																		}
-																		size="small"
+																	<div
+																		style={ {
+																			backgroundColor:
+																				'#f0f0f0',
+																			padding:
+																				'10px 14px',
+																			borderRadius:
+																				'18px 18px 18px 0',
+																			boxShadow:
+																				'0 1px 2px rgba(0,0,0,0.1)',
+																			marginBottom:
+																				'8px',
+																			color: '#333',
+																			whiteSpace:
+																				'pre-wrap',
+																			wordBreak:
+																				'break-word',
+																		} }
 																	>
-																		Start
-																		Over
-																	</Button>
+																		{
+																			entry.completion
+																		}
+																	</div>
 
-																	<Button
-																		variant="primary"
-																		onClick={ () =>
-																			insertContent(
-																				entry.completion
-																			)
-																		}
-																		size="small"
+																	{ /* Action buttons */ }
+																	<div
+																		style={ {
+																			display:
+																				'flex',
+																			justifyContent:
+																				'flex-start',
+																			gap: '8px',
+																			marginTop:
+																				'4px',
+																			marginBottom:
+																				'8px',
+																			flexWrap:
+																				'wrap',
+																		} }
 																	>
-																		Insert
-																		Content
-																	</Button>
+																		<Button
+																			variant="tertiary"
+																			isDestructive
+																			onClick={
+																				startOver
+																			}
+																			size="small"
+																		>
+																			Start
+																			Over
+																		</Button>
+
+																		<Button
+																			variant="primary"
+																			onClick={ () =>
+																				insertContent(
+																					entry.completion
+																				)
+																			}
+																			size="small"
+																		>
+																			Insert
+																			Content
+																		</Button>
+																	</div>
 																</div>
-															</>
+															</div>
 														) : (
 															<div
 																style={ {
-																	fontStyle:
-																		'italic',
 																	display:
 																		'flex',
+																	justifyContent:
+																		'flex-start',
+																	marginBottom:
+																		'8px',
 																	alignItems:
-																		'center',
+																		'flex-start',
 																} }
 															>
-																Waiting for
-																response
-																<LoadingDots />
+																<div
+																	style={ {
+																		backgroundColor:
+																			'#f0f0f0',
+																		padding:
+																			'10px 14px',
+																		borderRadius:
+																			'18px 18px 18px 0',
+																		color: '#666',
+																		fontStyle:
+																			'italic',
+																		display:
+																			'flex',
+																		alignItems:
+																			'center',
+																	} }
+																>
+																	Waiting for
+																	response
+																	<LoadingDots />
+																</div>
 															</div>
 														) }
 													</div>
@@ -438,7 +495,14 @@ function ChatUI() {
 									<TextareaControl
 										__nextHasNoMarginBottom
 										className="classifai-chat-input"
-										placeholder="What do you want to write about?"
+										placeholder={
+											conversation.length > 0 &&
+											conversation[
+												conversation.length - 1
+											].completion !== null
+												? 'Ask a follow-up or request changes to the content...'
+												: 'What do you want to write about?'
+										}
 										value={ inputValue }
 										onChange={ ( value ) =>
 											setInputValue( value )
