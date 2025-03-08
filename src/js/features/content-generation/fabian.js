@@ -1,22 +1,21 @@
 import { registerPlugin } from '@wordpress/plugins';
 import { createRoot, useEffect, useState, useRef } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
-import { TextareaControl, Button, SVG, Path } from '@wordpress/components';
+import {
+	TextareaControl,
+	Button,
+	SVG,
+	Path,
+	Icon,
+} from '@wordpress/components';
 import { motion, AnimatePresence } from 'motion/react';
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { autop } from '@wordpress/autop';
 import { rawHandler } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-
-// Icon Components
-function ReturnIcon() {
-	return (
-		<SVG height="16px" viewBox="0 -960 960 960" width="16px">
-			<Path d="M360-240 120-480l240-240 56 56-144 144h488v-160h80v240H272l144 144-56 56Z" />
-		</SVG>
-	);
-}
+import { backup, check, copySmall, keyboardReturn } from '@wordpress/icons';
+import { useCopyToClipboard } from '@wordpress/compose';
 
 function SparkleIcon() {
 	return (
@@ -37,7 +36,13 @@ function SparkleIcon() {
 // Loading Dots Component
 function LoadingDots() {
 	return (
-		<div style={ { display: 'inline-flex', alignItems: 'center' } }>
+		<div
+			style={ {
+				display: 'inline-flex',
+				alignItems: 'center',
+				fontSize: '20px',
+			} }
+		>
 			<motion.span
 				initial={ { opacity: 0.3 } }
 				animate={ { opacity: 1 } }
@@ -49,7 +54,7 @@ function LoadingDots() {
 				} }
 				style={ { marginRight: '4px' } }
 			>
-				•
+				.
 			</motion.span>
 			<motion.span
 				initial={ { opacity: 0.3 } }
@@ -63,7 +68,7 @@ function LoadingDots() {
 				} }
 				style={ { marginRight: '4px' } }
 			>
-				•
+				.
 			</motion.span>
 			<motion.span
 				initial={ { opacity: 0.3 } }
@@ -76,7 +81,7 @@ function LoadingDots() {
 					delay: 0.4,
 				} }
 			>
-				•
+				.
 			</motion.span>
 			<span className="screen-reader-text">
 				{ __( 'Loading', 'classifai' ) }
@@ -117,13 +122,23 @@ function UserMessage( { message } ) {
 
 // Chat Action Buttons Component
 function ChatActionButtons( { onStartOver, onInsertContent, content } ) {
+	const [ hasCopied, setHasCopied ] = useState( false );
+
+	const onSuccessfullCopy = () => {
+		setHasCopied( true );
+		setTimeout( () => {
+			setHasCopied( false );
+		}, 1500 );
+	};
+	const copyRef = useCopyToClipboard( content, onSuccessfullCopy );
+
 	return (
 		<div
 			style={ {
 				display: 'flex',
-				justifyContent: 'flex-start',
-				gap: '8px',
-				marginTop: '4px',
+				justifyContent: 'flex-end',
+				gap: '2px',
+				marginTop: '0',
 				marginBottom: '8px',
 				flexWrap: 'wrap',
 			} }
@@ -133,16 +148,64 @@ function ChatActionButtons( { onStartOver, onInsertContent, content } ) {
 				isDestructive
 				onClick={ onStartOver }
 				size="small"
+				icon={
+					<Icon
+						icon={ backup }
+						viewBox="0 0 24 24"
+						height={ 16 }
+						width={ 16 }
+					/>
+				}
+				iconPosition="right"
+				style={ { paddingInlineEnd: '4px' } }
 			>
 				{ __( 'Start Over', 'classifai' ) }
 			</Button>
-
 			<Button
-				variant="secondary"
+				ref={ copyRef }
+				variant="tertiary"
+				size="small"
+				icon={
+					hasCopied ? (
+						<Icon
+							icon={ check }
+							viewBox="0 0 24 24"
+							height={ 16 }
+							width={ 16 }
+						/>
+					) : (
+						<Icon
+							icon={ copySmall }
+							viewBox="0 0 24 24"
+							height={ 16 }
+							width={ 16 }
+						/>
+					)
+				}
+				disabled={ hasCopied }
+				iconPosition="right"
+				style={ { paddingInlineEnd: '4px' } }
+			>
+				{ hasCopied
+					? __( 'Copied!', 'classifai' )
+					: __( 'Copy', 'classifai' ) }
+			</Button>
+			<Button
+				variant="tertiary"
 				onClick={ () => onInsertContent( content ) }
 				size="small"
+				icon={
+					<Icon
+						icon={ check }
+						viewBox="0 0 24 24"
+						height={ 20 }
+						width={ 20 }
+					/>
+				}
+				iconPosition="right"
+				style={ { paddingInlineEnd: '4px' } }
 			>
-				{ __( 'Insert Content', 'classifai' ) }
+				{ __( 'Insert', 'classifai' ) }
 			</Button>
 		</div>
 	);
@@ -186,7 +249,8 @@ function LoadingResponse() {
 					color: '#666',
 					fontStyle: 'italic',
 					display: 'flex',
-					alignItems: 'center',
+					gap: '4px',
+					alignItems: 'flex-end',
 				} }
 			>
 				{ __( 'Waiting for response', 'classifai' ) }
@@ -198,39 +262,55 @@ function LoadingResponse() {
 
 // Conversation Item Component
 function ConversationItem( { entry, onStartOver, onInsertContent } ) {
+	const hasCompletion = entry.completion !== null;
+
 	return (
 		<div style={ { marginBottom: '20px' } }>
-			{ /* User message */ }
-			<UserMessage message={ entry.prompt } />
-
-			{ /* AI response or loading state */ }
-			{ entry.completion !== null ? (
-				<div
-					style={ {
-						display: 'flex',
-						justifyContent: 'flex-start',
-						marginBottom: '8px',
-						alignItems: 'flex-start',
-					} }
+			<AnimatePresence>
+				<motion.div
+					initial={ { opacity: 0 } }
+					animate={ { opacity: 1 } }
+					exit={ { opacity: 0 } }
 				>
-					<div
+					<UserMessage message={ entry.prompt } />
+				</motion.div>
+				{ hasCompletion ? (
+					<motion.div
+						initial={ { opacity: 0 } }
+						animate={ { opacity: 1 } }
+						exit={ { opacity: 0 } }
 						style={ {
 							display: 'flex',
-							flexDirection: 'column',
-							maxWidth: '85%',
+							justifyContent: 'flex-start',
+							marginBottom: '8px',
+							alignItems: 'flex-start',
 						} }
 					>
-						<AIResponse content={ entry.completion } />
-						<ChatActionButtons
-							onStartOver={ onStartOver }
-							onInsertContent={ onInsertContent }
-							content={ entry.completion }
-						/>
-					</div>
-				</div>
-			) : (
-				<LoadingResponse />
-			) }
+						<div
+							style={ {
+								display: 'flex',
+								flexDirection: 'column',
+								maxWidth: '85%',
+							} }
+						>
+							<AIResponse content={ entry.completion } />
+							<ChatActionButtons
+								onStartOver={ onStartOver }
+								onInsertContent={ onInsertContent }
+								content={ entry.completion }
+							/>
+						</div>
+					</motion.div>
+				) : (
+					<motion.div
+						initial={ { opacity: 0 } }
+						animate={ { opacity: 1 } }
+						exit={ { opacity: 0 } }
+					>
+						<LoadingResponse />
+					</motion.div>
+				) }
+			</AnimatePresence>
 		</div>
 	);
 }
@@ -296,7 +376,14 @@ function ChatInput( {
 				} }
 			/>
 			<Button
-				icon={ ReturnIcon }
+				icon={
+					<Icon
+						icon={ keyboardReturn }
+						viewBox="0 0 24 24"
+						height={ 16 }
+						width={ 16 }
+					/>
+				}
 				iconPosition="right"
 				type="submit"
 				style={ {
@@ -494,13 +581,18 @@ function ChatUI() {
 
 	// Determine placeholder text based on conversation state
 	const getPlaceholderText = () => {
-		return conversation.length > 0 &&
-			conversation[ conversation.length - 1 ].completion !== null
-			? __(
-					'Ask a follow-up or request changes to the content…',
-					'classifai'
-			  )
-			: __( 'What do you want to write about?', 'classifai' );
+		const hasActiveConversation =
+			conversation.length > 0 &&
+			conversation[ conversation.length - 1 ].completion !== null;
+
+		if ( hasActiveConversation ) {
+			return __(
+				'Ask a follow-up or request changes to the content…',
+				'classifai'
+			);
+		}
+
+		return __( 'What do you want to write about?', 'classifai' );
 	};
 
 	return (
@@ -528,8 +620,10 @@ function ChatUI() {
 							maxHeight: '600px',
 							backgroundColor: 'white',
 							padding: '16px',
-							boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+							boxShadow:
+								'0px 2px 3px 0px rgba(0, 0, 0, 0.05), 0px 4px 5px 0px rgba(0, 0, 0, 0.04), 0px 4px 5px 0px rgba(0, 0, 0, 0.03), 0px 16px 16px 0px rgba(0, 0, 0, 0.02)',
 							borderRadius: '8px',
+							border: '1px solid #e0e0e0',
 							overflow: 'hidden',
 							display: 'flex',
 							flexDirection: 'column',
@@ -557,17 +651,12 @@ function ChatUI() {
 								{ __( 'ClassifAI Assistant', 'classifai' ) }
 							</div>
 							<form onSubmit={ handleSubmit }>
-								{ /* Chat history */ }
 								<ChatHistory
 									conversation={ conversation }
 									onStartOver={ startOver }
 									onInsertContent={ insertContent }
 								/>
-
-								{ /* Error message */ }
 								<ErrorMessage error={ error } />
-
-								{ /* Chat input */ }
 								<ChatInput
 									value={ inputValue }
 									onChange={ ( value ) =>
