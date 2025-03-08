@@ -7,6 +7,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
 import { autop } from '@wordpress/autop';
 import { rawHandler } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 // Icon Components
 function ReturnIcon() {
@@ -48,7 +49,7 @@ function LoadingDots() {
 				} }
 				style={ { marginRight: '4px' } }
 			>
-				.
+				•
 			</motion.span>
 			<motion.span
 				initial={ { opacity: 0.3 } }
@@ -62,7 +63,7 @@ function LoadingDots() {
 				} }
 				style={ { marginRight: '4px' } }
 			>
-				.
+				•
 			</motion.span>
 			<motion.span
 				initial={ { opacity: 0.3 } }
@@ -75,8 +76,11 @@ function LoadingDots() {
 					delay: 0.4,
 				} }
 			>
-				.
+				•
 			</motion.span>
+			<span className="screen-reader-text">
+				{ __( 'Loading', 'classifai' ) }
+			</span>
 		</div>
 	);
 }
@@ -130,7 +134,7 @@ function ChatActionButtons( { onStartOver, onInsertContent, content } ) {
 				onClick={ onStartOver }
 				size="small"
 			>
-				Start Over
+				{ __( 'Start Over', 'classifai' ) }
 			</Button>
 
 			<Button
@@ -138,7 +142,7 @@ function ChatActionButtons( { onStartOver, onInsertContent, content } ) {
 				onClick={ () => onInsertContent( content ) }
 				size="small"
 			>
-				Insert Content
+				{ __( 'Insert Content', 'classifai' ) }
 			</Button>
 		</div>
 	);
@@ -185,7 +189,7 @@ function LoadingResponse() {
 					alignItems: 'center',
 				} }
 			>
-				Waiting for response
+				{ __( 'Waiting for response', 'classifai' ) }
 				<LoadingDots />
 			</div>
 		</div>
@@ -305,8 +309,11 @@ function ChatInput( {
 				variant="primary"
 				size="small"
 				disabled={ isLoading }
+				isBusy={ isLoading }
 			>
-				{ isLoading ? 'Sending...' : 'Send' }
+				{ isLoading
+					? __( 'Sending…', 'classifai' )
+					: __( 'Send', 'classifai' ) }
 			</Button>
 		</div>
 	);
@@ -321,11 +328,11 @@ function ErrorMessage( { error } ) {
 	return (
 		<div
 			style={ {
-				color: 'red',
+				color: '#cc1818',
 				marginBottom: '10px',
 			} }
 		>
-			Error: { error }
+			{ __( 'Error', 'classifai' ) }: { error }
 		</div>
 	);
 }
@@ -489,8 +496,11 @@ function ChatUI() {
 	const getPlaceholderText = () => {
 		return conversation.length > 0 &&
 			conversation[ conversation.length - 1 ].completion !== null
-			? 'Ask a follow-up or request changes to the content...'
-			: 'What do you want to write about?';
+			? __(
+					'Ask a follow-up or request changes to the content…',
+					'classifai'
+			  )
+			: __( 'What do you want to write about?', 'classifai' );
 	};
 
 	return (
@@ -544,7 +554,7 @@ function ChatUI() {
 									fontSize: '16px',
 								} }
 							>
-								ClassifAI Assistant
+								{ __( 'ClassifAI Assistant', 'classifai' ) }
 							</div>
 							<form onSubmit={ handleSubmit }>
 								{ /* Chat history */ }
@@ -575,7 +585,7 @@ function ChatUI() {
 						layoutId="chat-container"
 						initial={ { opacity: 0.9 } }
 						animate={ { opacity: 1 } }
-						exit={ { opacity: 0 } }
+						exit={ { opacity: 0.0 } }
 						transition={ { type: 'spring', duration: 0.3 } }
 						style={ {
 							display: 'flex',
@@ -590,7 +600,6 @@ function ChatUI() {
 						} }
 					>
 						<motion.div
-							layoutId="chat-header"
 							style={ {
 								display: 'flex',
 								justifyContent: 'center',
@@ -604,7 +613,10 @@ function ChatUI() {
 								onClick={ toggleChatUI }
 								variant="primary"
 								size="small"
-								aria-label="Open ClassifAI assistant"
+								aria-label={ __(
+									'Open ClassifAI assistant',
+									'classifai'
+								) }
 								className="classifai-chat-button"
 								style={ {
 									width: '100%',
