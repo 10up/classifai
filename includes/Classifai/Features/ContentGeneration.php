@@ -95,7 +95,7 @@ class ContentGeneration extends Feature {
 					],
 					'title'        => [
 						'type'              => 'string',
-						'sanitize_callback' => 'sanitize_text_field',
+						'sanitize_callback' => 'wp_kses_post',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
 					],
@@ -104,13 +104,13 @@ class ContentGeneration extends Feature {
 						'properties'  => [
 							'prompt'   => [
 								'type'              => 'string',
-								'sanitize_callback' => 'sanitize_text_field',
+								'sanitize_callback' => 'wp_kses_post',
 								'validate_callback' => 'rest_validate_request_arg',
 								'description'       => esc_html__( 'The prompt a user sent.', 'classifai' ),
 							],
 							'response' => [
 								'type'              => 'string',
-								'sanitize_callback' => 'sanitize_text_field',
+								'sanitize_callback' => 'wp_kses_post',
 								'validate_callback' => 'rest_validate_request_arg',
 								'description'       => esc_html__( 'The response from the assistant to the prompt.', 'classifai' ),
 							],

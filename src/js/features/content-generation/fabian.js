@@ -11,7 +11,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
-import { pasteHandler } from '@wordpress/blocks';
+import { pasteHandler, parse } from '@wordpress/blocks';
 import { store as editorStore } from '@wordpress/editor';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
@@ -28,6 +28,7 @@ import {
 	formatListBullets,
 } from '@wordpress/icons';
 import { useCopyToClipboard } from '@wordpress/compose';
+import { decodeEntities } from '@wordpress/html-entities';
 
 function SparkleIcon() {
 	return (
@@ -135,7 +136,7 @@ function UserMessage( { message } ) {
 					wordBreak: 'break-word',
 				} }
 			>
-				{ message }
+				{ decodeEntities( message ) }
 			</div>
 		</div>
 	);
@@ -247,7 +248,7 @@ function AIResponse( { content } ) {
 				wordBreak: 'break-word',
 			} }
 		>
-			{ content }
+			{ decodeEntities( content ) }
 		</div>
 	);
 }
@@ -900,13 +901,23 @@ function ChatUI() {
 				content: '',
 			} )
 			.then( () => {
-				const blocks = pasteHandler( {
-					HTML: content,
-					plainText: content,
-					mode: 'BLOCKS',
-				} );
+				const contentWithEntities = decodeEntities( content );
 
+				const containsBlockMarkup =
+					contentWithEntities.includes( '<!-- wp:' );
+
+				let blocks;
+				if ( containsBlockMarkup ) {
+					blocks = parse( contentWithEntities );
+				} else {
+					blocks = pasteHandler( {
+						HTML: contentWithEntities,
+						plainText: contentWithEntities,
+						mode: 'BLOCKS',
+					} );
+				}
 				dispatch( blockEditorStore ).insertBlocks( blocks );
+
 				// Close the chat UI after inserting content
 				setIsExpanded( false );
 				// Clear the conversation
