@@ -1,5 +1,11 @@
 import { registerPlugin } from '@wordpress/plugins';
-import { createRoot, useEffect, useState, useRef } from '@wordpress/element';
+import {
+	createRoot,
+	useEffect,
+	useState,
+	useRef,
+	useLayoutEffect,
+} from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import {
 	TextareaControl,
@@ -238,18 +244,12 @@ function AIResponse( { content } ) {
 	return (
 		<div
 			style={ {
-				backgroundColor: '#f0f0f0',
-				padding: '10px 14px',
-				borderRadius: '18px 18px 18px 0',
-				boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
-				marginBottom: '8px',
+				padding: '10px 0px',
 				color: '#333',
-				whiteSpace: 'pre-wrap',
 				wordBreak: 'break-word',
 			} }
-		>
-			{ decodeEntities( content ) }
-		</div>
+			dangerouslySetInnerHTML={ { __html: decodeEntities( content ) } }
+		/>
 	);
 }
 
@@ -312,7 +312,7 @@ function ConversationItem( { entry, onStartOver, onInsertContent } ) {
 							style={ {
 								display: 'flex',
 								flexDirection: 'column',
-								maxWidth: '85%',
+								maxWidth: '95%',
 							} }
 						>
 							<AIResponse content={ entry.completion } />
@@ -358,6 +358,7 @@ function ChatHistory( { conversation, onStartOver, onInsertContent } ) {
 				<ConversationItem
 					key={ index }
 					entry={ entry }
+					conversation={ conversation }
 					onStartOver={ onStartOver }
 					onInsertContent={ onInsertContent }
 				/>
@@ -373,11 +374,13 @@ function ChatInput( {
 	onKeyDown,
 	isLoading,
 	placeholderText,
+	textareaRef,
 } ) {
 	return (
 		<div style={ { position: 'relative' } }>
 			<TextareaControl
 				__nextHasNoMarginBottom
+				ref={ textareaRef }
 				className="classifai-chat-input"
 				placeholder={ placeholderText }
 				value={ value }
@@ -417,7 +420,7 @@ function ChatInput( {
 				} }
 				variant="primary"
 				size="small"
-				disabled={ isLoading }
+				disabled={ isLoading || ! value }
 				isBusy={ isLoading }
 			>
 				{ isLoading
@@ -447,7 +450,7 @@ function ErrorMessage( { error } ) {
 }
 
 // QuickActionOptions Component
-function QuickActionOptions( { onOptionSelect } ) {
+function QuickActionOptions( { onOptionSelect, hasContent = false } ) {
 	const [ showFullOptions, setShowFullOptions ] = useState( false );
 
 	return (
@@ -464,43 +467,47 @@ function QuickActionOptions( { onOptionSelect } ) {
 						gap: '8px',
 					} }
 				>
-					<Button
-						className="classifai-action-button"
-						onClick={ () => onOptionSelect( 'proofread' ) }
-						style={ {
-							flex: 1,
-							justifyContent: 'center',
-							border: '1px solid #e0e0e0',
-							padding: '12px 8px',
-							borderRadius: '4px',
-							backgroundColor: '#f9f9f9',
-						} }
-					>
-						<Icon icon={ search } />
-						<span style={ { marginLeft: '6px' } }>
-							{ __( 'Proofread', 'classifai' ) }
-						</span>
-					</Button>
+					{ !! hasContent && (
+						<>
+							<Button
+								className="classifai-action-button"
+								onClick={ () => onOptionSelect( 'proofread' ) }
+								style={ {
+									flex: 1,
+									justifyContent: 'center',
+									border: '1px solid #e0e0e0',
+									padding: '12px 8px',
+									borderRadius: '4px',
+									backgroundColor: '#f9f9f9',
+								} }
+							>
+								<Icon icon={ search } />
+								<span style={ { marginLeft: '6px' } }>
+									{ __( 'Proofread', 'classifai' ) }
+								</span>
+							</Button>
 
-					<Button
-						className="classifai-action-button"
-						onClick={ () => {
-							setShowFullOptions( ! showFullOptions );
-						} }
-						style={ {
-							flex: 1,
-							justifyContent: 'center',
-							border: '1px solid #e0e0e0',
-							padding: '12px 8px',
-							borderRadius: '4px',
-							backgroundColor: '#f9f9f9',
-						} }
-					>
-						<Icon icon={ update } />
-						<span style={ { marginLeft: '6px' } }>
-							{ __( 'Rewrite', 'classifai' ) }
-						</span>
-					</Button>
+							<Button
+								className="classifai-action-button"
+								onClick={ () => {
+									setShowFullOptions( ! showFullOptions );
+								} }
+								style={ {
+									flex: 1,
+									justifyContent: 'center',
+									border: '1px solid #e0e0e0',
+									padding: '12px 8px',
+									borderRadius: '4px',
+									backgroundColor: '#f9f9f9',
+								} }
+							>
+								<Icon icon={ update } />
+								<span style={ { marginLeft: '6px' } }>
+									{ __( 'Rewrite', 'classifai' ) }
+								</span>
+							</Button>
+						</>
+					) }
 				</motion.div>
 
 				{ showFullOptions && (
@@ -669,7 +676,7 @@ function ChatUI() {
 	const [ error, setError ] = useState( false );
 	const [ conversation, setConversation ] = useState( [] );
 	const chatContainerRef = useRef( null );
-
+	const textareaRef = useRef( null );
 	// Function to handle clicks outside the chat UI
 	const handleClickOutside = ( event ) => {
 		if (
@@ -679,6 +686,12 @@ function ChatUI() {
 			setIsExpanded( false );
 		}
 	};
+
+	useLayoutEffect( () => {
+		if ( textareaRef.current && isExpanded ) {
+			textareaRef.current.focus();
+		}
+	}, [ isExpanded ] );
 
 	// Add event listeners for clicks outside
 	useEffect( () => {
@@ -1016,10 +1029,16 @@ function ChatUI() {
 								{ conversation.length === 0 && (
 									<QuickActionOptions
 										onOptionSelect={ handleOptionSelect }
+										hasContent={
+											select( editorStore )
+												.getEditedPostContent()
+												.trim().length > 0
+										}
 									/>
 								) }
 								<ErrorMessage error={ error } />
 								<ChatInput
+									textareaRef={ textareaRef }
 									value={ inputValue }
 									onChange={ ( value ) =>
 										setInputValue( value )
