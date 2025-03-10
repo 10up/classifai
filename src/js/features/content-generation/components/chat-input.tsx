@@ -1,7 +1,33 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { TextareaControl, Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { keyboardReturn } from '@wordpress/icons';
+
+// Define style objects outside of JSX
+const containerStyles: CSSProperties = {
+	position: 'relative',
+};
+
+const getTextareaStyles = ( isLoading: boolean ): CSSProperties => ( {
+	width: '100%',
+	height: '80px',
+	maxHeight: '200px',
+	minHeight: '80px',
+	borderRadius: '4px',
+	border: '1px solid #ccc',
+	padding: '10px',
+	paddingBottom: '40px',
+	resize: 'none',
+	opacity: isLoading ? 0.7 : 1,
+} );
+
+const buttonStyles: CSSProperties = {
+	position: 'absolute',
+	bottom: '8px',
+	right: '8px',
+	paddingInline: '4px',
+	paddingInlineStart: '6px',
+};
 
 /**
  * Props for the ChatInput component
@@ -32,7 +58,7 @@ export const ChatInput: React.FC< ChatInputProps > = ( {
 	textareaRef,
 } ) => {
 	return (
-		<div style={ { position: 'relative' } }>
+		<div style={ containerStyles }>
 			<TextareaControl
 				__nextHasNoMarginBottom
 				ref={ textareaRef }
@@ -42,18 +68,7 @@ export const ChatInput: React.FC< ChatInputProps > = ( {
 				onChange={ onChange }
 				onKeyDown={ onKeyDown }
 				disabled={ isLoading }
-				style={ {
-					width: '100%',
-					height: '80px',
-					maxHeight: '200px',
-					minHeight: '80px',
-					borderRadius: '4px',
-					border: '1px solid #ccc',
-					padding: '10px',
-					paddingBottom: '40px',
-					resize: 'none',
-					opacity: isLoading ? 0.7 : 1,
-				} }
+				style={ getTextareaStyles( isLoading ) }
 			/>
 			<Button
 				icon={
@@ -66,13 +81,7 @@ export const ChatInput: React.FC< ChatInputProps > = ( {
 				}
 				iconPosition="right"
 				type="submit"
-				style={ {
-					position: 'absolute',
-					bottom: '8px',
-					right: '8px',
-					paddingInline: '4px',
-					paddingInlineStart: '6px',
-				} }
+				style={ buttonStyles }
 				variant="primary"
 				size="small"
 				disabled={ isLoading || ! value }

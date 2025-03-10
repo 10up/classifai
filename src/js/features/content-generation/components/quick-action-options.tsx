@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { motion, AnimatePresence } from 'motion/react';
@@ -10,6 +10,60 @@ import {
 	table,
 	formatListBullets,
 } from '@wordpress/icons';
+
+// Define style objects outside of JSX
+const containerStyles: CSSProperties = {
+	marginBottom: '8px',
+};
+
+const optionsContainerStyles: CSSProperties = {
+	display: 'flex',
+	gap: '8px',
+};
+
+const actionButtonStyles: CSSProperties = {
+	flex: 1,
+	justifyContent: 'center',
+	border: '1px solid #e0e0e0',
+	padding: '12px 8px',
+	borderRadius: '4px',
+	backgroundColor: '#f9f9f9',
+};
+
+const iconTextStyles: CSSProperties = {
+	marginLeft: '6px',
+};
+
+const toneButtonContainerStyles: CSSProperties = {
+	marginBottom: '8px',
+	marginTop: '12px',
+};
+
+const toneButtonStyles: CSSProperties = {
+	width: '100%',
+	justifyContent: 'flex-start',
+	textAlign: 'left',
+	marginBottom: '4px',
+	padding: '8px 12px',
+	border: 'none',
+};
+
+const actionButtonTextStyles: CSSProperties = {
+	marginLeft: '8px',
+};
+
+const actionSectionStyles: CSSProperties = {
+	borderTop: '1px solid #e0e0e0',
+	paddingTop: '8px',
+};
+
+const actionItemButtonStyles: CSSProperties = {
+	width: '100%',
+	justifyContent: 'flex-start',
+	textAlign: 'left',
+	padding: '8px 12px',
+	border: 'none',
+};
 
 /**
  * Props for the QuickActionOptions component
@@ -37,33 +91,19 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 	return (
 		<div
 			className="classifai-quick-action-options"
-			style={ {
-				marginBottom: '8px',
-			} }
+			style={ containerStyles }
 		>
 			<AnimatePresence>
-				<motion.div
-					style={ {
-						display: 'flex',
-						gap: '8px',
-					} }
-				>
+				<motion.div style={ optionsContainerStyles }>
 					{ !! hasContent && (
 						<>
 							<Button
 								className="classifai-action-button"
 								onClick={ () => onOptionSelect( 'proofread' ) }
-								style={ {
-									flex: 1,
-									justifyContent: 'center',
-									border: '1px solid #e0e0e0',
-									padding: '12px 8px',
-									borderRadius: '4px',
-									backgroundColor: '#f9f9f9',
-								} }
+								style={ actionButtonStyles }
 							>
 								<Icon icon={ search } />
-								<span style={ { marginLeft: '6px' } }>
+								<span style={ iconTextStyles }>
 									{ __( 'Proofread', 'classifai' ) }
 								</span>
 							</Button>
@@ -73,17 +113,10 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 								onClick={ () => {
 									setShowFullOptions( ! showFullOptions );
 								} }
-								style={ {
-									flex: 1,
-									justifyContent: 'center',
-									border: '1px solid #e0e0e0',
-									padding: '12px 8px',
-									borderRadius: '4px',
-									backgroundColor: '#f9f9f9',
-								} }
+								style={ actionButtonStyles }
 							>
 								<Icon icon={ update } />
-								<span style={ { marginLeft: '6px' } }>
+								<span style={ iconTextStyles }>
 									{ __( 'Rewrite', 'classifai' ) }
 								</span>
 							</Button>
@@ -98,27 +131,18 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 						animate={ { opacity: 1, height: 'auto' } }
 						exit={ { opacity: 0, height: 0 } }
 					>
-						<div
-							style={ { marginBottom: '8px', marginTop: '12px' } }
-						>
+						<div style={ toneButtonContainerStyles }>
 							<Button
 								className="classifai-tone-button"
 								onClick={ () =>
 									onOptionSelect( 'tone-friendly' )
 								}
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									marginBottom: '4px',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ toneButtonStyles }
 							>
 								<span role="img" aria-label="Friendly">
 									😊
 								</span>
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Friendly', 'classifai' ) }
 								</span>
 							</Button>
@@ -128,19 +152,12 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 								onClick={ () =>
 									onOptionSelect( 'tone-professional' )
 								}
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									marginBottom: '4px',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ toneButtonStyles }
 							>
 								<span role="img" aria-label="Professional">
 									💼
 								</span>
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Professional', 'classifai' ) }
 								</span>
 							</Button>
@@ -150,43 +167,25 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 								onClick={ () =>
 									onOptionSelect( 'tone-concise' )
 								}
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									marginBottom: '4px',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ toneButtonStyles }
 							>
 								<span role="img" aria-label="Concise">
 									⚡
 								</span>
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Concise', 'classifai' ) }
 								</span>
 							</Button>
 						</div>
 
-						<div
-							style={ {
-								borderTop: '1px solid #e0e0e0',
-								paddingTop: '8px',
-							} }
-						>
+						<div style={ actionSectionStyles }>
 							<Button
 								className="classifai-action-button"
 								onClick={ () => onOptionSelect( 'summary' ) }
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ actionItemButtonStyles }
 							>
 								<Icon icon={ paragraph } />
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Summary', 'classifai' ) }
 								</span>
 							</Button>
@@ -194,16 +193,10 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 							<Button
 								className="classifai-action-button"
 								onClick={ () => onOptionSelect( 'key-points' ) }
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ actionItemButtonStyles }
 							>
 								<Icon icon={ grid } />
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Key Points', 'classifai' ) }
 								</span>
 							</Button>
@@ -211,16 +204,10 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 							<Button
 								className="classifai-action-button"
 								onClick={ () => onOptionSelect( 'table' ) }
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ actionItemButtonStyles }
 							>
 								<Icon icon={ table } />
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'Table', 'classifai' ) }
 								</span>
 							</Button>
@@ -228,16 +215,10 @@ export const QuickActionOptions: React.FC< QuickActionOptionsProps > = ( {
 							<Button
 								className="classifai-action-button"
 								onClick={ () => onOptionSelect( 'list' ) }
-								style={ {
-									width: '100%',
-									justifyContent: 'flex-start',
-									textAlign: 'left',
-									padding: '8px 12px',
-									border: 'none',
-								} }
+								style={ actionItemButtonStyles }
 							>
 								<Icon icon={ formatListBullets } />
-								<span style={ { marginLeft: '8px' } }>
+								<span style={ actionButtonTextStyles }>
 									{ __( 'List', 'classifai' ) }
 								</span>
 							</Button>

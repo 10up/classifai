@@ -1,6 +1,17 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { __ } from '@wordpress/i18n';
 import { motion } from 'motion/react';
+
+// Define style objects outside of JSX
+const containerStyles: CSSProperties = {
+	display: 'inline-flex',
+	alignItems: 'center',
+	fontSize: '20px',
+};
+
+const dotStyles: CSSProperties = {
+	marginRight: '4px',
+};
 
 /**
  * LoadingDots component
@@ -11,13 +22,7 @@ import { motion } from 'motion/react';
  */
 export const LoadingDots: React.FC = () => {
 	return (
-		<div
-			style={ {
-				display: 'inline-flex',
-				alignItems: 'center',
-				fontSize: '20px',
-			} }
-		>
+		<div style={ containerStyles }>
 			<motion.span
 				initial={ { opacity: 0.3 } }
 				animate={ { opacity: 1 } }
@@ -27,7 +32,7 @@ export const LoadingDots: React.FC = () => {
 					repeat: Infinity,
 					repeatType: 'reverse',
 				} }
-				style={ { marginRight: '4px' } }
+				style={ dotStyles }
 			>
 				.
 			</motion.span>
@@ -41,7 +46,7 @@ export const LoadingDots: React.FC = () => {
 					repeatType: 'reverse',
 					delay: 0.2,
 				} }
-				style={ { marginRight: '4px' } }
+				style={ dotStyles }
 			>
 				.
 			</motion.span>

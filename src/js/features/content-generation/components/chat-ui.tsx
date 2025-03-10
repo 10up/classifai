@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
+import React, {
+	useEffect,
+	useState,
+	useRef,
+	useLayoutEffect,
+	CSSProperties,
+} from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import apiFetch from '@wordpress/api-fetch';
 import { select, dispatch } from '@wordpress/data';
@@ -15,6 +21,60 @@ import { QuickActionOptions } from './quick-action-options';
 import { ErrorMessage } from './error-message';
 import { ChatInput } from './chat-input';
 import { ConversationEntry } from './types';
+
+// Define style objects outside of JSX
+const chatContainerStyles: CSSProperties = {
+	position: 'absolute',
+	bottom: '20px',
+	right: '20px',
+	zIndex: '1000',
+};
+
+const chatUIStyles: CSSProperties = {
+	width: '400px',
+	maxHeight: '600px',
+	backgroundColor: 'white',
+	padding: '14px',
+	boxShadow:
+		'0px 2px 3px 0px rgba(0, 0, 0, 0.05), 0px 4px 5px 0px rgba(0, 0, 0, 0.04), 0px 4px 5px 0px rgba(0, 0, 0, 0.03), 0px 16px 16px 0px rgba(0, 0, 0, 0.02)',
+	borderRadius: '8px',
+	border: '1px solid #e0e0e0',
+	display: 'flex',
+	flexDirection: 'column',
+};
+
+const chatContentStyles: CSSProperties = {
+	display: 'flex',
+	flexDirection: 'column',
+	height: '100%',
+	maxHeight: '600px',
+	overflow: 'clip',
+	padding: '2px',
+};
+
+const chatTitleStyles: CSSProperties = {
+	marginBottom: '12px',
+	fontWeight: 'bold',
+	fontSize: '16px',
+};
+
+const chatButtonStyles: CSSProperties = {
+	display: 'flex',
+	justifyContent: 'center',
+	alignItems: 'center',
+	boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
+	padding: '0',
+	width: '48px',
+	height: '48px',
+	borderRadius: '999px',
+	minWidth: 'unset',
+	minHeight: 'unset',
+	color: 'white',
+	border: 'none',
+	cursor: 'pointer',
+	backgroundColor:
+		'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
+};
 
 /**
  * ChatUI component
@@ -326,12 +386,7 @@ export const ChatUI: React.FC = () => {
 	return (
 		<div
 			className="classifai-chat-container"
-			style={ {
-				position: 'absolute',
-				bottom: '20px',
-				right: '20px',
-				zIndex: '1000',
-			} }
+			style={ chatContainerStyles }
 			ref={ chatContainerRef }
 		>
 			<AnimatePresence>
@@ -343,39 +398,15 @@ export const ChatUI: React.FC = () => {
 						exit={ { opacity: 0 } }
 						transition={ { duration: 0.3, type: 'spring' } }
 						className="classifai-chat-ui"
-						style={ {
-							width: '400px',
-							maxHeight: '600px',
-							backgroundColor: 'white',
-							padding: '14px',
-							boxShadow:
-								'0px 2px 3px 0px rgba(0, 0, 0, 0.05), 0px 4px 5px 0px rgba(0, 0, 0, 0.04), 0px 4px 5px 0px rgba(0, 0, 0, 0.03), 0px 16px 16px 0px rgba(0, 0, 0, 0.02)',
-							borderRadius: '8px',
-							border: '1px solid #e0e0e0',
-							display: 'flex',
-							flexDirection: 'column',
-						} }
+						style={ chatUIStyles }
 					>
 						<motion.div
 							initial={ { opacity: 0, y: 10 } }
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { delay: 0.1 } }
-							style={ {
-								display: 'flex',
-								flexDirection: 'column',
-								height: '100%',
-								maxHeight: '600px',
-								overflow: 'clip',
-								padding: '2px',
-							} }
+							style={ chatContentStyles }
 						>
-							<div
-								style={ {
-									marginBottom: '12px',
-									fontWeight: 'bold',
-									fontSize: '16px',
-								} }
-							>
+							<div style={ chatTitleStyles }>
 								{ __( 'ClassifAI Assistant', 'classifai' ) }
 							</div>
 							<form onSubmit={ handleSubmit }>
@@ -411,34 +442,18 @@ export const ChatUI: React.FC = () => {
 					</motion.div>
 				) : (
 					<motion.button
-						layoutId="chat-container"
 						onClick={ toggleChatUI }
-						aria-label={ __(
-							'Open ClassifAI assistant',
-							'classifai'
-						) }
+						layoutId="chat-container"
 						className="classifai-chat-button"
 						initial={ { opacity: 0.9 } }
 						animate={ { opacity: 1 } }
 						exit={ { opacity: 0.0 } }
 						transition={ { type: 'spring', duration: 0.3 } }
-						style={ {
-							display: 'flex',
-							justifyContent: 'center',
-							alignItems: 'center',
-							boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-							padding: '0',
-							width: '48px',
-							height: '48px',
-							borderRadius: '999px',
-							minWidth: 'unset',
-							minHeight: 'unset',
-							color: 'white',
-							border: 'none',
-							cursor: 'pointer',
-							backgroundColor:
-								'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
-						} }
+						style={ chatButtonStyles }
+						aria-label={ __(
+							'Open ClassifAI assistant',
+							'classifai'
+						) }
 						whileHover={ {
 							backgroundColor:
 								'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',

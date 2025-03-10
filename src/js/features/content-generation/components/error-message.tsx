@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -7,6 +7,12 @@ import { __ } from '@wordpress/i18n';
 export interface ErrorMessageProps {
 	error: string | false;
 }
+
+// Define style object outside of JSX
+const errorStyles: CSSProperties = {
+	color: '#cc1818',
+	marginBottom: '10px',
+};
 
 /**
  * ErrorMessage component
@@ -22,12 +28,7 @@ export const ErrorMessage: React.FC< ErrorMessageProps > = ( { error } ) => {
 	}
 
 	return (
-		<div
-			style={ {
-				color: '#cc1818',
-				marginBottom: '10px',
-			} }
-		>
+		<div style={ errorStyles }>
 			{ __( 'Error', 'classifai' ) }: { error }
 		</div>
 	);

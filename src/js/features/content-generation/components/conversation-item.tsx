@@ -1,10 +1,28 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserMessage } from './user-message';
 import { AIResponse } from './ai-response';
 import { LoadingResponse } from './loading-response';
 import { ChatActionButtons } from './chat-action-buttons';
 import { ConversationEntry } from './types';
+
+// Define style objects outside of JSX
+const containerStyles: CSSProperties = {
+	marginBottom: '20px',
+};
+
+const responseContainerStyles: CSSProperties = {
+	display: 'flex',
+	justifyContent: 'flex-start',
+	marginBottom: '8px',
+	alignItems: 'flex-start',
+};
+
+const responseContentStyles: CSSProperties = {
+	display: 'flex',
+	flexDirection: 'column',
+	maxWidth: '95%',
+};
 
 /**
  * Props for the ConversationItem component
@@ -31,7 +49,7 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 	const hasCompletion = entry.completion !== null;
 
 	return (
-		<div style={ { marginBottom: '20px' } }>
+		<div style={ containerStyles }>
 			<AnimatePresence>
 				<motion.div
 					initial={ { opacity: 0 } }
@@ -45,20 +63,9 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 						initial={ { opacity: 0 } }
 						animate={ { opacity: 1 } }
 						exit={ { opacity: 0 } }
-						style={ {
-							display: 'flex',
-							justifyContent: 'flex-start',
-							marginBottom: '8px',
-							alignItems: 'flex-start',
-						} }
+						style={ responseContainerStyles }
 					>
-						<div
-							style={ {
-								display: 'flex',
-								flexDirection: 'column',
-								maxWidth: '95%',
-							} }
-						>
+						<div style={ responseContentStyles }>
 							<AIResponse content={ entry.completion || '' } />
 							<ChatActionButtons
 								onStartOver={ onStartOver }

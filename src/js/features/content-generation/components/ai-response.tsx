@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
@@ -7,6 +7,13 @@ import { decodeEntities } from '@wordpress/html-entities';
 export interface AIResponseProps {
 	content: string;
 }
+
+// Define style object outside of JSX
+const contentStyles: CSSProperties = {
+	padding: '10px 0px',
+	color: '#333',
+	wordBreak: 'break-word',
+};
 
 /**
  * AIResponse component
@@ -19,11 +26,7 @@ export interface AIResponseProps {
 export const AIResponse: React.FC< AIResponseProps > = ( { content } ) => {
 	return (
 		<div
-			style={ {
-				padding: '10px 0px',
-				color: '#333',
-				wordBreak: 'break-word',
-			} }
+			style={ contentStyles }
 			dangerouslySetInnerHTML={ { __html: decodeEntities( content ) } }
 		/>
 	);

@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, CSSProperties } from 'react';
 import { Button, Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { backup, check, copySmall } from '@wordpress/icons';
 import { useCopyToClipboard } from '@wordpress/compose';
+
+// Define style objects outside of JSX
+const actionsContainerStyles: CSSProperties = {
+	display: 'flex',
+	justifyContent: 'flex-end',
+	gap: '2px',
+	marginTop: '0',
+	marginBottom: '8px',
+	flexWrap: 'wrap',
+};
+
+const buttonStyles: CSSProperties = {
+	paddingInlineEnd: '4px',
+};
 
 /**
  * Props for the ChatActionButtons component
@@ -37,16 +51,7 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 	const copyRef = useCopyToClipboard( content, onSuccessfullCopy );
 
 	return (
-		<div
-			style={ {
-				display: 'flex',
-				justifyContent: 'flex-end',
-				gap: '2px',
-				marginTop: '0',
-				marginBottom: '8px',
-				flexWrap: 'wrap',
-			} }
-		>
+		<div style={ actionsContainerStyles }>
 			<Button
 				variant="tertiary"
 				isDestructive
@@ -61,7 +66,7 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 					/>
 				}
 				iconPosition="right"
-				style={ { paddingInlineEnd: '4px' } }
+				style={ buttonStyles }
 			>
 				{ __( 'Start Over', 'classifai' ) }
 			</Button>
@@ -88,7 +93,7 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 				}
 				disabled={ hasCopied }
 				iconPosition="right"
-				style={ { paddingInlineEnd: '4px' } }
+				style={ buttonStyles }
 			>
 				{ hasCopied
 					? __( 'Copied!', 'classifai' )
@@ -107,7 +112,7 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 					/>
 				}
 				iconPosition="right"
-				style={ { paddingInlineEnd: '4px' } }
+				style={ buttonStyles }
 			>
 				{ __( 'Insert', 'classifai' ) }
 			</Button>

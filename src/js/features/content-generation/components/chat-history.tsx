@@ -1,6 +1,15 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { ConversationItem } from './conversation-item';
 import { ConversationEntry } from './types';
+
+// Define style object outside of JSX
+const historyContainerStyles: CSSProperties = {
+	marginBottom: '10px',
+	maxHeight: '400px',
+	overflowY: 'auto',
+	paddingRight: '5px',
+	flex: '1',
+};
 
 /**
  * Props for the ChatHistory component
@@ -31,13 +40,7 @@ export const ChatHistory: React.FC< ChatHistoryProps > = ( {
 	return (
 		<div
 			className="classifai-chat-history"
-			style={ {
-				marginBottom: '10px',
-				maxHeight: '400px',
-				overflowY: 'auto',
-				paddingRight: '5px',
-				flex: '1',
-			} }
+			style={ historyContainerStyles }
 		>
 			{ conversation.map( ( entry, index ) => (
 				<ConversationItem
