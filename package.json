@@ -60,5 +60,19 @@
     "motion": "^12.4.10",
     "react-router-dom": "^7.1.5",
     "tippy.js": "^6.3.7"
+  },
+  "optionalDependencies": {
+    "@types/wordpress__blocks": "^12.5.17",
+    "@wordpress/api-fetch": "^7.19.0",
+    "@wordpress/block-editor": "^14.14.0",
+    "@wordpress/components": "^29.5.0",
+    "@wordpress/compose": "^7.19.0",
+    "@wordpress/data": "^10.19.0",
+    "@wordpress/dom-ready": "^4.19.0",
+    "@wordpress/element": "^6.19.0",
+    "@wordpress/html-entities": "^4.19.0",
+    "@wordpress/i18n": "^5.19.0",
+    "@wordpress/plugins": "^7.19.0",
+    "react": "^18.3.1"
   }
 }

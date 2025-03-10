@@ -1,0 +1,82 @@
+import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { UserMessage } from './user-message';
+import { AIResponse } from './ai-response';
+import { LoadingResponse } from './loading-response';
+import { ChatActionButtons } from './chat-action-buttons';
+import { ConversationEntry } from './types';
+
+/**
+ * Props for the ConversationItem component
+ */
+export interface ConversationItemProps {
+	entry: ConversationEntry;
+	onStartOver: () => void;
+	onInsertContent: ( content: string ) => void;
+}
+
+/**
+ * ConversationItem component
+ *
+ * Displays a single conversation exchange (user prompt and AI response)
+ *
+ * @param {ConversationItemProps} props Component props
+ * @return {React.ReactElement} A conversation exchange item
+ */
+export const ConversationItem: React.FC< ConversationItemProps > = ( {
+	entry,
+	onStartOver,
+	onInsertContent,
+} ) => {
+	const hasCompletion = entry.completion !== null;
+
+	return (
+		<div style={ { marginBottom: '20px' } }>
+			<AnimatePresence>
+				<motion.div
+					initial={ { opacity: 0 } }
+					animate={ { opacity: 1 } }
+					exit={ { opacity: 0 } }
+				>
+					<UserMessage message={ entry.prompt } />
+				</motion.div>
+				{ hasCompletion ? (
+					<motion.div
+						initial={ { opacity: 0 } }
+						animate={ { opacity: 1 } }
+						exit={ { opacity: 0 } }
+						style={ {
+							display: 'flex',
+							justifyContent: 'flex-start',
+							marginBottom: '8px',
+							alignItems: 'flex-start',
+						} }
+					>
+						<div
+							style={ {
+								display: 'flex',
+								flexDirection: 'column',
+								maxWidth: '95%',
+							} }
+						>
+							<AIResponse content={ entry.completion || '' } />
+							<ChatActionButtons
+								onStartOver={ onStartOver }
+								onInsertContent={ onInsertContent }
+								content={ entry.completion || '' }
+							/>
+						</div>
+					</motion.div>
+				) : (
+					<motion.div
+						initial={ { opacity: 0 } }
+						animate={ { opacity: 1 } }
+						exit={ { opacity: 0 } }
+					>
+						<LoadingResponse />
+					</motion.div>
+				) }
+			</AnimatePresence>
+		</div>
+	);
+};
