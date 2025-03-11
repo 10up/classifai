@@ -61,12 +61,13 @@ class Notifications {
 			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';
-
 			?>
+
 			<div data-notice="auto-upgrade-disabled" class="notice notice-warning">
-				<?php /* translators: %s: ClassifAI settings url */ ?>
-				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s">Register ClassifAI</a> to receive important plugin updates and other ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
+				<?php /* translators: %s: ClassifAI registration URL */ ?>
+				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s" target="_blank" rel="noopener noreferrer">Register ClassifAI</a> to enable automatic plugin updates and receive important ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
 			</div>
+
 			<?php
 		}
 	}
