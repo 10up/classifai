@@ -598,7 +598,7 @@ class Embeddings extends Provider {
 		/**
 		 * Fires after the embeddings similarity has been run but before results are sorted.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.1
 		 * @hook classifai_openai_embeddings_pre_sort_embeddings_similarity
 		 *
 		 * @param {array} $embeddings_similarity The embeddings similarity results.
@@ -630,7 +630,7 @@ class Embeddings extends Provider {
 		/**
 		 * Fires after the embeddings similarity has been run and sorted.
 		 *
-		 * @since x.x.x
+		 * @since 3.3.1
 		 * @hook classifai_openai_embeddings_post_sort_embeddings_similarity
 		 *
 		 * @param {array} $sorted_results The sorted embeddings similarity results.
@@ -814,7 +814,7 @@ class Embeddings extends Provider {
 						/**
 						 * Fires after the embeddings similarity has been run for a single chunk.
 						 *
-						 * @since x.x.x
+						 * @since 3.3.1
 						 * @hook classifai_openai_embeddings_single_embedding_similarity
 						 *
 						 * @param {bool|float} $similarity The embeddings similarity result.
