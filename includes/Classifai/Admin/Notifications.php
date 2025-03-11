@@ -55,9 +55,10 @@ class Notifications {
 	public function render_registration_notice() {
 		$registration_settings = get_option( 'classifai_settings' );
 		$page                  = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$welcome_guide         = isset( $_GET['welcome_guide'] ) ? sanitize_text_field( wp_unslash( $_GET['welcome_guide'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if (
-			'classifai' === $page &&
+			'classifai' === $page && '1' !== $welcome_guide &&
 			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';
