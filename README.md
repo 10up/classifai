@@ -123,10 +123,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.3.0",
+            "version": "3.3.1",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.3.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.3.1.zip",
                 "type": "zip"
             }
         }
@@ -138,7 +138,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.3.0"
+    "10up/classifai": "3.3.1"
 }
 ```
 
