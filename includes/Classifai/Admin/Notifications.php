@@ -88,7 +88,7 @@ class Notifications {
 			return;
 		}
 
-		$setup_url = admin_url( 'tools.php?page=classifai#/language_processing?welcome_guide=1' );
+		$setup_url = admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' );
 		if ( should_use_legacy_settings_panel() ) {
 			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
 		}
