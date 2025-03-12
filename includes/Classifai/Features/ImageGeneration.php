@@ -271,10 +271,11 @@ class ImageGeneration extends Feature {
 			return;
 		}
 
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'];
-		$number_of_images  = absint( $settings[ $provider_id ]['number_of_images'] );
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$settings           = $this->get_settings();
+		$provider_id        = $settings['provider'];
+		$number_of_images   = absint( $settings[ $provider_id ]['number_of_images'] );
+		$per_image_settings = $settings[ $provider_id ]['per_image_settings'] ?? false;
+		$provider_instance  = $this->get_feature_provider_instance( $provider_id );
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
@@ -299,6 +300,51 @@ class ImageGeneration extends Feature {
 					?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<br>
+				<?php if ( $per_image_settings ) : ?>
+					<input type="checkbox" id="view-additional-image-generation-settings" />
+					<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
+						<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
+					</label>
+				<?php endif; ?>
+				<div class="additional-image-generation-settings hidden">
+					<label>
+						<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
+						<select class="quality" name="quality">
+							<?php
+							$quality_options = DallE::get_image_quality_options();
+							$quality         = $settings[ $provider_id ]['quality'];
+							foreach ( $quality_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
+						<select class="size" name="size">
+							<?php
+							$size_options = DallE::get_image_size_options();
+							$size         = $settings[ $provider_id ]['image_size'];
+							foreach ( $size_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
+						<select class="style" name="style">
+							<?php
+							$style_options = DallE::get_image_style_options();
+							$style         = $settings[ $provider_id ]['style'];
+							foreach ( $style_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+				</div>
 				<button type="button" class="button button-secondary button-large button-generate">
 					<?php
 					if ( $number_of_images > 1 ) {

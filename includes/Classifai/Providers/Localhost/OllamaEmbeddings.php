@@ -554,6 +554,19 @@ class OllamaEmbeddings extends Ollama {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
+		/**
+		 * Fires after the embeddings similarity has been run but before results are sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_ollama_embeddings_pre_sort_embeddings_similarity
+		 *
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_ollama_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
+
 		// Sort the results by similarity.
 		usort(
 			$embeddings_similarity,
@@ -572,6 +585,20 @@ class OllamaEmbeddings extends Ollama {
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
+
+		/**
+		 * Fires after the embeddings similarity has been run and sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_ollama_embeddings_post_sort_embeddings_similarity
+		 *
+		 * @param {array} $sorted_results The sorted embeddings similarity results.
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_ollama_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
 		$return = [];
 
@@ -740,6 +767,21 @@ class OllamaEmbeddings extends Ollama {
 					// Loop through the chunks and run a similarity calculation on each.
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
+
+						/**
+						 * Fires after the embeddings similarity has been run for a single chunk.
+						 *
+						 * @since 3.3.1
+						 * @hook classifai_ollama_embeddings_single_embedding_similarity
+						 *
+						 * @param {bool|float} $similarity The embeddings similarity result.
+						 * @param {array} $embedding Post embedding data.
+						 * @param {array} $chunk Term chunk embedding data.
+						 * @param {int} $term_id ID of term we're comparing.
+						 * @param {string} $tax Taxonomy of term.
+						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+						 */
+						do_action( 'classifai_ollama_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
 
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
