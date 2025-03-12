@@ -58,6 +58,8 @@ class Update {
 			'classifai'
 		);
 
+		$this->updater->getVcsApi()->enableReleaseAssets();
+
 		$this->updater->addResultFilter(
 			function ( $plugin_info ) {
 				$plugin_info->icons = array(
