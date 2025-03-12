@@ -19,13 +19,17 @@ jobs:
       with:
         node-version-file: .nvmrc
 
-    - name: npm install and build
+    - name: Install dependencies and build assets
       run: |
         npm install
         npm run build
         npm run makepot
         composer install --no-dev -o
+
+    - name: Build release asset
+      run: |
         npm run archive
+        mkdir -p release/.github/workflows && cp -rf .github/workflows/ release/.github/workflows && cp .gitattributes release
 
     - name: Release to Stable
       uses: s0/git-publish-subdir-action@develop
