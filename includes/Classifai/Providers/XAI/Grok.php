@@ -425,6 +425,11 @@ class Grok extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
+		// Overwrite the prompt if we are generating excerpt for products.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt = $feature->woo_prompt;
+		}
+
 		/**
 		 * Filter the prompt we will send to xAI Grok.
 		 *
@@ -438,6 +443,14 @@ class Grok extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_excerpt_prompt', $prompt, $post_id, $excerpt_length );
+
+		// Check if we are generating excerpt for products.
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, $excerpt_length, false, $args['content'] );
 
 		/**
 		 * Filter the request body before sending to xAI Grok.
@@ -454,16 +467,7 @@ class Grok extends Provider {
 			'classifai_xai_grok_excerpt_request_body',
 			[
 				'model'       => $this->get_model(),
-				'messages'    => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '"""',
-					],
-				],
+				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'      => false,
 				'temperature' => 0.9,
 			],
