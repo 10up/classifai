@@ -42,13 +42,13 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 } ) => {
 	const [ hasCopied, setHasCopied ] = useState< boolean >( false );
 
-	const onSuccessfullCopy = (): void => {
+	const onSuccessfulCopy = (): void => {
 		setHasCopied( true );
 		setTimeout( () => {
 			setHasCopied( false );
 		}, 1500 );
 	};
-	const copyRef = useCopyToClipboard( content, onSuccessfullCopy );
+	const copyRef = useCopyToClipboard( content, onSuccessfulCopy );
 
 	return (
 		<div style={ actionsContainerStyles }>
