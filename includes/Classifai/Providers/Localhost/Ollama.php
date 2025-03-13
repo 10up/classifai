@@ -216,7 +216,7 @@ class Ollama extends Provider {
 
 		// Check if we are generating excerpt for products.
 		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
-			$args['content']       = $this->get_product_content( $post_id );
+			$args['content'] = $this->get_product_content( $post_id );
 		}
 
 		// Get the filtered content for request.
