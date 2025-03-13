@@ -157,6 +157,7 @@ export const ChatUI: React.FC = () => {
 	}, [ isExpanded ] );
 
 	// Handle quick action option selection
+	// TODO: Look to fully support this in the future.
 	const handleOptionSelect = ( option: string ): void => {
 		let prompt = '';
 		const selectedContent = select( editorStore ).getEditedPostContent();
@@ -261,6 +262,7 @@ export const ChatUI: React.FC = () => {
 
 		const userMessage = inputValue;
 		setInputValue( '' );
+		setError( false );
 
 		// Get post data
 		const postId = select( editorStore ).getCurrentPostId();
@@ -302,6 +304,7 @@ export const ChatUI: React.FC = () => {
 			},
 			( err: { message?: string } ) => {
 				setError( err?.message || 'An error occurred' );
+				setConversation( [] );
 				setIsLoading( false );
 			}
 		);
@@ -370,9 +373,10 @@ export const ChatUI: React.FC = () => {
 			return __( 'Request changes to the content…', 'classifai' );
 		}
 
-		if ( hasContent ) {
-			return __( 'Request changes to the content…', 'classifai' );
-		}
+		// TODO: Look to support modifying existing content in the future.
+		// if ( hasContent ) {
+		// 	return __( 'Request changes to the content…', 'classifai' );
+		// }
 
 		return __( 'Add a summary of your article', 'classifai' );
 	};
