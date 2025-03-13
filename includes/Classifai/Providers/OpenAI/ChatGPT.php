@@ -708,6 +708,63 @@ class ChatGPT extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_chatgpt_title_prompt', $prompt, $post_id, $args );
 
+		// WooCommerce Product Handling.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$product = wc_get_product( $post_id );
+	
+			if ( $product ) {
+				$product_data = [
+					'title'       => $product->get_name(),
+					'type'        => $product->get_type(),
+					'sku'         => $product->get_sku(),
+					'categories'  => wp_strip_all_tags( wc_get_product_category_list( $post_id ) ),
+					'tags'        => wp_strip_all_tags( wc_get_product_tag_list( $post_id ) ),
+					'attributes'  => [],
+					'price'       => $product->get_price(),
+					'stock'       => $product->is_in_stock() ? 'In Stock' : 'Out of Stock',
+					'short_desc'  => wp_strip_all_tags( $product->get_short_description() ),
+					'description' => wp_strip_all_tags( $product->get_description() ),
+				];
+	
+				// Fetch attributes.
+				foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
+					if ( $attribute->is_taxonomy() ) {
+						$terms = wc_get_product_terms( $post_id, $attribute_name, [ 'fields' => 'names' ] );
+						$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $terms );
+					} else {
+						$options = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
+						$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $options );
+					}
+				}
+	
+				$product_content = wp_json_encode( $product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT );
+	
+				$messages = [
+					[
+						'role'    => 'system',
+						'content' => 'You are an expert in e-commerce and WooCommerce SEO. Your task is to generate concise, compelling, and high-converting product titles. Use key details such as product category, type, attributes, price, and stock status to craft an engaging and relevant title within 40-60 characters.'
+					],
+					[
+						'role'    => 'user',
+						/* translators: %s: Product data */
+						'content' => sprintf( 'Here is the product data: """%s"""', $product_content ),
+					],
+				];
+			}
+		} else {
+			// Fallback for regular WordPress posts
+			$messages = [
+				[
+					'role'    => 'system',
+					'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				],
+				[
+					'role'    => 'user',
+					'content' => '"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
+				],
+			];
+		}
+
 		/**
 		 * Filter the request body before sending to ChatGPT.
 		 *
