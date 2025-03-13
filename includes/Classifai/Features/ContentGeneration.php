@@ -146,7 +146,7 @@ EOD;
 					],
 					'title'        => [
 						'type'              => 'string',
-						'sanitize_callback' => 'wp_kses_post',
+						'sanitize_callback' => 'sanitize_text_field',
 						'validate_callback' => 'rest_validate_request_arg',
 						'description'       => esc_html__( 'The title of the article.', 'classifai' ),
 					],

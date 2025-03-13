@@ -380,7 +380,7 @@ export const ChatUI: React.FC = () => {
 			);
 		}
 
-		return __( 'What do you want to write about?', 'classifai' );
+		return __( 'Add a summary of your article', 'classifai' );
 	};
 
 	return (
@@ -407,14 +407,16 @@ export const ChatUI: React.FC = () => {
 							style={ chatContentStyles }
 						>
 							<div style={ chatTitleStyles }>
-								{ __( 'ClassifAI Assistant', 'classifai' ) }
+								{ __( 'Generate content', 'classifai' ) }
 							</div>
 							<form onSubmit={ handleSubmit }>
-								<ChatHistory
-									conversation={ conversation }
-									onStartOver={ startOver }
-									onInsertContent={ insertContent }
-								/>
+								{ ! error && (
+									<ChatHistory
+										conversation={ conversation }
+										onStartOver={ startOver }
+										onInsertContent={ insertContent }
+									/>
+								) }
 								{ /* Show quick options when no conversation exists */ }
 								{ conversation.length === 0 && (
 									<QuickActionOptions
@@ -451,7 +453,7 @@ export const ChatUI: React.FC = () => {
 						transition={ { type: 'spring', duration: 0.3 } }
 						style={ chatButtonStyles }
 						aria-label={ __(
-							'Open ClassifAI assistant',
+							'Open Content Generation assistant',
 							'classifai'
 						) }
 						whileHover={ {
