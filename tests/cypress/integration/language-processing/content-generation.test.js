@@ -75,7 +75,7 @@ describe( '[Language processing] Content Generation Tests', () => {
 		} );
 
 		// Open the chat UI.
-		cy.get( '.classifai-chat-button' ).click();
+		cy.get( '.classifai-chat-button' ).first().click( { force: true } );
 		cy.get( '.classifai-chat-ui' ).should( 'exist' );
 
 		// Verify you can add an initial summary and content loads in.

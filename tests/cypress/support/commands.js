@@ -474,7 +474,7 @@ Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
 	cy.closeWelcomeGuide();
 
 	if ( enabled ) {
-		cy.get( '.classifai-chat-button' ).click();
+		cy.get( '.classifai-chat-button' ).first().click( { force: true } );
 		cy.get( '.classifai-chat-ui' ).should( 'exist' );
 	} else {
 		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
