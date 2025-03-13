@@ -73,8 +73,8 @@ abstract class Provider {
 			'title'       => $product->get_name(),
 			'type'        => $product->get_type(),
 			'sku'         => $product->get_sku(),
-			'categories'  => wp_strip_all_tags( wc_get_product_category_list( $product_id ) ),
-			'tags'        => wp_strip_all_tags( wc_get_product_tag_list( $product_id ) ),
+			'categories'  => function_exists( 'wc_get_product_category_list' ) ? wp_strip_all_tags( wc_get_product_category_list( $product_id ) ) : null,
+			'tags'        => function_exists( 'wc_get_product_tag_list' ) ? wp_strip_all_tags( wc_get_product_tag_list( $product_id ) ) : null,
 			'attributes'  => [],
 			'price'       => $product->get_price(),
 			'stock'       => $product->is_in_stock() ? 'In Stock' : 'Out of Stock',
@@ -85,7 +85,7 @@ abstract class Provider {
 		// Fetch attributes.
 		foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 			if ( $attribute->is_taxonomy() ) {
-				$terms                        = wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] );
+				$terms                        = function_exists( 'wc_get_product_terms' ) ? wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] ) : [];
 				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $terms );
 			} else {
 				$options                      = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
