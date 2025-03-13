@@ -22,9 +22,24 @@ abstract class Provider {
 	protected $feature_instance = null;
 
 	/**
+	 * Prefix for the system prompt message.
+	 *
+	 * @var string
+	 */
+	protected $prompt_system_content = 'You will be provided with content delimited by triple quotes.';
+
+	/**
+	 * Prefix for the WooCommerce system prompt message.
+	 *
+	 * @var string
+	 */
+	protected $woo_prompt_system_content = 'You are an expert in e-commerce and WooCommerce SEO.';
+
+	/**
 	 * Format the result of most recent request.
 	 *
 	 * @param array|\WP_Error $data Response data to format.
+	 *
 	 * @return string
 	 */
 	protected function get_formatted_latest_response( $data ): string {
