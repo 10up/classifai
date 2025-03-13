@@ -288,6 +288,11 @@ class Ollama extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or Ollama authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Overwrite the prompt if we are generating titles for products.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt = $feature->woo_prompt;
+		}
+
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
@@ -301,6 +306,14 @@ class Ollama extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_title_prompt', esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt ), $post_id, $args );
+
+		// Check if we are generating titles for products.
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, false, $args['content'] );
 
 		/**
 		 * Filter the request body before sending to Ollama.
@@ -317,16 +330,7 @@ class Ollama extends Provider {
 			'classifai_ollama_title_request_body',
 			[
 				'model'    => $settings[ static::ID ]['model'] ?? '',
-				'messages' => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
-					],
-				],
+				'messages' => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'stream'   => false,
 			],
 			$post_id
