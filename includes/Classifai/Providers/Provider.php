@@ -97,6 +97,49 @@ abstract class Provider {
 	}
 
 	/**
+	 * Get the request messages.
+	 * This is a helper function to get the request messages based on the post type.
+	 *
+	 * @param int    $post_id         The post ID.
+	 * @param string $prompt          The prompt message.
+	 * @param string $message_content The message content.
+	 *
+	 * @return array
+	 */
+	public function get_request_messages( $post_id, $prompt, $message_content = '' ) {
+		$messages = [];
+
+		// WooCommerce Product Handling.
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$messages = [
+				[
+					'role'    => 'system',
+					'content' => $this->woo_prompt_system_content . ' ' . $prompt,
+				],
+				[
+					'role'    => 'user',
+					/* translators: %s: Product data */
+					'content' => sprintf( 'Here is the product data: """%s"""', $message_content ),
+				],
+			];
+		} else {
+			// Fallback for regular WordPress posts, or when WooCommerce is not active.
+			$messages = [
+				[
+					'role'    => 'system',
+					'content' => $this->prompt_system_content . ' ' . $prompt,
+				],
+				[
+					'role'    => 'user',
+					'content' => '"""' . $message_content . '"""',
+				],
+			];
+		}
+
+		return $messages;
+	}
+
+	/**
 	 * Adds an API key field.
 	 *
 	 * @param array $args API key field arguments.
