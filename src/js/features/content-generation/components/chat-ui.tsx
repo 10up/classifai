@@ -367,17 +367,11 @@ export const ChatUI: React.FC = () => {
 		const hasContent = currentContent.length > 0;
 
 		if ( hasActiveConversation ) {
-			return __(
-				'Ask a follow-up or request changes to the content…',
-				'classifai'
-			);
+			return __( 'Request changes to the content…', 'classifai' );
 		}
 
 		if ( hasContent ) {
-			return __(
-				'Rewrite the content or ask a follow-up question…',
-				'classifai'
-			);
+			return __( 'Request changes to the content…', 'classifai' );
 		}
 
 		return __( 'Add a summary of your article', 'classifai' );
@@ -415,17 +409,6 @@ export const ChatUI: React.FC = () => {
 										conversation={ conversation }
 										onStartOver={ startOver }
 										onInsertContent={ insertContent }
-									/>
-								) }
-								{ /* Show quick options when no conversation exists */ }
-								{ conversation.length === 0 && (
-									<QuickActionOptions
-										onOptionSelect={ handleOptionSelect }
-										hasContent={
-											select( editorStore )
-												.getEditedPostContent()
-												.trim().length > 0
-										}
 									/>
 								) }
 								<ErrorMessage error={ error } />

@@ -41,9 +41,9 @@ class ContentGeneration extends Feature {
 	 * @var string
 	 */
 	public $return_format = <<<EOD
-The content returned should be valid WordPress block markup, particularly headings, paragraphs and lists. Don't generate any other type of output and don't use Markdown formatting.
+The content returned should be valid WordPress block markup, using headings, paragraphs and lists where it makes sense. You don't need to use all of those but when needed, use the proper markup. Don't generate any other type of output and don't use Markdown formatting.
 
-The markup of a heading looks like this:
+The markup of a heading should be one of these:
 
 <!-- wp:heading -->
 <h2 class="wp-block-heading">CONTENT</h2>
@@ -61,14 +61,17 @@ The markup of a heading looks like this:
 <h5 class="wp-block-heading">CONTENT</h5>
 <!-- /wp:heading -->
 
-The markup of a paragraph looks like this:
+The markup of a paragraph should look like this:
 <!-- wp:paragraph -->
 <p>CONTENT</p>
 <!-- /wp:paragraph -->
 
-The markup of a list looks like this:
+The markup of a list should be one of these:
 <!-- wp:list -->
 <ul class="wp-block-list">
+<!-- wp:list-item -->
+<li>CONTENT</li>
+<!-- /wp:list-item -->
 <!-- wp:list-item -->
 <li>CONTENT</li>
 <!-- /wp:list-item -->
@@ -77,6 +80,9 @@ The markup of a list looks like this:
 
 <!-- wp:list {"ordered":true} -->
 <ol class="wp-block-list">
+<!-- wp:list-item -->
+<li>CONTENT</li>
+<!-- /wp:list-item -->
 <!-- wp:list-item -->
 <li>CONTENT</li>
 <!-- /wp:list-item -->
