@@ -85,10 +85,10 @@ abstract class Provider {
 		// Fetch attributes.
 		foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
 			if ( $attribute->is_taxonomy() ) {
-				$terms = wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] );
+				$terms                        = wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] );
 				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $terms );
 			} else {
-				$options = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
+				$options                      = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
 				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $options );
 			}
 		}
