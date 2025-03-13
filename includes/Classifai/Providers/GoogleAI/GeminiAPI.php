@@ -247,6 +247,11 @@ class GeminiAPI extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
+		// Overwrite the prompt if we are generating excerpt for products.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt = $feature->woo_prompt;
+		}
+
 		/**
 		 * Filter the prompt we will send to Gemini API.
 		 *
@@ -260,6 +265,16 @@ class GeminiAPI extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_excerpt_prompt', $prompt, $post_id, $excerpt_length );
+
+		// Check if we are generating excerpt for products.
+		$prompt_system_content = $this->prompt_system_content;
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$args['content']       = $this->get_product_content( $post_id );
+			$prompt_system_content = $this->woo_prompt_system_content;
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, false, $args['content'] );
 
 		/**
 		 * Filter the request body before sending to Gemini API.
@@ -278,7 +293,7 @@ class GeminiAPI extends Provider {
 				'contents'         => [
 					[
 						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . ' \n """' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
+							'text' => $prompt_system_content . ' ' . $prompt . ' \n """' . $message_content . '"""',
 						],
 					],
 				],
@@ -348,10 +363,8 @@ class GeminiAPI extends Provider {
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
 		// Overwrite the prompt if we are generating titles for products.
-		$prompt_system_content = $this->prompt_system_content;
 		if ( 'product' === get_post_type( $post_id ) ) {
-			$prompt                = $feature->woo_prompt;
-			$prompt_system_content = $this->woo_prompt_system_content;
+			$prompt = $feature->woo_prompt;
 		}
 
 		/**
@@ -369,8 +382,10 @@ class GeminiAPI extends Provider {
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_title_prompt', $prompt, $post_id, $args );
 
 		// Check if we are generating titles for products.
+		$prompt_system_content = $this->prompt_system_content;
 		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
-			$args['content'] = $this->get_product_content( $post_id );
+			$args['content']       = $this->get_product_content( $post_id );
+			$prompt_system_content = $this->woo_prompt_system_content;
 		}
 
 		// Get the filtered content for request.
