@@ -7,7 +7,9 @@ const historyContainerStyles: CSSProperties = {
 	marginBottom: '10px',
 	maxHeight: '400px',
 	overflowY: 'auto',
-	paddingRight: '5px',
+	padding: '10px',
+	borderRadius: '8px',
+	border: '1px solid #ccc',
 	flex: '1',
 };
 

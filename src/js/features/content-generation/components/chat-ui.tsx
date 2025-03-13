@@ -31,8 +31,8 @@ const chatContainerStyles: CSSProperties = {
 };
 
 const chatUIStyles: CSSProperties = {
-	width: '400px',
-	maxHeight: '600px',
+	width: '500px',
+	maxHeight: '700px',
 	backgroundColor: 'white',
 	padding: '14px',
 	boxShadow:
@@ -47,7 +47,7 @@ const chatContentStyles: CSSProperties = {
 	display: 'flex',
 	flexDirection: 'column',
 	height: '100%',
-	maxHeight: '600px',
+	maxHeight: '700px',
 	overflow: 'clip',
 	padding: '2px',
 };

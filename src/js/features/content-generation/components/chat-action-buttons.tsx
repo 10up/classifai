@@ -56,7 +56,6 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 				variant="tertiary"
 				isDestructive
 				onClick={ onStartOver }
-				size="small"
 				icon={
 					<Icon
 						icon={ backup }
@@ -73,7 +72,6 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 			<Button
 				ref={ copyRef }
 				variant="tertiary"
-				size="small"
 				icon={
 					hasCopied ? (
 						<Icon
@@ -102,7 +100,6 @@ export const ChatActionButtons: React.FC< ChatActionButtonsProps > = ( {
 			<Button
 				variant="tertiary"
 				onClick={ () => onInsertContent( content ) }
-				size="small"
 				icon={
 					<Icon
 						icon={ check }

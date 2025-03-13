@@ -12,7 +12,7 @@ const getTextareaStyles = ( isLoading: boolean ): CSSProperties => ( {
 	width: '100%',
 	height: '80px',
 	maxHeight: '200px',
-	minHeight: '80px',
+	minHeight: '100px',
 	borderRadius: '4px',
 	border: '1px solid #ccc',
 	padding: '10px',
@@ -25,7 +25,7 @@ const buttonStyles: CSSProperties = {
 	position: 'absolute',
 	bottom: '8px',
 	right: '8px',
-	paddingInline: '4px',
+	paddingInline: '8px',
 	paddingInlineStart: '6px',
 };
 
@@ -83,7 +83,6 @@ export const ChatInput: React.FC< ChatInputProps > = ( {
 				type="submit"
 				style={ buttonStyles }
 				variant="primary"
-				size="small"
 				disabled={ isLoading || ! value }
 				isBusy={ isLoading }
 			>

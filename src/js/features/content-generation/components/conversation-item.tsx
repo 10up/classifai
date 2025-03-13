@@ -7,10 +7,6 @@ import { ChatActionButtons } from './chat-action-buttons';
 import { ConversationEntry } from './types';
 
 // Define style objects outside of JSX
-const containerStyles: CSSProperties = {
-	marginBottom: '20px',
-};
-
 const responseContainerStyles: CSSProperties = {
 	display: 'flex',
 	justifyContent: 'flex-start',
@@ -49,7 +45,7 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 	const hasCompletion = entry.completion !== null;
 
 	return (
-		<div style={ containerStyles }>
+		<div>
 			<AnimatePresence>
 				<motion.div
 					initial={ { opacity: 0 } }
