@@ -55,6 +55,48 @@ abstract class Provider {
 	}
 
 	/**
+	 * Get the product content.
+	 * This is a helper function to get the product content in a JSON format.
+	 *
+	 * @param int $product_id The product ID.
+	 *
+	 * @return string
+	 */
+	public function get_product_content( $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		if ( ! $product ) {
+			return '';
+		}
+
+		$product_data = [
+			'title'       => $product->get_name(),
+			'type'        => $product->get_type(),
+			'sku'         => $product->get_sku(),
+			'categories'  => wp_strip_all_tags( wc_get_product_category_list( $product_id ) ),
+			'tags'        => wp_strip_all_tags( wc_get_product_tag_list( $product_id ) ),
+			'attributes'  => [],
+			'price'       => $product->get_price(),
+			'stock'       => $product->is_in_stock() ? 'In Stock' : 'Out of Stock',
+			'short_desc'  => wp_strip_all_tags( $product->get_short_description() ),
+			'description' => wp_strip_all_tags( $product->get_description() ),
+		];
+
+		// Fetch attributes.
+		foreach ( $product->get_attributes() as $attribute_name => $attribute ) {
+			if ( $attribute->is_taxonomy() ) {
+				$terms = wc_get_product_terms( $product_id, $attribute_name, [ 'fields' => 'names' ] );
+				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $terms );
+			} else {
+				$options = is_array( $attribute->get_options() ) ? $attribute->get_options() : [];
+				$product_data['attributes'][] = $attribute_name . ': ' . implode( ', ', $options );
+			}
+		}
+
+		return wp_json_encode( $product_data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT );
+	}
+
+	/**
 	 * Adds an API key field.
 	 *
 	 * @param array $args API key field arguments.
