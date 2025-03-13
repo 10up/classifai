@@ -467,38 +467,18 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
  */
 Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
-	const shouldExist = enabled ? 'exist' : 'not.exist';
 	cy.visit( '/wp-admin/edit.php' );
 	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
 
 	// Find and open the summary panel.
 	cy.closeWelcomeGuide();
-	const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button,.editor-sidebar__panel .editor-post-panel__section .editor-post-card-panel`;
 
-	cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-		// Support pre WP 6.6+.
-		const $newPanel = $panelButton.parents( '.editor-post-panel__section' );
-
-		if ( $newPanel.length === 0 ) {
-			// Find the panel container.
-			const $panel = $panelButton.parents( '.components-panel__body' );
-
-			// Open panel.
-			if ( ! $panel.hasClass( 'is-opened' ) ) {
-				cy.wrap( $panelButton ).click();
-			}
-
-			// Verify button either exists or doesn't.
-			cy.wrap( $panel )
-				.find( '.classifai-post-status button.content' )
-				.should( shouldExist );
-		} else {
-			// Verify button either exists or doesn't.
-			cy.wrap( $newPanel )
-				.find( '.classifai-post-status button.content' )
-				.should( shouldExist );
-		}
-	} );
+	if ( enabled ) {
+		cy.get( '.classifai-chat-button' ).click();
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
+	} else {
+		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
+	}
 } );
 
 /**

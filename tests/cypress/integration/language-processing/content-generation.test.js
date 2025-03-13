@@ -74,84 +74,44 @@ describe( '[Language processing] Content Generation Tests', () => {
 			}
 		} );
 
-		// Open post settings sidebar.
-		cy.openDocumentSettingsSidebar();
-
-		// Find and open the summary panel.
-		const panelButtonSelector = `.components-panel__body.edit-post-post-status .components-panel__body-title button,.editor-sidebar__panel .editor-post-panel__section .editor-post-card-panel`;
-
-		cy.get( panelButtonSelector ).then( ( $panelButton ) => {
-			// Support pre WP 6.6+.
-			const $newPanel = $panelButton.parents(
-				'.editor-post-panel__section'
-			);
-
-			if ( $newPanel.length === 0 ) {
-				// Find the panel container.
-				const $panel = $panelButton.parents(
-					'.components-panel__body'
-				);
-
-				// Open panel.
-				if ( ! $panel.hasClass( 'is-opened' ) ) {
-					cy.wrap( $panelButton ).click();
-				}
-
-				// Verify button exists.
-				cy.wrap( $panel )
-					.find( '.classifai-post-status button.content' )
-					.should( 'exist' );
-
-				// Click on button and verify modal shows.
-				cy.wrap( $panel )
-					.find( '.classifai-post-status button.content' )
-					.click();
-			} else {
-				// Verify button exists.
-				cy.wrap( $newPanel )
-					.find( '.classifai-post-status button.content' )
-					.should( 'exist' );
-
-				// Click on button and verify modal shows.
-				cy.wrap( $newPanel )
-					.find( '.classifai-post-status button.content' )
-					.click();
-			}
-		} );
-
-		cy.get( '.content-modal' ).should( 'exist' );
+		// Open the chat UI.
+		cy.get( '.classifai-chat-button' ).click();
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
 
 		// Verify you can add an initial summary and content loads in.
-		cy.get( '.content-modal textarea' )
-			.first()
-			.type( '5 tips for using WordPress' );
-		cy.get( '.content-modal button.is-primary' ).first().click();
-		cy.get( '.content-modal .components-card' ).should( 'exist' );
+		cy.get( '.classifai-chat-input textarea' ).type(
+			'5 tips for using WordPress'
+		);
+		cy.get( '.classifai-chat-ui button.is-primary' ).click();
+		cy.get( '.classifai-chat-history' ).should(
+			'contain.text',
+			'Hello there, how may I assist you today?'
+		);
 
 		// Verify you can start over.
-		cy.get( '.content-modal .components-card__footer' )
+		cy.get( '.classifai-chat-history' )
 			.find( 'button.is-tertiary.is-destructive' )
 			.click();
-		cy.get( '.content-modal .components-card' ).should( 'not.exist' );
+		cy.get( '.classifai-chat-history' ).should( 'not.exist' );
 
 		// Verify you can iterate on the response.
-		cy.get( '.content-modal textarea' )
-			.first()
-			.type( '5 tips for using WordPress' );
-		cy.get( '.content-modal button.is-primary' ).first().click();
-		cy.get( '.content-modal .components-card' ).should( 'exist' );
-		cy.get( '.content-modal .components-card__footer' )
-			.find( 'button.is-tertiary' )
-			.first()
-			.click();
-		cy.get( '.content-modal textarea' ).first().type( 'Make it longer' );
-		cy.get( '.content-modal button.is-primary' ).first().click();
+		cy.get( '.classifai-chat-input textarea' ).type(
+			'5 tips for using WordPress'
+		);
+		cy.get( '.classifai-chat-ui button.is-primary' ).click();
+		cy.get( '.classifai-chat-history' ).should(
+			'contain.text',
+			'Hello there, how may I assist you today?'
+		);
+		cy.get( '.classifai-chat-input textarea' ).type( 'Make it longer' );
+		cy.get( '.classifai-chat-ui button.is-primary' ).click();
 
 		// Verify you can insert the content
-		cy.get( '.content-modal .components-card__footer' )
-			.find( 'button.is-primary' )
+		cy.get( '.classifai-chat-history' )
+			.find( 'button.is-tertiary' )
+			.last()
 			.click();
-		cy.get( '.content-modal' ).should( 'not.exist' );
+		cy.get( '.classifai-chat-ui' ).should( 'not.exist' );
 	} );
 
 	it( 'Can set multiple custom prompts, select one as the default and delete one.', () => {
