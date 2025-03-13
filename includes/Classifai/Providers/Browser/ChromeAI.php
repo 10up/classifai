@@ -138,6 +138,11 @@ class ChromeAI extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
+		// Overwrite the prompt if we are generating excerpt for products.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt = $feature->woo_prompt;
+		}
+
 		/**
 		 * Filter the prompt we will send to Chrome AI.
 		 *
@@ -151,6 +156,13 @@ class ChromeAI extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_chrome_ai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
+
+		// Check if we are generating excerpt for products.
+		$prompt_system_content = $this->prompt_system_content;
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$args['content']       = $this->get_product_content( $post_id );
+			$prompt_system_content = $this->woo_prompt_system_content;
+		}
 
 		/**
 		 * Filter the request body before sending to Chrome AI.
@@ -166,7 +178,7 @@ class ChromeAI extends Provider {
 		$body = apply_filters(
 			'classifai_chrome_ai_excerpt_request_body',
 			[
-				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				'prompt'  => $prompt_system_content . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ),
 				'func'    => static::ID,
 			],
@@ -206,10 +218,8 @@ class ChromeAI extends Provider {
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
 		// Overwrite the prompt if we are generating titles for products.
-		$prompt_system_content = $this->prompt_system_content;
 		if ( 'product' === get_post_type( $post_id ) ) {
-			$prompt                = $feature->woo_prompt;
-			$prompt_system_content = $this->woo_prompt_system_content;
+			$prompt = $feature->woo_prompt;
 		}
 
 		/**
@@ -227,8 +237,10 @@ class ChromeAI extends Provider {
 		$prompt = apply_filters( 'classifai_chrome_ai_title_prompt', $prompt, $post_id, $args );
 
 		// Check if we are generating titles for products.
+		$prompt_system_content = $this->prompt_system_content;
 		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
-			$args['content'] = $this->get_product_content( $post_id );
+			$args['content']       = $this->get_product_content( $post_id );
+			$prompt_system_content = $this->woo_prompt_system_content;
 		}
 
 		/**
