@@ -268,7 +268,7 @@ class GeminiAPI extends Provider {
 
 		// Check if we are generating excerpt for products.
 		$prompt_system_content = $this->prompt_system_content;
-		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
 			$args['content']       = $this->get_product_content( $post_id );
 			$prompt_system_content = $this->woo_prompt_system_content;
 		}
@@ -383,7 +383,7 @@ class GeminiAPI extends Provider {
 
 		// Check if we are generating titles for products.
 		$prompt_system_content = $this->prompt_system_content;
-		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
 			$args['content']       = $this->get_product_content( $post_id );
 			$prompt_system_content = $this->woo_prompt_system_content;
 		}

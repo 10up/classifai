@@ -63,7 +63,7 @@ abstract class Provider {
 	 * @return string
 	 */
 	public function get_product_content( $product_id ) {
-		$product = wc_get_product( $product_id );
+		$product = function_exists( 'wc_get_product' ) ? wc_get_product( $product_id ) : null;
 
 		if ( ! $product ) {
 			return '';
@@ -110,7 +110,7 @@ abstract class Provider {
 		$messages = [];
 
 		// WooCommerce Product Handling.
-		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
 			$messages = [
 				[
 					'role'    => 'system',

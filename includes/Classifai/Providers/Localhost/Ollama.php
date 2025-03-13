@@ -215,7 +215,7 @@ class Ollama extends Provider {
 		$prompt = apply_filters( 'classifai_ollama_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
 		// Check if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
 			$args['content']       = $this->get_product_content( $post_id );
 		}
 
@@ -312,7 +312,7 @@ class Ollama extends Provider {
 		$prompt = apply_filters( 'classifai_ollama_title_prompt', esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
 		// Check if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 		}
 
