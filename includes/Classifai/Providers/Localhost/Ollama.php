@@ -621,7 +621,7 @@ class Ollama extends Provider {
 		$messages = [
 			[
 				'role'    => 'system',
-				'content' => $prompt,
+				'content' => $prompt . "\n" . $feature->return_format,
 			],
 			[
 				'role'    => 'user',

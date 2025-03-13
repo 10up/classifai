@@ -32,7 +32,58 @@ class ContentGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary. Separate each paragraph with double line breaks.';
+	public $prompt = 'Act as an experienced SEO copywriter tasked with writing an article based off of a given summary and an optionally provided title. Your goal is to craft a compelling, informative piece that adheres to SEO best practices, is well-researched, engaging to the target audience, and structured in a way that enhances readability. Incorporate relevant keywords naturally throughout the text, without compromising the flow or quality of the content. Ensure that the article provides value to the reader. Only return the contents of the article, not the title or other commentary.';
+
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	/**
+	 * The format of how we'd like content to be returned.
+	 *
+	 * @var string
+	 */
+	public $return_format = <<<EOD
+The content returned should be valid WordPress block markup, particularly headings, paragraphs and lists. Don't generate any other type of output and don't use Markdown formatting.
+
+The markup of a heading looks like this:
+
+<!-- wp:heading -->
+<h2 class="wp-block-heading">CONTENT</h2>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":3} -->
+<h3 class="wp-block-heading">CONTENT</h3>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":4} -->
+<h4 class="wp-block-heading">CONTENT</h4>
+<!-- /wp:heading -->
+
+<!-- wp:heading {"level":5} -->
+<h5 class="wp-block-heading">CONTENT</h5>
+<!-- /wp:heading -->
+
+The markup of a paragraph looks like this:
+<!-- wp:paragraph -->
+<p>CONTENT</p>
+<!-- /wp:paragraph -->
+
+The markup of a list looks like this:
+<!-- wp:list -->
+<ul class="wp-block-list">
+<!-- wp:list-item -->
+<li>CONTENT</li>
+<!-- /wp:list-item -->
+</ul>
+<!-- /wp:list -->
+
+<!-- wp:list {"ordered":true} -->
+<ol class="wp-block-list">
+<!-- wp:list-item -->
+<li>CONTENT</li>
+<!-- /wp:list-item -->
+</ol>
+<!-- /wp:list -->
+EOD;
+	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
 
 	/**
 	 * Constructor.
