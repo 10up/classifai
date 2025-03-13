@@ -205,6 +205,13 @@ class ChromeAI extends Provider {
 
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
+		// Overwrite the prompt if we are generating titles for products.
+		$prompt_system_content = $this->prompt_system_content;
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt                = $feature->woo_prompt;
+			$prompt_system_content = $this->woo_prompt_system_content;
+		}
+
 		/**
 		 * Filter the prompt we will send to Chrome AI.
 		 *
@@ -218,6 +225,11 @@ class ChromeAI extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_chrome_ai_title_prompt', $prompt, $post_id, $args );
+
+		// Check if we are generating titles for products.
+		if ( 'product' === get_post_type( $post_id ) && wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+		}
 
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
@@ -233,7 +245,7 @@ class ChromeAI extends Provider {
 		$body = apply_filters(
 			'classifai_chrome_ai_title_request_body',
 			[
-				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
+				'prompt'  => $prompt_system_content . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, 15, false, $args['content'] ),
 				'func'    => static::ID,
 			],
