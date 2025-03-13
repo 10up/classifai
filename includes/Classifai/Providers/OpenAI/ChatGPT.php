@@ -780,16 +780,7 @@ class ChatGPT extends Provider {
 			'classifai_chatgpt_title_request_body',
 			[
 				'model'       => $this->chatgpt_model,
-				'messages'    => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
-					],
-				],
+				'messages'    => $messages,
 				'temperature' => 0.9,
 				'n'           => absint( $args['num'] ),
 			],
