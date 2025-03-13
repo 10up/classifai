@@ -689,6 +689,11 @@ class ChatGPT extends Provider {
 
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
+		// Check if WooCommerce is active and if we are generating titles for products.
+		if ( 'product' === get_post_type( $post_id ) ) {
+			$prompt = $feature->woo_prompt;
+		}
+
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
