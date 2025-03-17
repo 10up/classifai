@@ -190,17 +190,18 @@ class Ollama extends Provider {
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
-		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
+			$excerpt_prompt = $feature->woo_prompt;
+		} else {
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		}
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
-
-		// Overwrite the prompt if we are generating an excerpt for a product.
-		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
-		}
 
 		/**
 		 * Filter the prompt we will send to Ollama.
@@ -298,6 +299,8 @@ class Ollama extends Provider {
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 		}
 
 		/**
@@ -312,7 +315,7 @@ class Ollama extends Provider {
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_ollama_title_prompt', esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt ), $post_id, $args );
+		$prompt = apply_filters( 'classifai_ollama_title_prompt', $prompt, $post_id, $args );
 
 		// Check if we are generating titles for a product.
 		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && ( $post_id ) ) {

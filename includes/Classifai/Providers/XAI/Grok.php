@@ -420,17 +420,17 @@ class Grok extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
+			$excerpt_prompt = $feature->woo_prompt;
+		} else {
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		}
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
-
-		// Overwrite the prompt if we are generating an excerpt for a product.
-		if ( 'product' === $post_type ) {
-			$prompt = $feature->woo_prompt;
-		}
 
 		/**
 		 * Filter the prompt we will send to xAI Grok.
@@ -529,11 +529,11 @@ class Grok extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
-
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 		}
 
 		/**
