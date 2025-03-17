@@ -15,6 +15,7 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
+use function wc_get_product;
 
 /**
  * Ollama class
@@ -171,15 +172,16 @@ class Ollama extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new ExcerptGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -195,8 +197,8 @@ class Ollama extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
-		// Overwrite the prompt if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -214,8 +216,8 @@ class Ollama extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_ollama_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
-		// Check if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
+		// Check if we are generating an excerpt for a product.
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 		}
 
@@ -277,14 +279,15 @@ class Ollama extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new TitleGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -292,8 +295,8 @@ class Ollama extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or Ollama authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		// Overwrite the prompt if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating titles for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -311,8 +314,8 @@ class Ollama extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_ollama_title_prompt', esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt ), $post_id, $args );
 
-		// Check if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
+		// Check if we are generating titles for a product.
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && ( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 		}
 

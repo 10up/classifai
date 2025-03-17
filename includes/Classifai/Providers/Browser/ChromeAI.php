@@ -14,6 +14,7 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
+use function wc_get_product;
 
 class ChromeAI extends Provider {
 
@@ -114,15 +115,16 @@ class ChromeAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new ExcerptGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -138,8 +140,8 @@ class ChromeAI extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
-		// Overwrite the prompt if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -157,11 +159,11 @@ class ChromeAI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_chrome_ai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
-		// Check if we are generating excerpt for products.
-		$prompt_system_content = $this->prompt_system_content;
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
-			$args['content']       = $this->get_product_content( $post_id );
-			$prompt_system_content = $this->woo_prompt_system_content;
+		// Check if we are generating an excerpt for a product.
+		$system_prompt = $this->system_prompt;
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+			$system_prompt   = $this->system_prompt_woo;
 		}
 
 		/**
@@ -178,7 +180,7 @@ class ChromeAI extends Provider {
 		$body = apply_filters(
 			'classifai_chrome_ai_excerpt_request_body',
 			[
-				'prompt'  => $prompt_system_content . ' ' . $prompt,
+				'prompt'  => $system_prompt . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, $excerpt_length, false, $args['content'] ),
 				'func'    => static::ID,
 			],
@@ -200,14 +202,15 @@ class ChromeAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new TitleGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -217,8 +220,8 @@ class ChromeAI extends Provider {
 
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
-		// Overwrite the prompt if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating titles for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -236,11 +239,11 @@ class ChromeAI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_chrome_ai_title_prompt', $prompt, $post_id, $args );
 
-		// Check if we are generating titles for products.
-		$prompt_system_content = $this->prompt_system_content;
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
-			$args['content']       = $this->get_product_content( $post_id );
-			$prompt_system_content = $this->woo_prompt_system_content;
+		// Check if we are generating titles for a product.
+		$system_prompt = $this->system_prompt;
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+			$system_prompt   = $this->system_prompt_woo;
 		}
 
 		/**
@@ -257,7 +260,7 @@ class ChromeAI extends Provider {
 		$body = apply_filters(
 			'classifai_chrome_ai_title_request_body',
 			[
-				'prompt'  => $prompt_system_content . ' ' . $prompt,
+				'prompt'  => $system_prompt . ' ' . $prompt,
 				'content' => $this->get_content( $post_id, 15, false, $args['content'] ),
 				'func'    => static::ID,
 			],

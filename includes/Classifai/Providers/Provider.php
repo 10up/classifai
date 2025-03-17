@@ -5,6 +5,11 @@
 
 namespace Classifai\Providers;
 
+use function wc_get_product;
+use function wc_get_product_category_list;
+use function wc_get_product_tag_list;
+use function wc_get_product_terms;
+
 abstract class Provider {
 
 	/**
@@ -26,14 +31,14 @@ abstract class Provider {
 	 *
 	 * @var string
 	 */
-	protected $prompt_system_content = 'You will be provided with content delimited by triple quotes.';
+	protected $system_prompt = 'You will be provided with content delimited by triple quotes.';
 
 	/**
 	 * Prefix for the WooCommerce system prompt message.
 	 *
 	 * @var string
 	 */
-	protected $woo_prompt_system_content = 'You are an expert in e-commerce and WooCommerce SEO.';
+	protected $system_prompt_woo = 'You are an expert in e-commerce and WooCommerce SEO.';
 
 	/**
 	 * Format the result of most recent request.
@@ -56,13 +61,13 @@ abstract class Provider {
 
 	/**
 	 * Get the product content.
-	 * This is a helper function to get the product content in a JSON format.
+	 *
+	 * This is a helper function to get the product content in JSON format.
 	 *
 	 * @param int $product_id The product ID.
-	 *
 	 * @return string
 	 */
-	public function get_product_content( $product_id ) {
+	public function get_product_content( int $product_id ): string {
 		$product = function_exists( 'wc_get_product' ) ? wc_get_product( $product_id ) : null;
 
 		if ( ! $product ) {
@@ -98,28 +103,31 @@ abstract class Provider {
 
 	/**
 	 * Get the request messages.
+	 *
 	 * This is a helper function to get the request messages based on the post type.
 	 *
 	 * @param int    $post_id         The post ID.
 	 * @param string $prompt          The prompt message.
 	 * @param string $message_content The message content.
-	 *
 	 * @return array
 	 */
-	public function get_request_messages( $post_id, $prompt, $message_content = '' ) {
+	public function get_request_messages( int $post_id, string $prompt, string $message_content = '' ): array {
 		$messages = [];
 
 		// WooCommerce Product Handling.
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+		if (
+			'product' === get_post_type( $post_id ) &&
+			function_exists( 'wc_get_product' ) &&
+			wc_get_product( $post_id )
+		) {
 			$messages = [
 				[
 					'role'    => 'system',
-					'content' => $this->woo_prompt_system_content . ' ' . $prompt,
+					'content' => $this->system_prompt_woo . ' ' . $prompt,
 				],
 				[
 					'role'    => 'user',
-					/* translators: %s: Product data */
-					'content' => sprintf( 'Here is the product data: """%s"""', $message_content ),
+					'content' => sprintf( 'Product data: """%s"""', $message_content ),
 				],
 			];
 		} else {
@@ -127,7 +135,7 @@ abstract class Provider {
 			$messages = [
 				[
 					'role'    => 'system',
-					'content' => $this->prompt_system_content . ' ' . $prompt,
+					'content' => $this->system_prompt . ' ' . $prompt,
 				],
 				[
 					'role'    => 'user',

@@ -15,6 +15,7 @@ use WP_Error;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
+use function wc_get_product;
 
 class OpenAI extends Provider {
 
@@ -353,15 +354,16 @@ class OpenAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new ExcerptGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -377,8 +379,8 @@ class OpenAI extends Provider {
 		$prompt_replace = array( $excerpt_length, $args['title'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
-		// Overwrite the prompt if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -396,8 +398,8 @@ class OpenAI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
-		// Check if we are generating excerpt for products.
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+		// Check if we are generating an excerpt for a product.
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 		}
 
@@ -464,15 +466,16 @@ class OpenAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new TitleGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -482,8 +485,8 @@ class OpenAI extends Provider {
 
 		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
 
-		// Overwrite the prompt if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) ) {
+		// Overwrite the prompt if we are generating titles for a product.
+		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
 		}
 
@@ -502,7 +505,7 @@ class OpenAI extends Provider {
 		$prompt = apply_filters( 'classifai_azure_openai_title_prompt', $prompt, $post_id, $args );
 
 		// Check if we are generating titles for products.
-		if ( 'product' === get_post_type( $post_id ) && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 		}
 
