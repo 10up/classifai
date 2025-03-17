@@ -14,7 +14,6 @@ use Classifai\Normalizer;
 use WP_Error;
 
 use function Classifai\get_default_prompt;
-use function wc_get_product;
 
 class ChromeAI extends Provider {
 
@@ -162,7 +161,7 @@ class ChromeAI extends Provider {
 
 		// Check if we are generating an excerpt for a product.
 		$system_prompt = $this->system_prompt;
-		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 			$system_prompt   = $this->system_prompt_woo;
 		}
@@ -242,7 +241,7 @@ class ChromeAI extends Provider {
 
 		// Check if we are generating titles for a product.
 		$system_prompt = $this->system_prompt;
-		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && wc_get_product( $post_id ) ) {
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
 			$args['content'] = $this->get_product_content( $post_id );
 			$system_prompt   = $this->system_prompt_woo;
 		}
