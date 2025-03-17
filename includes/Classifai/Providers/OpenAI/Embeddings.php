@@ -341,6 +341,9 @@ class Embeddings extends Provider {
 			}
 		}
 
+		// Hide the update notice. This ensures we don't show this for new users.
+		update_option( 'classifai_hide_embeddings_notice', true, false );
+
 		return $new_settings;
 	}
 
