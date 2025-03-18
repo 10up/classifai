@@ -34,7 +34,7 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 			title: 'Test Key Takeaways post',
 			content: 'Test GPT content',
 			beforeSave: () => {
-				cy.customInsertBlock( 'classifai/key-takeaways' );
+				cy.insertBlock( 'classifai/key-takeaways' );
 			},
 		} ).then( () => {
 			cy.getBlockEditor()
