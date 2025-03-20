@@ -15,8 +15,7 @@ const getTextareaStyles = ( isLoading: boolean ): CSSProperties => ( {
 	minHeight: '100px',
 	borderRadius: '4px',
 	border: '1px solid #ccc',
-	padding: '10px',
-	paddingBottom: '40px',
+	padding: '10px 75px 10px 10px',
 	resize: 'none',
 	opacity: isLoading ? 0.7 : 1,
 } );

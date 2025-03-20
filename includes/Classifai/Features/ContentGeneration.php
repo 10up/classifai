@@ -41,51 +41,40 @@ class ContentGeneration extends Feature {
 	 * @var string
 	 */
 	public $return_format = <<<EOD
-The content returned should be valid WordPress block markup, using paragraphs, headings and lists where appropriate. You don't need to use all those elements but use those where it makes sense and be sure to use the proper markup. Don't generate any other type of output and don't use Markdown formatting. Don't start the content with a heading, start with a paragraph.
+The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
 
-The markup of a paragraph should look like this:
+Markup to use:
 <!-- wp:paragraph -->
 <p>CONTENT</p>
 <!-- /wp:paragraph -->
-
-The markup of a heading should look like one of these:
 
 <!-- wp:heading -->
 <h2 class="wp-block-heading">CONTENT</h2>
 <!-- /wp:heading -->
 
-<!-- wp:heading {"level":3} -->
-<h3 class="wp-block-heading">CONTENT</h3>
-<!-- /wp:heading -->
+<!-- wp:table -->
+<figure class="wp-block-table"><table class="has-fixed-layout"><tbody><tr><td>CONTENT</td></tr><tr><td>CONTENT</td></tr></tbody></table></figure>
+<!-- /wp:table -->
 
-<!-- wp:heading {"level":4} -->
-<h4 class="wp-block-heading">CONTENT</h4>
-<!-- /wp:heading -->
+<!-- wp:quote -->
+<blockquote class="wp-block-quote">
+<p>CONTENT</p>
+</blockquote>
+<!-- /wp:quote -->
 
-<!-- wp:heading {"level":5} -->
-<h5 class="wp-block-heading">CONTENT</h5>
-<!-- /wp:heading -->
+<!-- wp:pullquote -->
+<figure class="wp-block-pullquote"><blockquote><p>QUOTE</p><cite>AUTHOR</cite></blockquote></figure>
+<!-- /wp:pullquote -->
 
-The markup of a list should look like one of these:
 <!-- wp:list -->
 <ul class="wp-block-list">
-<!-- wp:list-item -->
 <li>CONTENT</li>
-<!-- /wp:list-item -->
-<!-- wp:list-item -->
-<li>CONTENT</li>
-<!-- /wp:list-item -->
 </ul>
 <!-- /wp:list -->
 
 <!-- wp:list {"ordered":true} -->
 <ol class="wp-block-list">
-<!-- wp:list-item -->
 <li>CONTENT</li>
-<!-- /wp:list-item -->
-<!-- wp:list-item -->
-<li>CONTENT</li>
-<!-- /wp:list-item -->
 </ol>
 <!-- /wp:list -->
 EOD;

@@ -440,7 +440,7 @@ export const ChatUI: React.FC = () => {
 						transition={ { type: 'spring', duration: 0.3 } }
 						style={ chatButtonStyles }
 						aria-label={ __(
-							'Open Content Generation assistant',
+							'Open content generation assistant',
 							'classifai'
 						) }
 						whileHover={ {
