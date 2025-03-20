@@ -92,7 +92,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 		<>
 			<Notices feature="registration" />
 			<Panel
-				header={ __( 'Classifai Registration Settings', 'classifai' ) }
+				header={ __( 'Registration Details', 'classifai' ) }
 				className="settings-panel"
 			>
 				<PanelBody>
@@ -114,7 +114,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 								{
 									// eslint-disable-next-line @wordpress/i18n-translator-comments
 									__(
-										'Registration is 100% free and provides update notifications and upgrades inside the dashboard.',
+										'Registration is 100% free and provides automatic update notifications and upgrades inside the dashboard.',
 										'classifai'
 									)
 								}{ ' ' }

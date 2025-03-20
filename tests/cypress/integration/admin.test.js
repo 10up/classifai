@@ -1,4 +1,9 @@
 describe( 'Admin can login and make sure plugin is activated', () => {
+	before( () => {
+		cy.login();
+		cy.disableElasticPress();
+	} );
+
 	beforeEach( () => {
 		cy.login();
 	} );
