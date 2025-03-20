@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UserMessage } from './user-message';
 import { AIResponse } from './ai-response';
@@ -43,6 +43,16 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 	onInsertContent,
 } ) => {
 	const hasCompletion = entry.completion !== null;
+	const containerRef = useRef< HTMLDivElement >( null );
+
+	useEffect( () => {
+		if ( containerRef.current ) {
+			containerRef.current.scrollIntoView( {
+				behavior: 'smooth',
+				block: 'nearest',
+			} );
+		}
+	}, [] );
 
 	return (
 		<div>
@@ -75,6 +85,7 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 						initial={ { opacity: 0 } }
 						animate={ { opacity: 1 } }
 						exit={ { opacity: 0 } }
+						ref={ containerRef }
 					>
 						<LoadingResponse />
 					</motion.div>

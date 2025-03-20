@@ -43,7 +43,7 @@ class ContentGeneration extends Feature {
 	public $return_format = <<<EOD
 The content returned should be valid WordPress block markup as described below, using elements like paragraphs and headings where appropriate. Be selective on the elements you use, defaulting to paragraphs. Please check the content before returning to ensure each element has proper opening and closing block markup and HTML tags and any required block attributes. Ensure elements don't nest inside each other, i.e. don't put a paragraph inside another paragraph or a list within a paragraph. Don't start the content with a heading, start with a paragraph.
 
-Markup to use:
+Markup available to use; don't use any other blocks, even if requested:
 <!-- wp:paragraph -->
 <p>CONTENT</p>
 <!-- /wp:paragraph -->
