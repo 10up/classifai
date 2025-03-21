@@ -191,8 +191,8 @@ class TextToSpeech extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'tts_model' => 'tts-1',
-						'voice'     => 'voice',
+						'tts_model' => 'gpt-4o-mini-tts',
+						'voice'     => 'alloy',
 						'format'    => 'mp3',
 						'speed'     => 1,
 					]
@@ -215,15 +215,15 @@ class TextToSpeech extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			if ( in_array( $new_settings[ static::ID ]['tts_model'], [ 'tts-1', 'tts-1-hd' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['tts_model'], [ 'gpt-4o-mini-tts', 'tts-1', 'tts-1-hd' ], true ) ) {
 				$new_settings[ static::ID ]['tts_model'] = sanitize_text_field( $new_settings[ static::ID ]['tts_model'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['voice'], [ 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['voice'], [ 'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer' ], true ) ) {
 				$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['format'], [ 'mp3', 'opus', 'aac', 'flac', 'wav', 'pcm' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['format'], [ 'mp3', 'wav' ], true ) ) {
 				$new_settings[ static::ID ]['format'] = sanitize_text_field( $new_settings[ static::ID ]['format'] );
 			}
 

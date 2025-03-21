@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_NAME } from '../../data/store';
+import { OpenAISettings } from './openai';
 
 /**
  * Component for OpenAI Text to Speech Provider settings.
@@ -33,33 +34,13 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
-	const Description = () => (
-		<>
-			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
-			<a
-				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
-				href="https://platform.openai.com/signup"
-			>
-				{ __( 'Sign up for one', 'classifai' ) }
-			</a>{ ' ' }
-			{ __( 'in order to get your API key.', 'classifai' ) }
-		</>
-	);
-
 	return (
 		<>
 			{ ! isConfigured && (
-				<SettingsRow
-					label={ __( 'API Key', 'classifai' ) }
-					description={ <Description /> }
-				>
-					<InputControl
-						id={ `${ providerName }_api_key` }
-						type="password"
-						value={ providerSettings.api_key || '' }
-						onChange={ ( value ) => onChange( { api_key: value } ) }
-					/>
-				</SettingsRow>
+				<OpenAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
 			<SettingsRow
 				label={ __( 'TTS model', 'classifai' ) }
@@ -67,7 +48,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 					<>
 						{ __( 'Select a', 'classifai' ) }{ ' ' }
 						<a
-							href="https://platform.openai.com/docs/models/tts"
+							href="https://platform.openai.com/docs/models#tts"
 							title={ __(
 								'OpenAI Text to Speech models',
 								'classifai'
@@ -77,27 +58,28 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 						>
 							{ __( 'model', 'classifai' ) }
 						</a>{ ' ' }
-						{ __( 'depending on your requirement.', 'classifai' ) }
+						{ __(
+							'depending on your requirements. GPT-4o mini TTS is the recommendation, as it is the newest model and typically provides the best results and performance at the best cost.',
+							'classifai'
+						) }
 					</>
 				}
 			>
 				<SelectControl
 					id={ `${ providerName }_tts_model` }
 					onChange={ ( value ) => onChange( { tts_model: value } ) }
-					value={ providerSettings.tts_model || 'tts-1' }
+					value={ providerSettings.tts_model || 'gpt-4o-mini-tts' }
 					options={ [
 						{
-							label: __(
-								'Text-to-speech 1 (Optimized for speed)',
-								'classifai'
-							),
+							label: __( 'GPT-4o mini TTS', 'classifai' ),
+							value: 'gpt-4o-mini-tts',
+						},
+						{
+							label: __( 'Text-to-speech 1', 'classifai' ),
 							value: 'tts-1',
 						},
 						{
-							label: __(
-								'Text-to-speech 1 HD (Optimized for quality)',
-								'classifai'
-							),
+							label: __( 'Text-to-speech 1 HD', 'classifai' ),
 							value: 'tts-1-hd',
 						},
 					] }
@@ -110,7 +92,7 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 					<>
 						{ __( 'Select the speech', 'classifai' ) }{ ' ' }
 						<a
-							href="https://platform.openai.com/docs/models/tts"
+							href="https://platform.openai.com/docs/guides/text-to-speech#voice-options"
 							target="_blank"
 							rel="noreferrer"
 						>
@@ -126,27 +108,39 @@ export const OpenAITextToSpeechSettings = ( { isConfigured = false } ) => {
 					value={ providerSettings.voice || 'alloy' }
 					options={ [
 						{
-							label: __( 'Alloy (male)', 'classifai' ),
+							label: __( 'Alloy', 'classifai' ),
 							value: 'alloy',
 						},
 						{
-							label: __( 'Echo (male)', 'classifai' ),
+							label: __( 'Ash', 'classifai' ),
+							value: 'ash',
+						},
+						{
+							label: __( 'Coral', 'classifai' ),
+							value: 'coral',
+						},
+						{
+							label: __( 'Echo', 'classifai' ),
 							value: 'echo',
 						},
 						{
-							label: __( 'Fable (male)', 'classifai' ),
+							label: __( 'Fable', 'classifai' ),
 							value: 'fable',
 						},
 						{
-							label: __( 'Onyx (male)', 'classifai' ),
+							label: __( 'Onyx', 'classifai' ),
 							value: 'onyx',
 						},
 						{
-							label: __( 'Nova (female)', 'classifai' ),
+							label: __( 'Nova', 'classifai' ),
 							value: 'nova',
 						},
 						{
-							label: __( 'Shimmer (female)', 'classifai' ),
+							label: __( 'Sage', 'classifai' ),
+							value: 'sage',
+						},
+						{
+							label: __( 'Shimmer', 'classifai' ),
 							value: 'shimmer',
 						},
 					] }
