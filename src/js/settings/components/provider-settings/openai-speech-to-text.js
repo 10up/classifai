@@ -10,16 +10,14 @@ import { STORE_NAME } from '../../data/store';
 import { OpenAISettings } from './openai';
 
 /**
- * Component for OpenAI Whisper settings.
- *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI Whisper settings.
+ * Component for OpenAI Speech to Text settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OpenAIWhisperSettings component.
+ * @return {React.ReactElement} OpenAISpeechToTextSettings component.
  */
-export const OpenAIWhisperSettings = ( { isConfigured = false } ) => {
+export const OpenAISpeechToTextSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_whisper';
 	const providerSettings = useSelect(
 		( select ) =>

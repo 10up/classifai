@@ -20,7 +20,7 @@ import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
 import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
-import { OpenAIWhisperSettings } from './openai-whisper';
+import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
 import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIDallESettings } from './openai-dalle';
@@ -66,7 +66,7 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <OpenAIEmbeddingsSettings isConfigured={ isConfigured } />;
 
 		case 'openai_whisper':
-			return <OpenAIWhisperSettings isConfigured={ isConfigured } />;
+			return <OpenAISpeechToTextSettings isConfigured={ isConfigured } />;
 
 		case 'openai_moderation':
 			return <OpenAIModerationSettings isConfigured={ isConfigured } />;

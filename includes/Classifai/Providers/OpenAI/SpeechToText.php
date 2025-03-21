@@ -1,6 +1,6 @@
 <?php
 /**
- * OpenAI Whisper (speech to text) integration
+ * OpenAI Speech to Text integration
  */
 
 namespace Classifai\Providers\OpenAI;
@@ -9,7 +9,7 @@ use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use WP_Error;
 
-class Whisper extends Provider {
+class SpeechToText extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
@@ -21,11 +21,11 @@ class Whisper extends Provider {
 	const ID = 'openai_whisper';
 
 	/**
-	 * OpenAI Whisper URL
+	 * OpenAI Audio API URL
 	 *
 	 * @var string
 	 */
-	protected $whisper_url = 'https://api.openai.com/v1/audio/';
+	protected $audio_url = 'https://api.openai.com/v1/audio/';
 
 	/**
 	 * OpenAI Whisper model
@@ -57,7 +57,7 @@ class Whisper extends Provider {
 	public $max_file_size = 25 * MB_IN_BYTES;
 
 	/**
-	 * OpenAI Whisper constructor.
+	 * OpenAI Speech to Text constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
@@ -72,7 +72,7 @@ class Whisper extends Provider {
 	 * @return string
 	 */
 	public function get_api_url( string $path = '' ): string {
-		return sprintf( '%s%s', trailingslashit( $this->whisper_url ), $path );
+		return sprintf( '%s%s', trailingslashit( $this->audio_url ), $path );
 	}
 
 	/**
@@ -196,12 +196,12 @@ class Whisper extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
 
 		/**
-		 * Filter the request body before sending to Whisper.
+		 * Filter the request body before sending to OpenAI.
 		 *
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Whisper.
+		 * @param {array} $body Request body that will be sent to OpenAI.
 		 * @param {int} $attachment_id ID of attachment we are transcribing.
 		 *
 		 * @return {array} Request body.

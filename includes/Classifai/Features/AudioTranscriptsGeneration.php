@@ -3,7 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use Classifai\Providers\OpenAI\Whisper;
+use Classifai\Providers\OpenAI\SpeechToText;
 use WP_Error;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -33,7 +33,7 @@ class AudioTranscriptsGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Whisper::ID => __( 'OpenAI Whisper', 'classifai' ),
+			SpeechToText::ID => __( 'OpenAI Audio Transcription', 'classifai' ),
 		];
 	}
 
@@ -270,7 +270,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => Whisper::ID,
+			'provider' => SpeechToText::ID,
 		];
 	}
 
@@ -321,7 +321,7 @@ class AudioTranscriptsGeneration extends Feature {
 		}
 
 		/**
-		 * Filter the text result returned from Whisper API.
+		 * Filter the text result returned from OpenAI Audio API.
 		 *
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_result
