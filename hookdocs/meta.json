@@ -13,5 +13,8 @@
     },
     "chrome-built-in-ai": {
         "title": "Chrome built-in AI"
+    },
+    "data-flow": {
+        "title": "ClassifAI Data Flow"
     }
 }
