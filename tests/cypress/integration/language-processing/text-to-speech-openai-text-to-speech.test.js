@@ -7,12 +7,14 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.selectProvider( 'openai_text_to_speech' );
-		cy.get( '#openai_text_to_speech_tts_model' ).select( 'tts-1' );
+		cy.get( '#openai_text_to_speech_tts_model' ).select(
+			'gpt-4o-mini-tts'
+		);
 		cy.get( '#openai_text_to_speech_api_key' ).clear().type( 'password' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
-		cy.get( '#openai_text_to_speech_voice' ).select( 'alloy' );
+		cy.get( '#openai_text_to_speech_voice' ).select( 'ash' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
