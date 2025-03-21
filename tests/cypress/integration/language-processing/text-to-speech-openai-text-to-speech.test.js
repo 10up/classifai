@@ -10,7 +10,7 @@ describe( '[Language Processing] Text to Speech (OpenAI) Tests', () => {
 		cy.get( '#openai_text_to_speech_tts_model' ).select(
 			'gpt-4o-mini-tts'
 		);
-		cy.get( '#openai_text_to_speech_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
 		cy.enableFeature();
 		cy.saveFeatureSettings();
 
