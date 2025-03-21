@@ -40,19 +40,15 @@ export const OpenAISpeechToTextSettings = ( { isConfigured = false } ) => {
 			<SettingsRow
 				label={ __( 'Model', 'classifai' ) }
 				description={ __(
-					'Choose which model you want to use. The default is Whisper which works well for most use cases. If you need more accurate results, you can use GPT-4o mini Transcribe or GPT-4o Transcribe, but note those are both significantly more expensive.',
+					'Choose which model you want to use. The default is GPT-4o mini Transcribe which works well for most use cases. If you need more accurate results, you can use GPT-4o Transcribe, which is slower and more expensive. For simpler audio files, the older Whisper model typically works great.',
 					'classifai'
 				) }
 			>
 				<SelectControl
 					id={ `${ providerName }_model` }
 					onChange={ ( value ) => onChange( { model: value } ) }
-					value={ providerSettings.model || 'whisper-1' }
+					value={ providerSettings.model || 'gpt-4o-mini-transcribe' }
 					options={ [
-						{
-							label: __( 'Whisper', 'classifai' ),
-							value: 'whisper-1',
-						},
 						{
 							label: __( 'GPT-4o mini Transcribe', 'classifai' ),
 							value: 'gpt-4o-mini-transcribe',
@@ -60,6 +56,10 @@ export const OpenAISpeechToTextSettings = ( { isConfigured = false } ) => {
 						{
 							label: __( 'GPT-4o Transcribe', 'classifai' ),
 							value: 'gpt-4o-transcribe',
+						},
+						{
+							label: __( 'Whisper', 'classifai' ),
+							value: 'whisper-1',
 						},
 					] }
 					__nextHasNoMarginBottom

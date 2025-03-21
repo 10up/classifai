@@ -63,7 +63,7 @@ class SpeechToText extends Provider {
 	 */
 	public function get_model(): string {
 		$settings = $this->feature_instance->get_settings();
-		$model    = $settings[ static::ID ]['model'] ?? 'whisper-1';
+		$model    = $settings[ static::ID ]['model'] ?? 'gpt-4o-mini-transcribe';
 
 		/**
 		 * Filter the model name.
@@ -147,7 +147,7 @@ class SpeechToText extends Provider {
 	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
-			'model'         => 'whisper-1',
+			'model'         => 'gpt-4o-mini-transcribe',
 			'authenticated' => false,
 		];
 
@@ -169,7 +169,7 @@ class SpeechToText extends Provider {
 		if ( in_array( $new_settings[ static::ID ]['model'], [ 'whisper-1', 'gpt-4o-mini-transcribe', 'gpt-4o-transcribe' ], true ) ) {
 			$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] );
 		} else {
-			$new_settings[ static::ID ]['model'] = 'whisper-1';
+			$new_settings[ static::ID ]['model'] = 'gpt-4o-mini-transcribe';
 		}
 
 		return $new_settings;
