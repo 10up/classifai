@@ -31,6 +31,49 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Get the API url.
+	 *
+	 * @return string
+	 */
+	public function get_api_url(): string {
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_text_to_speech_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_text_to_speech_api_url', $this->api_url );
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = $settings[ static::ID ]['tts_model'] ?? 'gpt-4o-mini-tts';
+
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to change the model for certain use cases.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_text_to_speech_model
+		 *
+		 * @param {string} $model The current model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_text_to_speech_model', $model );
+	}
+
+	/**
 	 * Register settings for the provider.
 	 */
 	public function render_provider_fields(): void {
@@ -312,7 +355,7 @@ class TextToSpeech extends Provider {
 
 		// Create the request body to synthesize speech from text.
 		$request_body = array(
-			'model'           => $settings[ static::ID ]['tts_model'],
+			'model'           => $this->get_model(),
 			'voice'           => $settings[ static::ID ]['voice'],
 			'response_format' => $settings[ static::ID ]['format'],
 			'speed'           => (float) $settings[ static::ID ]['speed'],
@@ -320,7 +363,7 @@ class TextToSpeech extends Provider {
 		);
 
 		$response = $request->post(
-			$this->api_url,
+			$this->get_api_url(),
 			[
 				'body' => wp_json_encode( $request_body ),
 			]
