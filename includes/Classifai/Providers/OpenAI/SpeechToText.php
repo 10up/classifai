@@ -28,13 +28,6 @@ class SpeechToText extends Provider {
 	protected $audio_url = 'https://api.openai.com/v1/audio/';
 
 	/**
-	 * OpenAI Whisper model
-	 *
-	 * @var string
-	 */
-	protected $whisper_model = 'whisper-1';
-
-	/**
 	 * Supported file formats
 	 *
 	 * @var array
@@ -43,10 +36,8 @@ class SpeechToText extends Provider {
 		'mp3',
 		'mp4',
 		'mpeg',
-		'mpga',
-		'm4a',
 		'wav',
-		'webm',
+		'ogg',
 	];
 
 	/**
@@ -66,13 +57,47 @@ class SpeechToText extends Provider {
 	}
 
 	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = $settings[ static::ID ]['model'] ?? 'whisper-1';
+
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to change the model for certain use cases.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_speech_to_text_model
+		 *
+		 * @param {string} $model The current model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_speech_to_text_model', $model );
+	}
+
+	/**
 	 * Builds the API url.
 	 *
 	 * @param string $path Path to append to API URL.
 	 * @return string
 	 */
 	public function get_api_url( string $path = '' ): string {
-		return sprintf( '%s%s', trailingslashit( $this->audio_url ), $path );
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_speech_to_text_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_speech_to_text_api_url', sprintf( '%s%s', trailingslashit( $this->audio_url ), $path ) );
 	}
 
 	/**
@@ -122,6 +147,7 @@ class SpeechToText extends Provider {
 	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
+			'model'         => 'whisper-1',
 			'authenticated' => false,
 		];
 
@@ -139,6 +165,12 @@ class SpeechToText extends Provider {
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+
+		if ( in_array( $new_settings[ static::ID ]['model'], [ 'whisper-1', 'gpt-4o-mini-transcribe', 'gpt-4o-transcribe' ], true ) ) {
+			$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] );
+		} else {
+			$new_settings[ static::ID ]['model'] = 'whisper-1';
+		}
 
 		return $new_settings;
 	}
@@ -210,7 +242,7 @@ class SpeechToText extends Provider {
 			'classifai_whisper_transcribe_request_body',
 			[
 				'file'            => get_attached_file( $attachment_id ) ?? '',
-				'model'           => $this->whisper_model,
+				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,
 			],
