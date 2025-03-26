@@ -111,9 +111,11 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
-		$post = get_post();
+		$post                 = get_post();
+		$supported_post_types = $this->get_supported_post_types();
 
-		if ( empty( $post ) ) {
+		// Only enqueue the script if we're on a supported post type.
+		if ( empty( $post ) || ! in_array( $post->post_type, $supported_post_types, true ) ) {
 			return;
 		}
 
