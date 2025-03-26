@@ -3,8 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import { PluginDocumentSettingPanel } from '@wordpress/edit-post';
-import { PostExcerptCheck } from '@wordpress/editor';
+import {
+	PluginDocumentSettingPanel,
+	PostExcerptCheck,
+} from '@wordpress/editor';
 import { registerPlugin } from '@wordpress/plugins';
 
 /**
@@ -15,7 +17,7 @@ import MaybeExcerptPanel from './maybe-excerpt-panel';
 
 // Remove core Post Excerpt panel.
 ( () => {
-	dispatch( 'core/edit-post' ).removeEditorPanel( 'post-excerpt' );
+	dispatch( 'core/editor' ).removeEditorPanel( 'post-excerpt' );
 } )();
 
 // Add our own custom Post Excerpt panel.

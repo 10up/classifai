@@ -10,8 +10,7 @@ import { addQueryArgs } from '@wordpress/url';
 const { classifaiDalleData } = window;
 
 const isInserterOpened = () =>
-	select( 'core/edit-post' )?.isInserterOpened() ||
-	select( 'core/edit-site' )?.isInserterOpened() ||
+	select( 'core/editor' )?.isInserterOpened() ||
 	select( 'core/edit-widgets' )?.isInserterOpened?.();
 
 const waitFor = async ( selector ) =>

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { withSelect } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/edit-post';
+import { PluginPrePublishPanel } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 
 /**
@@ -65,6 +65,6 @@ class MaybeExcerptPanel extends Component {
 export default withSelect( ( select ) => {
 	return {
 		excerpt: select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
-		isPublishPanelOpen: select( 'core/edit-post' ).isPublishSidebarOpened(),
+		isPublishPanelOpen: select( 'core/editor' ).isPublishSidebarOpened(),
 	};
 } )( MaybeExcerptPanel );
