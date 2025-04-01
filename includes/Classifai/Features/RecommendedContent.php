@@ -4,11 +4,15 @@ namespace Classifai\Features;
 
 use Classifai\Services\Personalizer as PersonalizerService;
 use Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
+use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
+
+use function Classifai\get_asset_info;
 
 /**
  * Class RecommendedContent
  */
 class RecommendedContent extends Feature {
+
 	/**
 	 * ID of the current feature.
 	 *
@@ -27,8 +31,16 @@ class RecommendedContent extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
+			OpenAIEmbeddings::ID     => __( 'OpenAI Embeddings', 'classifai' ),
 			PersonalizerProvider::ID => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 		];
+	}
+
+	/**
+	 * Set up necessary hooks.
+	 */
+	public function feature_setup() {
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 	}
 
 	/**
@@ -47,8 +59,25 @@ class RecommendedContent extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => PersonalizerProvider::ID,
+			'provider' => OpenAIEmbeddings::ID,
 		];
+	}
+
+	/**
+	 * Enqueue editor assets.
+	 */
+	public function enqueue_editor_assets() {
+		$settings = $this->get_settings();
+
+		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
+			wp_enqueue_script(
+				'classifai-plugin-classification-ibm-watson-js',
+				CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-variation.js',
+				get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
+				get_asset_info( 'recommended-content-block-variation', 'version' ),
+				true
+			);
+		}
 	}
 
 	/**

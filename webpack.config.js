@@ -18,6 +18,9 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
+		'recommended-content-block-variation': [
+			'./src/js/features/recommended-content/variation.js',
+		],
 
 		'classifai-plugin-media-processing': './src/js/features/media-processing/media-upload.js',
 		'classifai-plugin-editor-ocr': './src/js/features/media-processing/editor-ocr.js',

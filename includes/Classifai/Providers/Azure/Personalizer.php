@@ -49,7 +49,10 @@ class Personalizer extends Provider {
 	public function register() {
 		add_action( 'classifai_before_feature_nav', [ $this, 'show_deprecation_message' ] );
 
-		if ( ( new RecommendedContent() )->is_feature_enabled() ) {
+		if (
+			( new RecommendedContent() )->is_feature_enabled() &&
+			( new RecommendedContent() )->get_feature_provider_instance()::ID === static::ID
+		) {
 			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
