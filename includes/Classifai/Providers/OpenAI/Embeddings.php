@@ -11,9 +11,12 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
+use Classifai\Features\RecommendedContent;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use WP_Query;
+
 use function Classifai\should_use_legacy_settings_panel;
 
 class Embeddings extends Provider {
@@ -261,33 +264,43 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
+	 * Register what we need for the provider.
 	 */
 	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
-
-		$feature = new Classification();
-
-		self::$scheduler_instance = new EmbeddingsScheduler(
-			'classifai_schedule_generate_embedding_job',
-			__( 'OpenAI Embeddings', 'classifai' )
-		);
-		self::$scheduler_instance->init();
-		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
+		$classification_feature      = new Classification();
+		$recommended_content_feature = new RecommendedContent();
 
 		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
+			$classification_feature->is_feature_enabled() &&
+			$classification_feature->get_feature_provider_instance()::ID === static::ID
 		) {
-			return;
+			add_action( 'classifai_generate_term_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
+			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+			add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
+			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+
+			self::$scheduler_instance = new EmbeddingsScheduler(
+				'classifai_generate_term_embedding_job',
+				__( 'OpenAI Embeddings', 'classifai' )
+			);
+
+			self::$scheduler_instance->init();
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
-		add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
+		if (
+			$recommended_content_feature->is_feature_enabled() &&
+			$recommended_content_feature->get_feature_provider_instance()::ID === static::ID
+		) {
+			// Create action scheduler job to generate embeddings for all posts.
+			self::$scheduler_instance = new EmbeddingsScheduler(
+				'classifai_generate_post_embedding_job',
+				__( 'OpenAI Embeddings', 'classifai' )
+			);
+
+			self::$scheduler_instance->init();
+		}
 	}
 
 	/**
@@ -332,12 +345,23 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
-		if ( $new_settings[ static::ID ]['authenticated'] && isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
-			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
-				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
-					$this->trigger_taxonomy_update( $feature_name );
+		if (
+			$new_settings[ static::ID ]['authenticated'] &&
+			isset( $new_settings['status'] ) &&
+			1 === (int) $new_settings['status']
+		) {
+			// Trigger embedding generation for all terms in enabled taxonomies.
+			if ( $this->feature_instance instanceof Classification ) {
+				foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
+					if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
+						$this->trigger_taxonomy_update( $feature_name );
+					}
 				}
+			}
+
+			// Trigger embedding generation for all posts.
+			if ( $this->feature_instance instanceof RecommendedContent ) {
+				$this->trigger_post_update();
 			}
 		}
 
@@ -845,6 +869,82 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Schedules the job to generate embedding data for all posts.
+	 *
+	 * @param string $post_type Post type.
+	 * @param bool   $all       Whether to generate embeddings for all posts or just those without embeddings.
+	 * @param array  $args      Overridable query args for WP_Query()
+	 * @param int    $user_id   The user ID to run this as.
+	 */
+	public function trigger_post_update( string $post_type = 'post', bool $all = false, array $args = [], int $user_id = 0 ) {
+		$feature = new RecommendedContent();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
+		/**
+		 * Filter the number of post items to process in a batch.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_items_per_job
+		 *
+		 * @param {int} $number Number of post items to process per job.
+		 *
+		 * @return {int} Filtered number of post items to process per job.
+		 */
+		$number = apply_filters( 'classifai_openai_embeddings_items_per_job', 100 );
+
+		$default_args = [
+			'post_type'      => $post_type,
+			'post_status'    => 'publish',
+			'posts_per_page' => $number,
+			'fields'         => 'ids',
+			'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_compare'   => 'NOT EXISTS',
+		];
+
+		$default_args = array_merge( $default_args, $args );
+
+		// If we want all items, remove our meta query.
+		if ( $all ) {
+			if ( 'classifai_openai_embeddings' === $default_args['meta_key'] ) {
+				unset( $default_args['meta_key'] );
+			}
+
+			if ( 'NOT EXISTS' === $default_args['meta_compare'] ) {
+				unset( $default_args['meta_compare'] );
+			}
+		}
+
+		if ( 0 === $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$job_args = [
+			'post_type' => $post_type,
+			'all'       => $all,
+			'args'      => $default_args,
+			'user_id'   => $user_id,
+		];
+
+		// We return early and don't schedule the job if there are no posts.
+		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_generate_post_embedding_job', $job_args ) ) {
+			$posts = new WP_Query( $default_args );
+			$posts = $posts->get_posts();
+
+			if ( empty( $posts ) ) {
+				return;
+			}
+
+			\as_enqueue_async_action( 'classifai_generate_post_embedding_job', $job_args );
+		}
+	}
+
+	/**
 	 * Schedules the job to generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
@@ -918,7 +1018,7 @@ class Embeddings extends Provider {
 		];
 
 		// We return early and don't schedule the job if there are no terms.
-		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_generate_term_embedding_job', $job_args ) ) {
 			$terms = get_terms( $default_args );
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -927,7 +1027,7 @@ class Embeddings extends Provider {
 		}
 
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+			\as_enqueue_async_action( 'classifai_generate_term_embedding_job', $job_args );
 		}
 	}
 
@@ -939,7 +1039,7 @@ class Embeddings extends Provider {
 	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
-	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function generate_term_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
 
 		if ( $user_id > 0 ) {
 			// We set this as current_user_can() fails when this function runs

@@ -49,7 +49,7 @@ class RecommendedContent extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enables the ability to generate recommended content data for the block.', 'classifai' );
+		return esc_html__( 'Enables a recommended content block.', 'classifai' );
 	}
 
 	/**
