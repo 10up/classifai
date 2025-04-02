@@ -45,7 +45,7 @@ class RecommendedContent extends Feature {
 		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
-			// add_filter( 'rest_post_query', [ $this, 'modify_block_query_vars_rest' ], 10, 2 );
+			add_filter( 'rest_post_query', [ $this, 'modify_block_query_vars_rest' ], 10, 2 );
 		}
 	}
 
@@ -130,11 +130,27 @@ class RecommendedContent extends Feature {
 	 * @return array
 	 */
 	public function modify_block_query_vars_rest( $query_vars, $request ) {
-		if ( ! (bool) $request->get_param( 'AIContent' ) ) {
+		if ( ! (bool) $request->get_param( 'useAI' ) ) {
 			return $query_vars;
 		}
 
-		$query_vars = $this->modify_block_query_vars( $query_vars );
+		// Get the post ID from the request.
+		$referer = $request->get_header( 'referer' );
+		$post_id = 0;
+
+		if ( $referer ) {
+			$query = wp_parse_url( $referer, PHP_URL_QUERY );
+
+			if ( $query ) {
+				parse_str( $query, $parts );
+
+				if ( isset( $parts['post'] ) ) {
+					$post_id = (int) $parts['post'];
+				}
+			}
+		}
+
+		$query_vars = $this->modify_block_query_vars( $query_vars, $post_id );
 
 		return $query_vars;
 	}
@@ -143,10 +159,11 @@ class RecommendedContent extends Feature {
 	 * Modify the Recommended Content block query vars.
 	 *
 	 * @param array $query_vars The current query vars.
+	 * @param int   $post_id The post ID.
 	 * @return array
 	 */
-	public function modify_block_query_vars( $query_vars ) {
-		$post_id           = get_the_ID();
+	public function modify_block_query_vars( array $query_vars = [], int $post_id = 0 ) {
+		$post_id           = ! $post_id ? get_the_ID() : $post_id;
 		$post__in          = [];
 		$count             = 0;
 		$provider_instance = $this->get_feature_provider_instance();

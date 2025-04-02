@@ -24,7 +24,7 @@ registerBlockVariation( 'core/query', {
 		query: {
 			postType: 'post',
 			perPage: 3,
-			AIContent: true,
+			useAI: true,
 		},
 	},
 	allowedControls: [],
