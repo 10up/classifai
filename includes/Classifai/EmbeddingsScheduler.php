@@ -117,17 +117,28 @@ class EmbeddingsScheduler {
 
 		$args = $action->get_args();
 
-		if ( ! isset( $args['args'] ) && ! isset( $args['args']['exclude'] ) ) {
+		if ( ! isset( $args['args'] ) && ( ! isset( $args['args']['exclude'] ) || ! isset( $args['args']['post__not_in'] ) ) ) {
 			return;
 		}
 
-		$excludes = $args['args']['exclude'];
+		if ( isset( $args['args']['exclude'] ) ) {
+			$excludes = $args['args']['exclude'];
 
-		if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
-			return;
+			if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
+				return;
+			}
+
+			$logger = new ActionScheduler_DBLogger();
+			$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
+		} elseif ( isset( $args['args']['post__not_in'] ) ) {
+			$excludes = $args['args']['post__not_in'];
+
+			if ( empty( $excludes ) ) {
+				return;
+			}
+
+			$logger = new ActionScheduler_DBLogger();
+			$logger->log( $action_id, sprintf( 'Embeddings failed for posts: %s', implode( ', ', $excludes ) ) );
 		}
-
-		$logger = new ActionScheduler_DBLogger();
-		$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
 	}
 }
