@@ -267,6 +267,10 @@ class Embeddings extends Provider {
 	 * Register what we need for the provider.
 	 */
 	public function register() {
+		// Listen for Action Scheduler callbacks.
+		add_action( 'classifai_generate_term_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
+		add_action( 'classifai_generate_post_embedding_job', [ $this, 'generate_post_embedding_job' ], 10, 4 );
+
 		$classification_feature      = new Classification();
 		$recommended_content_feature = new RecommendedContent();
 
@@ -284,7 +288,6 @@ class Embeddings extends Provider {
 			self::$scheduler_instance->init();
 
 			// Register hooks.
-			add_action( 'classifai_generate_term_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
 			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
@@ -306,7 +309,6 @@ class Embeddings extends Provider {
 			self::$scheduler_instance->init();
 
 			// Register hooks.
-			add_action( 'classifai_generate_post_embedding_job', [ $this, 'generate_post_embedding_job' ], 10, 4 );
 			// TODO: add hook to when a post is published and generate embeddings then.
 			// TODO: output admin message when embedding generation is in progress. Look to remove code that isn't needed in scheduler class.
 		}
@@ -578,6 +580,8 @@ class Embeddings extends Provider {
 
 					if ( $embedding && ! is_wp_error( $embedding ) ) {
 						$embeddings[] = array_map( 'floatval', $embedding );
+					} elseif ( is_wp_error( $embedding ) ) {
+						return $embedding;
 					}
 				}
 			} else {
@@ -591,6 +595,8 @@ class Embeddings extends Provider {
 						},
 						$all_embeddings
 					);
+				} elseif ( is_wp_error( $all_embeddings ) ) {
+					return $all_embeddings;
 				}
 			}
 		}
@@ -946,14 +952,14 @@ class Embeddings extends Provider {
 		];
 
 		// We return early and don't schedule the job if there are no posts.
-		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_generate_post_embedding_job', $job_args ) ) {
-			$posts = new WP_Query( $default_args );
-			$posts = $posts->get_posts();
+		$posts = new WP_Query( $default_args );
+		$posts = $posts->get_posts();
 
-			if ( empty( $posts ) ) {
-				return;
-			}
+		if ( empty( $posts ) ) {
+			return;
+		}
 
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
 			\as_enqueue_async_action( 'classifai_generate_post_embedding_job', $job_args );
 		}
 	}
@@ -967,7 +973,6 @@ class Embeddings extends Provider {
 	 * @param int    $user_id   The user ID to run this as.
 	 */
 	public function generate_post_embedding_job( string $post_type = '', bool $all = false, array $args = [], int $user_id = 0 ) {
-
 		if ( $user_id > 0 ) {
 			// We set this as current_user_can() fails when this function runs
 			// under the context of Action Scheduler.
@@ -993,7 +998,7 @@ class Embeddings extends Provider {
 			}
 		}
 
-		if ( $all && isset( $args['offset'] ) && isset( $args['posts_per_page'] ) ) {
+		if ( $all && isset( $args['offset'], $args['posts_per_page'] ) ) {
 			$args['offset'] = $args['offset'] + $args['posts_per_page'];
 		}
 
