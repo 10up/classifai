@@ -116,9 +116,19 @@ class RecommendedContent extends Feature {
 		$post__in          = [];
 		$count             = 0;
 		$provider_instance = $this->get_feature_provider_instance();
+		$cache_key         = 'classifai_recommended_content_' . $post_id;
 
 		switch ( $provider_instance::ID ) {
 			case OpenAIEmbeddings::ID:
+				// Use cached results if they exist.
+				$post__in = wp_cache_get( $cache_key );
+
+				if ( is_array( $post__in ) ) {
+					break;
+				} else {
+					$post__in = [];
+				}
+
 				// Get embeddings for the current post.
 				/** @var OpenAIEmbeddings $provider_instance */
 				$embeddings = $provider_instance->generate_embeddings_for_post( $post_id, false, $this );
@@ -126,7 +136,7 @@ class RecommendedContent extends Feature {
 				if ( ! empty( $embeddings ) && ! is_wp_error( $embeddings ) ) {
 					// Get the posts that are similar to the current post.
 					/** @var OpenAIEmbeddings $provider_instance */
-					$results = $provider_instance->get_posts( $embeddings ); // TODO: add caching so we don't have to run this every time.
+					$results = $provider_instance->get_posts( $embeddings );
 
 					if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
 						// Loop through the results and add them to the post__in array.
@@ -156,6 +166,9 @@ class RecommendedContent extends Feature {
 		if ( empty( $post__in ) ) {
 			return $query_vars;
 		}
+
+		// Cache the results.
+		wp_cache_set( $cache_key, $post__in, '', 60 * MINUTE_IN_SECONDS );
 
 		// Add the post IDs we want to our query.
 		$query_vars = array_merge(
