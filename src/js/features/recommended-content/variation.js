@@ -24,9 +24,10 @@ registerBlockVariation( 'core/query', {
 		query: {
 			postType: 'post',
 			perPage: 3,
+			AIContent: true,
 		},
 	},
-	allowedControls: [ 'order' ],
+	allowedControls: [],
 	innerBlocks: [
 		[
 			'core/post-template',

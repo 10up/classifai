@@ -40,8 +40,13 @@ class RecommendedContent extends Feature {
 	 * Set up necessary hooks.
 	 */
 	public function feature_setup() {
-		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
-		add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
+		$settings = $this->get_settings();
+
+		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
+			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+			add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
+			// add_filter( 'rest_post_query', [ $this, 'modify_block_query_vars_rest' ], 10, 2 );
+		}
 	}
 
 	/**
@@ -68,17 +73,13 @@ class RecommendedContent extends Feature {
 	 * Enqueue editor assets.
 	 */
 	public function enqueue_editor_assets() {
-		$settings = $this->get_settings();
-
-		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
-			wp_enqueue_script(
-				'classifai-plugin-classification-ibm-watson-js',
-				CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-variation.js',
-				get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
-				get_asset_info( 'recommended-content-block-variation', 'version' ),
-				true
-			);
-		}
+		wp_enqueue_script(
+			'classifai-plugin-classification-ibm-watson-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-variation.js',
+			get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
+			get_asset_info( 'recommended-content-block-variation', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -90,19 +91,52 @@ class RecommendedContent extends Feature {
 	 */
 	public function pre_render_block( $pre_render, $block ) {
 		// Add our filter if this is the recommended content block.
-		// and we have the proper Provider selected.
 		if (
 			isset( $block['attrs']['namespace'] ) &&
 			'classifai/recommended-content' === $block['attrs']['namespace']
 		) {
-			$settings = $this->get_settings();
-
-			if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
-				add_filter( 'query_loop_block_query_vars', [ $this, 'modify_block_query_vars' ] );
-			}
+			add_filter( 'query_loop_block_query_vars', [ $this, 'modify_block_query_vars_front_end' ] );
 		}
 
 		return $pre_render;
+	}
+
+	/**
+	 * Modify the Recommended Content block query vars.
+	 *
+	 * This is applied to the front-end rendering of the block.
+	 *
+	 * @param array $query_vars The current query vars.
+	 * @return array
+	 */
+	public function modify_block_query_vars_front_end( $query_vars ) {
+		if ( is_admin() ) {
+			return $query_vars;
+		}
+
+		$query_vars = $this->modify_block_query_vars( $query_vars );
+
+		return $query_vars;
+	}
+
+	/**
+	 * Modify the Recommended Content block query vars.
+	 *
+	 * This is applied to the REST request the block makes
+	 * in the editor.
+	 *
+	 * @param array            $query_vars The current query vars.
+	 * @param \WP_REST_Request $request The REST request.
+	 * @return array
+	 */
+	public function modify_block_query_vars_rest( $query_vars, $request ) {
+		if ( ! (bool) $request->get_param( 'AIContent' ) ) {
+			return $query_vars;
+		}
+
+		$query_vars = $this->modify_block_query_vars( $query_vars );
+
+		return $query_vars;
 	}
 
 	/**
@@ -131,10 +165,12 @@ class RecommendedContent extends Feature {
 					if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
 						// Loop through the results and add them to the post__in array.
 						foreach ( $results as $result ) {
+							// If we have reached the max number of posts, break out of the loop.
 							if ( $count >= $query_vars['posts_per_page'] ) {
 								break;
 							}
 
+							// Skip the current item or items we've already added.
 							if (
 								$result['post_id'] === $post_id ||
 								in_array( $result['post_id'], $post__in, true )
