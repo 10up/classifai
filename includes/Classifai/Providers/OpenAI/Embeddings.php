@@ -918,9 +918,18 @@ class Embeddings extends Provider {
 	 * Determine which posts best match another post based on embeddings.
 	 *
 	 * @param array $embeddings An array of embeddings data.
+	 * @param int   $post_id ID of the post to compare against.
 	 * @return array|WP_Error
 	 */
-	public function get_posts( array $embeddings = [] ) {
+	public function get_posts( array $embeddings = [], int $post_id = 0 ) {
+		// Use cached results if they exist.
+		$cache_key = 'classifai_recommended_content_' . $post_id;
+		$results   = wp_cache_get( $cache_key );
+
+		if ( is_array( $results ) ) {
+			return $results;
+		}
+
 		if ( empty( $embeddings ) ) {
 			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required.', 'classifai' ) );
 		}
@@ -962,6 +971,9 @@ class Embeddings extends Provider {
 				'score'   => $similarity,
 			];
 		}
+
+		// Cache the results.
+		wp_cache_set( $cache_key, $results, '', 60 * MINUTE_IN_SECONDS );
 
 		return $results;
 	}
