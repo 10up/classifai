@@ -61,6 +61,13 @@ class Embeddings extends Provider {
 	protected $max_terms = 5000;
 
 	/**
+	 * Maximum number of posts we process.
+	 *
+	 * @var int
+	 */
+	protected $max_posts = 5000;
+
+	/**
 	 * NLU features that are supported by this provider.
 	 *
 	 * @var array
@@ -207,7 +214,30 @@ class Embeddings extends Provider {
 		 *
 		 * @return {int} The maximum terms.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
+		return (int) apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
+	}
+
+	/**
+	 * Get the maximum number of posts we process.
+	 *
+	 * @return int
+	 */
+	public function get_max_posts(): int {
+		/**
+		 * Filter the max number of posts.
+		 *
+		 * Default for this is 5000 but this filter can be used to change
+		 * this, either decreasing to help with performance or increasing
+		 * to ensure we consider more.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_embeddings_max_posts
+		 *
+		 * @param {int} $posts The default maximum posts.
+		 *
+		 * @return {int} The maximum posts.
+		 */
+		return (int) apply_filters( 'classifai_openai_embeddings_max_posts', $this->max_posts );
 	}
 
 	/**
@@ -630,7 +660,7 @@ class Embeddings extends Provider {
 
 		// Iterate through all of our embedding chunks and run our similarity calculations.
 		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding ) );
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding ) );
 		}
 
 		// Ensure we have some results.
@@ -729,7 +759,7 @@ class Embeddings extends Provider {
 
 		// Iterate through all of our embedding chunks and run our similarity calculations.
 		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding, false ) );
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding, false ) );
 		}
 
 		// Ensure we have some results.
@@ -794,7 +824,7 @@ class Embeddings extends Provider {
 	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
 	 */
-	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
+	private function get_term_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
 		$feature              = new Classification();
 		$embedding_similarity = [];
 		$taxonomies           = $feature->get_all_feature_taxonomies();
@@ -877,6 +907,126 @@ class Embeddings extends Provider {
 							];
 						}
 					}
+				}
+			}
+		}
+
+		return $embedding_similarity;
+	}
+
+	/**
+	 * Determine which posts best match another post based on embeddings.
+	 *
+	 * @param array $embeddings An array of embeddings data.
+	 * @return array|WP_Error
+	 */
+	public function get_posts( array $embeddings = [] ) {
+		if ( empty( $embeddings ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required.', 'classifai' ) );
+		}
+
+		$embeddings_similarity = [];
+
+		// Iterate through all of our embedding chunks and run our similarity calculations.
+		foreach ( $embeddings as $embedding ) {
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_post_embeddings_similarity( $embedding ) );
+		}
+
+		// Ensure we have some results.
+		if ( empty( $embeddings_similarity ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'No matching items found.', 'classifai' ) );
+		}
+
+		// Sort the results by similarity.
+		usort(
+			$embeddings_similarity,
+			function ( $a, $b ) {
+				return $a['similarity'] <=> $b['similarity'];
+			}
+		);
+
+		// Remove duplicates based on the post_id field.
+		$uniques               = array_unique( array_column( $embeddings_similarity, 'post_id' ) );
+		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
+
+		// Prepare the results.
+		$results = [];
+
+		foreach ( $embeddings_similarity as $result ) {
+			// Convert $similarity to percentage.
+			$similarity = round( ( 1 - $result['similarity'] ), 10 );
+
+			// Store the results.
+			$results[] = [
+				'post_id' => $result['post_id'],
+				'score'   => $similarity,
+			];
+		}
+
+		return $results;
+	}
+
+	/**
+	 * Get the similarity between an embedding and a group of posts.
+	 *
+	 * @param array  $embedding Embedding data.
+	 * @param string $post_type Post type.
+	 * @param bool   $consider_threshold Whether to consider the threshold setting.
+	 * @return array
+	 */
+	private function get_post_embeddings_similarity( array $embedding, string $post_type = 'post', bool $consider_threshold = true ): array {
+		$embedding_similarity = [];
+		$calculations         = new EmbeddingCalculations();
+
+		$posts = new WP_Query(
+			[
+				'post_type'      => $post_type,
+				'post_status'    => 'publish',
+				'posts_per_page' => $this->get_max_posts(),
+				'fields'         => 'ids',
+				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_compare'   => 'EXISTS',
+			]
+		);
+		$posts = $posts->get_posts();
+
+		if ( empty( $posts ) ) {
+			return [];
+		}
+
+		$threshold = 0.75; // TODO: make this a setting.
+
+		// Get embedding similarity for each post.
+		foreach ( $posts as $post_id ) {
+			$post_embedding = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+
+			if ( empty( $post_embedding ) ) {
+				continue;
+			}
+
+			// Loop through the chunks and run a similarity calculation on each.
+			foreach ( $post_embedding as $chunk ) {
+				$similarity = $calculations->cosine_similarity( $embedding, $chunk );
+
+				/**
+				 * Fires after the embeddings similarity has been run for a single chunk.
+				 *
+				 * @since x.x.x
+				 * @hook classifai_openai_embeddings_single_post_embedding_similarity
+				 *
+				 * @param {bool|float} $similarity The embeddings similarity result.
+				 * @param {array} $embedding Post embedding data.
+				 * @param {array} $chunk Post chunk embedding data.
+				 * @param {int} $post_id ID of post we're comparing.
+				 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+				 */
+				do_action( 'classifai_openai_embeddings_single_post_embedding_similarity', $similarity, $embedding, $chunk, $post_id, $consider_threshold );
+
+				if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+					$embedding_similarity[] = [
+						'post_id'    => $post_id,
+						'similarity' => $similarity,
+					];
 				}
 			}
 		}

@@ -41,6 +41,7 @@ class RecommendedContent extends Feature {
 	 */
 	public function feature_setup() {
 		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
+		add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
 	}
 
 	/**
@@ -78,6 +79,94 @@ class RecommendedContent extends Feature {
 				true
 			);
 		}
+	}
+
+	/**
+	 * Add filter to modify the Recommended Content block query vars.
+	 *
+	 * @param string $pre_render The pre-rendered block content.
+	 * @param array  $block The block data.
+	 * @return string
+	 */
+	public function pre_render_block( $pre_render, $block ) {
+		// Add our filter if this is the recommended content block.
+		// and we have the proper Provider selected.
+		if (
+			isset( $block['attrs']['namespace'] ) &&
+			'classifai/recommended-content' === $block['attrs']['namespace']
+		) {
+			$settings = $this->get_settings();
+
+			if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
+				add_filter( 'query_loop_block_query_vars', [ $this, 'modify_block_query_vars' ] );
+			}
+		}
+
+		return $pre_render;
+	}
+
+	/**
+	 * Modify the Recommended Content block query vars.
+	 *
+	 * @param array $query_vars The current query vars.
+	 * @return array
+	 */
+	public function modify_block_query_vars( $query_vars ) {
+		$post_id           = get_the_ID();
+		$post__in          = [];
+		$count             = 0;
+		$provider_instance = $this->get_feature_provider_instance();
+
+		switch ( $provider_instance::ID ) {
+			case OpenAIEmbeddings::ID:
+				// Get embeddings for the current post.
+				/** @var OpenAIEmbeddings $provider_instance */
+				$embeddings = $provider_instance->generate_embeddings_for_post( $post_id, false, $this );
+
+				if ( ! empty( $embeddings ) && ! is_wp_error( $embeddings ) ) {
+					// Get the posts that are similar to the current post.
+					/** @var OpenAIEmbeddings $provider_instance */
+					$results = $provider_instance->get_posts( $embeddings ); // TODO: add caching so we don't have to run this every time.
+
+					if ( ! empty( $results ) && ! is_wp_error( $results ) ) {
+						// Loop through the results and add them to the post__in array.
+						foreach ( $results as $result ) {
+							if ( $count >= $query_vars['posts_per_page'] ) {
+								break;
+							}
+
+							if (
+								$result['post_id'] === $post_id ||
+								in_array( $result['post_id'], $post__in, true )
+							) {
+								continue;
+							}
+
+							$post__in[] = $result['post_id'];
+
+							++$count;
+						}
+					}
+				}
+
+				break;
+		}
+
+		// If we have no matches, don't modify the query.
+		if ( empty( $post__in ) ) {
+			return $query_vars;
+		}
+
+		// Add the post IDs we want to our query.
+		$query_vars = array_merge(
+			$query_vars,
+			[
+				'posts_per_page' => count( $post__in ),
+				'post__in'       => array_unique( $post__in ),
+			]
+		);
+
+		return $query_vars;
 	}
 
 	/**
