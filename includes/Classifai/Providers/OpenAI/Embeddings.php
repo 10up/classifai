@@ -339,7 +339,7 @@ class Embeddings extends Provider {
 			self::$scheduler_instance->init();
 
 			// Register hooks.
-			// TODO: add hook to when a post is published and generate embeddings then.
+			add_action( 'wp_insert_post', [ $this, 'maybe_generated_embeddings_for_post' ], 999 );
 			// TODO: output admin message when embedding generation is in progress. Look to remove code that isn't needed in scheduler class.
 		}
 	}
@@ -545,6 +545,32 @@ class Embeddings extends Provider {
 		}
 
 		$this->regenerate_embeddings();
+	}
+
+	/**
+	 * Maybe generated embeddings for a post.
+	 *
+	 * @param int $post_id ID of the post.
+	 */
+	public function maybe_generated_embeddings_for_post( $post_id ) {
+		// Don't run on autosaves.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return;
+		}
+
+		// Only run on posts for now. // TODO: Add support for other post types.
+		$post_type = get_post_type( $post_id );
+		if ( 'post' !== $post_type ) {
+			return;
+		}
+
+		// Only run when publishing.
+		$post_status = get_post_status( $post_id );
+		if ( 'publish' !== $post_status ) {
+			return;
+		}
+
+		$this->generate_embeddings_for_post( $post_id, true, new RecommendedContent() );
 	}
 
 	/**
