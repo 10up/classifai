@@ -51,6 +51,9 @@ const PersonalizerDeprecationNotice = () => (
  * @return {React.ReactElement} The RecommendedContentSettings component.
  */
 export const RecommendedContentSettings = () => {
+	const featureSettings = useSelect( ( select ) =>
+		select( STORE_NAME ).getFeatureSettings()
+	);
 	const [ embedInProgress, setEmbedInProgress ] = useState( false );
 	const isEmbeddingInProgress = useRef( false );
 	const isSaving = useSelect( ( select ) =>
@@ -100,7 +103,9 @@ export const RecommendedContentSettings = () => {
 
 	return (
 		<Fill name="ClassifAIBeforeFeatureSettingsPanel">
-			<PersonalizerDeprecationNotice />
+			{ 'ms_azure_personalizer' === featureSettings.provider && (
+				<PersonalizerDeprecationNotice />
+			) }
 			{ embedInProgress && (
 				<Notice status="info" isDismissible={ false }>
 					{ __(

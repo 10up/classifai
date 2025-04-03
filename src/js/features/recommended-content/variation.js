@@ -37,6 +37,8 @@ registerBlockVariation( 'core/query', {
 			[
 				[ 'core/post-featured-image' ],
 				[ 'core/post-title', { level: 3, isLink: true } ],
+				[ 'core/post-date' ],
+				[ 'core/post-excerpt' ],
 			],
 		],
 	],

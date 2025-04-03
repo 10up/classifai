@@ -290,6 +290,16 @@ class Embeddings extends Provider {
 			'authenticated' => false,
 		];
 
+		switch ( $this->feature_instance::ID ) {
+			case RecommendedContent::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'embedding_threshold' => 75,
+					]
+				);
+		}
+
 		return $common_settings;
 	}
 
@@ -322,7 +332,7 @@ class Embeddings extends Provider {
 			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
 			add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
-			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
 		}
 
 		// Register things needed for the Recommended Content Feature.
@@ -350,14 +360,14 @@ class Embeddings extends Provider {
 	 * @param Feature $feature_instance The feature instance.
 	 * @return array
 	 */
-	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
+	public function modify_default_classification_feature_settings( array $settings, $feature_instance ): array {
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
 
 		$defaults = [];
 
@@ -384,6 +394,10 @@ class Embeddings extends Provider {
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+
+		if ( isset( $new_settings[ static::ID ]['embedding_threshold'] ) ) {
+			$new_settings[ static::ID ]['embedding_threshold'] = absint( $new_settings[ static::ID ]['embedding_threshold'] );
+		}
 
 		if (
 			$new_settings[ static::ID ]['authenticated'] &&
@@ -1031,7 +1045,11 @@ class Embeddings extends Provider {
 			return [];
 		}
 
-		$threshold = 0.75; // TODO: make this a setting.
+		$settings  = $this->feature_instance->get_settings();
+		$threshold = $settings[ static::ID ]['embedding_threshold'] ?? 75;
+
+		// Convert $threshold (%) to decimal.
+		$threshold = 1 - ( (float) $threshold / 100 );
 
 		// Get embedding similarity for each post.
 		foreach ( $posts as $post_id ) {
