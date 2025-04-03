@@ -244,6 +244,22 @@ class RecommendedContent extends Feature {
 	}
 
 	/**
+	 * Get status of embeddings generation process.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		$is_in_progress    = false;
+		$provider_instance = $this->get_feature_provider_instance();
+
+		if ( $provider_instance && method_exists( $provider_instance, 'is_embeddings_generation_in_progress' ) ) {
+			$is_in_progress = $provider_instance->is_embeddings_generation_in_progress();
+		}
+
+		return $is_in_progress;
+	}
+
+	/**
 	 * Generates feature setting data required for migration from
 	 * ClassifAI < 3.0.0 to 3.0.0
 	 *

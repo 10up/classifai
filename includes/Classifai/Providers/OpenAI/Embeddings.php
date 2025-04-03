@@ -340,7 +340,6 @@ class Embeddings extends Provider {
 
 			// Register hooks.
 			add_action( 'wp_insert_post', [ $this, 'maybe_generated_embeddings_for_post' ], 999 );
-			// TODO: output admin message when embedding generation is in progress. Look to remove code that isn't needed in scheduler class.
 		}
 	}
 
@@ -1702,6 +1701,14 @@ class Embeddings extends Provider {
 	 * @return bool
 	 */
 	public function is_embeddings_generation_in_progress(): bool {
-		return self::$scheduler_instance->is_embeddings_generation_in_progress();
+		if ( $this->feature_instance instanceof Classification ) {
+			return self::$scheduler_instance->is_embeddings_generation_in_progress( 'classifai_generate_term_embedding_job' );
+		}
+
+		if ( $this->feature_instance instanceof RecommendedContent ) {
+			return self::$scheduler_instance->is_embeddings_generation_in_progress( 'classifai_generate_post_embedding_job' );
+		}
+
+		return false;
 	}
 }

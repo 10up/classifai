@@ -3,9 +3,10 @@
 namespace Classifai\Admin;
 
 use Classifai\Features\Classification;
+use Classifai\Features\RecommendedContent;
 use Classifai\Services\ServicesManager;
-
 use Classifai\Taxonomy\TaxonomyFactory;
+
 use function Classifai\get_asset_info;
 use function Classifai\get_plugin;
 use function Classifai\get_post_types_for_language_settings;
@@ -272,11 +273,24 @@ class Settings {
 
 		register_rest_route(
 			'classifai/v1',
-			'embeddings_in_progress',
+			'embeddings_in_progress/(?P<feature>\w+)',
 			[
 				[
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => [ $this, 'check_embedding_generation_status' ],
+					'args'                => array(
+						'feature' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'enum'              => [
+								'classification',
+								'recommended_content',
+							],
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Feature being used.', 'classifai' ),
+						),
+					),
 					'permission_callback' => [ $this, 'get_settings_permissions_check' ],
 				],
 			]
@@ -451,15 +465,33 @@ class Settings {
 	}
 
 	/**
-	 * Callback for getting the registration settings.
+	 * Callback for getting the embedding generation status.
 	 *
+	 * @param \WP_REST_Request $request The full request object.
 	 * @return \WP_REST_Response
 	 */
-	public function check_embedding_generation_status(): \WP_REST_Response {
-		$classification = new Classification();
-		$response       = array(
-			'classifAIEmbedInProgress' => $classification->is_embeddings_generation_in_progress(),
-		);
+	public function check_embedding_generation_status( \WP_REST_Request $request ): \WP_REST_Response {
+		$feature = $request->get_param( 'feature' );
+
+		switch ( $feature ) {
+			case 'classification':
+				$feature = new Classification();
+				break;
+			case 'recommended_content':
+				$feature = new RecommendedContent();
+				break;
+			default:
+				return rest_ensure_response(
+					[
+						'classifAIEmbedInProgress' => false,
+					]
+				);
+		}
+
+		$response = [
+			'classifAIEmbedInProgress' => $feature->is_embeddings_generation_in_progress(),
+		];
+
 		return rest_ensure_response( $response );
 	}
 }

@@ -45,9 +45,10 @@ class EmbeddingsScheduler {
 	/**
 	 * Check if embeddings generation is in progress.
 	 *
+	 * @param string $job The job name to check. If empty, uses the default job name.
 	 * @return bool
 	 */
-	public function is_embeddings_generation_in_progress(): bool {
+	public function is_embeddings_generation_in_progress( string $job = '' ): bool {
 		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
 			return false;
 		}
@@ -55,7 +56,7 @@ class EmbeddingsScheduler {
 		$store = ActionScheduler_Store::instance();
 
 		$action_id = $store->find_action(
-			$this->job_name,
+			$job ?? $this->job_name,
 			array(
 				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)

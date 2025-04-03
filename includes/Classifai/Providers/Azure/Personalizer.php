@@ -76,8 +76,8 @@ class Personalizer extends Provider {
 				<?php
 				printf(
 					wp_kses(
-						// translators: 1 - link to Personalizer documentation; 2 - link to GitHub issue.
-						__( '<a href="%1$s" target="_blank">As of September 2023</a>, new Personalizer resources can no longer be created in Azure. This is currently the only provider available for the Recommended Content feature and as such, this feature will not work unless you had previously created a Personalizer resource. The Azure AI Personalizer provider is deprecated and will be removed in a future release. We hope to replace this provider with another one in a coming release to continue to support this feature (see <a href="%2$s" target="_blank">issue#392</a>).', 'classifai' ),
+						// translators: 1 - link to Personalizer documentation.
+						__( '<a href="%1$s" target="_blank">As of September 2023</a>, new Personalizer resources can no longer be created in Azure. This means you will not be able to use that as a Provider for the Recommended Content Feature unless you had previously created a Personalizer resource. The Azure AI Personalizer Provider is deprecated and will be removed in a future release.', 'classifai' ),
 						array(
 							'a' => array(
 								'href'   => array(),
@@ -85,8 +85,7 @@ class Personalizer extends Provider {
 							),
 						)
 					),
-					'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/',
-					'https://github.com/10up/classifai/issues/392'
+					'https://learn.microsoft.com/en-us/azure/ai-services/personalizer/'
 				)
 				?>
 			</p>
