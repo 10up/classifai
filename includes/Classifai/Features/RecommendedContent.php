@@ -214,7 +214,7 @@ class RecommendedContent extends Feature {
 		$query_vars = array_merge(
 			$query_vars,
 			[
-				'posts_per_page' => count( $post__in ),
+				'posts_per_page' => count( $post__in ), // TODO: We may want to backfill if we have less than the requested number.
 				'post__in'       => array_unique( $post__in ),
 			]
 		);

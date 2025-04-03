@@ -27,7 +27,7 @@ registerBlockVariation( 'core/query', {
 			useAI: true,
 		},
 	},
-	allowedControls: [],
+	allowedControls: [ 'order', 'postCount' ],
 	innerBlocks: [
 		[
 			'core/post-template',
