@@ -260,6 +260,11 @@ class Plugin {
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
+			if ( ! $feature->get_feature_provider_instance() ) {
+				// Skip if the feature does not have a provider instance.
+				continue;
+			}
+
 			// Check if the Feature is using a Provider that needs Action Scheduler.
 			switch ( $feature->get_feature_provider_instance()::ID ) {
 				case 'openai_embeddings':
