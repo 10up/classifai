@@ -27,7 +27,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
 * Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
-* BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
+* Suggest related content based on the currently viewed post using [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Generate image alt text using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Generate image tags and extract text from images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) or locally using [Ollama](https://ollama.com/)
 * Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -79,8 +79,6 @@ OpenAI, which is one of the providers that powers the classification, title gene
 Microsoft Azure AI Vision, which is one of the providers that powers the descriptive text generator, image tags generator, image cropping, image text extraction and PDF text extraction features, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 Microsoft Azure AI Speech, which is one of the providers that powers the text to speech feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
-
-Microsoft Azure AI Personalizer, which is one of the providers that powers the recommended content feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
 Microsoft Azure OpenAI, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a [pay per usage](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) plan.
 
@@ -687,30 +685,26 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Turn on the "Enable" toggle in the screen above.
 * Select "Comments" in the "Content to moderate" section.
 
-## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
+## Set Up Recommended Content (via OpenAI Embeddings)
 
-Azure AI Personalizer has been retired by Microsoft [as of September 2023](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/). The service will continue to work until 2026 but Personalizer resources can no longer be created. As such, consider this provider deprecated and be aware that we will be removing this in the near future. We are hoping to replace with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392)).
+### 1. Sign up for OpenAI
 
-Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to ensure Personalizer learns effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
 
-### 1. Sign up for Azure services
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Recommendation Service > Recommended Content > Settings
 
-- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
-- Log into your account and create a new [Personalizer resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer).
-- Enter your service name, select a subscription, location, pricing tier, and resource group.
-- Select **Create** to create the resource.
-- After your resource has deployed, select the **Go to Resource** button to go to your Personalizer resource.
-- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
-- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+* Select **OpenAI Embeddings** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Once valid credentials are saved, embeddings will be generated for all existing posts that don't have embeddings already.
 
-For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
+### 3. Add the "Recommended Content" block to your content
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content Service > Settings
-
-- In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
-- In the `API Key` field, enter your `KEY 1` from Step 1 above.
-
-### 3. Use "Recommended Content" block to display recommended content on your website
+* Edit an existing page and add in the new Recommended Content block.
+* This defaults to rendering 3 items that meet the threshold criteria set. This can be changed to render more or less. Note though that only items that meet the threshold will be used, so less items may be shown than selected.
+* This block uses a default template that renders the featured image, title, date and excerpt of each item rendered. This template can be changed in the block editor.
 
 ## Run locally hosted LLMs
 
