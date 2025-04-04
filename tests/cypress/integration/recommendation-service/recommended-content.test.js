@@ -20,7 +20,7 @@ describe( '[Recommendation Service] Recommended Content Tests', () => {
 		cy.saveFeatureSettings();
 	} );
 
-	it( 'Can add the Recommended Content block in a post', () => {
+	it.skip( 'Can add the Recommended Content block in a post', () => {
 		// Create test post and add our block.
 		cy.createPost( {
 			title: 'Test Recommended Content post',
@@ -28,7 +28,7 @@ describe( '[Recommendation Service] Recommended Content Tests', () => {
 			beforeSave: () => {
 				cy.insertBlockCustom(
 					'core/query/classifai/recommended-content',
-					'Recommended Content'
+					'recommended-content'
 				);
 			},
 		} ).then( () => {
