@@ -8,7 +8,7 @@ module.exports = defineConfig( {
 	screenshotsFolder: __dirname + '/screenshots',
 	videosFolder: __dirname + '/videos',
 	downloadsFolder: __dirname + '/downloads',
-	video: false,
+	video: true,
 	reporter: 'mochawesome',
 	reporterOptions: {
 		reportFilename: 'mochawesome-[name]',

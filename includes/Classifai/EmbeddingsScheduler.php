@@ -56,7 +56,7 @@ class EmbeddingsScheduler {
 		$store = ActionScheduler_Store::instance();
 
 		$action_id = $store->find_action(
-			$job ?? $this->job_name,
+			! empty( $job ) ? $job : $this->job_name,
 			array(
 				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)
