@@ -140,6 +140,7 @@ table {
 	overflow: scroll;
 }
 
+table th,
 table td {
 	overflow: scroll;
 }
