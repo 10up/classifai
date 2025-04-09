@@ -211,16 +211,7 @@ export const ServiceSettings = () => {
 							</FlexBlock>
 							<FlexItem>
 								<NavLink to={ feature } key={ feature }>
-									<Button
-										variant="secondary"
-										disabled={
-											'1' !==
-											getFeatureSettings(
-												'status',
-												feature
-											)
-										}
-									>
+									<Button variant="secondary">
 										{ __( 'Settings', 'classifai' ) }
 									</Button>
 								</NavLink>

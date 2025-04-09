@@ -21,11 +21,19 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	initialize: function ( options ) {
 		this.collection = new Images();
 		this.prompt = options.prompt;
+		this.quality = options.quality;
+		this.size = options.size;
+		this.style = options.style;
 
 		this.listenTo( this.collection, 'reset', this.renderAll );
 		this.listenTo( this.collection, 'error', this.error );
 
-		this.collection.makeRequest( this.prompt );
+		this.collection.makeRequest(
+			this.prompt,
+			this.quality,
+			this.size,
+			this.style
+		);
 		this.render();
 	},
 

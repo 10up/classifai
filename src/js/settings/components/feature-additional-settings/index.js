@@ -14,6 +14,7 @@ import { ImageTagGeneratorSettings } from './image-tag-generator';
 import { TextToSpeechSettings } from './text-to-speech';
 import { TitleGenerationSettings } from './title-generation';
 import { ContentResizingSettings } from './content-resizing';
+import { ContentGenerationSettings } from './content-generation';
 import { ExcerptGenerationSettings } from './excerpt-generation';
 import { KeyTakeawaysSettings } from './key-takeaways';
 import { ClassificationSettings } from './classification';
@@ -42,6 +43,9 @@ const AdditionalSettingsFields = () => {
 
 		case 'feature_excerpt_generation':
 			return <ExcerptGenerationSettings />;
+
+		case 'feature_content_generation':
+			return <ContentGenerationSettings />;
 
 		case 'feature_content_resizing':
 			return <ContentResizingSettings />;
