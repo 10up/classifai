@@ -76,6 +76,7 @@ class ServicesManager {
 			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
+			'\Classifai\Features\ContentGeneration',
 			'\Classifai\Features\ContentResizing',
 			'\Classifai\Features\KeyTakeaways',
 			'\Classifai\Features\TextToSpeech',

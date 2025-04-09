@@ -462,6 +462,26 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
 } );
 
 /**
+ * Verify that the content generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
+	cy.visit( '/wp-admin/edit.php' );
+	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
+
+	// Find and open the summary panel.
+	cy.closeWelcomeGuide();
+
+	if ( enabled ) {
+		cy.get( '.classifai-chat-button' ).first().click( { force: true } );
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
+	} else {
+		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
+	}
+} );
+
+/**
  * Verify that the image generation feature is enabled or disabled.
  *
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
