@@ -1,6 +1,6 @@
 {
   "$schema": "https://playground.wordpress.net/blueprint-schema.json",
-  "landingPage": "/wp-admin/tools.php?page=classifai#/language_processing?welcome_guide=1",
+  "landingPage": "/wp-admin/tools.php?welcome_guide=1&page=classifai#/language_processing",
   "preferredVersions": {
     "php": "7.4",
     "wp": "latest"

@@ -110,10 +110,7 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'quality',
-				'options'       => [
-					'standard' => __( 'Standard', 'classifai' ),
-					'hd'       => __( 'High Definition', 'classifai' ),
-				],
+				'options'       => self::get_image_quality_options(),
 				'default_value' => $settings['quality'],
 				'description'   => __( 'The quality of the image that will be generated. High Definition creates images with finer details and greater consistency across the image but costs more.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
@@ -129,11 +126,7 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'image_size',
-				'options'       => [
-					'1024x1024' => '1024x1024 (square)',
-					'1792x1024' => '1792x1024 (landscape)',
-					'1024x1792' => '1024x1792 (portrait)',
-				],
+				'options'       => self::get_image_size_options(),
 				'default_value' => $settings['image_size'],
 				'description'   => __( 'Size of generated images. Larger sizes cost more.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
@@ -149,14 +142,48 @@ class DallE extends Provider {
 			[
 				'option_index'  => static::ID,
 				'label_for'     => 'style',
-				'options'       => [
-					'vivid'   => __( 'Vivid', 'classifai' ),
-					'natural' => __( 'Natural', 'classifai' ),
-				],
+				'options'       => self::get_image_style_options(),
 				'default_value' => $settings['style'],
 				'description'   => __( 'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
 			]
+		);
+	}
+
+	/**
+	 * Returns the quality options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_quality_options() {
+		return array(
+			'standard' => __( 'Standard', 'classifai' ),
+			'hd'       => __( 'High Definition', 'classifai' ),
+		);
+	}
+
+	/**
+	 * Returns the image size options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_size_options() {
+		return array(
+			'1024x1024' => '1024x1024 (square)',
+			'1792x1024' => '1792x1024 (landscape)',
+			'1024x1792' => '1024x1792 (portrait)',
+		);
+	}
+
+	/**
+	 * Returns the style options for the provider.
+	 *
+	 * @return array
+	 */
+	public static function get_image_style_options() {
+		return array(
+			'vivid'   => __( 'Vivid', 'classifai' ),
+			'natural' => __( 'Natural', 'classifai' ),
 		);
 	}
 
@@ -176,10 +203,11 @@ class DallE extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'number_of_images' => 1,
-						'quality'          => 'standard',
-						'image_size'       => '1024x1024',
-						'style'            => 'vivid',
+						'number_of_images'   => 1,
+						'quality'            => 'standard',
+						'image_size'         => '1024x1024',
+						'style'              => 'vivid',
+						'per_image_settings' => false,
 					]
 				);
 		}

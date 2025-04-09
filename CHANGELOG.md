@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.3.1] - 2025-03-12
+
+### Added
+
+- Per-image customization of quality, size, and style when generating images (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#857](https://github.com/10up/classifai/pull/857)).
+- New hooks that allow custom processing when embedding similarity calculations happen (props [@dkotter](https://github.com/dkotter), [@tylercherpak](https://github.com/tylercherpak), [@iamdharmesh](https://github.com/iamdharmesh) via [#858](https://github.com/10up/classifai/pull/858)).
+
 ## [3.3.0] - 2025-02-20
 
 **Note that this release bumps the WordPress minimum from 6.5 to 6.6.**
@@ -689,6 +696,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.3.1]: https://github.com/10up/classifai/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/10up/classifai/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/10up/classifai/compare/3.1.1...3.2.0
 [3.1.1]: https://github.com/10up/classifai/compare/3.1.0...3.1.1
