@@ -20,6 +20,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate key takeaways from post content and render at the top of a post using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
+* Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E 3 API](https://platform.openai.com/docs/guides/images)
 * Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
@@ -44,9 +45,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 | :-: | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") | ![Screenshot of ClassifAI expand/condense text feature](assets/img/screenshot-12.png "Example of expanding or condensing text with OpenAI.") | ![Screenshot of ClassifAI text to speech generation](assets/img/screenshot-11.png "Example of automatic text to speech generation with Azure.") |
 
-| Key Takeaways | | | |
+| Key Takeaways | Content Generation | | |
 | :-: | :-: | :-: | :-: |
-| ![Screenshot of the ClassifAI Key Takeaways block](assets/img/screenshot-14.png "Example of generating key takeaways using OpenAI.") | | | |
+| ![Screenshot of the ClassifAI Key Takeaways block](assets/img/screenshot-14.png "Example of generating key takeaways using OpenAI.") | ![Screenshot of the ClassifAI Content Generation Feature](assets/img/screenshot-15.png "Example of generating content using OpenAI.") | | |
 
 ### Image Processing
 
@@ -213,7 +214,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation, Content Generation or Content Resizing > Settings
 
 * Select **OpenAI ChatGPT** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -231,6 +232,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content generation, edit (or create) an item.
+* Add a title to this item.
+* Open the Summary panel in the sidebar and click on `Generate content`.
 * To test content resizing, edit (or create) an item. Note: only the block editor is supported.
 * Add a paragraph block with some content.
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
@@ -247,7 +251,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Click `Keys and Endpoint` in the left hand Resource Management menu to get the endpoint for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation, Content Generation or Content Resizing > Settings
 
 * Select **Azure OpenAI** in the provider dropdown.
 * Enter your endpoint you copied from the above step into the `Endpoint URL` field.
@@ -268,6 +272,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content generation, edit (or create) an item.
+* Add a title to this item.
+* Open the Summary panel in the sidebar and click on `Generate content`.
 * To test content resizing, edit (or create) an item. Note: only the block editor is supported.
 * Add a paragraph block with some content.
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.

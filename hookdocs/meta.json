@@ -16,5 +16,8 @@
     },
     "data-flow": {
         "title": "ClassifAI Data Flow"
+    },
+    "feature-provider-support": {
+        "title": "Providers supported per Feature"
     }
 }
