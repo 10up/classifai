@@ -111,7 +111,7 @@ The following WP-CLI commands are supported by ClassifAI:
 
 * `wp classifai transcribe_audio <attachment_ids> [--per_page=<per_page>] [--force=<bool>] [--dry-run=<bool>]`
 
-  Batch generation of audio transcriptions using OpenAI's Whisper API.
+  Batch generation of audio transcriptions using OpenAI's Audio Transcription API.
 
   * `<attachment_ids>`: A comma-delimited list of attachment IDs to generate transcriptions for. If not set, will instead run a query to get all audio attachments to process.
 
