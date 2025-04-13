@@ -188,6 +188,8 @@ class RewriteTone extends Feature {
 			get_asset_info( 'classifai-plugin-rewrite-tone', 'version' ),
 			true
 		);
+
+		wp_enqueue_script( 'classifai-chat-ui-js' );
 	}
 
 	/**

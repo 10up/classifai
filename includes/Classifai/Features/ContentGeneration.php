@@ -241,6 +241,8 @@ EOD;
 			get_asset_info( 'classifai-plugin-content-generation', 'version' ),
 			true
 		);
+
+		wp_enqueue_script( 'classifai-chat-ui-js' );
 	}
 
 	/**
