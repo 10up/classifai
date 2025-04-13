@@ -7,6 +7,9 @@ import React, {
 } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { __ } from '@wordpress/i18n';
+import { SlotFillProvider, Slot, TabPanel } from '@wordpress/components';
+import { PluginArea } from '@wordpress/plugins';
+import { applyFilters } from '@wordpress/hooks';
 
 // Import our custom components
 import { SparkleIcon } from './sparkle-icon';
@@ -23,7 +26,6 @@ const chatUIStyles: CSSProperties = {
 	width: '500px',
 	maxHeight: '700px',
 	backgroundColor: 'white',
-	padding: '14px',
 	boxShadow:
 		'0px 2px 3px 0px rgba(0, 0, 0, 0.05), 0px 4px 5px 0px rgba(0, 0, 0, 0.04), 0px 4px 5px 0px rgba(0, 0, 0, 0.03), 0px 16px 16px 0px rgba(0, 0, 0, 0.02)',
 	borderRadius: '8px',
@@ -58,6 +60,8 @@ const chatButtonStyles: CSSProperties = {
 	backgroundColor:
 		'var(--wp-components-color-accent-darker-10,var(--wp-admin-theme-color-darker-10,#2145e6))',
 };
+
+const featureTabs = applyFilters( 'classifai.chatUI', [] ) as { name: string; title: string }[];
 
 /**
  * ChatUI component
@@ -160,6 +164,16 @@ export const ChatUI: React.FC = () => {
 							transition={ { delay: 0.1 } }
 							style={ chatContentStyles }
 						>
+							<SlotFillProvider>
+								<PluginArea />
+								<TabPanel tabs={ featureTabs } className='classifai-chat-tabs'>
+									{ ( tab ) => (
+										<div style={ { padding: '1rem 14px' } }>
+											<Slot name={ tab.name } />
+										</div>
+									) }
+								</TabPanel>
+							</SlotFillProvider>
 						</motion.div>
 					</motion.div>
 				) : (

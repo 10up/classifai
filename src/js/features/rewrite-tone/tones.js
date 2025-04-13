@@ -71,7 +71,7 @@ export const tones = {
 			},
 			{
 				value: 'general',
-				label: __( 'General Audience', 'classifai' ),
+				label: __( 'General', 'classifai' ),
 				description: __(
 					'Balanced, universally understandable.',
 					'classifai'
@@ -79,12 +79,12 @@ export const tones = {
 			},
 			{
 				value: 'maketing',
-				label: __( 'Marketing & Sales', 'classifai' ),
+				label: __( 'Marketing', 'classifai' ),
 				description: __( 'Promotional, action-driven.', 'classifai' ),
 			},
 			{
 				value: 'professional',
-				label: __( 'Business & Professional', 'classifai' ),
+				label: __( 'Professional', 'classifai' ),
 				description: __( 'Corporate, industry-focused.', 'classifai' ),
 			},
 		],

@@ -15,8 +15,10 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	SelectControl,
+	Fill
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { addFilter } from '@wordpress/hooks';
 
 import { useSelectedBlocks } from '../../hooks';
 import { InjectIframeStyles } from '../../components';
@@ -35,6 +37,8 @@ const allowedTextBlocks = [
 	'core/list',
 	'core/list-item',
 ];
+
+const chatTabSlug = 'classifai-rewrite-tone';
 
 function defaultToneAttribute( toneAttribute = '', value = null ) {
 	if ( ! toneAttribute ) {
@@ -226,7 +230,7 @@ const RewriteTonePlugin = () => {
 
 	return (
 		<>
-			<ClassifaiChatAreaSlot>
+			<Fill name={ chatTabSlug }>
 				<ToggleGroupControl
 					isBlock
 					label={ tones.emotion.label }
@@ -300,9 +304,9 @@ const RewriteTonePlugin = () => {
 					) }
 				</ToggleGroupControl>
 
-				<SelectControl
+				<ToggleGroupControl
+					isBlock
 					label={ tones.audience.label }
-					options={ tones.audience.value }
 					value={ audience }
 					help={
 						tones.audience.value.find(
@@ -313,7 +317,17 @@ const RewriteTonePlugin = () => {
 						setAudience( newAudience );
 						defaultToneAttribute( 'audience', newAudience );
 					} }
-				/>
+				>
+					{ tones.audience.value.map(
+						( { value, label }, index ) => (
+							<ToggleGroupControlOption
+								key={ index }
+								label={ label }
+								value={ value }
+							/>
+						)
+					) }
+				</ToggleGroupControl>
 
 				<Button
 					variant="secondary"
@@ -323,7 +337,7 @@ const RewriteTonePlugin = () => {
 				>
 					{ __( 'Rewrite', 'classifai' ) }
 				</Button>
-			</ClassifaiChatAreaSlot>
+			</Fill>
 
 			{ isPreviewVisible && (
 				<Modal
@@ -372,3 +386,15 @@ const RewriteTonePlugin = () => {
 registerPlugin( 'classifai-rewrite-tone-plugin', {
 	render: RewriteTonePlugin,
 } );
+
+addFilter(
+	'classifai.chatUI',
+	'classifai',
+	( args ) => {
+		args.push( {
+			name: chatTabSlug,
+			title: __( 'Rewrite Tone', 'classifai' ),
+		} );
+		return args;
+	}
+);
