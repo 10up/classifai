@@ -12,8 +12,6 @@ import { createBlock } from '@wordpress/blocks';
 import {
 	Modal,
 	Button,
-	Panel,
-	PanelBody,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	SelectControl,
@@ -228,108 +226,104 @@ const RewriteTonePlugin = () => {
 
 	return (
 		<>
-			<ClassifaiEditorHeaderSettingPanel>
-				<Panel>
-					<PanelBody title={ __( 'Tone Rewriting', 'classifai' ) }>
-						<ToggleGroupControl
-							isBlock
-							label={ tones.emotion.label }
-							value={ emotion }
-							onChange={ ( newEmotion ) => {
-								setEmotion( newEmotion );
-								defaultToneAttribute( 'emotion', newEmotion );
-							} }
-						>
-							{ tones.emotion.value.map(
-								( { value, label }, index ) => (
-									<ToggleGroupControlOption
-										key={ index }
-										label={ label }
-										value={ value }
-									/>
-								)
-							) }
-						</ToggleGroupControl>
+			<ClassifaiChatAreaSlot>
+				<ToggleGroupControl
+					isBlock
+					label={ tones.emotion.label }
+					value={ emotion }
+					onChange={ ( newEmotion ) => {
+						setEmotion( newEmotion );
+						defaultToneAttribute( 'emotion', newEmotion );
+					} }
+				>
+					{ tones.emotion.value.map(
+						( { value, label }, index ) => (
+							<ToggleGroupControlOption
+								key={ index }
+								label={ label }
+								value={ value }
+							/>
+						)
+					) }
+				</ToggleGroupControl>
 
-						<ToggleGroupControl
-							isBlock
-							label={ tones.formality.label }
-							value={ formality }
-							help={
-								tones.formality.value.find(
-									( el ) => el.value === formality
-								)?.description
-							}
-							onChange={ ( newFormality ) => {
-								setFormality( newFormality );
-								defaultToneAttribute(
-									'formality',
-									newFormality
-								);
-							} }
-						>
-							{ tones.formality.value.map(
-								( { value, label }, index ) => (
-									<ToggleGroupControlOption
-										key={ index }
-										label={ label }
-										value={ value }
-									/>
-								)
-							) }
-						</ToggleGroupControl>
+				<ToggleGroupControl
+					isBlock
+					label={ tones.formality.label }
+					value={ formality }
+					help={
+						tones.formality.value.find(
+							( el ) => el.value === formality
+						)?.description
+					}
+					onChange={ ( newFormality ) => {
+						setFormality( newFormality );
+						defaultToneAttribute(
+							'formality',
+							newFormality
+						);
+					} }
+				>
+					{ tones.formality.value.map(
+						( { value, label }, index ) => (
+							<ToggleGroupControlOption
+								key={ index }
+								label={ label }
+								value={ value }
+							/>
+						)
+					) }
+				</ToggleGroupControl>
 
-						<ToggleGroupControl
-							isBlock
-							label={ tones.intent.label }
-							value={ intent }
-							help={
-								tones.intent.value.find(
-									( el ) => el.value === intent
-								)?.description
-							}
-							onChange={ ( newIntent ) => {
-								setIntent( newIntent );
-								defaultToneAttribute( 'intent', newIntent );
-							} }
-						>
-							{ tones.intent.value.map(
-								( { value, label }, index ) => (
-									<ToggleGroupControlOption
-										key={ index }
-										label={ label }
-										value={ value }
-									/>
-								)
-							) }
-						</ToggleGroupControl>
+				<ToggleGroupControl
+					isBlock
+					label={ tones.intent.label }
+					value={ intent }
+					help={
+						tones.intent.value.find(
+							( el ) => el.value === intent
+						)?.description
+					}
+					onChange={ ( newIntent ) => {
+						setIntent( newIntent );
+						defaultToneAttribute( 'intent', newIntent );
+					} }
+				>
+					{ tones.intent.value.map(
+						( { value, label }, index ) => (
+							<ToggleGroupControlOption
+								key={ index }
+								label={ label }
+								value={ value }
+							/>
+						)
+					) }
+				</ToggleGroupControl>
 
-						<SelectControl
-							label={ tones.audience.label }
-							options={ tones.audience.value }
-							value={ audience }
-							help={
-								tones.audience.value.find(
-									( el ) => el.value === audience
-								)?.description
-							}
-							onChange={ ( newAudience ) => {
-								setAudience( newAudience );
-								defaultToneAttribute( 'audience', newAudience );
-							} }
-						/>
+				<SelectControl
+					label={ tones.audience.label }
+					options={ tones.audience.value }
+					value={ audience }
+					help={
+						tones.audience.value.find(
+							( el ) => el.value === audience
+						)?.description
+					}
+					onChange={ ( newAudience ) => {
+						setAudience( newAudience );
+						defaultToneAttribute( 'audience', newAudience );
+					} }
+				/>
 
-						<Button
-							variant="secondary"
-							size="small"
-							onClick={ rewriteTone }
-							isBusy={ isRewriteInProgress }
-						>
-							{ __( 'Rewrite', 'classifai' ) }
-						</Button>
-					</PanelBody>
-				</Panel>
-			</ClassifaiEditorHeaderSettingPanel>
+				<Button
+					variant="secondary"
+					size="small"
+					onClick={ rewriteTone }
+					isBusy={ isRewriteInProgress }
+				>
+					{ __( 'Rewrite', 'classifai' ) }
+				</Button>
+			</ClassifaiChatAreaSlot>
 
 			{ isPreviewVisible && (
 				<Modal
