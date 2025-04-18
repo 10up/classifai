@@ -249,7 +249,7 @@ EOD;
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate draft content.', 'classifai' );
+		return esc_html__( 'A sparkle icon will show in the bottom right corner in the block editor. Click on this to start the generation process.', 'classifai' );
 	}
 
 	/**
