@@ -19,7 +19,6 @@ describe( 'Image Generation (OpenAI DALL·E) Tests', () => {
 		cy.get( 'select#openai_dalle_number_of_images' ).select( '2' );
 		cy.get( 'select#openai_dalle_quality' ).select( 'hd' );
 		cy.get( 'select#openai_dalle_image_size' ).select( '1024x1792' );
-		cy.get( 'select#openai_dalle_style' ).select( 'natural' );
 
 		cy.allowFeatureToAdmin();
 

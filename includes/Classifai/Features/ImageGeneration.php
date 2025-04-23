@@ -3,7 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\ImageProcessing;
-use Classifai\Providers\OpenAI\DallE;
+use Classifai\Providers\OpenAI\Images;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -33,7 +33,7 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			DallE::ID => __( 'OpenAI DALL·E 3', 'classifai' ),
+			Images::ID => __( 'OpenAI Images', 'classifai' ),
 		];
 	}
 
@@ -307,43 +307,58 @@ class ImageGeneration extends Feature {
 						<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
 					</label>
 				<?php endif; ?>
+
 				<div class="additional-image-generation-settings hidden">
-					<label>
-						<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
-						<select class="quality" name="quality">
-							<?php
-							$quality_options = DallE::get_image_quality_options();
-							$quality         = $settings[ $provider_id ]['quality'];
-							foreach ( $quality_options as $key => $value ) {
-								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
-							}
-							?>
-						</select>
-					</label>
-					<label>
-						<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
-						<select class="size" name="size">
-							<?php
-							$size_options = DallE::get_image_size_options();
-							$size         = $settings[ $provider_id ]['image_size'];
-							foreach ( $size_options as $key => $value ) {
-								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
-							}
-							?>
-						</select>
-					</label>
-					<label>
-						<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
-						<select class="style" name="style">
-							<?php
-							$style_options = DallE::get_image_style_options();
-							$style         = $settings[ $provider_id ]['style'];
-							foreach ( $style_options as $key => $value ) {
-								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
-							}
-							?>
-						</select>
-					</label>
+					<?php
+					$quality_options = Images::get_image_quality_options();
+					if ( ! empty( $quality_options ) ) :
+						?>
+						<label>
+							<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
+							<select class="quality" name="quality">
+								<?php
+								$quality = $settings[ $provider_id ]['quality'];
+								foreach ( $quality_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
+								?>
+							</select>
+						</label>
+					<?php endif; ?>
+
+					<?php
+					$size_options = Images::get_image_size_options();
+					if ( ! empty( $size_options ) ) :
+						?>
+						<label>
+							<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
+							<select class="size" name="size">
+								<?php
+								$size = $settings[ $provider_id ]['image_size'];
+								foreach ( $size_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
+								?>
+							</select>
+						</label>
+					<?php endif; ?>
+
+					<?php
+					$style_options = Images::get_image_style_options();
+					if ( ! empty( $style_options ) ) :
+						?>
+						<label>
+							<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
+							<select class="style" name="style">
+								<?php
+								$style = $settings[ $provider_id ]['style'];
+								foreach ( $style_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
+								?>
+							</select>
+						</label>
+					<?php endif; ?>
 				</div>
 				<button type="button" class="button button-secondary button-large button-generate">
 					<?php
@@ -451,7 +466,7 @@ class ImageGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => DallE::ID,
+			'provider' => Images::ID,
 		];
 	}
 

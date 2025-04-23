@@ -10,7 +10,7 @@ use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
-class DallE extends Provider {
+class Images extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
