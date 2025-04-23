@@ -1,11 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {
-	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
-	SelectControl,
-	ToggleControl,
-} from '@wordpress/components';
+import { SelectControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
