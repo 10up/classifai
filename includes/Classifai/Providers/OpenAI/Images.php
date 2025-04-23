@@ -219,7 +219,7 @@ class Images extends Provider {
 						'number_of_images'   => 1,
 						'quality'            => 'auto',
 						'image_size'         => '1024x1024',
-						'style'              => '',
+						'style'              => 'vivid',
 						'per_image_settings' => false,
 					]
 				);
@@ -301,10 +301,15 @@ class Images extends Provider {
 				'num'     => $settings['number_of_images'] ?? 1,
 				'quality' => $settings['quality'] ?? 'auto',
 				'size'    => $settings['image_size'] ?? '1024x1024',
-				'style'   => $settings['style'] ?? '',
+				'style'   => $settings['style'] ?? 'vivid',
 				'format'  => 'b64_json',
 			]
 		);
+
+		// Force proper image quality for those that had been using DALL·E 2 or 3 and haven't updated settings.
+		if ( ! in_array( $args['quality'], [ 'auto', 'low', 'medium', 'high' ], true ) ) {
+			$args['size'] = 'auto';
+		}
 
 		// Force proper image size for those that had been using DALL·E 2 or 3 and haven't updated settings.
 		if ( ! in_array( $args['size'], [ '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
@@ -338,6 +343,24 @@ class Images extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
 
 		$model = $this->get_model();
+		$body  = [
+			'prompt'          => sanitize_text_field( $prompt ),
+			'model'           => $model,
+			'n'               => absint( $args['num'] ),
+			'quality'         => sanitize_text_field( $args['quality'] ),
+			'response_format' => sanitize_text_field( $args['format'] ),
+			'size'            => sanitize_text_field( $args['size'] ),
+			'style'           => sanitize_text_field( $args['style'] ),
+		];
+
+		if ( 'gpt-image-1' === $model ) {
+			// The gpt-image-1 model doesn't support response_format or style.
+			unset( $body['response_format'] );
+			unset( $body['style'] );
+		} elseif ( 'dall-e-3' === $model ) {
+			// DALL·E 3 doesn't support multiple images per request.
+			$body['n'] = 1;
+		}
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -349,18 +372,7 @@ class Images extends Provider {
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters(
-			'classifai_dalle_request_body',
-			[
-				'prompt'          => sanitize_text_field( $prompt ),
-				'model'           => $this->get_model(),
-				'n'               => 'dall-e-3' === $model ? 1 : sanitize_text_field( $args['num'] ),
-				'quality'         => sanitize_text_field( $args['quality'] ),
-				'response_format' => sanitize_text_field( $args['format'] ),
-				'size'            => sanitize_text_field( $args['size'] ),
-				'style'           => sanitize_text_field( $args['style'] ),
-			]
-		);
+		$body = apply_filters( 'classifai_dalle_request_body', $body );
 
 		$responses = [];
 
@@ -382,8 +394,6 @@ class Images extends Provider {
 				]
 			);
 		}
-
-		set_transient( 'classifai_openai_dalle_latest_response', $responses[ array_key_last( $responses ) ], DAY_IN_SECONDS * 30 );
 
 		$cleaned_responses = [];
 
