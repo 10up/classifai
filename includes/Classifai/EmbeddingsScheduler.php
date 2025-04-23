@@ -118,7 +118,7 @@ class EmbeddingsScheduler {
 
 		$args = $action->get_args();
 
-		if ( ! isset( $args['args'] ) && ( ! isset( $args['args']['exclude'] ) || ! isset( $args['args']['post__not_in'] ) ) ) {
+		if ( ! isset( $args['args'] ) || ( ! isset( $args['args']['exclude'] ) || ! isset( $args['args']['post__not_in'] ) ) ) {
 			return;
 		}
 

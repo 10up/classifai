@@ -16,12 +16,13 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.login();
 	} );
 
-	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
+	it( 'Can save OpenAI Audio Transcription settings', () => {
 		cy.visitFeatureSettings(
 			'language_processing/feature_audio_transcripts_generation'
 		);
 
 		cy.get( '#openai_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_whisper_model' ).select( 'whisper-1' );
 
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();
@@ -30,7 +31,8 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	let audioEditLink = '';
 	let mediaModalLink = '';
-	it( 'Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
+
+	it( 'Can see OpenAI Audio Transcription actions on edit media page and verify generated data.', () => {
 		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
@@ -63,7 +65,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		);
 	} );
 
-	it( 'Can see OpenAI Whisper language processing actions on media model', () => {
+	it( 'Can see OpenAI Audio Transcription actions on media model', () => {
 		const audioId = audioEditLink.split( 'post=' )[ 1 ]?.split( '&' )[ 0 ];
 		mediaModalLink = `wp-admin/upload.php?item=${ audioId }`;
 		cy.visit( mediaModalLink );
@@ -73,7 +75,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.get( '#classifai-retranscribe' ).contains( 'Re-transcribe' );
 	} );
 
-	it( 'Can enable/disable OpenAI Whisper language processing features', () => {
+	it( 'Can enable/disable OpenAI Audio Transcription features', () => {
 		const options = {
 			audioEditLink,
 			mediaModalLink,

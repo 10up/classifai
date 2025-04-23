@@ -10,6 +10,7 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Features\ContentResizing;
 use Classifai\Features\ExcerptGeneration;
 use Classifai\Features\TitleGeneration;
+use Classifai\Features\ContentGeneration;
 use Classifai\Features\KeyTakeaways;
 use Classifai\Normalizer;
 use WP_Error;
@@ -563,6 +564,137 @@ class Ollama extends Provider {
 	}
 
 	/**
+	 * Generate content.
+	 *
+	 * @param int   $post_id The Post ID we're processing
+	 * @param array $args Arguments passed in.
+	 * @return string|WP_Error
+	 */
+	public function generate_content( int $post_id = 0, array $args = [] ) {
+		if ( ! $post_id || ! get_post( $post_id ) ) {
+			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate content.', 'classifai' ) );
+		}
+
+		$feature  = new ContentGeneration();
+		$settings = $feature->get_settings();
+		$args     = wp_parse_args(
+			array_filter( $args ),
+			[
+				'title'        => '',
+				'summary'      => '',
+				'conversation' => [],
+			]
+		);
+
+		// These checks happen in the REST permission_callback,
+		// but we run them again here in case this method is called directly.
+		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ! $feature->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Content generation is disabled or Ollama authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Filter the prompt we will send to Ollama.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_ollama_content_prompt
+		 *
+		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before summary.
+		 * @param {int} $post_id ID of post.
+		 * @param {array} $args Arguments passed to endpoint.
+		 *
+		 * @return {string} Prompt.
+		 */
+		$prompt = apply_filters( 'classifai_ollama_content_prompt', esc_textarea( get_default_prompt( $settings['prompt'] ) ?? $feature->prompt ), $post_id, $args );
+
+		// Set up the content we are sending to the LLM.
+		if ( ! empty( $args['conversation'] ) ) {
+			$content = 'Summary: ' . $args['conversation'][0]['prompt'];
+		} else {
+			$content = 'Summary: ' . $args['summary'];
+		}
+
+		if ( ! empty( $args['title'] ) ) {
+			$content = 'Title: ' . $args['title'] . "\n" . $content;
+		}
+
+		// Set up our messages.
+		$messages = [
+			[
+				'role'    => 'system',
+				'content' => $prompt . "\n" . $feature->return_format,
+			],
+			[
+				'role'    => 'user',
+				'content' => $content,
+			],
+		];
+
+		// If we have an existing conversation, add it to the messages.
+		if ( ! empty( $args['conversation'] ) ) {
+			foreach ( $args['conversation'] as $i => $conversation ) {
+				if ( $i > 0 ) {
+					$messages[] = [
+						'role'    => 'user',
+						'content' => $conversation['prompt'],
+					];
+				}
+
+				$messages[] = [
+					'role'    => 'assistant',
+					'content' => $conversation['completion'],
+				];
+			}
+
+			$messages[] = [
+				'role'    => 'user',
+				'content' => $args['summary'],
+			];
+		}
+
+		/**
+		 * Filter the request body before sending to Ollama.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_ollama_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent to Ollama.
+		 * @param {int} $post_id ID of post.
+		 *
+		 * @return {array} Request body.
+		 */
+		$body = apply_filters(
+			'classifai_ollama_content_request_body',
+			[
+				'model'    => $settings[ static::ID ]['model'] ?? '',
+				'messages' => $messages,
+				'stream'   => false,
+			],
+			$post_id
+		);
+
+		// Make our API request.
+		$request  = new APIRequest( 'test' );
+		$response = $request->post(
+			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		// If we have a message, return it.
+		$return = '';
+		if ( isset( $response['message'], $response['message']['content'] ) ) {
+			$return = wp_kses_post( trim( $response['message']['content'], ' "\'' ) );
+		}
+
+		return $return;
+	}
+
+	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
 	 * @param int    $post_id       The post ID we're processing.
@@ -591,6 +723,9 @@ class Ollama extends Provider {
 				break;
 			case 'key_takeaways':
 				$return = $this->generate_key_takeaways( $post_id, $args );
+				break;
+			case 'create_content':
+				$return = $this->generate_content( $post_id, $args );
 				break;
 		}
 
