@@ -14,18 +14,17 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { STORE_NAME } from '../../data/store';
+import { OpenAISettings } from './openai';
 
 /**
- * Component for OpenAI DALL-E Provider settings.
- *
- * This component is used within the ProviderSettings component to allow users to configure the OpenAI DALL-E Provider settings.
+ * Component for OpenAI Images Provider settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.
  *
- * @return {React.ReactElement} OpenAIDallESettings component.
+ * @return {React.ReactElement} OpenAIImagesSettings component.
  */
-export const OpenAIDallESettings = ( { isConfigured = false } ) => {
+export const OpenAIImagesSettings = ( { isConfigured = false } ) => {
 	const providerName = 'openai_dalle';
 	const providerSettings = useSelect(
 		( select ) =>
@@ -34,33 +33,13 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
 
-	const Description = () => (
-		<>
-			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
-			<a
-				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
-				href="https://platform.openai.com/signup"
-			>
-				{ __( 'Sign up for one', 'classifai' ) }
-			</a>{ ' ' }
-			{ __( 'in order to get your API key.', 'classifai' ) }
-		</>
-	);
-
 	return (
 		<>
 			{ ! isConfigured && (
-				<SettingsRow
-					label={ __( 'API Key', 'classifai' ) }
-					description={ <Description /> }
-				>
-					<InputControl
-						id={ `${ providerName }_api_key` }
-						type="password"
-						value={ providerSettings.api_key || '' }
-						onChange={ ( value ) => onChange( { api_key: value } ) }
-					/>
-				</SettingsRow>
+				<OpenAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
 			<SettingsRow
 				label={ __( 'Number of images', 'classifai' ) }
@@ -85,22 +64,30 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 			<SettingsRow
 				label={ __( 'Image quality', 'classifai' ) }
 				description={ __(
-					'The quality of the image that will be generated. High Definition creates images with finer details and greater consistency across the image but costs more.',
+					'The quality of the image that will be generated. Set to auto to allow OpenAI to choose the best quality for the model.',
 					'classifai'
 				) }
 			>
 				<SelectControl
 					id={ `${ providerName }_quality` }
 					onChange={ ( value ) => onChange( { quality: value } ) }
-					value={ providerSettings.quality || 'standard' }
+					value={ providerSettings.quality || 'auto' }
 					options={ [
 						{
-							label: __( 'Standard', 'classifai' ),
-							value: 'standard',
+							label: __( 'Auto', 'classifai' ),
+							value: 'auto',
 						},
 						{
-							label: __( 'High Definition', 'classifai' ),
-							value: 'hd',
+							label: __( 'Low', 'classifai' ),
+							value: 'low',
+						},
+						{
+							label: __( 'Medium', 'classifai' ),
+							value: 'medium',
+						},
+						{
+							label: __( 'High', 'classifai' ),
+							value: 'high',
 						},
 					] }
 					__nextHasNoMarginBottom
@@ -123,36 +110,12 @@ export const OpenAIDallESettings = ( { isConfigured = false } ) => {
 							value: '1024x1024',
 						},
 						{
-							label: __( '1792x1024 (landscape)', 'classifai' ),
-							value: '1792x1024',
+							label: __( '1536x1024 (landscape)', 'classifai' ),
+							value: '1536x1024',
 						},
 						{
-							label: __( '1024x1792 (portrait)', 'classifai' ),
-							value: '1024x1792',
-						},
-					] }
-					__nextHasNoMarginBottom
-				/>
-			</SettingsRow>
-			<SettingsRow
-				label={ __( 'Image style', 'classifai' ) }
-				description={ __(
-					'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.',
-					'classifai'
-				) }
-			>
-				<SelectControl
-					id={ `${ providerName }_style` }
-					onChange={ ( value ) => onChange( { style: value } ) }
-					value={ providerSettings.style || 'vivid' }
-					options={ [
-						{
-							label: __( 'Vivid', 'classifai' ),
-							value: 'vivid',
-						},
-						{
-							label: __( 'Natural', 'classifai' ),
-							value: 'natural',
+							label: __( '1024x1536 (portrait)', 'classifai' ),
+							value: '1024x1536',
 						},
 					] }
 					__nextHasNoMarginBottom
