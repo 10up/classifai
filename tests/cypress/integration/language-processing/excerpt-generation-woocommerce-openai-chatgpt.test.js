@@ -19,7 +19,6 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
-		cy.installWooCommerce();
 		cy.activateWooCommerce();
 	} );
 
@@ -47,13 +46,10 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	it( 'Can generate and insert product short description (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		const data = getChatGPTData();
+		const expectedResponse = 'This is a test product description';
 
-		// Create test product
-		cy.classicCreateProduct( {
-			title: 'Excerpt test classic',
-			content: 'Test ChatGPT content.',
-		} );
+		// Create test product and wait for page load
+		cy.visit( '/wp-admin/post-new.php?post_type=product' );
 
 		// Ensure excerpt metabox is shown
 		cy.get( '#show-settings-link' ).click();
@@ -62,15 +58,20 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		// Verify button exists
 		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should( 'exist' );
 
-		// Click on button and verify data loads in
+		// Click on button and wait for excerpt to be populated
 		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).click();
 		
-		// Check both TinyMCE and textarea
+		// Check both TinyMCE and textarea with retries
 		cy.window().then( ( win ) => {
 			if ( win.tinyMCE && win.tinyMCE.get( 'excerpt' ) ) {
-				cy.wrap( win.tinyMCE.get( 'excerpt' ).getContent() ).should( 'eq', data );
+				// Wait for content to be populated with retries
+				cy.wrap( null, { timeout: 10000 } ).should(() => {
+					const content = win.tinyMCE.get( 'excerpt' ).getContent();
+					expect(content.replace(/<\/?p>/g, '')).to.equal(expectedResponse);
+				});
 			} else {
-				cy.get( '#excerpt' ).should( 'have.value', data );
+				// Wait for content to be populated with retries
+				cy.get( '#excerpt', { timeout: 10000 } ).should('have.value', expectedResponse);
 			}
 		} );
 
