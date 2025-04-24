@@ -46,7 +46,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	it( 'Can generate and insert product short description (Classic Editor)', () => {
 		cy.enableClassicEditor();
 
-		const expectedResponse = 'This is a test product description';
+		const expectedResponse = 'Hello there, how may I assist you today?';
 
 		// Create test product and wait for page load
 		cy.visit( '/wp-admin/post-new.php?post_type=product' );
