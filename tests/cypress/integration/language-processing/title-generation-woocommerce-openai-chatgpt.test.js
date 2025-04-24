@@ -12,7 +12,6 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	before( () => {
 		cy.login();
 		cy.optInAllFeatures();
-		cy.installWooCommerce();
 		cy.activateWooCommerce();
 	} );
 
@@ -41,13 +40,12 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 
 		const data = getChatGPTData();
 
-		// Create test product
-		cy.classicCreateProduct( {
-			title: 'Test ChatGPT generate titles',
-			content: 'Test product content',
-		} );
-
+		// Create test product and wait for page load
 		cy.visit( '/wp-admin/post-new.php?post_type=product' );
+		
+		// Wait for the page to be fully loaded and initialized
+		cy.get( '#title' ).should( 'be.visible' );
+		cy.get( '#content_ifr' ).should( 'exist' );
 
 		cy.get( '#classifai-title-generation__title-generate-btn' ).click();
 		cy.get( '#classifai-title-generation__modal' ).should( 'be.visible' );
@@ -58,6 +56,9 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 
 		cy.get( '.classifai-title-generation__select-title' ).first().click();
 		cy.get( '#classifai-title-generation__modal' ).should( 'not.be.visible' );
+		
+		// Verify title in both the visible input and hidden textarea
 		cy.get( '#title' ).should( 'have.value', data );
+		cy.get( '#title-prompt-text' ).should( 'not.be.visible' );
 	} );
 } );
