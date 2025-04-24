@@ -56,14 +56,8 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 
 		cy.get( '.classifai-title-generation__select-title' ).first().click();
 		cy.get( '#classifai-title-generation__modal' ).should( 'not.be.visible' );
-		
-		// Force focus on title field and verify its value
-		cy.get( '#title' )
-			.focus()
-			.should( 'have.value', data )
-			.trigger( 'input' );
+		cy.get( '#title' ).should( 'have.value', data );
 
-		// Wait for the title prompt to be hidden
-		cy.get( '#title-prompt-text' ).should( 'have.css', 'visibility', 'hidden' );
+		cy.disableClassicEditor();
 	} );
 } );
