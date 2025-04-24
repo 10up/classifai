@@ -796,30 +796,18 @@ Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
 } );
 
 /**
- * Install WooCommerce plugin.
- */
-Cypress.Commands.add( 'installWooCommerce', () => {
-	// Install only if not installed.
-	cy.visit( '/wp-admin/plugins.php' );
-	
-	if ( cy.get( '#the-list tr[data-slug="woocommerce"]' ).length === 0 ) {
-		cy.visit( '/wp-admin/plugin-install.php?s=woocommerce&tab=search&type=term' );
-		cy.get( '.plugin-card-woocommerce .install-now' ).click();
-		cy.get( '.plugin-card-woocommerce .activate-now' ).should( 'exist' );
-	}
-} );
-
-/**
  * Activate WooCommerce plugin.
  */
 Cypress.Commands.add( 'activateWooCommerce', () => {
 	cy.visit( '/wp-admin/plugins.php' );
 
-	// Activate only if not activated.
-	if ( cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).length > 0 ) {
-		cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).click();
-		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).should( 'exist' );
-	}
+	// Check if the activation link exists
+	cy.get( '#the-list tr[data-slug="woocommerce"]' ).then( $tr => {
+		if ( $tr.find( '.activate a' ).length > 0 ) {
+			cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).click();
+			cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).should( 'exist' );
+		}
+	} );
 } );
 
 /**
@@ -833,16 +821,6 @@ Cypress.Commands.add( 'deactivateWooCommerce', () => {
 		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).click();
 		cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).should( 'exist' );
 	}
-} );
-
-/**
- * Uninstall WooCommerce plugin.
- */
-Cypress.Commands.add( 'uninstallWooCommerce', () => {
-	cy.visit( '/wp-admin/plugins.php' );
-	cy.get( '#the-list tr[data-slug="woocommerce"] .delete a' ).click();
-	cy.get( '#submit' ).click();
-	cy.get( '#the-list tr[data-slug="woocommerce"]' ).should( 'not.exist' );
 } );
 
 /**
