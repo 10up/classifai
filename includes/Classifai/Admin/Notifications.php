@@ -55,18 +55,20 @@ class Notifications {
 	public function render_registration_notice() {
 		$registration_settings = get_option( 'classifai_settings' );
 		$page                  = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$welcome_guide         = isset( $_GET['welcome_guide'] ) ? sanitize_text_field( wp_unslash( $_GET['welcome_guide'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if (
-			'classifai' === $page &&
+			'classifai' === $page && '1' !== $welcome_guide &&
 			( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] )
 		) {
 			$notice_url = 'https://classifaiplugin.com/#cta';
-
 			?>
+
 			<div data-notice="auto-upgrade-disabled" class="notice notice-warning">
-				<?php /* translators: %s: ClassifAI settings url */ ?>
-				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s">Register ClassifAI</a> to receive important plugin updates and other ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
+				<?php /* translators: %s: ClassifAI registration URL */ ?>
+				<p><?php echo wp_kses_post( sprintf( __( '<a href="%s" target="_blank" rel="noopener noreferrer">Register ClassifAI</a> to enable automatic plugin updates and receive important ClassifAI news.', 'classifai' ), esc_url( $notice_url ) ) ); ?></p>
 			</div>
+
 			<?php
 		}
 	}
@@ -87,7 +89,7 @@ class Notifications {
 			return;
 		}
 
-		$setup_url = admin_url( 'tools.php?page=classifai#/language_processing?welcome_guide=1' );
+		$setup_url = admin_url( 'tools.php?welcome_guide=1&page=classifai#/language_processing' );
 		if ( should_use_legacy_settings_panel() ) {
 			$setup_url = admin_url( 'admin.php?page=classifai_setup' );
 		}

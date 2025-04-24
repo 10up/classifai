@@ -79,7 +79,7 @@ const ServiceSettingsWrapper = () => {
  * @return {React.ReactElement} The ServiceNavigation component.
  */
 export const ServiceNavigation = () => {
-	const location = useLocation();
+	const location = window.location;
 	const queryParams = new URLSearchParams( location.search );
 	const [ showWelcomeGuide, setShowWelcomeGuide ] = useState(
 		() => '1' === queryParams.get( 'welcome_guide' )

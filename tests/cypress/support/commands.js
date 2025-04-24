@@ -462,6 +462,26 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
 } );
 
 /**
+ * Verify that the content generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
+	cy.visit( '/wp-admin/edit.php' );
+	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
+
+	// Find and open the summary panel.
+	cy.closeWelcomeGuide();
+
+	if ( enabled ) {
+		cy.get( '.classifai-chat-button' ).first().click( { force: true } );
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
+	} else {
+		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
+	}
+} );
+
+/**
  * Verify that the image generation feature is enabled or disabled.
  *
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
@@ -669,130 +689,6 @@ Cypress.Commands.add( 'openUserPermissionsPanel', () => {
 Cypress.Commands.add( 'allowFeatureToAdmin', () => {
 	cy.openUserPermissionsPanel();
 	cy.get( '.settings-allowed-roles input#administrator' ).check();
-} );
-
-/**
- * Custom command to insert a block, until a new release of cypress-wp-utils.
- *
- * TODO: remove this command once cypress-wp-utils is updated.
- */
-Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
-	const [ namespace = '', ...blockNameRest ] = type.split( '/' );
-	let blockNames = [
-		blockNameRest.join( '/' ).replace( '/', '-' ),
-		blockNameRest.join( '/' ).replace( '/', '\\/' ),
-	];
-
-	blockNames = blockNames.filter( ( x, i, a ) => a.indexOf( x ) === i );
-
-	let inserterBtn;
-	let search = '';
-
-	if ( typeof name === 'string' && name.length ) {
-		search = name;
-	} else {
-		search = type;
-	}
-
-	// Start of block inserter toggle button click logic.
-	cy.get( 'body' ).then( ( $body ) => {
-		const selectors = [
-			'button[aria-label="Add block"]', // 5.7
-			'button[aria-label="Toggle block inserter"]', // 6.4
-			'button[aria-label="Block Inserter"]', // 6.8
-		];
-
-		selectors.forEach( ( selector ) => {
-			if ( $body.find( selector ).length ) {
-				cy.get( selector ).then( ( $button ) => {
-					if ( $button.length ) {
-						inserterBtn = cy.wrap( $button );
-						inserterBtn.first().click();
-					}
-				} );
-			}
-		} );
-	} );
-	// End of block inserter toggle button click logic.
-
-	// Start of Block tab click logic.
-	cy.get( 'button[role="tab"]' )
-		.contains( 'Blocks' )
-		.then( ( $tab ) => {
-			if ( $tab.length ) {
-				cy.wrap( $tab ).click();
-			}
-		} );
-	// End of Block tab click logic.
-
-	// Start of Block search logic.
-	cy.get( 'input[placeholder="Search"]' ).then( ( $input ) => {
-		if ( $input.length ) {
-			cy.wrap( $input ).type( search );
-		}
-	} );
-	// End of Block search logic.
-
-	blockNames.forEach( ( blockName ) => {
-		const blockSelector = `.editor-block-list-item-${
-			'core' === namespace ? '' : namespace + '-'
-		}${ blockName }`;
-
-		cy.get( 'body' ).then( ( $body ) => {
-			if ( $body.find( blockSelector ).length ) {
-				// Start of Block insertion by click logic.
-				cy.get( blockSelector ).then( ( $block ) => {
-					if ( $block.length ) {
-						cy.wrap( $block ).click();
-						inserterBtn.click();
-
-						const [ ns, rest ] = type.split( '/' ); // namespace = ns, second namespace or block name = rest
-
-						cy.get( 'body' ).then( ( $innerBody ) => {
-							if (
-								$innerBody.find(
-									'iframe[name="editor-canvas"]'
-								).length
-							) {
-								// Works with WP 6.4
-								getIframe(
-									'iframe[name="editor-canvas"]'
-								).then( ( $iframe ) => {
-									const blockInIframe = $iframe.find(
-										`.wp-block[data-type="${ ns }/${ rest }"]`
-									);
-									if ( blockInIframe.length > 0 ) {
-										cy.wrap(
-											blockInIframe.last().prop( 'id' )
-										);
-									}
-								} );
-							} else if (
-								$innerBody.find(
-									`.wp-block[data-type="${ ns }/${ rest }"]`
-								).length
-							) {
-								// Works with WP 5.7
-								cy.get(
-									`.wp-block[data-type="${ ns }/${ rest }"]`
-								).then( ( $blockInEditor ) => {
-									expect( $blockInEditor.length ).to.equal(
-										1
-									);
-									cy.wrap( $blockInEditor.prop( 'id' ) );
-								} );
-							} else {
-								throw new Error(
-									`${ ns }/${ rest } not found.`
-								);
-							}
-						} );
-					}
-				} );
-				// End of Block insertion by click logic.
-			}
-		} );
-	} );
 } );
 
 /**

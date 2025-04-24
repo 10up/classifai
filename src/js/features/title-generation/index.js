@@ -2,14 +2,14 @@
  * External Dependencies.
  */
 import { dispatch, select } from '@wordpress/data';
-import { PluginPostStatusInfo } from '@wordpress/edit-post';
-import { PostTypeSupportCheck } from '@wordpress/editor';
+import { PluginPostStatusInfo, PostTypeSupportCheck } from '@wordpress/editor';
 import {
 	Button,
 	Modal,
 	Spinner,
 	TextareaControl,
-	BaseControl,
+	Flex,
+	FlexItem,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
@@ -52,13 +52,15 @@ const TitleGenerationPlugin = () => {
 
 	const postId = select( 'core/editor' ).getCurrentPostId();
 	const postType = select( 'core/editor' ).getCurrentPostType();
-	const postContent =
-		select( 'core/editor' ).getEditedPostAttribute( 'content' );
+
 	const openModal = () => setOpen( true );
 	const closeModal = () =>
 		setOpen( false ) && setData( [] ) && setError( false );
 
 	const buttonClick = async ( path ) => {
+		const postContent =
+			select( 'core/editor' ).getEditedPostAttribute( 'content' );
+
 		setIsLoading( true );
 		openModal();
 		apiFetch( {
@@ -95,50 +97,52 @@ const TitleGenerationPlugin = () => {
 		}
 
 		return (
-			<>
+			<Flex gap="5" wrap>
 				{ dataToRender.map( ( item, i ) => {
 					return (
-						<div className="classifai-title" key={ i }>
-							<BaseControl>
-								<TextareaControl
-									rows="5"
-									width="100%"
-									value={ item }
-									onChange={ ( e ) => {
-										dataToRender[ i ] = e.target.value;
-										setData( dataToRender );
-									} }
-								/>
-								<Button
-									variant="secondary"
-									onClick={ async () => {
-										const isDirty =
-											select(
-												'core/editor'
-											).isEditedPostDirty();
-										dispatch( 'core/editor' ).editPost( {
-											title: data[ i ],
-										} );
-										closeModal();
-										if ( ! isDirty ) {
-											await dispatch(
-												'core'
-											).saveEditedEntityRecord(
-												'postType',
-												postType,
-												postId
-											);
-										}
-									} }
-								>
-									{ __( 'Select', 'classifai' ) }
-								</Button>
-							</BaseControl>
-							<br />
-						</div>
+						<FlexItem
+							className="classifai-title"
+							key={ i }
+							style={ { flexGrow: 1 } }
+						>
+							<TextareaControl
+								rows="5"
+								label={ __( 'Generated title', 'classifai' ) }
+								hideLabelFromVision
+								value={ item }
+								onChange={ ( e ) => {
+									dataToRender[ i ] = e.target.value;
+									setData( dataToRender );
+								} }
+							/>
+							<Button
+								variant="secondary"
+								onClick={ async () => {
+									const isDirty =
+										select(
+											'core/editor'
+										).isEditedPostDirty();
+									dispatch( 'core/editor' ).editPost( {
+										title: data[ i ],
+									} );
+									closeModal();
+									if ( ! isDirty ) {
+										await dispatch(
+											'core'
+										).saveEditedEntityRecord(
+											'postType',
+											postType,
+											postId
+										);
+									}
+								} }
+							>
+								{ __( 'Select', 'classifai' ) }
+							</Button>
+						</FlexItem>
 					);
 				} ) }
-			</>
+			</Flex>
 		);
 	};
 
@@ -149,6 +153,7 @@ const TitleGenerationPlugin = () => {
 					title={ __( 'Select a title', 'classifai' ) }
 					onRequestClose={ closeModal }
 					isFullScreen={ false }
+					size="medium"
 					className="title-modal"
 				>
 					{ isLoading && <Spinner /> }
