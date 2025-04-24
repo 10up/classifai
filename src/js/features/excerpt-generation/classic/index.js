@@ -18,19 +18,23 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 	 */
 	function generateExcerptInit() {
 		const excerptContainer = document.getElementById( 'excerpt' );
+		const isProduct = document.getElementById( 'post_type' )?.value === 'product';
+		const buttonText = isProduct 
+			? ( excerptContainer.value ? __( 'Re-generate short description', 'classifai' ) : __( 'Generate short description', 'classifai' ) )
+			: ( excerptContainer.value ? classifaiExcerptData?.regenerateText ?? '' : classifaiExcerptData?.buttonText ?? '' );
+
+		const buttonWidth = isProduct ? 'fit-content' : '100%';
 
 		// Boolean indicating whether generation is in progress.
 		let isProcessing = false;
 
 		// Creates and appends the "Generate excerpt" button.
 		$( '<span />', {
-			text: excerptContainer.value
-				? classifaiExcerptData?.regenerateText ?? ''
-				: classifaiExcerptData?.buttonText ?? '',
+			text: buttonText,
 			class: 'classifai-excerpt-generation__excerpt-generate-btn--text',
 		} )
 			.wrap(
-				'<div class="button" id="classifai-excerpt-generation__excerpt-generate-btn" />'
+				`<div class="button" id="classifai-excerpt-generation__excerpt-generate-btn" style="width: ${buttonWidth};" />`
 			)
 			.parent()
 			.append(
@@ -106,9 +110,21 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 					spinnerEl.hide();
 					isProcessing = false;
 
-					$( excerptContainer ).val( result ).trigger( 'input' );
+					if ( isProduct ) {
+						// For WooCommerce products, we need to update the TinyMCE editor
+						if ( typeof tinyMCE !== 'undefined' && tinyMCE.get( 'excerpt' ) ) {
+							tinyMCE.get( 'excerpt' ).setContent( result );
+						} else {
+							$( excerptContainer ).val( result );
+						}
+					} else {
+						$( excerptContainer ).val( result );
+					}
+					$( excerptContainer ).trigger( 'input' );
 					generateTextEl.text(
-						classifaiExcerptData?.regenerateText ?? ''
+						isProduct 
+							? __( 'Re-generate short description', 'classifai' )
+							: classifaiExcerptData?.regenerateText ?? ''
 					);
 				} )
 				.catch( ( error ) => {
