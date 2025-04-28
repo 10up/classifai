@@ -35,17 +35,22 @@ const Prompt = wp.media.View.extend( {
 	 */
 	promptRequest: function ( event ) {
 		let prompt = '';
+		let quality = '';
+		let size = '';
+		let style = '';
+		const parent = event.target.parentElement;
 
 		if ( event.which === 13 ) {
 			prompt = event.target.value.trim();
 		} else if ( event.target.nodeName === 'BUTTON' ) {
-			prompt = event.target.parentElement
-				.querySelector( '.prompt' )
-				.value.trim();
+			prompt = parent.querySelector( '.prompt' ).value.trim();
+			quality = parent.querySelector( '.quality' ).value.trim();
+			size = parent.querySelector( '.size' ).value.trim();
+			style = parent.querySelector( '.style' ).value.trim();
 		}
 
 		if ( prompt ) {
-			new GeneratedImagesContainer( { prompt } );
+			new GeneratedImagesContainer( { prompt, quality, size, style } );
 		}
 	},
 } );

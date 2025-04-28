@@ -33,8 +33,12 @@ export const SaveSettingsButton = ( {
 	label = __( 'Save Settings', 'classifai' ),
 } ) => {
 	const { featureName } = useFeatureSettings();
-	const { createErrorNotice, removeNotices, removeNotice } =
-		useDispatch( noticesStore );
+	const {
+		createSuccessNotice,
+		createErrorNotice,
+		removeNotices,
+		removeNotice,
+	} = useDispatch( noticesStore );
 	const notices = useSelect( ( select ) =>
 		select( noticesStore ).getNotices()
 	);
@@ -79,9 +83,19 @@ export const SaveSettingsButton = ( {
 					} );
 					setSettings( res.settings );
 					setIsSaving( false );
+					window.scrollTo( {
+						top: 0,
+						behavior: 'smooth',
+					} );
 					return;
 				}
 				onSaveSuccess();
+				createSuccessNotice(
+					__( 'Settings saved successfully.', 'classifai' ),
+					{
+						type: 'snackbar',
+					}
+				);
 				setSettings( res.settings );
 				setIsSaving( false );
 			} )
@@ -97,6 +111,10 @@ export const SaveSettingsButton = ( {
 					}
 				);
 				setIsSaving( false );
+				window.scrollTo( {
+					top: 0,
+					behavior: 'smooth',
+				} );
 			} );
 	};
 

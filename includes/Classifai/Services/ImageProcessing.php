@@ -57,6 +57,8 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\Azure\ComputerVision',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\DallE',
+				'Classifai\Providers\XAI\Grok',
+				'Classifai\Providers\Localhost\OllamaMultimodal',
 			]
 		);
 	}

@@ -498,7 +498,8 @@ function PreviewerResults() {
 	return (
 		<div className="classifai__classification-previewer-search-result-container">
 			{ ( 'azure_openai_embeddings' === activeProvider ||
-				'openai_embeddings' === activeProvider ) && (
+				'openai_embeddings' === activeProvider ||
+				'ollama_embeddings' === activeProvider ) && (
 				<AzureOpenAIEmbeddingsResults postId={ selectedPostId } />
 			) }
 			{ 'ibm_watson_nlu' === activeProvider && (

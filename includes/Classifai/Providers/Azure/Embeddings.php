@@ -481,6 +481,19 @@ class Embeddings extends OpenAI {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
+		/**
+		 * Fires after the embeddings similarity has been run but before results are sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_azure_openai_embeddings_pre_sort_embeddings_similarity
+		 *
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_azure_openai_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
+
 		// Sort the results by similarity.
 		usort(
 			$embeddings_similarity,
@@ -499,6 +512,20 @@ class Embeddings extends OpenAI {
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
+
+		/**
+		 * Fires after the embeddings similarity has been run and sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_azure_openai_embeddings_post_sort_embeddings_similarity
+		 *
+		 * @param {array} $sorted_results The sorted embeddings similarity results.
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_azure_openai_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
 		$return = [];
 
@@ -668,6 +695,21 @@ class Embeddings extends OpenAI {
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
 
+						/**
+						 * Fires after the embeddings similarity has been run for a single chunk.
+						 *
+						 * @since 3.3.1
+						 * @hook classifai_azure_openai_embeddings_single_embedding_similarity
+						 *
+						 * @param {bool|float} $similarity The embeddings similarity result.
+						 * @param {array} $embedding Post embedding data.
+						 * @param {array} $chunk Term chunk embedding data.
+						 * @param {int} $term_id ID of term we're comparing.
+						 * @param {string} $tax Taxonomy of term.
+						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+						 */
+						do_action( 'classifai_azure_openai_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
+
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
 								'taxonomy'   => $tax,
@@ -688,7 +730,7 @@ class Embeddings extends OpenAI {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	private function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
@@ -775,7 +817,7 @@ class Embeddings extends OpenAI {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {

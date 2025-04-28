@@ -1,6 +1,6 @@
 {
   "name": "classifai",
-  "version": "3.2.0",
+  "version": "3.3.1",
   "license": "GPL-2.0-or-later",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
@@ -37,15 +37,15 @@
   },
   "devDependencies": {
     "@10up/cypress-wp-utils": "^0.4.0",
-    "@wordpress/env": "^10.14.0",
-    "@wordpress/scripts": "^30.7.0",
-    "cypress": "^13.16.1",
+    "@wordpress/env": "^10.17.0",
+    "@wordpress/scripts": "^30.10.0",
+    "cypress": "^14.0.3",
     "cypress-file-upload": "^5.0.8",
     "cypress-mochawesome-reporter": "^3.8.2",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^9.1.7",
     "jsdoc": "^4.0.4",
-    "lint-staged": "^15.2.11",
+    "lint-staged": "^15.4.3",
     "mochawesome-json-to-md": "^0.7.2",
     "node-wp-i18n": "^1.2.7",
     "svg-react-loader": "^0.4.6",
@@ -53,10 +53,10 @@
     "wp-hookdoc": "^0.2.0"
   },
   "dependencies": {
-    "@wordpress/icons": "^10.14.0",
-    "choices.js": "^11.0.2",
+    "@wordpress/icons": "^10.17.0",
+    "choices.js": "^11.0.3",
     "classnames": "^2.5.1",
-    "react-router-dom": "^7.0.2",
+    "react-router-dom": "^7.1.5",
     "tippy.js": "^6.3.7"
   }
 }

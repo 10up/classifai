@@ -41,7 +41,7 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 
 	const Description = () => (
 		<>
-			{ __( "Don't have an OpenAI account yet? ", 'classifai' ) }
+			{ __( "Don't have an OpenAI account yet?", 'classifai' ) }{ ' ' }
 			<a
 				title={ __( 'Sign up for an OpenAI account', 'classifai' ) }
 				href="https://platform.openai.com/signup"
@@ -53,17 +53,16 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 	);
 	const promptExamples = (
 		<>
-			{ __( 'Add a custom prompt, if desired. ', 'classifai' ) }
-			{ __( 'See our ', 'classifai' ) }
+			{ __( 'Add a custom prompt, if desired. See our', 'classifai' ) }{ ' ' }
 			<a
 				href="https://10up.github.io/classifai/tutorial-prompt-examples.html"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
 				{ __( 'documentation', 'classifai' ) }
-			</a>
+			</a>{ ' ' }
 			{ __(
-				' for some example prompts you can try that have been tested for specific use cases.',
+				'for some example prompts you can try that have been tested for specific use cases.',
 				'classifai'
 			) }
 		</>
@@ -105,9 +104,11 @@ export const OpenAIChatGPTSettings = ( { isConfigured = false } ) => {
 					/>
 				</SettingsRow>
 			) }
-			{ [ 'feature_descriptive_text_generator' ].includes(
-				featureName
-			) && (
+			{ [
+				'feature_descriptive_text_generator',
+				'feature_image_to_text_generator',
+				'feature_image_tags_generator',
+			].includes( featureName ) && (
 				<SettingsRow
 					label={ __( 'Prompt', 'classifai' ) }
 					description={ promptExamples }

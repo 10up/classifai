@@ -49,12 +49,12 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 				href="https://cloud.ibm.com/registration"
 			>
 				{ __( 'Register for one', 'classifai' ) }
-			</a>
-			{ __( ' and set up a ', 'classifai' ) }
+			</a>{ ' ' }
+			{ __( 'and set up a', 'classifai' ) }{ ' ' }
 			<a href="https://cloud.ibm.com/catalog/services/natural-language-understanding">
 				{ __( 'Natural Language Understanding', 'classifai' ) }
-			</a>
-			{ __( ' Resource to get your API key.', 'classifai' ) }
+			</a>{ ' ' }
+			{ __( 'Resource to get your API key.', 'classifai' ) }
 		</>
 	);
 

@@ -177,7 +177,7 @@ import './previewer.scss';
 		 * Filters response data depending on the threshold value.
 		 *
 		 * @param {Object} data       Response data from NLU.
-		 * @param {Object} thresholds Object containing threshold values for various taxnomy types.
+		 * @param {Object} thresholds Object containing threshold values for various taxonomy types.
 		 * @return {Array} Sorted data.
 		 */
 		function filterByScoreOrRelevance( data = {}, thresholds ) {
@@ -513,7 +513,7 @@ document.addEventListener( 'DOMContentLoaded', function () {
 	if ( classifaiNLUCheckbox ) {
 		classifaiNLUCheckbox.addEventListener( 'change', function () {
 			const classifyButton = document.querySelector(
-				'.classifai-clasify-post-wrapper'
+				'.classifai-classify-post-wrapper'
 			);
 			if ( this.checked === true ) {
 				classifyButton.style.display = 'none';

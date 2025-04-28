@@ -23,12 +23,13 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false ) {
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false || strpos( $url, 'https://api.x.ai/v1/models' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/models.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false ) {
+	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false || strpos( $url, 'https://api.x.ai/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
 	} elseif (
 		strpos( $url, 'https://api.openai.com/v1/chat/completions' ) !== false ||
+		strpos( $url, 'https://api.x.ai/v1/chat/completions' ) !== false ||
 		strpos( $url, 'https://e2e-test-azure-openai.test/openai/deployments' ) !== false
 	) {
 		$response  = file_get_contents( __DIR__ . '/chatgpt.json' );
@@ -77,7 +78,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		);
 	} elseif (
 		strpos( $url, 'https://api.openai.com/v1/embeddings' ) !== false ||
-		strpos( $url, 'https://e2e-test-azure-openai-embeddings.test/openai/deployments' ) !== false
+		strpos( $url, 'https://e2e-test-azure-openai-embeddings.test/openai/deployments' ) !== false ||
+		strpos( $url, 'http://localhost:11434/api/embed' ) !== false
 	) {
 		$response = file_get_contents( __DIR__ . '/embeddings.json' );
 	} elseif ( strpos( $url, 'http://e2e-test-image-processing.test/computervision/imageanalysis:analyze?api-version=2024-02-01' ) !== false ) {
@@ -110,6 +112,21 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
 				$response = file_get_contents( __DIR__ . '/geminiapi-resize-content.json' );
+			}
+		}
+	} elseif ( strpos( $url, 'http://localhost:11434/api/tags' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/ollama-models.json' );
+	} elseif( strpos( $url, 'http://localhost:11434/api/chat' ) !== false ) {
+		$response  = file_get_contents( __DIR__ . '/ollama-chat.json' );
+		$body_json = $parsed_args['body'] ?? false;
+
+		if ( $body_json ) {
+			$body     = json_decode( $body_json, JSON_OBJECT_AS_ARRAY );
+			$messages = isset( $body['messages'] ) ? $body['messages'] : [];
+			$prompt   = count( $messages ) > 0 ? $messages[0]['content'] : '';
+
+			if ( str_contains( $prompt, 'Increase the content' ) || str_contains( $prompt, 'Decrease the content' ) ) {
+				$response = file_get_contents( __DIR__ . '/ollama-chat-resize.json' );
 			}
 		}
 	}

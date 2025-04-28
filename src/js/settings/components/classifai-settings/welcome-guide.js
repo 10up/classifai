@@ -50,7 +50,7 @@ export const ClassifAIWelcomeGuide = ( { closeWelcomeGuide } ) => {
 					<li>
 						<strong>
 							{ __(
-								'Turn on the Feature you want to use. ',
+								'Turn on the Feature you want to use.',
 								'classifai'
 							) }
 						</strong>
@@ -66,10 +66,10 @@ export const ClassifAIWelcomeGuide = ( { closeWelcomeGuide } ) => {
 					<li>
 						<strong>
 							{ __(
-								'Connect that AI provider to the Feature you enabled. ',
+								'Connect that AI provider to the Feature you enabled.',
 								'classifai'
 							) }
-						</strong>
+						</strong>{ ' ' }
 						<a
 							href="https://github.com/10up/classifai?tab=readme-ov-file#set-up-classification-via-ibm-watson"
 							target="_blank"
@@ -98,10 +98,7 @@ export const ClassifAIWelcomeGuide = ( { closeWelcomeGuide } ) => {
 					) }
 				</p>
 				<p>
-					{ __(
-						'If you need any help along the way, ',
-						'classifai'
-					) }
+					{ __( 'If you need any help along the way,', 'classifai' ) }{ ' ' }
 					<a
 						href="https://github.com/10up/classifai#frequently-asked-questions"
 						target="_blank"
