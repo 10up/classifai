@@ -14,7 +14,6 @@ import {
 	Button,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	SelectControl,
 	Fill
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -344,7 +343,7 @@ const RewriteTonePlugin = () => {
 					isFullScreen={ true }
 					onRequestClose={ () => setIsPreviewVisible( false ) }
 				>
-					<InjectIframeStyles>
+					<InjectIframeStyles title={ __( 'Rewrite tone previewer', 'classifai' ) }>
 						<BlockEditorProvider
 							value={ blocksForPreview }
 							settings={ {
@@ -355,7 +354,9 @@ const RewriteTonePlugin = () => {
 								templateLock: 'all',
 							} }
 						>
-							<BlockList />
+							<div style={ { marginTop: '150px' } }>
+								<BlockList />
+							</div>
 						</BlockEditorProvider>
 						<div
 							style={ {
@@ -363,10 +364,12 @@ const RewriteTonePlugin = () => {
 								flexFlow: 'row nowrap',
 								justifyContent: 'center',
 								gap: '1rem',
-								marginTop: '2rem',
-								marginRight: '1rem',
-								borderTop: '1px solid #dbdbdb',
-								paddingTop: '1rem',
+								borderBottom: '1px solid #dbdbdb',
+								backgroundColor: '#fff',
+								padding: '1rem 0',
+								position: 'fixed',
+								top: '0px',
+								width: '100%',
 							} }
 						>
 							<Button variant="secondary" onClick={ applyResult }>

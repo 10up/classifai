@@ -3,7 +3,7 @@ import { __ } from '@wordpress/i18n';
 
 import { useEditorCanvas } from '../hooks';
 
-export const InjectIframeStyles = ( { children } ) => {
+export const InjectIframeStyles = ( { children, title } ) => {
 	const iframeCanvas = useEditorCanvas();
 
 	// Reference to the iframe in which we show blocks for preview.
@@ -79,7 +79,7 @@ export const InjectIframeStyles = ( { children } ) => {
 			<iframe
 				ref={ iframeRef }
 				style={ { width: '100%', height: '100%', border: 'none' } }
-				title={ __( 'Rewrite tone previewer', 'classifai' ) }
+				title={ title }
 			></iframe>
 		</div>
 	);
