@@ -300,7 +300,7 @@ class ImageGeneration extends Feature {
 					<?php echo esc_html( $filterable_texts['post_generation_instructions'] ); ?>
 				</p>
 				<?php $max_prompt_chars = absint( $provider_instance->max_prompt_chars ?? -1 ); ?>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" <?php echo -1 !== $max_prompt_chars ? esc_attr( 'maxlength="' . $max_prompt_chars . '"' ) : null; ?>></textarea>
+				<textarea data-image-gen-setting name="prompt" class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" <?php echo -1 !== $max_prompt_chars ? esc_attr( 'maxlength="' . $max_prompt_chars . '"' ) : null; ?>></textarea>
 				<br>
 
 				<?php do_action( 'classifai_' . static::ID . '_media_template_additional_settings', $this ); ?>

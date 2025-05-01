@@ -16,22 +16,16 @@ const Images = Backbone.Collection.extend( {
 	/**
 	 * Send a request to our API endpoint.
 	 *
-	 * @param {string} prompt  Prompt used in generating images.
-	 * @param {string} quality Quality of the image.
-	 * @param {string} size    Size of the image.
-	 * @param {string} style   Style of the image.
+	 * @param {object} params Parameters to be passed with the request.
 	 */
-	makeRequest: function ( prompt, quality, size, style ) {
+	makeRequest: function ( params ) {
 		this.fetch( {
 			type: 'get',
 			beforeSend: function ( xhr ) {
 				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
 			data: {
-				prompt: prompt,
-				quality: quality,
-				size: size,
-				style: style,
+				...params,
 				format: 'b64_json',
 			},
 			reset: true,

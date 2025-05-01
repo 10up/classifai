@@ -106,7 +106,7 @@ class DallE extends Provider {
 		<div class="additional-image-generation-settings hidden">
 			<label>
 				<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
-				<select class="quality" name="quality">
+				<select data-image-gen-setting class="quality" name="quality">
 					<?php
 					foreach ( $quality_options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
@@ -117,7 +117,7 @@ class DallE extends Provider {
 
 			<label>
 				<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
-				<select class="size" name="size">
+				<select data-image-gen-setting class="size" name="size">
 					<?php
 					foreach ( $size_options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
@@ -128,7 +128,7 @@ class DallE extends Provider {
 
 			<label>
 				<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
-				<select class="style" name="style">
+				<select data-image-gen-setting class="style" name="style">
 					<?php
 					foreach ( $style_options as $key => $value ) {
 						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
