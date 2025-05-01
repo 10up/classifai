@@ -274,94 +274,39 @@ class ImageGeneration extends Feature {
 			return;
 		}
 
-		$settings           = $this->get_settings();
-		$provider_id        = $settings['provider'];
-		$number_of_images   = absint( $settings[ $provider_id ]['number_of_images'] );
-		$per_image_settings = $settings[ $provider_id ]['per_image_settings'] ?? false;
-		$provider_instance  = $this->get_feature_provider_instance( $provider_id );
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'];
+		$number_of_images  = absint( $settings[ $provider_id ]['number_of_images'] );
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		$filterable_texts = apply_filters(
+			'classifai_' . static::ID . '_filterable_texts',
+			array(
+				'prompt_text'                  => __( 'Enter a prompt below to generate an image.', 'classifai' ),
+				'post_generation_instructions' => __( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' ),
+				'generate_image_text'          => __( 'Generate image', 'classifai' ),
+			),
+			$this
+		);
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
-		<script type="text/html" id="tmpl-dalle-prompt">
+		<script type="text/html" id="tmpl-classifai-image-generation">
 			<div class="prompt-view">
 				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Enter a prompt below to generate images.', 'classifai' );
-					} else {
-						esc_html_e( 'Enter a prompt below to generate an image.', 'classifai' );
-					}
-					?>
+					<?php echo esc_html( $filterable_texts['prompt_text'] ); ?>
 				</p>
 				<p>
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
-					} else {
-						esc_html_e( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' );
-					}
-					?>
+					<?php echo esc_html( $filterable_texts['post_generation_instructions'] ); ?>
 				</p>
 				<?php $max_prompt_chars = absint( $provider_instance->max_prompt_chars ?? -1 ); ?>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" <?php echo -1 !== $max_prompt_chars ? esc_attr( 'maxlength="' . $max_prompt_chars . '"' ) : null; ?>></textarea>
 				<br>
-				<?php if ( DallE::ID === $provider_id ): ?>
-					<?php if ( $per_image_settings ) : ?>
-						<input type="checkbox" id="view-additional-image-generation-settings" />
-						<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
-							<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
-						</label>
-					<?php endif; ?>
-					<div class="additional-image-generation-settings hidden">
-						<label>
-							<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
-							<select class="quality" name="quality">
-								<?php
-								$quality_options = DallE::get_image_quality_options();
-								$quality         = $settings[ $provider_id ]['quality'];
-								foreach ( $quality_options as $key => $value ) {
-									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
-								}
-								?>
-							</select>
-						</label>
 
-						<label>
-							<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
-							<select class="size" name="size">
-								<?php
-								$size_options = DallE::get_image_size_options();
-								$size         = $settings[ $provider_id ]['image_size'];
-								foreach ( $size_options as $key => $value ) {
-									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
-								}
-								?>
-							</select>
-						</label>
-
-						<label>
-							<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
-							<select class="style" name="style">
-								<?php
-								$style_options = DallE::get_image_style_options();
-								$style         = $settings[ $provider_id ]['style'];
-								foreach ( $style_options as $key => $value ) {
-									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
-								}
-								?>
-							</select>
-						</label>
-					</div>
-				<?php endif; ?>
+				<?php do_action( 'classifai_' . static::ID . '_media_template_additional_settings', $this ); ?>
 
 				<button type="button" class="button button-secondary button-large button-generate">
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Generate images', 'classifai' );
-					} else {
-						esc_html_e( 'Generate image', 'classifai' );
-					}
-					?>
+					<?php echo esc_html( $filterable_texts['generate_image_text'] ); ?>
 				</button>
 				<span class="error"></span>
 			</div>
@@ -388,7 +333,7 @@ class ImageGeneration extends Feature {
 		// Template for a single generated image.
 		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation,PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 		?>
-		<script type="text/html" id="tmpl-dalle-image">
+		<script type="text/html" id="tmpl-classifai-generated-image">
 			<div class="generated-image">
 				<img src="data:image/png;base64,{{{ data.url }}}" />
 				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>

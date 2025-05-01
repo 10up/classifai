@@ -9,7 +9,6 @@ use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
-use WP_REST_Server;
 
 class DallE extends Provider {
 
@@ -47,6 +46,99 @@ class DallE extends Provider {
 	 */
 	public function register() {
 		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_filterable_texts', [ $this, 'adjust_filterable_texts' ], 10, 2 );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_media_template_additional_settings', [ $this, 'render_additional_media_template_settings' ], 10, 2 );
+	}
+
+	/**
+	 * Adjust the filterable texts for Backbone's media template.
+	 *
+	 * @param array                       $text_array       The text array to adjust.
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
+	 * @return array
+	 */
+	public function adjust_filterable_texts( $text_array, $feature_instance ) {
+		$settings = $feature_instance->get_settings();
+
+		if ( self::ID !== $settings['provider'] ) {
+			return $text_array;
+		}
+
+		$number_of_images = $settings[ self::ID ]['number_of_images'] ?? 1;
+
+		if ( $number_of_images > 1 ) {
+			$text_array['prompt_text']                  = esc_html__( 'Enter a prompt below to generate images.', 'classifai' );
+			$text_array['post_generation_instructions'] = esc_html__( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
+			$text_array['generate_image_text']          = esc_html__( 'Generate images', 'classifai' );
+		}
+
+		return $text_array;
+	}
+
+	/**
+	 * Renders provider specific settings in the media template.
+	 *
+	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
+	 */
+	public function render_additional_media_template_settings( $feature_instance ) {
+		$settings = $feature_instance->get_settings();
+
+		if ( self::ID !== $settings['provider'] ) {
+			return;
+		}
+
+		$per_image_settings = $settings[ self::ID ]['per_image_settings'] ?? false;
+		$quality_options    = self::get_image_quality_options();
+		$size_options       = self::get_image_size_options();
+		$style_options      = self::get_image_style_options();
+		$quality            = $settings[ self::ID ]['quality'];
+		$size               = $settings[ self::ID ]['image_size'];
+		$style              = $settings[ self::ID ]['style'];
+		?>
+
+		<?php if ( $per_image_settings ) : ?>
+			<input type="checkbox" id="view-additional-image-generation-settings" />
+			<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
+				<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
+			</label>
+		<?php endif; ?>
+
+		<div class="additional-image-generation-settings hidden">
+			<label>
+				<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
+				<select class="quality" name="quality">
+					<?php
+					foreach ( $quality_options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
+					}
+					?>
+				</select>
+			</label>
+
+			<label>
+				<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
+				<select class="size" name="size">
+					<?php
+					foreach ( $size_options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
+					}
+					?>
+				</select>
+			</label>
+
+			<label>
+				<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
+				<select class="style" name="style">
+					<?php
+					foreach ( $style_options as $key => $value ) {
+						echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
+					}
+					?>
+				</select>
+			</label>
+		</div>
+
+		<?php
 	}
 
 	/**

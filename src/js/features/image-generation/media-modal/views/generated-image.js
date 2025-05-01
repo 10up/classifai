@@ -11,7 +11,7 @@ import { cleanForSlug } from '@wordpress/url';
  */
 const GeneratedImage = wp.media.View.extend( {
 	tagName: 'li',
-	template: wp.template( 'dalle-image' ),
+	template: wp.template( 'classifai-generated-image' ),
 
 	events: {
 		'click .button-import': 'import',

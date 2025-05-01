@@ -9,7 +9,7 @@ import GeneratedImagesContainer from './generated-images-container';
  * well as basic HTML for the other containers (errors, images).
  */
 const Prompt = wp.media.View.extend( {
-	template: wp.template( 'dalle-prompt' ),
+	template: wp.template( 'classifai-image-generation' ),
 
 	events: {
 		'click .button-generate': 'promptRequest',
