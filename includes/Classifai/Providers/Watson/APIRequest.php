@@ -4,6 +4,7 @@ namespace Classifai\Providers\Watson;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
+use function Classifai\safe_wp_remote_get;
 
 /**
  * APIRequest class is the low level class to make IBM Watson API
@@ -57,7 +58,7 @@ class APIRequest {
 	 */
 	public function get( string $url, array $options = [] ) {
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		return $this->get_result( safe_wp_remote_get( $url, $options ) );
 	}
 
 	/**
@@ -70,7 +71,7 @@ class APIRequest {
 	 */
 	public function post( string $url, array $options = [] ) {
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		return $this->get_result( safe_wp_remote_get( $url, $options ) );
 	}
 
 	/**

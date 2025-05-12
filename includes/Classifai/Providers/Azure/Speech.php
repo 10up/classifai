@@ -11,6 +11,8 @@ use stdClass;
 use WP_Http;
 use WP_Error;
 
+use function Classifai\safe_wp_remote_get;
+
 class Speech extends Provider {
 
 	const ID = 'ms_azure_text_to_speech';
@@ -213,23 +215,7 @@ class Speech extends Provider {
 			$default['endpoint_url']
 		);
 
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get(
-				$request_url,
-				'',
-				3,
-				1,
-				20,
-				$request_params
-			);
-		} else {
-			$request_params['timeout'] = 20; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
-			$response = wp_remote_get(
-				$request_url,
-				$request_params
-			);
-		}
+		$response = safe_wp_remote_get( $request_url, $request_params );
 
 		if ( is_wp_error( $response ) ) {
 			add_settings_error(

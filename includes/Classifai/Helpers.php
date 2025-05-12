@@ -672,7 +672,7 @@ function get_classification_mode(): string {
  */
 function safe_wp_remote_get( string $url, array $args = [] ) {
 	if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-		return vip_safe_wp_remote_get( $url, $args );
+		return vip_safe_wp_remote_get( $url, '', 3, 1, 20, $args );
 	}
 
 	wp_parse_args(

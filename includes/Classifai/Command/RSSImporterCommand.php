@@ -2,6 +2,8 @@
 
 namespace Classifai\Command;
 
+use function Classifai\safe_wp_remote_get;
+
 require_once ABSPATH . 'wp-admin/includes/media.php';
 require_once ABSPATH . 'wp-admin/includes/file.php';
 require_once ABSPATH . 'wp-admin/includes/image.php';
@@ -204,7 +206,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		$options['timeout']              = 60; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 
 		$request_url = 'https://mercury.postlight.com/parser?url=' . rawurlencode( $url );
-		$response    = wp_remote_get( $request_url, $options ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		$response    = safe_wp_remote_get( $request_url, $options ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );
