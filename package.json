@@ -57,7 +57,7 @@
     "choices.js": "^11.1.0",
     "classnames": "^2.5.1",
     "motion": "^12.4.10",
-    "react-router-dom": "^7.1.5",
+    "react-router-dom": "^7.5.2",
     "tippy.js": "^6.3.7"
   },
   "optionalDependencies": {
