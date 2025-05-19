@@ -206,7 +206,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 		$options['timeout']              = 60; // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 
 		$request_url = 'https://mercury.postlight.com/parser?url=' . rawurlencode( $url );
-		$response    = safe_wp_remote_get( $request_url, $options ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		$response    = safe_wp_remote_get( $request_url, $options );
 
 		if ( ! is_wp_error( $response ) ) {
 			$body = wp_remote_retrieve_body( $response );

@@ -722,7 +722,6 @@ class Personalizer extends Provider {
 	 */
 	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn = false;
-		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
 		$result = safe_wp_remote_get(
 			trailingslashit( $url ) . $this->status_endpoint,
 			[
