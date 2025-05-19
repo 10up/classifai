@@ -74,7 +74,7 @@ class RecommendedContent extends Feature {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
-			'classifai-plugin-classification-ibm-watson-js',
+			'classifai-recommended-content-block-variation',
 			CLASSIFAI_PLUGIN_URL . 'dist/recommended-content-block-variation.js',
 			get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
 			get_asset_info( 'recommended-content-block-variation', 'version' ),
@@ -216,6 +216,7 @@ class RecommendedContent extends Feature {
 			[
 				'posts_per_page' => count( $post__in ), // TODO: We may want to backfill if we have less than the requested number.
 				'post__in'       => array_unique( $post__in ),
+				'orderby'        => 'post__in',
 			]
 		);
 
