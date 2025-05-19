@@ -19,6 +19,9 @@ import { getChatGPTData } from '../../plugins/functions';
 				cy.enableFeature();
 				cy.selectProvider( provider );
 				cy.get( `#${ provider }_api_key` ).clear().type( 'password' );
+				cy.get(
+					'.processing-mode-radio-control input[value="automatic"]'
+				).check();
 				cy.allowFeatureToAdmin();
 				cy.get(
 					'.classifai-settings__user-based-opt-out input'
@@ -264,6 +267,9 @@ describe( `OpenAI ChatGPT Image Tag and Text Generator Tests`, () => {
 			cy.enableFeature();
 			cy.selectProvider( 'openai_chatgpt' );
 			cy.get( '#openai_chatgpt_api_key' ).clear().type( 'password' );
+			cy.get(
+				'.processing-mode-radio-control input[value="automatic"]'
+			).check();
 			cy.allowFeatureToAdmin();
 			cy.get( '.classifai-settings__user-based-opt-out input' ).uncheck();
 

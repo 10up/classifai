@@ -198,7 +198,10 @@ EOD;
 	 * @return array
 	 */
 	public function generate_image_tags( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -385,8 +388,9 @@ EOD;
 		}
 
 		return [
-			'tag_taxonomy' => array_key_first( $options ),
-			'provider'     => ComputerVision::ID,
+			'tag_taxonomy'    => array_key_first( $options ),
+			'processing_mode' => 'automatic',
+			'provider'        => ComputerVision::ID,
 		];
 	}
 
@@ -400,6 +404,8 @@ EOD;
 		$settings = $this->get_settings();
 
 		$new_settings['tag_taxonomy'] = $new_settings['tag_taxonomy'] ?? $settings['tag_taxonomy'];
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
 
 		return $new_settings;
 	}
@@ -430,6 +436,18 @@ EOD;
 		 * @return {array} Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $taxonomies, $this );
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**
