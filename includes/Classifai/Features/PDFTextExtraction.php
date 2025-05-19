@@ -225,12 +225,12 @@ class PDFTextExtraction extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
-		if ( ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
+		if ( null === $post || ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
 			return $form_fields;
 		}
 
