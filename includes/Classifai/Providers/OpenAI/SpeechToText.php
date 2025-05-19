@@ -1,6 +1,6 @@
 <?php
 /**
- * OpenAI Whisper (speech to text) integration
+ * OpenAI Speech to Text integration
  */
 
 namespace Classifai\Providers\OpenAI;
@@ -9,7 +9,7 @@ use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use WP_Error;
 
-class Whisper extends Provider {
+class SpeechToText extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
@@ -21,18 +21,11 @@ class Whisper extends Provider {
 	const ID = 'openai_whisper';
 
 	/**
-	 * OpenAI Whisper URL
+	 * OpenAI Audio API URL
 	 *
 	 * @var string
 	 */
-	protected $whisper_url = 'https://api.openai.com/v1/audio/';
-
-	/**
-	 * OpenAI Whisper model
-	 *
-	 * @var string
-	 */
-	protected $whisper_model = 'whisper-1';
+	protected $audio_url = 'https://api.openai.com/v1/audio/';
 
 	/**
 	 * Supported file formats
@@ -43,10 +36,8 @@ class Whisper extends Provider {
 		'mp3',
 		'mp4',
 		'mpeg',
-		'mpga',
-		'm4a',
 		'wav',
-		'webm',
+		'ogg',
 	];
 
 	/**
@@ -57,12 +48,36 @@ class Whisper extends Provider {
 	public $max_file_size = 25 * MB_IN_BYTES;
 
 	/**
-	 * OpenAI Whisper constructor.
+	 * OpenAI Speech to Text constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = $settings[ static::ID ]['model'] ?? 'gpt-4o-mini-transcribe';
+
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to change the model for certain use cases.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_speech_to_text_model
+		 *
+		 * @param {string} $model The current model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_speech_to_text_model', $model );
 	}
 
 	/**
@@ -72,7 +87,17 @@ class Whisper extends Provider {
 	 * @return string
 	 */
 	public function get_api_url( string $path = '' ): string {
-		return sprintf( '%s%s', trailingslashit( $this->whisper_url ), $path );
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_speech_to_text_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_speech_to_text_api_url', sprintf( '%s%s', trailingslashit( $this->audio_url ), $path ) );
 	}
 
 	/**
@@ -122,6 +147,7 @@ class Whisper extends Provider {
 	public function get_default_provider_settings(): array {
 		$common_settings = [
 			'api_key'       => '',
+			'model'         => 'gpt-4o-mini-transcribe',
 			'authenticated' => false,
 		];
 
@@ -139,6 +165,12 @@ class Whisper extends Provider {
 		$api_key_settings                            = $this->sanitize_api_key_settings( $new_settings, $settings );
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+
+		if ( in_array( $new_settings[ static::ID ]['model'], [ 'whisper-1', 'gpt-4o-mini-transcribe', 'gpt-4o-transcribe' ], true ) ) {
+			$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] );
+		} else {
+			$new_settings[ static::ID ]['model'] = 'gpt-4o-mini-transcribe';
+		}
 
 		return $new_settings;
 	}
@@ -196,12 +228,12 @@ class Whisper extends Provider {
 		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
 
 		/**
-		 * Filter the request body before sending to Whisper.
+		 * Filter the request body before sending to OpenAI.
 		 *
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Whisper.
+		 * @param {array} $body Request body that will be sent to OpenAI.
 		 * @param {int} $attachment_id ID of attachment we are transcribing.
 		 *
 		 * @return {array} Request body.
@@ -210,7 +242,7 @@ class Whisper extends Provider {
 			'classifai_whisper_transcribe_request_body',
 			[
 				'file'            => get_attached_file( $attachment_id ) ?? '',
-				'model'           => $this->whisper_model,
+				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,
 			],
