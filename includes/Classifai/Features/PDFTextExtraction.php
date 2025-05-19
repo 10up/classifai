@@ -230,7 +230,7 @@ class PDFTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
-		if ( $post === null || ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
+		if ( null === $post || ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
 			return $form_fields;
 		}
 

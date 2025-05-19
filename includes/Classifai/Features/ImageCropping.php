@@ -315,7 +315,7 @@ class ImageCropping extends Feature {
 	 * @return array
 	 */
 	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
-		if ( $post === null || ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
+		if ( null === $post || ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
 			return $form_fields;
 		}
 

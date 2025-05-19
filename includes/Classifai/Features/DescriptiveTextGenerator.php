@@ -294,9 +294,9 @@ class DescriptiveTextGenerator extends Feature {
 	 */
 	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
 		if (
-			$post === null ||
-			!$this->is_feature_enabled() ||
-			!wp_attachment_is_image( $post ) ||
+			null === $post ||
+			! $this->is_feature_enabled() ||
+			! wp_attachment_is_image( $post ) ||
 			empty( $this->get_alt_text_settings() )
 		) {
 			return $form_fields;
