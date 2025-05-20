@@ -89,21 +89,46 @@ const Prompt = wp.media.View.extend( {
 	 * @param {Number} postId The Post ID.
 	 * @param {String} provider ID of the Provider.
 	 */
-	pollResults: function( postId, provider ) {
-		this.heartbeatSendHandler = function ( event, data ) {
-			data.classifai_action = 'classifai_check_image_generation_results';
-			data.classifai_post_id = postId;
-			data.classifai_provider = provider;
-		}
+	pollResults: async function( postId, provider ) {
+		/**
+		 * Fires as soon as the `Generate Image` tab is in view.
+		 * This is so that we don't wait for the first heartbeat-tick
+		 * to trigger.
+		 *
+		 * If this calls retrieves the results, then the heartbeat polling
+		 * is skipped.
+		 */
+		const initPollResults = await jQuery.ajax( {
+			url: ajaxurl,
+			method: 'POST',
+			data: {
+				action: 'classifai_check_image_generation_results',
+				classifai_post_id: postId,
+				classifai_provider: provider,
+			}
+		} );
 
-		jQuery( document ).on( 'heartbeat-send', this.heartbeatSendHandler );
+		let resultData = false;
+
+		if ( initPollResults.success ) {
+			resultData = initPollResults.data;
+		} else {
+			this.heartbeatSendHandler = function ( event, data ) {
+				data.classifai_action = 'classifai_check_image_generation_results';
+				data.classifai_post_id = postId;
+				data.classifai_provider = provider;
+			}
+	
+			jQuery( document ).on( 'heartbeat-send', this.heartbeatSendHandler );
+		}
 
 		EventBus.on( 'classifai:stop-polling', () => {
 			jQuery( document ).off( 'heartbeat-send', this.heartbeatSendHandler );
 		} );
 
 		new GeneratedImagesContainer( {
-			isAsync: true
+			isAsync: true,
+			resultData,
 		} );
 	}
 } );

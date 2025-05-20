@@ -32,6 +32,7 @@ class Leonardo extends Provider {
 	 */
 	public function register() {
 		add_action( 'classifai_' . ImageGeneration::ID . '_media_template_additional_settings', [ $this, 'render_additional_media_template_settings' ], 10, 2 );
+		add_action( 'wp_ajax_classifai_check_image_generation_results', [ $this, 'poll_on_modal_load' ] );
 		add_filter( 'heartbeat_received', [ $this, 'poll_image_generation_results' ], 10, 2 );
 	}
 
@@ -210,6 +211,27 @@ class Leonardo extends Provider {
 		$option[ $post_id ][ $generation_id ] = $generation_data;
 
 		update_option( self::ASYNC_GENERATION_OPTION, $option );
+	}
+
+	/**
+	 * Ajax callback to retrieve image generation results.
+	 * If image is found to be generated here, then heartbeat
+	 * polling is skipped.
+	 */
+	public function poll_on_modal_load() {
+		$data = [
+			'classifai_action' => 'classifai_check_image_generation_results',
+			'classifai_post_id' => absint( $_POST['classifai_post_id'] ?? 0 ),
+			'classifai_provider' => sanitize_text_field( $_POST['classifai_provider'] ?? '' )
+		];
+
+		$response = $this->poll_image_generation_results( [], $data );
+
+		if ( empty( $response ) ) {
+			wp_send_json_error();
+		}
+
+		wp_send_json_success( $response );
 	}
 
 	/**

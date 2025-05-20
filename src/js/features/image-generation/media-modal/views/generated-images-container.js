@@ -22,16 +22,26 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	initialize: function ( options ) {
 		this.collection = new Images();
 
-		if ( options?.isAsync ) {
-			jQuery( document ).on( 'heartbeat-tick', ( event, data ) => {
-				if ( false === data.continue_polling ) {
-					EventBus.trigger('classifai:stop-polling');
-				}
+		const { resultData = false } = options;
 
-				if ( data.generated_images && Array.isArray( data.generated_images ) ) {
-					this.collection.reset( data.generated_images );
-				}
-			} );
+		if ( options?.isAsync ) {
+			if ( false !== resultData && resultData.generated_images && Array.isArray( resultData.generated_images ) ) {
+				// Defer until DOM is ready.
+				setTimeout( () => {
+					this.collection.reset( resultData.generated_images );
+				}, 0 );
+			} else {
+				jQuery( document ).on( 'heartbeat-tick', ( event, data ) => {
+					if ( false === data.continue_polling ) {
+						EventBus.trigger( 'classifai:stop-polling' );
+					}
+	
+					if ( data.generated_images && Array.isArray( data.generated_images ) ) {
+						this.collection.reset( data.generated_images );
+					}
+				} );
+			}
+
 		} else {
 			this.prompt = options.prompt;
 			this.collection.makeRequest( options );
