@@ -672,7 +672,24 @@ function get_classification_mode(): string {
  */
 function safe_wp_remote_get( string $url, array $args = [] ) {
 	if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-		return vip_safe_wp_remote_get( $url, $args );
+		$fallback_value = '';
+		$threshold      = 3;
+		$timeout        = 1;
+		$retry          = 20;
+
+		/**
+		 * Sophisticated extended version of wp_remote_get(). It is designed to more gracefully handle failure than wp_safe_remote_get() does.
+		 *
+		 * @param string $url            Required. The URL from which to fetch data.
+		 * @param string $fallback_value Optional. To set any of the next arguments, pass an empty string, '' for this argument.
+		 * @param int    $threshold      Optional. The number of fails required before subsequent requests automatically return the fallback value. This prevents continually making requests and receiving timeouts for a down or slow remote site. Accepts values between 1 and 10; defaults to 3.
+		 * @param int    $timeout        Optional. The number of seconds before the request times out. Accepts values between 1 and 3; defaults to 1.
+		 * @param int    $retry          Optional. This argument controls both the number of seconds before resetting the fail counter and the number of seconds to delay making new requests after the fail threshold is reached. Accepts values of 10 or higher; defaults to 20.
+		 * @param array  $args           Optional. Can pass several different arguments to wp_remote_request().
+		 *
+		 * @return array The filtered arguments.
+		 */
+		return vip_safe_wp_remote_get( $url, $fallback_value, $threshold, $timeout, $retry, $args );
 	}
 
 	wp_parse_args(
