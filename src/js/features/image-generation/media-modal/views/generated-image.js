@@ -34,7 +34,15 @@ const GeneratedImage = wp.media.View.extend( {
 	 * Render the view.
 	 */
 	render: function () {
-		this.$el.html( this.template( this.data ) );
+		const isRemote = this.data.url.startsWith( 'http://' ) || this.data.url.startsWith( 'https://' );
+		const processedData = {
+			...this.data,
+			url: isRemote
+				? this.data.url
+				: `data:image/png;base64,${ this.data.url }`,
+		};
+
+		this.$el.html( this.template( processedData ) );
 		return this;
 	},
 
@@ -48,10 +56,24 @@ const GeneratedImage = wp.media.View.extend( {
 		const self = this;
 		this.enableLoadingState();
 
-		const blob = await this.convertImageToBlob( this.data.url );
+		let blob;
+
+		if ( this.data.url.startsWith( 'http://' ) || this.data.url.startsWith( 'https://' ) ) {
+			// Fetch the remote image as a blob
+			const response = await fetch( this.data.url, { mode: 'cors' } );
+			if ( ! response.ok ) {
+				this.$( '.error' ).text( classifaiDalleData.errorText );
+				this.disableLoadingState();
+				return;
+			}
+			blob = await response.blob();
+		} else {
+			blob = await this.convertImageToBlob( this.data.url );
+		}
 
 		if ( ! blob ) {
 			this.$( '.error' ).text( classifaiDalleData.errorText );
+			this.disableLoadingState();
 			return;
 		}
 

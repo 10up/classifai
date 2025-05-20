@@ -24,6 +24,8 @@ class ImageGeneration extends Feature {
 	 */
 	const ID = 'feature_image_generation';
 
+	const ASYNC_IMAGE_GEN_REQUESTS_OPTION = 'classifai_image_generation_requests';
+
 	/**
 	 * Constructor.
 	 */
@@ -154,7 +156,7 @@ class ImageGeneration extends Feature {
 
 		$settings         = $this->get_settings();
 		$provider_id      = $settings['provider'];
-		$number_of_images = absint( $settings[ $provider_id ]['number_of_images'] );
+		$number_of_images = absint( $settings[ $provider_id ]['number_of_images'] ?? 1 );
 
 		add_submenu_page(
 			'upload.php',
@@ -184,7 +186,7 @@ class ImageGeneration extends Feature {
 
 		$settings         = $this->get_settings();
 		$provider_id      = $settings['provider'];
-		$number_of_images = absint( $settings[ $provider_id ]['number_of_images'] );
+		$number_of_images = absint( $settings[ $provider_id ]['number_of_images'] ?? 1 );
 
 		wp_enqueue_media();
 
@@ -276,7 +278,6 @@ class ImageGeneration extends Feature {
 
 		$settings          = $this->get_settings();
 		$provider_id       = $settings['provider'];
-		$number_of_images  = absint( $settings[ $provider_id ]['number_of_images'] );
 		$provider_instance = $this->get_feature_provider_instance( $provider_id );
 
 		$filterable_texts = apply_filters(
@@ -285,6 +286,7 @@ class ImageGeneration extends Feature {
 				'prompt_text'                  => __( 'Enter a prompt below to generate an image.', 'classifai' ),
 				'post_generation_instructions' => __( 'Once an image is generated, you can import it into your Media Library and then select to insert.', 'classifai' ),
 				'generate_image_text'          => __( 'Generate image', 'classifai' ),
+				'generated_images_text'        => __( 'Image generated from prompt:', 'classifai' ),
 			),
 			$this
 		);
@@ -312,13 +314,7 @@ class ImageGeneration extends Feature {
 			</div>
 			<div class="generated-images">
 				<h2 class="prompt-text hidden">
-					<?php
-					if ( $number_of_images > 1 ) {
-						esc_html_e( 'Images generated from prompt:', 'classifai' );
-					} else {
-						esc_html_e( 'Image generated from prompt:', 'classifai' );
-					}
-					?>
+					<?php echo esc_html( $filterable_texts['generated_images_text'] ); ?>
 					<span></span>
 				</h2>
 				<span class="spinner"></span>
@@ -335,7 +331,7 @@ class ImageGeneration extends Feature {
 		?>
 		<script type="text/html" id="tmpl-classifai-generated-image">
 			<div class="generated-image">
-				<img src="data:image/png;base64,{{{ data.url }}}" />
+				<img src="{{{ data.url }}}" />
 				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
 				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
 				<span class="spinner"></span>
@@ -407,6 +403,31 @@ class ImageGeneration extends Feature {
 		return [
 			'provider' => DallE::ID,
 		];
+	}
+
+	/**
+	 * Store async image generation request metadata.
+	 *
+	 * @param int    $post_id      The post/page ID from which the request was triggered.
+	 * @param string $provider_id  The ID of the image generation provider (e.g., 'leonardo_ai').
+	 * @param string $prompt       Image generation text prompt.
+	 * @param string $generation_id The generation ID returned by the provider.
+	 */
+	public function store_async_generation_request( int $post_id, string $provider_id, string $prompt, string $generation_id ) {
+		$existing = get_option( self::ASYNC_IMAGE_GEN_REQUESTS_OPTION, [] );
+
+		if ( ! isset( $existing[ $post_id ] ) ) {
+			$existing[ $post_id ] = [];
+		}
+
+		$existing[ $post_id ][] = [
+			'generation_id' => $generation_id,
+			'timestamp'     => time(),
+			'provider_id'   => $provider_id,
+			'prompt'        => $prompt,
+		];
+
+		update_option( self::ASYNC_IMAGE_GEN_REQUESTS_OPTION, $existing );
 	}
 
 	/**

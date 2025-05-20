@@ -47,7 +47,7 @@ class DallE extends Provider {
 	public function register() {
 		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 		add_filter( 'classifai_' . ImageGeneration::ID . '_filterable_texts', [ $this, 'adjust_filterable_texts' ], 10, 2 );
-		add_filter( 'classifai_' . ImageGeneration::ID . '_media_template_additional_settings', [ $this, 'render_additional_media_template_settings' ], 10, 2 );
+		add_action( 'classifai_' . ImageGeneration::ID . '_media_template_additional_settings', [ $this, 'render_additional_media_template_settings' ], 10, 2 );
 	}
 
 	/**
@@ -70,6 +70,7 @@ class DallE extends Provider {
 			$text_array['prompt_text']                  = esc_html__( 'Enter a prompt below to generate images.', 'classifai' );
 			$text_array['post_generation_instructions'] = esc_html__( 'Once images are generated, choose one or more of those to import into your Media Library and then choose one image to insert.', 'classifai' );
 			$text_array['generate_image_text']          = esc_html__( 'Generate images', 'classifai' );
+			$text_array['generated_images_text']        = esc_html__( 'Images generated from prompt:', 'classifai' );
 		}
 
 		return $text_array;

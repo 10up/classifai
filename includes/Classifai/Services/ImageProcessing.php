@@ -59,6 +59,7 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\OpenAI\DallE',
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\OllamaMultimodal',
+				'Classifai\Providers\Leonardo\Leonardo',
 			]
 		);
 	}

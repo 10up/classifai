@@ -2,6 +2,7 @@
 
 import Images from '../collections/images';
 import GeneratedImage from './generated-image';
+import EventBus from '../events/event-bus';
 
 /**
  * View to render out the generated images container.
@@ -20,12 +21,25 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 	 */
 	initialize: function ( options ) {
 		this.collection = new Images();
-		this.prompt = options.prompt;
+
+		if ( options?.isAsync ) {
+			jQuery( document ).on( 'heartbeat-tick', ( event, data ) => {
+				if ( false === data.continue_polling ) {
+					EventBus.trigger('classifai:stop-polling');
+				}
+
+				if ( data.generated_images && Array.isArray( data.generated_images ) ) {
+					this.collection.reset( data.generated_images );
+				}
+			} );
+		} else {
+			this.prompt = options.prompt;
+			this.collection.makeRequest( options );
+		}
 
 		this.listenTo( this.collection, 'reset', this.renderAll );
 		this.listenTo( this.collection, 'error', this.error );
 
-		this.collection.makeRequest( options );
 		this.render();
 	},
 

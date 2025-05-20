@@ -13,10 +13,14 @@ import { PluginArea } from '@wordpress/plugins';
 import { getFeature, getScope, isProviderConfigured } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { useFeatureContext } from '../feature-settings/context';
+
+/**
+ * Providers
+ */
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
 import { GoogleAIGeminiAPISettings } from './google-gemini-api';
 import { AzureOpenAISettings } from './azure-openai';
-import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
 import { OpenAIModerationSettings } from './openai-moderation';
 import { OpenAIEmbeddingsSettings } from './openai-embeddings';
@@ -32,6 +36,7 @@ import { XAIGrokSettings } from './xai-grok';
 import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
+import { LeonardoSettings } from './leonardo/leonardo';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -103,6 +108,9 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'ollama_embeddings':
 			return <OllamaEmbeddingsSettings isConfigured={ isConfigured } />;
+
+		case 'leonardo':
+			return <LeonardoSettings isConfigured={ isConfigured } />
 
 		default:
 			return null;
