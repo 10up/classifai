@@ -34,6 +34,8 @@ class Leonardo extends Provider {
 		add_action( 'classifai_' . ImageGeneration::ID . '_media_template_additional_settings', [ $this, 'render_additional_media_template_settings' ], 10, 2 );
 		add_action( 'wp_ajax_classifai_check_image_generation_results', [ $this, 'poll_on_modal_load' ] );
 		add_filter( 'heartbeat_received', [ $this, 'poll_image_generation_results' ], 10, 2 );
+		add_action( 'classifai_override_generated_image_template', [ $this, 'render_field_to_image_result' ] );
+		add_action( 'wp_ajax_classifai_update_pending_list', [ $this, 'update_pending_list' ] );
 	}
 
 	/**
@@ -160,7 +162,6 @@ class Leonardo extends Provider {
 			return;
 		}
 
-		$generation_id = '';
 		$response_data = $response['sdGenerationJob'];
 		$generation_id = $response_data['generationId'];
 
@@ -220,18 +221,25 @@ class Leonardo extends Provider {
 	 */
 	public function poll_on_modal_load() {
 		$data = [
-			'classifai_action' => 'classifai_check_image_generation_results',
-			'classifai_post_id' => absint( $_POST['classifai_post_id'] ?? 0 ),
+			'classifai_action'   => 'classifai_check_image_generation_results',
+			'classifai_post_id'  => absint( $_POST['classifai_post_id'] ?? 0 ),
 			'classifai_provider' => sanitize_text_field( $_POST['classifai_provider'] ?? '' )
 		];
 
 		$response = $this->poll_image_generation_results( [], $data );
 
-		if ( empty( $response ) ) {
-			wp_send_json_error();
+		$contine_polling = isset( $response['continue_polling'] ) && $response['continue_polling'];
+		$has_images      = isset( $response['generated_images'] ) && ! empty( $response['generated_images'] );
+
+		if ( empty( $response ) || $contine_polling ) {
+			wp_send_json_error( [
+				'continue_polling' => true
+			] );
 		}
 
-		wp_send_json_success( $response );
+		if ( $has_images ) {
+			wp_send_json_success( $response );
+		}
 	}
 
 	/**
@@ -302,16 +310,71 @@ class Leonardo extends Provider {
 				$image_url = $generated_image['url'];
 
 				$image_results[] = [
-					'id'  => $image_id,
-					'url' => $image_url,
+					'id'     => $image_id,
+					'url'    => $image_url,
+					'gen_id' => $generation_id,
 				];
 			}
 		}
+
+		if ( ! isset( $option[ $post_id ][ $generation_id ]['results'] ) ) {
+			$option[ $post_id ][ $generation_id ]['results'] = [];
+		}
+
+		foreach ( $image_results as $image_result ) {
+			if ( ! in_array( $image_result['id'], $option[ $post_id ][ $generation_id ]['results'], true ) ) {
+				$option[ $post_id ][ $generation_id ]['results'][] = $image_result['id'];
+			}
+		}
+
+		update_option( self::ASYNC_GENERATION_OPTION, $option );
 
 		$response['continue_polling'] = in_array( false, $continue_polling, true );
 
 		$response['generated_images'] = $image_results;
 
 		return $response;
+	}
+
+	public function render_field_to_image_result() {
+		?>
+			<script type="text/html" id="tmpl-classifai-generated-image">
+				<div class="generated-image">
+					<img src="{{{ data.url }}}" />
+					<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
+					<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
+					<span class="spinner"></span>
+					<span class="error"></span>
+					<input type="hidden" class="classifai-generated-image-id" value="{{{ data.id }}}" />
+					<input type="hidden" class="classifai-generation-id" value="{{{ data.gen_id }}}" />
+				</div>
+			</script>
+		<?php
+	}
+
+	public function update_pending_list() {
+		$post_id       = absint( $_POST['post_id'] ?? 0 );
+		$image_id      = sanitize_text_field( $_POST['generated_image_id'] ?? '' );
+		$generation_id = sanitize_text_field( $_POST['generation_id'] ?? '' );
+		$option        = get_option( self::ASYNC_GENERATION_OPTION, [] );
+
+		if ( ! isset( $option[ $post_id ] ) ) {
+			return;
+		}
+
+		$generated_images = $option[ $post_id ];
+
+		if ( empty( $generated_images[ $generation_id ]['results'] ) ) {
+			return;
+		}
+
+		$results = $generated_images[ $generation_id ]['results'];
+		$index   = array_search( $image_id, $results );
+
+		if ( $index ) {
+			unset( $option[ $post_id ][ $generation_id ]['results'][ $index ] );
+		}
+
+		update_option( self::ASYNC_GENERATION_OPTION, $option );
 	}
 }

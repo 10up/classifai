@@ -329,15 +329,19 @@ class ImageGeneration extends Feature {
 		// Template for a single generated image.
 		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation,PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 		?>
-		<script type="text/html" id="tmpl-classifai-generated-image">
-			<div class="generated-image">
-				<img src="{{{ data.url }}}" />
-				<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
-				<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
-				<span class="spinner"></span>
-				<span class="error"></span>
-			</div>
-		</script>
+		<?php if ( has_action( 'classifai_override_generated_image_template' ) ) : ?>
+			<?php do_action( 'classifai_override_generated_image_template', $this ); ?>
+		<?php else : ?>
+			<script type="text/html" id="tmpl-classifai-generated-image">
+				<div class="generated-image">
+					<img src="{{{ data.url }}}" />
+					<button type="button" class="components-button button-secondary button-import"><?php esc_html_e( 'Import into Media Library', 'classifai' ); ?></button>
+					<button type="button" class="components-button is-tertiary button-import-insert"><?php esc_html_e( 'Import and Insert', 'classifai' ); ?></button>
+					<span class="spinner"></span>
+					<span class="error"></span>
+				</div>
+			</script>
+		<?php endif; ?>
 		<?php
 		/* phpcs:enable WordPressVIPMinimum.Security.Mustache.OutputNotation */
 	}
