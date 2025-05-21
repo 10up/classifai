@@ -165,7 +165,7 @@ class Leonardo extends Provider {
 		$response_data = $response['sdGenerationJob'];
 		$generation_id = $response_data['generationId'];
 
-		$this->save_async_image_generation_response( absint( $args['post_id'] ), $generation_id, $prompt );
+		$this->save_async_image_generation_response( $generation_id, $prompt );
 	}
 
 	/**
@@ -191,25 +191,25 @@ class Leonardo extends Provider {
 	 * This saved data will be used to perform interval polling to check
 	 * for results.
 	 *
-	 * @param int    $post_id       The Post ID from where the request was initiated.
 	 * @param string $generation_id The ID returned by the provider that will be later
 	 *                              usedto fetch the result.
 	 * @param string $prompt        The image generation text prompt.
 	 */
-	public function save_async_image_generation_response( int $post_id, string $generation_id, string $prompt ) {
+	public function save_async_image_generation_response( string $generation_id, string $prompt ) {
 		$option = get_option( self::ASYNC_GENERATION_OPTION, [] );
 
-		if ( ! isset( $option[ $post_id ] ) ) {
-			$option[ $post_id ] = [];
+		if ( ! isset( $option[ $generation_id ] ) ) {
+			$option[ $generation_id ] = [];
 		}
 
 		$generation_data = [
 			'timestamp' => time(),
 			'prompt'    => $prompt,
+			'status'    => 'PENDING',
 			'results'   => [],
 		];
 
-		$option[ $post_id ][ $generation_id ] = $generation_data;
+		$option[ $generation_id ] = $generation_data;
 
 		update_option( self::ASYNC_GENERATION_OPTION, $option );
 	}
@@ -223,7 +223,7 @@ class Leonardo extends Provider {
 		$data = [
 			'classifai_action'   => 'classifai_check_image_generation_results',
 			'classifai_post_id'  => absint( $_POST['classifai_post_id'] ?? 0 ),
-			'classifai_provider' => sanitize_text_field( $_POST['classifai_provider'] ?? '' )
+			'classifai_provider' => sanitize_text_field( wp_unslash( $_POST['classifai_provider'] ?? '' ) ),
 		];
 
 		$response = $this->poll_image_generation_results( [], $data );
@@ -232,9 +232,11 @@ class Leonardo extends Provider {
 		$has_images      = isset( $response['generated_images'] ) && ! empty( $response['generated_images'] );
 
 		if ( empty( $response ) || $contine_polling ) {
-			wp_send_json_error( [
-				'continue_polling' => true
-			] );
+			wp_send_json_error(
+				[
+					'continue_polling' => true,
+				]
+			);
 		}
 
 		if ( $has_images ) {
@@ -255,20 +257,17 @@ class Leonardo extends Provider {
 			return $response;
 		}
 
-		$post_id  = absint( $data['classifai_post_id'] );
 		$provider = sanitize_text_field( $data['classifai_provider'] );
 
-		if ( self::ID !== $provider || ! $post_id ) {
+		if ( self::ID !== $provider ) {
 			return $response;
 		}
 
 		$option = get_option( self::ASYNC_GENERATION_OPTION, [] );
 
-		if ( empty( $option[ $post_id ] ) || ! is_array( $option[ $post_id ] ) ) {
+		if ( empty( $option ) ) {
 			return $response;
 		}
-
-		$generated_images = $option[ $post_id ] ?? [];
 
 		/** @var \Classifai\Features\ImageGeneration $feature */
 		$image_generation = new ImageGeneration();
@@ -282,7 +281,7 @@ class Leonardo extends Provider {
 		$image_results    = [];
 		$continue_polling = [];
 
-		foreach ( $generated_images as $generation_id => $generation_data ) {
+		foreach ( $option as $generation_id => $generation_data ) {
 			if ( ! $generation_id ) {
 				continue;
 			}
@@ -298,6 +297,7 @@ class Leonardo extends Provider {
 				continue;
 			}
 
+			// We send this to heartbeat to continue polling until the results are ready.
 			if ( 'COMPLETE' !== $response['generations_by_pk']['status'] ) {
 				$continue_polling[] = true;
 				continue;
@@ -305,37 +305,75 @@ class Leonardo extends Provider {
 
 			$generated_image_store = $response['generations_by_pk']['generated_images'];
 
+			/**
+			 * This is not the 'status' returned by the provider.
+			 * We set this flag to determine which images are pending
+			 * to be imported to the media library. With the help of this
+			 * flag, we only preview images that are not already imported.
+			 */
+			$is_completed = 'COMPLETE' === $generation_data['status'];
+
 			foreach ( $generated_image_store as $generated_image ) {
-				$image_id  = $generated_image['id'];
+				/**
+				 * This ID is unique to the image generated. In case multiple
+				 * images are generated, each image will have a unique ID.
+				 */
+				$image_id = $generated_image['id'];
+
+				// The image URL. The Media modal uses this to render a preview.
 				$image_url = $generated_image['url'];
 
+				/**
+				 * If the image ID is no longer present in the option, and if our custom
+				 * `status` is marked as complete, it means the image is already imported.
+				 */
+				if ( ! in_array( $image_id, $option[ $generation_id ]['results'], true ) && $is_completed ) {
+					continue;
+				}
+
+				// This is for the Media modal to render the preview.
 				$image_results[] = [
 					'id'     => $image_id,
 					'url'    => $image_url,
 					'gen_id' => $generation_id,
 				];
 			}
+
+			// We mark the custom `status` flag as empty.
+			$option[ $generation_id ]['status'] = 'COMPLETE';
 		}
 
-		if ( ! isset( $option[ $post_id ][ $generation_id ]['results'] ) ) {
-			$option[ $post_id ][ $generation_id ]['results'] = [];
+		if ( ! isset( $option[ $generation_id ]['results'] ) ) {
+			$option[ $generation_id ]['results'] = [];
 		}
 
 		foreach ( $image_results as $image_result ) {
-			if ( ! in_array( $image_result['id'], $option[ $post_id ][ $generation_id ]['results'], true ) ) {
-				$option[ $post_id ][ $generation_id ]['results'][] = $image_result['id'];
+			if ( ! in_array( $image_result['id'], $option[ $generation_id ]['results'], true ) ) {
+				/**
+				 * We store each image ID in the option. This will be used to determine
+				 * which image is already imported, and which image should be skipped
+				 * from preview.
+				 */
+				$option[ $generation_id ]['results'][] = $image_result['id'];
 			}
 		}
 
 		update_option( self::ASYNC_GENERATION_OPTION, $option );
 
+		/**
+		 * The Media modal uses this information to determine whether to continue
+		 * polling, and to also render the preview images for import.
+		 */
 		$response['continue_polling'] = in_array( false, $continue_polling, true );
-
 		$response['generated_images'] = $image_results;
 
 		return $response;
 	}
 
+	/**
+	 * Renders addition `hidden` fields that contains the generation ID of the request,
+	 * and the image ID unique to the generated image.
+	 */
 	public function render_field_to_image_result() {
 		?>
 			<script type="text/html" id="tmpl-classifai-generated-image">
@@ -352,27 +390,26 @@ class Leonardo extends Provider {
 		<?php
 	}
 
+	/**
+	 * Callback to update option once an image is imported.
+	 *
+	 * Once an image is imported, we update the option so that the imported
+	 * image is no longer shown for preview.
+	 */
 	public function update_pending_list() {
-		$post_id       = absint( $_POST['post_id'] ?? 0 );
-		$image_id      = sanitize_text_field( $_POST['generated_image_id'] ?? '' );
-		$generation_id = sanitize_text_field( $_POST['generation_id'] ?? '' );
+		$image_id      = sanitize_text_field( wp_unslash( $_POST['generated_image_id'] ?? '' ) );
+		$generation_id = sanitize_text_field( wp_unslash( $_POST['generation_id'] ?? '' ) );
 		$option        = get_option( self::ASYNC_GENERATION_OPTION, [] );
 
-		if ( ! isset( $option[ $post_id ] ) ) {
+		if ( empty( $option[ $generation_id ]['results'] ) ) {
 			return;
 		}
 
-		$generated_images = $option[ $post_id ];
-
-		if ( empty( $generated_images[ $generation_id ]['results'] ) ) {
-			return;
-		}
-
-		$results = $generated_images[ $generation_id ]['results'];
-		$index   = array_search( $image_id, $results );
+		$results = $option[ $generation_id ]['results'];
+		$index   = array_search( $image_id, $results, true );
 
 		if ( $index ) {
-			unset( $option[ $post_id ][ $generation_id ]['results'][ $index ] );
+			unset( $option[ $generation_id ]['results'][ $index ] );
 		}
 
 		update_option( self::ASYNC_GENERATION_OPTION, $option );
