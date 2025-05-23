@@ -11,9 +11,12 @@ import domReady from '@wordpress/dom-ready';
 import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 
 domReady( () => {
-	const{ default_template = 'title-date' } = classifaiRecommendedContentSettings;
+	const { default_template: defaultTemplate = 'title-date' } =
+		classifaiRecommendedContentSettings;
 	const registeredVariations = wp.blocks.getBlockVariations( 'core/query' );
-	const variation =  registeredVariations.find( variation => variation.name === default_template );
+	const variation = registeredVariations.find(
+		( __variation ) => __variation.name === defaultTemplate
+	);
 
 	registerBlockVariation( 'core/query', {
 		name: 'classifai/recommended-content',
@@ -39,4 +42,3 @@ domReady( () => {
 		scope: [ 'inserter' ],
 	} );
 } );
-

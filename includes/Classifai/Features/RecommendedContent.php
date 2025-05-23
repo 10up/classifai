@@ -84,7 +84,7 @@ class RecommendedContent extends Feature {
 
 		$settings = $this->get_settings();
 		$data     = [
-			'default_template' => $settings['default_template']
+			'default_template' => $settings['default_template'],
 		];
 
 		wp_add_inline_script(

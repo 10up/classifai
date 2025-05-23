@@ -38,14 +38,16 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 	const { featureName } = useFeatureContext();
 	const providerName = 'openai_embeddings';
 	const allSettings = useSelect(
-		( select ) =>
-			select( STORE_NAME ).getFeatureSettings() || {}
+		( select ) => select( STORE_NAME ).getFeatureSettings() || {}
 	);
 	const providerSettings = allSettings[ providerName ];
-	const { setProviderSettings, setFeatureSettings } = useDispatch( STORE_NAME );
+	const { setProviderSettings, setFeatureSettings } =
+		useDispatch( STORE_NAME );
 	const onChange = ( data ) => setProviderSettings( providerName, data );
-	const blockVariations = useSelect( select => select( coreStore ).getBlockVariations( 'core/query' ) );
-	const defaultTemplate = allSettings['default_template'];
+	const blockVariations = useSelect( ( select ) =>
+		select( coreStore ).getBlockVariations( 'core/query' )
+	);
+	const defaultTemplate = allSettings.default_template;
 	const [ focusedTemplate, setFocusedTemplate ] = useState( defaultTemplate );
 	const [ isTemplateInFocus, setIsTemplateInFocus ] = useState( false );
 
@@ -54,7 +56,7 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 		width: '120px',
 		borderRadius: '6px',
 		cursor: 'pointer',
-	}
+	};
 
 	return (
 		<>
@@ -79,40 +81,75 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 							max="100"
 						/>
 					</SettingsRow>
-					<SettingsRow label={ __( 'Default Template', 'classifai' ) }>
+					<SettingsRow
+						label={ __( 'Default Template', 'classifai' ) }
+					>
 						<Flex align="normal" justify="start" gap={ 2 }>
-							{ blockVariations.map( variation => (
+							{ blockVariations.map( ( variation, index ) => (
 								<FlexItem
+									key={ index }
 									role="button"
 									tabIndex="0"
 									onFocus={ () => {
 										setFocusedTemplate( variation.name );
 										setIsTemplateInFocus( true );
 									} }
-									onBlur={ () => setIsTemplateInFocus( false ) }
+									onBlur={ () =>
+										setIsTemplateInFocus( false )
+									}
 									onKeyDown={ ( e ) => {
-										if ( 'Space' === e.code || 'Enter' === e.code) {
+										if (
+											'Space' === e.code ||
+											'Enter' === e.code
+										) {
 											e.preventDefault();
-											setFeatureSettings({ default_template: variation.name });
+											setFeatureSettings( {
+												default_template:
+													variation.name,
+											} );
 										}
-									}}
+									} }
 									style={ {
 										...iconWrapperStyle,
-										borderColor: defaultTemplate === variation.name ? 'var(--wp-admin-theme-color)' : '#e0e0e0',
-										borderWidth: defaultTemplate === variation.name && '2px',
-										backgroundColor: defaultTemplate === variation.name && 'color-mix(in srgb, var(--wp-admin-theme-color) 10%, transparent)',
-										outline: isTemplateInFocus && focusedTemplate === variation.name && '2px solid var(--wp-admin-theme-color)',
+										borderColor:
+											defaultTemplate === variation.name
+												? 'var(--wp-admin-theme-color)'
+												: '#e0e0e0',
+										borderWidth:
+											defaultTemplate ===
+												variation.name && '1px',
+										backgroundColor:
+											defaultTemplate ===
+												variation.name &&
+											'color-mix(in srgb, var(--wp-admin-theme-color) 10%, transparent)',
+										outline:
+											isTemplateInFocus &&
+											focusedTemplate ===
+												variation.name &&
+											'2px solid var(--wp-admin-theme-color)',
 									} }
-									onClick={ () => setFeatureSettings( { default_template: variation.name } ) }
+									onClick={ () =>
+										setFeatureSettings( {
+											default_template: variation.name,
+										} )
+									}
 								>
 									<Icon
 										icon={ variation.icon }
 										size={ 80 }
-										{ ...( defaultTemplate === variation.name && {
+										{ ...( defaultTemplate ===
+											variation.name && {
 											fill: 'var(--wp-admin-theme-color)',
 										} ) }
 									/>
-									<span style={ { display: "block", padding: '0 10px 10px 10px' } }>{ variation.title }</span>
+									<span
+										style={ {
+											display: 'block',
+											padding: '0 10px 10px 10px',
+										} }
+									>
+										{ variation.title }
+									</span>
 								</FlexItem>
 							) ) }
 						</Flex>
