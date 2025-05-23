@@ -65,7 +65,8 @@ class RecommendedContent extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => OpenAIEmbeddings::ID,
+			'provider'         => OpenAIEmbeddings::ID,
+			'default_template' => 'title-date',
 		];
 	}
 
@@ -79,6 +80,19 @@ class RecommendedContent extends Feature {
 			get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
 			get_asset_info( 'recommended-content-block-variation', 'version' ),
 			true
+		);
+
+		$settings = $this->get_settings();
+		$data     = [
+			'default_template' => $settings['default_template']
+		];
+
+		wp_add_inline_script(
+			'classifai-recommended-content-block-variation',
+			sprintf(
+				'const classifaiRecommendedContentSettings = %s',
+				wp_json_encode( $data )
+			)
 		);
 	}
 
