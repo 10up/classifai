@@ -150,7 +150,10 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return array
 	 */
 	public function generate_image_alt_tags( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -288,12 +291,13 @@ class DescriptiveTextGenerator extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
 		if (
+			null === $post ||
 			! $this->is_feature_enabled() ||
 			! wp_attachment_is_image( $post ) ||
 			empty( $this->get_alt_text_settings() )
@@ -344,6 +348,18 @@ class DescriptiveTextGenerator extends Feature {
 	}
 
 	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
+	}
+
+	/**
 	 * Get the description for the enable field.
 	 *
 	 * @return string
@@ -390,6 +406,7 @@ class DescriptiveTextGenerator extends Feature {
 				'caption'     => 0,
 				'description' => 0,
 			],
+			'processing_mode'         => 'automatic',
 			'provider'                => ComputerVision::ID,
 		];
 	}
@@ -444,6 +461,8 @@ class DescriptiveTextGenerator extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['descriptive_text_fields'] = array_map( 'sanitize_text_field', $new_settings['descriptive_text_fields'] ?? $settings['descriptive_text_fields'] );
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
 
 		return $new_settings;
 	}
