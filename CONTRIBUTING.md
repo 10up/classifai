@@ -38,6 +38,7 @@ The `develop` branch is the development branch which means it contains the next 
 1. Props: update `CREDITS.md` file with any new contributors, confirm maintainers are accurate.
 1. New files: Check to be sure any new files/paths that are unnecessary in the production version are included in `.gitattributes`.
 1. Readme updates: Make any other readme changes as necessary in `README.md` and `readme.txt`.
+1. Features + Providers: If there is a new feature, new provider, or new intersection of the two then ensure that's added to our [documentation](https://github.com/10up/classifai/blob/develop/hookdocs/feature-provider-support.md) and the [Choose Your AI Platforms page](https://classifaiplugin.com/choose-your-platforms/).
 1. Merge: Make a non-fast-forward merge from your release branch to `develop` (or merge the pull request), then do the same for `develop` into `trunk` (`git checkout trunk && git merge --no-ff develop`). `trunk` contains the stable development version.
 1. Push: Push your trunk branch to GitHub (e.g. `git push origin trunk`).
 1. [Wait for build](https://xkcd.com/303/): Head to the [Actions](https://github.com/10up/classifai/actions) tab in the repo and wait for it to finish if it hasn't already. If it doesn't succeed, figure out why and start over.
