@@ -3,6 +3,8 @@
  */
 import { Slot } from '@wordpress/components';
 import { PluginArea } from '@wordpress/plugins';
+import { registerPlugin } from '@wordpress/plugins';
+import { Fill } from '@wordpress/components';
 
 /**
  * Internal dependencies
