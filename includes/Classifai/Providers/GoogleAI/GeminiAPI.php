@@ -30,7 +30,7 @@ class GeminiAPI extends Provider {
 	protected $googleai_url = 'https://generativelanguage.googleapis.com/v1beta';
 
 	/**
-	 * GeminiAPI model
+	 * Gemini API model
 	 *
 	 * @var string
 	 */
