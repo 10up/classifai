@@ -205,8 +205,10 @@ class RecommendedContent extends Feature {
 				break;
 		}
 
-		// If we have no matches, don't modify the query.
+		// If we have no matches, remove the current post from the query
+		// but otherwise keep the query as is.
 		if ( empty( $post__in ) ) {
+			$query_vars['post__not_in'] = [ $post_id ];
 			return $query_vars;
 		}
 
