@@ -409,6 +409,8 @@ class Images extends Provider {
 						}
 					}
 				}
+			} elseif ( is_wp_error( $response ) ) {
+				return $response;
 			}
 		}
 
