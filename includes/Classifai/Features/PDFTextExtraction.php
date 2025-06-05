@@ -190,6 +190,13 @@ class PDFTextExtraction extends Feature {
 	 * @param int $attachment_id Attachment ID.
 	 */
 	public function read_pdf( int $attachment_id ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
+			return;
+		}
+
 		$this->run( $attachment_id, 'read_pdf' );
 	}
 
@@ -225,12 +232,12 @@ class PDFTextExtraction extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
-		if ( ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
+		if ( null === $post || ! $this->is_feature_enabled() || ! attachment_is_pdf( $post ) ) {
 			return $form_fields;
 		}
 
@@ -269,8 +276,35 @@ class PDFTextExtraction extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => ComputerVision::ID,
+			'processing_mode' => 'automatic',
+			'provider'        => ComputerVision::ID,
 		];
+	}
+
+	/**
+	 * Sanitizes the default feature settings.
+	 *
+	 * @param array $new_settings Settings being saved.
+	 * @return array
+	 */
+	public function sanitize_default_feature_settings( array $new_settings ): array {
+		$settings = $this->get_settings();
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+
+		return $new_settings;
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**

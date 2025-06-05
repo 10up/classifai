@@ -151,12 +151,12 @@ class AudioTranscriptsGeneration extends Feature {
 	/**
 	 * Add new buttons to the media modal.
 	 *
-	 * @param array    $form_fields Existing form fields.
-	 * @param \WP_Post $attachment Attachment object.
+	 * @param array         $form_fields Existing form fields.
+	 * @param \WP_Post|null $attachment  Attachment object.
 	 * @return array
 	 */
-	public function add_buttons_to_media_modal( array $form_fields, \WP_Post $attachment ): array {
-		if ( ! $this->should_process( $attachment->ID ) ) {
+	public function add_buttons_to_media_modal( array $form_fields, ?\WP_Post $attachment ): array {
+		if ( null === $attachment || ! $this->should_process( $attachment->ID ) ) {
 			return $form_fields;
 		}
 
