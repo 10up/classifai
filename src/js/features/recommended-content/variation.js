@@ -37,7 +37,7 @@ domReady( () => {
 			},
 		},
 		allowedControls: [ 'order', 'postCount' ],
-		innerBlocks: variation.innerBlocks,
+		innerBlocks: variation.innerBlocks.filter( innerBlock => 'core/post-template' === innerBlock[0] ),
 		isActive: [ 'namespace' ],
 		scope: [ 'inserter' ],
 	} );
