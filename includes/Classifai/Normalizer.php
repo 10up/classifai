@@ -23,7 +23,21 @@ class Normalizer {
 	 * @return string
 	 */
 	public function normalize( $post_id, $post_content = '' ) {
-		$post         = get_post( $post_id );
+		$post = get_post( $post_id );
+
+		// Remove any query blocks from the content.
+		// This is to avoid content from other posts getting added.
+		if ( empty( $post_content ) && has_block( 'core/query', $post->post_content ) ) {
+			$blocks       = parse_blocks( $post->post_content );
+			$blocks       = array_filter(
+				$blocks,
+				function ( $block ) {
+					return 'core/query' !== $block['blockName'];
+				}
+			);
+			$post_content = serialize_blocks( $blocks );
+		}
+
 		$post_content = empty( $post_content ) ? apply_filters( 'the_content', $post->post_content ) : $post_content;
 		$post_title   = apply_filters( 'the_title', $post->post_title );
 
