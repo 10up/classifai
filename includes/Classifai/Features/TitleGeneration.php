@@ -35,6 +35,13 @@ class TitleGeneration extends Feature {
 	public $prompt = 'Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.';
 
 	/**
+	 * Prompt for generating titles for WooCommerce Products.
+	 *
+	 * @var string
+	 */
+	public $woo_prompt = 'Write an SEO-friendly, engaging product title that encourages clicks and purchases. Use key details like product type, attributes, and categories while keeping it within 40 to 60 characters.';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
