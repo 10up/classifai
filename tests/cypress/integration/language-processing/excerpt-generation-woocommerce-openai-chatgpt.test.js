@@ -9,15 +9,10 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		cy.get( '.settings-allowed-post-types input#post' ).check();
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
-		cy.activateWooCommerce();
 	} );
 
 	beforeEach( () => {
 		cy.login();
-	} );
-
-	after( () => {
-		cy.deactivateWooCommerce();
 	} );
 
 	it( 'Enable OpenAI ChatGPT "Language Processing" excerpt settings', () => {
@@ -34,6 +29,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	} );
 
 	it( 'Can generate and insert product short description (Classic Editor)', () => {
+		cy.activateWooCommerce();
 		cy.enableClassicEditor();
 
 		const expectedResponse = 'Hello there, how may I assist you today?';
@@ -72,6 +68,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 			}
 		} );
 
+		cy.deactivateWooCommerce();
 		cy.disableClassicEditor();
 	} );
 } );

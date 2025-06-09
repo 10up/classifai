@@ -695,16 +695,9 @@ Cypress.Commands.add( 'allowFeatureToAdmin', () => {
  */
 Cypress.Commands.add( 'activateWooCommerce', () => {
 	cy.visit( '/wp-admin/plugins.php' );
-
-	// Check if the activation link exists
-	cy.get( '#the-list tr[data-slug="woocommerce"]' ).then( ( $tr ) => {
-		if ( $tr.find( '.activate a' ).length > 0 ) {
-			cy.get(
-				'#the-list tr[data-slug="woocommerce"] .activate a'
-			).click();
-			cy.get(
-				'#the-list tr[data-slug="woocommerce"] .deactivate a'
-			).should( 'exist' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-woocommerce' ).length > 0 ) {
+			cy.get( '#activate-woocommerce' ).click();
 		}
 	} );
 } );
@@ -714,17 +707,11 @@ Cypress.Commands.add( 'activateWooCommerce', () => {
  */
 Cypress.Commands.add( 'deactivateWooCommerce', () => {
 	cy.visit( '/wp-admin/plugins.php' );
-
-	// Deactivate only if activated.
-	if (
-		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).length >
-		0
-	) {
-		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).click();
-		cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).should(
-			'exist'
-		);
-	}
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-woocommerce' ).length > 0 ) {
+			cy.get( '#deactivate-woocommerce' ).click();
+		}
+	} );
 } );
 
 /**

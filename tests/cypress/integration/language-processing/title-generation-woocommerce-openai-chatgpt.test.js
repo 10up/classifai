@@ -7,15 +7,10 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	before( () => {
 		cy.login();
 		cy.optInAllFeatures();
-		cy.activateWooCommerce();
 	} );
 
 	beforeEach( () => {
 		cy.login();
-	} );
-
-	after( () => {
-		cy.deactivateWooCommerce();
 	} );
 
 	it( 'Enable OpenAI ChatGPT "Language Processing" title settings', () => {
@@ -31,6 +26,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 	} );
 
 	it( 'Can generate and insert product title (Classic Editor)', () => {
+		cy.activateWooCommerce();
 		cy.enableClassicEditor();
 
 		const data = getChatGPTData();
@@ -55,6 +51,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		);
 		cy.get( '#title' ).should( 'have.value', data );
 
+		cy.deactivateWooCommerce();
 		cy.disableClassicEditor();
 	} );
 } );
