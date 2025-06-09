@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
  * Internal dependencies
  */
 import { getChatGPTData } from '../../plugins/functions';
@@ -15,7 +10,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		cy.activateWooCommerce();
 	} );
 
-    beforeEach( () => {
+	beforeEach( () => {
 		cy.login();
 	} );
 
@@ -42,7 +37,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 
 		// Create test product and wait for page load
 		cy.visit( '/wp-admin/post-new.php?post_type=product' );
-		
+
 		// Wait for the page to be fully loaded and initialized
 		cy.get( '#title' ).should( 'be.visible' );
 		cy.get( '#content_ifr' ).should( 'exist' );
@@ -55,7 +50,9 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 			.should( 'have.value', data );
 
 		cy.get( '.classifai-title-generation__select-title' ).first().click();
-		cy.get( '#classifai-title-generation__modal' ).should( 'not.be.visible' );
+		cy.get( '#classifai-title-generation__modal' ).should(
+			'not.be.visible'
+		);
 		cy.get( '#title' ).should( 'have.value', data );
 
 		cy.disableClassicEditor();

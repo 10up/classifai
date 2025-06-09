@@ -24,7 +24,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
-import { getIframe } from '@10up/cypress-wp-utils/lib/functions/get-iframe';
 
 const imageProcessingFeatures = [
 	'feature_descriptive_text_generator',
@@ -698,10 +697,14 @@ Cypress.Commands.add( 'activateWooCommerce', () => {
 	cy.visit( '/wp-admin/plugins.php' );
 
 	// Check if the activation link exists
-	cy.get( '#the-list tr[data-slug="woocommerce"]' ).then( $tr => {
+	cy.get( '#the-list tr[data-slug="woocommerce"]' ).then( ( $tr ) => {
 		if ( $tr.find( '.activate a' ).length > 0 ) {
-			cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).click();
-			cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).should( 'exist' );
+			cy.get(
+				'#the-list tr[data-slug="woocommerce"] .activate a'
+			).click();
+			cy.get(
+				'#the-list tr[data-slug="woocommerce"] .deactivate a'
+			).should( 'exist' );
 		}
 	} );
 } );
@@ -713,9 +716,14 @@ Cypress.Commands.add( 'deactivateWooCommerce', () => {
 	cy.visit( '/wp-admin/plugins.php' );
 
 	// Deactivate only if activated.
-	if ( cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).length > 0 ) {
+	if (
+		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).length >
+		0
+	) {
 		cy.get( '#the-list tr[data-slug="woocommerce"] .deactivate a' ).click();
-		cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).should( 'exist' );
+		cy.get( '#the-list tr[data-slug="woocommerce"] .activate a' ).should(
+			'exist'
+		);
 	}
 } );
 

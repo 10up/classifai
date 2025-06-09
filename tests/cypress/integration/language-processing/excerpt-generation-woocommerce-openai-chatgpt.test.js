@@ -1,13 +1,3 @@
-/**
- * External dependencies
- */
-import { __ } from '@wordpress/i18n';
-
-/**
- * Internal dependencies
- */
-import { getChatGPTData } from '../../plugins/functions';
-
 describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', () => {
 	before( () => {
 		cy.login();
@@ -22,7 +12,7 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		cy.activateWooCommerce();
 	} );
 
-    beforeEach( () => {
+	beforeEach( () => {
 		cy.login();
 	} );
 
@@ -56,22 +46,29 @@ describe( '[Language processing] WooCommerce Product Excerpt Generation Tests', 
 		cy.get( '#postexcerpt-hide' ).check( { force: true } );
 
 		// Verify button exists
-		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should( 'exist' );
+		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should(
+			'exist'
+		);
 
 		// Click on button and wait for excerpt to be populated
 		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).click();
-		
+
 		// Check both TinyMCE and textarea with retries
 		cy.window().then( ( win ) => {
 			if ( win.tinyMCE && win.tinyMCE.get( 'excerpt' ) ) {
 				// Wait for content to be populated with retries
-				cy.wrap( null, { timeout: 10000 } ).should(() => {
+				cy.wrap( null, { timeout: 10000 } ).should( () => {
 					const content = win.tinyMCE.get( 'excerpt' ).getContent();
-					expect(content.replace(/<\/?p>/g, '')).to.equal(expectedResponse);
-				});
+					expect( content.replace( /<\/?p>/g, '' ) ).to.equal(
+						expectedResponse
+					);
+				} );
 			} else {
 				// Wait for content to be populated with retries
-				cy.get( '#excerpt', { timeout: 10000 } ).should('have.value', expectedResponse);
+				cy.get( '#excerpt', { timeout: 10000 } ).should(
+					'have.value',
+					expectedResponse
+				);
 			}
 		} );
 
