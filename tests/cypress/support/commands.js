@@ -24,7 +24,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
-import { getIframe } from '@10up/cypress-wp-utils/lib/functions/get-iframe';
 
 const imageProcessingFeatures = [
 	'feature_descriptive_text_generator',
@@ -810,4 +809,46 @@ Cypress.Commands.add( 'insertBlockCustom', ( type, name ) => {
 			}
 		} );
 	} );
+} );
+
+/**
+ * Activate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'activateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-woocommerce' ).length > 0 ) {
+			cy.get( '#activate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Deactivate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'deactivateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-woocommerce' ).length > 0 ) {
+			cy.get( '#deactivate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Create a product in the block editor.
+ */
+Cypress.Commands.add( 'createProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '.editor-post-title__input' ).type( title );
+	cy.get( '.block-editor-rich-text__editable' ).type( content );
+} );
+
+/**
+ * Create a product in the classic editor.
+ */
+Cypress.Commands.add( 'classicCreateProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '#title' ).type( title );
+	cy.get( '#content' ).type( content );
 } );

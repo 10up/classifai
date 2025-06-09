@@ -24,4 +24,4 @@ parameters:
 		# Flags these require statements even though they are fine.
 		- '#Path in require_once\(\) "\.\/wp-admin\/includes\/.+\.php" is not a file or it does not exist#'
 	WPCompat:
-		requiresAtLeast: '6.6'
+		requiresAtLeast: '6.7'
