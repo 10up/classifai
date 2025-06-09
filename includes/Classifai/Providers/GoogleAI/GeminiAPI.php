@@ -30,11 +30,11 @@ class GeminiAPI extends Provider {
 	protected $googleai_url = 'https://generativelanguage.googleapis.com/v1beta';
 
 	/**
-	 * GeminiAPI model
+	 * Gemini API model
 	 *
 	 * @var string
 	 */
-	protected $googleai_model = 'models/gemini-pro';
+	protected $model = 'models/gemini-2.5-flash-preview-05-20';
 
 	/**
 	 * GeminiAPI constructor.
@@ -43,6 +43,28 @@ class GeminiAPI extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to use a different model, like
+		 * gemini-2.5-pro-preview-05-06.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_googleai_gemini_api_model
+		 *
+		 * @param {string} $model The default model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_googleai_gemini_api_model', $this->model );
 	}
 
 	/**
@@ -310,7 +332,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -426,7 +448,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -531,7 +553,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -564,8 +586,9 @@ class GeminiAPI extends Provider {
 	 *
 	 * ### Important Note:
 	 * The content length is not limited in this implementation.
-	 * The Gemini Pro model can process up to 30,720 input tokens, which is approximately equivalent to 18,000 - 24,000 words. (https://ai.google.dev/models/gemini#model_variations)
-	 * Given that the average blog post length ranges from 1,500 - 2,500 words, this limit is more than sufficient for our use case.
+	 * The Gemini 2.5 Flash model can process up to 1,048,576 input tokens:
+	 * (https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash-preview).
+	 * This limit should be more than sufficient for our use case.
 	 *
 	 * @param int    $post_id      Post ID to get content from.
 	 * @param bool   $use_title    Whether to use the title or not.

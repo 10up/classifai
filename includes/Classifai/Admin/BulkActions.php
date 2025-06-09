@@ -83,6 +83,10 @@ class BulkActions {
 			}
 
 			foreach ( $settings['post_types'] as $post_type ) {
+				if ( ! is_string( $post_type ) ) {
+					continue;
+				}
+
 				add_filter( "bulk_actions-edit-$post_type", [ $this, 'register_language_processing_actions' ] );
 				add_filter( "handle_bulk_actions-edit-$post_type", [ $this, 'language_processing_actions_handler' ], 10, 3 );
 
