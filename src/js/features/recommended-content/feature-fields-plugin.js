@@ -46,7 +46,7 @@ function AdditionalFeatureFields() {
 	return (
 		<Fill name="ClassifAIFeatureSettings">
 			<SettingsRow
-				label={ __( 'Default Template', 'classifai' ) }
+				label={ __( 'Default template', 'classifai' ) }
 			>
 				<Flex align="normal" justify="start" gap={ 2 }>
 					{ blockVariations.map( ( variation, index ) => (
