@@ -42,6 +42,8 @@ class RecommendedContent extends Feature {
 	public function feature_setup() {
 		$settings = $this->get_settings();
 
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_feature_setting_assets' ] );
+
 		if ( isset( $settings['provider'] ) && OpenAIEmbeddings::ID === $settings['provider'] ) {
 			add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_editor_assets' ] );
 			add_filter( 'pre_render_block', [ $this, 'pre_render_block' ], 10, 2 );
@@ -65,8 +67,22 @@ class RecommendedContent extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => OpenAIEmbeddings::ID,
+			'provider'         => OpenAIEmbeddings::ID,
+			'default_template' => 'title-date',
 		];
+	}
+
+	/**
+	 * Enqueues feature-level assets.
+	 */
+	public function enqueue_feature_setting_assets() {
+		wp_enqueue_script(
+			'classifai-plugin-recommended-content-feature-fields',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-recommended-content-feature-fields.js',
+			get_asset_info( 'classifai-plugin-recommended-content-feature-fields', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-recommended-content-feature-fields', 'version' ),
+			true
+		);
 	}
 
 	/**
@@ -79,6 +95,19 @@ class RecommendedContent extends Feature {
 			get_asset_info( 'recommended-content-block-variation', 'dependencies' ),
 			get_asset_info( 'recommended-content-block-variation', 'version' ),
 			true
+		);
+
+		$settings = $this->get_settings();
+		$data     = [
+			'default_template' => $settings['default_template'],
+		];
+
+		wp_add_inline_script(
+			'classifai-recommended-content-block-variation',
+			sprintf(
+				'const classifaiRecommendedContentSettings = %s',
+				wp_json_encode( $data )
+			)
 		);
 	}
 
