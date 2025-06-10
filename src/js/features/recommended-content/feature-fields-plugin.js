@@ -5,12 +5,7 @@ import { registerCoreBlocks } from '@wordpress/block-library';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/blocks';
 
-import {
-	Fill,
-	Flex,
-	FlexItem,
-	Icon,
-} from '@wordpress/components';
+import { Fill, Flex, FlexItem, Icon } from '@wordpress/components';
 
 import { SettingsRow } from '../../settings/components/settings-row';
 
@@ -19,7 +14,7 @@ registerCoreBlocks();
 
 registerPlugin( 'classifai-plugin-recommended-content-feature-fields', {
 	render: AdditionalFeatureFields,
-	scope: 'feature-recommended-content'
+	scope: 'feature-recommended-content',
 } );
 
 function AdditionalFeatureFields() {
@@ -33,7 +28,9 @@ function AdditionalFeatureFields() {
 	const blockVariations = useSelect( ( select ) =>
 		select( coreStore ).getBlockVariations( 'core/query' )
 	);
-	const [ focusedTemplate, setFocusedTemplate ] = useState( featureSettings.defaultTemplate );
+	const [ focusedTemplate, setFocusedTemplate ] = useState(
+		featureSettings.defaultTemplate
+	);
 	const [ isTemplateInFocus, setIsTemplateInFocus ] = useState( false );
 
 	const iconWrapperStyle = {
@@ -45,9 +42,7 @@ function AdditionalFeatureFields() {
 
 	return (
 		<Fill name="ClassifAIFeatureSettings">
-			<SettingsRow
-				label={ __( 'Default template', 'classifai' ) }
-			>
+			<SettingsRow label={ __( 'Default template', 'classifai' ) }>
 				<Flex align="normal" justify="start" gap={ 2 }>
 					{ blockVariations.map( ( variation, index ) => (
 						<FlexItem
@@ -58,9 +53,7 @@ function AdditionalFeatureFields() {
 								setFocusedTemplate( variation.name );
 								setIsTemplateInFocus( true );
 							} }
-							onBlur={ () =>
-								setIsTemplateInFocus( false )
-							}
+							onBlur={ () => setIsTemplateInFocus( false ) }
 							onKeyDown={ ( e ) => {
 								if (
 									'Space' === e.code ||
@@ -68,8 +61,7 @@ function AdditionalFeatureFields() {
 								) {
 									e.preventDefault();
 									setFeatureSettings( {
-										default_template:
-											variation.name,
+										default_template: variation.name,
 									} );
 								}
 							} }
@@ -80,16 +72,13 @@ function AdditionalFeatureFields() {
 										? 'var(--wp-admin-theme-color)'
 										: '#e0e0e0',
 								borderWidth:
-									defaultTemplate ===
-										variation.name && '1px',
+									defaultTemplate === variation.name && '1px',
 								backgroundColor:
-									defaultTemplate ===
-										variation.name &&
+									defaultTemplate === variation.name &&
 									'color-mix(in srgb, var(--wp-admin-theme-color) 10%, transparent)',
 								outline:
 									isTemplateInFocus &&
-									focusedTemplate ===
-										variation.name &&
+									focusedTemplate === variation.name &&
 									'2px solid var(--wp-admin-theme-color)',
 							} }
 							onClick={ () =>
@@ -101,8 +90,7 @@ function AdditionalFeatureFields() {
 							<Icon
 								icon={ variation.icon }
 								size={ 80 }
-								{ ...( defaultTemplate ===
-									variation.name && {
+								{ ...( defaultTemplate === variation.name && {
 									fill: 'var(--wp-admin-theme-color)',
 								} ) }
 							/>

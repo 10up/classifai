@@ -18,24 +18,38 @@ domReady( () => {
 		( __variation ) => __variation.name === defaultTemplate
 	);
 
-	variation.innerBlocks = variation.innerBlocks.filter( ( innerBlock ) => 'core/post-template' === innerBlock[0] );
+	variation.innerBlocks = variation.innerBlocks.filter(
+		( innerBlock ) => 'core/post-template' === innerBlock[ 0 ]
+	);
 	variation.innerBlocks.forEach( ( innerBlock, index ) => {
-		if ( 'core/post-template' === innerBlock[0] ) {
-			variation.innerBlocks[ index ][1] = Object.assign( variation.innerBlocks[ index ][1], {
-				layout: {
-					type: 'grid',
-					columnCount: 3,
+		if ( 'core/post-template' === innerBlock[ 0 ] ) {
+			variation.innerBlocks[ index ][ 1 ] = Object.assign(
+				variation.innerBlocks[ index ][ 1 ],
+				{
+					layout: {
+						type: 'grid',
+						columnCount: 3,
+					},
 				}
-			} );
+			);
 
-			if ( Array.isArray( innerBlock[2] ) ) {
-				innerBlock[2].forEach( ( __innerBlock, __index ) => {
-					if ( 'core/post-title' === __innerBlock[0] ) {
-						variation.innerBlocks[ index ][2][ __index ][1] = variation.innerBlocks[ index ][2][ __index ][1] || {};
-						variation.innerBlocks[ index ][2][ __index ][1] = Object.assign( variation.innerBlocks[ index ][2][ __index ][1], {
-							level: 3,
-							isLink: true,
-						} );
+			if ( Array.isArray( innerBlock[ 2 ] ) ) {
+				innerBlock[ 2 ].forEach( ( __innerBlock, __index ) => {
+					if ( 'core/post-title' === __innerBlock[ 0 ] ) {
+						variation.innerBlocks[ index ][ 2 ][ __index ][ 1 ] =
+							variation.innerBlocks[ index ][ 2 ][
+								__index
+							][ 1 ] || {};
+						variation.innerBlocks[ index ][ 2 ][ __index ][ 1 ] =
+							Object.assign(
+								variation.innerBlocks[ index ][ 2 ][
+									__index
+								][ 1 ],
+								{
+									level: 3,
+									isLink: true,
+								}
+							);
 					}
 				} );
 			}

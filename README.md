@@ -710,8 +710,8 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 ### 3. Add the "Recommended Content" block to your content
 
 * Edit an existing page and add in the new Recommended Content block.
-* This defaults to rendering 3 items that meet the threshold criteria set. This can be changed to render more or less. Note though that only items that meet the threshold will be used, so less items may be shown than selected.
-* This block uses a default template that renders the featured image, title, date and excerpt of each item rendered. This template can be changed in the block editor.
+* This defaults to rendering 3 items that meet the threshold criteria set. This can be changed to render more or less. Note though that only items that meet the threshold will be used, so less items may be shown than selected. If no items meet the threshold, the block will instead pull from the most recent posts.
+* This block will render using the template selected in the settings. This template can be modified in the block editor.
 
 ## Run locally hosted LLMs
 
