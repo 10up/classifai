@@ -5,6 +5,7 @@
 
 namespace Classifai\Providers\OpenAI;
 
+use Classifai\Admin\Notifications;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
@@ -13,6 +14,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use function Classifai\should_use_legacy_settings_panel;
 
 class Embeddings extends Provider {
 
@@ -241,32 +243,6 @@ class Embeddings extends Provider {
 			]
 		);
 
-		// If embeddings regeneration is being requested, run that.
-		if (
-			isset( $_GET['feature'] ) &&
-			'feature_classification' === sanitize_text_field( wp_unslash( $_GET['feature'] ) )
-		) {
-			if ( isset( $_GET['embedding_regen_completed'] ) ) {
-				add_action(
-					'admin_notices',
-					function () {
-						?>
-						<div class="notice notice-success is-dismissible">
-							<p><?php esc_html_e( 'Embeddings have been regenerated.', 'classifai' ); ?></p>
-						</div>
-						<?php
-					}
-				);
-			}
-
-			if (
-				isset( $_GET['embeddings_nonce'] ) &&
-				wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
-			) {
-				$this->regenerate_embeddings();
-			}
-		}
-
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
 
@@ -308,9 +284,10 @@ class Embeddings extends Provider {
 			return;
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] );
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] );
+		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
 		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+		add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
 	}
 
 	/**
@@ -321,7 +298,7 @@ class Embeddings extends Provider {
 	 * @return array
 	 */
 	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
@@ -363,6 +340,9 @@ class Embeddings extends Provider {
 				}
 			}
 		}
+
+		// Hide the update notice. This ensures we don't show this for new users.
+		update_option( 'classifai_hide_embeddings_notice', true, false );
 
 		return $new_settings;
 	}
@@ -443,8 +423,19 @@ class Embeddings extends Provider {
 		// Hide the admin notice.
 		update_option( 'classifai_hide_embeddings_notice', true, false );
 
+		// Set a notice to let the user know the embeddings have been regenerated.
+		$notifications = new Notifications();
+		$notifications->set_notice(
+			esc_html__( 'Embeddings have been regenerated.', 'classifai' ),
+			'success',
+		);
+
 		// Redirect to the same page but remove the nonce so we don't run this again.
-		wp_safe_redirect( admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification&embedding_regen_completed' ) );
+		$redirect_url = admin_url( 'tools.php?page=classifai#/language_processing/feature_classification' );
+		if ( should_use_legacy_settings_panel() ) {
+			$redirect_url = admin_url( 'tools.php?page=classifai&tab=language_processing&feature=feature_classification' );
+		}
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 
@@ -452,10 +443,8 @@ class Embeddings extends Provider {
 	 * Get the data to preview terms.
 	 *
 	 * @since 2.5.0
-	 *
-	 * @return array
 	 */
-	public function get_post_classifier_embeddings_preview_data(): array {
+	public function get_post_classifier_embeddings_preview_data() {
 		$nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['nonce'] ) ) : false;
 
 		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'classifai-previewer-action' ) ) {
@@ -470,9 +459,27 @@ class Embeddings extends Provider {
 		// Add terms to this item based on embedding data.
 		if ( $embeddings && ! is_wp_error( $embeddings ) ) {
 			$embeddings_terms = $this->get_terms( $embeddings );
+
+			if ( is_wp_error( $embeddings_terms ) ) {
+				wp_send_json_error( $embeddings_terms->get_error_message() );
+			}
 		}
 
-		return wp_send_json_success( $embeddings_terms );
+		wp_send_json_success( $embeddings_terms );
+	}
+
+	/**
+	 * Regenerate embeddings.
+	 */
+	public function classifai_regen_embeddings() {
+		if (
+			! isset( $_GET['embeddings_nonce'] ) ||
+			! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['embeddings_nonce'] ) ), 'regen_embeddings' )
+		) {
+			wp_die( esc_html__( 'You do not have permission to perform this operation.', 'classifai' ) );
+		}
+
+		$this->regenerate_embeddings();
 	}
 
 	/**
@@ -522,7 +529,7 @@ class Embeddings extends Provider {
 
 		// Chunk the post content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $post_id, 'post' );
+		$content        = $this->get_normalized_content( $post_id, 'post' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -591,6 +598,19 @@ class Embeddings extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'No matching terms found.', 'classifai' ) );
 		}
 
+		/**
+		 * Fires after the embeddings similarity has been run but before results are sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_openai_embeddings_pre_sort_embeddings_similarity
+		 *
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_openai_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
+
 		// Sort the results by similarity.
 		usort(
 			$embeddings_similarity,
@@ -609,6 +629,20 @@ class Embeddings extends Provider {
 		foreach ( $embeddings_similarity as $item ) {
 			$sorted_results[ $item['taxonomy'] ][] = $item;
 		}
+
+		/**
+		 * Fires after the embeddings similarity has been run and sorted.
+		 *
+		 * @since 3.3.1
+		 * @hook classifai_openai_embeddings_post_sort_embeddings_similarity
+		 *
+		 * @param {array} $sorted_results The sorted embeddings similarity results.
+		 * @param {array} $embeddings_similarity The embeddings similarity results.
+		 * @param {int} $post_id ID of post to set terms on.
+		 * @param {array} $embeddings Embeddings data.
+		 * @param {bool} $link Whether to link the terms or not.
+		 */
+		do_action( 'classifai_openai_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
 		$return = [];
 
@@ -683,7 +717,6 @@ class Embeddings extends Provider {
 		}
 
 		// Prepare the results.
-		$index   = 0;
 		$results = [];
 
 		foreach ( $sorted_results as $tax => $terms ) {
@@ -691,23 +724,22 @@ class Embeddings extends Provider {
 			$taxonomy = get_taxonomy( $tax );
 			$tax_name = $taxonomy->labels->singular_name;
 
-			// Setup our taxonomy object.
-			$results[] = new \stdClass();
-
-			$results[ $index ]->{$tax_name} = [];
+			// Initialize the taxonomy bucket in results.
+			$results[ $tax ] = [
+				'label' => $tax_name,
+				'data'  => [],
+			];
 
 			foreach ( $terms as $term ) {
 				// Convert $similarity to percentage.
 				$similarity = round( ( 1 - $term['similarity'] ), 10 );
 
 				// Store the results.
-				$results[ $index ]->{$tax_name}[] = [ // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.Found
+				$results[ $tax ]['data'][] = [
 					'label' => get_term( $term['term_id'] )->name,
 					'score' => $similarity,
 				];
 			}
-
-			++$index;
 		}
 
 		return $results;
@@ -782,6 +814,21 @@ class Embeddings extends Provider {
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
 
+						/**
+						 * Fires after the embeddings similarity has been run for a single chunk.
+						 *
+						 * @since 3.3.1
+						 * @hook classifai_openai_embeddings_single_embedding_similarity
+						 *
+						 * @param {bool|float} $similarity The embeddings similarity result.
+						 * @param {array} $embedding Post embedding data.
+						 * @param {array} $chunk Term chunk embedding data.
+						 * @param {int} $term_id ID of term we're comparing.
+						 * @param {string} $tax Taxonomy of term.
+						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+						 */
+						do_action( 'classifai_openai_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
+
 						if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
 							$embedding_similarity[] = [
 								'taxonomy'   => $tax,
@@ -802,7 +849,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function trigger_taxonomy_update( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
@@ -889,7 +936,7 @@ class Embeddings extends Provider {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param bool   $all      Whether to generate embeddings for all terms or just those without embeddings.
-	 * @param array  $args     Overrideable query args for get_terms()
+	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
 	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
@@ -939,7 +986,7 @@ class Embeddings extends Provider {
 	 * @param Feature $feature The feature instance.
 	 * @return array|WP_Error
 	 */
-	public function generate_embeddings_for_term( int $term_id, bool $force = false, Feature $feature = null ) {
+	public function generate_embeddings_for_term( int $term_id, bool $force = false, ?Feature $feature = null ) {
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_term', $term_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'User does not have valid permissions to edit this term.', 'classifai' ) );
@@ -996,7 +1043,7 @@ class Embeddings extends Provider {
 
 		// Chunk the term content down.
 		$embeddings     = [];
-		$content        = $this->get_content( $term_id, 'term' );
+		$content        = $this->get_normalized_content( $term_id, 'term' );
 		$content_chunks = $this->chunk_content( $content );
 
 		// Get the embeddings for each chunk.
@@ -1208,8 +1255,9 @@ class Embeddings extends Provider {
 	 * @param string $type Type of content. Default 'post'.
 	 * @return string
 	 */
-	public function get_content( int $id = 0, string $type = 'post' ): string {
+	public function get_normalized_content( int $id = 0, string $type = 'post' ): string {
 		$normalizer = new Normalizer();
+		$content    = '';
 
 		// Get the content depending on the type.
 		switch ( $type ) {
@@ -1249,7 +1297,7 @@ class Embeddings extends Provider {
 	 * @param int    $post_id The Post Id we're processing.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
-	 * @return string|WP_Error
+	 * @return array|string|WP_Error
 	 */
 	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
 		if ( ! $post_id || ! get_post( $post_id ) ) {
@@ -1293,5 +1341,14 @@ class Embeddings extends Provider {
 			$settings,
 			$this->feature_instance
 		);
+	}
+
+	/**
+	 * Get embeddings generation status.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		return self::$scheduler_instance->is_embeddings_generation_in_progress();
 	}
 }

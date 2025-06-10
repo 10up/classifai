@@ -89,6 +89,7 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_get
 		 *
+		 * @param {array|WP_Error} $response The API response.
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
 		 * @param {string} $this->feature Feature name.
@@ -155,6 +156,7 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post
 		 *
+		 * @param {array|WP_Error} $response The API response.
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
 		 * @param {string} $this->feature Feature name.
@@ -249,6 +251,7 @@ class APIRequest {
 		 * @since 2.4.0
 		 * @hook classifai_openai_api_response_post_form
 		 *
+		 * @param {array|WP_Error} $response The API response.
 		 * @param {string} $url Request URL.
 		 * @param {array} $options Request body options.
 		 * @param {string} $this->feature Feature name.
@@ -275,7 +278,7 @@ class APIRequest {
 			$headers      = wp_remote_retrieve_headers( $response );
 			$content_type = false;
 
-			if ( ! is_wp_error( $headers ) ) {
+			if ( ! empty( $headers ) ) {
 				$content_type = isset( $headers['content-type'] ) ? $headers['content-type'] : false;
 			}
 
@@ -289,7 +292,7 @@ class APIRequest {
 					if ( empty( $json['error'] ) ) {
 						return $json;
 					} else {
-						$message = $json['error']['message'] ?? esc_html__( 'An error occured', 'classifai' );
+						$message = $json['error']['message'] ?? esc_html__( 'An error occurred', 'classifai' );
 						return new WP_Error( $code, $message );
 					}
 				} else {

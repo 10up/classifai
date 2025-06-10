@@ -1,0 +1,636 @@
+#classifai-settings {
+	font-size: 14px;
+	box-sizing: border-box;
+
+	#classifai-header {
+		background-color: #fff;
+		box-sizing: border-box;
+		display: block;
+		left: 0;
+		right: 0;
+		top: 0;
+		position: sticky;
+		z-index: 1001;
+		margin-left: -20px;
+		padding: 0px;
+		box-shadow: 0px 10px 10px 0px #f0f0f1;
+
+		@media screen and (max-width: 782px) {
+			margin-left: -10px;
+			padding: 0px;
+		}
+
+		body.admin-bar & {
+			@media (min-width: 601px) {
+				top: 46px;
+			}
+
+			@media (min-width: 783px) {
+				top: 32px;
+			}
+		}
+
+		.classifai-header-layout {
+			justify-content: space-between;
+			padding: 18px 20px;
+			display: flex;
+			align-items: center;
+			margin: 0 auto;
+			padding: 18px 20px;
+			max-width: 1260px;
+    		box-sizing: content-box;
+			position: relative;
+
+			@media screen and (max-width: 782px) {
+				padding: 18px 10px;
+			}
+		}
+
+		#classifai-logo {
+			line-height: 0;
+			width: 180px;
+		}
+
+		#classifai-header-controls {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+		}
+	}
+
+	.components-notice {
+		&, &__content {
+			margin: 0;
+		}
+
+		&.personalizer-deprecation-notice,
+		&.is-info {
+			margin-top: 16px;
+			margin-bottom: 16px;
+		}
+	}
+
+	.components-notice-list {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin-block-end: 16px;
+		margin-top: 16px;
+	}
+
+	.settings-panel {
+		margin-top: 16px;
+
+		.settings-row {
+			display: flex;
+			justify-content: flex-start;
+			align-items: flex-start;
+			flex-direction: row;
+		}
+
+		@media (max-width: 600px) {
+			.settings-row {
+			  flex-direction: column;
+			}
+		}
+
+		.settings-label {
+			align-items: center;
+			font-weight: bold;
+			flex-shrink: 0;
+			flex: 20%;
+			padding: 12px 0px;
+		}
+
+		.settings-control {
+			align-items: center;
+			flex: 80%;
+			padding: 12px 10px;
+		}
+
+		.settings-description {
+			margin-top: 8px;
+			font-size: 13px;
+		}
+
+		.settings-allowed-roles .settings-control .components-checkbox-control {
+			margin-bottom: 8px;
+		}
+
+		.classifai-settings__users .settings-control label.components-form-token-field__label {
+			display: none;
+		}
+
+		.components-base-control.components-checkbox-control {
+			margin-bottom: 8px;
+		}
+
+		.classifai-panel-header-close {
+			margin-right: -10px;
+		}
+	}
+
+	.classifai-settings-wrapper {
+		width: 100%;
+		max-width: 1280px;
+		margin: 0 auto;
+		padding-right: 20px;
+		box-sizing: border-box;
+
+		.classifai-tabs {
+			display: flex;
+			align-items: stretch;
+			flex-direction: row;
+			justify-content: flex-start;
+			border-bottom: 1px solid #ccd0d4;
+			padding-bottom: 0;
+
+			&[aria-orientation="vertical"] {
+				flex-direction: column;
+				border: 0px;
+				justify-content: flex-start;
+				flex-basis: 0;
+				flex-grow: 1;
+				margin-right: 0px;
+
+				.classifai-tabs-item {
+					background: #fafafa;
+					border: 1px solid #e0e0e0;
+					text-align: left;
+					padding: 14px 16px;
+
+					&.active-tab {
+						background: #fff;
+						border-bottom: 1px solid var(--wp-admin-theme-color);
+						box-shadow: inset 0 -2px var(--wp-admin-theme-color);
+					}
+
+					&:hover,
+					&:focus {
+						background: #fff;
+					}
+				}
+
+				@media screen and (max-width: 782px) {
+					margin-right: 0px;
+					margin-top: 0px;
+				}
+
+				@media screen and (max-width: 782px) {
+					gap: 0;
+					width: 100%;
+				}
+			}
+
+			.active-tab,
+			.classifai-tabs-item:focus:not(:disabled) {
+				box-shadow: inset 0 -2px var(--wp-admin-theme-color);
+			}
+
+			@media screen and (max-width: 782px) {
+				margin-top: 16px;
+			}
+
+			.classifai-tabs-item {
+				position: relative;
+				border-radius: 0;
+				background: transparent;
+				border: none;
+				box-shadow: none;
+				cursor: pointer;
+				padding: 14px 12px;
+				margin-left: 0;
+				margin-right: 1rem;
+				font-weight: 500;
+				text-decoration: none;
+				font-size: 15px;
+				height: auto;
+				color: var(--wp-components-color-foreground, #1e1e1e);
+
+				&:hover,
+				&:focus {
+					color:var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+				}
+
+				&:focus:not(:disabled) {
+					position: relative;
+					box-shadow: none;
+					outline: none;
+				}
+
+				// Tab indicator
+				&::after {
+					content: "";
+					position: absolute;
+					right: 0;
+					bottom: 0;
+					left: 0;
+					pointer-events: none;
+
+					// Draw the indicator.
+					background: var(--wp-admin-theme-color, #3858e9);
+					height: calc(0 * var(--wp-admin-border-width-focus));
+					border-radius: 0;
+
+					// Animation
+					transition: all 0.1s linear;
+				}
+
+				// Active.
+				&.active-tab {
+					color:var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+				}
+
+				&.active-tab::after {
+					height: calc(1 * var(--wp-admin-border-width-focus));
+
+					// Windows high contrast mode.
+					outline: 2px solid transparent;
+					outline-offset: -1px;
+				}
+
+				// Focus.
+				&::before {
+					content: "";
+					position: absolute;
+					top: 12px;
+					right: 12px;
+					bottom: 12px;
+					left: 12px;
+					pointer-events: none;
+
+					// Draw the indicator.
+					box-shadow: 0 0 0 0 transparent;
+					border-radius: 2px;
+
+					// Animation
+					transition: all 0.1s linear;
+				}
+
+				&:focus-visible::before {
+					box-shadow: 0 0 0 var(--wp-admin-border-width-focus) var(--wp-admin-theme-color, #3858e9);
+
+					// Windows high contrast mode.
+					outline: 2px solid transparent;
+				}
+			}
+		}
+
+		span.dashicons.dashicons-yes-alt {
+			color: #46b450;
+		}
+
+		span.dashicons.dashicons-dismiss {
+			color: #cc0000;
+		}
+
+		.classifai-settings-edit-provider {
+			cursor: pointer;
+
+			&:hover {
+				color: #3858e9;
+			}
+		}
+
+		.classifai-field-type-prompt-setting {
+			padding: 5px 20px;
+			border: 1px solid #f0f0f1;
+			position: relative;
+			display: flex;
+			flex-direction:column;
+
+			&:first-child {
+				> input,
+				> label {
+					display: none;
+				}
+			}
+
+			&:nth-child(2n + 1) {
+				background-color: #f0f0f1;
+			}
+
+			label {
+				display: block;
+			}
+
+			input, textarea {
+				margin-right: 0;
+				display: block;
+			}
+
+			input[type="text"] {
+				width: 90%;
+			}
+
+			.components-base-control {
+				margin-top: 8px;
+			}
+
+			/* Style for prompt action items container */
+			.actions-rows {
+				display: flex;
+				margin: 0.35em 0 .5em!important;
+
+				/* Style for prompt actions */
+				button {
+					cursor: pointer;
+					text-decoration: none;
+
+					&.action__remove_prompt {
+						color: #b32d2e;
+					}
+				}
+
+				span.separator{
+					margin-left: 8px;
+					margin-right: 8px;
+					color: #a7aaad;
+				}
+
+				/* Styling for default prompt first action */
+				button:disabled{
+					pointer-events: none;
+				}
+
+			}
+
+			+ button {
+				margin-top: 10px;
+			}
+		}
+
+		.settings-row.nlu-features {
+			.components-base-control {
+				max-width: 180px;
+				margin-bottom: 8px;
+			}
+		}
+
+		.components-radio-control__option {
+			margin-bottom: 4px;
+		}
+
+		@media screen and (max-width: 782px) {
+			padding-right: 10px;
+		}
+	}
+
+	.service-settings-wrapper {
+		margin-right: 20px;
+		padding-top: 24px;
+		display: flex;
+		gap: 24px;
+
+		@media screen and (max-width: 782px) {
+			margin-right: 10px;
+		}
+
+		.feature-settings-wrapper{
+			flex-basis: 0;
+			flex-grow: 3;
+		}
+
+		@media screen and (max-width: 782px) {
+			display: block;
+			gap: 0;
+		}
+	}
+
+	.classifai-loading-settings {
+		text-align: center;
+		margin: 20vh 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		.components-spinner {
+			float: none;
+		}
+
+		.description {
+			color: #777;
+			margin-top: 4px;
+		}
+	}
+
+	.classifai-setup__content {
+		margin-left: 0px;
+		margin-right: 0px;
+	}
+
+	.classifai-configure-provider-notice {
+		margin-top: 0.5rem;
+	}
+
+	.classifai-settings-footer {
+		margin: 16px 0px;
+	}
+
+	.classifai-admin-notices {
+		margin-right: 0px;
+	}
+
+	.classifai-settings-snackbar-notices {
+		position: fixed;
+		left: auto;
+		bottom: 40px;
+
+		@media screen and (max-width: 600px) {
+			padding: 0px 20px 0px 0px;
+		}
+	}
+}
+
+.classifai-onboarding {
+	&__configure {
+		.classifai-settings-footer {
+			display: flex;
+
+			& > button {
+				margin-top: 1rem;
+				flex-grow: 1;
+				flex-basis: 0;
+			}
+		}
+
+		&--status,
+		&--enable-features {
+			& img {
+				max-width: 100%;
+			}
+		}
+	}
+
+	&__welcome-to-classifai {
+		text-align: center;
+	}
+
+	&__welcome-note {
+
+		p {
+			font-size: 14px;
+    		margin: 1.2em 0;
+		}
+
+		li {
+			margin-bottom: 12px;
+		}
+	}
+}
+
+// Previewer.
+.classifai__classification-previewer {
+	position: fixed;
+	top: 0;
+	right: 0;
+	width: 100%;
+	max-width: 500px;
+	height: 100%;
+	box-shadow: 0 19px 28px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22);
+	backdrop-filter: blur(10px);
+	background-color: rgba(0, 0, 0, 0.15);
+	z-index: 9999;
+	padding: 4rem 1rem;
+	padding-bottom: 2.5rem;
+	transform: translateX(500px);
+	transition: transform 0.2s ease-in-out;
+	box-sizing: border-box;
+
+	display: flex;
+	flex-direction: column;
+
+	&--open {
+		transform: translateX(0);
+	}
+}
+
+.classifai__classification-previewer-result-notice {
+	margin-bottom: 2rem !important;
+}
+
+.classifai__classification-previewer-search-control {
+	display: flex;
+	gap: 1rem;
+	width: 100%;
+
+	& > div {
+		flex-grow: 1;
+	}
+}
+
+.classifai__classification-previewer-search-and-results {
+	position: relative;
+	background-color: #fff;
+
+	.components-input-control__container {
+		border: 1px solid rgb(148 148 148);
+	}
+}
+
+.classifai__classification-previewer-search-results {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	padding: 0.25rem 0;
+	height: auto;
+	background-color: #fff;
+	border: 1px solid rgb(148 148 148);
+    box-sizing: border-box;
+    z-index: 999;
+}
+
+.classifai__classification-previewer-processing {
+	margin: 2rem auto;
+	width: 48px;
+	height: 48px;
+
+	svg {
+		margin: 0;
+	}
+}
+
+.classifai__classification-previewer-search-result-container {
+	margin-top: 3rem;
+	flex-grow: 1;
+	overflow-y: auto;
+}
+
+.classifai__classification-previewer-search-item {
+	padding: 0.25rem 0.5rem;
+
+	&:hover,
+	&:active,
+	&:focus {
+		background-color: #777;
+		color: #fff;
+		cursor: pointer;
+	}
+}
+
+.classifai__classification-previewer-result-card {
+	margin-bottom: 2rem;
+}
+
+.classifai__classification-previewer-result-card-heading {
+	font-size: 1.15rem !important;
+	margin: 0;
+}
+
+.classifai__classification-previewer-result-tag {
+	display: inline-block;
+	margin-right: 0.5rem;
+	margin-bottom: 0.5rem;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.classifai__classification-previewer-result-tag-score {
+	display: inline-block;
+	padding: 0.25rem 0.5rem;
+	border-right: 1px solid #ccc;
+	background-color: #ddd;
+}
+
+.classifai__classification-previewer-result-tag-label {
+	display: inline-block;
+	padding: 0 0.5rem;
+}
+
+.classifai__classification-previewer-result-tag--exceeds-threshold {
+	border-color: #37bb60;
+	font-weight: bold;
+
+	.classifai__classification-previewer-result-tag-score {
+		color: #f1f1f1;
+		background-color: #37bb60;
+		border-right: 1px solid #37bb60;
+	}
+
+	.classifai__classification-previewer-result-tag-label {
+		color: #37bb60;
+	}
+}
+
+.components-button.classifai__classification-previewer-close-button.is-link {
+	position: relative;
+	margin: 0 auto;
+	top: 1rem;
+}
+
+.classifai-settings-dashboard {
+	margin-top: 16px;
+}
+
+.classifai-feature-status {
+	margin-bottom: 0 !important;
+
+	.components-flex {
+		gap: 0 !important;
+	}
+}
+
+.classifai-settings__main-title {
+	margin-top: 2.5rem;
+}

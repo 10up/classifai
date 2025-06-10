@@ -5,6 +5,8 @@
 
 namespace Classifai\Services;
 
+use function Classifai\should_use_legacy_settings_panel;
+
 class ServicesManager {
 
 	/**
@@ -52,8 +54,10 @@ class ServicesManager {
 			}
 		}
 
-		// Do the settings pages.
-		$this->do_settings();
+		if ( should_use_legacy_settings_panel() ) {
+			// Do the settings pages.
+			$this->do_settings();
+		}
 
 		// Register the functionality
 		$this->register_services();
@@ -72,10 +76,14 @@ class ServicesManager {
 			'\Classifai\Features\Classification',
 			'\Classifai\Features\TitleGeneration',
 			'\Classifai\Features\ExcerptGeneration',
+			'\Classifai\Features\ContentGeneration',
 			'\Classifai\Features\ContentResizing',
+			'\Classifai\Features\KeyTakeaways',
 			'\Classifai\Features\TextToSpeech',
 			'\Classifai\Features\AudioTranscriptsGeneration',
 			'\Classifai\Features\Moderation',
+			'\Classifai\Features\Smart404',
+			'\Classifai\Features\TermCleanup',
 		];
 
 		foreach ( $core_features as $feature ) {
@@ -133,7 +141,7 @@ class ServicesManager {
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
-		$settings = get_option( 'classifai_settings' );
+		$settings = get_option( 'classifai_settings', [] );
 
 		// Special handling polyfill for pre-1.3 settings which were nested
 		if ( ! isset( $settings['email'] ) && isset( $settings['registration']['email'] ) ) {

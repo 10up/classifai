@@ -3,6 +3,8 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -22,6 +24,20 @@ class ImageTagsGenerator extends Feature {
 	 */
 	const ID = 'feature_image_tags_generator';
 
+	// phpcs:disable Squiz.PHP.Heredoc.NotAllowed
+	/**
+	 * Prompt for generating tags.
+	 *
+	 * @var string
+	 */
+	public $prompt = <<<EOD
+You are an assistant that generates image tags. You will be provided with an image and will generate a list of tags that best represent the image. Ensure the tags are short. Return at most the best 5 tags and return these in the following format:
+- Tag
+- Another tag
+- ...
+EOD;
+	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
+
 	/**
 	 * Constructor.
 	 */
@@ -34,6 +50,8 @@ class ImageTagsGenerator extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			ChatGPT::ID        => __( 'OpenAI ChatGPT', 'classifai' ),
+			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -45,6 +63,37 @@ class ImageTagsGenerator extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
+			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
+			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -149,7 +198,10 @@ class ImageTagsGenerator extends Feature {
 	 * @return array
 	 */
 	public function generate_image_tags( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -266,12 +318,12 @@ class ImageTagsGenerator extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
-		if ( ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
+		if ( null === $post || ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
 			return $form_fields;
 		}
 
@@ -293,7 +345,7 @@ class ImageTagsGenerator extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Image tags will be added automatically.', 'classifai' );
+		return esc_html__( 'Automatically add relevant tags to your images.', 'classifai' );
 	}
 
 	/**
@@ -336,8 +388,9 @@ class ImageTagsGenerator extends Feature {
 		}
 
 		return [
-			'tag_taxonomy' => array_key_first( $options ),
-			'provider'     => ComputerVision::ID,
+			'tag_taxonomy'    => array_key_first( $options ),
+			'processing_mode' => 'automatic',
+			'provider'        => ComputerVision::ID,
 		];
 	}
 
@@ -352,7 +405,49 @@ class ImageTagsGenerator extends Feature {
 
 		$new_settings['tag_taxonomy'] = $new_settings['tag_taxonomy'] ?? $settings['tag_taxonomy'];
 
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+
 		return $new_settings;
+	}
+
+	/**
+	 * Return the list of Attachment taxonomies for the feature settings.
+	 *
+	 * @param array $object_types Array of object types to filter taxonomies by, not in use.
+	 * @return array
+	 */
+	public function get_taxonomies( array $object_types = [] ): array {
+		$attachment_taxonomies = get_object_taxonomies( 'attachment', 'objects' );
+		$taxonomies            = [];
+
+		foreach ( $attachment_taxonomies as $name => $taxonomy ) {
+			$taxonomies[ $name ] = $taxonomy->label;
+		}
+
+		/**
+		 * Filter taxonomies shown in settings.
+		 *
+		 * @since 3.2.0
+		 * @hook classifai_feature_image_tags_generator_setting_taxonomies
+		 *
+		 * @param {array} $supported Array of supported image taxonomies.
+		 * @param {object} $this Current instance of the class.
+		 *
+		 * @return {array} Array of taxonomies.
+		 */
+		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $taxonomies, $this );
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**

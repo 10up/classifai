@@ -186,34 +186,26 @@ class ImageGeneration extends Feature {
 		wp_enqueue_media();
 
 		wp_enqueue_style(
-			'classifai-image-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.css',
+			'classifai-plugin-image-generation-media-modal-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-media-modal.css',
 			[],
-			get_asset_info( 'media-modal', 'version' ),
+			get_asset_info( 'classifai-plugin-image-generation-media-modal', 'version' ),
 			'all'
 		);
 
 		wp_enqueue_script(
-			'classifai-generate-images',
-			CLASSIFAI_PLUGIN_URL . 'dist/media-modal.js',
-			array_merge( get_asset_info( 'media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
-			get_asset_info( 'media-modal', 'version' ),
+			'classifai-plugin-image-generation-media-modal-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-media-modal.js',
+			array_merge( get_asset_info( 'classifai-plugin-image-generation-media-modal', 'dependencies' ), array( 'jquery', 'wp-api' ) ),
+			get_asset_info( 'classifai-plugin-image-generation-media-modal', 'version' ),
 			true
 		);
 
 		wp_enqueue_script(
-			'classifai-inserter-media-category',
-			CLASSIFAI_PLUGIN_URL . 'dist/inserter-media-category.js',
-			get_asset_info( 'inserter-media-category', 'dependencies' ),
-			get_asset_info( 'inserter-media-category', 'version' ),
-			true
-		);
-
-		wp_enqueue_script(
-			'classifai-extend-image-blocks',
-			CLASSIFAI_PLUGIN_URL . 'dist/extend-image-blocks.js',
-			get_asset_info( 'extend-image-blocks', 'dependencies' ),
-			get_asset_info( 'extend-image-blocks', 'version' ),
+			'classifai-plugin-inserter-media-category-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-inserter-media-category.js',
+			get_asset_info( 'classifai-plugin-inserter-media-category', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-inserter-media-category', 'version' ),
 			true
 		);
 
@@ -237,7 +229,7 @@ class ImageGeneration extends Feature {
 		);
 
 		wp_localize_script(
-			'classifai-generate-images',
+			'classifai-plugin-image-generation-media-modal-js',
 			'classifaiDalleData',
 			[
 				'endpoint'   => 'classifai/v1/generate-image',
@@ -253,15 +245,15 @@ class ImageGeneration extends Feature {
 
 			if ( 'classifai-generate-image' === $action ) {
 				wp_enqueue_script(
-					'classifai-generate-images-media-upload',
-					CLASSIFAI_PLUGIN_URL . 'dist/generate-image-media-upload.js',
-					array_merge( get_asset_info( 'generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
-					get_asset_info( 'classifai-generate-images-media-upload', 'version' ),
+					'classifai-plugin-image-generation-generate-image-media-upload-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-image-generation-generate-image-media-upload.js',
+					array_merge( get_asset_info( 'classifai-plugin-image-generation-generate-image-media-upload', 'dependencies' ), array( 'jquery' ) ),
+					get_asset_info( 'classifai-plugin-image-generation-generate-image-media-upload', 'version' ),
 					true
 				);
 
 				wp_localize_script(
-					'classifai-generate-images-media-upload',
+					'classifai-plugin-image-generation-generate-image-media-upload-js',
 					'classifaiGenerateImages',
 					[
 						'upload_url' => esc_url( admin_url( 'upload.php' ) ),
@@ -279,10 +271,11 @@ class ImageGeneration extends Feature {
 			return;
 		}
 
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'];
-		$number_of_images  = absint( $settings[ $provider_id ]['number_of_images'] );
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+		$settings           = $this->get_settings();
+		$provider_id        = $settings['provider'];
+		$number_of_images   = absint( $settings[ $provider_id ]['number_of_images'] );
+		$per_image_settings = $settings[ $provider_id ]['per_image_settings'] ?? false;
+		$provider_instance  = $this->get_feature_provider_instance( $provider_id );
 		?>
 
 		<?php // Template for the Generate images tab content. Includes prompt input. ?>
@@ -307,6 +300,51 @@ class ImageGeneration extends Feature {
 					?>
 				</p>
 				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<br>
+				<?php if ( $per_image_settings ) : ?>
+					<input type="checkbox" id="view-additional-image-generation-settings" />
+					<label id="view-additional-image-generation-settings-label" for="view-additional-image-generation-settings">
+						<?php esc_html_e( 'Additional settings', 'classifai' ); ?>
+					</label>
+				<?php endif; ?>
+				<div class="additional-image-generation-settings hidden">
+					<label>
+						<span><?php esc_html_e( 'Quality:', 'classifai' ); ?></span>
+						<select class="quality" name="quality">
+							<?php
+							$quality_options = DallE::get_image_quality_options();
+							$quality         = $settings[ $provider_id ]['quality'];
+							foreach ( $quality_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $quality, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Size:', 'classifai' ); ?></span>
+						<select class="size" name="size">
+							<?php
+							$size_options = DallE::get_image_size_options();
+							$size         = $settings[ $provider_id ]['image_size'];
+							foreach ( $size_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $size, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+					<label>
+						<span><?php esc_html_e( 'Style:', 'classifai' ); ?></span>
+						<select class="style" name="style">
+							<?php
+							$style_options = DallE::get_image_style_options();
+							$style         = $settings[ $provider_id ]['style'];
+							foreach ( $style_options as $key => $value ) {
+								echo '<option value="' . esc_attr( $key ) . '" ' . selected( $style, $key, false ) . '>' . esc_html( $value ) . '</option>';
+							}
+							?>
+						</select>
+					</label>
+				</div>
 				<button type="button" class="button button-secondary button-large button-generate">
 					<?php
 					if ( $number_of_images > 1 ) {
@@ -339,7 +377,7 @@ class ImageGeneration extends Feature {
 
 		<?php
 		// Template for a single generated image.
-		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation */
+		/* phpcs:disable WordPressVIPMinimum.Security.Mustache.OutputNotation,PluginCheck.CodeAnalysis.ImageFunctions.NonEnqueuedImage */
 		?>
 		<script type="text/html" id="tmpl-dalle-image">
 			<div class="generated-image">
@@ -390,7 +428,7 @@ class ImageGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'When enabled, a new Generate images tab will be shown in the media upload flow, allowing you to generate and import images.', 'classifai' );
+		return esc_html__( 'Add a new "Generate images" tab in the media upload flow, allowing you to generate and import images.', 'classifai' );
 	}
 
 	/**

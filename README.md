@@ -1,39 +1,14 @@
-# ![ClassifAI](https://classifaiplugin.com/wp-content/themes/fse-classifai-theme/assets/img/logo.svg "ClassifAI")
+# ClassifAI
+
+![ClassifAI](https://github.com/10up/classifai/blob/develop/assets/img/banner-1544x500.png)
+
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.8%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
+
+[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
 > Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.6%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md)
-
-[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/test.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/test.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/lint.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/lint.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
-
 *You can learn more about ClassifAI's features at [ClassifAIPlugin.com](https://classifaiplugin.com/) and documentation at the [ClassifAI documentation site](https://10up.github.io/classifai/).*
-
-## Table of Contents
-
-* [Overview](#overview)
-* [Features](#features)
-* [Requirements](#requirements)
-* [Pricing](#pricing)
-* [Installation](#installation)
-* [Register ClassifAI account](#register-classifai-account)
-* [Set Up IBM Watson NLU Language Processing](#set-up-classification-via-ibm-watson)
-* [Set Up OpenAI ChatGPT Language Processing](#set-up-language-processing-features-via-openai-chatgpt)
-* [Set Up Azure OpenAI Language Processing](#set-up-language-processing-features-via-azure-openai)
-* [Set Up Google AI (Gemini API) Language Processing](#set-up-language-processing-features-via-google-ai-gemini-api)
-* [Set Up OpenAI Embeddings Language Processing](#set-up-classification-via-openai-embeddings)
-* [Set Up OpenAI Whisper Language Processing](#set-up-audio-transcripts-generation-via-openai-whisper)
-* [Set Up Azure AI Language Processing](#set-up-text-to-speech-via-microsoft-azure)
-* [Set Up OpenAI Text to Speech Processing](#set-up-text-to-speech-via-openai)
-* [Set Up AWS Language Processing](#set-up-text-to-speech-via-amazon-polly)
-* [Set Up Azure AI Vision Image Processing](#set-up-image-processing-features-via-microsoft-azure)
-* [Set Up OpenAI DALL·E Image Processing](#set-up-image-generation-via-openai)
-* [Set Up OpenAI Moderation Language Processing](#set-up-comment-moderation-via-openai-moderation)
-* [Set Up Azure AI Personalizer Recommended Content](#set-up-recommended-content-via-microsoft-azure-ai-personalizer)
-* [WP CLI Commands](#wp-cli-commands)
-* [FAQs](#frequently-asked-questions)
-* [Support](#support-level)
-* [Changelog](#changelog)
-* [Contributing](#contributing)
 
 ## Overview
 
@@ -41,17 +16,23 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 
 ## Features
 
-* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
-* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
-* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview)
+* Generate a summary of post content and store it as an excerpt using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
+* Generate key takeaways from post content and render at the top of a post using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
+* Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
+* Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
+* Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E 3 API](https://platform.openai.com/docs/guides/images)
-* Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
+* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
-* Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service)
+* Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
+* Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
+* Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
 * BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
-* Generate image alt text, image tags, and smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
-* Scan images and PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Generate image alt text using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
+* Generate image tags and extract text from images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) or locally using [Ollama](https://ollama.com/)
+* Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
+* Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
 
 ### Language Processing
@@ -64,6 +45,10 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 | :-: | :-: | :-: | :-: |
 | ![Screenshot of ClassifAI audio transcript generation](assets/img/screenshot-9.png "Example of automatic audio transcript generation with OpenAI.") | ![Screenshot of ClassifAI title generation](assets/img/screenshot-10.png "Example of automatic title generation with OpenAI.") | ![Screenshot of ClassifAI expand/condense text feature](assets/img/screenshot-12.png "Example of expanding or condensing text with OpenAI.") | ![Screenshot of ClassifAI text to speech generation](assets/img/screenshot-11.png "Example of automatic text to speech generation with Azure.") |
 
+| Key Takeaways | Content Generation | | |
+| :-: | :-: | :-: | :-: |
+| ![Screenshot of the ClassifAI Key Takeaways block](assets/img/screenshot-14.png "Example of generating key takeaways using OpenAI.") | ![Screenshot of the ClassifAI Content Generation Feature](assets/img/screenshot-15.png "Example of generating content using OpenAI.") | | |
+
 ### Image Processing
 
 | Alt Text | Smart Cropping | Tagging | Generate Images |
@@ -73,13 +58,16 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.1+
+* [WordPress](http://wordpress.org) 6.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT, Embeddings, Text to Speech or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ChatGPT, Embeddings, Text to Speech or Speech to Text Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
+* To utilize the Ollama Language or Image Processing functionality, you will need to install [Ollama](https://ollama.com/) and download the appropriate models.
+* To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
+* To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
 ## Pricing
 
@@ -136,10 +124,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "2.0.0",
+            "version": "3.3.1",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/2.0.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.3.1.zip",
                 "type": "zip"
             }
         }
@@ -151,7 +139,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.0.0"
+    "10up/classifai": "3.3.1"
 }
 ```
 
@@ -169,7 +157,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Check for an email from `ClassifAI Team` which contains the registration key.
 - Note that the email will be sent from `opensource@10up.com`, so please whitelist this email address if needed.
 
-### 2. Configure ClassifAI Registration Key under Tools > ClassifAI
+### 2. Configure ClassifAI Registration Key under Tools > ClassifAI > ClassifAI Registration
 
 - In the `Registered Email` field, enter the email you used for registration.
 - In the `Registration Key` field, enter the registration key from the email in step 1 above.
@@ -185,7 +173,7 @@ ClassifAI is a sophisticated solution that we want organizations of all shapes a
 - Log into your account (accepting the privacy policy) and create a new [*Natural Language Understanding*](https://cloud.ibm.com/catalog/services/natural-language-understanding) Resource if you do not already have one. It may take a minute for your account to fully populate with the default resource group to use.
 - Click `Manage` in the left hand menu, then `Show credentials` on the Manage page to view the credentials for this resource.
 
-### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification
+### 2. Configure IBM Watson API Keys under Tools > ClassifAI > Language Processing > Classification > Settings
 
 - Select **IBM Watson NLU** in the provider dropdown.
 
@@ -212,7 +200,7 @@ For more information, see https://cloud.ibm.com/docs/watson?topic=watson-endpoin
 
 IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories), [Keywords](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords), [Concepts](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts) & [Entities](https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities) can each be stored in existing WordPress taxonomies or a custom Watson taxonomy.
 
-### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > Classification
+### 3. Configure Post Types to classify and IBM Watson Features to enable under ClassifAI > Language Processing > Classification > Settings
 
 - Choose which public post types to classify when saved.
 - Choose whether to assign category, keyword, entity, and concept as well as the thresholds and taxonomies used for each.
@@ -228,7 +216,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation, Content Generation or Content Resizing > Settings
 
 * Select **OpenAI ChatGPT** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -236,7 +224,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 ### 3. Enable specific Language Processing feature settings
 
 * For each feature, set any options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -246,6 +234,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content generation, edit (or create) an item.
+* Add a title to this item.
+* Open the Summary panel in the sidebar and click on `Generate content`.
 * To test content resizing, edit (or create) an item. Note: only the block editor is supported.
 * Add a paragraph block with some content.
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
@@ -262,7 +253,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Click `Keys and Endpoint` in the left hand Resource Management menu to get the endpoint for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation, Content Generation or Content Resizing > Settings
 
 * Select **Azure OpenAI** in the provider dropdown.
 * Enter your endpoint you copied from the above step into the `Endpoint URL` field.
@@ -271,9 +262,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 ### 3. Enable specific Language Processing features
 
-* Check the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -283,6 +274,9 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * To test title generation, edit (or create) an item that supports titles.
 * Ensure this item has content saved.
 * Open the Summary panel in the sidebar and click on `Generate titles`.
+* To test content generation, edit (or create) an item.
+* Add a title to this item.
+* Open the Summary panel in the sidebar and click on `Generate content`.
 * To test content resizing, edit (or create) an item. Note: only the block editor is supported.
 * Add a paragraph block with some content.
 * With this block selected, select the AI icon in the toolbar and choose to either expand or condense the text.
@@ -297,16 +291,16 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Note that if this page doesn't work, it's likely that Gemini is not enabled in your workspace. Contact your workspace administrator to get this enabled.
 * Click `Create API key` and copy the key that is shown.
 
-### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing
+### 2. Configure API Keys under Tools > ClassifAI > Language Processing > Title Generation, Excerpt Generation or Content Resizing > Settings
 
 * Select **Google AI (Gemini API)** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Language Processing features
 
-* Check the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content type to test enabled features
 
@@ -330,7 +324,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Classification > Settings
 
 * Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -339,7 +333,7 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 
 * Choose to automatically classify content.
 * Set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Edit a content item
 
@@ -347,11 +341,11 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Create a new piece of content that matches the post type and post status chosen in settings.
 * Open the taxonomy panel in the sidebar and see terms that were auto-applied.
 
-## Set Up Audio Transcripts Generation (via OpenAI Whisper)
+## Set Up Audio Transcripts Generation (via OpenAI Speech to Text)
 
 Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can create a transcript for audio files that meet the following requirements:
 
-* The file must be presented in mp3, mp4, mpeg, mpga, m4a, wav, or webm format
+* The file must be presented in mp3, mp4, mpeg, wav, or ogg format
 * The file size must be less than 25 megabytes (MB)
 
 ### 1. Sign up for OpenAI
@@ -361,7 +355,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation > Settings
 
 * Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -370,7 +364,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 * Choose to enable the ability to automatically generate transcripts from supported audio files.
 * Choose which user roles have access to this ability.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Upload a new audio file
 
@@ -386,12 +380,12 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Location/Region` for this resource.
 * Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **Microsoft Azure AI Speech** in the provider dropdown.
 * In the `Endpoint URL` field, enter the following URL, replacing `LOCATION` with the `Location/Region` you found above: `https://LOCATION.tts.speech.microsoft.com/`.
 * In the `API Key` field, enter your `KEY 1` copied from above.
-* Click **Save Changes** (the page will reload).
+* Click **Save Settings**.
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice as per your choice.
 * Select a post type that should use this service.
@@ -412,7 +406,7 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **OpenAI Text to Speech** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -446,14 +440,14 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * On the **Retrieve access key** page, choose **Show** to reveal the value of your user's secret access key.
 * Copy and save the credentials in a secure location on your computer or click "Download .csv file" to save the access key ID and secret access key to a `.csv` file.
 
-### 2. Configure AWS credentials under Tools > ClassifAI > Language Processing > Text to Speech
+### 2. Configure AWS credentials under Tools > ClassifAI > Language Processing > Text to Speech > Settings
 
 * Select **Amazon Polly** in the provider dropdown.
 * In the `AWS access key` field, enter the `Access key
 ` copied from above.
 * In the `AWS secret access key` field, enter your `Secret access key` copied from above.
 * In the `AWS Region` field, enter your AWS region value eg: `us-east-1`
-* Click **Save Changes** (the page will reload).
+* Click **Save Settings**.
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice and voice engine as per your choice.
 * Select a post type that should use this service.
@@ -464,6 +458,165 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 * After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
 * Click the button to preview the generated speech audio for the post.
 * View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up the Smart 404 Feature
+
+### 1. Decide on Provider
+
+* This Feature is powered by either OpenAI or Azure OpenAI.
+* Once you've chosen a Provider, you'll need to create an account and get authentication details.
+  * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
+
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Smart 404 > Settings
+
+* Select the proper Provider in the provider dropdown.
+* Enter your authentication details.
+* Configure any other settings as desired.
+
+### 3. ElasticPress configuration
+
+Once the Smart 404 Feature is configured, you can then proceed to get ElasticPress set up to index the data.
+
+If on a standard WordPress installation:
+
+* Install and activate the [ElasticPress](https://github.com/10up/elasticpress) plugin.
+* Set your Elasticsearch URL in the ElasticPress settings (`ElasticPress > Settings`).
+* Go to the `ElasticPress > Sync` settings page and trigger a sync, ensuring this is set to run a sync from scratch. This will send over the new schema to Elasticsearch and index all content, including creating vector embeddings for each post.
+
+If on a WordPress VIP hosted environment:
+
+* [Enable Enterprise Search](https://docs.wpvip.com/enterprise-search/enable/)
+* [Run the VIP-CLI `index` command](https://docs.wpvip.com/enterprise-search/index/). This sends the new schema to Elasticsearch and indexes all content, including creating vector embeddings for each post. Note you may need to use the `--setup` flag to ensure the schema is created correctly.
+
+At this point all of your content should be indexed, along with the embeddings data. You'll then need to update your 404 template to display the recommended results.
+
+### 4. Display the recommended results
+
+The Smart 404 Feature comes with a few helper functions that can be used to display the recommended results on your 404 page:
+
+* Directly display the results using the `Classifai\render_smart_404_results()` function.
+* Get the data and then display it in your own way using the `Classifai\get_smart_404_results()` function.
+
+You will need to directly integrate these functions into your 404 template where desired. The plugin does not automatically display the results on the 404 page for you.
+
+Both functions support the following arguments. If any argument is not provided, the default value set on the settings page will be used:
+
+* `$index` (string) - The ElasticPress index to search in. Default is `post`.
+* `$num` (int) - Maximum number of results to display. Default is `5`.
+* `$num_candidates` (int) - Maximum number of results to search over. Default is `5000`.
+* `$rescore` (bool) - Whether to run a rescore query or not. Can give better results but often is slower. Default is `false`.
+* `$score_function` (string) - The [vector scoring function](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/query-dsl-script-score-query.html#vector-functions) to use. Default is `cosine`. Options are `cosine`, `dot_product`, `l1_norm` and `l2_norm`.
+
+The `Classifai\render_smart_404_results()` function also supports the following additional arguments:
+
+* `$fallback` (bool) - Whether to run a fallback WordPress query if no results are found in Elasticsearch. These results will then be rendered. Default is `true`.
+
+Examples:
+
+```php
+// Render the results.
+Classifai\render_smart_404_results(
+  [
+    'index'          => 'post',
+    'num'            => 3,
+    'num_candidates' => 1000,
+    'rescore'        => true,
+    'fallback'       => true,
+    'score_function' => 'dot_product',
+  ]
+);
+```
+
+```php
+// Get the results.
+$results = Classifai\get_smart_404_results(
+  [
+    'index'          => 'post',
+    'num'            => 10,
+    'num_candidates' => 8000,
+    'rescore'        => false,
+    'score_function' => 'cosine',
+  ]
+);
+
+ob_start();
+
+// Render the results.
+foreach ( $results as $result ) {
+?>
+  <div>
+    <?php if ( has_post_thumbnail( $result->ID ) ) : ?>
+      <figure>
+        <a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+          <?php echo wp_kses_post( get_the_post_thumbnail( $result->ID ) ); ?>
+        </a>
+      </figure>
+    <?php endif; ?>
+    <a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+      <?php echo esc_html( $result->post_title ); ?>
+    </a>
+  </div>
+<?php
+}
+
+$output = ob_get_clean();
+echo $output;
+```
+
+### Local Quickstart
+
+If you want to quickly test things locally, ensure you have Docker installed (Docker Desktop recommended) and then run the following command:
+
+```bash
+docker run -p 9200:9200 -d --name elasticsearch \
+  -e "discovery.type=single-node" \
+  -e "xpack.security.enabled=false" \
+  -e "xpack.security.http.ssl.enabled=false" \
+  -e "xpack.license.self_generated.type=basic" \
+  docker.elastic.co/elasticsearch/elasticsearch:7.9.0
+```
+
+This will download, install and start Elasticsearch v7.9.0 to your local machine. You can then access Elasticsearch at `http://localhost:9200`, which is the same URL you can use to configure ElasticPress with. It is recommended that you change the `Content Items per Index Cycle` setting in ElasticPress to `20` to ensure indexing doesn't timeout. Also be aware of API rate limits on the OpenAI Embeddings API.
+
+## Set Up the Term Cleanup Feature
+
+### 1. Decide on Provider
+
+* This Feature is powered by either OpenAI or Azure OpenAI.
+* Once you've chosen a Provider, you'll need to create an account and get authentication details.
+  * When setting things up on the Azure side, ensure you choose either the `text-embedding-3-small` or `text-embedding-3-large` model. The Feature will not work with other models.
+
+### 2. Configure Settings under Tools > ClassifAI > Language Processing > Term Cleanup > Settings
+
+* Select the proper Provider in the provider dropdown.
+* Enter your authentication details.
+* Configure any other settings as desired.
+
+### 3. ElasticPress configuration
+
+It is recommended to use ElasticPress with this Feature, especially if processing more than 500 terms, as performance will be significantly better. Once the Term Cleanup Feature is configured, you can then proceed to get ElasticPress set up to index the data.
+
+If on a standard WordPress installation:
+
+* Install and activate the [ElasticPress](https://github.com/10up/elasticpress) plugin.
+* Set your Elasticsearch URL in the ElasticPress settings (`ElasticPress > Settings`).
+* Enable the [term index](https://www.elasticpress.io/blog/2023/03/enabling-comments-and-terms-in-elasticpress-5-0/) feature.
+* Go to the `ElasticPress > Sync` settings page and trigger a sync, ensuring this is set to run a sync from scratch. This will send over the new schema to Elasticsearch and index all content, including creating vector embeddings for each term.
+
+If on a WordPress VIP hosted environment:
+
+* [Enable Enterprise Search](https://docs.wpvip.com/enterprise-search/enable/).
+* [Enable the term index](https://docs.wpvip.com/enterprise-search/enable-features/#h-terms). Example command: `vip @example-app.develop -- wp vip-search activate-feature terms`.
+* [Run the VIP-CLI `index` command](https://docs.wpvip.com/enterprise-search/index/). This sends the new schema to Elasticsearch and indexes all content, including creating vector embeddings for each term. Note you may need to use the `--setup` flag to ensure the schema is created correctly.
+
+### 4. Start the Term Cleanup Process
+
+Once configured, the plugin will add a new submenu under the Tools menu called Term Cleanup.
+
+* Go to the Term Cleanup page, click on your desired taxonomy, then click on the "Find similar" button.
+* This initializes a background process that will compare each term to find ones that are similar.
+* Once done, all the results will be displayed.
+* You can then skip or merge the potential duplicate terms from the settings page.
 
 ## Set Up Image Processing features (via Microsoft Azure)
 
@@ -480,7 +633,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 - Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
 - Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing > Descriptive Text Generator, Image Tags Generator, Image Cropping, Image Text Extraction or PDF Text Extraction
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Image Processing > Descriptive Text Generator, Image Tags Generator, Image Cropping, Image Text Extraction or PDF Text Extraction > Settings
 
 - Select **Microsoft Azure AI Vision** in the provider dropdown.
 - In the `Endpoint URL` field, enter your `API endpoint`.
@@ -502,7 +655,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
 
 * Select **OpenAI DALL·E 3** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
@@ -511,7 +664,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 * Choose to add the ability to generate images.
 * If image generation is configured, set the other options as needed.
-* Save changes and ensure a success message is shown. An error will show if API authentication fails.
+* Save settings. An error will show if API authentication fails.
 
 ### 4. Trigger the media flow within a content item
 
@@ -531,14 +684,14 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
 * Click `Create new secret key` and copy the key that is shown.
 
-### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Language Processing > Moderation >  > Settings
 
 * Select **OpenAI Moderation** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable Comment Moderation
 
-* Select the "Enable" checkbox in above screen.
+* Turn on the "Enable" toggle in the screen above.
 * Select "Comments" in the "Content to moderate" section.
 
 ## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
@@ -559,12 +712,33 @@ Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-se
 
 For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content
+### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content Service > Settings
 
 - In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
 - In the `API Key` field, enter your `KEY 1` from Step 1 above.
 
 ### 3. Use "Recommended Content" block to display recommended content on your website
+
+## Run locally hosted LLMs
+
+Some of the Features in ClassifAI can be set up to use locally hosted LLMs. This has the benefit of complete privacy and data control, as well as being able to be run without any cost. The trade-offs here are performance isn't as great and results may also be less accurate.
+
+Right now, this is powered by Ollama, a tool that allows you to host and run LLMs locally. To set this up, follow the steps below:
+
+### 1. Install Ollama
+
+* [Install Ollama](https://ollama.com/) on your local machine.
+* By default Ollama runs at `http://localhost:11434/`.
+
+### 2. Install the model
+
+* Decide which models you want to use. This will depend on the Feature you are setting up. For instance, if you want to use Image Processing Features, ensure you install a Vision model. If you want to use the Classification Feature, ensure you install an Embedding model. All other Features should work with standard models.
+* Install the model locally by running `ollama pull <model-name>` in your terminal.
+
+### 3. Configure Provider
+
+* Once Ollama is running and the model is installed, you can proceed to use it as a Provider for the desired Feature.
+* Note that when using locally hosted LLMs, performance may be slower than using cloud-based services, especially for initial requests. Results may also be less accurate but these are the trade-offs for privacy and data control.
 
 ## WP CLI Commands
 
@@ -608,4 +782,4 @@ Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/
 
 ## Like what you see?
 
-<a href="http://10up.com/contact/"><img src="https://10up.com/uploads/2016/10/10up-Github-Banner.png" width="850" alt="Work with us at 10up"></a>
+<a href="http://10up.com/contact/"><img src="https://github.com/10up/.github/blob/trunk/profile/10up-github-banner.jpg" width="850" alt="Work with the 10up WordPress Practice at Fueled"></a>

@@ -42,13 +42,17 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Moderation',
-				'Classifai\Providers\OpenAI\Whisper',
+				'Classifai\Providers\OpenAI\SpeechToText',
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\GoogleAI\GeminiAPI',
 				'Classifai\Providers\Azure\OpenAI',
 				'Classifai\Providers\AWS\AmazonPolly',
 				'Classifai\Providers\Azure\Embeddings',
 				'Classifai\Providers\Azure\Language',
+				'Classifai\Providers\Browser\ChromeAI',
+				'Classifai\Providers\XAI\Grok',
+				'Classifai\Providers\Localhost\Ollama',
+				'Classifai\Providers\Localhost\OllamaEmbeddings',
 			]
 		);
 	}

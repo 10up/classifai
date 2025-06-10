@@ -21,6 +21,7 @@ tests export-ignore
 .gitattributes export-ignore
 .gitignore export-ignore
 .nvmrc export-ignore
+.typos.toml export-ignore
 .wordpress-version-checker.json export-ignore
 .wp-env.json export-ignore
 .wp-env.override.json export-ignore
@@ -35,7 +36,9 @@ hookdoc-conf.json export-ignore
 LICENSE.md export-ignore
 package-lock.json export-ignore
 package.json export-ignore
+phpcs-compat.xml.dist export-ignore
 phpcs.xml.dist export-ignore
+phpstan.neon.dist export-ignore
 phpunit.xml.dist export-ignore
 README.md export-ignore
 webpack.config.js export-ignore

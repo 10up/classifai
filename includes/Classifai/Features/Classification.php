@@ -6,6 +6,7 @@ use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\Watson\NLU;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Localhost\OllamaEmbeddings;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -43,6 +44,7 @@ class Classification extends Feature {
 			NLU::ID              => __( 'IBM Watson NLU', 'classifai' ),
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
+			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -250,6 +252,7 @@ class Classification extends Feature {
 				break;
 			case AzureEmbeddings::ID:
 			case OpenAIEmbeddings::ID:
+			case OllamaEmbeddings::ID:
 				$results = $provider_instance->set_terms( $post_id, $results, $link );
 				break;
 		}
@@ -303,18 +306,18 @@ class Classification extends Feature {
 	 */
 	public function enqueue_admin_assets() {
 		wp_enqueue_script(
-			'classifai-language-processing-script',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.js',
-			get_asset_info( 'language-processing', 'dependencies' ),
-			get_asset_info( 'language-processing', 'version' ),
+			'classifai-plugin-classification-previewer-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-previewer.js',
+			get_asset_info( 'classifai-plugin-classification-previewer', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classification-previewer', 'version' ),
 			true
 		);
 
 		wp_enqueue_style(
-			'classifai-language-processing-style',
-			CLASSIFAI_PLUGIN_URL . 'dist/language-processing.css',
+			'classifai-plugin-classification-previewer-css',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-previewer.css',
 			array(),
-			get_asset_info( 'language-processing', 'version' ),
+			get_asset_info( 'classifai-plugin-classification-previewer', 'version' ),
 			'all'
 		);
 	}
@@ -326,10 +329,10 @@ class Classification extends Feature {
 		global $post;
 
 		wp_enqueue_script(
-			'classifai-editor',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor.js',
-			get_asset_info( 'editor', 'dependencies' ),
-			get_asset_info( 'editor', 'version' ),
+			'classifai-plugin-classification-ibm-watson-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-ibm-watson.js',
+			get_asset_info( 'classifai-plugin-classification-ibm-watson', 'dependencies' ),
+			get_asset_info( 'classifai-plugin-classification-ibm-watson', 'version' ),
 			true
 		);
 
@@ -338,15 +341,15 @@ class Classification extends Feature {
 		}
 
 		wp_enqueue_script(
-			'classifai-gutenberg-plugin',
-			CLASSIFAI_PLUGIN_URL . 'dist/gutenberg-plugin.js',
-			array_merge( get_asset_info( 'gutenberg-plugin', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'gutenberg-plugin', 'version' ),
+			'classifai-plugin-classification-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification', 'version' ),
 			true
 		);
 
 		wp_add_inline_script(
-			'classifai-gutenberg-plugin',
+			'classifai-plugin-classification-js',
 			sprintf(
 				'var classifaiPostData = %s;',
 				wp_json_encode(
@@ -458,7 +461,7 @@ class Classification extends Feature {
 			</label>
 		</p>
 
-		<div class="classifai-clasify-post-wrapper" style="display: none;">
+		<div class="classifai-classify-post-wrapper" style="display: none;">
 			<a href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=classifai_classify_post&post_id=' . $post->ID ), 'classifai_classify_post_action', 'classifai_classify_post_nonce' ) ); ?>" class="button button-classify-post">
 				<?php esc_html_e( 'Suggest terms & tags', 'classifai' ); ?>
 			</a>
@@ -738,7 +741,7 @@ class Classification extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enables automatic content classification.', 'classifai' );
+		return esc_html__( 'Classify your content automatically or when manually triggered.', 'classifai' );
 	}
 
 	/**
@@ -782,7 +785,7 @@ class Classification extends Feature {
 		);
 
 		// Embeddings only supports existing terms.
-		if ( isset( $settings['provider'] ) && ( OpenAIEmbeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] ) ) {
+		if ( isset( $settings['provider'] ) && ( OpenAIEmbeddings::ID === $settings['provider'] || AzureEmbeddings::ID === $settings['provider'] || OllamaEmbeddings::ID === $settings['provider'] ) ) {
 			unset( $method_options['recommended_terms'] );
 			$settings['classification_method'] = 'existing_terms';
 		}
@@ -853,10 +856,10 @@ class Classification extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'post_statuses'         => [
-				'publish' => 1,
+				'publish' => 'publish',
 			],
 			'post_types'            => [
-				'post' => 1,
+				'post' => 'post',
 			],
 			'classification_mode'   => 'manual_review',
 			'classification_method' => 'recommended_terms',
@@ -879,7 +882,7 @@ class Classification extends Feature {
 		$new_settings['classification_method'] = sanitize_text_field( $new_settings['classification_method'] ?? $settings['classification_method'] );
 
 		// Embeddings only supports existing terms.
-		if ( isset( $new_settings['provider'] ) && ( OpenAIEmbeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] ) ) {
+		if ( isset( $new_settings['provider'] ) && ( OpenAIEmbeddings::ID === $new_settings['provider'] || AzureEmbeddings::ID === $new_settings['provider'] || OllamaEmbeddings::ID === $settings['provider'] ) ) {
 			$new_settings['classification_method'] = 'existing_terms';
 		}
 
@@ -1015,37 +1018,7 @@ class Classification extends Feature {
 			}
 		}
 
-		$taxonomies = get_taxonomies( [], 'objects' );
-		$taxonomies = array_filter( $taxonomies, 'is_taxonomy_viewable' );
-		$supported  = [];
-
-		foreach ( $taxonomies as $taxonomy ) {
-			// Remove this taxonomy if it doesn't support at least one of our post types.
-			if (
-				(
-					! empty( $supported_post_types ) &&
-					empty( array_intersect( $supported_post_types, $taxonomy->object_type ) )
-				) ||
-				'post_format' === $taxonomy->name
-			) {
-				continue;
-			}
-
-			$supported[ $taxonomy->name ] = $taxonomy->labels->singular_name;
-		}
-
-		/**
-		 * Filter taxonomies shown in settings.
-		 *
-		 * @since 3.0.0
-		 * @hook classifai_feature_classification_setting_taxonomies
-		 *
-		 * @param {array} $supported Array of supported taxonomies.
-		 * @param {object} $this Current instance of the class.
-		 *
-		 * @return {array} Array of taxonomies.
-		 */
-		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
+		return $this->get_taxonomies( $supported_post_types );
 	}
 
 	/**
@@ -1189,5 +1162,19 @@ class Classification extends Feature {
 		}
 
 		return $new_settings;
+	}
+
+	/**
+	 * Get status of embeddings generation process.
+	 *
+	 * @return bool
+	 */
+	public function is_embeddings_generation_in_progress(): bool {
+		$is_in_progress    = false;
+		$provider_instance = $this->get_feature_provider_instance();
+		if ( $provider_instance && method_exists( $provider_instance, 'is_embeddings_generation_in_progress' ) ) {
+			$is_in_progress = $provider_instance->is_embeddings_generation_in_progress();
+		}
+		return $is_in_progress;
 	}
 }

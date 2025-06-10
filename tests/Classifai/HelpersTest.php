@@ -8,6 +8,8 @@ use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
 use function Classifai\Providers\Watson\get_feature_threshold;
 use function Classifai\get_classification_feature_taxonomy;
+use function Classifai\get_url_slugs;
+use function Classifai\get_last_url_slug;
 
 /**
  * @group helpers
@@ -283,5 +285,31 @@ class HelpersTest extends \WP_UnitTestCase {
 		$statuses_diff = array_diff( $core_statuses, $all_statuses );
 		$this->assertEquals( 0, count( $statuses_diff ) );
 		$this->assertArrayHasKey( 'unread', $all_statuses );
+	}
+
+	/**
+	 * Tests for the get_last_url_slug method.
+	 */
+	public function test_get_url_slugs() {
+		global $wp;
+
+		// If URL is https://www.example.com/this/is/a/test/
+		// $wp->request will be 'this/is/a/test'.
+		$wp->request = 'this/is/a/test';
+
+		$slugs = get_url_slugs();
+		$this->assertEquals( [ 'this', 'is', 'a', 'test' ], $slugs );
+	}
+
+	/**
+	 * Tests for the get_last_url_slug method.
+	 */
+	public function test_get_last_url_slug() {
+		global $wp;
+
+		$wp->request = 'https://example.com/this/is/a/test/';
+
+		$slug = get_last_url_slug();
+		$this->assertEquals( 'test', $slug );
 	}
 }

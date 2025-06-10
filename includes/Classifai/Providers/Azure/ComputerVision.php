@@ -15,7 +15,7 @@ use Classifai\Providers\Provider;
 use WP_Error;
 
 use function Classifai\computer_vision_max_filesize;
-use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_modified_image_source_url;
 
 class ComputerVision extends Provider {
@@ -25,7 +25,23 @@ class ComputerVision extends Provider {
 	/**
 	 * @var string URL fragment to the analyze API endpoint
 	 */
-	protected $analyze_url = 'vision/v3.2/analyze';
+	protected $analyze_url = 'computervision/imageanalysis:analyze?api-version=2024-02-01';
+
+	/**
+	 * Image types to process.
+	 *
+	 * @var array
+	 */
+	private $image_types_to_process = [
+		'bmp',
+		'gif',
+		'jpeg',
+		'png',
+		'webp',
+		'ico',
+		'tiff',
+		'mpo',
+	];
 
 	/**
 	 * ComputerVision constructor.
@@ -115,7 +131,7 @@ class ComputerVision extends Provider {
 				'min'           => 1,
 				'step'          => 1,
 				'default_value' => $settings['descriptive_confidence_threshold'],
-				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 55.', 'classifai' ),
+				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
 			]
 		);
@@ -164,7 +180,7 @@ class ComputerVision extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'descriptive_confidence_threshold' => 55,
+						'descriptive_confidence_threshold' => 70,
 					]
 				);
 
@@ -377,23 +393,17 @@ class ComputerVision extends Provider {
 	 *
 	 * @since 1.6.0
 	 *
-	 * @param array $metadata Attachment metadata.
-	 * @param int   $attachment_id Attachment ID.
+	 * @param string $image_url URL of image to process.
+	 * @param int    $attachment_id Attachment ID.
 	 * @return string|WP_Error
 	 */
-	public function ocr_processing( array $metadata = [], int $attachment_id = 0 ) {
+	public function ocr_processing( string $image_url, int $attachment_id = 0 ) {
 		if ( ! wp_attachment_is_image( $attachment_id ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
-		$feature  = new ImageTextExtraction();
-		$settings = $feature->get_settings( static::ID );
-
-		if ( ! is_array( $metadata ) || ! is_array( $settings ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Invalid data found. Please check your settings and try again.', 'classifai' ) );
-		}
-
-		$should_ocr_scan = $feature->is_feature_enabled();
+		$feature = new ImageTextExtraction();
+		$rtn     = '';
 
 		/**
 		 * Filters whether to run OCR scanning on the current image.
@@ -401,25 +411,61 @@ class ComputerVision extends Provider {
 		 * @since 1.6.0
 		 * @hook classifai_should_ocr_scan_image
 		 *
-		 * @param {bool}  $should_ocr_scan Whether to run OCR scanning. The default value is set in ComputerVision settings.
-		 * @param {array} $metadata        Image metadata.
-		 * @param {int}   $attachment_id   The attachment ID.
+		 * @param {bool}  $should_scan   Whether to run OCR scanning. Defaults to feature being enabled.
+		 * @param {string} $image_url    URL of image to process.
+		 * @param {int}   $attachment_id The attachment ID.
 		 *
 		 * @return {bool} Whether to run OCR scanning.
 		 */
-		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $should_ocr_scan, $metadata, $attachment_id ) ) {
+		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $feature->is_feature_enabled(), $image_url, $attachment_id ) ) {
 			return '';
 		}
 
-		$image_url = wp_get_attachment_url( $attachment_id );
-		$scan      = $this->scan_image( $image_url, $feature );
+		$details = $this->scan_image( $image_url, $feature );
 
-		$ocr      = new OCR( $settings, $scan );
-		$response = $ocr->generate_ocr_data( $metadata, $attachment_id );
+		if ( is_wp_error( $details ) ) {
+			return $details;
+		}
 
-		set_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response', $scan, DAY_IN_SECONDS * 30 );
+		set_transient( 'classifai_azure_computer_vision_image_text_extraction_latest_response', $details, DAY_IN_SECONDS * 30 );
 
-		return $response;
+		if ( isset( $details->readResult ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			$text = [];
+
+			// Iterate down the chain to find the text we want.
+			foreach ( $details->readResult as $result ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				foreach ( $result as $block ) {
+					foreach ( $block as $lines ) {
+						foreach ( $lines as $line ) {
+							if ( isset( $line->text ) ) {
+								$text[] = $line->text;
+							}
+						}
+					}
+				}
+			}
+
+			if ( ! empty( $text ) ) {
+
+				/**
+				 * Filter the text returned from the API.
+				 *
+				 * @since 1.6.0
+				 * @hook classifai_ocr_text
+				 *
+				 * @param {string} $text    The returned text data.
+				 * @param {object} $details The full scan results from the API.
+				 *
+				 * @return {string} The filtered text data.
+				 */
+				$rtn = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $details );
+
+				// Save all the results for later
+				update_post_meta( $attachment_id, 'classifai_computer_vision_ocr', $details );
+			}
+		}
+
+		return $rtn;
 	}
 
 	/**
@@ -443,45 +489,48 @@ class ComputerVision extends Provider {
 			return $details;
 		}
 
-		$captions = $details->description->captions ?? [];
+		$caption = isset( $details->captionResult ) ? (array) $details->captionResult : []; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		set_transient( 'classifai_azure_computer_vision_descriptive_text_latest_response', $details, DAY_IN_SECONDS * 30 );
 
 		/**
-		 * Filter the captions returned from the API.
+		 * Filter the caption returned from the API.
 		 *
 		 * @since 1.4.0
 		 * @hook classifai_computer_vision_captions
 		 *
-		 * @param {array} $captions The returned caption data.
+		 * @param {array} $caption The returned caption data.
 		 *
 		 * @return {array} The filtered caption data.
 		 */
-		$captions = apply_filters( 'classifai_computer_vision_captions', $captions );
+		$caption = apply_filters( 'classifai_computer_vision_captions', $caption );
 
-		// Process the returned captions to see if they pass the threshold.
-		if ( is_array( $captions ) && ! empty( $captions ) ) {
+		// Process the returned caption to see if it passes the threshold.
+		if ( is_array( $caption ) && ! empty( $caption ) ) {
 			$settings  = $feature->get_settings( static::ID );
 			$threshold = $settings['descriptive_confidence_threshold'];
 
-			// Check the first caption to see if it passes the threshold.
-			if ( $captions[0]->confidence * 100 > $threshold ) {
-				$rtn = $captions[0]->text;
+			// Check the caption to see if it passes the threshold.
+			if ( isset( $caption['confidence'] ) && $caption['confidence'] * 100 > $threshold ) {
+				$rtn = ucfirst( $caption['text'] ?? '' );
 			} else {
+				/* translators: 1: Confidence score, 2: Threshold setting */
+				$rtn = new WP_Error( 'threshold', sprintf( esc_html__( 'Caption confidence score is %1$d%% which is lower than your threshold setting of %2$d%%', 'classifai' ), $caption['confidence'] * 100, $threshold ) );
+
 				/**
 				 * Fires if there were no captions returned.
 				 *
 				 * @since 1.5.0
 				 * @hook classifai_computer_vision_caption_failed
 				 *
-				 * @param {array} $tags      The caption data.
+				 * @param {array} $caption   The caption data.
 				 * @param {int}   $threshold The caption_threshold setting.
 				 */
-				do_action( 'classifai_computer_vision_caption_failed', $captions, $threshold );
+				do_action( 'classifai_computer_vision_caption_failed', $caption, $threshold );
 			}
 
-			// Save all the results for later.
-			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $captions );
+			// Save full results for later.
+			update_post_meta( $attachment_id, 'classifai_computer_vision_captions', $caption );
 		}
 
 		return $rtn;
@@ -540,7 +589,7 @@ class ComputerVision extends Provider {
 			return $details;
 		}
 
-		$tags = $details->tags ?? [];
+		$tags = $details->tagsResult->values ?? []; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 		set_transient( 'classifai_azure_computer_vision_image_tags_latest_response', $details, DAY_IN_SECONDS * 30 );
 
@@ -597,7 +646,7 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature   Feature instance
 	 * @return bool|object|WP_Error
 	 */
-	protected function scan_image( string $image_url, \Classifai\Features\Feature $feature = null ) {
+	protected function scan_image( string $image_url, ?\Classifai\Features\Feature $feature = null ) {
 		$settings = $feature->get_settings( static::ID );
 
 		// Check if valid authentication is in place.
@@ -669,19 +718,23 @@ class ComputerVision extends Provider {
 	 * @param \Classifai\Features\Feature $feature Feature instance
 	 * @return string
 	 */
-	protected function prep_api_url( \Classifai\Features\Feature $feature = null ): string {
+	protected function prep_api_url( ?\Classifai\Features\Feature $feature = null ): string {
 		$settings     = $feature->get_settings( static::ID );
 		$api_features = [];
 
 		if ( $feature instanceof DescriptiveTextGenerator && $feature->is_feature_enabled() && ! empty( $feature->get_alt_text_settings() ) ) {
-			$api_features[] = 'Description';
+			$api_features[] = 'caption';
 		}
 
 		if ( $feature instanceof ImageTagsGenerator && $feature->is_feature_enabled() ) {
-			$api_features[] = 'Tags';
+			$api_features[] = 'tags';
 		}
 
-		$endpoint = add_query_arg( 'visualFeatures', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
+		if ( $feature instanceof ImageTextExtraction && $feature->is_feature_enabled() ) {
+			$api_features[] = 'read';
+		}
+
+		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
 
 		return $endpoint;
 	}
@@ -696,7 +749,7 @@ class ComputerVision extends Provider {
 	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn     = false;
 		$request = wp_remote_post(
-			trailingslashit( $url ) . $this->analyze_url,
+			add_query_arg( 'features', 'caption', trailingslashit( $url ) . $this->analyze_url ),
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $api_key,
@@ -724,7 +777,7 @@ class ComputerVision extends Provider {
 	 * @param int    $attachment_id The attachment ID we're processing.
 	 * @param string $route_to_call The name of the route we're going to be processing.
 	 * @param array  $args          Optional arguments to pass to the route.
-	 * @return array|string|WP_Error
+	 * @return array|string|WP_Error|null
 	 */
 	public function rest_endpoint_callback( $attachment_id, string $route_to_call = '', array $args = [] ) {
 		// Check to be sure the post both exists and is an attachment.
@@ -743,22 +796,36 @@ class ComputerVision extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'No valid metadata found.', 'classifai' ) );
 		}
 
-		switch ( $route_to_call ) {
-			case 'ocr':
-				return $this->ocr_processing( $metadata, $attachment_id );
+		if ( 'crop' === $route_to_call ) {
+			return $this->smart_crop_image( $metadata, $attachment_id );
+		}
 
-			case 'crop':
-				return $this->smart_crop_image( $metadata, $attachment_id );
+		// Check if the image is of a type we can process.
+		$mime_type          = get_post_mime_type( $attachment_id );
+		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
+		$process            = false;
+
+		foreach ( $matched_extensions as $ext ) {
+			if ( in_array( $ext, $this->image_types_to_process, true ) ) {
+				$process = true;
+				break;
+			}
+		}
+
+		if ( ! $process ) {
+			return new WP_Error( 'invalid', esc_html__( 'Image does not match a valid mime type.', 'classifai' ) );
 		}
 
 		$image_url = get_modified_image_source_url( $attachment_id );
 
 		if ( empty( $image_url ) || ! filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
 			if ( isset( $metadata['sizes'] ) && is_array( $metadata['sizes'] ) ) {
-				$image_url = get_largest_acceptable_image_url(
+				$image_url = get_largest_size_and_dimensions_image_url(
 					get_attached_file( $attachment_id ),
 					wp_get_attachment_url( $attachment_id ),
-					$metadata['sizes'],
+					$metadata,
+					[ 50, 16000 ],
+					[ 50, 16000 ],
 					computer_vision_max_filesize()
 				);
 			} else {
@@ -767,12 +834,15 @@ class ComputerVision extends Provider {
 		}
 
 		if ( empty( $image_url ) ) {
-			return new WP_Error( 'error', esc_html__( 'Valid image size not found. Make sure the image is less than 4MB.' ) );
+			return new WP_Error( 'error', esc_html__( 'Image does not meet size requirements. Please ensure it is at least 50x50 but less than 16000x16000 and smaller than 20MB.', 'classifai' ) );
 		}
 
 		switch ( $route_to_call ) {
 			case 'descriptive_text':
 				return $this->generate_alt_tags( $image_url, $attachment_id );
+
+			case 'ocr':
+				return $this->ocr_processing( $image_url, $attachment_id );
 
 			case 'tags':
 				return $this->generate_image_tags( $image_url, $attachment_id );

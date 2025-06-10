@@ -3,6 +3,8 @@
 namespace Classifai;
 
 use Classifai\Features\Classification;
+use Classifai\Features\Smart404;
+use Classifai\Features\Smart404EPIntegration;
 use Classifai\Providers\Provider;
 use Classifai\Admin\UserProfile;
 use Classifai\Providers\Watson\NLU;
@@ -150,7 +152,7 @@ function computer_vision_max_filesize(): int {
 	 *
 	 * @return {int} Filtered filesize in bytes.
 	 */
-	return apply_filters( 'classifai_computer_vision_max_filesize', 4 * MB_IN_BYTES ); // 4MB default.
+	return apply_filters( 'classifai_computer_vision_max_filesize', 20 * MB_IN_BYTES ); // 20MB default.
 }
 
 /**
@@ -214,8 +216,8 @@ function get_largest_acceptable_image_url( string $full_image, string $full_url,
  * @param string $full_image The path to the full-sized image source file.
  * @param string $full_url   The URL of the full-sized image.
  * @param array  $metadata   Attachment metadata, including intermediate sizes.
- * @param array  $width      Array of minimimum and maximum width values. Default 0, 4200.
- * @param array  $height     Array of minimimum and maximum height values. Default 0, 4200.
+ * @param array  $width      Array of minimum and maximum width values. Default 0, 4200.
+ * @param array  $height     Array of minimum and maximum height values. Default 0, 4200.
  * @param int    $max_size   The maximum acceptable filesize. Default 1MB.
  * @return string|null The image URL, or null if no acceptable image found.
  */
@@ -300,7 +302,7 @@ function attachment_is_pdf( $post ): bool {
  * @param string $attribute Optional attribute to get. Can be version or dependencies.
  * @return string|array
  */
-function get_asset_info( string $slug, string $attribute = null ) {
+function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
 		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
@@ -454,7 +456,7 @@ function check_term_permissions( string $tax = '' ) {
 	$create_cap = is_taxonomy_hierarchical( $taxonomy->name ) ? $taxonomy->cap->edit_terms : $taxonomy->cap->assign_terms;
 
 	if ( ! current_user_can( $create_cap ) || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
-		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not alllowed to create or assign to this taxonomy.', 'classifai' ) );
+		return new WP_Error( 'rest_cannot_assign_term', esc_html__( 'Sorry, you are not allowed to create or assign to this taxonomy.', 'classifai' ) );
 	}
 
 	return true;
@@ -517,7 +519,7 @@ function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {
 
 				return array(
 					'title'    => sanitize_text_field( $prompt['title'] ),
-					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'prompt'   => wp_kses_post( $prompt['prompt'] ),
 					'default'  => absint( $default ),
 					'original' => absint( $prompt['original'] ),
 				);
@@ -587,10 +589,7 @@ function sanitize_number_of_responses_field( string $key, array $new_settings, a
 function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
-	return filter_var(
-		isset( $settings[ $classify_by ] ) ?? false,
-		FILTER_VALIDATE_BOOLEAN
-	);
+	return ( ! empty( $settings[ $classify_by ] ) );
 }
 
 /**
@@ -662,7 +661,6 @@ function get_classification_mode(): string {
 	return $value;
 }
 
-
 /**
  * Use VIP's `vip_safe_wp_remote_get` if available, otherwise use `wp_remote_get`.
  *
@@ -701,4 +699,116 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
 	);
 
 	return wp_remote_get( $url, $args ); // phpcs:ignore
+}
+
+/**
+ * Determine if the legacy settings panel should be used.
+ *
+ * @since 3.2.0
+ *
+ * @return bool
+ */
+function should_use_legacy_settings_panel(): bool {
+	/**
+	 * Filter to determine if the legacy settings panel should be used.
+	 *
+	 * @since 3.2.0
+	 * @hook classifai_use_legacy_settings_panel
+	 *
+	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
+	 *
+	 * @return {bool} Whether to use the legacy settings panel.
+	 */
+	return apply_filters( 'classifai_use_legacy_settings_panel', false );
+}
+
+/**
+ * Get all parts from the current URL.
+ *
+ * For instance, if the URL is `https://example.com/this/is/a/test/`,
+ * this function will return: `[ 'this', 'is', 'a', 'test' ]`.
+ *
+ * @return array
+ */
+function get_url_slugs(): array {
+	global $wp;
+
+	$parts = explode( '/', $wp->request );
+
+	return array_filter( $parts );
+}
+
+/**
+ * Get the last part from the current URL.
+ *
+ * For instance, if the URL is `https://example.com/this/is/a/test`,
+ * this function will return: 'test'.
+ *
+ * @return string
+ */
+function get_last_url_slug(): string {
+	$parts = get_url_slugs();
+
+	return trim( end( $parts ) );
+}
+
+/**
+ * Check if ElasticPress is installed.
+ *
+ * @return bool
+ */
+function is_elasticpress_installed(): bool {
+	return class_exists( '\\ElasticPress\\Feature' );
+}
+
+/**
+ * Get the Smart 404 results.
+ *
+ * @param array $args Arguments to pass to the search.
+ * @return array
+ */
+function get_smart_404_results( array $args = [] ): array {
+	// Run our query.
+	$results = ( new Smart404() )->exact_knn_search( get_last_url_slug(), $args );
+
+	// Ensure the query ran successfully.
+	if ( is_wp_error( $results ) ) {
+		return [];
+	}
+
+	// Convert the results to normal WP_Post objects.
+	$results = ( new Smart404EPIntegration() )->convert_es_results_to_post_objects( $results );
+
+	return $results;
+}
+
+/**
+ * Render the Smart 404 results.
+ *
+ * @param array $args Arguments to pass to the search.
+ */
+function render_smart_404_results( array $args = [] ) {
+	// Get the results.
+	$results = get_smart_404_results( $args );
+
+	// Handle situation where we don't have results.
+	if ( empty( $results ) ) {
+		return;
+	}
+
+	// Iterate through each result and render it.
+	echo '<ul>';
+	foreach ( $results as $result ) {
+		?>
+		<li>
+			<a href="<?php echo esc_url( get_permalink( $result->ID ) ); ?>">
+				<?php echo esc_html( $result->post_title ); ?>
+			</a>
+			<p>
+				<?php echo esc_html( $result->post_excerpt ); ?>
+			</p>
+		</li>
+		<?php
+	}
+	echo '</ul>';
 }

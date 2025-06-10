@@ -444,3 +444,50 @@ document.addEventListener( 'DOMContentLoaded', function () {
 		}
 	} );
 } )( jQuery );
+
+// Update the Term Cleanup status.
+( function ( $ ) {
+	const statusWrapper = $( '.classifai-term-cleanup-process-status' );
+	const processRunning = statusWrapper.length;
+	const taxonomy = statusWrapper.data( 'taxonomy' );
+
+	if ( ! processRunning || ! taxonomy ) {
+		return;
+	}
+
+	const ajaxUrl = classifai_term_cleanup_params?.ajax_url; // eslint-disable-line camelcase
+	const ajaxNonce = classifai_term_cleanup_params?.ajax_nonce; // eslint-disable-line camelcase
+
+	const intervalId = setInterval( function () {
+		$.ajax( {
+			url: ajaxUrl,
+			type: 'POST',
+			data: {
+				action: 'classifai_get_term_cleanup_status',
+				taxonomy,
+				nonce: ajaxNonce,
+			},
+			success( response ) {
+				if ( response.success && response.data ) {
+					if ( response.data.is_running && response.data.status ) {
+						// Update the sync status on the page
+						statusWrapper.html( response.data.status );
+					} else {
+						// Clear interval and reload the page.
+						clearInterval( intervalId );
+						window.location.reload();
+					}
+				}
+			},
+			error( jqXHR, textStatus, errorThrown ) {
+				// eslint-disable-next-line no-console
+				console.error(
+					'Error: ',
+					textStatus,
+					', Details: ',
+					errorThrown
+				);
+			},
+		} );
+	}, 30000 ); // 30000 milliseconds = 30 seconds
+} )( jQuery );

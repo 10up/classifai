@@ -3,11 +3,11 @@ import { getWhisperData } from '../../plugins/functions';
 describe( '[Language processing] Speech to Text Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );
@@ -16,23 +16,23 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.login();
 	} );
 
-	it( 'Can save OpenAI Whisper "Language Processing" settings', () => {
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+	it( 'Can save OpenAI Audio Transcription settings', () => {
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
 
-		cy.get( '#api_key' ).clear().type( 'password' );
+		cy.get( '#openai_api_key' ).clear().type( 'password' );
+		cy.get( '#openai_whisper_model' ).select( 'whisper-1' );
 
-		cy.get( '#status' ).check();
-		cy.get(
-			'#classifai_feature_audio_transcripts_generation_roles_administrator'
-		).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.allowFeatureToAdmin();
+		cy.saveFeatureSettings();
 	} );
 
 	let audioEditLink = '';
 	let mediaModalLink = '';
-	it( 'Can see OpenAI Whisper language processing actions on edit media page and verify generated data.', () => {
+
+	it( 'Can see OpenAI Audio Transcription actions on edit media page and verify generated data.', () => {
 		cy.visit( '/wp-admin/upload.php?mode=grid' ); // Ensure grid mode is enabled.
 		cy.visit( '/wp-admin/media-new.php' );
 		cy.get( '#plupload-upload-ui' ).should( 'exist' );
@@ -65,7 +65,7 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		);
 	} );
 
-	it( 'Can see OpenAI Whisper language processing actions on media model', () => {
+	it( 'Can see OpenAI Audio Transcription actions on media model', () => {
 		const audioId = audioEditLink.split( 'post=' )[ 1 ]?.split( '&' )[ 0 ];
 		mediaModalLink = `wp-admin/upload.php?item=${ audioId }`;
 		cy.visit( mediaModalLink );
@@ -75,28 +75,28 @@ describe( '[Language processing] Speech to Text Tests', () => {
 		cy.get( '#classifai-retranscribe' ).contains( 'Re-transcribe' );
 	} );
 
-	it( 'Can enable/disable OpenAI Whisper language processing features', () => {
+	it( 'Can enable/disable OpenAI Audio Transcription features', () => {
 		const options = {
 			audioEditLink,
 			mediaModalLink,
 		};
 
 		// Disable features
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).uncheck();
-		cy.get( '#submit' ).click();
+		cy.disableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is not available.
 		cy.verifySpeechToTextEnabled( false, options );
 
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		// Verify that the feature is available.
 		cy.verifySpeechToTextEnabled( true, options );
@@ -104,11 +104,11 @@ describe( '[Language processing] Speech to Text Tests', () => {
 
 	it( 'Can enable/disable speech to text feature by role', () => {
 		// Enable feature.
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_audio_transcripts_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_audio_transcripts_generation'
 		);
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
 		const options = {
 			audioEditLink,

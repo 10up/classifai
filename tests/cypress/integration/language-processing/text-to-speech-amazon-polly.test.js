@@ -1,24 +1,25 @@
 describe( '[Language Processing] Text to Speech (Amazon Polly) Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visit(
-			'/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_text_to_speech_generation'
+		cy.visitFeatureSettings(
+			'language_processing/feature_text_to_speech_generation'
 		);
-		cy.get(
-			'#classifai_feature_text_to_speech_generation_post_types_post'
-		).check( 'post' );
-		cy.get( '#provider' ).select( 'aws_polly' );
-		cy.get( '#access_key_id' ).clear();
-		cy.get( '#access_key_id' ).type( 'SAMPLE_ACCESS_KEY' );
-		cy.get( '#secret_access_key' ).clear();
-		cy.get( '#secret_access_key' ).type( 'SAMPLE_SECRET_ACCESS_KEY' );
-		cy.get( '#aws_region' ).clear();
-		cy.get( '#aws_region' ).type( 'SAMPLE_SECRET_ACCESS_KEY' );
-		cy.get( '#status' ).check();
-		cy.get( '#submit' ).click();
+		cy.get( '#classifai-logo' ).should( 'exist' );
+		cy.get( '.settings-allowed-post-types input#post' ).check();
+		cy.selectProvider( 'aws_polly' );
+		cy.get( '#aws_polly_access_key_id' ).clear();
+		cy.get( '#aws_polly_access_key_id' ).type( 'SAMPLE_ACCESS_KEY' );
+		cy.get( '#aws_polly_secret_access_key' ).clear();
+		cy.get( '#aws_polly_secret_access_key' ).type(
+			'SAMPLE_SECRET_ACCESS_KEY'
+		);
+		cy.get( '#aws_polly_aws_region' ).clear();
+		cy.get( '#aws_polly_aws_region' ).type( 'SAMPLE_SECRET_ACCESS_KEY' );
+		cy.enableFeature();
+		cy.saveFeatureSettings();
 
-		cy.get( '#voice' ).select( 'Aditi' );
-		cy.get( '#submit' ).click();
+		cy.get( '#aws_polly_voice' ).select( 'Aditi' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );

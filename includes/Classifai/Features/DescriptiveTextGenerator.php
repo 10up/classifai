@@ -3,6 +3,9 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\XAI\Grok;
+use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -22,6 +25,13 @@ class DescriptiveTextGenerator extends Feature {
 	const ID = 'feature_descriptive_text_generator';
 
 	/**
+	 * Prompt for generating descriptive text.
+	 *
+	 * @var string
+	 */
+	public $prompt = 'You are an assistant that generates descriptions of images that are used on a website. You will be provided with an image and will describe the main item you see in the image, giving details but staying concise. There is no need to say "the image contains" or similar, just describe what is actually in the image. This text will be important for screen readers, so make sure it is descriptive and accurate but not overly verbose. Before returning the text, re-evaluate your response and ensure you are following the above points, in particular ensuring the text is concise.';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -33,6 +43,9 @@ class DescriptiveTextGenerator extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			ChatGPT::ID        => __( 'OpenAI', 'classifai' ),
+			Grok::ID           => __( 'xAI Grok', 'classifai' ),
+			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -137,7 +150,10 @@ class DescriptiveTextGenerator extends Feature {
 	 * @return array
 	 */
 	public function generate_image_alt_tags( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -192,6 +208,8 @@ class DescriptiveTextGenerator extends Feature {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( \WP_Post $post ) {
+		global $wp_meta_boxes;
+
 		if ( ! wp_attachment_is_image( $post ) || ! $this->is_feature_enabled() ) {
 			return;
 		}
@@ -273,12 +291,13 @@ class DescriptiveTextGenerator extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
 		if (
+			null === $post ||
 			! $this->is_feature_enabled() ||
 			! wp_attachment_is_image( $post ) ||
 			empty( $this->get_alt_text_settings() )
@@ -329,12 +348,24 @@ class DescriptiveTextGenerator extends Feature {
 	}
 
 	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
+	}
+
+	/**
 	 * Get the description for the enable field.
 	 *
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'Enable this to generate descriptive text for images.', 'classifai' );
+		return esc_html__( 'Automatically generate descriptive text for images, storing this as image alt text, caption or description.', 'classifai' );
 	}
 
 	/**
@@ -371,12 +402,53 @@ class DescriptiveTextGenerator extends Feature {
 	public function get_feature_default_settings(): array {
 		return [
 			'descriptive_text_fields' => [
-				'alt'         => 0,
+				'alt'         => 'alt',
 				'caption'     => 0,
 				'description' => 0,
 			],
+			'processing_mode'         => 'automatic',
 			'provider'                => ComputerVision::ID,
 		];
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
+			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ Grok::ID ]['prompt'] ) ) {
+			foreach ( $settings[ Grok::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ Grok::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
+			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -389,6 +461,8 @@ class DescriptiveTextGenerator extends Feature {
 		$settings = $this->get_settings();
 
 		$new_settings['descriptive_text_fields'] = array_map( 'sanitize_text_field', $new_settings['descriptive_text_fields'] ?? $settings['descriptive_text_fields'] );
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
 
 		return $new_settings;
 	}

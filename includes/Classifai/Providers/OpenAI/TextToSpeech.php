@@ -31,6 +31,49 @@ class TextToSpeech extends Provider {
 	}
 
 	/**
+	 * Get the API url.
+	 *
+	 * @return string
+	 */
+	public function get_api_url(): string {
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_text_to_speech_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_text_to_speech_api_url', $this->api_url );
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = $settings[ static::ID ]['tts_model'] ?? 'gpt-4o-mini-tts';
+
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to change the model for certain use cases.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_openai_text_to_speech_model
+		 *
+		 * @param {string} $model The current model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_text_to_speech_model', $model );
+	}
+
+	/**
 	 * Register settings for the provider.
 	 */
 	public function render_provider_fields(): void {
@@ -84,6 +127,7 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
+							/* translators: %s is replaced with the OpenAI Text to Speech models URL */
 							__( 'Select a <a href="%s" title="OpenAI Text to Speech models" target="_blank">model</a> depending on your requirement.', 'classifai' ),
 							[
 								'a' => [
@@ -120,7 +164,8 @@ class TextToSpeech extends Provider {
 					'' :
 					sprintf(
 						wp_kses(
-							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech models" target="_blank">voice</a>.', 'classifai' ),
+							/* translators: %s is replaced with the OpenAI Text to Speech voice options URL */
+							__( 'Select the speech <a href="%s" title="OpenAI Text to Speech voice options" target="_blank">voice</a>.', 'classifai' ),
 							[
 								'a' => [
 									'href'  => [],
@@ -144,8 +189,8 @@ class TextToSpeech extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'format',
 				'options'       => [
-					'mp3'  => __( '.mp3', 'classifai' ),
-					'wav'  => __( '.wav', 'classifai' ),
+					'mp3' => __( '.mp3', 'classifai' ),
+					'wav' => __( '.wav', 'classifai' ),
 				],
 				'default_value' => $settings['format'],
 				'description'   => __( 'Select the desired audio format.', 'classifai' ),
@@ -189,8 +234,8 @@ class TextToSpeech extends Provider {
 				return array_merge(
 					$common_settings,
 					[
-						'tts_model' => 'tts-1',
-						'voice'     => 'voice',
+						'tts_model' => 'gpt-4o-mini-tts',
+						'voice'     => 'alloy',
 						'format'    => 'mp3',
 						'speed'     => 1,
 					]
@@ -213,15 +258,15 @@ class TextToSpeech extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			if ( in_array( $new_settings[ static::ID ]['tts_model'], [ 'tts-1', 'tts-1-hd' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['tts_model'], [ 'gpt-4o-mini-tts', 'tts-1', 'tts-1-hd' ], true ) ) {
 				$new_settings[ static::ID ]['tts_model'] = sanitize_text_field( $new_settings[ static::ID ]['tts_model'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['voice'], [ 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['voice'], [ 'alloy', 'ash', 'ballad', 'coral', 'echo', 'fable', 'onyx', 'nova', 'sage', 'shimmer' ], true ) ) {
 				$new_settings[ static::ID ]['voice'] = sanitize_text_field( $new_settings[ static::ID ]['voice'] );
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['format'], [ 'mp3', 'opus', 'aac', 'flac', 'wav', 'pcm' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['format'], [ 'mp3', 'wav' ], true ) ) {
 				$new_settings[ static::ID ]['format'] = sanitize_text_field( $new_settings[ static::ID ]['format'] );
 			}
 
@@ -254,7 +299,7 @@ class TextToSpeech extends Provider {
 		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'synthesize':
-				$return = $this->synthesize_speech( $post_id, $args );
+				$return = $this->synthesize_speech( $post_id );
 				break;
 		}
 
@@ -310,7 +355,7 @@ class TextToSpeech extends Provider {
 
 		// Create the request body to synthesize speech from text.
 		$request_body = array(
-			'model'           => $settings[ static::ID ]['tts_model'],
+			'model'           => $this->get_model(),
 			'voice'           => $settings[ static::ID ]['voice'],
 			'response_format' => $settings[ static::ID ]['format'],
 			'speed'           => (float) $settings[ static::ID ]['speed'],
@@ -318,7 +363,7 @@ class TextToSpeech extends Provider {
 		);
 
 		$response = $request->post(
-			$this->api_url,
+			$this->get_api_url(),
 			[
 				'body' => wp_json_encode( $request_body ),
 			]
@@ -349,9 +394,9 @@ class TextToSpeech extends Provider {
 		$debug_info        = [];
 
 		if ( $this->feature_instance instanceof FeatureTextToSpeech ) {
-			$debug_info[ __( 'Model', 'classifai' ) ]          = $provider_settings['tts_model'] ?? '';
-			$debug_info[ __( 'Voice', 'classifai' ) ]          = $provider_settings['voice'] ?? '';
-			$debug_info[ __( 'Audio format', 'classifai' ) ]   = $provider_settings['format'] ?? '';
+			$debug_info[ __( 'Model', 'classifai' ) ]        = $provider_settings['tts_model'] ?? '';
+			$debug_info[ __( 'Voice', 'classifai' ) ]        = $provider_settings['voice'] ?? '';
+			$debug_info[ __( 'Audio format', 'classifai' ) ] = $provider_settings['format'] ?? '';
 
 			// We don't save the response transient because WP does not support serialized binary data to be inserted to the options.
 		}

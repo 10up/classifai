@@ -3,6 +3,8 @@
 namespace Classifai\Features;
 
 use Classifai\Providers\Azure\ComputerVision;
+use Classifai\Providers\OpenAI\ChatGPT;
+use Classifai\Providers\Localhost\OllamaMultimodal as OllamaMM;
 use Classifai\Services\ImageProcessing;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -24,6 +26,13 @@ class ImageTextExtraction extends Feature {
 	const ID = 'feature_image_to_text_generator';
 
 	/**
+	 * Prompt for extracting text.
+	 *
+	 * @var string
+	 */
+	public $prompt = 'You are an assistant that extracts text from images. You will be provided with an image and will return whatever text is in the image. Return only the text, nothing else. If there is no text present, return the word none.';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -35,6 +44,8 @@ class ImageTextExtraction extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
+			ChatGPT::ID        => __( 'OpenAI ChatGPT', 'classifai' ),
+			OllamaMM::ID       => __( 'Ollama', 'classifai' ),
 		];
 	}
 
@@ -46,6 +57,37 @@ class ImageTextExtraction extends Feature {
 	public function setup() {
 		parent::setup();
 		add_action( 'rest_api_init', [ $this, 'register_endpoints' ] );
+	}
+
+	/**
+	 * Returns the settings for the feature.
+	 *
+	 * @param string $index The index of the setting to return.
+	 * @return array|mixed
+	 */
+	public function get_settings( $index = false ) {
+		$settings = parent::get_settings( $index );
+
+		// Keep using the original prompt from the codebase to allow updates.
+		if ( $settings && ! empty( $settings[ ChatGPT::ID ]['prompt'] ) ) {
+			foreach ( $settings[ ChatGPT::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ ChatGPT::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		if ( $settings && ! empty( $settings[ OllamaMM::ID ]['prompt'] ) ) {
+			foreach ( $settings[ OllamaMM::ID ]['prompt'] as $key => $prompt ) {
+				if ( 1 === intval( $prompt['original'] ) ) {
+					$settings[ OllamaMM::ID ]['prompt'][ $key ]['prompt'] = $this->prompt;
+					break;
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -142,7 +184,10 @@ class ImageTextExtraction extends Feature {
 	 * @return array
 	 */
 	public function generate_ocr_text( array $metadata, int $attachment_id ): array {
-		if ( ! $this->is_feature_enabled() ) {
+		if (
+			! $this->is_feature_enabled() ||
+			'automatic' !== $this->get_processing_mode()
+		) {
 			return $metadata;
 		}
 
@@ -180,8 +225,7 @@ class ImageTextExtraction extends Feature {
 		 *
 		 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
 		 * @param {int}    $attachment_id ID of the attachment post.
-		 * @param {object} $scan          The full scan results from the API.
-		 * @param {string} $text          The text data to be saved.
+		 * @param {object} $result        The full scan results from the API.
 		 *
 		 * @return {string} The filtered text data.
 		 */
@@ -216,10 +260,10 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function enqueue_editor_assets() {
 		wp_enqueue_script(
-			'editor-ocr',
-			CLASSIFAI_PLUGIN_URL . 'dist/editor-ocr.js',
-			array_merge( get_asset_info( 'editor-ocr', 'dependencies' ), array( 'lodash' ) ),
-			get_asset_info( 'editor-ocr', 'version' ),
+			'classifai-plugin-editor-ocr-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-editor-ocr.js',
+			array_merge( get_asset_info( 'classifai-plugin-editor-ocr', 'dependencies' ), array( 'lodash' ) ),
+			get_asset_info( 'classifai-plugin-editor-ocr', 'version' ),
 			true
 		);
 	}
@@ -230,6 +274,8 @@ class ImageTextExtraction extends Feature {
 	 * @param \WP_Post $post The post object.
 	 */
 	public function setup_attachment_meta_box( \WP_Post $post ) {
+		global $wp_meta_boxes;
+
 		if ( ! wp_attachment_is_image( $post ) || ! $this->is_feature_enabled() ) {
 			return;
 		}
@@ -366,12 +412,12 @@ class ImageTextExtraction extends Feature {
 	/**
 	 * Adds the rescan buttons to the media modal.
 	 *
-	 * @param array    $form_fields Array of fields
-	 * @param \WP_Post $post        Post object for the attachment being viewed.
+	 * @param array         $form_fields Array of fields
+	 * @param \WP_Post|null $post        Post object for the attachment being viewed.
 	 * @return array
 	 */
-	public function add_rescan_button_to_media_modal( array $form_fields, \WP_Post $post ): array {
-		if ( ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
+	public function add_rescan_button_to_media_modal( array $form_fields, ?\WP_Post $post ): array {
+		if ( null === $post || ! $this->is_feature_enabled() || ! wp_attachment_is_image( $post ) ) {
 			return $form_fields;
 		}
 
@@ -393,7 +439,7 @@ class ImageTextExtraction extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'OCR detects text in images (e.g., handwritten notes) and saves that as post content.', 'classifai' );
+		return esc_html__( 'OCR detects text in images (e.g., handwritten notes) and saves that as content with the image.', 'classifai' );
 	}
 
 	/**
@@ -403,8 +449,35 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => ComputerVision::ID,
+			'processing_mode' => 'automatic',
+			'provider'        => ComputerVision::ID,
 		];
+	}
+
+	/**
+	 * Sanitizes the default feature settings.
+	 *
+	 * @param array $new_settings Settings being saved.
+	 * @return array
+	 */
+	public function sanitize_default_feature_settings( array $new_settings ): array {
+		$settings = $this->get_settings();
+
+		$new_settings['processing_mode'] = sanitize_text_field( $new_settings['processing_mode'] ?? $settings['processing_mode'] );
+
+		return $new_settings;
+	}
+
+	/**
+	 * Return the processing mode for the feature.
+	 *
+	 * @return string
+	 */
+	public function get_processing_mode(): string {
+		$settings = $this->get_settings();
+		$value    = $settings['processing_mode'] ?? 'automatic';
+
+		return $value;
 	}
 
 	/**
