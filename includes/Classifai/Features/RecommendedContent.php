@@ -241,12 +241,36 @@ class RecommendedContent extends Feature {
 			return $query_vars;
 		}
 
+		$post__in   = array_unique( $post__in );
+		$post_count = count( $post__in );
+
+		// Backfill if we have less than the requested number of posts.
+		if ( $post_count < $query_vars['posts_per_page'] ) {
+			$new_query_vars = $query_vars;
+
+			// Run a query using the current query vars to get more posts.
+			$backfill_query = new \WP_Query(
+				array_merge(
+					$new_query_vars,
+					[
+						'posts_per_page' => (int) $query_vars['posts_per_page'] - $post_count,
+						'post__not_in'   => [ $post_id ],
+						'fields'         => 'ids',
+					]
+				)
+			);
+
+			// Add the backfilled posts to the post__in array.
+			$post__in   = array_merge( $post__in, $backfill_query->posts );
+			$post_count = count( $post__in );
+		}
+
 		// Add the post IDs we want to our query.
 		$query_vars = array_merge(
 			$query_vars,
 			[
-				'posts_per_page' => count( $post__in ), // TODO: We may want to backfill if we have less than the requested number.
-				'post__in'       => array_unique( $post__in ),
+				'posts_per_page' => $post_count,
+				'post__in'       => $post__in,
 				'orderby'        => 'post__in',
 			]
 		);
