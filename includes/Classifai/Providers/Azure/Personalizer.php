@@ -722,7 +722,7 @@ class Personalizer extends Provider {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( string $url, string $api_key ) {
-		$rtn = false;
+		$rtn    = false;
 		$result = safe_wp_remote_get(
 			trailingslashit( $url ) . $this->status_endpoint,
 			[
