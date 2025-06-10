@@ -1029,27 +1029,34 @@ class Embeddings extends Provider {
 		$embedding_similarity = [];
 		$calculations         = new EmbeddingCalculations();
 
-		$posts = new WP_Query(
-			[
-				'post_type'      => $post_type,
-				'post_status'    => 'publish',
-				'posts_per_page' => $this->get_max_posts(),
-				'fields'         => 'ids',
-				'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_compare'   => 'EXISTS',
-			]
-		);
-		$posts = $posts->get_posts();
+		static $posts     = null;
+		static $threshold = null;
+
+		if ( null === $posts ) {
+			$posts = new WP_Query(
+				[
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => $this->get_max_posts(),
+					'fields'         => 'ids',
+					'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare'   => 'EXISTS',
+				]
+			);
+			$posts = $posts->get_posts();
+		}
 
 		if ( empty( $posts ) ) {
 			return [];
 		}
 
-		$settings  = $this->feature_instance->get_settings();
-		$threshold = $settings[ static::ID ]['embedding_threshold'] ?? 75;
+		if ( null === $threshold ) {
+			$settings  = $this->feature_instance->get_settings();
+			$threshold = $settings[ static::ID ]['embedding_threshold'] ?? 75;
 
-		// Convert $threshold (%) to decimal.
-		$threshold = 1 - ( (float) $threshold / 100 );
+			// Convert $threshold (%) to decimal.
+			$threshold = 1 - ( (float) $threshold / 100 );
+		}
 
 		// Get embedding similarity for each post.
 		foreach ( $posts as $post_id ) {
