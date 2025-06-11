@@ -23,7 +23,7 @@ import { OpenAIEmbeddingsSettings } from './openai-embeddings';
 import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
 import { AzurePersonalizerSettings } from './azure-personlizer';
-import { OpenAIDallESettings } from './openai-dalle';
+import { OpenAIImagesSettings } from './openai-images';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
@@ -72,7 +72,7 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <OpenAIModerationSettings isConfigured={ isConfigured } />;
 
 		case 'openai_dalle':
-			return <OpenAIDallESettings isConfigured={ isConfigured } />;
+			return <OpenAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;
