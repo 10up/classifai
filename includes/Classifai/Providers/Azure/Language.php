@@ -58,7 +58,7 @@ class Language extends Provider {
 
 		add_settings_field(
 			static::ID . '_endpoint_url',
-			$args['label'] ?? esc_html__( 'Endpoint URL', 'classifai' ),
+			esc_html__( 'Endpoint URL', 'classifai' ),
 			[ $this->feature_instance, 'render_input' ],
 			$this->feature_instance->get_option_name(),
 			$this->feature_instance->get_option_name() . '_section',
