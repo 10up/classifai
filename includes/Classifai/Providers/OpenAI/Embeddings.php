@@ -230,7 +230,7 @@ class Embeddings extends Provider {
 		 * this, either decreasing to help with performance or increasing
 		 * to ensure we consider more.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_embeddings_max_posts
 		 *
 		 * @param {int} $posts The default maximum posts.
@@ -1073,7 +1073,7 @@ class Embeddings extends Provider {
 				/**
 				 * Fires after the embeddings similarity has been run for a single chunk.
 				 *
-				 * @since x.x.x
+				 * @since 3.4.0
 				 * @hook classifai_openai_embeddings_single_post_embedding_similarity
 				 *
 				 * @param {bool|float} $similarity The embeddings similarity result.
@@ -1117,7 +1117,7 @@ class Embeddings extends Provider {
 		/**
 		 * Filter the number of post items to process in a batch.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_embeddings_items_per_job
 		 *
 		 * @param {int} $number Number of post items to process per job.
