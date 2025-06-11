@@ -5,6 +5,7 @@ The following table lists out all the Providers that are in ClassifAI and what F
 | Classification               |   |   |   |   | X |   |   | X | X | X |   |
 | Title Generation             |   |   |   |   | X |   | X |   | X | X | X |
 | Excerpt Generation           |   |   |   |   | X |   | X |   | X | X | X |
+| Content Generation           |   |   |   |   | X |   |   |   | X | X |   |
 | Content Resizing             |   |   |   |   | X |   | X |   | X | X | X |
 | Key Takeaways                |   |   |   |   | X |   |   |   | X | X |   |
 | Text to Speech               | X |   | X |   |   |   |   |   |   | X |   |
@@ -18,4 +19,4 @@ The following table lists out all the Providers that are in ClassifAI and what F
 | Image Text Extraction        |   |   |   | X |   |   |   |   | X | X |   |
 | Image Generation             |   |   |   |   |   |   |   |   |   | X |   |
 | PDF Text Extraction          |   |   |   | X |   |   |   |   |   |   |   |
-| Recommended Content          |   | X |   |   |   |   |   |   |   |   |   |
+| Recommended Content          |   | X |   |   |   |   |   |   |   | X |   |
