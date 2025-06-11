@@ -4,6 +4,65 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.4.0] - 2025-06-12
+
+**Note that this release bumps the WordPress minimum from 6.6 to 6.7.**
+
+### Added
+
+- New Content Generation Feature, allowing the creation of draft content from a summary (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9), [@fabiankaegy](https://github.com/fabiankaegy) via [#859](https://github.com/10up/classifai/pull/859), [#864](https://github.com/10up/classifai/pull/864)).
+- New Recommended Content block powered by the OpenAI Embeddings Provider (props [@dkotter](https://github.com/dkotter), [@fabiankaegy](https://github.com/fabiankaegy), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#881](https://github.com/10up/classifai/pull/881)).
+- Default template global settings for Recommended Content Block (props [@Sidsector9](https://github.com/Sidsector9), [@dkotter](https://github.com/dkotter) via [#917](https://github.com/10up/classifai/pull/917)).
+- Support for the new OpenAI `gpt-image-1` image generation model (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#897](https://github.com/10up/classifai/pull/897)).
+- Support for WooCommerce product-based title and excerpt generation (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#876](https://github.com/10up/classifai/pull/876)).
+- New Processing Mode setting to our Image Processing Features, allowing you to only have those Features trigger when someone manually requests it, rather than automatically on upload (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#862](https://github.com/10up/classifai/pull/862)).
+- Support for selecting new OpenAI Audio Transcription models, GPT-4o mini Transcribe and GPT-4o Transcribe (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#875](https://github.com/10up/classifai/pull/875)).
+- Support for selecting the new GPT-4o mini TTS model in our Text to Speech Feature (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#876](https://github.com/10up/classifai/pull/876)).
+
+### Changed
+
+- Switch to the Gemini 2.5 Flash model from the Gemini Pro model (props [@dkotter](https://github.com/dkotter), [@MadtownLems](https://github.com/MadtownLems), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#927](https://github.com/10up/classifai/pull/927)).
+- Bump WordPress minimum from 6.6 to 6.7 (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#876](https://github.com/10up/classifai/pull/876)).
+- Bump WordPress "tested up to" version to 6.8 (props [@sksaju](https://github.com/sksaju), [@dkotter](https://github.com/dkotter) via [#900](https://github.com/10up/classifai/pull/900)).
+- Use the attached release asset in our plugin updater (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#870](https://github.com/10up/classifai/pull/870)).
+- Set the GPT-4o mini TTS model as our new default in our Text to Speech Feature (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#876](https://github.com/10up/classifai/pull/876)).
+- Minor text tweaks to our registration language (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#868](https://github.com/10up/classifai/pull/868)).
+- Don't show the registration admin notice when the welcome guide is showing (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#868](https://github.com/10up/classifai/pull/868)).
+- Don't disable the Settings button if the Feature is turned off (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#867](https://github.com/10up/classifai/pull/867)).
+- Update the layout of the Generate Titles modal (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#860](https://github.com/10up/classifai/pull/860)).
+
+### Fixed
+
+- Fatal error where `$post` was `null` (props [@sksaju](https://github.com/sksaju), [@dkotter](https://github.com/dkotter) via [#905](https://github.com/10up/classifai/pull/905)).
+- Ensure we properly store the post type setting to avoid PHP notices (props [@JiveDig](https://github.com/JiveDig), [@dkotter](https://github.com/dkotter), [@Sidsector9](https://github.com/Sidsector9) via [#893](https://github.com/10up/classifai/pull/893)).
+- Fix condition to prevent warnings when `$args['args']` is not defined (props [@dilipbheda](https://github.com/dilipbheda), [@dkotter](https://github.com/dkotter) via [#896](https://github.com/10up/classifai/pull/896)).
+- Ensure that the Text-to-Speech feature options are available only for the allowed post types (props [@iamdharmesh](https://github.com/iamdharmesh), [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#878](https://github.com/10up/classifai/pull/878)).
+- Ensure the embeddings update notice doesn't show if it isn't needed (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#868](https://github.com/10up/classifai/pull/868)).
+- Fix various Gutenberg deprecation notices added in WordPress 6.5 and 6.6 (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#860](https://github.com/10up/classifai/pull/860)).
+- Ensure we pass the most recent version of the content in our title and excerpt generation Features (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#860](https://github.com/10up/classifai/pull/860)).
+
+### Security
+
+- Bump `tar-fs` from 3.0.8 to 3.0.9 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#929](https://github.com/10up/classifai/pull/929)).
+- Bump `react-router` from 7.1.5 to 7.5.2 and `react-router-dom` from 7.1.5 to 7.5.2 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#899](https://github.com/10up/classifai/pull/899)).
+- Bump `http-proxy-middleware` from 2.0.6 to 2.0.9 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#894](https://github.com/10up/classifai/pull/894)).
+- Bump `axios` from 1.7.9 to 1.8.3 (props [@dependabot[bot]](https://github.com/apps/dependabot), [@dkotter](https://github.com/dkotter) via [#869](https://github.com/10up/classifai/pull/869)).
+
+### Developer
+
+- Rename the `DallE` Provider class to `Images`. If you directly extend that class yourself, you'll need to update your code to account for this. Also updated a handful of other references to `DALLE` to `Images` (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@Sidsector9](https://github.com/Sidsector9) via [#897](https://github.com/10up/classifai/pull/897)).
+- Rename the OpenAI `Whisper` Provider to `SpeechToText`. If anyone extended the `Whisper` class, you'll need to update your code to account for this (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#875](https://github.com/10up/classifai/pull/875)).
+- New filter, `classifai_googleai_gemini_api_model`, making it easier to change the model Google AI uses (props [@dkotter](https://github.com/dkotter), [@MadtownLems](https://github.com/MadtownLems), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#927](https://github.com/10up/classifai/pull/927)).
+- New filters, `classifai_openai_speech_to_text_model` and `classifai_openai_speech_to_text_api_url`, around the Speech to Text model and API URL, allowing those to easily be changed (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#875](https://github.com/10up/classifai/pull/875)).
+- New filters, `classifai_openai_text_to_speech_api_url` and `classifai_openai_text_to_speech_model`, Text to Speech model and API URL, allowing those to easily be changed (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#876](https://github.com/10up/classifai/pull/876)).
+- Initial set of data flow diagrams (props [@christianc1](https://github.com/christianc1), [@dkotter](https://github.com/dkotter) via [#902](https://github.com/10up/classifai/pull/902)).
+- New developer doc that outlines which Providers we support and which Features each Provider supports (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#882](https://github.com/10up/classifai/pull/882)).
+- New developer doc that outlines how data is used within ClassifAI (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#874](https://github.com/10up/classifai/pull/874)).
+- Ensure the final release asset gets attached properly to the release (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#870](https://github.com/10up/classifai/pull/870)).
+- Update release instructions (props [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#903](https://github.com/10up/classifai/pull/903)).
+- Update `@10up/cypress-wp-utils` from 0.4.0 to 0.5.0 (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#872](https://github.com/10up/classifai/pull/872)).
+- Update all third-party actions our workflows rely on to use versions based on specific commit hashes (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#873](https://github.com/10up/classifai/pull/873)).
+
 ## [3.3.1] - 2025-03-12
 
 ### Added
@@ -696,6 +755,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.4.0]: https://github.com/10up/classifai/compare/3.3.1...3.4.0
 [3.3.1]: https://github.com/10up/classifai/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/10up/classifai/compare/3.2.0...3.3.0
 [3.2.0]: https://github.com/10up/classifai/compare/3.1.1...3.2.0
