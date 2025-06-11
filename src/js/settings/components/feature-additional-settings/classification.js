@@ -159,7 +159,7 @@ export const ClassificationSettings = () => {
 			const getEmbeddingsInProgress = async () => {
 				try {
 					const res = await apiFetch( {
-						path: '/classifai/v1/embeddings_in_progress',
+						path: '/classifai/v1/embeddings_in_progress/classification',
 					} );
 					if ( res?.classifAIEmbedInProgress ) {
 						setEmbedInProgress( true );
