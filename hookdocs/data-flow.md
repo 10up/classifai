@@ -1,0 +1,107 @@
+ClassifAI brings various AI Features into WordPress. These Features are powered by a number of different AI Providers, like OpenAI or Azure AI Vision. Each Feature uses certain pieces of data (like titles or content) and will send that along to each AI Provider. This document outlines the specific pieces of data each Feature in ClassifAI will send along to the configured Provider, along with any controls in place to manage that data.
+
+It’s important to note that ClassifAI will only send data to the configured Provider and only for Features that are turned on. This gives the user full control over which Features and Providers they want to use (or not use).
+
+While it varies slightly depending on the Feature and Provider in use, the general flow is as follows:
+
+1. A Feature is triggered by a user. For instance, clicking the Generate Excerpt button
+2. An initial request is handled by the individual WordPress site, ensuring the request is valid and has the data we need
+3. We then send a request along to the configured AI Provider (as an example, OpenAI). This request will contain credentials (like API key) and the data needed (for the generate excerpt example, will be the title and full content of the item being processed)
+4. Once a response is received, that is parsed and the data is returned to the user (for example, the excerpt is populated)
+
+## Language Processing Features
+
+### Classification
+
+- **Data**: If using IBM Watson as the Provider, will send the title and full content of the item being classified. If using an Embeddings Provider (i.e. OpenAI Embeddings) will send the title and full content of the item being classified and also sends the name, slug and description of each term from each enabled taxonomy (this data is sent when the Feature is initially configured).
+- **Controls**: In the settings UI, can control which post types and post statuses are used. Can also control which taxonomies are used for an Embeddings Provider. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Title Generation
+
+- **Data**: The full content of the item being processed is sent, along with whatever prompt is set as the default.
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Excerpt Generation
+
+- **Data**: The full content of the item being processed is sent, along with whatever prompt is set as the default. If the `{{TITLE}}` variable is set, it will be replaced with the title of the item being processed.
+- **Controls**: In the settings UI, can control the prompt that is used and which post types are allowed. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Content Resizing
+
+- **Data**: The content of the individual paragraph being processed is sent, along with whatever prompt is set as the default.
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Key Takeaways
+
+- **Data**: The full content of the item being processed is sent, along with whatever prompt is set as the default. If the `{{TITLE}}` variable is set, it will be replaced with the title of the item being processed
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Text to Speech
+
+- **Data**: The title and full content of the item being processed is sent.
+- **Controls**: In the settings UI, can control which post types are allowed. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Audio Transcripts Generation
+
+- **Data**: The audio file being processed is sent.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Moderation
+
+- **Data**: The content of the comment being processed is sent.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Smart 404
+
+- **Data**: The title, slug and full content of each post is sent to the configured Embeddings Provider and then those embeddings are stored in elasticsearch. In addition, the page slug that landed someone on a 404 screen is sent to the configured Embeddings Provider.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Term Cleanup
+
+- **Data**: The name, slug and description of each term within each enabled taxonomy is sent to the configured Embeddings Provider. If ElasticPress is being used, the embeddings are then stored in elasticsearch, otherwise will be stored in the WP database.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+## Image Processing Features
+
+### Descriptive Text Generator
+
+- **Data**: The image URL that is being processed is sent. If using a generative AI Provider (like OpenAI) the default prompt that is set is also sent.
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Image Tags Generator
+
+- **Data**: The image URL that is being processed is sent. If using a generative AI Provider (like OpenAI) the default prompt that is set is also sent.
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Image Cropping
+
+- **Data**: The image URL that is being processed is sent.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Image Text Extraction
+
+- **Data**: The image URL that is being processed is sent. If using a generative AI Provider (like OpenAI) the default prompt that is set is also sent.
+- **Controls**: In the settings UI, can control the prompt that is used. There are also multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+### Image Generation
+
+- **Data**: The user entered prompt is sent.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over the data that is sent.
+
+### PDF Text Extraction
+
+- **Data**: The PDF URL that is being processed is sent.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+## Recommendation Service
+
+### Recommended Content
+
+Currently the only Provider available for this feature is Azure AI Personalizer, which is no longer available to use as of September 2023. As such, it’s unlikely that this is being used but is still documented here.
+
+- **Data**: When getting recommended content results, we send the user agent, week day and time of day for the current user. We also send the post ID, title, excerpt, permalink and taxonomy terms for the 50 most recent published posts (or other post type). When a user clicks on a recommended content item, we send the post ID to a reward endpoint to help tune the content results.
+- **Controls**: There are multiple hooks at the code level that allow fine grained control over which items are allowed to be processed or the data that is sent.
+
+## ClassifAI Registration
+
+In order to provide automatic updates, we require users to register for a key at <https://classifaiplugin.com/>. After registration, the email and key are entered on this settings page and are then sent to a REST endpoint on <https://classifaiplugin.com/> to validate. Once we see those credentials as being valid, automatic updates will then work.

@@ -111,9 +111,11 @@ class TextToSpeech extends Feature {
 			return;
 		}
 
-		$post = get_post();
+		$post                 = get_post();
+		$supported_post_types = $this->get_supported_post_types();
 
-		if ( empty( $post ) ) {
+		// Only enqueue the script if we're on a supported post type.
+		if ( empty( $post ) || ! in_array( $post->post_type, $supported_post_types, true ) ) {
 			return;
 		}
 
@@ -784,12 +786,11 @@ class TextToSpeech extends Feature {
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings   = $this->get_settings();
 		$post_types = \Classifai\get_post_types_for_language_settings();
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
+				$new_settings['post_types'][ $post_type->name ] = '';
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}

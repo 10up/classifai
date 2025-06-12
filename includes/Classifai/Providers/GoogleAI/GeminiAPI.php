@@ -30,11 +30,11 @@ class GeminiAPI extends Provider {
 	protected $googleai_url = 'https://generativelanguage.googleapis.com/v1beta';
 
 	/**
-	 * GeminiAPI model
+	 * Gemini API model
 	 *
 	 * @var string
 	 */
-	protected $googleai_model = 'models/gemini-pro';
+	protected $model = 'models/gemini-2.5-flash-preview-05-20';
 
 	/**
 	 * GeminiAPI constructor.
@@ -43,6 +43,28 @@ class GeminiAPI extends Provider {
 	 */
 	public function __construct( $feature_instance = null ) {
 		$this->feature_instance = $feature_instance;
+	}
+
+	/**
+	 * Get the model name.
+	 *
+	 * @return string
+	 */
+	public function get_model(): string {
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to use a different model, like
+		 * gemini-2.5-pro-preview-05-06.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_googleai_gemini_api_model
+		 *
+		 * @param {string} $model The default model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_googleai_gemini_api_model', $this->model );
 	}
 
 	/**
@@ -220,15 +242,16 @@ class GeminiAPI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new ExcerptGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -240,7 +263,12 @@ class GeminiAPI extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
+			$excerpt_prompt = $feature->woo_prompt;
+		} else {
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		}
 
 		// Replace our variables in the prompt.
 		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
@@ -261,6 +289,16 @@ class GeminiAPI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
+		// Check if we are generating an excerpt for a product.
+		$system_prompt = $this->system_prompt;
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+			$system_prompt   = $this->system_prompt_woo;
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, false, $args['content'] );
+
 		/**
 		 * Filter the request body before sending to Gemini API.
 		 *
@@ -278,7 +316,7 @@ class GeminiAPI extends Provider {
 				'contents'         => [
 					[
 						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . ' \n """' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
+							'text' => $system_prompt . ' ' . $prompt . ' \n """' . $message_content . '"""',
 						],
 					],
 				],
@@ -294,7 +332,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -327,15 +365,16 @@ class GeminiAPI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new TitleGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num'     => 1, // Gemini API only returns 1 title.
 				'content' => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -345,7 +384,12 @@ class GeminiAPI extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+		// Overwrite the prompt if we are generating titles for a product.
+		if ( 'product' === $post_type ) {
+			$prompt = $feature->woo_prompt;
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+		}
 
 		/**
 		 * Filter the prompt we will send to Gemini API.
@@ -360,6 +404,16 @@ class GeminiAPI extends Provider {
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_title_prompt', $prompt, $post_id, $args );
+
+		// Check if we are generating titles for a product.
+		$system_prompt = $this->system_prompt;
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+			$system_prompt   = $this->system_prompt;
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, false, $args['content'] );
 
 		/**
 		 * Filter the request body before sending to Gemini API.
@@ -378,7 +432,7 @@ class GeminiAPI extends Provider {
 				'contents'         => [
 					[
 						'parts' => [
-							'text' => 'You will be provided with content delimited by triple quotes. ' . $prompt . '\n"""' . $this->get_content( $post_id, false, $args['content'] ) . '"""',
+							'text' => $system_prompt . ' ' . $prompt . '\n"""' . $message_content . '"""',
 						],
 					],
 				],
@@ -394,7 +448,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -499,7 +553,7 @@ class GeminiAPI extends Provider {
 
 		// Make our API request.
 		$response = $request->post(
-			$this->googleai_url . '/' . $this->googleai_model . ':generateContent',
+			$this->googleai_url . '/' . $this->get_model() . ':generateContent',
 			[
 				'body' => wp_json_encode( $body ),
 			]
@@ -532,8 +586,9 @@ class GeminiAPI extends Provider {
 	 *
 	 * ### Important Note:
 	 * The content length is not limited in this implementation.
-	 * The Gemini Pro model can process up to 30,720 input tokens, which is approximately equivalent to 18,000 - 24,000 words. (https://ai.google.dev/models/gemini#model_variations)
-	 * Given that the average blog post length ranges from 1,500 - 2,500 words, this limit is more than sufficient for our use case.
+	 * The Gemini 2.5 Flash model can process up to 1,048,576 input tokens:
+	 * (https://ai.google.dev/gemini-api/docs/models#gemini-2.5-flash-preview).
+	 * This limit should be more than sufficient for our use case.
 	 *
 	 * @param int    $post_id      Post ID to get content from.
 	 * @param bool   $use_title    Whether to use the title or not.

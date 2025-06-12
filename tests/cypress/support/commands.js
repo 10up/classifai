@@ -24,7 +24,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
-import { getIframe } from '@10up/cypress-wp-utils/lib/functions/get-iframe';
 
 const imageProcessingFeatures = [
 	'feature_descriptive_text_generator',
@@ -462,6 +461,26 @@ Cypress.Commands.add( 'verifyTitleGenerationEnabled', ( enabled = true ) => {
 } );
 
 /**
+ * Verify that the content generation feature is enabled or disabled.
+ *
+ * @param {boolean} enabled Whether the feature should be enabled or disabled.
+ */
+Cypress.Commands.add( 'verifyContentGenerationEnabled', ( enabled = true ) => {
+	cy.visit( '/wp-admin/edit.php' );
+	cy.get( '#the-list tr:nth-child(1) td.title a.row-title' ).click();
+
+	// Find and open the summary panel.
+	cy.closeWelcomeGuide();
+
+	if ( enabled ) {
+		cy.get( '.classifai-chat-button' ).first().click( { force: true } );
+		cy.get( '.classifai-chat-ui' ).should( 'exist' );
+	} else {
+		cy.get( '.classifai-chat-button' ).should( 'not.exist' );
+	}
+} );
+
+/**
  * Verify that the image generation feature is enabled or disabled.
  *
  * @param {boolean} enabled Whether the feature should be enabled or disabled.
@@ -672,15 +691,13 @@ Cypress.Commands.add( 'allowFeatureToAdmin', () => {
 } );
 
 /**
- * Custom command to insert a block, until a new release of cypress-wp-utils.
- *
- * TODO: remove this command once cypress-wp-utils is updated.
+ * Custom insertBlock command until upstream changes are in place.
  */
-Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
+Cypress.Commands.add( 'insertBlockCustom', ( type, name ) => {
 	const [ namespace = '', ...blockNameRest ] = type.split( '/' );
 	let blockNames = [
-		blockNameRest.join( '/' ).replace( '/', '-' ),
-		blockNameRest.join( '/' ).replace( '/', '\\/' ),
+		blockNameRest.join( '/' ).replace( /\//g, '-' ),
+		blockNameRest.join( '/' ).replace( /\//g, String.raw`\/` ),
 	];
 
 	blockNames = blockNames.filter( ( x, i, a ) => a.indexOf( x ) === i );
@@ -746,13 +763,12 @@ Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
 						cy.wrap( $block ).click();
 						inserterBtn.click();
 
-						const [ ns, rest ] = type.split( '/' ); // namespace = ns, second namespace or block name = rest
+						const [ ns, rest ] = type.split( '/' );
 
-						cy.get( 'body' ).then( ( $innerBody ) => {
+						cy.get( 'body' ).then( ( $body ) => {
 							if (
-								$innerBody.find(
-									'iframe[name="editor-canvas"]'
-								).length
+								$body.find( 'iframe[name="editor-canvas"]' )
+									.length
 							) {
 								// Works with WP 6.4
 								getIframe(
@@ -768,7 +784,7 @@ Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
 									}
 								} );
 							} else if (
-								$innerBody.find(
+								$body.find(
 									`.wp-block[data-type="${ ns }/${ rest }"]`
 								).length
 							) {
@@ -793,4 +809,46 @@ Cypress.Commands.add( 'customInsertBlock', ( type, name ) => {
 			}
 		} );
 	} );
+} );
+
+/**
+ * Activate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'activateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-woocommerce' ).length > 0 ) {
+			cy.get( '#activate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Deactivate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'deactivateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-woocommerce' ).length > 0 ) {
+			cy.get( '#deactivate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Create a product in the block editor.
+ */
+Cypress.Commands.add( 'createProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '.editor-post-title__input' ).type( title );
+	cy.get( '.block-editor-rich-text__editable' ).type( content );
+} );
+
+/**
+ * Create a product in the classic editor.
+ */
+Cypress.Commands.add( 'classicCreateProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '#title' ).type( title );
+	cy.get( '#content' ).type( content );
 } );

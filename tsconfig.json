@@ -1,0 +1,55 @@
+{
+	"compilerOptions": {
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
+		"allowJs": true,
+		"skipLibCheck": true,
+		"declaration": true,
+		"declarationMap": true,
+		"forceConsistentCasingInFileNames": true,
+		"incremental": true,
+		"esModuleInterop": false,
+		"target": "esnext",
+ 		"module": "esnext",
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"strictBindCallApply": true,
+		"strictNullChecks": true,
+		"outDir": "./dist",
+ 		"checkJs": true,
+ 		"allowSyntheticDefaultImports": true,
+ 		"jsx": "preserve",
+ 		"composite": true,
+ 		"emitDeclarationOnly": true,
+ 		/* Strict Type-Checking Options */
+ 		"strict": true,
+ 		/* Additional Checks */
+ 		"noUnusedLocals": true,
+ 		"noUnusedParameters": true,
+ 		"noImplicitReturns": true,
+ 		/* Module Resolution Options */
+ 		"moduleResolution": "node",
+ 		"typeRoots": [
+ 			"./node_modules/@types"
+ 		],
+ 		"types": []
+	},
+	"exclude": [
+		"cypress/**",
+		"example/**",
+		"node_modules/**",
+		"dist/**",
+		"webpack.config.js",
+		"cypress.config.js",
+		"**/*.test.ts",
+		"**/*.test.js",
+		"**/*.spec.ts",
+		"**/*.spec.js",
+		"**/*.js"
+	]
+}

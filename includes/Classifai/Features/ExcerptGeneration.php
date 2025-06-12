@@ -35,6 +35,13 @@ class ExcerptGeneration extends Feature {
 	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
 
 	/**
+	 * Prompt for generating excerpts for WooCommerce Products.
+	 *
+	 * @var string
+	 */
+	public $woo_prompt = 'Create a concise, compelling summary for an ecommerce product that highlights key features, benefits, and unique selling points. Keep it within {{WORDS}} words and ensure it pairs well with the product title: {{TITLE}}.';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -392,7 +399,7 @@ class ExcerptGeneration extends Feature {
 			}
 
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
+				$new_settings['post_types'][ $post_type->name ] = '';
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}

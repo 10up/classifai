@@ -18,6 +18,9 @@ module.exports = {
 		'recommended-content-block-frontend': [
 			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
 		],
+		'recommended-content-block-variation': [
+			'./src/js/features/recommended-content/variation.js',
+		],
 
 		'classifai-plugin-media-processing': './src/js/features/media-processing/media-upload.js',
 		'classifai-plugin-editor-ocr': './src/js/features/media-processing/editor-ocr.js',
@@ -33,12 +36,14 @@ module.exports = {
 		'classifai-plugin-classic-title-generation': './src/js/features/title-generation/classic/index.js',
 		'classifai-plugin-excerpt-generation': './src/js/features/excerpt-generation/index.js',
 		'classifai-plugin-classic-excerpt-generation': './src/js/features/excerpt-generation/classic/index.js',
+		'classifai-plugin-content-generation': './src/js/features/content-generation/index.js',
 		'classifai-plugin-inserter-media-category': './src/js/features/image-generation/inserter-media-category.js',
 		'classifai-plugin-image-generation-media-modal': [
 			'./src/js/features/image-generation/media-modal/index.js',
 			'./src/js/features/image-generation/extend-image-block-generate-image.js'
 		],
 		'classifai-plugin-image-generation-generate-image-media-upload': './src/js/features/image-generation/media-modal/views/generate-image-media-upload.js',
+		'classifai-plugin-recommended-content-feature-fields': './src/js/features/recommended-content/feature-fields-plugin.js',
 		settings: './src/js/settings/index.js',
 	},
 	module: {
