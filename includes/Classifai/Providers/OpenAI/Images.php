@@ -64,7 +64,7 @@ class Images extends Provider {
 		/**
 		 * Filter the API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_api_url
 		 *
 		 * @param {string} $url The default API URL.
@@ -86,7 +86,7 @@ class Images extends Provider {
 		 * Useful if you want to use a different model, like
 		 * dall-e-3.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_embeddings_model
 		 *
 		 * @param {string} $model The default model to use.
@@ -108,7 +108,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has a different maximum.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_max_prompt_chars
 		 *
 		 * @param {int} $model The default maximum prompt characters.
@@ -137,7 +137,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has different options.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_quality_options
 		 *
 		 * @param {int} $model The default quality options.
@@ -166,7 +166,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has different options.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_size_options
 		 *
 		 * @param {int} $model The default size options.
@@ -190,7 +190,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has different options.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_style_options
 		 *
 		 * @param {int} $model The default style options.

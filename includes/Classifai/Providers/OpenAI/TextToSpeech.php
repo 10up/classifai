@@ -39,7 +39,7 @@ class TextToSpeech extends Provider {
 		/**
 		 * Filter the API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_text_to_speech_api_url
 		 *
 		 * @param {string} $url The default API URL.
@@ -63,7 +63,7 @@ class TextToSpeech extends Provider {
 		 *
 		 * Useful if you want to change the model for certain use cases.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_openai_text_to_speech_model
 		 *
 		 * @param {string} $model The current model to use.
