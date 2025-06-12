@@ -298,7 +298,10 @@ abstract class Feature {
 
 		// Sanitize the provider specific settings.
 		$provider_instance = $this->get_feature_provider_instance( $new_settings['provider'] );
-		$new_settings      = $provider_instance->sanitize_settings( $new_settings );
+
+		if ( $provider_instance ) {
+			$new_settings = $provider_instance->sanitize_settings( $new_settings );
+		}
 
 		/**
 		 * Filter to change settings before they're saved.
@@ -1189,7 +1192,7 @@ abstract class Feature {
 	 * Returns the instance of the provider set for the feature.
 	 *
 	 * @param string $provider_id The ID of the provider.
-	 * @return \Classifai\Providers
+	 * @return \Classifai\Providers|null
 	 */
 	public function get_feature_provider_instance( string $provider_id = '' ) {
 		$provider_id       = $provider_id ? $provider_id : $this->get_settings( 'provider' );

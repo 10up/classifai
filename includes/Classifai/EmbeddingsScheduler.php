@@ -45,9 +45,10 @@ class EmbeddingsScheduler {
 	/**
 	 * Check if embeddings generation is in progress.
 	 *
+	 * @param string $job The job name to check. If empty, uses the default job name.
 	 * @return bool
 	 */
-	public function is_embeddings_generation_in_progress(): bool {
+	public function is_embeddings_generation_in_progress( string $job = '' ): bool {
 		if ( ! class_exists( 'ActionScheduler_Store' ) ) {
 			return false;
 		}
@@ -55,7 +56,7 @@ class EmbeddingsScheduler {
 		$store = ActionScheduler_Store::instance();
 
 		$action_id = $store->find_action(
-			$this->job_name,
+			! empty( $job ) ? $job : $this->job_name,
 			array(
 				'status' => ActionScheduler_Store::STATUS_PENDING,
 			)
@@ -117,17 +118,28 @@ class EmbeddingsScheduler {
 
 		$args = $action->get_args();
 
-		if ( ! isset( $args['args'] ) && ! isset( $args['args']['exclude'] ) ) {
+		if ( ! isset( $args['args'] ) || ( ! isset( $args['args']['exclude'] ) || ! isset( $args['args']['post__not_in'] ) ) ) {
 			return;
 		}
 
-		$excludes = $args['args']['exclude'];
+		if ( isset( $args['args']['exclude'] ) ) {
+			$excludes = $args['args']['exclude'];
 
-		if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
-			return;
+			if ( empty( $excludes ) || ( 1 === count( $excludes ) && in_array( 1, $excludes, true ) ) ) {
+				return;
+			}
+
+			$logger = new ActionScheduler_DBLogger();
+			$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
+		} elseif ( isset( $args['args']['post__not_in'] ) ) {
+			$excludes = $args['args']['post__not_in'];
+
+			if ( empty( $excludes ) ) {
+				return;
+			}
+
+			$logger = new ActionScheduler_DBLogger();
+			$logger->log( $action_id, sprintf( 'Embeddings failed for posts: %s', implode( ', ', $excludes ) ) );
 		}
-
-		$logger = new ActionScheduler_DBLogger();
-		$logger->log( $action_id, sprintf( 'Embeddings failed for terms: %s', implode( ', ', $excludes ) ) );
 	}
 }

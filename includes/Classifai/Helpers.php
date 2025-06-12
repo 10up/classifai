@@ -519,7 +519,7 @@ function sanitize_prompts( $prompt_key = '', array $new_settings = [] ): array {
 
 				return array(
 					'title'    => sanitize_text_field( $prompt['title'] ),
-					'prompt'   => sanitize_textarea_field( $prompt['prompt'] ),
+					'prompt'   => wp_kses_post( $prompt['prompt'] ),
 					'default'  => absint( $default ),
 					'original' => absint( $prompt['original'] ),
 				);
