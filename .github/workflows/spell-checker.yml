@@ -1,0 +1,20 @@
+name: 'Spell Checker'
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  Spell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Actions Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Spell Check
+        uses: crate-ci/typos@7bc041cbb7ca9167c9e0e4ccbb26f48eb0f9d4e0 # v1.30.2
+        with:
+          files: ./
