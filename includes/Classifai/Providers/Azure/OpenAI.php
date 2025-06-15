@@ -854,7 +854,7 @@ class OpenAI extends Provider {
 		/**
 		 * Filter the prompt we will send to Azure OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Azure OpenAI. Gets added before summary.
@@ -913,7 +913,7 @@ class OpenAI extends Provider {
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Azure OpenAI.

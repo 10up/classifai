@@ -27,7 +27,7 @@ const GeneratedImage = wp.media.View.extend( {
 	initialize: function ( options ) {
 		this.data = this.model.toJSON();
 		this.prompt = options.prompt;
-		this.fileName = cleanForSlug( this.prompt );
+		this.fileName = this.createSafeFilename( this.prompt );
 	},
 
 	/**
@@ -36,6 +36,36 @@ const GeneratedImage = wp.media.View.extend( {
 	render: function () {
 		this.$el.html( this.template( this.data ) );
 		return this;
+	},
+
+	/**
+	 * Create a safe filename from a prompt.
+	 *
+	 * @param {string} prompt    The original prompt text.
+	 * @param {number} maxLength Maximum length for the filename (excluding extension).
+	 * @return {string} Safe filename.
+	 */
+	createSafeFilename: function ( prompt, maxLength = 80 ) {
+		if ( ! prompt ) {
+			return 'generated-image';
+		}
+
+		// Clean the prompt first
+		const cleaned = cleanForSlug( prompt );
+
+		// If it's already short enough, return it
+		if ( cleaned.length <= maxLength ) {
+			return cleaned;
+		}
+
+		// Try to truncate at word boundary (hyphen in slug)
+		const truncated = cleaned.substring( 0, maxLength );
+		const lastHyphen = truncated.lastIndexOf( '-' );
+
+		// Use word boundary if it's not too short (at least 50% of maxLength)
+		return lastHyphen > maxLength * 0.5
+			? truncated.substring( 0, lastHyphen )
+			: truncated;
 	},
 
 	/**

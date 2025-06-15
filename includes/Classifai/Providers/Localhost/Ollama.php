@@ -608,7 +608,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the prompt we will send to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_ollama_content_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Ollama. Gets added before summary.
@@ -667,7 +667,7 @@ class Ollama extends Provider {
 		/**
 		 * Filter the request body before sending to Ollama.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_ollama_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Ollama.
