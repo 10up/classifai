@@ -297,7 +297,7 @@ class SpeechToText extends Provider {
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',
 			[
-				'file'            => $file_path ?? '',
+				'file'            => $file_path,
 				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,

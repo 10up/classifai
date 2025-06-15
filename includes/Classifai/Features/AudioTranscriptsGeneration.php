@@ -373,7 +373,7 @@ class AudioTranscriptsGeneration extends Feature {
 		$response = wp_safe_remote_get(
 			$url,
 			[
-				'timeout' => 30,
+				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 
@@ -399,7 +399,7 @@ class AudioTranscriptsGeneration extends Feature {
 
 		// Initialize the WordPress filesystem.
 		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . '/wp-admin/includes/file.php';
+			require_once ABSPATH . 'wp-admin/includes/file.php';
 			WP_Filesystem();
 		}
 
