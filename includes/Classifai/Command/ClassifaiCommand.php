@@ -403,7 +403,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * : Whether to run as a dry-run. Default true
 	 *
 	 * [--files=<string>]
-	 * : Comma-separated file paths to audio files
+	 * : Comma delimited file URLs or paths to audio files
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
