@@ -349,6 +349,189 @@ class AudioTranscriptsGeneration extends Feature {
 	}
 
 	/**
+	 * Downloads a remote audio file and saves it to a temporary directory within the uploads folder.
+	 *
+	 * This function performs the following:
+	 * 1. Creates a temporary directory under wp-content/uploads/classifai-temp/.
+	 * 2. Downloads the remote file using wp_safe_remote_get().
+	 * 3. Writes the file to the temporary directory.
+	 * 4. Validates that the file is a supported audio type by checking extension and MIME type.
+	 * 5. Uses `finfo` (if available) for an additional MIME type validation.
+	 *
+	 * @param string $url Remote URL to an audio file.
+	 *
+	 * @return string|WP_Error The path to the saved file on success, or WP_Error on failure.
+	 */
+	public static function remote_url_to_path( string $url ) {
+		$upload_dir = wp_upload_dir();
+		$temp_dir   = trailingslashit( $upload_dir['basedir'] ) . 'classifai-temp/';
+
+		if ( ! file_exists( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
+		}
+
+		$response = wp_safe_remote_get(
+			$url,
+			[
+				'timeout' => 30,
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'download_failed', __( 'Failed to download remote file: ', 'classifai' ) . $response->get_error_message() );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( empty( $body ) ) {
+			return new WP_Error( 'empty_download', __( 'Downloaded file is empty.', 'classifai' ) );
+		}
+
+		$filename = wp_basename( wp_parse_url( $url, PHP_URL_PATH ) );
+
+		if ( empty( $filename ) ) {
+			$filename = 'audio_' . time() . '.tmp';
+		}
+
+		$temp_file_path = $temp_dir . $filename;
+
+		global $wp_filesystem;
+
+		// Initialize the WordPress filesystem.
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		$bytes_written = $wp_filesystem->put_contents(
+			$temp_file_path,
+			$body
+		);
+
+		if ( false === $bytes_written ) {
+			return new WP_Error( 'file_write_failed', __( 'Failed to write temporary file.', 'classifai' ) );
+		}
+
+		// Step 5: Validate audio file type
+		$supported_audio_extensions = [
+			'mp3',
+			'mp4',
+			'mpeg',
+			'mpga',
+			'm4a',
+			'wav',
+			'webm',
+		];
+
+		$supported_audio_mime_types = [
+			'audio/mpeg',
+			'audio/mp4',
+			'audio/x-m4a',
+			'audio/wav',
+			'audio/x-wav',
+			'audio/x-pn-wav',
+			'audio/webm',
+		];
+
+		$filetype  = wp_check_filetype( $temp_file_path );
+		$extension = strtolower( $filetype['ext'] ?? '' );
+		$mime_type = $filetype['type'] ?? '';
+
+		if ( empty( $extension ) || empty( $mime_type ) ) {
+			return new WP_Error( 'filetype_unknown', __( 'Could not determine file type.', 'classifai' ) );
+		}
+
+		if ( ! in_array( $extension, $supported_audio_extensions, true ) || ! in_array( $mime_type, $supported_audio_mime_types, true ) ) {
+			return new WP_Error(
+				'unsupported_audio_type',
+				sprintf(
+					/* translators: %1$s Extension, %2$s MIME Type. */
+					__( 'Unsupported audio type. Extension: %1$s, MIME type: %2$s', 'classifai' ),
+					$extension,
+					$mime_type
+				)
+			);
+		}
+
+		// Just an additional check to keep things secure.
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo          = finfo_open( FILEINFO_MIME_TYPE );
+			$real_mime_type = finfo_file( $finfo, $temp_file_path );
+			finfo_close( $finfo );
+
+			if ( ! in_array( $real_mime_type, $supported_audio_mime_types, true ) ) {
+				return new WP_Error(
+					'unsupported_audio_content',
+					sprintf(
+						/* translators: %1$s Detected MIME Type. */
+						__( 'File content does not match supported audio types. Detected: %s', 'classifai' ),
+						$real_mime_type
+					)
+				);
+			}
+		}
+
+		return $temp_file_path;
+	}
+
+	/**
+	 * Returns if the resource is of type attachment, URL or system path.
+	 *
+	 * @param int|string $audio_resource The ID of the attachment, or system or URL path
+	 *                                   to the audio file.
+	 *
+	 * @return boolean|string The resource type. (attachment, url, path or false if none).
+	 */
+	public static function get_resource_type( $audio_resource ) {
+		if ( ! is_scalar( $audio_resource ) ) {
+			return false;
+		}
+
+		if ( is_numeric( $audio_resource ) ) {
+			return 'attachment';
+		}
+
+		if ( filter_var( $audio_resource, FILTER_VALIDATE_URL ) ) {
+			return 'url';
+		}
+
+		return 'path';
+	}
+
+	/**
+	 * Returns true if attachment, false otherwise.
+	 *
+	 * @param string $audio_resource The ID of the attachment.
+	 *
+	 * @return boolean
+	 */
+	public static function is_attachment( $audio_resource ) {
+		return 'attachment' === self::get_resource_type( $audio_resource );
+	}
+
+	/**
+	 * Returns true if URL, false otherwise.
+	 *
+	 * @param string $audio_resource The URL to the audio file.
+	 *
+	 * @return boolean
+	 */
+	public static function is_remote_url( $audio_resource ) {
+		return 'url' === self::get_resource_type( $audio_resource );
+	}
+
+	/**
+	 * Returns true if system path, false otherwise.
+	 *
+	 * @param string $audio_resource The system file path to the audio file.
+	 *
+	 * @return boolean
+	 */
+	public static function is_local_path( $audio_resource ) {
+		return 'path' === self::get_resource_type( $audio_resource );
+	}
+
+	/**
 	 * Generates feature setting data required for migration from
 	 * ClassifAI < 3.0.0 to 3.0.0
 	 *

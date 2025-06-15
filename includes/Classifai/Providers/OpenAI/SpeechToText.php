@@ -178,23 +178,25 @@ class SpeechToText extends Provider {
 	/**
 	 * Common entry point for all REST endpoints for this provider.
 	 *
-	 * @param int    $post_id The Post ID we're processing.
+	 * @param string $audio_resource Attachment ID, URL or system file path to the audio resource.
 	 * @param string $route_to_call The route we are processing.
 	 * @param array  $args Optional arguments to pass to the route.
 	 * @return string|WP_Error
 	 */
-	public function rest_endpoint_callback( $post_id = 0, string $route_to_call = '', array $args = [] ) {
-		if ( ! $post_id || ! get_post( $post_id ) ) {
-			return new WP_Error( 'post_id_required', esc_html__( 'A valid attachment ID is required to generate a transcript.', 'classifai' ) );
-		}
+	public function rest_endpoint_callback( string $audio_resource, string $route_to_call = '', array $args = [] ) {
+		$return = '';
 
-		$route_to_call = strtolower( $route_to_call );
-		$return        = '';
-
-		// Handle all of our routes.
 		switch ( $route_to_call ) {
 			case 'transcript':
-				$return = $this->transcribe_audio( $post_id, $args );
+				if ( AudioTranscriptsGeneration::is_attachment( $audio_resource ) ) {
+					return $this->transcribe_from_attachment( $audio_resource, $args );
+				} elseif ( AudioTranscriptsGeneration::is_remote_url( $audio_resource ) ) {
+					return $this->transcribe_from_path( $audio_resource );
+				} elseif ( AudioTranscriptsGeneration::is_local_path( $audio_resource ) ) {
+					return $this->transcribe_audio( $audio_resource, $args );
+				}
+				break;
+			default:
 				break;
 		}
 
@@ -202,13 +204,17 @@ class SpeechToText extends Provider {
 	}
 
 	/**
-	 * Start the audio transcription process.
+	 * Generates a transcript from a given attachment ID if permissions and feature settings allow.
 	 *
-	 * @param int   $attachment_id Attachment ID to process.
-	 * @param array $args Optional arguments passed in.
-	 * @return WP_Error|bool
+	 * Validates that the current user can edit the attachment, ensures the feature is enabled,
+	 * and checks whether the attachment meets the processing criteria (e.g., correct file type and size).
+	 *
+	 * @param int   $attachment_id Attachment post ID.
+	 * @param array $args          Optional arguments to pass to the route.
+	 *
+	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
 	 */
-	public function transcribe_audio( int $attachment_id = 0, array $args = [] ) {
+	private function transcribe_from_attachment( int $attachment_id = 0, array $args = [] ) {
 		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
 			return new \WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
 		}
@@ -223,9 +229,58 @@ class SpeechToText extends Provider {
 			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
 		}
 
-		$settings = $feature->get_settings( static::ID );
+		return $this->transcribe_audio(
+			get_attached_file( $attachment_id ),
+			array_merge( $args, array( 'attachment_id' => $attachment_id ) )
+		);
+	}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
+	/**
+	 * Generates a transcript from a file path or remote URL.
+	 *
+	 * If the path is a remote URL, it is downloaded to a temporary location and deleted after processing.
+	 * If it's a local path and the file exists, it is processed directly.
+	 *
+	 * @param string $path Absolute local path or remote URL to an audio file.
+	 * @param array  $args  Optional arguments to pass to the route.
+	 *
+	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
+	 */
+	private function transcribe_from_path( string $path, array $args = [] ) {
+		$result = '';
+
+		if ( AudioTranscriptsGeneration::is_remote_url( $path ) ) {
+			$temp_file_path = AudioTranscriptsGeneration::remote_url_to_path( $path );
+
+			if ( is_wp_error( $temp_file_path ) ) {
+				return $temp_file_path;
+			}
+
+			$result = $this->transcribe_audio( $temp_file_path, $args );
+			wp_delete_file( $temp_file_path );
+		} elseif ( AudioTranscriptsGeneration::is_local_path( $path ) ) {
+			if ( file_exists( $path ) ) {
+				return $this->transcribe_audio( $path, $args );
+
+			} else {
+				return $result;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Start the audio transcription process.
+	 *
+	 * @param string $file_path File system path.
+	 * @param array  $args      Optional arguments passed in.
+	 * @return WP_Error|bool
+	 */
+	public function transcribe_audio( string $file_path = '', array $args = [] ) {
+		$feature  = new AudioTranscriptsGeneration();
+		$settings = $feature->get_settings( static::ID );
+		$request  = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name() );
 
 		/**
 		 * Filter the request body before sending to OpenAI.
@@ -233,20 +288,22 @@ class SpeechToText extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {int} $attachment_id ID of attachment we are transcribing.
+		 * @param {array}  $body      Request body that will be sent to OpenAI.
+		 * @param {string} $file_path Path of the attachment we are transcribing.
+		 * @param {args}   $args      Additional args.
 		 *
 		 * @return {array} Request body.
 		 */
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',
 			[
-				'file'            => get_attached_file( $attachment_id ) ?? '',
+				'file'            => $file_path ?? '',
 				'model'           => $this->get_model(),
 				'response_format' => 'json',
 				'temperature'     => 0,
 			],
-			$attachment_id
+			$file_path,
+			$args
 		);
 
 		// Make our API request.

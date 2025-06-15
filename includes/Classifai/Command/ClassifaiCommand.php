@@ -402,6 +402,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--dry-run=<bool>]
 	 * : Whether to run as a dry-run. Default true
 	 *
+	 * [--files=<string>]
+	 * : Comma-separated file paths to audio files
+	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
@@ -434,6 +437,57 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 		if ( $dry_run ) {
 			\WP_CLI::line( '--- Running command in dry-run mode ---' );
+		}
+
+		if ( ! empty( $opts['files'] ) ) {
+			$files       = explode( ',', $opts['files'] );
+			$counter     = 1;
+			$total_files = count( $files );
+			$result      = '';
+
+			foreach ( $files as $path ) {
+				\WP_CLI::log( '' );
+
+				if ( AudioTranscriptsGeneration::is_local_path( $path ) && ! file_exists( $path ) ) {
+					\WP_CLI::warning( 'File does not exist. Skipping...' );
+					continue;
+				}
+
+				\WP_CLI::log( sprintf( '... Transcribing (%1$s / %2$s): %3$s', $counter, $total_files, $path ) );
+
+				if ( ! $dry_run ) {
+					$result = $audio_transcription->run( $path, 'transcript' );
+
+					if ( is_wp_error( $result ) ) {
+						\WP_CLI::warning( $result->get_error_message() );
+						continue;
+					}
+				}
+
+				$counter++;
+
+				if ( empty( $result ) && ! $dry_run ) {
+					\WP_CLI::warning( sprintf( 'Transcribing for %s failed. Is the audio empty?', $path ) );
+					continue;
+				}
+
+				$filename             = wp_basename( $path );
+				$filename_without_ext = pathinfo( $filename, PATHINFO_FILENAME );
+				$txt_file_path = getcwd() . '/' . $filename_without_ext . '.txt';
+
+				if ( file_exists( $txt_file_path ) && ! $opts['force'] ) {
+					\WP_CLI::warning( 'The file already exists. Skipping .txt generation...' );
+					continue;
+				}
+
+				if ( ! $dry_run ) {
+					file_put_contents( $txt_file_path, $result );
+				}
+
+				\WP_CLI::success( sprintf( 'Transcribed file saved at %s', $txt_file_path ) );
+			}
+
+			return;
 		}
 
 		// Process the passed in attachment IDs.
