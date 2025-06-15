@@ -473,7 +473,8 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				$filename             = wp_basename( $path );
 				$filename_without_ext = pathinfo( $filename, PATHINFO_FILENAME );
-				$txt_file_path        = getcwd() . '/' . $filename_without_ext . '.txt';
+				$temp_dir             = trailingslashit( get_temp_dir() );
+				$txt_file_path        = $temp_dir . $filename_without_ext . '.txt';
 
 				if ( file_exists( $txt_file_path ) && ! $opts['force'] ) {
 					\WP_CLI::warning( 'The file already exists. Skipping .txt generation...' );
@@ -494,7 +495,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					 * fail silently or return false. Therefore, native PHP functions like file_put_contents()
 					 * are safe and appropriate in this context.
 					 */
-					file_put_contents( $txt_file_path, $result ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+					file_put_contents( $txt_file_path, $result ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_file_put_contents
 				}
 
 				\WP_CLI::success( sprintf( 'Transcribed file saved at %s', $txt_file_path ) );
