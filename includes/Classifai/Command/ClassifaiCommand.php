@@ -464,7 +464,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 					}
 				}
 
-				$counter++;
+				++$counter;
 
 				if ( empty( $result ) && ! $dry_run ) {
 					\WP_CLI::warning( sprintf( 'Transcribing for %s failed. Is the audio empty?', $path ) );
@@ -473,7 +473,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 
 				$filename             = wp_basename( $path );
 				$filename_without_ext = pathinfo( $filename, PATHINFO_FILENAME );
-				$txt_file_path = getcwd() . '/' . $filename_without_ext . '.txt';
+				$txt_file_path        = getcwd() . '/' . $filename_without_ext . '.txt';
 
 				if ( file_exists( $txt_file_path ) && ! $opts['force'] ) {
 					\WP_CLI::warning( 'The file already exists. Skipping .txt generation...' );
@@ -481,7 +481,20 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				}
 
 				if ( ! $dry_run ) {
-					file_put_contents( $txt_file_path, $result );
+					/**
+					 * Writing file from WP-CLI; WP_Filesystem is not suitable in non-interactive CLI context
+					 * because it may prompt for filesystem credentials (e.g., FTP/SSH), which cannot be
+					 * provided in headless environments.
+					 *
+					 * WordPress determines the filesystem method based on context. If `FS_METHOD` is not
+					 * explicitly defined as 'direct' (e.g., in wp-config.php), WP_Filesystem() may fall back
+					 * to 'ftp', 'ftpext', or 'ssh', and prompt for credentials via a UI form.
+					 *
+					 * In CLI scripts (like WP-CLI), such prompts are unsupported, and the filesystem API may
+					 * fail silently or return false. Therefore, native PHP functions like file_put_contents()
+					 * are safe and appropriate in this context.
+					 */
+					file_put_contents( $txt_file_path, $result ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 				}
 
 				\WP_CLI::success( sprintf( 'Transcribed file saved at %s', $txt_file_path ) );
