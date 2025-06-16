@@ -405,6 +405,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * [--files=<string>]
 	 * : Comma delimited file URLs or paths to audio files
 	 *
+	 * [--model=<string>]
+	 * : The model to be used to transcription.
+	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
 	 */
@@ -445,6 +448,12 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$total_files = count( $files );
 			$result      = '';
 
+
+			$custom_model = $opts['model'] ?? null;
+			$filter_model = function ( $model ) use ( $custom_model ) {
+				return $custom_model ?? $model;
+			};
+
 			foreach ( $files as $path ) {
 				\WP_CLI::log( '' );
 
@@ -456,7 +465,9 @@ class ClassifaiCommand extends \WP_CLI_Command {
 				\WP_CLI::log( sprintf( '... Transcribing (%1$s / %2$s): %3$s', $counter, $total_files, $path ) );
 
 				if ( ! $dry_run ) {
+					add_filter( 'classifai_openai_speech_to_text_model', $filter_model );
 					$result = $audio_transcription->run( $path, 'transcript' );
+					remove_filter( 'classifai_openai_speech_to_text_model', $filter_model );
 
 					if ( is_wp_error( $result ) ) {
 						\WP_CLI::warning( $result->get_error_message() );
