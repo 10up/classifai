@@ -30,11 +30,11 @@ class GeminiAPI extends Provider {
 	protected $googleai_url = 'https://generativelanguage.googleapis.com/v1beta';
 
 	/**
-	 * Gemini API model
+	 * Gemini API default model.
 	 *
 	 * @var string
 	 */
-	protected $model = 'models/gemini-2.5-flash-preview-05-20';
+	protected $default_model = 'models/gemini-2.5-flash-preview-05-20';
 
 	/**
 	 * GeminiAPI constructor.
@@ -51,6 +51,9 @@ class GeminiAPI extends Provider {
 	 * @return string
 	 */
 	public function get_model(): string {
+		$settings = $this->feature_instance->get_settings();
+		$model    = ! empty( $settings[ static::ID ]['model'] ) ? $settings[ static::ID ]['model'] : $this->default_model;
+
 		/**
 		 * Filter the model name.
 		 *
@@ -64,7 +67,7 @@ class GeminiAPI extends Provider {
 		 *
 		 * @return {string} The model to use.
 		 */
-		return apply_filters( 'classifai_googleai_gemini_api_model', $this->model );
+		return apply_filters( 'classifai_googleai_gemini_api_model', $model );
 	}
 
 	/**
@@ -115,6 +118,8 @@ class GeminiAPI extends Provider {
 		$common_settings = [
 			'api_key'       => '',
 			'authenticated' => false,
+			'model'         => $this->default_model,
+			'models'        => [],
 		];
 
 		return $common_settings;
@@ -129,9 +134,12 @@ class GeminiAPI extends Provider {
 	public function sanitize_settings( array $new_settings ): array {
 		$settings         = $this->feature_instance->get_settings();
 		$api_key_settings = $this->sanitize_api_key_settings( $new_settings, $settings );
+		$model            = ! empty( $new_settings[ static::ID ]['model'] ) ? sanitize_text_field( $new_settings[ static::ID ]['model'] ) : $this->default_model;
 
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
+		$new_settings[ static::ID ]['model']         = $model;
+		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
 
 		return $new_settings;
 	}
@@ -144,13 +152,13 @@ class GeminiAPI extends Provider {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
-		if ( is_wp_error( $authenticated ) ) {
+		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$error_message                               = $authenticated->get_error_message();
+			$error_message                               = $models->get_error_message();
 
 			// Add an error message.
 			add_settings_error(
@@ -161,6 +169,7 @@ class GeminiAPI extends Provider {
 			);
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
+			$new_settings[ static::ID ]['models']        = $models;
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
@@ -169,12 +178,13 @@ class GeminiAPI extends Provider {
 	}
 
 	/**
-	 * Authenticate our credentials.
+	 * Get the available models.
+	 * This function also authenticates the credentials.
 	 *
 	 * @param string $api_key Api Key.
-	 * @return bool|WP_Error
+	 * @return array|WP_Error
 	 */
-	protected function authenticate_credentials( string $api_key = '' ) {
+	protected function get_models( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini API) key.', 'classifai' ) );
@@ -184,7 +194,28 @@ class GeminiAPI extends Provider {
 		$request  = new APIRequest( $api_key );
 		$response = $request->get( $this->googleai_url . '/models' );
 
-		return ! is_wp_error( $response ) ? true : $response;
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$models = [];
+		foreach ( $response['models'] as $model ) {
+			if ( is_array( $model['supportedGenerationMethods'] ) && in_array( 'generateContent', $model['supportedGenerationMethods'], true ) ) {
+				$models[ $model['name'] ] = $model['displayName'];
+			}
+		}
+
+		/**
+		 * Filter the models returned by the Gemini API.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_googleai_gemini_api_models
+		 *
+		 * @param {array} $models The models.
+		 *
+		 * @return {array} The models.
+		 */
+		return apply_filters( 'classifai_googleai_gemini_api_models', $models );
 	}
 
 	/**
@@ -635,6 +666,7 @@ class GeminiAPI extends Provider {
 		$settings   = $this->feature_instance->get_settings();
 		$debug_info = [];
 
+		$debug_info[ __( 'Model', 'classifai' ) ] = $this->get_model();
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = 1;
 			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );

@@ -2,8 +2,10 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalInputControl as InputControl } from '@wordpress/components';
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	SelectControl,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -48,6 +50,47 @@ export const GoogleAIGeminiAPISettings = ( { isConfigured = false } ) => {
 		</>
 	);
 
+	const models = [];
+
+	// Convert providerSettings.models to an array from an object.
+	if (
+		providerSettings?.models &&
+		! Array.isArray( providerSettings.models )
+	) {
+		for ( const [ key, value ] of Object.entries(
+			providerSettings.models
+		) ) {
+			models.push( { label: value, value: key } );
+		}
+	} else {
+		models.push( {
+			label: __( '-- Choose Model --', 'classifai' ),
+			value: '',
+		} );
+	}
+
+	const ModelDescription = () => (
+		<>
+			{ __(
+				'Choose the model you want to use for requests.',
+				'classifai'
+			) }{ ' ' }
+			{ __(
+				'Not sure which model to use? You can find more details on models',
+				'classifai'
+			) }{ ' ' }
+			<a
+				title={ __( 'Learn more about models', 'classifai' ) }
+				href="https://ai.google.dev/gemini-api/docs/models"
+				target="_blank"
+				rel="noopener noreferrer"
+			>
+				{ __( 'here', 'classifai' ) }
+			</a>
+			.
+		</>
+	);
+
 	return (
 		<>
 			<SettingsRow
@@ -59,6 +102,18 @@ export const GoogleAIGeminiAPISettings = ( { isConfigured = false } ) => {
 					type="password"
 					value={ providerSettings.api_key || '' }
 					onChange={ ( value ) => onChange( { api_key: value } ) }
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ <ModelDescription /> }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
 		</>
