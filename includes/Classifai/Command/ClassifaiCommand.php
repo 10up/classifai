@@ -448,7 +448,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$total_files = count( $files );
 			$result      = '';
 
-
 			$custom_model = $opts['model'] ?? null;
 			$filter_model = function ( $model ) use ( $custom_model ) {
 				return $custom_model ?? $model;
