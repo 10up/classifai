@@ -28,6 +28,7 @@ import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 const BlockEdit = ( props ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ run, setRun ] = useState( false );
+	const [ errors, setErrors ] = useState( [] );
 	const { attributes, setAttributes } = props;
 	const { render, takeaways, title } = attributes;
 	const blockProps = useBlockProps();
@@ -40,8 +41,24 @@ const BlockEdit = ( props ) => {
 			const postTitle =
 				select( 'core/editor' ).getEditedPostAttribute( 'title' );
 
+			// If no content or the only content in the post is this block, don't make an API call.
+			if (
+				! postContent ||
+				'<!-- wp:classifai/key-takeaways /-->' === postContent
+			) {
+				setErrors( [
+					__(
+						'No content found. Please add content then refresh results from the block settings.',
+						'classifai'
+					),
+				] );
+				setRun( false );
+				return;
+			}
+
 			setRun( false );
 			setIsLoading( true );
+			setErrors( [] );
 
 			apiFetch( {
 				path: '/classifai/v1/key-takeaways/',
@@ -63,9 +80,7 @@ const BlockEdit = ( props ) => {
 					setIsLoading( false );
 				},
 				( err ) => {
-					setAttributes( {
-						takeaways: [ `Error:  ${ err?.message }` ],
-					} );
+					setErrors( [ err?.message ] );
 					setIsLoading( false );
 				}
 			);
@@ -132,7 +147,32 @@ const BlockEdit = ( props ) => {
 				</Placeholder>
 			) }
 
-			{ ! isLoading && (
+			{ ! isLoading && errors.length > 0 && (
+				<div { ...blockProps }>
+					<Placeholder
+						icon={ icon }
+						label={ __( 'Key Takeaways', 'classifai' ) }
+						isColumnLayout
+					>
+						<p
+							style={ {
+								color: '#cc1818',
+								fontWeight: 'bold',
+								marginBottom: 0,
+							} }
+						>
+							{ __( 'Error', 'classifai' ) }
+						</p>
+						<ul style={ { lineHeight: '1.5', marginTop: 0 } }>
+							{ errors.map( ( error, index ) => (
+								<li key={ index }>{ error }</li>
+							) ) }
+						</ul>
+					</Placeholder>
+				</div>
+			) }
+
+			{ ! isLoading && takeaways.length > 0 && errors.length === 0 && (
 				<div { ...blockProps }>
 					<RichText
 						tagName="h2"
