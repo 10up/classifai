@@ -43,6 +43,13 @@ class ChatGPT extends Provider {
 	protected $chatgpt_model = 'gpt-4o-mini';
 
 	/**
+	 * OpenAI Vision model
+	 *
+	 * @var string
+	 */
+	protected $vision_model = 'gpt-4.1-mini';
+
+	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
@@ -300,7 +307,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_descriptive_text_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -401,7 +408,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_ocr_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -512,7 +519,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_image_tag_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
