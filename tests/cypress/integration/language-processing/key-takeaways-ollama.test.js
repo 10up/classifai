@@ -37,7 +37,7 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		} ).then( () => {
 			cy.getBlockEditor()
 				.find(
-					'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeways__content'
+					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
 				)
 				.should( 'contain.text', 'Ollama request failed' );
 		} );
