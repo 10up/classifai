@@ -151,7 +151,7 @@ class Language extends Provider {
 	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn = false;
 
-		$endpoint = trailingslashit( $url ) . '/text/analytics/v3.1/languages';
+		$endpoint = trailingslashit( $url ) . 'language/:analyze-text';
 		$endpoint = add_query_arg( 'api-version', static::API_VERSION, $endpoint );
 
 		$request = safe_wp_remote_get(
