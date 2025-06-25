@@ -43,11 +43,30 @@ class ChatGPT extends Provider {
 	protected $chatgpt_model = 'gpt-4o-mini';
 
 	/**
+	 * OpenAI Vision model
+	 *
+	 * @var string
+	 */
+	protected $vision_model = 'gpt-4.1-mini';
+
+	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
 	 */
 	protected $max_tokens = 128000;
+
+	/**
+	 * Image types to process.
+	 *
+	 * @var array
+	 */
+	private $image_types_to_process = [
+		'gif',
+		'jpeg',
+		'png',
+		'webp',
+	];
 
 	/**
 	 * OpenAI ChatGPT constructor.
@@ -288,7 +307,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_descriptive_text_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -389,7 +408,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_ocr_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -500,7 +519,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_image_tag_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -1236,6 +1255,22 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
+		// Check if the image is of a type we can process.
+		$mime_type          = get_post_mime_type( $attachment_id );
+		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
+		$process            = false;
+
+		foreach ( $matched_extensions as $ext ) {
+			if ( in_array( $ext, $this->image_types_to_process, true ) ) {
+				$process = true;
+				break;
+			}
+		}
+
+		if ( ! $process ) {
+			return new WP_Error( 'invalid', esc_html__( 'Image does not match a valid mime type.', 'classifai' ) );
+		}
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		if ( ! $metadata || ! is_array( $metadata ) ) {
@@ -1254,7 +1289,7 @@ class ChatGPT extends Provider {
 					'min' => 512,
 					'max' => 2000,
 				],
-				'filesize' => 100 * MB_IN_BYTES,
+				'filesize' => 50 * MB_IN_BYTES,
 			]
 		);
 
