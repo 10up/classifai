@@ -48,7 +48,7 @@ const BlockEdit = ( props ) => {
 			) {
 				setErrors( [
 					__(
-						'No content found. Please add content then refresh results from the block settings.',
+						'No content found. Please add content then click the "Refresh results" button.',
 						'classifai'
 					),
 				] );
@@ -169,6 +169,17 @@ const BlockEdit = ( props ) => {
 								<li key={ index }>{ error }</li>
 							) ) }
 						</ul>
+						<Button
+							label={ __(
+								'Re-generate key takeaways',
+								'classifai'
+							) }
+							text={ __( 'Refresh results', 'classifai' ) }
+							variant={ 'secondary' }
+							onClick={ () => setRun( true ) }
+							isBusy={ isLoading }
+							style={ { width: '115px' } }
+						/>
 					</Placeholder>
 				</div>
 			) }

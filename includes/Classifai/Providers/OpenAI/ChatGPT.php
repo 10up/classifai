@@ -938,7 +938,7 @@ class ChatGPT extends Provider {
 		// Ensure we have content before making a request.
 		$content = $this->get_content( $post_id, 0, false, $args['content'] );
 		if ( empty( $content ) ) {
-			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then refresh results from the block settings.', 'classifai' ) );
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Refresh results" button.', 'classifai' ) );
 		}
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
