@@ -104,6 +104,17 @@ class KeyTakeaways extends Feature {
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
 						],
+						'run'    => [
+							'type'              => 'string',
+							'enum'              => [
+								'auto',
+								'manual',
+							],
+							'default'           => 'auto',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Whether the key takeaways were generated automatically or manually.', 'classifai' ),
+						],
 					],
 					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
 				],
@@ -133,6 +144,17 @@ class KeyTakeaways extends Feature {
 							'sanitize_callback' => 'sanitize_text_field',
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'How the key takeaways should be rendered.', 'classifai' ),
+						],
+						'run'     => [
+							'type'              => 'string',
+							'enum'              => [
+								'auto',
+								'manual',
+							],
+							'default'           => 'auto',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Whether the key takeaways were generated automatically or manually.', 'classifai' ),
 						],
 					],
 					'permission_callback' => [ $this, 'generate_key_takeaways_permissions_check' ],
@@ -193,6 +215,7 @@ class KeyTakeaways extends Feature {
 						'content' => $request->get_param( 'content' ),
 						'title'   => $request->get_param( 'title' ),
 						'render'  => $request->get_param( 'render' ),
+						'run'     => $request->get_param( 'run' ),
 					]
 				)
 			);

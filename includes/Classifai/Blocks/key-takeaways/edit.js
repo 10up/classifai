@@ -68,6 +68,7 @@ const BlockEdit = ( props ) => {
 					content: postContent,
 					title: postTitle,
 					render,
+					run: run ? 'manual' : 'auto',
 				},
 			} ).then(
 				async ( res ) => {

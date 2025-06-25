@@ -904,6 +904,7 @@ class ChatGPT extends Provider {
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
+				'run'     => 'auto',
 			]
 		);
 
@@ -911,6 +912,27 @@ class ChatGPT extends Provider {
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Decide if we should automatically run the key takeaways generation.
+		 *
+		 * By default, we will always run the generation. If you
+		 * only want to run when triggered manually, you can
+		 * filter the return value to false.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_key_takeaways_auto_run
+		 *
+		 * @param {bool} $run Whether to run the key takeaways generation.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {bool} Whether to run the key takeaways generation.
+		 */
+		$run = apply_filters( 'classifai_chatgpt_key_takeaways_auto_run', true, $post_id );
+
+		if ( 'auto' === $args['run'] && ! (bool) $run ) {
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please run the generation from the block settings.', 'classifai' ) );
 		}
 
 		// Ensure we have content before making a request.
