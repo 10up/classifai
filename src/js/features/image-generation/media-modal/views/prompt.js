@@ -38,6 +38,7 @@ const Prompt = wp.media.View.extend( {
 		let quality = '';
 		let size = '';
 		let style = '';
+		let aspectRatio = '';
 		const parent = event.target.parentElement;
 
 		if ( event.which === 13 ) {
@@ -47,10 +48,19 @@ const Prompt = wp.media.View.extend( {
 			quality = parent?.querySelector( '.quality' )?.value.trim();
 			size = parent?.querySelector( '.size' )?.value.trim();
 			style = parent?.querySelector( '.style' )?.value.trim();
+			aspectRatio = parent
+				?.querySelector( '.aspect-ratio' )
+				?.value.trim();
 		}
 
 		if ( prompt ) {
-			new GeneratedImagesContainer( { prompt, quality, size, style } );
+			new GeneratedImagesContainer( {
+				prompt,
+				quality,
+				size,
+				style,
+				aspectRatio,
+			} );
 		}
 	},
 } );

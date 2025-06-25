@@ -16,12 +16,13 @@ const Images = Backbone.Collection.extend( {
 	/**
 	 * Send a request to our API endpoint.
 	 *
-	 * @param {string} prompt  Prompt used in generating images.
-	 * @param {string} quality Quality of the image.
-	 * @param {string} size    Size of the image.
-	 * @param {string} style   Style of the image.
+	 * @param {string} prompt      Prompt used in generating images.
+	 * @param {string} quality     Quality of the image.
+	 * @param {string} size        Size of the image.
+	 * @param {string} style       Style of the image.
+	 * @param {string} aspectRatio Aspect ratio of the image.
 	 */
-	makeRequest: function ( prompt, quality, size, style ) {
+	makeRequest: function ( prompt, quality, size, style, aspectRatio ) {
 		this.fetch( {
 			type: 'get',
 			beforeSend: function ( xhr ) {
@@ -32,6 +33,7 @@ const Images = Backbone.Collection.extend( {
 				quality: quality,
 				size: size,
 				style: style,
+				aspect_ratio: aspectRatio,
 				format: 'b64_json',
 			},
 			reset: true,

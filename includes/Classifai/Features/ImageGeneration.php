@@ -3,7 +3,7 @@
 namespace Classifai\Features;
 
 use Classifai\Services\ImageProcessing;
-use Classifai\Providers\OpenAI\Images;
+use Classifai\Providers\OpenAI\Images as OpenAIImages;
 use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -34,7 +34,7 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Images::ID         => __( 'OpenAI Images', 'classifai' ),
+			OpenAIImages::ID   => __( 'OpenAI Images', 'classifai' ),
 			GoogleAIImagen::ID => __( 'Google AI Imagen', 'classifai' ),
 		];
 	}
@@ -312,7 +312,7 @@ class ImageGeneration extends Feature {
 
 				<div class="additional-image-generation-settings hidden">
 					<?php
-					$quality_options = Images::get_image_quality_options();
+					$quality_options = method_exists( $provider_instance, 'get_image_quality_options' ) ? $provider_instance->get_image_quality_options() : [];
 					if ( ! empty( $quality_options ) ) :
 						?>
 						<label>
@@ -329,7 +329,7 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$size_options = Images::get_image_size_options();
+					$size_options = method_exists( $provider_instance, 'get_image_size_options' ) ? $provider_instance->get_image_size_options() : [];
 					if ( ! empty( $size_options ) ) :
 						?>
 						<label>
@@ -346,7 +346,24 @@ class ImageGeneration extends Feature {
 					<?php endif; ?>
 
 					<?php
-					$style_options = Images::get_image_style_options();
+					$aspect_ratio_options = method_exists( $provider_instance, 'get_image_aspect_ratio_options' ) ? $provider_instance->get_image_aspect_ratio_options() : [];
+					if ( ! empty( $aspect_ratio_options ) ) :
+						?>
+						<label>
+							<span><?php esc_html_e( 'Aspect ratio:', 'classifai' ); ?></span>
+							<select class="aspect-ratio" name="aspect-ratio">
+								<?php
+								$aspect_ratio = $settings[ $provider_id ]['aspect_ratio'];
+								foreach ( $aspect_ratio_options as $key => $value ) {
+									echo '<option value="' . esc_attr( $key ) . '" ' . selected( $aspect_ratio, $key, false ) . '>' . esc_html( $value ) . '</option>';
+								}
+								?>
+							</select>
+						</label>
+					<?php endif; ?>
+
+					<?php
+					$style_options = method_exists( $provider_instance, 'get_image_style_options' ) ? $provider_instance->get_image_style_options() : [];
 					if ( ! empty( $style_options ) ) :
 						?>
 						<label>
@@ -468,7 +485,7 @@ class ImageGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => Images::ID,
+			'provider' => OpenAIImages::ID,
 		];
 	}
 
