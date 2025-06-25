@@ -26,6 +26,7 @@ import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIImagesSettings } from './openai-images';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
+import { AzureLanguageSettings } from './azure-language';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
 import { ChromeAISettings } from './chrome-ai';
 import { XAIGrokSettings } from './xai-grok';
@@ -58,6 +59,9 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 					isConfigured={ isConfigured }
 				/>
 			);
+
+		case 'azure_language':
+			return <AzureLanguageSettings isConfigured={ isConfigured } />;
 
 		case 'ibm_watson_nlu':
 			return <IBMWatsonNLUSettings isConfigured={ isConfigured } />;
