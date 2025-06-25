@@ -4,6 +4,7 @@ namespace Classifai\Features;
 
 use Classifai\Services\ImageProcessing;
 use Classifai\Providers\OpenAI\Images;
+use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -33,7 +34,8 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			Images::ID => __( 'OpenAI Images', 'classifai' ),
+			Images::ID         => __( 'OpenAI Images', 'classifai' ),
+			GoogleAIImagen::ID => __( 'Google AI Imagen', 'classifai' ),
 		];
 	}
 
