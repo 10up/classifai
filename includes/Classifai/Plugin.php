@@ -252,10 +252,29 @@ class Plugin {
 	 * Load the Action Scheduler library.
 	 */
 	public function load_action_scheduler() {
-		$features                 = [ new \Classifai\Features\Classification(), new \Classifai\Features\TermCleanup() ];
+		$features                 = [
+			new \Classifai\Features\Classification(),
+			new \Classifai\Features\TermCleanup(),
+			new \Classifai\Features\RecommendedContent(),
+		];
 		$is_feature_being_enabled = false;
 
 		foreach ( $features as $feature ) {
+			if ( ! $feature->get_feature_provider_instance() ) {
+				// Skip if the feature does not have a provider instance.
+				continue;
+			}
+
+			// Check if the Feature is using a Provider that needs Action Scheduler.
+			switch ( $feature->get_feature_provider_instance()::ID ) {
+				case 'openai_embeddings':
+				case 'azure_openai_embeddings':
+				case 'ollama_embeddings':
+					break;
+				default:
+					continue 2;
+			}
+
 			if ( isset( $_POST['classifai_feature_classification'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 				$is_feature_being_enabled = sanitize_text_field( wp_unslash( $_POST['classifai_feature_classification']['status'] ?? false ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			}

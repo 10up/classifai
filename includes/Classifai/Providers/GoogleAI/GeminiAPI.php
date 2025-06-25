@@ -57,7 +57,7 @@ class GeminiAPI extends Provider {
 		 * Useful if you want to use a different model, like
 		 * gemini-2.5-pro-preview-05-06.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_googleai_gemini_api_model
 		 *
 		 * @param {string} $model The default model to use.

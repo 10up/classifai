@@ -1,6 +1,6 @@
 <?php
 /**
- * OpenAI DALL·E integration
+ * OpenAI Image integration
  */
 
 namespace Classifai\Providers\OpenAI;
@@ -9,30 +9,36 @@ use Classifai\Features\ImageGeneration;
 use Classifai\Providers\Provider;
 use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
-use WP_REST_Server;
 
-class DallE extends Provider {
+class Images extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
 
 	const ID = 'openai_dalle';
 
 	/**
-	 * OpenAI DALL·E URL.
+	 * OpenAI Image URL.
 	 *
 	 * @var string
 	 */
-	protected $dalle_url = 'https://api.openai.com/v1/images/generations';
+	protected $api_url = 'https://api.openai.com/v1/images/generations';
+
+	/**
+	 * OpenAI Image model.
+	 *
+	 * @var string
+	 */
+	protected $model = 'gpt-image-1';
 
 	/**
 	 * Maximum number of characters a prompt can have.
 	 *
 	 * @var int
 	 */
-	public $max_prompt_chars = 4000;
+	public $max_prompt_chars = 32000;
 
 	/**
-	 * OpenAI DALL·E constructor.
+	 * OpenAI Image constructor.
 	 *
 	 * @param \Classifai\Features\Feature $feature_instance The feature instance.
 	 */
@@ -50,141 +56,148 @@ class DallE extends Provider {
 	}
 
 	/**
-	 * Register settings for the provider.
+	 * Get the API URL.
+	 *
+	 * @return string
 	 */
-	public function render_provider_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		add_settings_field(
-			static::ID . '_api_key',
-			esc_html__( 'API Key', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'api_key',
-				'input_type'    => 'password',
-				'default_value' => $settings['api_key'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-				'description'   => $this->feature_instance->is_configured_with_provider( static::ID ) ?
-					'' :
-					sprintf(
-						wp_kses(
-							/* translators: %1$s is replaced with the OpenAI sign up URL */
-							__( 'Don\'t have an OpenAI account yet? <a title="Sign up for an OpenAI account" href="%1$s">Sign up for one</a> in order to get your API key.', 'classifai' ),
-							[
-								'a' => [
-									'href'  => [],
-									'title' => [],
-								],
-							]
-						),
-						esc_url( 'https://platform.openai.com/signup' )
-					),
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_number_of_images',
-			esc_html__( 'Number of images', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'number_of_images',
-				'options'       => array_combine( range( 1, 10 ), range( 1, 10 ) ),
-				'default_value' => $settings['number_of_images'],
-				'description'   => __( 'Number of images that will be generated in one request. Note that each image will incur separate costs.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_quality',
-			esc_html__( 'Image quality', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'quality',
-				'options'       => self::get_image_quality_options(),
-				'default_value' => $settings['quality'],
-				'description'   => __( 'The quality of the image that will be generated. High Definition creates images with finer details and greater consistency across the image but costs more.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_image_size',
-			esc_html__( 'Image size', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'image_size',
-				'options'       => self::get_image_size_options(),
-				'default_value' => $settings['image_size'],
-				'description'   => __( 'Size of generated images. Larger sizes cost more.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
-		);
-
-		add_settings_field(
-			static::ID . '_style',
-			esc_html__( 'Image style', 'classifai' ),
-			[ $this->feature_instance, 'render_select' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'style',
-				'options'       => self::get_image_style_options(),
-				'default_value' => $settings['style'],
-				'description'   => __( 'The style of the generated images. Vivid causes more hyper-real and dramatic images. Natural causes more natural, less hyper-real looking images.', 'classifai' ),
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID,
-			]
-		);
+	public function get_api_url(): string {
+		/**
+		 * Filter the API URL.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_api_url
+		 *
+		 * @param {string} $url The default API URL.
+		 *
+		 * @return {string} The API URL.
+		 */
+		return apply_filters( 'classifai_openai_dalle_api_url', $this->api_url );
 	}
 
 	/**
-	 * Returns the quality options for the provider.
+	 * Get the model name.
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public static function get_image_quality_options() {
-		return array(
-			'standard' => __( 'Standard', 'classifai' ),
-			'hd'       => __( 'High Definition', 'classifai' ),
-		);
+	public function get_model(): string {
+		/**
+		 * Filter the model name.
+		 *
+		 * Useful if you want to use a different model, like
+		 * dall-e-3.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_embeddings_model
+		 *
+		 * @param {string} $model The default model to use.
+		 *
+		 * @return {string} The model to use.
+		 */
+		return apply_filters( 'classifai_openai_dalle_embeddings_model', $this->model );
 	}
 
 	/**
-	 * Returns the image size options for the provider.
+	 * Get the maximum number of characters the prompt supports.
 	 *
-	 * @return array
+	 * @return int
 	 */
-	public static function get_image_size_options() {
-		return array(
-			'1024x1024' => '1024x1024 (square)',
-			'1792x1024' => '1792x1024 (landscape)',
-			'1024x1792' => '1024x1792 (portrait)',
-		);
+	public function get_max_prompt_chars(): int {
+		/**
+		 * Filter the max number of characters the prompt can have.
+		 *
+		 * Useful if you want to change to a different model
+		 * that has a different maximum.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_max_prompt_chars
+		 *
+		 * @param {int} $model The default maximum prompt characters.
+		 *
+		 * @return {int} The maximum prompt characters.
+		 */
+		return apply_filters( 'classifai_openai_dalle_max_prompt_chars', $this->max_prompt_chars );
 	}
 
 	/**
-	 * Returns the style options for the provider.
+	 * Returns the image quality options.
 	 *
 	 * @return array
 	 */
-	public static function get_image_style_options() {
-		return array(
-			'vivid'   => __( 'Vivid', 'classifai' ),
-			'natural' => __( 'Natural', 'classifai' ),
-		);
+	public static function get_image_quality_options(): array {
+		$options = [
+			'auto'   => __( 'Auto', 'classifai' ),
+			'low'    => __( 'Low', 'classifai' ),
+			'medium' => __( 'Medium', 'classifai' ),
+			'high'   => __( 'High', 'classifai' ),
+		];
+
+		/**
+		 * Filter the image quality options that are available.
+		 *
+		 * Useful if you want to change to a different model
+		 * that has different options.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_quality_options
+		 *
+		 * @param {int} $model The default quality options.
+		 *
+		 * @return {int} The quality options.
+		 */
+		return apply_filters( 'classifai_openai_dalle_quality_options', $options );
+	}
+
+	/**
+	 * Returns the image size options.
+	 *
+	 * @return array
+	 */
+	public static function get_image_size_options(): array {
+		$options = [
+			'auto'      => __( 'Auto', 'classifai' ),
+			'1024x1024' => __( '1024x1024 (square)', 'classifai' ),
+			'1536x1024' => __( '1536x1024 (landscape)', 'classifai' ),
+			'1024x1536' => __( '1024x1536 (portrait)', 'classifai' ),
+		];
+
+		/**
+		 * Filter the image size options that are available.
+		 *
+		 * Useful if you want to change to a different model
+		 * that has different options.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_size_options
+		 *
+		 * @param {int} $model The default size options.
+		 *
+		 * @return {int} The size options.
+		 */
+		return apply_filters( 'classifai_openai_dalle_size_options', $options );
+	}
+
+	/**
+	 * Returns the style options.
+	 *
+	 * @return array
+	 */
+	public static function get_image_style_options(): array {
+		$options = [];
+
+		/**
+		 * Filter the image style options that are available.
+		 *
+		 * Useful if you want to change to a different model
+		 * that has different options.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_dalle_style_options
+		 *
+		 * @param {int} $model The default style options.
+		 *
+		 * @return {int} The style options.
+		 */
+		return apply_filters( 'classifai_openai_dalle_style_options', $options );
 	}
 
 	/**
@@ -204,7 +217,7 @@ class DallE extends Provider {
 					$common_settings,
 					[
 						'number_of_images'   => 1,
-						'quality'            => 'standard',
+						'quality'            => 'auto',
 						'image_size'         => '1024x1024',
 						'style'              => 'vivid',
 						'per_image_settings' => false,
@@ -230,22 +243,16 @@ class DallE extends Provider {
 		if ( $this->feature_instance instanceof ImageGeneration ) {
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
-			if ( in_array( $new_settings[ static::ID ]['quality'], [ 'standard', 'hd' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['quality'], [ 'auto', 'low', 'medium', 'high' ], true ) ) {
 				$new_settings[ static::ID ]['quality'] = sanitize_text_field( $new_settings[ static::ID ]['quality'] );
 			} else {
 				$new_settings[ static::ID ]['quality'] = $settings[ static::ID ]['quality'];
 			}
 
-			if ( in_array( $new_settings[ static::ID ]['image_size'], [ '1024x1024', '1792x1024', '1024x1792' ], true ) ) {
+			if ( in_array( $new_settings[ static::ID ]['image_size'], [ 'auto', '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
 				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] );
 			} else {
 				$new_settings[ static::ID ]['image_size'] = $settings[ static::ID ]['image_size'];
-			}
-
-			if ( in_array( $new_settings[ static::ID ]['style'], [ 'vivid', 'natural' ], true ) ) {
-				$new_settings[ static::ID ]['style'] = sanitize_text_field( $new_settings[ static::ID ]['style'] );
-			} else {
-				$new_settings[ static::ID ]['style'] = $settings[ static::ID ]['style'];
 			}
 		}
 
@@ -292,15 +299,20 @@ class DallE extends Provider {
 			array_filter( $args ),
 			[
 				'num'     => $settings['number_of_images'] ?? 1,
-				'quality' => $settings['quality'] ?? 'standard',
+				'quality' => $settings['quality'] ?? 'auto',
 				'size'    => $settings['image_size'] ?? '1024x1024',
 				'style'   => $settings['style'] ?? 'vivid',
-				'format'  => 'url',
+				'format'  => 'b64_json',
 			]
 		);
 
-		// Force proper image size for those that had been using DALL·E 2 and haven't updated settings.
-		if ( ! in_array( $args['size'], [ '1024x1024', '1792x1024', '1024x1792' ], true ) ) {
+		// Force proper image quality for those that had been using DALL·E 2 or 3 and haven't updated settings.
+		if ( ! in_array( $args['quality'], [ 'auto', 'low', 'medium', 'high' ], true ) ) {
+			$args['size'] = 'auto';
+		}
+
+		// Force proper image size for those that had been using DALL·E 2 or 3 and haven't updated settings.
+		if ( ! in_array( $args['size'], [ '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
 			$args['size'] = '1024x1024';
 		}
 
@@ -309,60 +321,79 @@ class DallE extends Provider {
 		}
 
 		/**
-		 * Filter the prompt we will send to DALL·E.
+		 * Filter the prompt we will send to OpenAI.
 		 *
 		 * @since 2.0.0
 		 * @hook classifai_dalle_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to DALL·E.
+		 * @param {string} $prompt Prompt we are sending to OpenAI.
 		 *
 		 * @return {string} Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
 
+		$max_prompt_chars = $this->get_max_prompt_chars();
+
 		// If our prompt exceeds the max length, throw an error.
-		if ( mb_strlen( $prompt ) > $this->max_prompt_chars ) {
-			return new WP_Error( 'invalid_param', esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed 1000 characters.', 'classifai' ) );
+		if ( mb_strlen( $prompt ) > $max_prompt_chars ) {
+			/* translators: %d is the maximum number of characters allowed in the prompt. */
+			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $max_prompt_chars ) );
 		}
 
 		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
 
+		$model = $this->get_model();
+		$body  = [
+			'prompt'          => sanitize_text_field( $prompt ),
+			'model'           => $model,
+			'n'               => absint( $args['num'] ),
+			'quality'         => sanitize_text_field( $args['quality'] ),
+			'response_format' => sanitize_text_field( $args['format'] ),
+			'size'            => sanitize_text_field( $args['size'] ),
+			'style'           => sanitize_text_field( $args['style'] ),
+		];
+
+		if ( 'gpt-image-1' === $model ) {
+			// The gpt-image-1 model doesn't support response_format or style.
+			unset( $body['response_format'] );
+			unset( $body['style'] );
+		} elseif ( 'dall-e-3' === $model ) {
+			// DALL·E 3 doesn't support multiple images per request.
+			$body['n'] = 1;
+		}
+
 		/**
-		 * Filter the request body before sending to DALL·E.
+		 * Filter the request body before sending to OpenAI.
 		 *
 		 * @since 2.0.0
 		 * @hook classifai_dalle_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to DALL·E.
+		 * @param {array} $body Request body that will be sent to OpenAI.
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters(
-			'classifai_dalle_request_body',
-			[
-				'prompt'          => sanitize_text_field( $prompt ),
-				'model'           => 'dall-e-3',
-				'n'               => 1,
-				'quality'         => sanitize_text_field( $args['quality'] ),
-				'response_format' => sanitize_text_field( $args['format'] ),
-				'size'            => sanitize_text_field( $args['size'] ),
-				'style'           => sanitize_text_field( $args['style'] ),
-			]
-		);
+		$body = apply_filters( 'classifai_dalle_request_body', $body );
 
 		$responses = [];
 
 		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
-		for ( $i = 0; $i < $args['num']; $i++ ) {
+		if ( 'dall-e-3' === $model ) {
+			for ( $i = 0; $i < $args['num']; $i++ ) {
+				$responses[] = $request->post(
+					$this->get_api_url(),
+					[
+						'body' => wp_json_encode( $body ),
+					]
+				);
+			}
+		} else {
 			$responses[] = $request->post(
-				$this->dalle_url,
+				$this->get_api_url(),
 				[
 					'body' => wp_json_encode( $body ),
 				]
 			);
 		}
-
-		set_transient( 'classifai_openai_dalle_latest_response', $responses[ array_key_last( $responses ) ], DAY_IN_SECONDS * 30 );
 
 		$cleaned_responses = [];
 
@@ -378,6 +409,8 @@ class DallE extends Provider {
 						}
 					}
 				}
+			} elseif ( is_wp_error( $response ) ) {
+				return $response;
 			}
 		}
 
@@ -398,7 +431,6 @@ class DallE extends Provider {
 			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'] ?? 1;
 			$debug_info[ __( 'Quality', 'classifai' ) ]          = $provider_settings['quality'] ?? 'standard';
 			$debug_info[ __( 'Size', 'classifai' ) ]             = $provider_settings['image_size'] ?? '1024x1024';
-			$debug_info[ __( 'Style', 'classifai' ) ]            = $provider_settings['style'] ?? 'vivid';
 			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) );
 		}
 
@@ -430,31 +462,21 @@ class DallE extends Provider {
 			],
 			'quality' => [
 				'type'              => 'string',
-				'enum'              => [
-					'standard',
-					'hd',
-				],
+				'enum'              => array_keys( $this->get_image_quality_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Quality of generated image', 'classifai' ),
 			],
 			'size'    => [
 				'type'              => 'string',
-				'enum'              => [
-					'1024x1024',
-					'1792x1024',
-					'1024x1792',
-				],
+				'enum'              => array_keys( $this->get_image_size_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
 			],
 			'style'   => [
 				'type'              => 'string',
-				'enum'              => [
-					'vivid',
-					'natural',
-				],
+				'enum'              => array_keys( $this->get_image_style_options() ),
 				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Style of generated image', 'classifai' ),

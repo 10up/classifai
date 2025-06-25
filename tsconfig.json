@@ -49,6 +49,7 @@
 		"**/*.test.ts",
 		"**/*.test.js",
 		"**/*.spec.ts",
-		"**/*.spec.js"
+		"**/*.spec.js",
+		"**/*.js"
 	]
 }

@@ -1,8 +1,17 @@
 /**
  * WordPress dependencies
  */
+import apiFetch from '@wordpress/api-fetch';
 import { Fill, Notice } from '@wordpress/components';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { store as noticesStore } from '@wordpress/notices';
+
+/**
+ * Internal dependencies
+ */
+import { STORE_NAME } from '../../data/store';
 
 /**
  * Component for Notice about the deprecation of the Personalizer provider.
@@ -27,18 +36,9 @@ const PersonalizerDeprecationNotice = () => (
 			</a>
 			{ ', ' }
 			{ __(
-				'new Personalizer resources can no longer be created in Azure. This is currently the only provider available for the Recommended Content feature and as such, this feature will not work unless you had previously created a Personalizer resource. The Azure AI Personalizer provider is deprecated and will be removed in a future release. We hope to replace this provider with another one in a coming release to continue to support this feature',
+				'new Personalizer resources can no longer be created in Azure. This means you will not be able to use that as a Provider for the Recommended Content Feature unless you had previously created a Personalizer resource. The Azure AI Personalizer Provider is deprecated and will be removed in a future release.',
 				'classifai'
 			) }
-			{ __( '(see', 'classifai' ) }{ ' ' }
-			<a
-				href="https://github.com/10up/classifai/issues/392"
-				target="_blank"
-				rel="noreferrer"
-			>
-				{ __( 'issue#392', 'classifai' ) }
-			</a>
-			{ ').' }
 		</p>
 	</Notice>
 );
@@ -51,9 +51,69 @@ const PersonalizerDeprecationNotice = () => (
  * @return {React.ReactElement} The RecommendedContentSettings component.
  */
 export const RecommendedContentSettings = () => {
+	const featureSettings = useSelect( ( select ) =>
+		select( STORE_NAME ).getFeatureSettings()
+	);
+	const [ embedInProgress, setEmbedInProgress ] = useState( false );
+	const isEmbeddingInProgress = useRef( false );
+	const isSaving = useSelect( ( select ) =>
+		select( STORE_NAME ).getIsSaving()
+	);
+	const { createSuccessNotice } = useDispatch( noticesStore );
+
+	// Check if embeddings are in progress
+	useEffect( () => {
+		if ( ! isSaving ) {
+			const getEmbeddingsInProgress = async () => {
+				try {
+					const res = await apiFetch( {
+						path: '/classifai/v1/embeddings_in_progress/recommended_content',
+					} );
+
+					if ( res?.classifAIEmbedInProgress ) {
+						setEmbedInProgress( true );
+						isEmbeddingInProgress.current = true;
+					} else {
+						setEmbedInProgress( false );
+						clearInterval( intervalId );
+
+						if ( isEmbeddingInProgress.current ) {
+							createSuccessNotice(
+								__(
+									'Generation of embeddings is completed.',
+									'classifai'
+								),
+								{
+									id: 'success-feature_recommended_content',
+								}
+							);
+						}
+
+						isEmbeddingInProgress.current = false;
+					}
+				} catch ( error ) {}
+			};
+
+			const intervalId = setInterval( getEmbeddingsInProgress, 10000 );
+			getEmbeddingsInProgress();
+
+			return () => clearInterval( intervalId );
+		}
+	}, [ isSaving, createSuccessNotice ] );
+
 	return (
 		<Fill name="ClassifAIBeforeFeatureSettingsPanel">
-			<PersonalizerDeprecationNotice />
+			{ 'ms_azure_personalizer' === featureSettings.provider && (
+				<PersonalizerDeprecationNotice />
+			) }
+			{ embedInProgress && (
+				<Notice status="info" isDismissible={ false }>
+					{ __(
+						'Generation of embeddings is in progress.',
+						'classifai'
+					) }
+				</Notice>
+			) }
 		</Fill>
 	);
 };
