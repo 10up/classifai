@@ -154,14 +154,29 @@ class Language extends Provider {
 		$endpoint = trailingslashit( $url ) . 'language/:analyze-text';
 		$endpoint = add_query_arg( 'api-version', static::API_VERSION, $endpoint );
 
-		$request = safe_wp_remote_get(
+		$body = [
+			'kind'          => 'LanguageDetection',
+			'parameters'    => [
+				'modelVersion' => 'latest',
+			],
+			'analysisInput' => [
+				'documents' => [
+					[
+						'id'   => '1',
+						'text' => 'Hello world',
+					],
+				],
+			],
+		];
+
+		$request = wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
 					'Ocp-Apim-Subscription-Key' => $api_key,
 					'Content-Type'              => 'application/json',
 				],
-				'body'    => '{"documents": [{"id": "1","text": "Hello world"}]}',
+				'body'    => wp_json_encode( $body ),
 			]
 		);
 
