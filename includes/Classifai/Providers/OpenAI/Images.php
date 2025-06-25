@@ -87,13 +87,13 @@ class Images extends Provider {
 		 * dall-e-3.
 		 *
 		 * @since 3.4.0
-		 * @hook classifai_openai_dalle_embeddings_model
+		 * @hook classifai_openai_dalle_model
 		 *
 		 * @param {string} $model The default model to use.
 		 *
 		 * @return {string} The model to use.
 		 */
-		return apply_filters( 'classifai_openai_dalle_embeddings_model', $this->model );
+		return apply_filters( 'classifai_openai_dalle_model', $this->model );
 	}
 
 	/**
