@@ -913,6 +913,12 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
+		// Ensure we have content before making a request.
+		$content = $this->get_content( $post_id, 0, false, $args['content'] );
+		if ( empty( $content ) ) {
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then refresh results from the block settings.', 'classifai' ) );
+		}
+
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
@@ -957,7 +963,7 @@ class ChatGPT extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+						'content' => '"""' . $content . '"""',
 					],
 				],
 				'response_format' => [
