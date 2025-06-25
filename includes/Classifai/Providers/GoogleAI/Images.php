@@ -56,7 +56,7 @@ class Images extends Provider {
 	 * This only fires if can_register returns true.
 	 */
 	public function register() {
-		// add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
+		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 	}
 
 	/**
@@ -129,11 +129,11 @@ class Images extends Provider {
 	 */
 	public static function get_image_aspect_ratio_options(): array {
 		$options = [
-			'1:1'  => __( '1:1', 'classifai' ),
-			'3:4'  => __( '3:4', 'classifai' ),
-			'4:3'  => __( '4:3', 'classifai' ),
-			'9:16' => __( '9:16', 'classifai' ),
-			'16:9' => __( '16:9', 'classifai' ),
+			'1:1'  => __( '1:1 (square)', 'classifai' ),
+			'3:4'  => __( '3:4 (portrait)', 'classifai' ),
+			'4:3'  => __( '4:3 (landscape)', 'classifai' ),
+			'9:16' => __( '9:16 (portrait)', 'classifai' ),
+			'16:9' => __( '16:9 (landscape)', 'classifai' ),
 		];
 
 		/**

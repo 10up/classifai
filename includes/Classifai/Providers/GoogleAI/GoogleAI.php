@@ -11,6 +11,13 @@ use WP_Error;
 trait GoogleAI {
 
 	/**
+	 * OpenAI model URL
+	 *
+	 * @var string
+	 */
+	protected $model_url = 'https://generativelanguage.googleapis.com/v1beta/models';
+
+	/**
 	 * Sanitize the API key, showing an error message if needed.
 	 *
 	 * @param array $new_settings Incoming settings, if any.
@@ -51,12 +58,12 @@ trait GoogleAI {
 	protected function authenticate_credentials( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini API) key.', 'classifai' ) );
+			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini) key.', 'classifai' ) );
 		}
 
 		// Make request to ensure credentials work.
 		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->googleai_url . '/models' );
+		$response = $request->get( $this->model_url );
 
 		return ! is_wp_error( $response ) ? true : $response;
 	}
