@@ -245,30 +245,24 @@ class Images extends Provider {
 			[
 				'num'          => $settings['number_of_images'] ?? 1,
 				'aspect_ratio' => $settings['aspect_ratio'] ?? '1:1',
-				'format'       => 'b64_json',
 			]
 		);
 
-		// Force proper image size for those that had been using DALL·E 2 or 3 and haven't updated settings.
-		if ( ! in_array( $args['size'], [ '1024x1024', '1536x1024', '1024x1536' ], true ) ) {
-			$args['size'] = '1024x1024';
-		}
-
 		if ( ! $image_generation->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		/**
-		 * Filter the prompt we will send to OpenAI.
+		 * Filter the prompt we will send to Google AI.
 		 *
-		 * @since 2.0.0
-		 * @hook classifai_dalle_prompt
+		 * @since x.x.x
+		 * @hook classifai_googleai_images_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to OpenAI.
+		 * @param {string} $prompt Prompt we are sending to Google AI.
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+		$prompt = apply_filters( 'classifai_googleai_images_prompt', $prompt );
 
 		$max_prompt_chars = $this->get_max_prompt_chars();
 
@@ -280,73 +274,50 @@ class Images extends Provider {
 
 		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
 
-		$model = $this->get_model();
-		$body  = [
-			'prompt'          => sanitize_text_field( $prompt ),
-			'model'           => $model,
-			'n'               => absint( $args['num'] ),
-			'response_format' => sanitize_text_field( $args['format'] ),
-			'size'            => sanitize_text_field( $args['size'] ),
-		];
-
-		if ( 'dall-e-3' === $model ) {
-			// DALL·E 3 doesn't support multiple images per request.
-			$body['n'] = 1;
-		}
-
 		/**
-		 * Filter the request body before sending to OpenAI.
+		 * Filter the request body before sending to Google AI.
 		 *
-		 * @since 2.0.0
-		 * @hook classifai_dalle_request_body
+		 * @since x.x.x
+		 * @hook classifai_googleai_images_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {array} $body Request body that will be sent to Google AI.
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters( 'classifai_dalle_request_body', $body );
-
-		$responses = [];
-
-		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
-		if ( 'dall-e-3' === $model ) {
-			for ( $i = 0; $i < $args['num']; $i++ ) {
-				$responses[] = $request->post(
-					$this->get_api_url(),
+		$body = apply_filters(
+			'classifai_googleai_images_request_body',
+			[
+				'instances'  => [
 					[
-						'body' => wp_json_encode( $body ),
-					]
-				);
-			}
-		} else {
-			$responses[] = $request->post(
-				$this->get_api_url(),
-				[
-					'body' => wp_json_encode( $body ),
-				]
-			);
-		}
+						'prompt' => sanitize_text_field( $prompt ),
+					],
+				],
+				'parameters' => [
+					'sampleCount' => absint( $args['num'] ),
+					'aspectRatio' => sanitize_text_field( $args['aspect_ratio'] ),
+				],
+			],
+		);
 
-		$cleaned_responses = [];
+		// Make our API request.
+		$response = $request->post(
+			trailingslashit( $this->get_api_url() ) . 'models/' . $this->get_model() . ':predict',
+			[
+				'body' => wp_json_encode( $body ),
+			]
+		);
 
-		foreach ( $responses as $response ) {
-			// Extract out the image response, if it exists.
-			if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
-				foreach ( $response['data'] as $data ) {
-					if ( ! empty( $data[ $args['format'] ] ) ) {
-						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
-						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
-						}
-					}
+		// Extract out the image response, if it exists.
+		if ( ! is_wp_error( $response ) && ! empty( $response['candidates'] ) ) {
+			foreach ( $response['candidates'] as $candidate ) {
+				if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
+					$parts    = $candidate['content']['parts'];
+					$response = [ 'url' => sanitize_text_field( trim( $parts[0]['text'], ' "\'' ) ) ];
 				}
-			} elseif ( is_wp_error( $response ) ) {
-				return $response;
 			}
 		}
 
-		return $cleaned_responses;
+		return $response;
 	}
 
 	/**
