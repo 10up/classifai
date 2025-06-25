@@ -19,6 +19,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { postList, paragraph } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -166,7 +167,9 @@ const BlockEdit = ( props ) => {
 						</p>
 						<ul style={ { lineHeight: '1.5', marginTop: 0 } }>
 							{ errors.map( ( error, index ) => (
-								<li key={ index }>{ error }</li>
+								<li key={ index }>
+									{ decodeEntities( error ) }
+								</li>
 							) ) }
 						</ul>
 						<Button

@@ -932,7 +932,7 @@ class ChatGPT extends Provider {
 		$run = apply_filters( 'classifai_chatgpt_key_takeaways_auto_run', true, $post_id );
 
 		if ( 'auto' === $args['run'] && ! (bool) $run ) {
-			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please run the generation from the block settings.', 'classifai' ) );
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Refresh results" button when ready.', 'classifai' ) );
 		}
 
 		// Ensure we have content before making a request.
