@@ -45,62 +45,6 @@ class Language extends Provider {
 	}
 
 	/**
-	 * This method will be called by the feature to render the fields
-	 * required by the provider, such as API key, endpoint URL, etc.
-	 *
-	 * This should also register settings that are required for the feature
-	 * to work.
-	 */
-	public function render_provider_fields() {
-		$settings = $this->feature_instance->get_settings( static::ID );
-
-		$this->add_api_key_field();
-
-		add_settings_field(
-			static::ID . '_endpoint_url',
-			esc_html__( 'Endpoint URL', 'classifai' ),
-			[ $this->feature_instance, 'render_input' ],
-			$this->feature_instance->get_option_name(),
-			$this->feature_instance->get_option_name() . '_section',
-			[
-				'option_index'  => static::ID,
-				'label_for'     => 'endpoint_url',
-				'input_type'    => 'text',
-				'default_value' => $settings['endpoint_url'],
-				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
-				'description'   => sprintf(
-					wp_kses(
-						// translators: 1 - link to create a Language resource.
-						__( 'Azure Cognitive Service Language Endpoint, <a href="%1$s" target="_blank">create a Language resource</a> in the Azure portal to get your key and endpoint.', 'classifai' ),
-						array(
-							'a' => array(
-								'href'   => array(),
-								'target' => array(),
-							),
-						)
-					),
-					esc_url( 'https://portal.azure.com/#home' )
-				),
-			]
-		);
-	}
-
-	/**
-	 * Returns the default settings for this provider.
-	 *
-	 * @return array
-	 */
-	public function get_default_provider_settings(): array {
-		$common_settings = [
-			'api_key'       => '',
-			'endpoint_url'  => '',
-			'authenticated' => false,
-		];
-
-		return $common_settings;
-	}
-
-	/**
 	 * Sanitize the settings for this provider.
 	 *
 	 * Can also be useful to verify the Provider API connection
