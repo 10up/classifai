@@ -588,8 +588,7 @@ class ChatGPT extends Provider {
 
 		$feature   = new ExcerptGeneration();
 		$settings  = $feature->get_settings();
-		
-		$args = wp_parse_args(
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
