@@ -17,3 +17,31 @@ Generate just an image caption:
 Generate just an image description:
 
 > You are an assistant that generates descriptions of images that are used on a website. You will be provided with an image and will describe the main item you see in the image, giving details but staying concise. There is no need to say "the image contains" or similar, just describe what is actually in the image. Ensure it is descriptive and accurate but not overly verbose.
+
+## Title Generation
+
+### Sentence Case Formatting (Default Behavior)
+
+ClassifAI's Title Generation feature now generates titles in **sentence case** by default (where only the first word and proper nouns are capitalized). This modern formatting approach works well for most editorial workflows and follows contemporary web writing standards.
+
+The default prompt is:
+
+> Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters and format it in sentence case.
+
+#### Title Case Formatting (Traditional Capitalization)
+
+To generate titles in traditional title case where most major words are capitalized:
+
+> Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters. Use title case formatting where major words are capitalized.
+
+#### No Specific Formatting (Let AI Decide)
+
+To let the AI choose the most appropriate formatting:
+
+> Write an SEO-friendly title for the following content that will encourage readers to clickthrough, staying within a range of 40 to 60 characters.
+
+### Understanding Sentence Case
+
+- **Capitalize**: First word, proper nouns (Apple, Google, WordPress), places (New York), people's names, acronyms (SEO, API, HTML)
+- **Lowercase**: Articles (a, an, the), conjunctions (and, or, but), prepositions (in, on, at, for, with) unless they are the first word
+- **Example**: "How to optimize your WordPress site for better SEO"
