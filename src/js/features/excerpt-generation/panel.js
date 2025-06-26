@@ -60,7 +60,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		const payload = {
 			id: postId,
 			content: postContent,
-			title: postTitle
+			title: postTitle,
 		};
 
 		// Only include author in payload if we have it, otherwise let server fetch it.
