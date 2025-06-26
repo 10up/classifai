@@ -191,20 +191,20 @@ class ExcerptGeneration extends Feature {
 
 		if ( strpos( $route, '/classifai/v1/generate-excerpt' ) === 0 ) {
 			$post_id = $request->get_param( 'id' );
-			
+
 			// Get the author name - prefer from request payload, fallback to database.
 			$author_name = $request->get_param( 'author' );
-			
+
 			if ( empty( $author_name ) && $post_id ) {
 				$post = get_post( $post_id );
 				if ( $post ) {
 					$author_name = get_the_author_meta( 'display_name', $post->post_author );
 				}
 			}
-			
+
 			if ( $post_id ) {
 				$post = get_post( $post_id );
-				
+
 				/**
 				 * Filter the author name used in excerpt generation.
 				 *

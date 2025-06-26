@@ -589,35 +589,12 @@ class ChatGPT extends Provider {
 		$feature   = new ExcerptGeneration();
 		$settings  = $feature->get_settings();
 		
-		// Get author information if not provided
-		$author_name = '';
-		if ( ! isset( $args['author'] ) || empty( $args['author'] ) ) {
-			$post = get_post( $post_id );
-			if ( $post ) {
-				$author_name = get_the_author_meta( 'display_name', $post->post_author );
-				
-				/**
-				 * Filter the author name used in excerpt generation.
-				 *
-				 * @since 3.x.x
-				 * @hook classifai_excerpt_generation_author_name
-				 *
-				 * @param {string} $author_name The author's display name.
-				 * @param {int}    $post_id     The post ID.
-				 * @param {WP_Post} $post       The post object.
-				 *
-				 * @return {string} The author name to use in the prompt.
-				 */
-				$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id, $post );
-			}
-		}
-		
 		$args = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
-				'author'  => $author_name,
+				'author'  => '',
 			]
 		);
 		$post_type = get_post_type( $post_id );
