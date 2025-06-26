@@ -307,17 +307,20 @@ class Images extends Provider {
 			]
 		);
 
-		// Extract out the image response, if it exists.
-		if ( ! is_wp_error( $response ) && ! empty( $response['candidates'] ) ) {
-			foreach ( $response['candidates'] as $candidate ) {
-				if ( isset( $candidate['content'], $candidate['content']['parts'] ) ) {
-					$parts    = $candidate['content']['parts'];
-					$response = [ 'url' => sanitize_text_field( trim( $parts[0]['text'], ' "\'' ) ) ];
+		$cleaned_responses = [];
+
+		// Extract out the image responses, if they exist.
+		if ( ! is_wp_error( $response ) && ! empty( $response['predictions'] ) ) {
+			foreach ( $response['predictions'] as $candidate ) {
+				if ( isset( $candidate['bytesBase64Encoded'] ) ) {
+					$cleaned_responses[] = [ 'url' => sanitize_text_field( trim( $candidate['bytesBase64Encoded'] ) ) ];
 				}
 			}
+		} elseif ( is_wp_error( $response ) ) {
+			return $response;
 		}
 
-		return $response;
+		return $cleaned_responses;
 	}
 
 	/**
