@@ -48,10 +48,17 @@ class Images extends Provider {
 
 	/**
 	 * Register what we need for the provider.
-	 *
-	 * This only fires if can_register returns true.
 	 */
 	public function register() {
+		$feature = new ImageGeneration();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
 		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 	}
 
