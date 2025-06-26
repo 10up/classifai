@@ -23,19 +23,33 @@ const Images = Backbone.Collection.extend( {
 	 * @param {string} aspectRatio Aspect ratio of the image.
 	 */
 	makeRequest: function ( prompt, quality, size, style, aspectRatio ) {
+		const data = {
+			format: 'b64_json',
+			prompt: prompt,
+		};
+
+		if ( quality ) {
+			data.quality = quality;
+		}
+
+		if ( size ) {
+			data.size = size;
+		}
+
+		if ( style ) {
+			data.style = style;
+		}
+
+		if ( aspectRatio ) {
+			data.aspect_ratio = aspectRatio;
+		}
+
 		this.fetch( {
 			type: 'get',
 			beforeSend: function ( xhr ) {
 				xhr.setRequestHeader( 'X-WP-Nonce', wpApiSettings.nonce );
 			},
-			data: {
-				prompt: prompt,
-				quality: quality,
-				size: size,
-				style: style,
-				aspect_ratio: aspectRatio,
-				format: 'b64_json',
-			},
+			data: data,
 			reset: true,
 			error: function ( collection, response ) {
 				new ErrorMessage( { error: response.responseJSON.message } );
