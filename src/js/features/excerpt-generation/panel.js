@@ -55,14 +55,14 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		}
 
 		setIsLoading( true );
-		
+
 		// Prepare the payload.
-		const payload = { 
-			id: postId, 
-			content: postContent, 
+		const payload = {
+			id: postId,
+			content: postContent,
 			title: postTitle
 		};
-		
+
 		// Only include author in payload if we have it, otherwise let server fetch it.
 		if ( authorName ) {
 			payload.author = authorName;
