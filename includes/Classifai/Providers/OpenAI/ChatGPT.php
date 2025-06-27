@@ -1036,7 +1036,7 @@ class ChatGPT extends Provider {
 				// If the request was refused, return an error.
 				if ( isset( $choice['message'], $choice['message']['refusal'] ) ) {
 					// translators: %s: error message.
-					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), esc_html( $choice['message']['refusal'] ) ) );
+					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), wp_kses_post( $choice['message']['refusal'] ) ) );
 				}
 			}
 		}
