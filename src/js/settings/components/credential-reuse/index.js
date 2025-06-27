@@ -160,11 +160,13 @@ export const CredentialReuseModal = ( {
 						{ providers.map( ( providerId ) => {
 							const provider = reusableCredentials[ providerId ];
 							return (
-								<label aria-label={ sprintf(
-									/* translators: %s: Provider name */
-									__( 'Select %s provider', 'classifai' ),
-									reusableCredentials[ providerId ].provider_display_name || providerId
-								) }
+								<label // eslint-disable-line jsx-a11y/label-has-associated-control
+									aria-label={ sprintf(
+										/* translators: %s: Provider name */
+										__( 'Select %s provider', 'classifai' ),
+										provider.provider_display_name ||
+											providerId
+									) }
 									key={ providerId }
 									className="classifai-provider-option"
 								>
