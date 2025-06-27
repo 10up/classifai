@@ -340,7 +340,7 @@ class Settings {
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Target feature ID to copy credentials to.', 'classifai' ),
 						),
-								'provider_id' => array(
+						'provider_id'       => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
