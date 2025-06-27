@@ -32,7 +32,7 @@ class ExcerptGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words written by {{AUTHOR}}. Ensure this summary pairs well with the following text: {{TITLE}}.';
+	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. The original message was written by {{AUTHOR}}. Ensure this summary pairs well with the following text: {{TITLE}}.';
 
 	/**
 	 * Prompt for generating excerpts for WooCommerce Products.
@@ -202,23 +202,20 @@ class ExcerptGeneration extends Feature {
 				}
 			}
 
-			if ( $post_id ) {
-				$post = get_post( $post_id );
+			$post = get_post( $post_id );
 
-				/**
-				 * Filter the author name used in excerpt generation.
-				 *
-				 * @since 3.x.x
-				 * @hook classifai_excerpt_generation_author_name
-				 *
-				 * @param {string} $author_name The author's display name.
-				 * @param {int}    $post_id     The post ID.
-				 * @param {WP_Post} $post       The post object.
-				 *
-				 * @return {string} The author name to use in the prompt.
-				 */
-				$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id, $post );
-			}
+			/**
+			 * Filter the author name used in excerpt generation.
+			 *
+			 * @since 3.x.x
+			 * @hook classifai_excerpt_generation_author_name
+			 *
+			 * @param {string} $author_name The author's display name.
+			 * @param {int}    $post_id     The post ID.
+			 *
+			 * @return {string} The author name to use in the prompt.
+			 */
+			$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
 
 			return rest_ensure_response(
 				$this->run(
