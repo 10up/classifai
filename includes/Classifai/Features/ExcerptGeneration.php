@@ -32,7 +32,7 @@ class ExcerptGeneration extends Feature {
 	 *
 	 * @var string
 	 */
-	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. Ensure this summary pairs well with the following text: {{TITLE}}.';
+	public $prompt = 'Summarize the following message using a maximum of {{WORDS}} words. The original message was written by {{AUTHOR}}. Ensure this summary pairs well with the following text: {{TITLE}}.';
 
 	/**
 	 * Prompt for generating excerpts for WooCommerce Products.
@@ -132,6 +132,12 @@ class ExcerptGeneration extends Feature {
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Title of content we want a summary for.', 'classifai' ),
 						],
+						'author'  => [
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+							'description'       => esc_html__( 'Author name for context in excerpt generation.', 'classifai' ),
+						],
 					],
 					'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
 				],
@@ -184,13 +190,39 @@ class ExcerptGeneration extends Feature {
 		$route = $request->get_route();
 
 		if ( strpos( $route, '/classifai/v1/generate-excerpt' ) === 0 ) {
+			$post_id = $request->get_param( 'id' );
+
+			// Get the author name - prefer from request payload, fallback to database.
+			$author_name = $request->get_param( 'author' );
+
+			if ( empty( $author_name ) && $post_id ) {
+				$post = get_post( $post_id );
+				if ( $post ) {
+					$author_name = get_the_author_meta( 'display_name', $post->post_author );
+				}
+			}
+
+			/**
+			 * Filter the author name used in excerpt generation.
+			 *
+			 * @since 3.x.x
+			 * @hook classifai_excerpt_generation_author_name
+			 *
+			 * @param {string} $author_name The author's display name.
+			 * @param {int}    $post_id     The post ID.
+			 *
+			 * @return {string} The author name to use in the prompt.
+			 */
+			$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
+
 			return rest_ensure_response(
 				$this->run(
-					$request->get_param( 'id' ),
+					$post_id,
 					'excerpt',
 					[
 						'content' => $request->get_param( 'content' ),
 						'title'   => $request->get_param( 'title' ),
+						'author'  => $author_name,
 					]
 				)
 			);
@@ -300,7 +332,7 @@ class ExcerptGeneration extends Feature {
 				'label_for'     => 'generate_excerpt_prompt',
 				'placeholder'   => $this->prompt,
 				'default_value' => $settings['generate_excerpt_prompt'],
-				'description'   => esc_html__( "Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.", 'classifai' ),
+				'description'   => esc_html__( "Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title. {{AUTHOR}} will be replaced with the post author's display name.", 'classifai' ),
 			]
 		);
 
