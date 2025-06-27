@@ -179,6 +179,7 @@ class Ollama extends Provider {
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
+				'author'  => '',
 			]
 		);
 		$post_type = get_post_type( $post_id );
@@ -199,8 +200,8 @@ class Ollama extends Provider {
 		}
 
 		// Replace our variables in the prompt.
-		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
