@@ -49,7 +49,7 @@ const BlockEdit = ( props ) => {
 			) {
 				setErrors( [
 					__(
-						'No content found. Please add content then click the "Refresh results" button.',
+						'No content found. Please add content then click the "Generate results" button.',
 						'classifai'
 					),
 				] );
@@ -118,6 +118,11 @@ const BlockEdit = ( props ) => {
 		} );
 	};
 
+	const buttonText =
+		takeaways.length > 0
+			? __( 'Refresh results', 'classifai' )
+			: __( 'Generate results', 'classifai' );
+
 	return (
 		<>
 			<BlockControls>
@@ -126,8 +131,8 @@ const BlockEdit = ( props ) => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'classifai' ) }>
 					<Button
-						label={ __( 'Re-generate key takeaways', 'classifai' ) }
-						text={ __( 'Refresh results', 'classifai' ) }
+						label={ __( 'Generate key takeaways', 'classifai' ) }
+						text={ buttonText }
 						variant={ 'secondary' }
 						onClick={ () => setRun( true ) }
 						isBusy={ isLoading }
@@ -187,14 +192,14 @@ const BlockEdit = ( props ) => {
 						) }
 						<Button
 							label={ __(
-								'Re-generate key takeaways',
+								'Generate key takeaways',
 								'classifai'
 							) }
-							text={ __( 'Refresh results', 'classifai' ) }
+							text={ buttonText }
 							variant={ 'secondary' }
 							onClick={ () => setRun( true ) }
 							isBusy={ isLoading }
-							style={ { width: '115px' } }
+							style={ { width: '125px' } }
 						/>
 					</Placeholder>
 				</div>

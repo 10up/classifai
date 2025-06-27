@@ -511,13 +511,13 @@ class Ollama extends Provider {
 		$run = apply_filters( 'classifai_ollama_key_takeaways_auto_run', true, $post_id );
 
 		if ( 'auto' === $args['run'] && ! (bool) $run ) {
-			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Refresh results" button when ready.', 'classifai' ) );
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Generate results" button when ready.', 'classifai' ) );
 		}
 
 		// Ensure we have content before making a request.
 		$content = $this->get_content( $post_id, false, $args['content'] );
 		if ( empty( $content ) ) {
-			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Refresh results" button.', 'classifai' ) );
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
