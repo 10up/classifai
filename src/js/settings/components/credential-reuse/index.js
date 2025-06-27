@@ -137,15 +137,17 @@ export const CredentialReuseModal = ( {
 			className="classifai-credential-reuse-modal"
 			size="medium"
 		>
-			{ isLoadingCredentials ? (
+			{ isLoadingCredentials && (
 				<div className="classifai-loading">
 					<Icon icon="update" />
 					{ __( 'Checking for existing credentials…', 'classifai' ) }
 				</div>
-			) : providers.length > 0 ? (
+			) }
+			{ providers.length > 0 && (
 				<>
 					<Notice status="info" isDismissible={ false }>
 						{ sprintf(
+							/* translators: %s: Feature label */
 							__(
 								'We found existing provider credentials that can be used with %s. Would you like to reuse them?',
 								'classifai'
@@ -158,7 +160,11 @@ export const CredentialReuseModal = ( {
 						{ providers.map( ( providerId ) => {
 							const provider = reusableCredentials[ providerId ];
 							return (
-								<label
+								<label aria-label={ sprintf(
+									/* translators: %s: Provider name */
+									__( 'Select %s provider', 'classifai' ),
+									reusableCredentials[ providerId ].provider_display_name || providerId
+								) }
 									key={ providerId }
 									className="classifai-provider-option"
 								>
@@ -180,6 +186,7 @@ export const CredentialReuseModal = ( {
 										</strong>
 										<span className="classifai-feature-label">
 											{ sprintf(
+												/* translators: %s: Feature label */
 												__(
 													'Currently used by %s',
 													'classifai'
@@ -221,10 +228,12 @@ export const CredentialReuseModal = ( {
 						</FlexItem>
 					</Flex>
 				</>
-			) : (
+			) }
+			{ providers.length === 0 && (
 				<>
 					<Notice status="info" isDismissible={ false }>
 						{ sprintf(
+							/* translators: %s: Feature label */
 							__(
 								'No compatible existing credentials were found for %s.',
 								'classifai'
