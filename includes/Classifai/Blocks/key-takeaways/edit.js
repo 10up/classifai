@@ -156,22 +156,35 @@ const BlockEdit = ( props ) => {
 						label={ __( 'Key Takeaways', 'classifai' ) }
 						isColumnLayout
 					>
-						<p
-							style={ {
-								color: '#cc1818',
-								fontWeight: 'bold',
-								marginBottom: 0,
-							} }
-						>
-							{ __( 'Error', 'classifai' ) }
-						</p>
-						<ul style={ { lineHeight: '1.5', marginTop: 0 } }>
-							{ errors.map( ( error, index ) => (
-								<li key={ index }>
-									{ decodeEntities( error ) }
-								</li>
-							) ) }
-						</ul>
+						{ ! errors[ 0 ].toLowerCase().includes( 'disabled' ) ? (
+							<>
+								<p
+									style={ {
+										color: '#cc1818',
+										fontWeight: 'bold',
+										marginBottom: 0,
+									} }
+								>
+									{ __( 'Errors', 'classifai' ) }
+								</p>
+								<ul
+									style={ {
+										lineHeight: '1.5',
+										marginTop: 0,
+									} }
+								>
+									{ errors.map( ( error, index ) => (
+										<li key={ index }>
+											{ decodeEntities( error ) }
+										</li>
+									) ) }
+								</ul>
+							</>
+						) : (
+							errors.map( ( error, index ) => (
+								<p key={ index }>{ decodeEntities( error ) }</p>
+							) )
+						) }
 						<Button
 							label={ __(
 								'Re-generate key takeaways',
