@@ -202,8 +202,6 @@ class ExcerptGeneration extends Feature {
 				}
 			}
 
-			$post = get_post( $post_id );
-
 			/**
 			 * Filter the author name used in excerpt generation.
 			 *
