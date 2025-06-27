@@ -28,6 +28,7 @@ import { store as noticesStore } from '@wordpress/notices';
  */
 import { STORE_NAME } from '../../data/store';
 import { isProviderConfigurationNeeded } from '../../utils/utils';
+import { CredentialReuseModal } from '../credential-reuse';
 const { features } = window.classifAISettings;
 
 /**
@@ -56,6 +57,8 @@ const ConfigureProviderNotice = () => (
  */
 export const ServiceSettings = () => {
 	const [ enabled, setEnabled ] = useState( false );
+	const [ showCredentialModal, setShowCredentialModal ] = useState( false );
+	const [ currentFeature, setCurrentFeature ] = useState( null );
 	const { setCurrentService, setIsSaving, setSettings } =
 		useDispatch( STORE_NAME );
 	const {
@@ -86,6 +89,79 @@ export const ServiceSettings = () => {
 	}, [ service, setCurrentService ] );
 
 	const serviceFeatures = features[ service ] || {};
+
+	/**
+	 * Check for reusable credentials in the background.
+	 *
+	 * @param {string} featureName The feature name to check for.
+	 */
+	const checkForReusableCredentials = async ( featureName ) => {
+		// Check if user has disabled the prompt
+		const dontAsk = localStorage.getItem( 'classifai_dont_ask_credential_reuse' ) === 'true';
+		
+		if ( dontAsk ) {
+			return;
+		}
+
+		try {
+			const reusableCredentials = await apiFetch( {
+				path: `/classifai/v1/credential-reuse/${ featureName }`,
+			} );
+			
+			const providers = Object.keys( reusableCredentials );
+			
+			if ( providers.length > 0 ) {
+				// Show credential reuse modal only if there are reusable credentials
+				setCurrentFeature( featureName );
+				setShowCredentialModal( true );
+			}
+		} catch ( error ) {
+			console.error( 'Failed to check for reusable credentials:', error );
+		}
+	};
+
+	/**
+	 * Handle toggle change with credential reuse check.
+	 *
+	 * @param {boolean} value Whether the feature should be enabled.
+	 * @param {string} featureName The feature name being toggled.
+	 */
+	const handleToggleChange = ( value, featureName ) => {
+		const currentStatus = getFeatureSettings( 'status', featureName );
+		
+		// Enable/disable the feature immediately
+		setEnabled( value );
+		wp.data.dispatch( STORE_NAME ).setFeatureSettings(
+			{
+				status: value ? '1' : '0',
+			},
+			featureName
+		);
+
+		// Check for reusable credentials in the background (only when enabling)
+		if ( value && currentStatus === '0' ) {
+			checkForReusableCredentials( featureName );
+		}
+	};
+
+	/**
+	 * Handle credentials being reused.
+	 *
+	 * @param {string} providerId The provider ID that was selected.
+	 */
+	const handleCredentialsReused = ( providerId ) => {
+		// Feature is already enabled, credentials have been copied by the API
+		// Trigger a settings refresh to show the updated provider in the UI
+		window.location.reload();
+	};
+
+	/**
+	 * Handle modal close.
+	 */
+	const handleModalClose = () => {
+		setShowCredentialModal( false );
+		setCurrentFeature( null );
+	};
 
 	const saveSettings = () => {
 		// Remove existing notices.
@@ -179,17 +255,7 @@ export const ServiceSettings = () => {
 											)
 										}
 										onChange={ ( value ) => {
-											setEnabled( value );
-											wp.data
-												.dispatch( STORE_NAME )
-												.setFeatureSettings(
-													{
-														status: value
-															? '1'
-															: '0',
-													},
-													feature
-												);
+											handleToggleChange( value, feature );
 										} }
 										__nextHasNoMarginBottom
 									/>
@@ -220,6 +286,14 @@ export const ServiceSettings = () => {
 					</PanelBody>
 				</Panel>
 			) ) }
+
+			<CredentialReuseModal
+				isOpen={ showCredentialModal }
+				onClose={ handleModalClose }
+				featureName={ currentFeature }
+				featureLabel={ currentFeature ? serviceFeatures[ currentFeature ]?.label : '' }
+				onCredentialsReused={ handleCredentialsReused }
+			/>
 		</div>
 	);
 };
