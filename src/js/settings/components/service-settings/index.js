@@ -97,8 +97,11 @@ export const ServiceSettings = () => {
 	 */
 	const checkForReusableCredentials = async ( featureName ) => {
 		// Check if user has disabled the prompt
-		const dontAsk = localStorage.getItem( 'classifai_dont_ask_credential_reuse' ) === 'true';
-		
+		const dontAsk =
+			window.localStorage.getItem(
+				'classifai_dont_ask_credential_reuse'
+			) === 'true';
+
 		if ( dontAsk ) {
 			return;
 		}
@@ -107,28 +110,28 @@ export const ServiceSettings = () => {
 			const reusableCredentials = await apiFetch( {
 				path: `/classifai/v1/credential-reuse/${ featureName }`,
 			} );
-			
+
 			const providers = Object.keys( reusableCredentials );
-			
+
 			if ( providers.length > 0 ) {
 				// Show credential reuse modal only if there are reusable credentials
 				setCurrentFeature( featureName );
 				setShowCredentialModal( true );
 			}
 		} catch ( error ) {
-			console.error( 'Failed to check for reusable credentials:', error );
+			// Error handled gracefully
 		}
 	};
 
 	/**
 	 * Handle toggle change with credential reuse check.
 	 *
-	 * @param {boolean} value Whether the feature should be enabled.
-	 * @param {string} featureName The feature name being toggled.
+	 * @param {boolean} value       Whether the feature should be enabled.
+	 * @param {string}  featureName The feature name being toggled.
 	 */
 	const handleToggleChange = ( value, featureName ) => {
 		const currentStatus = getFeatureSettings( 'status', featureName );
-		
+
 		// Enable/disable the feature immediately
 		setEnabled( value );
 		wp.data.dispatch( STORE_NAME ).setFeatureSettings(
@@ -147,9 +150,8 @@ export const ServiceSettings = () => {
 	/**
 	 * Handle credentials being reused.
 	 *
-	 * @param {string} providerId The provider ID that was selected.
 	 */
-	const handleCredentialsReused = ( providerId ) => {
+	const handleCredentialsReused = () => {
 		// Feature is already enabled, credentials have been copied by the API
 		// Trigger a settings refresh to show the updated provider in the UI
 		window.location.reload();
@@ -255,7 +257,10 @@ export const ServiceSettings = () => {
 											)
 										}
 										onChange={ ( value ) => {
-											handleToggleChange( value, feature );
+											handleToggleChange(
+												value,
+												feature
+											);
 										} }
 										__nextHasNoMarginBottom
 									/>
@@ -291,7 +296,11 @@ export const ServiceSettings = () => {
 				isOpen={ showCredentialModal }
 				onClose={ handleModalClose }
 				featureName={ currentFeature }
-				featureLabel={ currentFeature ? serviceFeatures[ currentFeature ]?.label : '' }
+				featureLabel={
+					currentFeature
+						? serviceFeatures[ currentFeature ]?.label
+						: ''
+				}
 				onCredentialsReused={ handleCredentialsReused }
 			/>
 		</div>

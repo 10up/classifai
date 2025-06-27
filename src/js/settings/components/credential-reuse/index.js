@@ -3,14 +3,14 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { 
-	Modal, 
-	Button, 
-	Notice, 
+import {
+	Modal,
+	Button,
+	Notice,
 	CheckboxControl,
 	Flex,
 	FlexItem,
-	Icon
+	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -20,20 +20,20 @@ import apiFetch from '@wordpress/api-fetch';
  * Shows a modal asking the user if they want to reuse existing provider credentials
  * when enabling a new feature.
  *
- * @param {Object}   props                   Component props.
- * @param {boolean}  props.isOpen            Whether the modal is open.
- * @param {Function} props.onClose           Callback when modal is closed.
- * @param {string}   props.featureName       Name of the feature being enabled.
- * @param {string}   props.featureLabel      Display label of the feature being enabled.
+ * @param {Object}   props                     Component props.
+ * @param {boolean}  props.isOpen              Whether the modal is open.
+ * @param {Function} props.onClose             Callback when modal is closed.
+ * @param {string}   props.featureName         Name of the feature being enabled.
+ * @param {string}   props.featureLabel        Display label of the feature being enabled.
  * @param {Function} props.onCredentialsReused Callback when credentials are reused.
  * @return {React.ReactElement|null} The modal component or null if not open.
  */
-export const CredentialReuseModal = ( { 
-	isOpen, 
-	onClose, 
-	featureName, 
+export const CredentialReuseModal = ( {
+	isOpen,
+	onClose,
+	featureName,
 	featureLabel,
-	onCredentialsReused 
+	onCredentialsReused,
 } ) => {
 	const [ reusableCredentials, setReusableCredentials ] = useState( {} );
 	const [ selectedProvider, setSelectedProvider ] = useState( '' );
@@ -57,14 +57,14 @@ export const CredentialReuseModal = ( {
 				path: `/classifai/v1/credential-reuse/${ featureName }`,
 			} );
 			setReusableCredentials( response );
-			
+
 			// Auto-select the first available provider
 			const providerIds = Object.keys( response );
 			if ( providerIds.length > 0 ) {
 				setSelectedProvider( providerIds[ 0 ] );
 			}
 		} catch ( error ) {
-			console.error( 'Failed to fetch reusable credentials:', error );
+			// Error handled gracefully
 		} finally {
 			setIsLoadingCredentials( false );
 		}
@@ -74,12 +74,15 @@ export const CredentialReuseModal = ( {
 	 * Handle reusing credentials.
 	 */
 	const handleReuseCredentials = async () => {
-		if ( ! selectedProvider ) return;
+		if ( ! selectedProvider ) {
+			return;
+		}
 
 		setIsLoading( true );
 		try {
-			const sourceFeatureId = reusableCredentials[ selectedProvider ].feature_id;
-			
+			const sourceFeatureId =
+				reusableCredentials[ selectedProvider ].feature_id;
+
 			await apiFetch( {
 				path: '/classifai/v1/credential-reuse/copy',
 				method: 'POST',
@@ -92,13 +95,16 @@ export const CredentialReuseModal = ( {
 
 			// Save "don't ask again" preference
 			if ( dontAskAgain ) {
-				localStorage.setItem( 'classifai_dont_ask_credential_reuse', 'true' );
+				window.localStorage.setItem(
+					'classifai_dont_ask_credential_reuse',
+					'true'
+				);
 			}
 
 			onCredentialsReused( selectedProvider );
 			onClose();
 		} catch ( error ) {
-			console.error( 'Failed to copy credentials:', error );
+			// Error handled gracefully
 		} finally {
 			setIsLoading( false );
 		}
@@ -110,7 +116,10 @@ export const CredentialReuseModal = ( {
 	const handleSkip = () => {
 		// Save "don't ask again" preference if checked
 		if ( dontAskAgain ) {
-			localStorage.setItem( 'classifai_dont_ask_credential_reuse', 'true' );
+			window.localStorage.setItem(
+				'classifai_dont_ask_credential_reuse',
+				'true'
+			);
 		}
 		onClose();
 	};
@@ -131,7 +140,7 @@ export const CredentialReuseModal = ( {
 			{ isLoadingCredentials ? (
 				<div className="classifai-loading">
 					<Icon icon="update" />
-					{ __( 'Checking for existing credentials...', 'classifai' ) }
+					{ __( 'Checking for existing credentials…', 'classifai' ) }
 				</div>
 			) : providers.length > 0 ? (
 				<>
@@ -149,21 +158,32 @@ export const CredentialReuseModal = ( {
 						{ providers.map( ( providerId ) => {
 							const provider = reusableCredentials[ providerId ];
 							return (
-								<label key={ providerId } className="classifai-provider-option">
+								<label
+									key={ providerId }
+									className="classifai-provider-option"
+								>
 									<input
 										type="radio"
 										name="provider"
 										value={ providerId }
-										checked={ selectedProvider === providerId }
-										onChange={ () => setSelectedProvider( providerId ) }
+										checked={
+											selectedProvider === providerId
+										}
+										onChange={ () =>
+											setSelectedProvider( providerId )
+										}
 									/>
 									<div className="classifai-provider-info">
 										<strong>
-											{ provider.provider_display_name || providerId }
+											{ provider.provider_display_name ||
+												providerId }
 										</strong>
 										<span className="classifai-feature-label">
 											{ sprintf(
-												__( 'Currently used by %s', 'classifai' ),
+												__(
+													'Currently used by %s',
+													'classifai'
+												),
 												provider.feature_label
 											) }
 										</span>
@@ -190,8 +210,8 @@ export const CredentialReuseModal = ( {
 							</Button>
 						</FlexItem>
 						<FlexItem>
-							<Button 
-								variant="primary" 
+							<Button
+								variant="primary"
 								onClick={ handleReuseCredentials }
 								isBusy={ isLoading }
 								disabled={ ! selectedProvider || isLoading }

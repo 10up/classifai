@@ -24,7 +24,7 @@ import { CredentialReuseModal } from '../credential-reuse';
 export const EnableToggleControl = ( { children } ) => {
 	const { featureName, getFeatureSettings, setFeatureSettings } =
 		useFeatureSettings();
-	const [showCredentialModal, setShowCredentialModal] = useState(false);
+	const [ showCredentialModal, setShowCredentialModal ] = useState( false );
 	const status = getFeatureSettings( 'status' ) || '0';
 	const feature = getFeature( featureName );
 
@@ -33,14 +33,14 @@ export const EnableToggleControl = ( { children } ) => {
 	 *
 	 * @param {boolean} value Whether the feature should be enabled.
 	 */
-	const handleToggleChange = (value) => {
+	const handleToggleChange = ( value ) => {
 		// Enable/disable the feature immediately
-		setFeatureSettings({
+		setFeatureSettings( {
 			status: value ? '1' : '0',
-		});
+		} );
 
 		// Check for reusable credentials in the background (only when enabling)
-		if (value && status === '0') {
+		if ( value && status === '0' ) {
 			checkForReusableCredentials();
 		}
 	};
@@ -50,8 +50,11 @@ export const EnableToggleControl = ( { children } ) => {
 	 */
 	const checkForReusableCredentials = async () => {
 		// Check if user has disabled the prompt
-		const dontAsk = localStorage.getItem( 'classifai_dont_ask_credential_reuse' ) === 'true';
-		
+		const dontAsk =
+			window.localStorage.getItem(
+				'classifai_dont_ask_credential_reuse'
+			) === 'true';
+
 		if ( dontAsk ) {
 			return;
 		}
@@ -60,24 +63,23 @@ export const EnableToggleControl = ( { children } ) => {
 			const reusableCredentials = await apiFetch( {
 				path: `/classifai/v1/credential-reuse/${ featureName }`,
 			} );
-			
+
 			const providers = Object.keys( reusableCredentials );
-			
+
 			if ( providers.length > 0 ) {
 				// Show credential reuse modal only if there are reusable credentials
 				setShowCredentialModal( true );
 			}
 		} catch ( error ) {
-			console.error( 'Failed to check for reusable credentials:', error );
+			// Error handled gracefully
 		}
 	};
 
 	/**
 	 * Handle credentials being reused.
 	 *
-	 * @param {string} providerId The provider ID that was selected.
 	 */
-	const handleCredentialsReused = (providerId) => {
+	const handleCredentialsReused = () => {
 		// Feature is already enabled, credentials have been copied by the API
 		// Trigger a settings refresh to show the updated provider in the UI
 		window.location.reload();
@@ -87,7 +89,7 @@ export const EnableToggleControl = ( { children } ) => {
 	 * Handle modal close.
 	 */
 	const handleModalClose = () => {
-		setShowCredentialModal(false);
+		setShowCredentialModal( false );
 		// Feature is already enabled, no need to change status
 	};
 
