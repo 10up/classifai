@@ -414,6 +414,9 @@ function get_all_post_statuses(): array {
 		$all_statuses['request-completed']
 	);
 
+	// Remove any HTML from the statuses.
+	$all_statuses = array_map( 'strip_tags', $all_statuses );
+
 	/*
 	 * There is a minor difference in the label for 'pending' status between
 	 * `get_post_statuses()` and `get_post_stati()`.
