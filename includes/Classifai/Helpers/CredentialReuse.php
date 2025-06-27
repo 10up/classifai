@@ -10,9 +10,9 @@ use function Classifai\get_plugin;
 
 /**
  * CredentialReuse class.
- * 
+ *
  * Handles detection and reuse of service provider credentials across features.
- * 
+ *
  * @since x.x.x
  */
 class CredentialReuse {
@@ -186,23 +186,23 @@ class CredentialReuse {
 	 */
 	public static function get_provider_display_name( string $provider_id ): string {
 		$provider_names = [
-			'openai_chatgpt'          => __( 'OpenAI ChatGPT', 'classifai' ),
-			'openai_dalle'            => __( 'OpenAI DALL-E', 'classifai' ),
-			'openai_embeddings'       => __( 'OpenAI Embeddings', 'classifai' ),
-			'openai_moderation'       => __( 'OpenAI Moderation', 'classifai' ),
-			'openai_speech_to_text'   => __( 'OpenAI Speech to Text', 'classifai' ),
-			'openai_text_to_speech'   => __( 'OpenAI Text to Speech', 'classifai' ),
-			'azure_openai'            => __( 'Azure OpenAI', 'classifai' ),
-			'azure_ai_vision'         => __( 'Azure AI Vision', 'classifai' ),
-			'azure_speech'            => __( 'Microsoft Azure AI Speech', 'classifai' ),
-			'ms_azure_personalizer'   => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
-			'aws_polly'               => __( 'Amazon Polly', 'classifai' ),
-			'google_gemini_api'       => __( 'Google AI Gemini API', 'classifai' ),
-			'ibm_watson_nlu'          => __( 'IBM Watson NLU', 'classifai' ),
-			'ollama'                  => __( 'Ollama', 'classifai' ),
-			'ollama_embeddings'       => __( 'Ollama Embeddings', 'classifai' ),
-			'ollama_multimodal'       => __( 'Ollama Multimodal', 'classifai' ),
-			'xai_grok'                => __( 'xAI Grok', 'classifai' ),
+			'openai_chatgpt'        => __( 'OpenAI ChatGPT', 'classifai' ),
+			'openai_dalle'          => __( 'OpenAI DALL-E', 'classifai' ),
+			'openai_embeddings'     => __( 'OpenAI Embeddings', 'classifai' ),
+			'openai_moderation'     => __( 'OpenAI Moderation', 'classifai' ),
+			'openai_speech_to_text' => __( 'OpenAI Speech to Text', 'classifai' ),
+			'openai_text_to_speech' => __( 'OpenAI Text to Speech', 'classifai' ),
+			'azure_openai'          => __( 'Azure OpenAI', 'classifai' ),
+			'azure_ai_vision'       => __( 'Azure AI Vision', 'classifai' ),
+			'azure_speech'          => __( 'Microsoft Azure AI Speech', 'classifai' ),
+			'ms_azure_personalizer' => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
+			'aws_polly'             => __( 'Amazon Polly', 'classifai' ),
+			'google_gemini_api'     => __( 'Google AI Gemini API', 'classifai' ),
+			'ibm_watson_nlu'        => __( 'IBM Watson NLU', 'classifai' ),
+			'ollama'                => __( 'Ollama', 'classifai' ),
+			'ollama_embeddings'     => __( 'Ollama Embeddings', 'classifai' ),
+			'ollama_multimodal'     => __( 'Ollama Multimodal', 'classifai' ),
+			'xai_grok'              => __( 'xAI Grok', 'classifai' ),
 		];
 
 		return $provider_names[ $provider_id ] ?? ucwords( str_replace( '_', ' ', $provider_id ) );

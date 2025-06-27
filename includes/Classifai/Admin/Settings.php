@@ -340,7 +340,7 @@ class Settings {
 							'validate_callback' => 'rest_validate_request_arg',
 							'description'       => esc_html__( 'Target feature ID to copy credentials to.', 'classifai' ),
 						),
-						'provider_id' => array(
+								'provider_id' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
@@ -581,17 +581,17 @@ class Settings {
 		$target_feature_id = $request->get_param( 'target_feature_id' );
 		$provider_id       = $request->get_param( 'provider_id' );
 
-		$success = CredentialReuse::copy_provider_credentials( 
-			$source_feature_id, 
-			$target_feature_id, 
-			$provider_id 
+		$success = CredentialReuse::copy_provider_credentials(
+			$source_feature_id,
+			$target_feature_id,
+			$provider_id
 		);
 
 		if ( ! $success ) {
-			return new \WP_Error( 
-				'copy_failed', 
-				__( 'Failed to copy credentials.', 'classifai' ), 
-				[ 'status' => 400 ] 
+			return new \WP_Error(
+				'copy_failed',
+				__( 'Failed to copy credentials.', 'classifai' ),
+				[ 'status' => 400 ]
 			);
 		}
 
