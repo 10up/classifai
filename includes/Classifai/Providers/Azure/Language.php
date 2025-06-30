@@ -301,8 +301,12 @@ class Language extends Provider {
 				return new WP_Error( 'auth', $response->error->message );
 			}
 
-			while ( 'succeeded' !== $response->status ) {
-				sleep( .5 );
+			$attempts = 0;
+			$max_attempts = 10;
+
+			while ( 'succeeded' !== $response->status && $attempts < $max_attempts ) {
+				$attempts++;
+				sleep( 2 );
 				$request  = safe_wp_remote_get(
 					$url,
 					[
@@ -313,6 +317,11 @@ class Language extends Provider {
 					]
 				);
 				$response = json_decode( wp_remote_retrieve_body( $request ) );
+			}
+
+			// Check if we exceeded max attempts
+			if ( $attempts >= $max_attempts && 'succeeded' !== $response->status ) {
+				return new WP_Error( 'timeout', esc_html__( 'Summary generation timed out. Please try again.', 'classifai' ) );
 			}
 
 			$summary = $response->tasks->items[0]->results->documents[0]->summaries[0]->text;
