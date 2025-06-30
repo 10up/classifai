@@ -329,11 +329,17 @@ class Language extends Provider {
 			}
 
 			// Check if we exceeded max attempts
-			if ( $attempts >= $max_attempts && 'succeeded' !== $response->status ) {
-				return new WP_Error( 'timeout', esc_html__( 'Summary generation timed out. Please try again.', 'classifai' ) );
+			if ( $attempts >= $max_attempts && 'running' === $response->status ) {
+				return new WP_Error( 'timeout', esc_html__( 'Summary retrieval is still running after 10 attempts. Please retry.', 'classifai' ) );
 			}
 
-			$summary = $response->tasks->items[0]->results->documents[0]->summaries[0]->text;
+			$summary = ! empty( $response->tasks->items[0]->results->documents[0]->summaries[0] )
+				? $response->tasks->items[0]->results->documents[0]->summaries[0]->text
+				: '';
+
+			if ( empty( $summary ) ) {
+				return new WP_Error( 'no_results', esc_html__( 'No summary was generated. Please save the post and retry.', 'classifai' ) );
+			}
 		}
 
 		return $summary;
