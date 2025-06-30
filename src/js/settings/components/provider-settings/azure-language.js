@@ -30,7 +30,6 @@ export const AzureLanguageSettings = ( { isConfigured = false } ) => {
 	);
 	const { setProviderSettings } = useDispatch( STORE_NAME );
 	const onChange = ( data ) => {
-		console.log( 'data', data );
 		setProviderSettings( providerName, data );
 	};
 
