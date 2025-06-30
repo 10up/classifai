@@ -19,6 +19,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { postList, paragraph } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -28,6 +29,7 @@ import { ReactComponent as icon } from '../../../../assets/img/block-icon.svg';
 const BlockEdit = ( props ) => {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ run, setRun ] = useState( false );
+	const [ errors, setErrors ] = useState( [] );
 	const { attributes, setAttributes } = props;
 	const { render, takeaways, title } = attributes;
 	const blockProps = useBlockProps();
@@ -40,8 +42,24 @@ const BlockEdit = ( props ) => {
 			const postTitle =
 				select( 'core/editor' ).getEditedPostAttribute( 'title' );
 
+			// If no content or the only content in the post is this block, don't make an API call.
+			if (
+				! postContent ||
+				'<!-- wp:classifai/key-takeaways /-->' === postContent
+			) {
+				setErrors( [
+					__(
+						'No content found. Please add content then click the "Generate results" button.',
+						'classifai'
+					),
+				] );
+				setRun( false );
+				return;
+			}
+
 			setRun( false );
 			setIsLoading( true );
+			setErrors( [] );
 
 			apiFetch( {
 				path: '/classifai/v1/key-takeaways/',
@@ -51,6 +69,7 @@ const BlockEdit = ( props ) => {
 					content: postContent,
 					title: postTitle,
 					render,
+					run: run ? 'manual' : 'auto',
 				},
 			} ).then(
 				async ( res ) => {
@@ -63,9 +82,7 @@ const BlockEdit = ( props ) => {
 					setIsLoading( false );
 				},
 				( err ) => {
-					setAttributes( {
-						takeaways: [ `Error:  ${ err?.message }` ],
-					} );
+					setErrors( [ err?.message ] );
 					setIsLoading( false );
 				}
 			);
@@ -101,6 +118,11 @@ const BlockEdit = ( props ) => {
 		} );
 	};
 
+	const buttonText =
+		takeaways.length > 0
+			? __( 'Refresh results', 'classifai' )
+			: __( 'Generate results', 'classifai' );
+
 	return (
 		<>
 			<BlockControls>
@@ -109,8 +131,8 @@ const BlockEdit = ( props ) => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'classifai' ) }>
 					<Button
-						label={ __( 'Re-generate key takeaways', 'classifai' ) }
-						text={ __( 'Refresh results', 'classifai' ) }
+						label={ __( 'Generate key takeaways', 'classifai' ) }
+						text={ buttonText }
 						variant={ 'secondary' }
 						onClick={ () => setRun( true ) }
 						isBusy={ isLoading }
@@ -132,7 +154,58 @@ const BlockEdit = ( props ) => {
 				</Placeholder>
 			) }
 
-			{ ! isLoading && (
+			{ ! isLoading && errors.length > 0 && (
+				<div { ...blockProps }>
+					<Placeholder
+						icon={ icon }
+						label={ __( 'Key Takeaways', 'classifai' ) }
+						isColumnLayout
+					>
+						{ ! errors[ 0 ].toLowerCase().includes( 'disabled' ) ? (
+							<>
+								<p
+									style={ {
+										color: '#cc1818',
+										fontWeight: 'bold',
+										marginBottom: 0,
+									} }
+								>
+									{ __( 'Errors', 'classifai' ) }
+								</p>
+								<ul
+									style={ {
+										lineHeight: '1.5',
+										marginTop: 0,
+									} }
+								>
+									{ errors.map( ( error, index ) => (
+										<li key={ index }>
+											{ decodeEntities( error ) }
+										</li>
+									) ) }
+								</ul>
+							</>
+						) : (
+							errors.map( ( error, index ) => (
+								<p key={ index }>{ decodeEntities( error ) }</p>
+							) )
+						) }
+						<Button
+							label={ __(
+								'Generate key takeaways',
+								'classifai'
+							) }
+							text={ buttonText }
+							variant={ 'secondary' }
+							onClick={ () => setRun( true ) }
+							isBusy={ isLoading }
+							style={ { width: '125px' } }
+						/>
+					</Placeholder>
+				</div>
+			) }
+
+			{ ! isLoading && takeaways.length > 0 && errors.length === 0 && (
 				<div { ...blockProps }>
 					<RichText
 						tagName="h2"

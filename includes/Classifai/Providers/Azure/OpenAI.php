@@ -364,6 +364,7 @@ class OpenAI extends Provider {
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
+				'author'  => '',
 			]
 		);
 		$post_type = get_post_type( $post_id );
@@ -384,8 +385,8 @@ class OpenAI extends Provider {
 		}
 
 		// Replace our variables in the prompt.
-		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -699,6 +700,7 @@ class OpenAI extends Provider {
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
+				'run'     => 'auto',
 			]
 		);
 
@@ -706,6 +708,33 @@ class OpenAI extends Provider {
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Decide if we should automatically run the key takeaways generation.
+		 *
+		 * By default, we will always run the generation. If you
+		 * only want to run when triggered manually, you can
+		 * filter the return value to false.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_key_takeaways_auto_run
+		 *
+		 * @param {bool} $run Whether to run the key takeaways generation.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {bool} Whether to run the key takeaways generation.
+		 */
+		$run = apply_filters( 'classifai_azure_openai_key_takeaways_auto_run', true, $post_id );
+
+		if ( 'auto' === $args['run'] && ! (bool) $run ) {
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Generate results" button when ready.', 'classifai' ) );
+		}
+
+		// Ensure we have content before making a request.
+		$content = $this->get_content( $post_id, 0, false, $args['content'] );
+		if ( empty( $content ) ) {
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
@@ -749,7 +778,7 @@ class OpenAI extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+						'content' => '"""' . $content . '"""',
 					],
 				],
 				'response_format' => [

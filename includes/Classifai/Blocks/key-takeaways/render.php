@@ -10,6 +10,11 @@
 $block_title = $attributes['title'] ?? '';
 $layout      = $attributes['render'] ?? 'list';
 $takeaways   = $attributes['takeaways'] ?? [];
+
+// If there are no takeaways, don't render the block.
+if ( empty( $takeaways ) ) {
+	return;
+}
 ?>
 
 <div <?php echo get_block_wrapper_attributes(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>

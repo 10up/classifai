@@ -67,7 +67,7 @@ export const ExcerptGenerationSettings = ( {
 				<SettingsRow
 					label={ __( 'Prompt', 'classifai' ) }
 					description={ __(
-						"Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title.",
+						"Add a custom prompt. Note the following variables that can be used in the prompt and will be replaced with content: {{WORDS}} will be replaced with the desired excerpt length setting. {{TITLE}} will be replaced with the item's title. {{AUTHOR}} will be replaced with the post author's display name.",
 						'classifai'
 					) }
 				>
