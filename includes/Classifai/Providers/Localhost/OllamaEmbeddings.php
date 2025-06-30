@@ -503,6 +503,8 @@ class OllamaEmbeddings extends Ollama {
 
 					if ( $embedding && ! is_wp_error( $embedding ) ) {
 						$embeddings[] = array_map( 'floatval', $embedding );
+					} elseif ( is_wp_error( $embedding ) ) {
+						return $embedding;
 					}
 				}
 			} else {
@@ -516,6 +518,8 @@ class OllamaEmbeddings extends Ollama {
 						},
 						$all_embeddings
 					);
+				} elseif ( is_wp_error( $all_embeddings ) ) {
+					return $all_embeddings;
 				}
 			}
 		}
@@ -1011,6 +1015,8 @@ class OllamaEmbeddings extends Ollama {
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
+				} elseif ( is_wp_error( $embedding ) ) {
+					return $embedding;
 				}
 			}
 		}

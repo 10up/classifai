@@ -427,6 +427,8 @@ class Embeddings extends OpenAI {
 
 					if ( $embedding && ! is_wp_error( $embedding ) ) {
 						$embeddings[] = array_map( 'floatval', $embedding );
+					} elseif ( is_wp_error( $embedding ) ) {
+						return $embedding;
 					}
 				}
 			} else {
@@ -440,6 +442,8 @@ class Embeddings extends OpenAI {
 						},
 						$all_embeddings
 					);
+				} elseif ( is_wp_error( $all_embeddings ) ) {
+					return $all_embeddings;
 				}
 			}
 		}
@@ -934,6 +938,8 @@ class Embeddings extends OpenAI {
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
+				} elseif ( is_wp_error( $embedding ) ) {
+					return $embedding;
 				}
 			}
 		}
