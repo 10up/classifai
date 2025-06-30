@@ -301,8 +301,17 @@ class Language extends Provider {
 				return new WP_Error( 'auth', $response->error->message );
 			}
 
-			$attempts = 0;
-			$max_attempts = 10;
+			$attempts     = 0;
+			/**
+			 * Filter the maximum number of attempts to retrieve the summary.
+			 * Increment this value if you are experiencing timeout errors.
+			 *
+			 * @since 3.2.0
+			 * @hook classifai_azure_language_max_attempts
+			 * @param {int} $max_attempts The maximum number of attempts.
+			 * @return {int} The maximum number of attempts.
+			 */
+			$max_attempts = apply_filters( 'classifai_azure_language_max_attempts', 10 );
 
 			while ( 'succeeded' !== $response->status && $attempts < $max_attempts ) {
 				$attempts++;
