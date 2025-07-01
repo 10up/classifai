@@ -14,34 +14,40 @@ import {
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { PromptRepeater } from './prompt-repeater';
+import { getFeature } from '../../utils/utils';
+import { useFeatureContext } from '../feature-settings/context';
 
 /**
  * Component for Excerpt Generation feature settings.
  *
  * This component is used within the FeatureSettings component to allow users to configure the Excerpt Generation feature.
  *
- * @param {Object} props                    Component props.
- * @param {boolean} [props.showPrompt=true] Whether to show the prompt settings row.
- * @param {boolean} [props.showPostTypes=true] Whether to show the post types settings row.
- * @param {boolean} [props.showLength=true] Whether to show the excerpt length settings row.
+ * @param  {Object}  props                      Component props.
+ * @param  {boolean} [props.showPrompt=true]    Whether to show the prompt settings row.
+ * @param  {boolean} [props.showPostTypes=true] Whether to show the post types settings row.
+ * @param  {boolean} [props.showLength=true]    Whether to show the excerpt length settings row.
+ *
  * @return {React.ReactElement} ExcerptGenerationSettings component.
  */
-export const ExcerptGenerationSettings = ( { 
-	showPrompt = true, 
-	showPostTypes = true, 
-	showLength = true 
+export const ExcerptGenerationSettings = ( {
+	showPrompt = true,
+	showPostTypes = true,
+	showLength = true,
 } = {} ) => {
+	const { featureName } = useFeatureContext();
+	const feature = getFeature( featureName );
+
 	// determine which provider is currently loaded
 	const provider = useSelect(
 		( select ) =>
 			select( STORE_NAME ).getFeatureSettings( 'provider' ) ||
 			Object.keys( feature?.providers || {} )[ 0 ]
 	);
-	
+
 	/**
 	 * These fields don't apply to Azure Language. Azure has its own keyed fields. This parameter is
 	 * filtered at Classifai\Providers\Azure\Language (classifai_azure_language_summary_length)
-	 * 
+	 *
 	 * There is likely a better way to handle this where the individual provider configs can govern
 	 * the fields that are shown. For now this is a quick fix.
 	 */
@@ -49,7 +55,7 @@ export const ExcerptGenerationSettings = ( {
 		showPrompt = false;
 		showLength = false;
 	}
-	
+
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);

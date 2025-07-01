@@ -37,14 +37,20 @@ export const AzureLanguageSettings = ( { isConfigured = false } ) => {
 		<>
 			{ __( "Don't have an Azure account yet?", 'classifai' ) }{ ' ' }
 			<a
-				title={ __( 'Create a Language resource in Azure', 'classifai' ) }
+				title={ __(
+					'Create a Language resource in Azure',
+					'classifai'
+				) }
 				href="https://portal.azure.com/#home"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
 				{ __( 'Create a Language resource', 'classifai' ) }
 			</a>{ ' ' }
-			{ __( 'in the Azure portal to get your key and endpoint.', 'classifai' ) }
+			{ __(
+				'in the Azure portal to get your key and endpoint.',
+				'classifai'
+			) }
 		</>
 	);
 
@@ -60,7 +66,9 @@ export const AzureLanguageSettings = ( { isConfigured = false } ) => {
 							id={ `${ providerName }_api_key` }
 							type="password"
 							value={ providerSettings.api_key || '' }
-							onChange={ ( value ) => onChange( { api_key: value } ) }
+							onChange={ ( value ) =>
+								onChange( { api_key: value } )
+							}
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -74,7 +82,9 @@ export const AzureLanguageSettings = ( { isConfigured = false } ) => {
 							id={ `${ providerName }_endpoint_url` }
 							type="url"
 							value={ providerSettings.endpoint_url || '' }
-							onChange={ ( value ) => onChange( { endpoint_url: value } ) }
+							onChange={ ( value ) =>
+								onChange( { endpoint_url: value } )
+							}
 						/>
 					</SettingsRow>
 				</>
