@@ -22,10 +22,10 @@ import { useFeatureContext } from '../feature-settings/context';
  *
  * This component is used within the FeatureSettings component to allow users to configure the Excerpt Generation feature.
  *
- * @param  {Object}  props                      Component props.
- * @param  {boolean} [props.showPrompt=true]    Whether to show the prompt settings row.
- * @param  {boolean} [props.showPostTypes=true] Whether to show the post types settings row.
- * @param  {boolean} [props.showLength=true]    Whether to show the excerpt length settings row.
+ * @param {Object}  props                      Component props.
+ * @param {boolean} [props.showPrompt=true]    Whether to show the prompt settings row.
+ * @param {boolean} [props.showPostTypes=true] Whether to show the post types settings row.
+ * @param {boolean} [props.showLength=true]    Whether to show the excerpt length settings row.
  *
  * @return {React.ReactElement} ExcerptGenerationSettings component.
  */
