@@ -366,11 +366,11 @@ class Embeddings extends OpenAI {
 	}
 
 	/**
-	 * Trigger embedding generation for content being saved.
+	 * Trigger embedding generation for a post.
 	 *
-	 * @param int  $post_id ID of post being saved.
+	 * @param int  $post_id ID of post.
 	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @return array|WP_Error
+	 * @return array[]|WP_Error Array of embedding vectors on success, WP_Error on failure.
 	 */
 	public function generate_embeddings_for_post( int $post_id, bool $force = false ) {
 		// Don't run on autosaves.
