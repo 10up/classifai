@@ -217,7 +217,7 @@ const BlockEdit = ( props ) => {
 						placeholder="Key Takeaways"
 					/>
 					<div
-						className="wp-block-classifai-key-takeways__content"
+						className="wp-block-classifai-key-takeaways__content"
 						style={ { fontStyle: 'italic' } }
 					>
 						{ render === 'list' && (
