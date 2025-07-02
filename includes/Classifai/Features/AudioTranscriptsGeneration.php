@@ -388,6 +388,50 @@ class AudioTranscriptsGeneration extends Feature {
 			return new WP_Error( 'empty_download', __( 'Downloaded file is empty.', 'classifai' ) );
 		}
 
+		/**
+		 * Using `php://temp` to stream the remote file into memory (or to a secure system temp file if it exceeds the memory limit).
+		 *
+		 * WP_Filesystem does not support PHP stream wrappers like `php://temp`, so native file functions (fopen, fwrite, fclose)
+		 * are required here. This usage is safe because PHP handles any overflow using the system's temp directory (e.g., /tmp),
+		 * which is outside the web root in properly configured environments.
+		 *
+		 * phpcs:ignore comments are used to silence warnings about native file functions in this controlled context.
+		 */
+		$stream = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+		fwrite( $stream, $body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		rewind( $stream );
+
+		// Determine file type using finfo if the function is available.
+		$real_mime_type = false;
+
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo          = finfo_open( FILEINFO_MIME_TYPE );
+			$real_mime_type = finfo_buffer( $finfo, $body );
+			finfo_close( $finfo );
+		}
+
+		$supported_audio_mime_types = [
+			'audio/mpeg',
+			'audio/mp4',
+			'audio/x-m4a',
+			'audio/wav',
+			'audio/x-wav',
+			'audio/x-pn-wav',
+			'audio/webm',
+		];
+
+		if ( ! in_array( $real_mime_type, $supported_audio_mime_types, true ) ) {
+			return new WP_Error(
+				'unsupported_audio_content',
+				sprintf(
+					// translators: %s The detected MIME type.
+					__( 'File content does not match supported audio types. Detected: %s', 'classifai' ),
+					$real_mime_type
+				)
+			);
+		}
+
+		// Passed MIME check. Now write to disk
 		$filename = wp_basename( wp_parse_url( $url, PHP_URL_PATH ) );
 
 		if ( empty( $filename ) ) {
@@ -404,72 +448,24 @@ class AudioTranscriptsGeneration extends Feature {
 			WP_Filesystem();
 		}
 
-		$bytes_written = $wp_filesystem->put_contents(
-			$temp_file_path,
-			$body
-		);
+		rewind( $stream );
+		$file_contents = stream_get_contents( $stream );
+		fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+		$bytes_written = $wp_filesystem->put_contents( $temp_file_path, $file_contents );
 
 		if ( false === $bytes_written ) {
 			return new WP_Error( 'file_write_failed', __( 'Failed to write temporary file.', 'classifai' ) );
 		}
 
-		// Step 5: Validate audio file type
-		$supported_audio_extensions = [
-			'mp3',
-			'mp4',
-			'mpeg',
-			'mpga',
-			'm4a',
-			'wav',
-			'webm',
-		];
-
-		$supported_audio_mime_types = [
-			'audio/mpeg',
-			'audio/mp4',
-			'audio/x-m4a',
-			'audio/wav',
-			'audio/x-wav',
-			'audio/x-pn-wav',
-			'audio/webm',
-		];
-
+		// Secondary check using wp_check_filetype if needed.
 		$filetype  = wp_check_filetype( $temp_file_path );
 		$extension = strtolower( $filetype['ext'] ?? '' );
-		$mime_type = $filetype['type'] ?? '';
 
-		if ( empty( $extension ) || empty( $mime_type ) ) {
+		if ( empty( $extension ) ) {
+			// Clean up file if created.
+			$wp_filesystem->delete( $temp_file_path );
 			return new WP_Error( 'filetype_unknown', __( 'Could not determine file type.', 'classifai' ) );
-		}
-
-		if ( ! in_array( $extension, $supported_audio_extensions, true ) || ! in_array( $mime_type, $supported_audio_mime_types, true ) ) {
-			return new WP_Error(
-				'unsupported_audio_type',
-				sprintf(
-					/* translators: %1$s Extension, %2$s MIME Type. */
-					__( 'Unsupported audio type. Extension: %1$s, MIME type: %2$s', 'classifai' ),
-					$extension,
-					$mime_type
-				)
-			);
-		}
-
-		// Just an additional check to keep things secure.
-		if ( function_exists( 'finfo_open' ) ) {
-			$finfo          = finfo_open( FILEINFO_MIME_TYPE );
-			$real_mime_type = finfo_file( $finfo, $temp_file_path );
-			finfo_close( $finfo );
-
-			if ( ! in_array( $real_mime_type, $supported_audio_mime_types, true ) ) {
-				return new WP_Error(
-					'unsupported_audio_content',
-					sprintf(
-						/* translators: %1$s Detected MIME Type. */
-						__( 'File content does not match supported audio types. Detected: %s', 'classifai' ),
-						$real_mime_type
-					)
-				);
-			}
 		}
 
 		return $temp_file_path;
