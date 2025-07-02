@@ -10,6 +10,7 @@ use WP_REST_Request;
 
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
+use function Classifai\get_resource_type;
 
 /**
  * Class AudioTranscriptsGeneration
@@ -472,63 +473,6 @@ class AudioTranscriptsGeneration extends Feature {
 		}
 
 		return $temp_file_path;
-	}
-
-	/**
-	 * Returns if the resource is of type attachment, URL or system path.
-	 *
-	 * @param int|string $audio_resource The ID of the attachment, or system or URL path
-	 *                                   to the audio file.
-	 *
-	 * @return boolean|string The resource type. (attachment, url, path or false if none).
-	 */
-	public static function get_resource_type( $audio_resource ) {
-		if ( ! is_scalar( $audio_resource ) ) {
-			return false;
-		}
-
-		if ( is_numeric( $audio_resource ) ) {
-			return 'attachment';
-		}
-
-		if ( filter_var( $audio_resource, FILTER_VALIDATE_URL ) ) {
-			return 'url';
-		}
-
-		return 'path';
-	}
-
-	/**
-	 * Returns true if attachment, false otherwise.
-	 *
-	 * @param string $audio_resource The ID of the attachment.
-	 *
-	 * @return boolean
-	 */
-	public static function is_attachment( $audio_resource ) {
-		return 'attachment' === self::get_resource_type( $audio_resource );
-	}
-
-	/**
-	 * Returns true if URL, false otherwise.
-	 *
-	 * @param string $audio_resource The URL to the audio file.
-	 *
-	 * @return boolean
-	 */
-	public static function is_remote_url( $audio_resource ) {
-		return 'url' === self::get_resource_type( $audio_resource );
-	}
-
-	/**
-	 * Returns true if system path, false otherwise.
-	 *
-	 * @param string $audio_resource The system file path to the audio file.
-	 *
-	 * @return boolean
-	 */
-	public static function is_local_path( $audio_resource ) {
-		return 'path' === self::get_resource_type( $audio_resource );
 	}
 
 	/**

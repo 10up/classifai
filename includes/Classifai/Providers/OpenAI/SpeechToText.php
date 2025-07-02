@@ -188,11 +188,11 @@ class SpeechToText extends Provider {
 
 		switch ( $route_to_call ) {
 			case 'transcript':
-				if ( AudioTranscriptsGeneration::is_attachment( $audio_resource ) ) {
+				if ( \Classifai\is_attachment( $audio_resource ) ) {
 					return $this->transcribe_from_attachment( $audio_resource, $args );
-				} elseif ( AudioTranscriptsGeneration::is_remote_url( $audio_resource ) ) {
+				} elseif ( \Classifai\is_remote_url( $audio_resource ) ) {
 					return $this->transcribe_from_path( $audio_resource );
-				} elseif ( AudioTranscriptsGeneration::is_local_path( $audio_resource ) ) {
+				} elseif ( \Classifai\is_local_path( $audio_resource ) ) {
 					return $this->transcribe_audio( $audio_resource, $args );
 				}
 				break;
@@ -249,7 +249,7 @@ class SpeechToText extends Provider {
 	private function transcribe_from_path( string $path, array $args = [] ) {
 		$result = '';
 
-		if ( AudioTranscriptsGeneration::is_remote_url( $path ) ) {
+		if ( \Classifai\is_remote_url( $path ) ) {
 			$temp_file_path = AudioTranscriptsGeneration::remote_url_to_path( $path );
 
 			if ( is_wp_error( $temp_file_path ) ) {
@@ -258,7 +258,7 @@ class SpeechToText extends Provider {
 
 			$result = $this->transcribe_audio( $temp_file_path, $args );
 			wp_delete_file( $temp_file_path );
-		} elseif ( AudioTranscriptsGeneration::is_local_path( $path ) ) {
+		} elseif ( \Classifai\is_local_path( $path ) ) {
 			if ( file_exists( $path ) ) {
 				return $this->transcribe_audio( $path, $args );
 

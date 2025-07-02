@@ -406,7 +406,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 	 * : Comma delimited file URLs or paths to audio files
 	 *
 	 * [--model=<string>]
-	 * : The model to be used to transcription.
+	 * : The model to be used for transcription.
 	 *
 	 * @param array $args Arguments.
 	 * @param array $opts Options.
@@ -456,7 +456,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			foreach ( $files as $path ) {
 				\WP_CLI::log( '' );
 
-				if ( AudioTranscriptsGeneration::is_local_path( $path ) && ! file_exists( $path ) ) {
+				if ( \Classifai\is_local_path( $path ) && ! file_exists( $path ) ) {
 					\WP_CLI::warning( 'File does not exist. Skipping...' );
 					continue;
 				}
