@@ -33,7 +33,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			// Disable if already enabled.
 			cy.disableFeatureIfEnabled();
 
-			cy.get( '.components-form-toggle__input' ).click();
+			cy.enableFeature( false );
 
 			// Wait for API call
 			cy.wait( '@checkCredentials' );
@@ -69,7 +69,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.disableFeatureIfEnabled();
 
 			// Enable the feature
-			cy.get( '.components-form-toggle__input' ).check();
+			cy.enableFeature( false );
 
 			// API should not be called when flag is set
 			cy.get( '.components-modal__header' ).should( 'not.exist' );
@@ -92,7 +92,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.disableFeatureIfEnabled();
 
 			// Enable the feature
-			cy.get( '.components-form-toggle__input' ).check();
+			cy.enableFeature( false );
 
 			// Wait for API call
 			cy.wait( '@checkCredentials' );
@@ -136,7 +136,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.disableFeatureIfEnabled();
 
 			// Trigger modal
-			cy.get( '.components-form-toggle__input' ).check();
+			cy.enableFeature( false );
 			cy.wait( '@checkCredentials' );
 
 			// Click X button
@@ -154,7 +154,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.disableFeatureIfEnabled();
 
 			// Trigger modal
-			cy.get( '.components-form-toggle__input' ).check();
+			cy.enableFeature( false );
 			cy.wait( '@checkCredentials' );
 
 			// Check "Don't ask again" checkbox
@@ -185,7 +185,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.disableFeatureIfEnabled();
 
 			// Enable feature
-			cy.get( '.components-form-toggle__input' ).check();
+			cy.enableFeature( false );
 			cy.wait( '@checkCredentials' );
 
 			// Check features are displayed

@@ -624,8 +624,10 @@ Cypress.Commands.add( 'saveFeatureSettings', () => {
 /**
  * Enable Feature.
  */
-Cypress.Commands.add( 'enableFeature', () => {
-	cy.disableCredentialReuseModal();
+Cypress.Commands.add( 'enableFeature', ( disableCredentialReuseModal = true ) => {
+	if ( disableCredentialReuseModal ) {
+		cy.disableCredentialReuseModal();
+	}
 	cy.get( '.classifai-enable-feature-toggle input[type="checkbox"]' ).check();
 } );
 
