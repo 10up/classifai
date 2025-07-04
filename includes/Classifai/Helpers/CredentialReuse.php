@@ -18,6 +18,34 @@ use function Classifai\get_plugin;
 class CredentialReuse {
 
 	/**
+	 * Provider groups that share the same API key.
+	 *
+	 * @since x.x.x
+	 *
+	 * @var array
+	 */
+	private static $provider_groups = [
+		'openai' => [
+			'openai_chatgpt',
+			'openai_embeddings',
+			'openai_moderation',
+			'openai_dalle',
+			'openai_speech_to_text',
+			'openai_text_to_speech',
+		],
+		'azure' => [
+			'azure_openai',
+			'azure_ai_vision',
+			'azure_speech',
+		],
+		'ollama' => [
+			'ollama',
+			'ollama_embeddings',
+			'ollama_multimodal',
+		],
+	];
+
+	/**
 	 * Get all configured providers across all features.
 	 *
 	 * @since x.x.x
@@ -46,6 +74,39 @@ class CredentialReuse {
 	}
 
 	/**
+	 * Get the provider group for a given provider ID.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $provider_id The provider ID.
+	 * @return string|null The provider group name or null if not found.
+	 */
+	private static function get_provider_group( string $provider_id ): ?string {
+		foreach ( self::$provider_groups as $group_name => $providers ) {
+			if ( in_array( $provider_id, $providers, true ) ) {
+				return $group_name;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get all providers in the same group as the given provider.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $provider_id The provider ID.
+	 * @return array Array of provider IDs in the same group.
+	 */
+	private static function get_providers_in_same_group( string $provider_id ): array {
+		$group = self::get_provider_group( $provider_id );
+		if ( ! $group ) {
+			return [ $provider_id ];
+		}
+		return self::$provider_groups[ $group ];
+	}
+
+	/**
 	 * Check if a provider is compatible with a feature.
 	 *
 	 * @since x.x.x
@@ -66,6 +127,54 @@ class CredentialReuse {
 	}
 
 	/**
+	 * Check if any provider in the same group is compatible with a feature.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $provider_id The provider ID to check.
+	 * @param string $feature_id  The feature ID to check against.
+	 * @return bool True if any provider in the same group is compatible.
+	 */
+	private static function is_provider_group_compatible( string $provider_id, string $feature_id ): bool {
+		$providers_in_group = self::get_providers_in_same_group( $provider_id );
+		
+		foreach ( $providers_in_group as $group_provider_id ) {
+			if ( self::is_provider_compatible( $group_provider_id, $feature_id ) ) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Get the best matching provider ID for a feature from a provider group.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string $source_provider_id The source provider ID.
+	 * @param string $feature_id         The target feature ID.
+	 * @return string|null The best matching provider ID or null if none found.
+	 */
+	private static function get_best_matching_provider( string $source_provider_id, string $feature_id ): ?string {
+		$providers_in_group = self::get_providers_in_same_group( $source_provider_id );
+		
+		// First, try to find an exact match
+		if ( self::is_provider_compatible( $source_provider_id, $feature_id ) ) {
+			return $source_provider_id;
+		}
+		
+		// Then, try to find any compatible provider in the same group
+		foreach ( $providers_in_group as $group_provider_id ) {
+			if ( self::is_provider_compatible( $group_provider_id, $feature_id ) ) {
+				return $group_provider_id;
+			}
+		}
+		
+		return null;
+	}
+
+	/**
 	 * Get reusable credentials for a feature.
 	 *
 	 * @since x.x.x
@@ -83,9 +192,24 @@ class CredentialReuse {
 				continue;
 			}
 
-			// Check if provider is compatible with the target feature.
+			// Check if provider is directly compatible with the target feature.
 			if ( self::is_provider_compatible( $provider_id, $feature_id ) ) {
 				$reusable[ $provider_id ] = $provider_data;
+				continue;
+			}
+
+			// Check if any provider in the same group is compatible.
+			if ( self::is_provider_group_compatible( $provider_id, $feature_id ) ) {
+				$best_match = self::get_best_matching_provider( $provider_id, $feature_id );
+				if ( $best_match ) {
+					// Create a modified provider data entry with the best matching provider ID
+					$reusable[ $best_match ] = [
+						'feature_id'    => $provider_data['feature_id'],
+						'feature_label' => $provider_data['feature_label'],
+						'credentials'   => $provider_data['credentials'],
+						'source_provider_id' => $provider_id, // Track the original provider
+					];
+				}
 			}
 		}
 
@@ -123,12 +247,29 @@ class CredentialReuse {
 		$source_settings = $features[ $source_feature_id ]->get_settings();
 		$target_settings = $features[ $target_feature_id ]->get_settings();
 
-		if ( empty( $source_settings[ $provider_id ] ) ) {
+		// Find the source provider credentials
+		$source_credentials = null;
+
+		// First, try to find the exact provider
+		if ( ! empty( $source_settings[ $provider_id ] ) ) {
+			$source_credentials = $source_settings[ $provider_id ];
+		} else {
+			// If not found, look for any provider in the same group
+			$providers_in_group = self::get_providers_in_same_group( $provider_id );
+			foreach ( $providers_in_group as $group_provider_id ) {
+				if ( ! empty( $source_settings[ $group_provider_id ] ) ) {
+					$source_credentials = $source_settings[ $group_provider_id ];
+					break;
+				}
+			}
+		}
+
+		if ( ! $source_credentials ) {
 			return false;
 		}
 
-		// Copy the provider credentials.
-		$target_settings[ $provider_id ] = $source_settings[ $provider_id ];
+		// Copy the provider credentials to the target provider
+		$target_settings[ $provider_id ] = $source_credentials;
 		$target_settings['provider']     = $provider_id;
 
 		// Update the target feature settings.
@@ -206,5 +347,16 @@ class CredentialReuse {
 		];
 
 		return $provider_names[ $provider_id ] ?? ucwords( str_replace( '_', ' ', $provider_id ) );
+	}
+
+	/**
+	 * Get provider groups for external use.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array Array of provider groups.
+	 */
+	public static function get_provider_groups(): array {
+		return self::$provider_groups;
 	}
 }
