@@ -149,7 +149,7 @@ export const CredentialReuseModal = ( {
 						{ sprintf(
 							/* translators: %s: Feature label */
 							__(
-								'We found existing provider credentials that can be used with %s. Would you like to reuse them?',
+								'We found existing Provider credentials that can be used with %s. Would you like to reuse them?',
 								'classifai'
 							),
 							featureLabel || 'this feature'
@@ -163,7 +163,7 @@ export const CredentialReuseModal = ( {
 								<label // eslint-disable-line jsx-a11y/label-has-associated-control
 									aria-label={ sprintf(
 										/* translators: %s: Provider name */
-										__( 'Select %s provider', 'classifai' ),
+										__( 'Select %s Provider', 'classifai' ),
 										provider.provider_display_name ||
 											providerId
 									) }
@@ -207,7 +207,7 @@ export const CredentialReuseModal = ( {
 						checked={ dontAskAgain }
 						onChange={ setDontAskAgain }
 						help={ __(
-							'You can always configure credentials manually in the feature settings.',
+							'You can always configure credentials manually in the Feature settings.',
 							'classifai'
 						) }
 					/>

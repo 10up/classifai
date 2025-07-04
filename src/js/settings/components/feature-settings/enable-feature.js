@@ -104,7 +104,7 @@ export const EnableToggleControl = ( { children } ) => {
 	return (
 		<>
 			<SettingsRow
-				label={ __( 'Enable feature', 'classifai' ) }
+				label={ __( 'Enable Feature', 'classifai' ) }
 				description={ enableDescription }
 			>
 				<ToggleControl

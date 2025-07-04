@@ -187,7 +187,7 @@ class CredentialReuse {
 	public static function get_provider_display_name( string $provider_id ): string {
 		$provider_names = [
 			'openai_chatgpt'        => __( 'OpenAI ChatGPT', 'classifai' ),
-			'openai_dalle'          => __( 'OpenAI DALL-E', 'classifai' ),
+			'openai_dalle'          => __( 'OpenAI Images', 'classifai' ),
 			'openai_embeddings'     => __( 'OpenAI Embeddings', 'classifai' ),
 			'openai_moderation'     => __( 'OpenAI Moderation', 'classifai' ),
 			'openai_speech_to_text' => __( 'OpenAI Speech to Text', 'classifai' ),
