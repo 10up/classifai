@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useParams, useNavigate } from 'react-router-dom';
 
 /**
  * WordPress dependencies
@@ -72,6 +72,7 @@ export const ServiceSettings = () => {
 	);
 
 	const { service } = useParams();
+	const navigate = useNavigate();
 	const isInitialPageLoad = useRef( true );
 
 	const { settings, getFeatureSettings } = useSelect( ( select ) => {
@@ -150,11 +151,16 @@ export const ServiceSettings = () => {
 	/**
 	 * Handle credentials being reused.
 	 *
+	 * @param {string} providerId The provider ID that was reused.
 	 */
-	const handleCredentialsReused = () => {
+	const handleCredentialsReused = ( providerId ) => {
 		// Feature is already enabled, credentials have been copied by the API
-		// Trigger a settings refresh to show the updated provider in the UI
-		window.location.reload();
+		// Navigate to the feature settings page and reload to show the configuration
+		if ( currentFeature ) {
+			// Navigate to feature settings and reload immediately
+			navigate( currentFeature );
+			window.location.reload();
+		}
 	};
 
 	/**
