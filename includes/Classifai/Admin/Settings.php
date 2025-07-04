@@ -497,7 +497,7 @@ class Settings {
 	}
 
 	/**
-	 * Add link to the ClassifAI registration in the plugin row, if needed.
+	 * Add link to the ClassifAI registration in the plugin row.
 	 *
 	 * @param string $plugin_file Plugin file path.
 	 */
@@ -519,7 +519,6 @@ class Settings {
 			<td colspan="4" class="plugin-update colspanchange">
 				<div class="update-message notice inline notice-warning notice-alt">
 					<p>
-						<?php /* translators: %s: ClassifAI registration url */ ?>
 						<?php echo wp_kses_post( __( '<a href="https://classifaiplugin.com/#cta" target="_blank" rel="noopener noreferrer">Register</a> for a free ClassifAI key to receive automatic plugin updates.', 'classifai' ) ); ?>
 					</p>
 				</div>
