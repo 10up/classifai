@@ -873,3 +873,14 @@ Cypress.Commands.add( 'enableCredentialReuseModal', () => {
 		win.localStorage.removeItem( 'classifai_dont_ask_credential_reuse' );
 	} );
 } );
+
+/**
+ * Disable feature if already enabled.
+ */
+Cypress.Commands.add( 'disableFeatureIfEnabled', () => {
+	cy.get( '.components-form-toggle__input' ).then( ( $toggle ) => {
+		if ( $toggle.is( ':checked' ) ) {
+			cy.wrap( $toggle ).click();
+		}
+	} );
+} );
