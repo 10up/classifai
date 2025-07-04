@@ -126,7 +126,8 @@ export const CredentialReuseModal = ( {
 
 	const providers = Object.keys( reusableCredentials );
 
-	if ( ! isOpen || ( providers.length === 0 && ! isLoadingCredentials ) ) {
+	// Only return null if the modal is not open.
+	if ( ! isOpen ) {
 		return null;
 	}
 
@@ -143,7 +144,7 @@ export const CredentialReuseModal = ( {
 					{ __( 'Checking for existing credentials…', 'classifai' ) }
 				</div>
 			) }
-			{ providers.length > 0 && (
+			{ ! isLoadingCredentials && providers.length > 0 && (
 				<>
 					<Notice status="info" isDismissible={ false }>
 						{ sprintf(
@@ -231,7 +232,7 @@ export const CredentialReuseModal = ( {
 					</Flex>
 				</>
 			) }
-			{ providers.length === 0 && (
+			{ ! isLoadingCredentials && providers.length === 0 && (
 				<>
 					<Notice status="info" isDismissible={ false }>
 						{ sprintf(
