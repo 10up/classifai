@@ -124,12 +124,12 @@ export const CredentialReuseModal = ( {
 		onClose();
 	};
 
-	const providers = Object.keys( reusableCredentials );
-
 	// Only return null if the modal is not open.
 	if ( ! isOpen ) {
 		return null;
 	}
+
+	const providers = Object.keys( reusableCredentials );
 
 	return (
 		<Modal

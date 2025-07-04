@@ -150,10 +150,8 @@ export const ServiceSettings = () => {
 
 	/**
 	 * Handle credentials being reused.
-	 *
-	 * @param {string} providerId The provider ID that was reused.
 	 */
-	const handleCredentialsReused = ( providerId ) => {
+	const handleCredentialsReused = () => {
 		// Feature is already enabled, credentials have been copied by the API
 		// Navigate to the feature settings page and reload to show the configuration
 		if ( currentFeature ) {
