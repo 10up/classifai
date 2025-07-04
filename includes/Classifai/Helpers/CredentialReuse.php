@@ -33,7 +33,7 @@ class CredentialReuse {
 			'openai_speech_to_text',
 			'openai_text_to_speech',
 		],
-		'azure' => [
+		'azure'  => [
 			'azure_openai',
 			'azure_ai_vision',
 			'azure_speech',
@@ -137,13 +137,13 @@ class CredentialReuse {
 	 */
 	private static function is_provider_group_compatible( string $provider_id, string $feature_id ): bool {
 		$providers_in_group = self::get_providers_in_same_group( $provider_id );
-		
+
 		foreach ( $providers_in_group as $group_provider_id ) {
 			if ( self::is_provider_compatible( $group_provider_id, $feature_id ) ) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -158,19 +158,19 @@ class CredentialReuse {
 	 */
 	private static function get_best_matching_provider( string $source_provider_id, string $feature_id ): ?string {
 		$providers_in_group = self::get_providers_in_same_group( $source_provider_id );
-		
+
 		// First, try to find an exact match
 		if ( self::is_provider_compatible( $source_provider_id, $feature_id ) ) {
 			return $source_provider_id;
 		}
-		
+
 		// Then, try to find any compatible provider in the same group
 		foreach ( $providers_in_group as $group_provider_id ) {
 			if ( self::is_provider_compatible( $group_provider_id, $feature_id ) ) {
 				return $group_provider_id;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -204,10 +204,10 @@ class CredentialReuse {
 				if ( $best_match ) {
 					// Create a modified provider data entry with the best matching provider ID
 					$reusable[ $best_match ] = [
-						'feature_id'    => $provider_data['feature_id'],
-						'feature_label' => $provider_data['feature_label'],
-						'credentials'   => $provider_data['credentials'],
-						'source_provider_id' => $provider_id, // Track the original provider
+						'feature_id'         => $provider_data['feature_id'],
+						'feature_label'      => $provider_data['feature_label'],
+						'credentials'        => $provider_data['credentials'],
+						'source_provider_id' => $provider_id,
 					];
 				}
 			}
