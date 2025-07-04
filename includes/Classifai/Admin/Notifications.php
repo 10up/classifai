@@ -30,7 +30,6 @@ class Notifications {
 		add_action( 'admin_notices', [ $this, 'maybe_render_notices' ], 0 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'add_dismiss_script' ] );
 		add_action( 'wp_ajax_classifai_dismiss_notice', [ $this, 'ajax_maybe_dismiss_notice' ] );
-		add_action( 'after_plugin_row', [ $this, 'update_notice' ], 10, 3 );
 	}
 
 	/**
@@ -398,39 +397,5 @@ EOD;
 			'message' => $message,
 		];
 		set_transient( 'classifai_notices', $notices );
-	}
-
-	/**
-	 * Under plugin row update notice
-	 *
-	 * @param  string $plugin_file Plugin file path.
-	 * @return
-	 */
-	public function update_notice( $plugin_file ) {
-
-		if ( CLASSIFAI_PLUGIN_BASENAME !== $plugin_file ) {
-			return;
-		}
-
-		$registration_settings = get_option( 'classifai_settings' );
-
-		if ( ! isset( $registration_settings['valid_license'] ) || ! $registration_settings['valid_license'] ) {
-
-			$notice_url = 'https://classifaiplugin.com/#cta';
-			?>
-
-			<tr class="plugin-update-tr active" id="classifai-update" >
-				<td colspan="4" class="plugin-update colspanchange">
-					<div class="update-message notice inline notice-warning notice-alt">
-						<p>
-							<?php /* translators: %s: distributor notice url */ ?>
-							<?php echo wp_kses_post( sprintf( __( '<a href="%s" target="_blank" rel="noopener noreferrer">Register</a> for a free ClassifAI key to receive automatic plugin updates.', 'classifai' ), esc_url( $notice_url ) ) ); ?>
-						</p>
-					</div>
-				</td>
-			</tr>
-
-			<?php
-		}
 	}
 }

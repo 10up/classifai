@@ -28,6 +28,7 @@ class Settings {
 		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
+		add_action( 'after_plugin_row', [ $this, 'update_notice' ] );
 	}
 
 	/**
@@ -493,5 +494,38 @@ class Settings {
 		];
 
 		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Add link to the ClassifAI registration in the plugin row, if needed.
+	 *
+	 * @param string $plugin_file Plugin file path.
+	 */
+	public function update_notice( $plugin_file ) {
+
+		if ( CLASSIFAI_PLUGIN_BASENAME !== $plugin_file ) {
+			return;
+		}
+
+		$registration_settings = get_option( 'classifai_settings' );
+
+		if ( ! empty( $registration_settings['valid_license'] ) ) {
+			return;
+		}
+
+		?>
+
+		<tr class="plugin-update-tr active" id="classifai-update" >
+			<td colspan="4" class="plugin-update colspanchange">
+				<div class="update-message notice inline notice-warning notice-alt">
+					<p>
+						<?php /* translators: %s: ClassifAI registration url */ ?>
+						<?php echo wp_kses_post( __( '<a href="https://classifaiplugin.com/#cta" target="_blank" rel="noopener noreferrer">Register</a> for a free ClassifAI key to receive automatic plugin updates.', 'classifai' ) ); ?>
+					</p>
+				</div>
+			</td>
+		</tr>
+
+		<?php
 	}
 }
