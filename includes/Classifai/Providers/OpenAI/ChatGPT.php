@@ -43,11 +43,30 @@ class ChatGPT extends Provider {
 	protected $chatgpt_model = 'gpt-4o-mini';
 
 	/**
+	 * OpenAI Vision model
+	 *
+	 * @var string
+	 */
+	protected $vision_model = 'gpt-4.1-mini';
+
+	/**
 	 * Maximum number of tokens our model supports
 	 *
 	 * @var int
 	 */
 	protected $max_tokens = 128000;
+
+	/**
+	 * Image types to process.
+	 *
+	 * @var array
+	 */
+	private $image_types_to_process = [
+		'gif',
+		'jpeg',
+		'png',
+		'webp',
+	];
 
 	/**
 	 * OpenAI ChatGPT constructor.
@@ -288,7 +307,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_descriptive_text_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -389,7 +408,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_ocr_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -500,7 +519,7 @@ class ChatGPT extends Provider {
 		$body = apply_filters(
 			'classifai_chatgpt_image_tag_request_body',
 			[
-				'model'       => $this->chatgpt_model,
+				'model'       => $this->vision_model,
 				'messages'    => [
 					[
 						'role'    => 'system',
@@ -574,6 +593,7 @@ class ChatGPT extends Provider {
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
+				'author'  => '',
 			]
 		);
 		$post_type = get_post_type( $post_id );
@@ -596,8 +616,8 @@ class ChatGPT extends Provider {
 		}
 
 		// Replace our variables in the prompt.
-		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -904,6 +924,7 @@ class ChatGPT extends Provider {
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
+				'run'     => 'auto',
 			]
 		);
 
@@ -911,6 +932,33 @@ class ChatGPT extends Provider {
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Decide if we should automatically run the key takeaways generation.
+		 *
+		 * By default, we will always run the generation. If you
+		 * only want to run when triggered manually, you can
+		 * filter the return value to false.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_chatgpt_key_takeaways_auto_run
+		 *
+		 * @param {bool} $run Whether to run the key takeaways generation.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {bool} Whether to run the key takeaways generation.
+		 */
+		$run = apply_filters( 'classifai_chatgpt_key_takeaways_auto_run', true, $post_id );
+
+		if ( 'auto' === $args['run'] && ! (bool) $run ) {
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Generate results" button when ready.', 'classifai' ) );
+		}
+
+		// Ensure we have content before making a request.
+		$content = $this->get_content( $post_id, 0, false, $args['content'] );
+		if ( empty( $content ) ) {
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
@@ -957,7 +1005,7 @@ class ChatGPT extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+						'content' => '"""' . $content . '"""',
 					],
 				],
 				'response_format' => [
@@ -1236,6 +1284,22 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'invalid', esc_html__( 'This attachment can\'t be processed.', 'classifai' ) );
 		}
 
+		// Check if the image is of a type we can process.
+		$mime_type          = get_post_mime_type( $attachment_id );
+		$matched_extensions = explode( '|', array_search( $mime_type, wp_get_mime_types(), true ) );
+		$process            = false;
+
+		foreach ( $matched_extensions as $ext ) {
+			if ( in_array( $ext, $this->image_types_to_process, true ) ) {
+				$process = true;
+				break;
+			}
+		}
+
+		if ( ! $process ) {
+			return new WP_Error( 'invalid', esc_html__( 'Image does not match a valid mime type.', 'classifai' ) );
+		}
+
 		$metadata = wp_get_attachment_metadata( $attachment_id );
 
 		if ( ! $metadata || ! is_array( $metadata ) ) {
@@ -1254,7 +1318,7 @@ class ChatGPT extends Provider {
 					'min' => 512,
 					'max' => 2000,
 				],
-				'filesize' => 100 * MB_IN_BYTES,
+				'filesize' => 50 * MB_IN_BYTES,
 			]
 		);
 

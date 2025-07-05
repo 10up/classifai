@@ -42,12 +42,36 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			select( 'core/editor' ).getEditedPostAttribute( 'content' );
 		const postTitle =
 			select( 'core/editor' ).getEditedPostAttribute( 'title' );
+		const authorId =
+			select( 'core/editor' ).getEditedPostAttribute( 'author' );
+
+		// Get author display name.
+		let authorName = '';
+		if ( authorId ) {
+			const author = select( 'core' ).getUser( authorId );
+			if ( author && author.name ) {
+				authorName = author.name;
+			}
+		}
 
 		setIsLoading( true );
+
+		// Prepare the payload.
+		const payload = {
+			id: postId,
+			content: postContent,
+			title: postTitle,
+		};
+
+		// Only include author in payload if we have it, otherwise let server fetch it.
+		if ( authorName ) {
+			payload.author = authorName;
+		}
+
 		apiFetch( {
 			path,
 			method: 'POST',
-			data: { id: postId, content: postContent, title: postTitle },
+			data: payload,
 		} ).then(
 			async ( res ) => {
 				// Support calling a function from the response for browser AI.
