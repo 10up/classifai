@@ -353,11 +353,11 @@ class AudioTranscriptsGeneration extends Feature {
 	 * Downloads a remote audio file and saves it to a temporary directory within the uploads folder.
 	 *
 	 * This function performs the following:
-	 * 1. Creates a temporary directory under wp-content/uploads/classifai-temp/.
-	 * 2. Downloads the remote file using wp_safe_remote_get().
-	 * 3. Writes the file to the temporary directory.
-	 * 4. Validates that the file is a supported audio type by checking extension and MIME type.
-	 * 5. Uses `finfo` (if available) for an additional MIME type validation.
+	 * 1. Downloads the remote file using wp_safe_remote_get().
+	 * 2. Streams the file into memory using php://temp for secure handling.
+	 * 3. Validates that the file is a supported audio type by checking its MIME type using `finfo`, if available.
+	 * 4. If valid, saves the file to a temporary directory under wp-content/uploads/classifai-temp/.
+	 * 5. Returns the local file path, or a WP_Error on failure.
 	 *
 	 * @param string $url Remote URL to an audio file.
 	 *
@@ -397,8 +397,8 @@ class AudioTranscriptsGeneration extends Feature {
 		 *
 		 * phpcs:ignore comments are used to silence warnings about native file functions in this controlled context.
 		 */
-		$stream = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
-		fwrite( $stream, $body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+		$stream = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		fwrite( $stream, $body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fwrite
 		rewind( $stream );
 
 		// Determine file type using finfo if the function is available.
@@ -431,7 +431,7 @@ class AudioTranscriptsGeneration extends Feature {
 			);
 		}
 
-		// Passed MIME check. Now write to disk
+		// Passed MIME check, now write to disk.
 		$filename = wp_basename( wp_parse_url( $url, PHP_URL_PATH ) );
 
 		if ( empty( $filename ) ) {
