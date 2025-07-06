@@ -919,12 +919,32 @@ class ChatGPT extends Provider {
 		$settings = $feature->get_settings();
 		$request  = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
 
-		$emotion   = sanitize_text_field( $args['emotion'] ?? 'happy' );
-		$formality = sanitize_text_field( $args['formality'] ?? 'formal' );
-		$intent    = sanitize_text_field( $args['intent'] ?? 'storytelling' );
-		$audience  = sanitize_text_field( $args['audience'] ?? 'general' );
-		$prompt    = "Rewrite the following content with the following tone attributes: Emotion: {$emotion}, Formality: {$formality}, Intent: {$intent}, Audience: {$audience}. Ensure that the rewritten content aligns with the selected attributes. Keep it {$formality} and make it {$intent}. The tone should reflect a {$emotion} sentiment while ensuring it resonates well with a {$audience} audience.";
+		$tone   = sanitize_text_field( $args['tone'] ?? 'friendly' );
+		$prompt = current(
+			array_map(
+				fn( $result_tone ) => $result_tone['sys_prompt'],
+				array_filter(
+					$args['tones'],
+					fn( $current_tone ) => $tone === $current_tone['value']
+				)
+			)
+		);
 
+		if ( empty( $prompt ) ) {
+			return '';
+		}
+
+		/**
+		 * Filter the request body before sending to OpenAI ChatGPT.
+		 *
+		 * @since x.x.x
+		 *
+		 * @hook classifai_chatgpt_resize_content_request_body
+		 *
+		 * @param {array} $body Request body that will be sent.
+		 *
+		 * @return {array} Request body.
+		 */
 		$body = apply_filters(
 			'classifai_chatgpt_resize_content_request_body',
 			[

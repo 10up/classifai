@@ -155,11 +155,9 @@ class RewriteTone extends Feature {
 					$request->get_param( 'id' ),
 					'rewrite_tone',
 					[
-						'content'   => $request->get_param( 'content' ),
-						'emotion'   => $request->get_param( 'emotion' ),
-						'formality' => $request->get_param( 'formality' ),
-						'intent'    => $request->get_param( 'intent' ),
-						'audience'  => $request->get_param( 'audience' ),
+						'content' => $request->get_param( 'content' ),
+						'tone'    => $request->get_param( 'tone' ),
+						'tones'   => $this->get_tones(),
 					]
 				)
 			);
@@ -190,6 +188,93 @@ class RewriteTone extends Feature {
 		);
 
 		wp_enqueue_script( 'classifai-chat-ui-js' );
+
+		wp_add_inline_script(
+			'classifai-plugin-rewrite-tone-js',
+			sprintf(
+				'let classifaiRewriteToneTones = %s',
+				wp_json_encode(
+					array_map(
+						fn( $x ) => array(
+							'label' => $x['label'],
+							'value' => $x['value'],
+							'info'  => $x['info'],
+						),
+						$this->get_tones()
+					)
+				)
+			)
+		);
+	}
+
+	/**
+	 * Returns an array of tones available.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return array
+	 */
+	private function get_tones() {
+		/**
+		 * Filter the tones available for the Rewrite Tone feature.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_feature_rewrite_tone_get_tones
+		 *
+		 * @param {array} $tones Array of tones.
+		 *
+		 * @return {array} Filtered array of tones.
+		 */
+		return apply_filters(
+			'classifai_' . self::ID . 'get_tones',
+			array(
+				array(
+					'label'      => __( '🙂 Friendly', 'classifai' ),
+					'value'      => 'friendly',
+					'info'       => __( 'Conversational and warm, like talking to a friend.', 'classifai' ),
+					'sys_prompt' => __(
+						'You are a friendly and approachable writer. Rewrite the given content using a conversational and welcoming tone. Use inclusive language and keep the reader engaged with warmth and clarity, as if you\'re talking to a friend.',
+						'classifai'
+					),
+				),
+				array(
+					'label'      => __( '💼 Professional', 'classifai' ),
+					'value'      => 'professional',
+					'info'       => __( 'Formal and polished, suitable for business settings.', 'classifai' ),
+					'sys_prompt' => __(
+						'You are a professional copywriter. Rewrite the given content with a formal and polished tone suitable for a business or corporate audience. Maintain clarity and authority, avoid contractions, and use industry-appropriate language.',
+						'classifai'
+					),
+				),
+				array(
+					'label'      => __( '🗣️ Persuasive', 'classifai' ),
+					'value'      => 'persuasive',
+					'info'       => __( 'Compelling and action-driven to influence readers.', 'classifai' ),
+					'sys_prompt' => __(
+						'You are a persuasive marketing expert. Rewrite the content to convince the reader to take action. Use compelling language, clear value propositions, and emotional appeal. Emphasize benefits over features, and guide the reader confidently toward the intended goal.',
+						'classifai'
+					),
+				),
+				array(
+					'label'      => __( '📘 Educational', 'classifai' ),
+					'value'      => 'educational',
+					'info'       => __( 'Clear and instructive, ideal for teaching.', 'classifai' ),
+					'sys_prompt' => __(
+						'You are an educational content specialist. Rewrite the content in a tone that is instructive, clear, and easy to follow. Use simple, precise language to teach or explain, ensuring the reader understands the topic step by step.',
+						'classifai'
+					),
+				),
+				array(
+					'label'      => __( '📖 Storytelling', 'classifai' ),
+					'value'      => 'storytelling',
+					'info'       => __( 'Narrative and engaging, turning facts into stories.', 'classifai' ),
+					'sys_prompt' => __(
+						'You are a skilled storyteller. Rewrite the content as a narrative that draws the reader in. Use vivid descriptions, emotional hooks, and a clear arc to transform information into an engaging story that resonates with the audience.',
+						'classifai'
+					),
+				),
+			)
+		);
 	}
 
 	/**
