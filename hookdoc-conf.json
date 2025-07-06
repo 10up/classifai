@@ -7,7 +7,7 @@
       "tutorials": "./hookdocs"
   },
   "source": {
-      "includePattern": ".+\\.(php|inc)?$"
+    "includePattern": ".+\\.(php|inc)?$"
   },
   "plugins": [
     "node_modules/wp-hookdoc/plugin",

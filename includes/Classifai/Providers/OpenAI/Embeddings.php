@@ -11,9 +11,12 @@ use Classifai\Providers\OpenAI\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Normalizer;
 use Classifai\Features\Classification;
+use Classifai\Features\RecommendedContent;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use WP_Query;
+
 use function Classifai\should_use_legacy_settings_panel;
 
 class Embeddings extends Provider {
@@ -56,6 +59,13 @@ class Embeddings extends Provider {
 	 * @var int
 	 */
 	protected $max_terms = 5000;
+
+	/**
+	 * Maximum number of posts we process.
+	 *
+	 * @var int
+	 */
+	protected $max_posts = 5000;
 
 	/**
 	 * NLU features that are supported by this provider.
@@ -204,7 +214,30 @@ class Embeddings extends Provider {
 		 *
 		 * @return {int} The maximum terms.
 		 */
-		return apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
+		return (int) apply_filters( 'classifai_openai_embeddings_max_terms', $this->max_terms );
+	}
+
+	/**
+	 * Get the maximum number of posts we process.
+	 *
+	 * @return int
+	 */
+	public function get_max_posts(): int {
+		/**
+		 * Filter the max number of posts.
+		 *
+		 * Default for this is 5000 but this filter can be used to change
+		 * this, either decreasing to help with performance or increasing
+		 * to ensure we consider more.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_embeddings_max_posts
+		 *
+		 * @param {int} $posts The default maximum posts.
+		 *
+		 * @return {int} The maximum posts.
+		 */
+		return (int) apply_filters( 'classifai_openai_embeddings_max_posts', $this->max_posts );
 	}
 
 	/**
@@ -257,54 +290,84 @@ class Embeddings extends Provider {
 			'authenticated' => false,
 		];
 
+		switch ( $this->feature_instance::ID ) {
+			case RecommendedContent::ID:
+				return array_merge(
+					$common_settings,
+					[
+						'embedding_threshold' => 75,
+					]
+				);
+		}
+
 		return $common_settings;
 	}
 
 	/**
-	 * Register what we need for the plugin.
-	 *
-	 * This only fires if can_register returns true.
+	 * Register what we need for the provider.
 	 */
 	public function register() {
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		// Listen for Action Scheduler callbacks.
+		add_action( 'classifai_generate_term_embedding_job', [ $this, 'generate_term_embedding_job' ], 10, 4 );
+		add_action( 'classifai_generate_post_embedding_job', [ $this, 'generate_post_embedding_job' ], 10, 4 );
 
-		$feature = new Classification();
+		$classification_feature      = new Classification();
+		$recommended_content_feature = new RecommendedContent();
 
-		self::$scheduler_instance = new EmbeddingsScheduler(
-			'classifai_schedule_generate_embedding_job',
-			__( 'OpenAI Embeddings', 'classifai' )
-		);
-		self::$scheduler_instance->init();
-		add_action( 'classifai_schedule_generate_embedding_job', [ $this, 'generate_embedding_job' ], 10, 4 );
-
+		// Register things needed for the Classification Feature.
 		if (
-			! $feature->is_feature_enabled() ||
-			$feature->get_feature_provider_instance()::ID !== static::ID
+			$classification_feature->is_feature_enabled() &&
+			$classification_feature->get_feature_provider_instance()::ID === static::ID
 		) {
-			return;
+			// Create action scheduler job to generate embeddings for all terms.
+			self::$scheduler_instance = new EmbeddingsScheduler(
+				'classifai_generate_term_embedding_job',
+				__( 'OpenAI Embeddings', 'classifai' )
+			);
+
+			self::$scheduler_instance->init();
+
+			// Register hooks.
+			add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
+			add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
+			add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
+			add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
 		}
 
-		add_action( 'created_term', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'edited_terms', [ $this, 'generate_embeddings_for_term' ] ); /** @phpstan-ignore return.void (function is used in multiple contexts and needs to return data if called directly) */
-		add_action( 'wp_ajax_get_post_classifier_embeddings_preview_data', array( $this, 'get_post_classifier_embeddings_preview_data' ) );
-		add_action( 'admin_post_classifai_regen_embeddings', [ $this, 'classifai_regen_embeddings' ] );
+		// Register things needed for the Recommended Content Feature.
+		if (
+			$recommended_content_feature->is_feature_enabled() &&
+			$recommended_content_feature->get_feature_provider_instance()::ID === static::ID
+		) {
+			// Create action scheduler job to generate embeddings for all posts.
+			self::$scheduler_instance = new EmbeddingsScheduler(
+				'classifai_generate_post_embedding_job',
+				__( 'OpenAI Embeddings', 'classifai' )
+			);
+
+			self::$scheduler_instance->init();
+
+			// Register hooks.
+			add_action( 'wp_insert_post', [ $this, 'maybe_generated_embeddings_for_post' ], 999 );
+		}
 	}
 
 	/**
-	 * Modify the default settings for the classification feature.
+	 * Modify the default settings for the Classification Feature.
 	 *
 	 * @param array   $settings Current settings.
 	 * @param Feature $feature_instance The feature instance.
 	 * @return array
 	 */
-	public function modify_default_feature_settings( array $settings, $feature_instance ): array {
-		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10 );
+	public function modify_default_classification_feature_settings( array $settings, $feature_instance ): array {
+		remove_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10 );
 
 		if ( $feature_instance->get_settings( 'provider' ) !== static::ID ) {
 			return $settings;
 		}
 
-		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_feature_settings' ], 10, 2 );
+		add_filter( 'classifai_feature_classification_get_default_settings', [ $this, 'modify_default_classification_feature_settings' ], 10, 2 );
 
 		$defaults = [];
 
@@ -332,12 +395,27 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
-		// Trigger embedding generation for all terms in enabled taxonomies if the feature is on.
-		if ( $new_settings[ static::ID ]['authenticated'] && isset( $new_settings['status'] ) && 1 === (int) $new_settings['status'] ) {
-			foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
-				if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
-					$this->trigger_taxonomy_update( $feature_name );
+		if ( isset( $new_settings[ static::ID ]['embedding_threshold'] ) ) {
+			$new_settings[ static::ID ]['embedding_threshold'] = absint( $new_settings[ static::ID ]['embedding_threshold'] );
+		}
+
+		if (
+			$new_settings[ static::ID ]['authenticated'] &&
+			isset( $new_settings['status'] ) &&
+			1 === (int) $new_settings['status']
+		) {
+			// Trigger embedding generation for all terms in enabled taxonomies.
+			if ( $this->feature_instance instanceof Classification ) {
+				foreach ( array_keys( $this->nlu_features ) as $feature_name ) {
+					if ( isset( $new_settings[ $feature_name ] ) && 1 === (int) $new_settings[ $feature_name ] ) {
+						$this->trigger_taxonomy_update( $feature_name );
+					}
 				}
+			}
+
+			// Trigger embedding generation for all posts.
+			if ( $this->feature_instance instanceof RecommendedContent ) {
+				$this->trigger_post_update();
 			}
 		}
 
@@ -483,21 +561,48 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Trigger embedding generation for content being saved.
+	 * Maybe generated embeddings for a post.
 	 *
-	 * @param int  $post_id ID of post being saved.
-	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @return array|WP_Error
+	 * @param int $post_id ID of the post.
 	 */
-	public function generate_embeddings_for_post( int $post_id, bool $force = false ) {
+	public function maybe_generated_embeddings_for_post( $post_id ) {
 		// Don't run on autosaves.
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-			return new WP_Error( 'invalid', esc_html__( 'Classification will not work during an autosave.', 'classifai' ) );
+			return;
+		}
+
+		// Only run on posts for now. // TODO: Add support for other post types.
+		$post_type = get_post_type( $post_id );
+		if ( 'post' !== $post_type ) {
+			return;
+		}
+
+		// Only run when publishing.
+		$post_status = get_post_status( $post_id );
+		if ( 'publish' !== $post_status ) {
+			return;
+		}
+
+		$this->generate_embeddings_for_post( $post_id, true, new RecommendedContent() );
+	}
+
+	/**
+	 * Trigger embedding generation for a post.
+	 *
+	 * @param int          $post_id ID of post.
+	 * @param bool         $force Whether to force generation of embeddings even if they already exist. Default false.
+	 * @param Feature|null $feature The feature instance.
+	 * @return array[]|WP_Error Array of embedding vectors on success, WP_Error on failure.
+	 */
+	public function generate_embeddings_for_post( int $post_id, bool $force = false, $feature = null ) {
+		// Don't run on autosaves.
+		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+			return new WP_Error( 'invalid', esc_html__( 'Embedding generation will not work during an autosave.', 'classifai' ) );
 		}
 
 		// Ensure the user has permissions to edit.
 		if ( ! current_user_can( 'edit_post', $post_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'User does not have permission to classify this item.', 'classifai' ) );
+			return new WP_Error( 'invalid', esc_html__( 'User does not have permission to generate embeddings.', 'classifai' ) );
 		}
 
 		/**
@@ -515,7 +620,7 @@ class Embeddings extends Provider {
 		 * @return {bool} Whether the item should be classified.
 		 */
 		if ( ! apply_filters( 'classifai_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
+			return new WP_Error( 'invalid', esc_html__( 'Embedding generation is disabled for this item.', 'classifai' ) );
 		}
 
 		// Try to use the stored embeddings first.
@@ -540,15 +645,17 @@ class Embeddings extends Provider {
 			// If we have a lot of tokens, we need to get embeddings for each chunk individually.
 			if ( $this->max_tokens < $total_tokens ) {
 				foreach ( $content_chunks as $chunk ) {
-					$embedding = $this->generate_embedding( $chunk );
+					$embedding = $this->generate_embedding( $chunk, $feature );
 
 					if ( $embedding && ! is_wp_error( $embedding ) ) {
 						$embeddings[] = array_map( 'floatval', $embedding );
+					} elseif ( is_wp_error( $embedding ) ) {
+						return $embedding;
 					}
 				}
 			} else {
 				// Otherwise let's get all embeddings in a single request.
-				$all_embeddings = $this->generate_embeddings( $content_chunks );
+				$all_embeddings = $this->generate_embeddings( $content_chunks, $feature );
 
 				if ( $all_embeddings && ! is_wp_error( $all_embeddings ) ) {
 					$embeddings = array_map(
@@ -557,6 +664,8 @@ class Embeddings extends Provider {
 						},
 						$all_embeddings
 					);
+				} elseif ( is_wp_error( $all_embeddings ) ) {
+					return $all_embeddings;
 				}
 			}
 		}
@@ -590,7 +699,7 @@ class Embeddings extends Provider {
 
 		// Iterate through all of our embedding chunks and run our similarity calculations.
 		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding ) );
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding ) );
 		}
 
 		// Ensure we have some results.
@@ -689,7 +798,7 @@ class Embeddings extends Provider {
 
 		// Iterate through all of our embedding chunks and run our similarity calculations.
 		foreach ( $embeddings as $embedding ) {
-			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_embeddings_similarity( $embedding, false ) );
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_term_embeddings_similarity( $embedding, false ) );
 		}
 
 		// Ensure we have some results.
@@ -754,7 +863,7 @@ class Embeddings extends Provider {
 	 * @param bool  $consider_threshold Whether to consider the threshold setting.
 	 * @return array
 	 */
-	private function get_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
+	private function get_term_embeddings_similarity( array $embedding, bool $consider_threshold = true ): array {
 		$feature              = new Classification();
 		$embedding_similarity = [];
 		$taxonomies           = $feature->get_all_feature_taxonomies();
@@ -845,6 +954,274 @@ class Embeddings extends Provider {
 	}
 
 	/**
+	 * Determine which posts best match another post based on embeddings.
+	 *
+	 * @param array $embeddings An array of embeddings data.
+	 * @param int   $post_id ID of the post to compare against.
+	 * @return array|WP_Error
+	 */
+	public function get_posts( array $embeddings = [], int $post_id = 0 ) {
+		// Use cached results if they exist.
+		$cache_key = 'classifai_recommended_content_' . $post_id;
+		$results   = wp_cache_get( $cache_key );
+
+		if ( is_array( $results ) ) {
+			return $results;
+		}
+
+		if ( empty( $embeddings ) ) {
+			return new WP_Error( 'data_required', esc_html__( 'Valid embedding data is required.', 'classifai' ) );
+		}
+
+		$embeddings_similarity = [];
+
+		// Iterate through all of our embedding chunks and run our similarity calculations.
+		foreach ( $embeddings as $embedding ) {
+			$embeddings_similarity = array_merge( $embeddings_similarity, $this->get_post_embeddings_similarity( $embedding ) );
+		}
+
+		// Ensure we have some results.
+		if ( empty( $embeddings_similarity ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'No matching items found.', 'classifai' ) );
+		}
+
+		// Sort the results by similarity.
+		usort(
+			$embeddings_similarity,
+			function ( $a, $b ) {
+				return $a['similarity'] <=> $b['similarity'];
+			}
+		);
+
+		// Remove duplicates based on the post_id field.
+		$uniques               = array_unique( array_column( $embeddings_similarity, 'post_id' ) );
+		$embeddings_similarity = array_intersect_key( $embeddings_similarity, $uniques );
+
+		// Prepare the results.
+		$results = [];
+
+		foreach ( $embeddings_similarity as $result ) {
+			// Convert $similarity to percentage.
+			$similarity = round( ( 1 - $result['similarity'] ), 10 );
+
+			// Store the results.
+			$results[] = [
+				'post_id' => $result['post_id'],
+				'score'   => $similarity,
+			];
+		}
+
+		// Cache the results.
+		wp_cache_set( $cache_key, $results, '', 60 * MINUTE_IN_SECONDS );
+
+		return $results;
+	}
+
+	/**
+	 * Get the similarity between an embedding and a group of posts.
+	 *
+	 * @param array  $embedding Embedding data.
+	 * @param string $post_type Post type.
+	 * @param bool   $consider_threshold Whether to consider the threshold setting.
+	 * @return array
+	 */
+	private function get_post_embeddings_similarity( array $embedding, string $post_type = 'post', bool $consider_threshold = true ): array {
+		$embedding_similarity = [];
+		$calculations         = new EmbeddingCalculations();
+
+		static $posts     = null;
+		static $threshold = null;
+
+		if ( null === $posts ) {
+			$posts = new WP_Query(
+				[
+					'post_type'      => $post_type,
+					'post_status'    => 'publish',
+					'posts_per_page' => $this->get_max_posts(),
+					'fields'         => 'ids',
+					'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare'   => 'EXISTS',
+				]
+			);
+			$posts = $posts->get_posts();
+		}
+
+		if ( empty( $posts ) ) {
+			return [];
+		}
+
+		if ( null === $threshold ) {
+			$settings  = $this->feature_instance->get_settings();
+			$threshold = $settings[ static::ID ]['embedding_threshold'] ?? 75;
+
+			// Convert $threshold (%) to decimal.
+			$threshold = 1 - ( (float) $threshold / 100 );
+		}
+
+		// Get embedding similarity for each post.
+		foreach ( $posts as $post_id ) {
+			$post_embedding = get_post_meta( $post_id, 'classifai_openai_embeddings', true );
+
+			if ( empty( $post_embedding ) ) {
+				continue;
+			}
+
+			// Loop through the chunks and run a similarity calculation on each.
+			foreach ( $post_embedding as $chunk ) {
+				$similarity = $calculations->cosine_similarity( $embedding, $chunk );
+
+				/**
+				 * Fires after the embeddings similarity has been run for a single chunk.
+				 *
+				 * @since 3.4.0
+				 * @hook classifai_openai_embeddings_single_post_embedding_similarity
+				 *
+				 * @param {bool|float} $similarity The embeddings similarity result.
+				 * @param {array} $embedding Post embedding data.
+				 * @param {array} $chunk Post chunk embedding data.
+				 * @param {int} $post_id ID of post we're comparing.
+				 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+				 */
+				do_action( 'classifai_openai_embeddings_single_post_embedding_similarity', $similarity, $embedding, $chunk, $post_id, $consider_threshold );
+
+				if ( false !== $similarity && ( ! $consider_threshold || $similarity <= $threshold ) ) {
+					$embedding_similarity[] = [
+						'post_id'    => $post_id,
+						'similarity' => $similarity,
+					];
+				}
+			}
+		}
+
+		return $embedding_similarity;
+	}
+
+	/**
+	 * Schedules the job to generate embedding data for all posts.
+	 *
+	 * @param string $post_type Post type.
+	 * @param bool   $all       Whether to generate embeddings for all posts or just those without embeddings.
+	 * @param array  $args      Overridable query args for WP_Query()
+	 * @param int    $user_id   The user ID to run this as.
+	 */
+	public function trigger_post_update( string $post_type = 'post', bool $all = false, array $args = [], int $user_id = 0 ) {
+		$feature = new RecommendedContent();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
+		/**
+		 * Filter the number of post items to process in a batch.
+		 *
+		 * @since 3.4.0
+		 * @hook classifai_openai_embeddings_items_per_job
+		 *
+		 * @param {int} $number Number of post items to process per job.
+		 *
+		 * @return {int} Filtered number of post items to process per job.
+		 */
+		$number = apply_filters( 'classifai_openai_embeddings_items_per_job', 100 );
+
+		$default_args = [
+			'post_type'      => $post_type,
+			'post_status'    => 'publish',
+			'posts_per_page' => $number,
+			'fields'         => 'ids',
+			'meta_key'       => 'classifai_openai_embeddings', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_compare'   => 'NOT EXISTS',
+			'offset'         => 0,
+			'post__not_in'   => [], // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+		];
+
+		$default_args = array_merge( $default_args, $args );
+
+		// If we want all items, remove our meta query.
+		if ( $all ) {
+			if ( 'classifai_openai_embeddings' === $default_args['meta_key'] ) {
+				unset( $default_args['meta_key'] );
+			}
+
+			if ( 'NOT EXISTS' === $default_args['meta_compare'] ) {
+				unset( $default_args['meta_compare'] );
+			}
+		} else {
+			unset( $default_args['offset'] );
+		}
+
+		if ( 0 === $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$job_args = [
+			'post_type' => $post_type,
+			'all'       => $all,
+			'args'      => $default_args,
+			'user_id'   => $user_id,
+		];
+
+		// We return early and don't schedule the job if there are no posts.
+		$posts = new WP_Query( $default_args );
+		$posts = $posts->get_posts();
+
+		if ( empty( $posts ) ) {
+			return;
+		}
+
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			\as_enqueue_async_action( 'classifai_generate_post_embedding_job', $job_args );
+		}
+	}
+
+	/**
+	 * Job to generate embedding data for all posts.
+	 *
+	 * @param string $post_type Post type.
+	 * @param bool   $all       Whether to generate embeddings for all posts or just those without embeddings.
+	 * @param array  $args      Overridable query args for WP_Query().
+	 * @param int    $user_id   The user ID to run this as.
+	 */
+	public function generate_post_embedding_job( string $post_type = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+		if ( $user_id > 0 ) {
+			// We set this as current_user_can() fails when this function runs
+			// under the context of Action Scheduler.
+			wp_set_current_user( $user_id );
+		}
+
+		$posts = new WP_Query( $args );
+		$posts = $posts->get_posts();
+
+		if ( empty( $posts ) ) {
+			return;
+		}
+
+		$exclude = [];
+
+		// Generate embedding data for each post.
+		foreach ( $posts as $post_id ) {
+			/** @var int $post_id */
+			$has_generated = $this->generate_embeddings_for_post( $post_id, $all, new RecommendedContent() );
+
+			if ( is_wp_error( $has_generated ) ) {
+				$exclude[] = $post_id;
+			}
+		}
+
+		if ( $all && isset( $args['offset'], $args['posts_per_page'] ) ) {
+			$args['offset'] = $args['offset'] + $args['posts_per_page'];
+		}
+
+		if ( ! empty( $exclude ) ) {
+			$args['post__not_in'] = array_merge( $args['post__not_in'], $exclude ); // phpcs:ignore WordPressVIPMinimum.Performance.WPQueryParams.PostNotIn_exclude
+		}
+
+		$this->trigger_post_update( $post_type, $all, $args, $user_id );
+	}
+
+	/**
 	 * Schedules the job to generate embedding data for all terms within a taxonomy.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
@@ -918,7 +1295,7 @@ class Embeddings extends Provider {
 		];
 
 		// We return early and don't schedule the job if there are no terms.
-		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_schedule_generate_embedding_job', $job_args ) ) {
+		if ( function_exists( 'as_has_scheduled_action' ) && ! \as_has_scheduled_action( 'classifai_generate_term_embedding_job', $job_args ) ) {
 			$terms = get_terms( $default_args );
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
@@ -927,7 +1304,7 @@ class Embeddings extends Provider {
 		}
 
 		if ( function_exists( 'as_enqueue_async_action' ) ) {
-			\as_enqueue_async_action( 'classifai_schedule_generate_embedding_job', $job_args );
+			\as_enqueue_async_action( 'classifai_generate_term_embedding_job', $job_args );
 		}
 	}
 
@@ -939,7 +1316,7 @@ class Embeddings extends Provider {
 	 * @param array  $args     Overridable query args for get_terms()
 	 * @param int    $user_id  The user ID to run this as.
 	 */
-	public function generate_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
+	public function generate_term_embedding_job( string $taxonomy = '', bool $all = false, array $args = [], int $user_id = 0 ) {
 
 		if ( $user_id > 0 ) {
 			// We set this as current_user_can() fails when this function runs
@@ -1053,6 +1430,8 @@ class Embeddings extends Provider {
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
+				} elseif ( is_wp_error( $embedding ) ) {
+					return $embedding;
 				}
 			}
 		}
@@ -1080,7 +1459,7 @@ class Embeddings extends Provider {
 
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
@@ -1156,7 +1535,7 @@ class Embeddings extends Provider {
 
 		// Ensure the feature is enabled.
 		if ( ! $feature->is_feature_enabled() ) {
-			return new WP_Error( 'not_enabled', esc_html__( 'Classification is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
+			return new WP_Error( 'not_enabled', esc_html__( 'Embedding generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
@@ -1349,6 +1728,14 @@ class Embeddings extends Provider {
 	 * @return bool
 	 */
 	public function is_embeddings_generation_in_progress(): bool {
-		return self::$scheduler_instance->is_embeddings_generation_in_progress();
+		if ( $this->feature_instance instanceof Classification ) {
+			return self::$scheduler_instance->is_embeddings_generation_in_progress( 'classifai_generate_term_embedding_job' );
+		}
+
+		if ( $this->feature_instance instanceof RecommendedContent ) {
+			return self::$scheduler_instance->is_embeddings_generation_in_progress( 'classifai_generate_post_embedding_job' );
+		}
+
+		return false;
 	}
 }

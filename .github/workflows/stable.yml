@@ -19,12 +19,15 @@ jobs:
       with:
         node-version-file: .nvmrc
 
-    - name: npm install and build
+    - name: Install dependencies and build assets
       run: |
         npm install
         npm run build
         npm run makepot
         composer install --no-dev -o
+
+    - name: Build release asset
+      run: |
         npm run archive
 
     - name: Release to Stable

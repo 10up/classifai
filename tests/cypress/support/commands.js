@@ -24,7 +24,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 import { getNLUData } from '../plugins/functions';
-import { getIframe } from '@10up/cypress-wp-utils/lib/functions/get-iframe';
 
 const imageProcessingFeatures = [
 	'feature_descriptive_text_generator',
@@ -689,4 +688,167 @@ Cypress.Commands.add( 'openUserPermissionsPanel', () => {
 Cypress.Commands.add( 'allowFeatureToAdmin', () => {
 	cy.openUserPermissionsPanel();
 	cy.get( '.settings-allowed-roles input#administrator' ).check();
+} );
+
+/**
+ * Custom insertBlock command until upstream changes are in place.
+ */
+Cypress.Commands.add( 'insertBlockCustom', ( type, name ) => {
+	const [ namespace = '', ...blockNameRest ] = type.split( '/' );
+	let blockNames = [
+		blockNameRest.join( '/' ).replace( /\//g, '-' ),
+		blockNameRest.join( '/' ).replace( /\//g, String.raw`\/` ),
+	];
+
+	blockNames = blockNames.filter( ( x, i, a ) => a.indexOf( x ) === i );
+
+	let inserterBtn;
+	let search = '';
+
+	if ( typeof name === 'string' && name.length ) {
+		search = name;
+	} else {
+		search = type;
+	}
+
+	// Start of block inserter toggle button click logic.
+	cy.get( 'body' ).then( ( $body ) => {
+		const selectors = [
+			'button[aria-label="Add block"]', // 5.7
+			'button[aria-label="Toggle block inserter"]', // 6.4
+			'button[aria-label="Block Inserter"]', // 6.8
+		];
+
+		selectors.forEach( ( selector ) => {
+			if ( $body.find( selector ).length ) {
+				cy.get( selector ).then( ( $button ) => {
+					if ( $button.length ) {
+						inserterBtn = cy.wrap( $button );
+						inserterBtn.first().click();
+					}
+				} );
+			}
+		} );
+	} );
+	// End of block inserter toggle button click logic.
+
+	// Start of Block tab click logic.
+	cy.get( 'button[role="tab"]' )
+		.contains( 'Blocks' )
+		.then( ( $tab ) => {
+			if ( $tab.length ) {
+				cy.wrap( $tab ).click();
+			}
+		} );
+	// End of Block tab click logic.
+
+	// Start of Block search logic.
+	cy.get( 'input[placeholder="Search"]' ).then( ( $input ) => {
+		if ( $input.length ) {
+			cy.wrap( $input ).type( search );
+		}
+	} );
+	// End of Block search logic.
+
+	blockNames.forEach( ( blockName ) => {
+		const blockSelector = `.editor-block-list-item-${
+			'core' === namespace ? '' : namespace + '-'
+		}${ blockName }`;
+
+		cy.get( 'body' ).then( ( $body ) => {
+			if ( $body.find( blockSelector ).length ) {
+				// Start of Block insertion by click logic.
+				cy.get( blockSelector ).then( ( $block ) => {
+					if ( $block.length ) {
+						cy.wrap( $block ).click();
+						inserterBtn.click();
+
+						const [ ns, rest ] = type.split( '/' );
+
+						cy.get( 'body' ).then( ( $body ) => {
+							if (
+								$body.find( 'iframe[name="editor-canvas"]' )
+									.length
+							) {
+								// Works with WP 6.4
+								getIframe(
+									'iframe[name="editor-canvas"]'
+								).then( ( $iframe ) => {
+									const blockInIframe = $iframe.find(
+										`.wp-block[data-type="${ ns }/${ rest }"]`
+									);
+									if ( blockInIframe.length > 0 ) {
+										cy.wrap(
+											blockInIframe.last().prop( 'id' )
+										);
+									}
+								} );
+							} else if (
+								$body.find(
+									`.wp-block[data-type="${ ns }/${ rest }"]`
+								).length
+							) {
+								// Works with WP 5.7
+								cy.get(
+									`.wp-block[data-type="${ ns }/${ rest }"]`
+								).then( ( $blockInEditor ) => {
+									expect( $blockInEditor.length ).to.equal(
+										1
+									);
+									cy.wrap( $blockInEditor.prop( 'id' ) );
+								} );
+							} else {
+								throw new Error(
+									`${ ns }/${ rest } not found.`
+								);
+							}
+						} );
+					}
+				} );
+				// End of Block insertion by click logic.
+			}
+		} );
+	} );
+} );
+
+/**
+ * Activate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'activateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#activate-woocommerce' ).length > 0 ) {
+			cy.get( '#activate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Deactivate WooCommerce plugin.
+ */
+Cypress.Commands.add( 'deactivateWooCommerce', () => {
+	cy.visit( '/wp-admin/plugins.php' );
+	cy.get( 'body' ).then( ( $body ) => {
+		if ( $body.find( '#deactivate-woocommerce' ).length > 0 ) {
+			cy.get( '#deactivate-woocommerce' ).click();
+		}
+	} );
+} );
+
+/**
+ * Create a product in the block editor.
+ */
+Cypress.Commands.add( 'createProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '.editor-post-title__input' ).type( title );
+	cy.get( '.block-editor-rich-text__editable' ).type( content );
+} );
+
+/**
+ * Create a product in the classic editor.
+ */
+Cypress.Commands.add( 'classicCreateProduct', ( { title, content } ) => {
+	cy.visit( '/wp-admin/post-new.php?post_type=product' );
+	cy.get( '#title' ).type( title );
+	cy.get( '#content' ).type( content );
 } );

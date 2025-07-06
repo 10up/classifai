@@ -3,7 +3,7 @@
  * Global Constants.
  */
 
-$plugin_version = '3.3.1';
+$plugin_version = '3.4.0';
 
 // Useful global constants
 classifai_define( 'CLASSIFAI_PLUGIN', __DIR__ . '/classifai.php' );

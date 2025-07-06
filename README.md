@@ -2,7 +2,7 @@
 
 ![ClassifAI](https://github.com/10up/classifai/blob/develop/assets/img/banner-1544x500.png)
 
-[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.7%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
+[![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.8%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
 
 [![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
@@ -21,14 +21,14 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's DALL·E 3 API](https://platform.openai.com/docs/guides/images)
-* Generate transcripts of audio files using [OpenAI's Whisper API](https://platform.openai.com/docs/guides/speech-to-text)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision)
+* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
 * Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
-* BETA: Recommend content based on overall site traffic via [Microsoft Azure's AI Personalizer API](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) *(note that this service has been [deprecated by Microsoft](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/) and as such, will no longer work. We are looking to replace this with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392))*
+* Suggest related content based on the currently viewed post using [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings)
 * Generate image alt text using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Generate image tags and extract text from images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/), [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat) or locally using [Ollama](https://ollama.com/)
 * Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
@@ -58,9 +58,9 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 ## Requirements
 
 * PHP 7.4+
-* [WordPress](http://wordpress.org) 6.6+
+* [WordPress](http://wordpress.org) 6.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
-* To utilize the ChatGPT, Embeddings, Text to Speech or Whisper Language Processing functionality or DALL·E Image Processing functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ChatGPT, Embeddings, Text to Speech or Speech to Text Language Processing functionality or Image Generation functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
@@ -80,8 +80,6 @@ OpenAI, which is one of the providers that powers the classification, title gene
 Microsoft Azure AI Vision, which is one of the providers that powers the descriptive text generator, image tags generator, image cropping, image text extraction and PDF text extraction features, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/computer-vision/) that offers 20 transactions per minute and 5,000 transactions per month.
 
 Microsoft Azure AI Speech, which is one of the providers that powers the text to speech feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/speech-services/) that offers 0.5 million characters per month.
-
-Microsoft Azure AI Personalizer, which is one of the providers that powers the recommended content feature, has a ["free" pricing tier](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/personalizer/) that offers 50,000 transactions per month.
 
 Microsoft Azure OpenAI, which is one of the providers that powers the title generation, excerpt generation and content resizing features, has a [pay per usage](https://azure.microsoft.com/en-us/pricing/details/cognitive-services/openai-service/) plan.
 
@@ -124,10 +122,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.3.1",
+            "version": "3.4.0",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.3.1.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.4.0.zip",
                 "type": "zip"
             }
         }
@@ -139,7 +137,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.3.1"
+    "10up/classifai": "3.4.0"
 }
 ```
 
@@ -341,11 +339,11 @@ IBM Watson's [Categories](https://cloud.ibm.com/docs/natural-language-understand
 * Create a new piece of content that matches the post type and post status chosen in settings.
 * Open the taxonomy panel in the sidebar and see terms that were auto-applied.
 
-## Set Up Audio Transcripts Generation (via OpenAI Whisper)
+## Set Up Audio Transcripts Generation (via OpenAI Speech to Text)
 
 Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can create a transcript for audio files that meet the following requirements:
 
-* The file must be presented in mp3, mp4, mpeg, mpga, m4a, wav, or webm format
+* The file must be presented in mp3, mp4, mpeg, wav, or ogg format
 * The file size must be less than 25 megabytes (MB)
 
 ### 1. Sign up for OpenAI
@@ -657,7 +655,7 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 ### 2. Configure OpenAI API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
 
-* Select **OpenAI DALL·E 3** in the provider dropdown.
+* Select **OpenAI Images** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
 
 ### 3. Enable specific Image Processing features
@@ -694,30 +692,26 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 * Turn on the "Enable" toggle in the screen above.
 * Select "Comments" in the "Content to moderate" section.
 
-## Set Up Recommended Content (via Microsoft Azure AI Personalizer)
+## Set Up Recommended Content (via OpenAI Embeddings)
 
-Azure AI Personalizer has been retired by Microsoft [as of September 2023](https://learn.microsoft.com/en-us/azure/ai-services/personalizer/). The service will continue to work until 2026 but Personalizer resources can no longer be created. As such, consider this provider deprecated and be aware that we will be removing this in the near future. We are hoping to replace with a new provider to maintain the same functionality (see [issue#392](https://github.com/10up/classifai/issues/392)).
+### 1. Sign up for OpenAI
 
-Note that [Personalizer](https://azure.microsoft.com/en-us/services/cognitive-services/personalizer/) requires sufficient data volume to enable Personalizer to learn. In general, we recommend a minimum of ~1,000 events per day to ensure Personalizer learns effectively. If Personalizer doesn't receive sufficient data, the service takes longer to determine the best actions.
+* [Sign up for an OpenAI account](https://platform.openai.com/signup) or sign into your existing one.
+* If creating a new account, complete the verification process (requires confirming your email and phone number).
+* Log into your account and go to the [API key page](https://platform.openai.com/account/api-keys).
+* Click `Create new secret key` and copy the key that is shown.
 
-### 1. Sign up for Azure services
+### 2. Configure OpenAI API Keys under Tools > ClassifAI > Recommendation Service > Recommended Content > Settings
 
-- [Register for a Microsoft Azure account](https://azure.microsoft.com/en-us/free/) or sign into your existing one.
-- Log into your account and create a new [Personalizer resource](https://portal.azure.com/#create/Microsoft.CognitiveServicesPersonalizer).
-- Enter your service name, select a subscription, location, pricing tier, and resource group.
-- Select **Create** to create the resource.
-- After your resource has deployed, select the **Go to Resource** button to go to your Personalizer resource.
-- Click `Keys and Endpoint` in the left hand Resource Management menu to view the `Endpoint` URL for this resource.
-- Click the copy icon next to `KEY 1` to copy the API Key credential for this resource.
+* Select **OpenAI Embeddings** in the provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Once valid credentials are saved, embeddings will be generated for all existing posts that don't have embeddings already.
 
-For more information, see https://docs.microsoft.com/en-us/azure/cognitive-services/personalizer/how-to-create-resource
+### 3. Add the "Recommended Content" block to your content
 
-### 2. Configure Microsoft Azure API and Key under Tools > ClassifAI > Recommended Content Service > Settings
-
-- In the `Endpoint URL` field, enter your `Endpoint` URL from Step 1 above.
-- In the `API Key` field, enter your `KEY 1` from Step 1 above.
-
-### 3. Use "Recommended Content" block to display recommended content on your website
+* Edit an existing page and add in the new Recommended Content block.
+* This defaults to rendering 3 items that meet the threshold criteria set. This can be changed to render more or less. Note though that only items that meet the threshold will be used, so less items may be shown than selected. If no items meet the threshold, the block will instead pull from the most recent posts.
+* This block will render using the template selected in the settings. This template can be modified in the block editor.
 
 ## Run locally hosted LLMs
 
@@ -782,4 +776,4 @@ Please read [CODE_OF_CONDUCT.md](https://github.com/10up/classifai/blob/develop/
 
 ## Like what you see?
 
-<a href="http://10up.com/contact/"><img src="https://10up.com/uploads/2016/10/10up-Github-Banner.png" width="850" alt="Work with us at 10up"></a>
+<a href="http://10up.com/contact/"><img src="https://github.com/10up/.github/blob/trunk/profile/10up-github-banner.jpg" width="850" alt="Work with the 10up WordPress Practice at Fueled"></a>

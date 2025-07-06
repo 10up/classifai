@@ -357,15 +357,17 @@ class OpenAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'A valid post ID is required to generate an excerpt.', 'classifai' ) );
 		}
 
-		$feature  = new ExcerptGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new ExcerptGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
+				'author'  => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks (and the one above) happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -374,11 +376,17 @@ class OpenAI extends Provider {
 		}
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
-		$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+
+		// Overwrite the prompt if we are generating an excerpt for a product.
+		if ( 'product' === $post_type ) {
+			$excerpt_prompt = $feature->woo_prompt;
+		} else {
+			$excerpt_prompt = esc_textarea( get_default_prompt( $settings['generate_excerpt_prompt'] ) ?? $feature->prompt );
+		}
 
 		// Replace our variables in the prompt.
-		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}' );
-		$prompt_replace = array( $excerpt_length, $args['title'] );
+		$prompt_search  = array( '{{WORDS}}', '{{TITLE}}', '{{AUTHOR}}' );
+		$prompt_replace = array( $excerpt_length, $args['title'], $args['author'] );
 		$prompt         = str_replace( $prompt_search, $prompt_replace, $excerpt_prompt );
 
 		/**
@@ -395,6 +403,14 @@ class OpenAI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
+		// Check if we are generating an excerpt for a product.
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, $excerpt_length, false, $args['content'] );
+
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
 		 *
@@ -409,16 +425,7 @@ class OpenAI extends Provider {
 		$body = apply_filters(
 			'classifai_azure_openai_excerpt_request_body',
 			[
-				'messages'    => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, $excerpt_length, false, $args['content'] ) . '"""',
-					],
-				],
+				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'temperature' => 0.9,
 			],
 			$post_id
@@ -464,15 +471,16 @@ class OpenAI extends Provider {
 			return new WP_Error( 'post_id_required', esc_html__( 'Post ID is required to generate titles.', 'classifai' ) );
 		}
 
-		$feature  = new TitleGeneration();
-		$settings = $feature->get_settings();
-		$args     = wp_parse_args(
+		$feature   = new TitleGeneration();
+		$settings  = $feature->get_settings();
+		$args      = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num'     => $settings[ static::ID ]['number_of_suggestions'] ?? 1,
 				'content' => '',
 			]
 		);
+		$post_type = get_post_type( $post_id );
 
 		// These checks happen in the REST permission_callback,
 		// but we run them again here in case this method is called directly.
@@ -480,7 +488,12 @@ class OpenAI extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+		// Overwrite the prompt if we are generating titles for a product.
+		if ( 'product' === $post_type ) {
+			$prompt = $feature->woo_prompt;
+		} else {
+			$prompt = esc_textarea( get_default_prompt( $settings['generate_title_prompt'] ) ?? $feature->prompt );
+		}
 
 		/**
 		 * Filter the prompt we will send to Azure OpenAI.
@@ -496,6 +509,14 @@ class OpenAI extends Provider {
 		 */
 		$prompt = apply_filters( 'classifai_azure_openai_title_prompt', $prompt, $post_id, $args );
 
+		// Check if we are generating titles for products.
+		if ( 'product' === $post_type && function_exists( 'wc_get_product' ) && \wc_get_product( $post_id ) ) {
+			$args['content'] = $this->get_product_content( $post_id );
+		}
+
+		// Get the filtered content for request.
+		$message_content = $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] );
+
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
 		 *
@@ -510,16 +531,7 @@ class OpenAI extends Provider {
 		$body = apply_filters(
 			'classifai_azure_openai_title_request_body',
 			[
-				'messages'    => [
-					[
-						'role'    => 'system',
-						'content' => 'You will be provided with content delimited by triple quotes. ' . $prompt,
-					],
-					[
-						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] ) . '"""',
-					],
-				],
+				'messages'    => $this->get_request_messages( $post_id, $prompt, $message_content ),
 				'temperature' => 0.9,
 				'n'           => absint( $args['num'] ),
 			],
@@ -688,6 +700,7 @@ class OpenAI extends Provider {
 				'content' => '',
 				'title'   => get_the_title( $post_id ),
 				'render'  => 'list',
+				'run'     => 'auto',
 			]
 		);
 
@@ -695,6 +708,33 @@ class OpenAI extends Provider {
 		// but we run them again here in case this method is called directly.
 		if ( empty( $settings ) || ( isset( $settings[ static::ID ]['authenticated'] ) && false === $settings[ static::ID ]['authenticated'] ) || ( ! $feature->is_feature_enabled() && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Key Takeaways generation is disabled or authentication failed. Please check your settings.', 'classifai' ) );
+		}
+
+		/**
+		 * Decide if we should automatically run the key takeaways generation.
+		 *
+		 * By default, we will always run the generation. If you
+		 * only want to run when triggered manually, you can
+		 * filter the return value to false.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_key_takeaways_auto_run
+		 *
+		 * @param {bool} $run Whether to run the key takeaways generation.
+		 * @param {int} $post_id ID of post we are summarizing.
+		 *
+		 * @return {bool} Whether to run the key takeaways generation.
+		 */
+		$run = apply_filters( 'classifai_azure_openai_key_takeaways_auto_run', true, $post_id );
+
+		if ( 'auto' === $args['run'] && ! (bool) $run ) {
+			return new WP_Error( 'not_run', esc_html__( 'Automatic generation is disabled. Please click the "Generate results" button when ready.', 'classifai' ) );
+		}
+
+		// Ensure we have content before making a request.
+		$content = $this->get_content( $post_id, 0, false, $args['content'] );
+		if ( empty( $content ) ) {
+			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
@@ -738,7 +778,7 @@ class OpenAI extends Provider {
 					],
 					[
 						'role'    => 'user',
-						'content' => '"""' . $this->get_content( $post_id, 0, false, $args['content'] ) . '"""',
+						'content' => '"""' . $content . '"""',
 					],
 				],
 				'response_format' => [
@@ -843,7 +883,7 @@ class OpenAI extends Provider {
 		/**
 		 * Filter the prompt we will send to Azure OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Azure OpenAI. Gets added before summary.
@@ -902,7 +942,7 @@ class OpenAI extends Provider {
 		/**
 		 * Filter the request body before sending to Azure OpenAI.
 		 *
-		 * @since x.x.x
+		 * @since 3.4.0
 		 * @hook classifai_azure_openai_content_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Azure OpenAI.

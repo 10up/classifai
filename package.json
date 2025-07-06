@@ -1,6 +1,6 @@
 {
   "name": "classifai",
-  "version": "3.3.1",
+  "version": "3.4.0",
   "license": "GPL-2.0-or-later",
   "repository": "https://github.com/10up/classifai/",
   "description": "Enhance your WordPress content with Artificial Intelligence and Machine Learning services.",
@@ -57,7 +57,7 @@
     "choices.js": "^11.1.0",
     "classnames": "^2.5.1",
     "motion": "^12.4.10",
-    "react-router-dom": "^7.1.5",
+    "react-router-dom": "^7.5.2",
     "tippy.js": "^6.3.7"
   },
   "optionalDependencies": {

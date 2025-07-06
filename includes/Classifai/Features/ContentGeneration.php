@@ -251,7 +251,7 @@ EOD;
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the status panel that can be used to generate draft content.', 'classifai' );
+		return esc_html__( 'A sparkle icon will show in the bottom right corner in the block editor. Click on this to start the generation process.', 'classifai' );
 	}
 
 	/**
@@ -304,14 +304,13 @@ EOD;
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings   = $this->get_settings();
 		$post_types = \Classifai\get_post_types_for_language_settings();
 
 		$new_settings['prompt'] = sanitize_prompts( 'prompt', $new_settings );
 
 		foreach ( $post_types as $post_type ) {
 			if ( ! isset( $new_settings['post_types'][ $post_type->name ] ) ) {
-				$new_settings['post_types'][ $post_type->name ] = $settings['post_types'];
+				$new_settings['post_types'][ $post_type->name ] = '';
 			} else {
 				$new_settings['post_types'][ $post_type->name ] = sanitize_text_field( $new_settings['post_types'][ $post_type->name ] );
 			}

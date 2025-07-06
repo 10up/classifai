@@ -111,6 +111,7 @@ export const ChatUI: React.FC = () => {
 
 	// Handle quick action option selection
 	// TODO: Look to fully support this in the future.
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleOptionSelect = ( option: string ): void => {
 		let prompt = '';
 		const selectedContent = select( editorStore ).getEditedPostContent();
@@ -316,6 +317,7 @@ export const ChatUI: React.FC = () => {
 			conversation[ conversation.length - 1 ].completion !== null;
 
 		const currentContent = select( editorStore ).getEditedPostContent();
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const hasContent = currentContent.length > 0;
 
 		if ( hasActiveConversation ) {

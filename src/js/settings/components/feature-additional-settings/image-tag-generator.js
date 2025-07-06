@@ -3,7 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 // eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { SelectControl } from '@wordpress/components';
+import { SelectControl, RadioControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -36,18 +36,49 @@ export const ImageTagGeneratorSettings = () => {
 		};
 	} );
 	return (
-		<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
-			<SelectControl
-				id="feature_image_tags_generator_tag_taxonomy"
-				onChange={ ( value ) => {
-					setFeatureSettings( {
-						tag_taxonomy: value,
-					} );
-				} }
-				value={ featureSettings.tag_taxonomy || 'classifai-image-tags' }
-				options={ options }
-				__nextHasNoMarginBottom
-			/>
-		</SettingsRow>
+		<>
+			<SettingsRow label={ __( 'Tag taxonomy', 'classifai' ) }>
+				<SelectControl
+					id="feature_image_tags_generator_tag_taxonomy"
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							tag_taxonomy: value,
+						} );
+					} }
+					value={
+						featureSettings.tag_taxonomy || 'classifai-image-tags'
+					}
+					options={ options }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Processing mode', 'classifai' ) }
+				description={ __(
+					'Choose how you want images to be processed. These can be processed automatically when each image is uploaded or can instead be triggered manually on each desired image. Note if set to automatic, you can still trigger the processing manually on individual images.',
+					'classifai'
+				) }
+			>
+				<RadioControl
+					className="processing-mode-radio-control"
+					onChange={ ( value ) => {
+						setFeatureSettings( {
+							processing_mode: value,
+						} );
+					} }
+					options={ [
+						{
+							label: __( 'Automatically on upload', 'classifai' ),
+							value: 'automatic',
+						},
+						{
+							label: __( 'Manually trigger', 'classifai' ),
+							value: 'manual',
+						},
+					] }
+					selected={ featureSettings.processing_mode }
+				/>
+			</SettingsRow>
+		</>
 	);
 };

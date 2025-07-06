@@ -3,21 +3,6 @@ describe( 'Common Feature Fields', () => {
 		cy.login();
 	} );
 
-	const features = {
-		feature_classification: 'Classification',
-		feature_title_generation: 'Title Generation',
-		feature_excerpt_generation: 'Excerpt Generation',
-		feature_content_resizing: 'Content Resizing',
-		feature_text_to_speech_generation: 'Text to Speech',
-		feature_audio_transcripts_generation: 'Audio Transcripts Generation',
-		feature_image_generation: 'Image Generation',
-		feature_descriptive_text_generator: 'Descriptive Text Generator',
-		feature_image_tags_generator: 'Image Tags Generator',
-		feature_image_cropping: 'Image Cropping',
-		feature_image_to_text_generator: 'Image Text Extraction',
-		feature_pdf_to_text_generation: 'PDF Text Extraction',
-	};
-
 	const services = {
 		language_processing: {
 			feature_classification: 'Classification',
@@ -25,7 +10,8 @@ describe( 'Common Feature Fields', () => {
 			feature_excerpt_generation: 'Excerpt Generation',
 			feature_content_resizing: 'Content Resizing',
 			feature_text_to_speech_generation: 'Text to Speech',
-			feature_audio_transcripts_generation: 'Audio Transcripts Generation',
+			feature_audio_transcripts_generation:
+				'Audio Transcripts Generation',
 		},
 		image_processing: {
 			feature_image_generation: 'Image Generation',
@@ -34,6 +20,9 @@ describe( 'Common Feature Fields', () => {
 			feature_image_cropping: 'Image Cropping',
 			feature_image_to_text_generator: 'Image Text Extraction',
 			feature_pdf_to_text_generation: 'PDF Text Extraction',
+		},
+		personalizer: {
+			feature_recommended_content: 'Recommended Content',
 		},
 	};
 
@@ -45,7 +34,7 @@ describe( 'Common Feature Fields', () => {
 		Object.keys( features ).forEach( ( feature ) => {
 			it( `"${ features[ feature ] }" feature common fields`, () => {
 				cy.visitFeatureSettings( `${ service }/${ feature }` );
-	
+
 				cy.get( '.classifai-enable-feature-toggle input' ).should(
 					'exist'
 				);
@@ -55,13 +44,14 @@ describe( 'Common Feature Fields', () => {
 				).should( 'exist' );
 				cy.get( 'body' ).then( ( $body ) => {
 					if (
-						$body.find( '.classifai-settings-edit-provider' ).length > 0
+						$body.find( '.classifai-settings-edit-provider' )
+							.length > 0
 					) {
 						cy.get( '.classifai-settings-edit-provider' ).click();
 					}
 				} );
 				cy.get( '.classifai-provider-select select' ).should( 'exist' );
-	
+
 				for ( const role of allowedRoles ) {
 					if (
 						'feature_image_generation' === feature &&
@@ -69,14 +59,14 @@ describe( 'Common Feature Fields', () => {
 					) {
 						continue;
 					}
-	
+
 					const roleField = cy.get(
 						`.settings-allowed-roles input#${ role }`
 					);
 					roleField.should( 'be.visible' );
 					roleField.should( 'have.value', 1 );
 				}
-	
+
 				cy.get( '.classifai-settings__users' ).should( 'be.visible' );
 			} );
 		} );
