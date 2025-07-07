@@ -186,6 +186,13 @@ class Plugin {
 			true
 		);
 
+		$readme_path = trailingslashit( CLASSIFAI_PLUGIN_DIR ) . 'README.md';
+		$readme_content = '';
+
+		if ( file_exists( $readme_path ) ) {
+			$readme_content = file_get_contents( $readme_path );
+		}
+
 		$localize_data = [
 			'api_password'             => __( 'API Password', 'classifai' ),
 			'api_key'                  => __( 'API Key', 'classifai' ),
@@ -195,6 +202,51 @@ class Plugin {
 			'opt_out_enabled_features' => array_keys( $allowed_features ),
 			'profile_url'              => esc_url( get_edit_profile_url( get_current_user_id() ) . '#classifai-profile-features-section' ),
 			'plugin_url'               => CLASSIFAI_PLUGIN_URL,
+			'instruction'              => array(
+				'feature_classification'            => array(
+					'ibm_watson_nlu'          => preg_match('/## Set Up Classification \(via IBM Watson\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+					'openai_embeddings'       => preg_match('/## Set Up Classification \(via OpenAI Embeddings\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+					'azure_openai_embeddings' => '',
+					'ollama_embeddings'       => '',
+				),
+				'feature_title_generation'          => array(
+					'openai_chatgpt'      => '',
+					'googleai_gemini_api' => '',
+					'azure_openai'        => '',
+					'xai_grok'            => '',
+					'ollama'              => '',
+				),
+				'feature_excerpt_generation'        => array(
+					'openai_chatgpt'      => '',
+					'googleai_gemini_api' => '',
+					'azure_openai'        => '',
+					'xai_grok'            => '',
+					'ollama'              => '',
+				),
+				'feature_content_generation'        => array(
+					'openai_chatgpt' => '',
+					'azure_openai'   => '',
+					'ollama'         => '',
+				),
+				'feature_content_resizing'          => array(
+					'openai_chatgpt'      => '',
+					'googleai_gemini_api' => '',
+					'azure_openai'        => '',
+					'xai_grok'            => '',
+					'ollama'              => '',
+				),
+				'feature_key_takeaways'              => array(),
+				'feature_text_to_speech_generation'  => array(),
+				'feature_smart_404'                  => array(),
+				'feature_term_cleanup'               => array(),
+				'feature_descriptive_text_generator' => array(),
+				'feature_image_tags_generator'       => array(),
+				'feature_image_to_text_generator'    => array(),
+				'feature_image_cropping'             => array(),
+				'feature_pdf_to_text_generation'     => array(),
+				'feature_moderation'                 => array(),
+				'feature_recommended_content'        => array(),
+			),
 		];
 
 		wp_localize_script(

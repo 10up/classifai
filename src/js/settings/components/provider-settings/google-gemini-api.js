@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { SetupInstruction } from './setup-instruction';
 
 /**
  * Component for Google AI (Gemini API) Provider settings.
@@ -50,6 +51,7 @@ export const GoogleAIGeminiAPISettings = ( { isConfigured = false } ) => {
 
 	return (
 		<>
+			<SetupInstruction provider={ providerName } />
 			<SettingsRow
 				label={ __( 'API Key', 'classifai' ) }
 				description={ <Description /> }
