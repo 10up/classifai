@@ -772,3 +772,56 @@ function render_smart_404_results( array $args = [] ) {
 	}
 	echo '</ul>';
 }
+
+/**
+ * Returns if a resource is of type attachment, URL or system path.
+ *
+ * @param int|string $resource_ref The ID of the attachment, or system or URL path
+ *                                   to the audio file.
+ * @return bool|string The resource type. (attachment, url, path or false if none).
+ */
+function get_resource_type( $resource_ref ) {
+	if ( ! is_scalar( $resource_ref ) ) {
+		return false;
+	}
+
+	if ( is_numeric( $resource_ref ) ) {
+		return 'attachment';
+	}
+
+	if ( filter_var( $resource_ref, FILTER_VALIDATE_URL ) ) {
+		return 'url';
+	}
+
+	return 'path';
+}
+
+/**
+ * Returns true if attachment, false otherwise.
+ *
+ * @param string $resource_ref The ID of the attachment.
+ * @return bool
+ */
+function is_attachment( string $resource_ref ): bool {
+	return 'attachment' === get_resource_type( $resource_ref );
+}
+
+/**
+ * Returns true if the resource path is a URL, false otherwise.
+ *
+ * @param string $resource_ref The URL to the audio file.
+ * @return bool
+ */
+function is_remote_url( string $resource_ref ): bool {
+	return 'url' === get_resource_type( $resource_ref );
+}
+
+/**
+ * Returns true if the resource path is a system path, false otherwise.
+ *
+ * @param string $resource_ref The system file path to the audio file.
+ * @return bool
+ */
+function is_local_path( string $resource_ref ): bool {
+	return 'path' === get_resource_type( $resource_ref );
+}
