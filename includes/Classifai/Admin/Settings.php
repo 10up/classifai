@@ -28,7 +28,7 @@ class Settings {
 		add_action( 'admin_menu', [ $this, 'register_settings_page' ] );
 		add_action( 'admin_enqueue_scripts', [ $this, 'admin_enqueue_scripts' ] );
 		add_action( 'rest_api_init', [ $this, 'register_routes' ] );
-		add_action( 'after_plugin_row', [ $this, 'update_notice' ] );
+		add_action( 'after_plugin_row_' . CLASSIFAI_PLUGIN_BASENAME, [ $this, 'update_notice' ] );
 	}
 
 	/**
@@ -497,15 +497,9 @@ class Settings {
 	}
 
 	/**
-	 * Add link to the ClassifAI registration in the plugin row.
-	 *
-	 * @param string $plugin_file Plugin file path.
+	 * Add a link to the ClassifAI registration page in the plugin row.
 	 */
-	public function update_notice( $plugin_file ) {
-
-		if ( CLASSIFAI_PLUGIN_BASENAME !== $plugin_file ) {
-			return;
-		}
+	public function update_notice() {
 
 		$registration_settings = get_option( 'classifai_settings' );
 
