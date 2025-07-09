@@ -9,6 +9,10 @@ use Classifai\Features\AudioTranscriptsGeneration;
 use Classifai\Providers\Provider;
 use WP_Error;
 
+use function Classifai\is_attachment;
+use function Classifai\is_remote_url;
+use function Classifai\is_local_path;
+
 class SpeechToText extends Provider {
 
 	use \Classifai\Providers\OpenAI\OpenAI;
@@ -188,11 +192,11 @@ class SpeechToText extends Provider {
 
 		switch ( $route_to_call ) {
 			case 'transcript':
-				if ( \Classifai\is_attachment( $audio_resource ) ) {
+				if ( is_attachment( $audio_resource ) ) {
 					return $this->transcribe_from_attachment( $audio_resource, $args );
-				} elseif ( \Classifai\is_remote_url( $audio_resource ) ) {
+				} elseif ( is_remote_url( $audio_resource ) ) {
 					return $this->transcribe_from_path( $audio_resource );
-				} elseif ( \Classifai\is_local_path( $audio_resource ) ) {
+				} elseif ( is_local_path( $audio_resource ) ) {
 					return $this->transcribe_audio( $audio_resource, $args );
 				}
 				break;
@@ -204,14 +208,14 @@ class SpeechToText extends Provider {
 	}
 
 	/**
-	 * Generates a transcript from a given attachment ID if permissions and feature settings allow.
+	 * Generates a transcript from a given attachment ID.
 	 *
-	 * Validates that the current user can edit the attachment, ensures the feature is enabled,
-	 * and checks whether the attachment meets the processing criteria (e.g., correct file type and size).
+	 * Validates that the current user can edit the attachment,
+	 * ensures the feature is enabled, and checks whether the attachment
+	 * meets the processing criteria (e.g., correct file type and size).
 	 *
 	 * @param int   $attachment_id Attachment post ID.
 	 * @param array $args          Optional arguments to pass to the route.
-	 *
 	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
 	 */
 	private function transcribe_from_attachment( int $attachment_id = 0, array $args = [] ) {
@@ -238,12 +242,12 @@ class SpeechToText extends Provider {
 	/**
 	 * Generates a transcript from a file path or remote URL.
 	 *
-	 * If the path is a remote URL, it is downloaded to a temporary location and deleted after processing.
-	 * If it's a local path and the file exists, it is processed directly.
+	 * If the path is a remote URL, it is downloaded to a temporary
+	 * location and deleted after processing. If it's a local path
+	 * and the file exists, it is processed directly.
 	 *
 	 * @param string $path Absolute local path or remote URL to an audio file.
 	 * @param array  $args  Optional arguments to pass to the route.
-	 *
 	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
 	 */
 	private function transcribe_from_path( string $path, array $args = [] ) {
@@ -271,7 +275,7 @@ class SpeechToText extends Provider {
 	}
 
 	/**
-	 * Start the audio transcription process.
+	 * Run the audio transcription process.
 	 *
 	 * @param string $file_path File system path.
 	 * @param array  $args      Optional arguments passed in.

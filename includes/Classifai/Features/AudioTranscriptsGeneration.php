@@ -350,7 +350,7 @@ class AudioTranscriptsGeneration extends Feature {
 	}
 
 	/**
-	 * Downloads a remote audio file and saves it to a temporary directory within the uploads folder.
+	 * Downloads a remote audio file and saves it to a temporary directory.
 	 *
 	 * This function performs the following:
 	 * 1. Downloads the remote file using wp_safe_remote_get().
@@ -360,7 +360,6 @@ class AudioTranscriptsGeneration extends Feature {
 	 * 5. Returns the local file path, or a WP_Error on failure.
 	 *
 	 * @param string $url Remote URL to an audio file.
-	 *
 	 * @return string|WP_Error The path to the saved file on success, or WP_Error on failure.
 	 */
 	public static function remote_url_to_path( string $url ) {
