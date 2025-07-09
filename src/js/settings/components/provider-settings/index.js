@@ -131,7 +131,7 @@ export const ProviderSettings = () => {
 	);
 
 	// Remove the Chrome AI Provider from the list of providers if the browser AI is not available.
-	if ( feature?.providers?.chrome_ai && ! window.ai ) {
+	if ( feature?.providers?.chrome_ai && ! window.LanguageModel ) {
 		delete feature.providers.chrome_ai;
 	}
 
