@@ -6,7 +6,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		);
 		cy.enableFeature();
 		cy.selectProvider( 'googleai_gemini_api' );
-		cy.get( 'input#googleai_gemini_api_api_key' ).clear().type( 'abc123' );
+		cy.get( 'input#googleai_gemini_api_key' ).clear().type( 'abc123' );
 		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();

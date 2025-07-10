@@ -14,7 +14,8 @@ import { getFeature, getScope, isProviderConfigured } from '../../utils/utils';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { OpenAIChatGPTSettings } from './openai-chatgpt';
-import { GoogleAIGeminiAPISettings } from './google-gemini-api';
+import { GoogleAIGeminiSettings } from './googleai-gemini';
+import { GoogleAIImagesSettings } from './googleai-images';
 import { AzureOpenAISettings } from './azure-openai';
 import { useFeatureContext } from '../feature-settings/context';
 import { IBMWatsonNLUSettings } from './ibm-watson-nlu';
@@ -48,7 +49,10 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 			return <OpenAIChatGPTSettings isConfigured={ isConfigured } />;
 
 		case 'googleai_gemini_api':
-			return <GoogleAIGeminiAPISettings isConfigured={ isConfigured } />;
+			return <GoogleAIGeminiSettings isConfigured={ isConfigured } />;
+
+		case 'googleai_images':
+			return <GoogleAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'azure_openai':
 		case 'azure_openai_embeddings':

@@ -24,9 +24,7 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'googleai_gemini_api' );
-		cy.get( 'input#googleai_gemini_api_api_key' )
-			.clear()
-			.type( 'password' );
+		cy.get( 'input#googleai_gemini_api_key' ).clear().type( 'password' );
 
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();
@@ -102,7 +100,9 @@ describe( '[Language processing] Excerpt Generation Tests', () => {
 		cy.get( '#postexcerpt-hide' ).check( { force: true } );
 
 		// Verify button exists.
-		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should( 'exist' );
+		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).should(
+			'exist'
+		);
 
 		// Click on button and verify data loads in.
 		cy.get( '#classifai-excerpt-generation__excerpt-generate-btn' ).click();
