@@ -372,7 +372,7 @@ class TextToSpeech extends Provider {
 		if ( is_wp_error( $response ) ) {
 			return new WP_Error(
 				'openai_text_to_speech_http_error',
-				esc_html( $response->get_error_message() )
+				wp_kses_post( $response->get_error_message() )
 			);
 		}
 

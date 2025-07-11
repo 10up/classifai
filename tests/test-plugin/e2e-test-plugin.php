@@ -100,6 +100,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 			'success'     => 1,
 			'body'        => '',
 		);
+	} elseif ( strpos( $url, 'https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-preview-06-06:predict' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/imagen.json' );
 	} elseif ( strpos( $url, 'https://generativelanguage.googleapis.com/v1beta' ) !== false ) {
 		$response  = file_get_contents( __DIR__ . '/geminiapi.json' );
 		$body_json = $parsed_args['body'] ?? false;

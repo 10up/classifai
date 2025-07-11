@@ -24,6 +24,7 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 		this.quality = options.quality;
 		this.size = options.size;
 		this.style = options.style;
+		this.aspectRatio = options.aspectRatio;
 
 		this.listenTo( this.collection, 'reset', this.renderAll );
 		this.listenTo( this.collection, 'error', this.error );
@@ -32,7 +33,8 @@ const GeneratedImagesContainer = wp.media.View.extend( {
 			this.prompt,
 			this.quality,
 			this.size,
-			this.style
+			this.style,
+			this.aspectRatio
 		);
 		this.render();
 	},
