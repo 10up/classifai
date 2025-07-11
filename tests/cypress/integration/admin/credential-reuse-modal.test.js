@@ -16,7 +16,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.enableCredentialReuseModal();
 
 			// Mock the API response to simulate available credentials
-			cy.intercept( 'GET', '**/index.php?rest_route=%2Fclassifai%2Fv1%2Fcredential-reuse%2Ffeature_title_generation**', {
+			cy.intercept( 'GET', '**/wp-json/classifai/v1/credential-reuse/feature_title_generation**', {
 				statusCode: 200,
 				body: {
 					openai_chatgpt: {
@@ -51,7 +51,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.visitFeatureSettings( 'language_processing/feature_title_generation' );
 
 			// Mock the API response
-			cy.intercept( 'GET', '**/index.php?rest_route=%2Fclassifai%2Fv1%2Fcredential-reuse%2Ffeature_title_generation**', {
+			cy.intercept( 'GET', '**/wp-json/classifai/v1/credential-reuse/feature_title_generation**', {
 				statusCode: 200,
 				body: {
 					openai_chatgpt: {
@@ -83,7 +83,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.enableCredentialReuseModal();
 
 			// Mock empty response
-			cy.intercept( 'GET', '**/index.php?rest_route=%2Fclassifai%2Fv1%2Fcredential-reuse%2Ffeature_title_generation**', {
+			cy.intercept( 'GET', '**/wp-json/classifai/v1/credential-reuse/feature_title_generation**', {
 				statusCode: 200,
 				body: {}
 			} ).as( 'checkCredentials' );
@@ -105,7 +105,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 	describe( 'Modal Interaction', () => {
 		beforeEach( () => {
 			// Setup common mocks
-			cy.intercept( 'GET', '**/index.php?rest_route=%2Fclassifai%2Fv1%2Fcredential-reuse%2Ffeature_title_generation**', {
+			cy.intercept( 'GET', '**/wp-json/classifai/v1/credential-reuse/feature_title_generation**', {
 				statusCode: 200,
 				body: {
 					openai_chatgpt: {
@@ -177,7 +177,7 @@ describe( 'Credential Reuse Modal Tests', () => {
 			cy.visitFeatureSettings( 'language_processing/feature_title_generation' );
 			cy.enableCredentialReuseModal();
 
-			cy.intercept( 'POST', '**/index.php?rest_route=%2Fclassifai%2Fv1%2Fcredential-reuse%2Fcopy**', {
+			cy.intercept( 'POST', '**/wp-json/classifai/v1/credential-reuse/copy**', {
 				success: true
 			} ).as( 'applyCredentials' );
 
