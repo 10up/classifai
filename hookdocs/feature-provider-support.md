@@ -17,6 +17,6 @@ The following table lists out all the Providers that are in ClassifAI and what F
 | Image Tags Generator         |   |   |   | X |   |   |   |   | X | X |   |
 | Image Cropping               |   |   |   | X |   |   |   |   |   |   |   |
 | Image Text Extraction        |   |   |   | X |   |   |   |   | X | X |   |
-| Image Generation             |   |   |   |   |   |   |   |   |   | X |   |
+| Image Generation             |   |   |   |   |   |   | X |   |   | X |   |
 | PDF Text Extraction          |   |   |   | X |   |   |   |   |   |   |   |
 | Recommended Content          |   | X |   |   |   |   |   |   |   | X |   |

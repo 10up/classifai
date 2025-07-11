@@ -1078,3 +1078,14 @@ table.similar_terms.widefat th {
 table.similar_terms.widefat thead th {
 	font-weight: bold;
 }
+
+#wpbody {
+
+	tr[data-slug="classifai"] {
+
+		th, td {
+			box-shadow: none;
+			border-bottom: 0;
+		}
+	}
+}
