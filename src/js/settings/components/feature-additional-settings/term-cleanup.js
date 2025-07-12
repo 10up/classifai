@@ -7,6 +7,7 @@ import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 import { getFeature } from '../../utils/utils';
+import { thresholdInfo } from '../../utils/helper-text';
 
 /**
  * Component for Term Cleanup feature settings.
@@ -31,7 +33,7 @@ export const TermCleanupSettings = () => {
 	);
 	const { setFeatureSettings } = useDispatch( STORE_NAME );
 	const { taxonomies = {} } = getFeature( featureName );
-
+	const [ thresholdInfoStates, setThresholdInfoStates ] = useState( {} );
 	const options = Object.keys( taxonomies ).map( ( slug ) => {
 		return {
 			value: slug,
@@ -46,6 +48,13 @@ export const TermCleanupSettings = () => {
 			defaultThreshold: 75,
 		};
 	} );
+
+	const toggleThresholdInfo = ( feature ) => {
+		setThresholdInfoStates( prev => ({
+			...prev,
+			[ feature ]: ! prev[ feature ]
+		}));
+	};
 
 	const Description = () => {
 		if ( window.classifAISettings?.isEPinstalled ) {
@@ -123,7 +132,7 @@ export const TermCleanupSettings = () => {
 							/>
 							<InputControl
 								id={ `${ feature }-threshold` }
-								label={ __( 'Threshold (%)', 'classifai' ) }
+								label={ __( 'Confidence Threshold (%)', 'classifai' ) }
 								type="number"
 								value={
 									featureSettings?.taxonomies?.[
@@ -139,6 +148,17 @@ export const TermCleanupSettings = () => {
 									} );
 								} }
 							/>
+							<div className="display-container-wrapper">
+								<span 
+									className="dashicons dashicons-info-outline helper-text-icon"
+									title={ __( 'Click to show more information', 'classifai' ) }
+									onClick={ () => toggleThresholdInfo( feature ) }
+									style={ { cursor: 'pointer' } }
+								></span>
+								{ thresholdInfoStates[ feature ] && (
+									thresholdInfo[ 'helper' ]
+								) }
+							</div>
 						</SettingsRow>
 					);
 				} ) }

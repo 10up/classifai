@@ -8,6 +8,7 @@ import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -15,6 +16,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { getFeature } from '../../utils/utils';
+import { thresholdInfo, nluHelperText } from '../../utils/helper-text';
 
 /**
  * Component for render settings fields when IBM Watson NLU is selected as the provider.
@@ -24,6 +26,7 @@ import { getFeature } from '../../utils/utils';
  * @return {React.ReactElement} NLUFeatureSettings component.
  */
 export const NLUFeatureSettings = () => {
+	const [ thresholdInfoStates, setThresholdInfoStates ] = useState( {} );
 	const featureSettings = useSelect( ( select ) =>
 		select( STORE_NAME ).getFeatureSettings()
 	);
@@ -36,46 +39,22 @@ export const NLUFeatureSettings = () => {
 		category: {
 			label: __( 'Category', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: __(
-				'<p>IBM Watson analyzes your content and assigns a broad topic hierarchy that best describes the overall subject.</p>'+
-				'<p>Example:<code>/technology and computing/software</code></p>'+
-				'<p>Categories are useful for general classification and site-wide content grouping.</p>'+
-				'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#categories" target="_blank">Learn more</a></p>',
-				'classifai'
-			),
+			helperText: nluHelperText[ 'category' ],
 		},
 		keyword: {
 			label: __( 'Keyword', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: __(
-				'<p>Keywords represent important terms in your content that are contextually significant.</p>'+
-				'<p>Watson extracts these to help identify core concepts, topics, and SEO-friendly tags.</p>'+
-				'<p>Keywords often map well to WordPress tags.</p>'+
-				'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#keywords" target="_blank">Learn more</a></p>',
-				'classifai'
-			),
+			helperText: nluHelperText[ 'keyword' ],
 		},
 		entity: {
 			label: __( 'Entity', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: __(
-				'<p>Entities are named people, places, brands, and other proper nouns mentioned in your content.</p>'+
-				'<p>Watson identifies and classifies these by type (e.g., Person, Company, Location) and optionally links them to known databases like Wikipedia.</p>'+
-				'<p>Entities are helpful for structured data and enhancing rich snippets or metadata.</p>'+
-				'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#entities" target="_blank">Learn more</a></p>',
-				'classifai'
-			),
+			helperText: nluHelperText[ 'entity' ],
 		},
 		concept: {
 			label: __( 'Concept', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: __(
-				'<p>Concepts reflect high-level abstract ideas Watson identifies in your content, even if the term isn\'t explicitly used.</p>'+
-				'<p>For example, an article about "the iPhone" might be linked to the concept of “Apple Inc.”</p>'+
-				'<p>Concepts are great for semantic tagging and content recommendation systems.</p>'+
-				'<p><a href="https://cloud.ibm.com/docs/natural-language-understanding?topic=natural-language-understanding-about#concepts" target="_blank">Learn more</a></p>',
-				'classifai'
-			),
+			helperText: nluHelperText[ 'concept' ],
 		},
 	};
 
@@ -119,6 +98,13 @@ export const NLUFeatureSettings = () => {
 		} );
 	}
 
+	const toggleThresholdInfo = ( feature ) => {
+		setThresholdInfoStates( prev => ({
+			...prev,
+			[ feature ]: ! prev[ feature ]
+		}));
+	};
+
 	return (
 		<>
 			{ Object.keys( features ).map( ( feature ) => {
@@ -144,7 +130,7 @@ export const NLUFeatureSettings = () => {
 						/>
 						<InputControl
 							id={ `${ feature }-threshold` }
-							label={ __( 'Threshold (%)', 'classifai' ) }
+							label={ __( 'Confidence Threshold (%)', 'classifai' ) }
 							type="number"
 							value={
 								featureSettings[ `${ feature }_threshold` ] ||
@@ -156,6 +142,18 @@ export const NLUFeatureSettings = () => {
 								} );
 							} }
 						/>
+						<div className="display-container-wrapper">
+							<span 
+								className="dashicons dashicons-info-outline helper-text-icon"
+								title={ __( 'Click to show more information', 'classifai' ) }
+								onClick={ () => toggleThresholdInfo( feature ) }
+								style={ { cursor: 'pointer' } }
+							></span>
+							{ thresholdInfoStates[ feature ] && (
+								thresholdInfo[ 'helper' ]
+							) }
+						</div>
+						
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl
 								id={ `${ feature }-taxonomy` }

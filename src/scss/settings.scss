@@ -129,6 +129,17 @@
 			margin-right: -10px;
 		}
 
+		.display-container-wrapper {
+			margin-top: 8px;
+			margin-bottom: 8px;
+
+			.helper-text-content {
+				margin-top: 8px;
+				padding: 4px 20px;
+				background-color: #f0f0f1;
+			}
+		}
+
 		// Tooltip styles for helper text
 		.tooltip-container {
 			position: relative;
