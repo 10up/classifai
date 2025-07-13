@@ -56,7 +56,7 @@ class KeyTakeaways extends Feature {
 			'instructions' => [
 				ChatGPT::ID => '',
 				OpenAI::ID  => '',
-				Ollama::ID  => '',
+				Ollama::ID  => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}
