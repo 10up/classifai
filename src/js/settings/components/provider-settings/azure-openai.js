@@ -12,7 +12,6 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
-import { SetupInstruction } from './setup-instruction';
 
 /**
  * Component for Azure OpenAI Provider settings.
@@ -53,7 +52,6 @@ export const AzureOpenAISettings = ( {
 		<>
 			{ ! isConfigured && (
 				<>
-					<SetupInstruction provider={ providerName } />
 					<SettingsRow
 						label={ __( 'Endpoint URL', 'classifai' ) }
 						description={ <Description /> }

@@ -14,7 +14,6 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { OpenAISettings } from './openai';
 import { useFeatureContext } from '../feature-settings/context';
-import { SetupInstruction } from './setup-instruction';
 
 /**
  * React Component for OpenAI Embeddings settings.
@@ -39,13 +38,10 @@ export const OpenAIEmbeddingsSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<SetupInstruction provider={ providerName } />
-					<OpenAISettings
-						providerSettings={ providerSettings }
-						onChange={ onChange }
-					/>
-				</>
+				<OpenAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
 			{ [ 'feature_recommended_content' ].includes( featureName ) && (
 				<SettingsRow label={ __( 'Threshold %', 'classifai' ) }>

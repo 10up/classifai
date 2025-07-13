@@ -13,7 +13,6 @@ import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
 import { useFeatureContext } from '../feature-settings/context';
 import { PromptRepeater } from '../feature-additional-settings/prompt-repeater';
-import { SetupInstruction } from './setup-instruction';
 
 /**
  * Component for xAI Grok Provider settings.
@@ -72,20 +71,17 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<SetupInstruction provider={ providerName } />
-					<SettingsRow
-						label={ __( 'API Key', 'classifai' ) }
-						description={ <Description /> }
-					>
-						<InputControl
-							id={ `${ providerName }_api_key` }
-							type="password"
-							value={ providerSettings.api_key || '' }
-							onChange={ ( value ) => onChange( { api_key: value } ) }
-						/>
-					</SettingsRow>
-				</>
+				<SettingsRow
+					label={ __( 'API Key', 'classifai' ) }
+					description={ <Description /> }
+				>
+					<InputControl
+						id={ `${ providerName }_api_key` }
+						type="password"
+						value={ providerSettings.api_key || '' }
+						onChange={ ( value ) => onChange( { api_key: value } ) }
+					/>
+				</SettingsRow>
 			) }
 			{ [
 				'feature_content_resizing',

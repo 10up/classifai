@@ -8,7 +8,6 @@ import { useSelect, useDispatch } from '@wordpress/data';
  */
 import { STORE_NAME } from '../../data/store';
 import { OllamaBaseSettings } from './ollama-base';
-import { SetupInstruction } from './setup-instruction';
 
 /**
  * React Component for Ollama Embeddings settings.
@@ -35,13 +34,10 @@ export const OllamaEmbeddingsSettings = ( { isConfigured = false } ) => {
 	}
 
 	return (
-		<>
-			<SetupInstruction provider={ providerName } />
-			<OllamaBaseSettings
-				providerSettings={ providerSettings }
-				providerName
-				onChange={ onChange }
-			/>
-		</>
+		<OllamaBaseSettings
+			providerSettings={ providerSettings }
+			providerName
+			onChange={ onChange }
+		/>
 	);
 };

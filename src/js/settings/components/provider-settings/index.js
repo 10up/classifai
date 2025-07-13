@@ -189,6 +189,7 @@ export const ProviderSettings = () => {
 				{ ! configured && (
 					<SettingsRow
 						label={ __( 'Select a provider', 'classifai' ) }
+						instructionProvider={ provider }
 					>
 						<SelectControl
 							className="classifai-provider-select"

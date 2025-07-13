@@ -14,7 +14,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
-import { SetupInstruction } from './setup-instruction';
 
 /**
  * Component for IBM Watson NLU Provider settings.
@@ -61,7 +60,6 @@ export const IBMWatsonNLUSettings = ( { isConfigured = false } ) => {
 
 	return (
 		<>
-			<SetupInstruction provider={ providerName } />
 			<SettingsRow label={ __( 'API URL', 'classifai' ) }>
 				<InputControl
 					id={ `${ providerName }_endpoint_url` }

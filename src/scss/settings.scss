@@ -95,11 +95,25 @@
 		}
 
 		.settings-label {
+			display: flex;
 			align-items: center;
 			font-weight: bold;
 			flex-shrink: 0;
 			flex: 20%;
 			padding: 12px 0px;
+
+			.settings-info-button {
+
+				&:hover {
+					background: none;
+					outline: none;
+				}
+
+				&:focus {
+					box-shadow: none;
+					outline: none;
+				}
+			}
 		}
 
 		.settings-control {
@@ -633,4 +647,15 @@
 
 .classifai-settings__main-title {
 	margin-top: 2.5rem;
+}
+
+.tools_page_classifai {
+
+	.settings-instruction-modal {
+
+		ul {
+			list-style: unset;
+			padding: revert;
+		}
+	}
 }
