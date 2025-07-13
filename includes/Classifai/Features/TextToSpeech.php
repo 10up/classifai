@@ -69,6 +69,18 @@ class TextToSpeech extends Feature {
 			Speech::ID      => __( 'Microsoft Azure AI Speech', 'classifai' ),
 			OpenAITTS::ID   => __( 'OpenAI Text to Speech', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				AmazonPolly::ID => preg_match('/## Set Up Text to Speech \(via Amazon Polly\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				Speech::ID      => preg_match('/## Set Up Text to Speech \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OpenAITTS::ID   => preg_match('/## Set Up Text to Speech \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+			],
+		];
 	}
 
 	/**

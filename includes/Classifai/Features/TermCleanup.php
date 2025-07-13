@@ -66,6 +66,17 @@ class TermCleanup extends Feature {
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				OpenAIEmbeddings::ID => preg_match('/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				AzureEmbeddings::ID  => preg_match('/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+			],
+		];
 	}
 
 	/**

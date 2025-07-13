@@ -35,6 +35,16 @@ class PDFTextExtraction extends Feature {
 		$this->supported_providers = [
 			ComputerVision::ID => __( 'Microsoft Azure AI Vision', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				ComputerVision::ID => preg_match('/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+			],
+		];
 	}
 
 	/**

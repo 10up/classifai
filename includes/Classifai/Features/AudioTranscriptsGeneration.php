@@ -36,6 +36,16 @@ class AudioTranscriptsGeneration extends Feature {
 		$this->supported_providers = [
 			SpeechToText::ID => __( 'OpenAI Audio Transcription', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				SpeechToText::ID => preg_match('/## Set Up Audio Transcripts Generation \(via OpenAI Speech to Text\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+			],
+		];
 	}
 
 	/**

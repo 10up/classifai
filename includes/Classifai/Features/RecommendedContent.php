@@ -34,6 +34,17 @@ class RecommendedContent extends Feature {
 			OpenAIEmbeddings::ID     => __( 'OpenAI Embeddings', 'classifai' ),
 			PersonalizerProvider::ID => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				OpenAIEmbeddings::ID     => preg_match('/## Set Up Recommended Content \(via OpenAI Embeddings\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				PersonalizerProvider::ID => '',
+			],
+		];
 	}
 
 	/**

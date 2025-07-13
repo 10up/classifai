@@ -59,6 +59,21 @@ class ExcerptGeneration extends Feature {
 			ChromeAI::ID  => __( 'Chrome AI (experimental)', 'classifai' ),
 			Ollama::ID    => __( 'Ollama', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				ChatGPT::ID   => preg_match('/## Set Up Language Processing Features \(via OpenAI ChatGPT\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				GeminiAPI::ID => preg_match('/## Set Up Language Processing Features \(via Google AI \(Gemini API\)\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OpenAI::ID    => preg_match('/## Set Up Language Processing Features \(via Azure OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				Grok::ID      => '',
+				ChromeAI::ID  => '',
+				Ollama::ID    => preg_match('/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+			],
+		];
 	}
 
 	/**

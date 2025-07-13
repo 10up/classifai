@@ -170,6 +170,7 @@ class Settings {
 					'roles'              => $feature->get_roles(),
 					'enable_description' => $feature->get_enable_description(),
 					'taxonomies'         => $feature->get_taxonomies(),
+					'providers_data'     => $feature->supported_providers_data,
 				);
 
 				// Add taxonomies under post types for language processing features to allow filtering by post type.

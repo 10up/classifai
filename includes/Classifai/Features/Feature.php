@@ -59,6 +59,13 @@ abstract class Feature {
 	public $supported_providers = [];
 
 	/**
+	 * Array of providers data supported by the feature.
+	 *
+	 * @var \Classifai\Providers\Provider[]
+	 */
+	public $supported_providers_data = [];
+
+	/**
 	 * Set up necessary hooks.
 	 */
 	public function setup() {
@@ -1410,5 +1417,27 @@ abstract class Feature {
 			$args,
 			$this
 		);
+	}
+
+	/**
+	 * Get content from README.md file.
+	 *
+	 * @return string|WP_Error
+	 */
+	public function get_readme_content(): string | WP_Error {
+
+		$readme_path = trailingslashit( CLASSIFAI_PLUGIN_DIR ) . 'README.md';
+
+		if ( ! file_exists( $readme_path ) ) {
+			return __return_empty_string();
+		}
+
+		$readme_content = file_get_contents( $readme_path ); // phpcs:ignore
+
+		if ( false === $readme_content || ! is_string( $readme_content ) ) {
+			return new WP_Error( 'invalid', esc_html__( 'Readme cannot be downloaded.', 'classifai' ) );
+		}
+
+		return $readme_content;
 	}
 }

@@ -1,4 +1,3 @@
-/* global ClassifAI */
 /**
  * WordPress dependencies
  */
@@ -29,11 +28,18 @@ export const SetupInstruction = ( { provider } ) => {
 
 	useEffect( () => {
 		setReadmeContent(
-			ClassifAI.instruction[ featureName ][ provider ] ||
-				'No Instruction found'
+			feature.providers_data.instructions[ provider ] ||
+				__( 'No Instruction found', 'classifai' )
 		);
-		setInstructionTitle( feature.providers[ provider ] || '' );
-	}, [ provider, featureName, feature.providers ] );
+		setInstructionTitle(
+			`${ feature.label + ' - ' + feature.providers[ provider ] }` || ''
+		);
+	}, [
+		provider,
+		feature.providers,
+		feature.providers_data.instructions,
+		feature.label,
+	] );
 
 	const instruction = marked.parse( readmeContent );
 

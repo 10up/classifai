@@ -47,6 +47,18 @@ class KeyTakeaways extends Feature {
 			OpenAI::ID  => __( 'Azure OpenAI', 'classifai' ),
 			Ollama::ID  => __( 'Ollama', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				ChatGPT::ID => '',
+				OpenAI::ID  => '',
+				Ollama::ID  => '',
+			],
+		];
 	}
 
 	/**

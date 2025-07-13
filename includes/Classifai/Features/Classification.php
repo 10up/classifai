@@ -46,6 +46,19 @@ class Classification extends Feature {
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
 			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
 		];
+
+		// Get readme content.
+		$readme_content = $this->get_readme_content();
+
+		// Contains supported providers data.
+		$this->supported_providers_data = [
+			'instructions' => [
+				NLU::ID              => preg_match('/## Set Up Classification \(via IBM Watson\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OpenAIEmbeddings::ID => preg_match('/## Set Up Classification \(via OpenAI Embeddings\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				AzureEmbeddings::ID  => '',
+				OllamaEmbeddings::ID => '',
+			],
+		];
 	}
 
 	/**
