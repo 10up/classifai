@@ -73,8 +73,8 @@ class TermCleanup extends Feature {
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				OpenAIEmbeddings::ID => preg_match('/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
-				AzureEmbeddings::ID  => preg_match('/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OpenAIEmbeddings::ID => preg_match( '/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				AzureEmbeddings::ID  => preg_match( '/## Set Up the Term Cleanup Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

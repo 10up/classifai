@@ -60,9 +60,9 @@ EOD;
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				ComputerVision::ID => preg_match('/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				ChatGPT::ID        => '',
-				OllamaMM::ID       => preg_match('/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OllamaMM::ID       => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

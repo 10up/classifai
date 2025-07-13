@@ -76,9 +76,9 @@ class TextToSpeech extends Feature {
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				AmazonPolly::ID => preg_match('/## Set Up Text to Speech \(via Amazon Polly\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
-				Speech::ID      => preg_match('/## Set Up Text to Speech \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
-				OpenAITTS::ID   => preg_match('/## Set Up Text to Speech \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				AmazonPolly::ID => preg_match( '/## Set Up Text to Speech \(via Amazon Polly\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				Speech::ID      => preg_match( '/## Set Up Text to Speech \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAITTS::ID   => preg_match( '/## Set Up Text to Speech \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

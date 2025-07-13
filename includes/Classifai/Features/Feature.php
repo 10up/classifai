@@ -1424,7 +1424,7 @@ abstract class Feature {
 	 *
 	 * @return string|WP_Error
 	 */
-	public function get_readme_content(): string | WP_Error {
+	public function get_readme_content() {
 
 		$readme_path = trailingslashit( CLASSIFAI_PLUGIN_DIR ) . 'README.md';
 

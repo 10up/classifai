@@ -40,7 +40,7 @@ class Moderation extends Feature {
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				ModerationProvider::ID => preg_match('/## Set Up Comment Moderation \(via OpenAI Moderation\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				ModerationProvider::ID => preg_match( '/## Set Up Comment Moderation \(via OpenAI Moderation\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

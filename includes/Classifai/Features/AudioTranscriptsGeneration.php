@@ -43,7 +43,7 @@ class AudioTranscriptsGeneration extends Feature {
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				SpeechToText::ID => preg_match('/## Set Up Audio Transcripts Generation \(via OpenAI Speech to Text\)(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				SpeechToText::ID => preg_match( '/## Set Up Audio Transcripts Generation \(via OpenAI Speech to Text\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

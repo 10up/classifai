@@ -43,8 +43,8 @@ class Smart404 extends Feature {
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instructions' => [
-				OpenAIEmbeddings::ID => preg_match('/## Set Up the Smart 404 Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
-				AzureEmbeddings::ID  => preg_match('/## Set Up the Smart 404 Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches) ? $matches[1] : '',
+				OpenAIEmbeddings::ID => preg_match( '/## Set Up the Smart 404 Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				AzureEmbeddings::ID  => preg_match( '/## Set Up the Smart 404 Feature(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}
