@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
-## [3.5.0] - 2025-07-10
+## [3.5.0] - 2025-07-14
 
 ### Added
 
