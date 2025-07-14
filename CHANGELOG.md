@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file, per [the Ke
 
 ## [Unreleased] - TBD
 
+## [3.5.0] - 2025-07-14
+
+### Added
+
+- Google AI Imagen as a new Provider for Image Generation (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- New option to our WP-CLI command adding the ability to transcribe audio through remote URLs or File system paths (props [@Sidsector9](https://github.com/Sidsector9), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#937](https://github.com/10up/classifai/pull/937)).
+- New filters, `classifai_chatgpt_key_takeaways_auto_run`, `classifai_ollama_key_takeaways_auto_run`, `classifai_azure_openai_key_takeaways_auto_run`, that allow turning off automatic processing of Key Takeaways (props [@gsarig](https://github.com/gsarig), [@dkotter](https://github.com/dkotter) via [#941](https://github.com/10up/classifai/pull/941)).
+- Prompt users to register on the Installed Plugins screen (props [@BhargavBhandari90](https://github.com/BhargavBhandari90), [@jeffpaul](https://github.com/jeffpaul), [@dkotter](https://github.com/dkotter) via [#952](https://github.com/10up/classifai/pull/952)).
+
+### Changed
+
+- Switch to using `gpt-4.1-mini` instead of `gpt-4o-mini` for any image processing Features with OpenAI (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#940](https://github.com/10up/classifai/pull/940)).
+- Enhance title generation prompts to default to sentence case formatting (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#942](https://github.com/10up/classifai/pull/942)).
+- Enhance Excerpt Generation by including Author Context (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#944](https://github.com/10up/classifai/pull/944)).
+- New error state in the Key Takeaways block, making it more clear when an error occurs (props [@dkotter](https://github.com/dkotter), [@gsarig](https://github.com/gsarig) via [#941](https://github.com/10up/classifai/pull/941)).
+
+### Fixed
+
+- Don't render the Key Takeaways block if we have no Key Takeaways to show (props [@dkotter](https://github.com/dkotter), [@gsarig](https://github.com/gsarig) via [#941](https://github.com/10up/classifai/pull/941)).
+- Update wrong hook name from `classifai_openai_dalle_embeddings_model` to `classifai_openai_dalle_model` (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- Ensure per-image options are sent correctly when the Generate Image prompt is submitted via the Enter key (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#943](https://github.com/10up/classifai/pull/943)).
+- Ensure API error messages aren't fully HTML escaped so they are easier to read and understand (props [@dkotter](https://github.com/dkotter), [@iamdharmesh](https://github.com/iamdharmesh) via [#946](https://github.com/10up/classifai/pull/946)).
+- Remove HTML from post statuses before rendering those in our settings (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh) via [#948](https://github.com/10up/classifai/pull/948)).
+- Ensure if an API error occurs when generating embeddings, we don't try to keep processing that item and end up in an infinite loop (props [@dkotter](https://github.com/dkotter), [@MiguelAxcar](https://github.com/MiguelAxcar) via [#949](https://github.com/10up/classifai/pull/949)).
+- Key Takeaways block editor class name (props [@mattradford-sage](https://github.com/mattradford-sage), [@dkotter](https://github.com/dkotter) via [#951](https://github.com/10up/classifai/pull/951)).
+- Only allow jpg, png, gif and webp images to be processed when using OpenAI, matching what they support (props [@dkotter](https://github.com/dkotter), [@faisal-alvi](https://github.com/faisal-alvi) via [#940](https://github.com/10up/classifai/pull/940)).
+
+### Developer
+
+- Add a main Diagrams doc page and nest all diagrams under that (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#939](https://github.com/10up/classifai/pull/939)).
+- New developer doc on how to trigger ClassifAI Features within your own UI (props [@dkotter](https://github.com/dkotter), [@jeffpaul](https://github.com/jeffpaul) via [#945](https://github.com/10up/classifai/pull/945)).
+
 ## [3.4.0] - 2025-06-12
 
 **Note that this release bumps the WordPress minimum from 6.6 to 6.7.**
@@ -755,6 +787,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Initial closed source release
 
 [Unreleased]: https://github.com/10up/classifai/compare/trunk...develop
+[3.5.0]: https://github.com/10up/classifai/compare/3.4.0...3.5.0
 [3.4.0]: https://github.com/10up/classifai/compare/3.3.1...3.4.0
 [3.3.1]: https://github.com/10up/classifai/compare/3.3.0...3.3.1
 [3.3.0]: https://github.com/10up/classifai/compare/3.2.0...3.3.0

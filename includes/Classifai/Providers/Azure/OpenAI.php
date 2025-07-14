@@ -717,7 +717,7 @@ class OpenAI extends Provider {
 		 * only want to run when triggered manually, you can
 		 * filter the return value to false.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_azure_openai_key_takeaways_auto_run
 		 *
 		 * @param {bool} $run Whether to run the key takeaways generation.
