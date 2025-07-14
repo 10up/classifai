@@ -18,6 +18,7 @@ import { useState, useEffect, useContext, useRef } from '@wordpress/element';
 import { useDebounce } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -260,7 +261,7 @@ export const ClassificationSettings = () => {
 							checked={
 								featureSettings.post_statuses?.[ key ] === key
 							}
-							label={ postStatuses?.[ key ] }
+							label={ decodeEntities( postStatuses?.[ key ] ) }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									post_statuses: {

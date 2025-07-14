@@ -1,3 +1,40 @@
+## Custom Feature trigger
+
+Most Features in ClassifAI rely on custom REST endpoints that are called anytime the Feature is triggered. These endpoints can also be used to trigger the Feature from outside of the built-in UI. Note the Feature needs to be enabled and a Provider configured for this to work and you need to have the proper permissions to access the endpoint.
+
+As an example, if we want to trigger the Title Generation Feature for a post with ID 123, we would need to do something like this:
+
+```php
+// Trigger the generation of titles.
+$request = wp_remote_get(
+    'https://example.com/wp-json/classifai/v1/generate-title/123',
+    [
+        'headers' => [
+            'Content-Type'  => 'application/json',
+            'Authorization' => 'Basic ' . base64_encode( 'username:password' ),
+        ]
+    ]
+);
+
+// Ensure we have a successful response.
+if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+    return;
+}
+
+// Get the response body and decode it.
+$body     = wp_remote_retrieve_body( $request );
+$response = json_decode( $body, true );
+
+// Process the response.
+if ( is_array( $response ) ) {
+    foreach ( $response as $title ) {
+        // Do something with the title.
+    }
+}
+```
+
+This code would be triggered by your own custom UI, for example an A/B testing tool where you want to test multiple title variations.
+
 ## Make ClassifAI taxonomies private
 
 Some users might want to set some of the taxonomies provided by the plugin private, so that their archive pages won't be generated (and thus indexed by search engines).

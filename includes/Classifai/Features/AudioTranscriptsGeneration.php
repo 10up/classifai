@@ -10,6 +10,7 @@ use WP_REST_Request;
 
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
+use function Classifai\get_resource_type;
 
 /**
  * Class AudioTranscriptsGeneration
@@ -346,6 +347,127 @@ class AudioTranscriptsGeneration extends Feature {
 		} else {
 			return $text;
 		}
+	}
+
+	/**
+	 * Downloads a remote audio file and saves it to a temporary directory.
+	 *
+	 * This function performs the following:
+	 * 1. Downloads the remote file using wp_safe_remote_get().
+	 * 2. Streams the file into memory using php://temp for secure handling.
+	 * 3. Validates that the file is a supported audio type by checking its MIME type using `finfo`, if available.
+	 * 4. If valid, saves the file to a temporary directory under wp-content/uploads/classifai-temp/.
+	 * 5. Returns the local file path, or a WP_Error on failure.
+	 *
+	 * @param string $url Remote URL to an audio file.
+	 * @return string|WP_Error The path to the saved file on success, or WP_Error on failure.
+	 */
+	public static function remote_url_to_path( string $url ) {
+		$upload_dir = wp_upload_dir();
+		$temp_dir   = trailingslashit( $upload_dir['basedir'] ) . 'classifai-temp/';
+
+		if ( ! file_exists( $temp_dir ) ) {
+			wp_mkdir_p( $temp_dir );
+		}
+
+		$response = wp_safe_remote_get(
+			$url,
+			[
+				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			]
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error( 'download_failed', __( 'Failed to download remote file: ', 'classifai' ) . $response->get_error_message() );
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+
+		if ( empty( $body ) ) {
+			return new WP_Error( 'empty_download', __( 'Downloaded file is empty.', 'classifai' ) );
+		}
+
+		/**
+		 * Using `php://temp` to stream the remote file into memory (or to a secure system temp file if it exceeds the memory limit).
+		 *
+		 * WP_Filesystem does not support PHP stream wrappers like `php://temp`, so native file functions (fopen, fwrite, fclose)
+		 * are required here. This usage is safe because PHP handles any overflow using the system's temp directory (e.g., /tmp),
+		 * which is outside the web root in properly configured environments.
+		 *
+		 * phpcs:ignore comments are used to silence warnings about native file functions in this controlled context.
+		 */
+		$stream = fopen( 'php://temp', 'r+' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen, WordPress.WP.AlternativeFunctions.file_system_read_fopen
+		fwrite( $stream, $body ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite, WordPressVIPMinimum.Functions.RestrictedFunctions.file_ops_fwrite
+		rewind( $stream );
+
+		// Determine file type using finfo if the function is available.
+		$real_mime_type = false;
+
+		if ( function_exists( 'finfo_open' ) ) {
+			$finfo          = finfo_open( FILEINFO_MIME_TYPE );
+			$real_mime_type = finfo_buffer( $finfo, $body );
+			finfo_close( $finfo );
+		}
+
+		$supported_audio_mime_types = [
+			'audio/mpeg',
+			'audio/mp4',
+			'audio/x-m4a',
+			'audio/wav',
+			'audio/x-wav',
+			'audio/x-pn-wav',
+			'audio/webm',
+		];
+
+		if ( ! in_array( $real_mime_type, $supported_audio_mime_types, true ) ) {
+			return new WP_Error(
+				'unsupported_audio_content',
+				sprintf(
+					// translators: %s The detected MIME type.
+					__( 'File content does not match supported audio types. Detected: %s', 'classifai' ),
+					$real_mime_type
+				)
+			);
+		}
+
+		// Passed MIME check, now write to disk.
+		$filename = wp_basename( wp_parse_url( $url, PHP_URL_PATH ) );
+
+		if ( empty( $filename ) ) {
+			$filename = 'audio_' . time() . '.tmp';
+		}
+
+		$temp_file_path = $temp_dir . $filename;
+
+		global $wp_filesystem;
+
+		// Initialize the WordPress filesystem.
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
+
+		rewind( $stream );
+		$file_contents = stream_get_contents( $stream );
+		fclose( $stream ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+
+		$bytes_written = $wp_filesystem->put_contents( $temp_file_path, $file_contents );
+
+		if ( false === $bytes_written ) {
+			return new WP_Error( 'file_write_failed', __( 'Failed to write temporary file.', 'classifai' ) );
+		}
+
+		// Secondary check using wp_check_filetype if needed.
+		$filetype  = wp_check_filetype( $temp_file_path );
+		$extension = strtolower( $filetype['ext'] ?? '' );
+
+		if ( empty( $extension ) ) {
+			// Clean up file if created.
+			$wp_filesystem->delete( $temp_file_path );
+			return new WP_Error( 'filetype_unknown', __( 'Could not determine file type.', 'classifai' ) );
+		}
+
+		return $temp_file_path;
 	}
 
 	/**
