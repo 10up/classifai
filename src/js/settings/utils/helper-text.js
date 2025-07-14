@@ -45,3 +45,12 @@ export const nluHelperText = {
         'classifai'
     ),
 };
+
+export const moderationHelperText = {
+    'content_types': __(
+        '<p>The Moderation endpoint provides a simple interface to classify user-generated content into specific content categories.</p>   '+
+        '<p>Categories include: hate, threatening, harassment, self-harm, sexual, violence</p>'+
+        '<p><a href="https://platform.openai.com/docs/guides/moderation/overview#content-classifications" target="_blank">Learn more</a></p>',
+        'classifai'
+    ),
+};

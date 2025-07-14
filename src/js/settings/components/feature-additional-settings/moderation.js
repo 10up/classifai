@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { SettingsRow } from '../settings-row';
 import { STORE_NAME } from '../../data/store';
+import { moderationHelperText } from '../../utils/helper-text';
 
 /**
  * Component for Moderation feature settings.
@@ -29,36 +30,43 @@ export const ModerationSettings = () => {
 	};
 
 	return (
-		<SettingsRow
-			label={ __( 'Content to moderate', 'classifai' ) }
-			description={ __(
-				'Choose what type of content to moderate.',
-				'classifai'
-			) }
-			className="settings-moderation-content-types"
-		>
-			{ Object.keys( contentTypes ).map( ( contentType ) => {
-				return (
-					<CheckboxControl
-						id={ contentType }
-						key={ contentType }
-						checked={
-							featureSettings.content_types?.[ contentType ] ===
-							contentType
-						}
-						label={ contentTypes[ contentType ] }
-						onChange={ ( value ) => {
-							setFeatureSettings( {
-								content_types: {
-									...featureSettings.content_types,
-									[ contentType ]: value ? contentType : '0',
-								},
-							} );
-						} }
-						__nextHasNoMarginBottom
-					/>
-				);
-			} ) }
-		</SettingsRow>
+		<>
+			<SettingsRow
+				label={ __( 'Content to moderate', 'classifai' ) }
+				description={ __(
+					'Choose what type of content to moderate.',
+					'classifai'
+				) }
+				className="settings-moderation-content-types"
+			>
+				{ Object.keys( contentTypes ).map( ( contentType ) => {
+					return (
+						<CheckboxControl
+							id={ contentType }
+							key={ contentType }
+							checked={
+								featureSettings.content_types?.[ contentType ] ===
+								contentType
+							}
+							label={ contentTypes[ contentType ] }
+							onChange={ ( value ) => {
+								setFeatureSettings( {
+									content_types: {
+										...featureSettings.content_types,
+										[ contentType ]: value ? contentType : '0',
+									},
+								} );
+							} }
+							__nextHasNoMarginBottom
+						/>
+					);
+				} ) }
+			</SettingsRow>
+			<div className="display-container-wrapper">
+				<div className="helper-text-content">
+					<div dangerouslySetInnerHTML={ { __html: moderationHelperText[ 'content_types' ] } } />	
+				</div>
+			</div>
+		</>
 	);
 };
