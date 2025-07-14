@@ -45,15 +45,18 @@ export const ModerationSettings = () => {
 							id={ contentType }
 							key={ contentType }
 							checked={
-								featureSettings.content_types?.[ contentType ] ===
-								contentType
+								featureSettings.content_types?.[
+									contentType
+								] === contentType
 							}
 							label={ contentTypes[ contentType ] }
 							onChange={ ( value ) => {
 								setFeatureSettings( {
 									content_types: {
 										...featureSettings.content_types,
-										[ contentType ]: value ? contentType : '0',
+										[ contentType ]: value
+											? contentType
+											: '0',
 									},
 								} );
 							} }
@@ -64,7 +67,11 @@ export const ModerationSettings = () => {
 			</SettingsRow>
 			<div className="display-container-wrapper">
 				<div className="helper-text-content">
-					<div dangerouslySetInnerHTML={ { __html: moderationHelperText[ 'content_types' ] } } />	
+					<div
+						dangerouslySetInnerHTML={ {
+							__html: moderationHelperText.content_types,
+						} }
+					/>
 				</div>
 			</div>
 		</>

@@ -133,6 +133,14 @@
 			margin-top: 8px;
 			margin-bottom: 8px;
 
+			.helper-text-icon {
+				cursor: pointer;
+				background: none;
+				border: none;
+				padding: 0;
+				margin: 0;
+			}
+
 			.helper-text-content {
 				margin-top: 8px;
 				padding: 4px 20px;

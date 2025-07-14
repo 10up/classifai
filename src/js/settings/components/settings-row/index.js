@@ -19,7 +19,7 @@ export const SettingsRow = ( props ) => {
 			<div className="settings-label">
 				{ props.label }
 				{ props.helperText && (
-					<div 
+					<div
 						className="tooltip-container"
 						onMouseEnter={ () => setShowTooltip( true ) }
 						onMouseLeave={ () => setShowTooltip( false ) }
@@ -27,7 +27,11 @@ export const SettingsRow = ( props ) => {
 						<span className="dashicons dashicons-info-outline helper-text-icon"></span>
 						{ showTooltip && (
 							<div className="settings-helper-text tooltip">
-								<div dangerouslySetInnerHTML={ { __html: props.helperText } } />
+								<div
+									dangerouslySetInnerHTML={ {
+										__html: props.helperText,
+									} }
+								/>
 							</div>
 						) }
 					</div>

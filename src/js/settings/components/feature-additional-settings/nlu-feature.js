@@ -39,22 +39,22 @@ export const NLUFeatureSettings = () => {
 		category: {
 			label: __( 'Category', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: nluHelperText[ 'category' ],
+			helperText: nluHelperText.category,
 		},
 		keyword: {
 			label: __( 'Keyword', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: nluHelperText[ 'keyword' ],
+			helperText: nluHelperText.keyword,
 		},
 		entity: {
 			label: __( 'Entity', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: nluHelperText[ 'entity' ],
+			helperText: nluHelperText.entity,
 		},
 		concept: {
 			label: __( 'Concept', 'classifai' ),
 			defaultThreshold: 70,
-			helperText: nluHelperText[ 'concept' ],
+			helperText: nluHelperText.concept,
 		},
 	};
 
@@ -99,16 +99,17 @@ export const NLUFeatureSettings = () => {
 	}
 
 	const toggleThresholdInfo = ( feature ) => {
-		setThresholdInfoStates( prev => ({
+		setThresholdInfoStates( ( prev ) => ( {
 			...prev,
-			[ feature ]: ! prev[ feature ]
-		}));
+			[ feature ]: ! prev[ feature ],
+		} ) );
 	};
 
 	return (
 		<>
 			{ Object.keys( features ).map( ( feature ) => {
-				const { defaultThreshold, label, helperText } = features[ feature ];
+				const { defaultThreshold, label, helperText } =
+					features[ feature ];
 				return (
 					<SettingsRow
 						key={ feature }
@@ -130,7 +131,10 @@ export const NLUFeatureSettings = () => {
 						/>
 						<InputControl
 							id={ `${ feature }-threshold` }
-							label={ __( 'Confidence Threshold (%)', 'classifai' ) }
+							label={ __(
+								'Confidence Threshold (%)',
+								'classifai'
+							) }
 							type="number"
 							value={
 								featureSettings[ `${ feature }_threshold` ] ||
@@ -143,17 +147,22 @@ export const NLUFeatureSettings = () => {
 							} }
 						/>
 						<div className="display-container-wrapper">
-							<span 
+							<button
 								className="dashicons dashicons-info-outline helper-text-icon"
-								title={ __( 'Click to show more information', 'classifai' ) }
+								title={ __(
+									'Click to show more information',
+									'classifai'
+								) }
 								onClick={ () => toggleThresholdInfo( feature ) }
-								style={ { cursor: 'pointer' } }
-							></span>
-							{ thresholdInfoStates[ feature ] && (
-								thresholdInfo[ 'helper' ]
-							) }
+								aria-label={ __(
+									'Click to show threshold information',
+									'classifai'
+								) }
+							></button>
+							{ thresholdInfoStates[ feature ] &&
+								thresholdInfo.helper }
 						</div>
-						
+
 						{ 'ibm_watson_nlu' === featureSettings.provider && (
 							<SelectControl
 								id={ `${ feature }-taxonomy` }

@@ -50,10 +50,10 @@ export const TermCleanupSettings = () => {
 	} );
 
 	const toggleThresholdInfo = ( feature ) => {
-		setThresholdInfoStates( prev => ({
+		setThresholdInfoStates( ( prev ) => ( {
 			...prev,
-			[ feature ]: ! prev[ feature ]
-		}));
+			[ feature ]: ! prev[ feature ],
+		} ) );
 	};
 
 	const Description = () => {
@@ -132,7 +132,10 @@ export const TermCleanupSettings = () => {
 							/>
 							<InputControl
 								id={ `${ feature }-threshold` }
-								label={ __( 'Confidence Threshold (%)', 'classifai' ) }
+								label={ __(
+									'Confidence Threshold (%)',
+									'classifai'
+								) }
 								type="number"
 								value={
 									featureSettings?.taxonomies?.[
@@ -149,15 +152,22 @@ export const TermCleanupSettings = () => {
 								} }
 							/>
 							<div className="display-container-wrapper">
-								<span 
+								<button
 									className="dashicons dashicons-info-outline helper-text-icon"
-									title={ __( 'Click to show more information', 'classifai' ) }
-									onClick={ () => toggleThresholdInfo( feature ) }
-									style={ { cursor: 'pointer' } }
-								></span>
-								{ thresholdInfoStates[ feature ] && (
-									thresholdInfo[ 'helper' ]
-								) }
+									title={ __(
+										'Click to show more information',
+										'classifai'
+									) }
+									onClick={ () =>
+										toggleThresholdInfo( feature )
+									}
+									aria-label={ __(
+										'Click to show threshold information',
+										'classifai'
+									) }
+								></button>
+								{ thresholdInfoStates[ feature ] &&
+									thresholdInfo.helper }
 							</div>
 						</SettingsRow>
 					);
