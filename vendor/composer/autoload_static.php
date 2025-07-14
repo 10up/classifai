@@ -474,6 +474,8 @@ class ComposerStaticInit5f8e7a0c0c12a517240bd7bee9f43f1f
         'Classifai\\Providers\\Browser\\ChromeAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Browser/ChromeAI.php',
         'Classifai\\Providers\\GoogleAI\\APIRequest' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/APIRequest.php',
         'Classifai\\Providers\\GoogleAI\\GeminiAPI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/GeminiAPI.php',
+        'Classifai\\Providers\\GoogleAI\\GoogleAI' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/GoogleAI.php',
+        'Classifai\\Providers\\GoogleAI\\Images' => __DIR__ . '/../..' . '/includes/Classifai/Providers/GoogleAI/Images.php',
         'Classifai\\Providers\\Localhost\\Ollama' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/Ollama.php',
         'Classifai\\Providers\\Localhost\\OllamaEmbeddings' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/OllamaEmbeddings.php',
         'Classifai\\Providers\\Localhost\\OllamaMultimodal' => __DIR__ . '/../..' . '/includes/Classifai/Providers/Localhost/OllamaMultimodal.php',

@@ -377,6 +377,8 @@ return array(
     'Classifai\\Providers\\Browser\\ChromeAI' => $baseDir . '/includes/Classifai/Providers/Browser/ChromeAI.php',
     'Classifai\\Providers\\GoogleAI\\APIRequest' => $baseDir . '/includes/Classifai/Providers/GoogleAI/APIRequest.php',
     'Classifai\\Providers\\GoogleAI\\GeminiAPI' => $baseDir . '/includes/Classifai/Providers/GoogleAI/GeminiAPI.php',
+    'Classifai\\Providers\\GoogleAI\\GoogleAI' => $baseDir . '/includes/Classifai/Providers/GoogleAI/GoogleAI.php',
+    'Classifai\\Providers\\GoogleAI\\Images' => $baseDir . '/includes/Classifai/Providers/GoogleAI/Images.php',
     'Classifai\\Providers\\Localhost\\Ollama' => $baseDir . '/includes/Classifai/Providers/Localhost/Ollama.php',
     'Classifai\\Providers\\Localhost\\OllamaEmbeddings' => $baseDir . '/includes/Classifai/Providers/Localhost/OllamaEmbeddings.php',
     'Classifai\\Providers\\Localhost\\OllamaMultimodal' => $baseDir . '/includes/Classifai/Providers/Localhost/OllamaMultimodal.php',
