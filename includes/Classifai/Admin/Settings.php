@@ -338,8 +338,14 @@ class Settings {
 		foreach ( $settings as $feature_key => $feature_settings ) {
 			$feature = $features[ $feature_key ];
 
+			// Ensure this is a valid Feature.
 			if ( ! $feature ) {
-				return new \WP_Error( 'invalid_feature', __( 'Invalid feature.', 'classifai' ), [ 'status' => 400 ] );
+				return new \WP_Error( 'invalid_feature', __( 'Invalid Feature.', 'classifai' ), [ 'status' => 400 ] );
+			}
+
+			// Ensure the selected Provider is supported by the Feature.
+			if ( ! in_array( $feature_settings['provider'], array_keys( $feature->get_providers() ), true ) ) {
+				return new \WP_Error( 'invalid_provider', __( 'Invalid Provider.', 'classifai' ), [ 'status' => 400 ] );
 			}
 
 			// Skip sanitizing settings for setup step 1.
