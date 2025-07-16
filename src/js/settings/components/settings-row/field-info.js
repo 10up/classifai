@@ -17,6 +17,34 @@ import { marked } from 'marked';
 import { useEffect } from 'react';
 import { getFeature } from '../../utils/utils';
 
+/**
+ * FieldInfo Component
+ *
+ * This component displays a small helper icon button (e.g., an "info" icon) next to a field or label.
+ * When clicked, it opens a modal displaying detailed information specific to the field.
+ *
+ * @summary Shows a helper icon button that opens a modal with detailed information.
+ *
+ * @param {Object} props                    Component props.
+ * @param {Object} props.fieldInfo          Field information object.
+ * @param {string} props.fieldInfo.type     Type of information to display (e.g., 'instruction').
+ * @param {string} props.fieldInfo.provider Provider type to look up data.
+ *
+ * @example
+ * <FieldInfo
+ *   fieldInfo={{
+ *     type: 'instruction',
+ *     provider: 'gemini'
+ *   }}
+ * />
+ *
+ * @return {JSX.Element} The rendered FieldInfo button and modal.
+ *
+ * Notes:
+ * - The modal content is loaded dynamically from feature context data.
+ * - The icon can be customized based on info type.
+ * - Uses `dangerouslySetInnerHTML` to render content.
+ */
 export const FieldInfo = ( props ) => {
 	const { featureName } = useFeatureContext();
 	const [ isOpen, setOpen ] = useState( false );
