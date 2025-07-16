@@ -1422,7 +1422,7 @@ abstract class Feature {
 	/**
 	 * Get content from README.md file.
 	 *
-	 * @return string|WP_Error
+	 * @return string
 	 */
 	public function get_readme_content() {
 
@@ -1435,7 +1435,7 @@ abstract class Feature {
 		$readme_content = file_get_contents( $readme_path ); // phpcs:ignore
 
 		if ( false === $readme_content || ! is_string( $readme_content ) ) {
-			return new WP_Error( 'invalid', esc_html__( 'Readme cannot be downloaded.', 'classifai' ) );
+			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
 		}
 
 		return $readme_content;

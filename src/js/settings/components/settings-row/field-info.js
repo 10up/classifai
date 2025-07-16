@@ -79,7 +79,7 @@ export const FieldInfo = ( props ) => {
 	}, [
 		props.fieldInfo,
 		feature.providers,
-		feature.providers_data.instructions,
+		feature.providers_data,
 		feature.label,
 	] );
 
@@ -92,7 +92,7 @@ export const FieldInfo = ( props ) => {
 				onClick={ openModal }
 				size="small"
 				icon={ icon }
-				label={ __( 'AI Configuration Instruction', 'classifai' ) }
+				label={ infoTitle }
 			></Button>
 			{ isOpen && (
 				<Modal
