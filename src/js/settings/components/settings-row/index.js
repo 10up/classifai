@@ -12,7 +12,6 @@ import { FieldInfo } from './field-info';
  * @param {Object} props.children The children of the component.
  */
 export const SettingsRow = ( props ) => {
-	console.log('props', props);
 	return (
 		<div className={ classNames( 'settings-row', props?.className ) }>
 			<div className="settings-label">
