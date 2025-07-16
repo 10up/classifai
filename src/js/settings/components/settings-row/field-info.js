@@ -17,31 +17,43 @@ import { marked } from 'marked';
 import { useEffect } from 'react';
 import { getFeature } from '../../utils/utils';
 
-export const SetupInstruction = ( { provider } ) => {
+export const FieldInfo = ( props ) => {
 	const { featureName } = useFeatureContext();
 	const [ isOpen, setOpen ] = useState( false );
-	const [ readmeContent, setReadmeContent ] = useState( '' );
-	const [ instructionTitle, setInstructionTitle ] = useState( '' );
+	const [ icon, setIcon ] = useState( 'info' );
+	const [ fieldInfoContent, setFieldInfoContent ] = useState( '' );
+	const [ infoTitle, setInfoTitle ] = useState( '' );
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
 	const feature = getFeature( featureName );
 
 	useEffect( () => {
-		setReadmeContent(
-			feature.providers_data.instructions[ provider ] ||
-				__( 'No Instruction found', 'classifai' )
-		);
-		setInstructionTitle(
-			`${ feature.label + ' - ' + feature.providers[ provider ] }` || ''
-		);
+		switch ( props.fieldInfo.type ) {
+			case 'instruction':
+				setFieldInfoContent(
+					feature.providers_data[ props.fieldInfo.type ][
+						props.fieldInfo.provider
+					] || __( 'No info found.', 'classifai' )
+				);
+				setInfoTitle(
+					`${
+						feature.label +
+						' - ' +
+						feature.providers[ props.fieldInfo.provider ]
+					}` || ''
+				);
+				setIcon( 'editor-help' );
+				break;
+
+			default:
+				break;
+		}
 	}, [
-		provider,
+		props.fieldInfo,
 		feature.providers,
 		feature.providers_data.instructions,
 		feature.label,
 	] );
-
-	const instruction = marked.parse( readmeContent );
 
 	return (
 		<>
@@ -51,18 +63,22 @@ export const SetupInstruction = ( { provider } ) => {
 				variant="tertiary"
 				onClick={ openModal }
 				size="small"
-				icon={ 'editor-help' }
+				icon={ icon }
 				label={ __( 'AI Configuration Instruction', 'classifai' ) }
 			></Button>
 			{ isOpen && (
 				<Modal
 					size="large"
-					className="settings-instruction-modal"
-					title={ instructionTitle }
+					className="settings-info-modal"
+					title={ infoTitle }
 					onRequestClose={ closeModal }
 					isDismissible={ true }
 				>
-					<div dangerouslySetInnerHTML={ { __html: instruction } } />
+					<div
+						dangerouslySetInnerHTML={ {
+							__html: marked.parse( fieldInfoContent ),
+						} }
+					/>
 				</Modal>
 			) }
 		</>

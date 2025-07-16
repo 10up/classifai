@@ -43,7 +43,7 @@ class ImageGeneration extends Feature {
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
-			'instructions' => [
+			'instruction' => [
 				OpenAIImages::ID   => preg_match( '/## Set Up Image Generation \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				GoogleAIImagen::ID => preg_match( '/## Set Up Image Generation \(via Google AI Imagen\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],

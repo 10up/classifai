@@ -53,7 +53,7 @@ class KeyTakeaways extends Feature {
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
-			'instructions' => [
+			'instruction' => [
 				ChatGPT::ID => '',
 				OpenAI::ID  => '',
 				Ollama::ID  => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import classNames from 'classnames';
-import { SetupInstruction } from '../provider-settings/setup-instruction';
+import { FieldInfo } from './field-info';
 
 /**
  * Settings row component.
@@ -12,12 +12,13 @@ import { SetupInstruction } from '../provider-settings/setup-instruction';
  * @param {Object} props.children The children of the component.
  */
 export const SettingsRow = ( props ) => {
+	console.log('props', props);
 	return (
 		<div className={ classNames( 'settings-row', props?.className ) }>
 			<div className="settings-label">
 				{ props.label }
-				{ props.instructionProvider && (
-					<SetupInstruction provider={ props.instructionProvider } />
+				{ props.fieldInfo && (
+					<FieldInfo fieldInfo={ props.fieldInfo } />
 				) }
 			</div>
 			<div className="settings-control">

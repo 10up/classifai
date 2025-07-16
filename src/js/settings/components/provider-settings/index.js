@@ -189,7 +189,10 @@ export const ProviderSettings = () => {
 				{ ! configured && (
 					<SettingsRow
 						label={ __( 'Select a provider', 'classifai' ) }
-						instructionProvider={ provider }
+						fieldInfo={ {
+							provider,
+							type: 'instruction',
+						} }
 					>
 						<SelectControl
 							className="classifai-provider-select"

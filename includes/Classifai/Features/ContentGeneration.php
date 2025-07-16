@@ -101,7 +101,7 @@ EOD;
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
-			'instructions' => [
+			'instruction' => [
 				ChatGPT::ID => preg_match( '/## Set Up Language Processing Features \(via OpenAI ChatGPT\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				OpenAI::ID  => preg_match( '/## Set Up Language Processing Features \(via Azure OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				Ollama::ID  => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',

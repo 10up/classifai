@@ -49,7 +49,7 @@ class ImageCropping extends Feature {
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
-			'instructions' => [
+			'instruction' => [
 				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
