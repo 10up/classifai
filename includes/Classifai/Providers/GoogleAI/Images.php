@@ -76,7 +76,7 @@ class Images extends Provider {
 		/**
 		 * Filter the API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_api_url
 		 *
 		 * @param {string} $url The default API URL.
@@ -98,7 +98,7 @@ class Images extends Provider {
 		 * Useful if you want to use a different model, like
 		 * imagen-4.0-ultra.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_model
 		 *
 		 * @param {string} $model The default model to use.
@@ -120,7 +120,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has a different maximum.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_max_prompt_chars
 		 *
 		 * @param {int} $model The default maximum prompt characters.
@@ -150,7 +150,7 @@ class Images extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has different options.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_aspect_ratio_options
 		 *
 		 * @param {int} $model The default aspect ratio options.
@@ -263,7 +263,7 @@ class Images extends Provider {
 		/**
 		 * Filter the prompt we will send to Google AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Google AI.
@@ -285,7 +285,7 @@ class Images extends Provider {
 		/**
 		 * Filter the request body before sending to Google AI.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_googleai_images_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Google AI.
@@ -334,7 +334,7 @@ class Images extends Provider {
 	/**
 	 * Register additional REST arguments for the provider.
 	 *
-	 * @since x.x.x
+	 * @since 3.5.0
 	 *
 	 * @param array $args Existing REST arguments.
 	 * @return array
