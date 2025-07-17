@@ -10,7 +10,6 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies.
  */
 import TaxonomyControls from './taxonomy-controls';
-import PrePubClassifyPost from './pre-publish-classify-post';
 import { DisableFeatureButton } from '../../components';
 import { handleClick } from '../../../js/helpers';
 
@@ -33,9 +32,7 @@ export const ClassificationButton = () => {
 		__( 'Post', 'classifai' );
 
 	const [ isLoading, setLoading ] = useState( false );
-	const [ resultReceived, setResultReceived ] = useState( false );
 	const [ isOpen, setOpen ] = useState( false );
-	const [ popupOpened, setPopupOpened ] = useState( false );
 	const openModal = () => setOpen( true );
 	const closeModal = () => setOpen( false );
 
@@ -124,10 +121,8 @@ export const ClassificationButton = () => {
 		}
 		if ( callbackArgs?.openPopup ) {
 			openModal();
-			setPopupOpened( true );
 		}
 		setLoading( false );
-		setResultReceived( true );
 	};
 
 	/**
@@ -285,40 +280,6 @@ export const ClassificationButton = () => {
 					padding: '5px',
 				} }
 			></span>
-			<PrePubClassifyPost popupOpened={ popupOpened }>
-				{ ! resultReceived && (
-					<>
-						<Button
-							variant={ 'secondary' }
-							data-id={ postId }
-							onClick={ ( e ) => {
-								handleClick( {
-									button: e.target,
-									endpoint: '/classifai/v1/classify/',
-									callback: buttonClickCallBack,
-									buttonText,
-									linkTerms: false,
-								} );
-							} }
-						>
-							{ buttonText }
-						</Button>
-						<span
-							className="spinner classify"
-							style={ { float: 'none', display: 'none' } }
-						></span>
-						<span
-							className="error"
-							style={ {
-								display: 'none',
-								color: '#bc0b0b',
-								padding: '5px',
-							} }
-						></span>
-					</>
-				) }
-				{ resultReceived && modalData }
-			</PrePubClassifyPost>
 		</div>
 	);
 };

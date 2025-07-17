@@ -348,6 +348,14 @@ class Classification extends Feature {
 			true
 		);
 
+		wp_enqueue_script(
+			'classifai-plugin-classification-pre-publish-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-pre-publish.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification-pre-publish', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification-pre-publish', 'version' ),
+			true
+		);
+
 		wp_add_inline_script(
 			'classifai-plugin-classification-js',
 			sprintf(
