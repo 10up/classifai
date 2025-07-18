@@ -23,11 +23,7 @@ const PrePublishClassificationContent = () => {
 
 	let [ taxTermsAI, setTaxTermsAI ] = useState( {} );
 	const { postType, postId, postTypeLabel } = useSelect( ( select ) => {
-		const {
-			getCurrentPostType,
-			getCurrentPostId,
-			getPostTypeLabel,
-		} = select( 'core/editor' );
+		const { getCurrentPostType, getCurrentPostId, getPostTypeLabel } = select( 'core/editor' );
 		const currentPostType = getCurrentPostType();
 		const currentPostId = getCurrentPostId();
 
@@ -179,14 +175,7 @@ const PrePublishClassificationContent = () => {
 		<PrePubClassifyPost popupOpened={ false }>
 			{ ! resultReceived && (
 				<>
-					<p>
-						{
-							__(
-								'Get AI-powered suggestions for categories and tags.',
-								'classifai'
-							)
-						}
-					</p>
+					<p> { __( 'Get AI-powered suggestions for categories and tags.', 'classifai' ) } </p>
 					<Button
 						variant="secondary"
 						data-id={ postId }
