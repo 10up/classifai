@@ -1426,17 +1426,28 @@ abstract class Feature {
 	 */
 	public function get_readme_content() {
 
-		$readme_path = trailingslashit( CLASSIFAI_PLUGIN_DIR ) . 'README.md';
+		// Get readme content from cache.
+		$readme_content = get_transient( 'classifai_readme_content' );
 
-		if ( ! file_exists( $readme_path ) ) {
-			return __return_empty_string();
+		if ( ! empty( $readme_content ) ) {
+			return $readme_content;
 		}
 
-		$readme_content = file_get_contents( $readme_path ); // phpcs:ignore
+		// Get readme content.
+		$readme_request = wp_remote_get( CLASSIFAI_PLUGIN_README_URL );
 
-		if ( false === $readme_content || ! is_string( $readme_content ) ) {
+		if ( is_wp_error( $readme_request ) ) {
 			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
 		}
+
+		$readme_content = wp_remote_retrieve_body( $readme_request );
+
+		if ( empty( $readme_content ) || ! is_string( $readme_content ) ) {
+			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
+		}
+
+		// Cache readme content.
+		set_transient( 'classifai_readme_content', $readme_content, DAY_IN_SECONDS );
 
 		return $readme_content;
 	}
