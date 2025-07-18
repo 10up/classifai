@@ -20,13 +20,17 @@ const PrePublishClassificationContent = () => {
 	const [ resultReceived, setResultReceived ] = useState( false );
 	const [ featureTaxonomies, setFeatureTaxonomies ] = useState( [] );
 	const [ taxQuery, setTaxQuery ] = useState( {} );
-    
+
 	let [ taxTermsAI, setTaxTermsAI ] = useState( {} );
 	const { postType, postId, postTypeLabel } = useSelect( ( select ) => {
-		const { getCurrentPostType, getCurrentPostId, getPostTypeLabel } = select( 'core/editor' );
+		const {
+			getCurrentPostType,
+			getCurrentPostId,
+			getPostTypeLabel,
+		} = select( 'core/editor' );
 		const currentPostType = getCurrentPostType();
 		const currentPostId = getCurrentPostId();
-		
+
 		return {
 			postType: currentPostType,
 			postId: currentPostId,
@@ -175,7 +179,14 @@ const PrePublishClassificationContent = () => {
 		<PrePubClassifyPost popupOpened={ false }>
 			{ ! resultReceived && (
 				<>
-					<p>{ __( 'Get AI-powered suggestions for categories and tags.', 'classifai' ) }</p>
+					<p>
+						{
+							__(
+								'Get AI-powered suggestions for categories and tags.',
+								'classifai'
+							)
+						}
+					</p>
 					<Button
 						variant="secondary"
 						data-id={ postId }
