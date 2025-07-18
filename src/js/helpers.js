@@ -97,21 +97,17 @@ export const chromeAITextGeneration = async ( prompt = '', content = '' ) => {
 		'classifai'
 	);
 
-	if ( ! window.ai ) {
+	if ( ! window.LanguageModel ) {
 		// eslint-disable-next-line no-alert
 		window.alert( errorMessage );
 		return result;
 	}
 
-	const supportsTextGeneration =
-		await window.ai.languageModel?.capabilities();
+	const available = await window.LanguageModel?.availability();
 
-	if (
-		supportsTextGeneration &&
-		supportsTextGeneration.available === 'readily'
-	) {
+	if ( available && available !== 'unavailable' ) {
 		try {
-			const session = await window.ai.languageModel.create( {
+			const session = await window.LanguageModel.create( {
 				initialPrompts: [
 					{
 						role: 'system',
