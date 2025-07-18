@@ -1434,7 +1434,9 @@ abstract class Feature {
 		}
 
 		// Get readme content.
-		$readme_request = wp_remote_get( CLASSIFAI_PLUGIN_README_URL );
+		$readme_request = function_exists( 'vip_safe_wp_remote_get' )
+			? vip_safe_wp_remote_get( CLASSIFAI_PLUGIN_README_URL )
+			: wp_remote_get( CLASSIFAI_PLUGIN_README_URL );
 
 		if ( is_wp_error( $readme_request ) ) {
 			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
