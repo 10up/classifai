@@ -157,33 +157,31 @@ export const ProviderSettings = () => {
 	return (
 		<>
 			{ configured && (
-				<>
-					<SettingsRow label={ __( 'Provider', 'classifai' ) }>
-						<>
-							<Tooltip text={ __( 'Configured', 'classifai' ) }>
-								<>
-									<Icon icon="yes-alt" /> { providerLabel }
-								</>
-							</Tooltip>{ ' ' }
-							<Tooltip text={ __( 'Edit', 'classifai' ) }>
-								{ /* The fragment is necessary here. `Tooltip` tries to pass `refs` to `Icon` which isn't
-								wrapped inside forwardRef(), without which it throws an error. DO NOT REMOVE THE FRAGMENTS. */ }
-								<>
-									<Icon
-										icon="edit"
-										className="classifai-settings-edit-provider"
-										style={ {
-											cursor: 'pointer',
-										} }
-										onClick={ () =>
-											setEditProvider( featureName )
-										}
-									/>
-								</>
-							</Tooltip>
-						</>
-					</SettingsRow>
-				</>
+				<SettingsRow label={ __( 'Provider', 'classifai' ) }>
+					<>
+						<Tooltip text={ __( 'Configured', 'classifai' ) }>
+							<>
+								<Icon icon="yes-alt" /> { providerLabel }
+							</>
+						</Tooltip>{ ' ' }
+						<Tooltip text={ __( 'Edit', 'classifai' ) }>
+							{ /* The fragment is necessary here. `Tooltip` tries to pass `refs` to `Icon` which isn't
+							wrapped inside forwardRef(), without which it throws an error. DO NOT REMOVE THE FRAGMENTS. */ }
+							<>
+								<Icon
+									icon="edit"
+									className="classifai-settings-edit-provider"
+									style={ {
+										cursor: 'pointer',
+									} }
+									onClick={ () =>
+										setEditProvider( featureName )
+									}
+								/>
+							</>
+						</Tooltip>
+					</>
+				</SettingsRow>
 			) }
 			<>
 				{ ! configured && (

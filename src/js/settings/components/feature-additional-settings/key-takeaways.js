@@ -31,19 +31,17 @@ export const KeyTakeawaysSettings = () => {
 	};
 
 	return (
-		<>
-			<SettingsRow
-				label={ __( 'Prompt', 'classifai' ) }
-				description={ __(
-					"Add a custom prompt. Note that the {{TITLE}} variable can be used in the prompt, and it will be replaced with the item's title.",
-					'classifai'
-				) }
-			>
-				<PromptRepeater
-					prompts={ featureSettings.key_takeaways_prompt }
-					setPrompts={ setPrompts }
-				/>
-			</SettingsRow>
-		</>
+		<SettingsRow
+			label={ __( 'Prompt', 'classifai' ) }
+			description={ __(
+				"Add a custom prompt. Note that the {{TITLE}} variable can be used in the prompt, and it will be replaced with the item's title.",
+				'classifai'
+			) }
+		>
+			<PromptRepeater
+				prompts={ featureSettings.key_takeaways_prompt }
+				setPrompts={ setPrompts }
+			/>
+		</SettingsRow>
 	);
 };

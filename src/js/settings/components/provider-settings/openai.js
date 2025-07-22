@@ -30,18 +30,16 @@ export const OpenAISettings = ( { providerSettings, onChange } ) => {
 	);
 
 	return (
-		<>
-			<SettingsRow
-				label={ __( 'API Key', 'classifai' ) }
-				description={ <Description /> }
-			>
-				<InputControl
-					id="openai_api_key"
-					type="password"
-					value={ providerSettings.api_key || '' }
-					onChange={ ( value ) => onChange( { api_key: value } ) }
-				/>
-			</SettingsRow>
-		</>
+		<SettingsRow
+			label={ __( 'API Key', 'classifai' ) }
+			description={ <Description /> }
+		>
+			<InputControl
+				id="openai_api_key"
+				type="password"
+				value={ providerSettings.api_key || '' }
+				onChange={ ( value ) => onChange( { api_key: value } ) }
+			/>
+		</SettingsRow>
 	);
 };

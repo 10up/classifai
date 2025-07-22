@@ -283,21 +283,16 @@ const TaxonomyControls = ( { onChange, query } ) => {
 								onChange={ onTermsChange( slug ) }
 							/>
 							{ ! hasAI && (
-								<>
-									<p
-										style={ { color: '#cc1818' } }
-										key={ slug }
-									>
-										{ sprintf(
-											/* translators: %s: taxonomy name */
-											__(
-												'ClassifAI has no new recommendations for %s',
-												'classifai'
-											),
-											name
-										) }
-									</p>
-								</>
+								<p style={ { color: '#cc1818' } } key={ slug }>
+									{ sprintf(
+										/* translators: %s: taxonomy name */
+										__(
+											'ClassifAI has no new recommendations for %s',
+											'classifai'
+										),
+										name
+									) }
+								</p>
 							) }
 							<hr />
 						</Fragment>

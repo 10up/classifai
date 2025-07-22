@@ -69,17 +69,15 @@ export const ChromeAISettings = () => {
 	};
 
 	return (
-		<>
-			<SettingsRow
-				label={ __( 'Built-in AI Support', 'classifai' ) }
-				description={ <Description hasSupport={ supported } /> }
-			>
-				{ supported && <Icon icon="yes-alt" /> }
-				{ ! supported && <Icon icon="dismiss" /> }{ ' ' }
-				{ supported
-					? __( 'Supported', 'classifai' )
-					: __( 'Not Supported', 'classifai' ) }
-			</SettingsRow>
-		</>
+		<SettingsRow
+			label={ __( 'Built-in AI Support', 'classifai' ) }
+			description={ <Description hasSupport={ supported } /> }
+		>
+			{ supported && <Icon icon="yes-alt" /> }
+			{ ! supported && <Icon icon="dismiss" /> }{ ' ' }
+			{ supported
+				? __( 'Supported', 'classifai' )
+				: __( 'Not Supported', 'classifai' ) }
+		</SettingsRow>
 	);
 };

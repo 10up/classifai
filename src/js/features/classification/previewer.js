@@ -180,7 +180,7 @@ import './previewer.scss';
 		 * @param {Object} thresholds Object containing threshold values for various taxonomy types.
 		 * @return {Array} Sorted data.
 		 */
-		function filterByScoreOrRelevance( data = {}, thresholds ) {
+		function filterByScoreOrRelevance( data, thresholds ) {
 			const filteredItems = Object.keys( data ).map( ( key ) => ( {
 				[ key ]: data[ key ].filter( ( item ) => {
 					if ( item?.score && item.score * 100 > thresholds[ key ] ) {

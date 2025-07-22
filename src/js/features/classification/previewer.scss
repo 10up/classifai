@@ -46,7 +46,7 @@
             }
 
             &:after {
-                opacity: 0;
+                opacity: 1;
                 content: "\f463";
                 animation: loading-rotation 2s infinite linear;
                 font-family: dashicons;
@@ -58,10 +58,6 @@
                 height: 1.5rem;
                 line-height: 1.5rem;
                 transform: translate(-50%, -50%) rotate(0deg);
-            }
-
-            &:after {
-                opacity: 1;
             }
         }
     }

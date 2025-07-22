@@ -248,7 +248,7 @@ export const ChatUI: React.FC = () => {
 				setIsLoading( false );
 			},
 			( err: { message?: string } ) => {
-				setError( err?.message || 'An error occurred' );
+				setError( err?.message ?? 'An error occurred' );
 				setIsLoading( false );
 			}
 		);
@@ -303,7 +303,7 @@ export const ChatUI: React.FC = () => {
 				setIsLoading( false );
 			},
 			( err: { message?: string } ) => {
-				setError( err?.message || 'An error occurred' );
+				setError( err?.message ?? 'An error occurred' );
 				setConversation( [] );
 				setIsLoading( false );
 			}

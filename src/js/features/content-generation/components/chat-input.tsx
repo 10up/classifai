@@ -82,7 +82,7 @@ export const ChatInput: React.FC< ChatInputProps > = ( {
 				type="submit"
 				style={ buttonStyles }
 				variant="primary"
-				disabled={ isLoading || ! value }
+				disabled={ isLoading ?? ! value }
 				isBusy={ isLoading }
 			>
 				{ isLoading

@@ -481,7 +481,7 @@ const colorsArray = [ '#8c2525', '#ca4444', '#303030' ];
 
 let timeoutId = 0;
 
-function processAnimation( content = '', wrapperRef ) {
+function processAnimation( content, wrapperRef ) {
 	if ( ! wrapperRef ) {
 		return;
 	}
@@ -557,22 +557,20 @@ const withInspectorControls = createHigherOrderComponent( ( BlockEdit ) => {
 		}
 
 		return (
-			<>
-				<div style={ { position: 'relative' } }>
-					<div className="classifai-content-resize__overlay">
-						<div className="classifai-content-resize__overlay-text">
-							{ __( 'Processing data…', 'classifai' ) }
-						</div>
+			<div style={ { position: 'relative' } }>
+				<div className="classifai-content-resize__overlay">
+					<div className="classifai-content-resize__overlay-text">
+						{ __( 'Processing data…', 'classifai' ) }
 					</div>
-					<div
-						id="classifai-content-resize__mock-content"
-						ref={ mockWrapper }
-					>
-						{ __plainTextContent }
-					</div>
-					<BlockEdit { ...props } />
 				</div>
-			</>
+				<div
+					id="classifai-content-resize__mock-content"
+					ref={ mockWrapper }
+				>
+					{ __plainTextContent }
+				</div>
+				<BlockEdit { ...props } />
+			</div>
 		);
 	};
 }, 'withInspectorControl' );

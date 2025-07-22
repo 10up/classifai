@@ -78,17 +78,15 @@ export const PromptRepeater = ( props ) => {
 					key={ index }
 				>
 					{ !! prompt.original && (
-						<>
-							<p className="classifai-original-prompt">
-								<strong>
-									{ __(
-										'ClassifAI default prompt:',
-										'classifai'
-									) }
-								</strong>{ ' ' }
-								{ prompt.prompt }
-							</p>
-						</>
+						<p className="classifai-original-prompt">
+							<strong>
+								{ __(
+									'ClassifAI default prompt:',
+									'classifai'
+								) }
+							</strong>{ ' ' }
+							{ prompt.prompt }
+						</p>
 					) }
 					{ ! prompt.original && (
 						<>

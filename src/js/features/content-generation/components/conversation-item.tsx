@@ -72,11 +72,11 @@ export const ConversationItem: React.FC< ConversationItemProps > = ( {
 						style={ responseContainerStyles }
 					>
 						<div style={ responseContentStyles }>
-							<AIResponse content={ entry.completion || '' } />
+							<AIResponse content={ entry.completion ?? '' } />
 							<ChatActionButtons
 								onStartOver={ onStartOver }
 								onInsertContent={ onInsertContent }
-								content={ entry.completion || '' }
+								content={ entry.completion ?? '' }
 							/>
 						</div>
 					</motion.div>
