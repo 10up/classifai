@@ -206,14 +206,12 @@ class NLU extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		return [
 			'endpoint_url' => '',
 			'apikey'       => '',
 			'username'     => 'apikey',
 			'password'     => '',
 		];
-
-		return $common_settings;
 	}
 
 	/**
@@ -487,9 +485,7 @@ class NLU extends Provider {
 
 		$classifier = new PostClassifier();
 
-		$output = $classifier->classify( $post_id );
-
-		return $output;
+		return $classifier->classify( $post_id );
 	}
 
 	/**
@@ -507,9 +503,7 @@ class NLU extends Provider {
 
 		$classifier = new PostClassifier();
 
-		$output = $classifier->link( $post_id, $terms, [], $link );
-
-		return $output;
+		return $classifier->link( $post_id, $terms, [], $link );
 	}
 
 	/**

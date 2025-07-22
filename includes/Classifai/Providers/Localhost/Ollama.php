@@ -42,14 +42,12 @@ class Ollama extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		return [
 			'endpoint_url'  => 'http://localhost:11434/',
 			'authenticated' => false,
 			'model'         => '',
 			'models'        => [],
 		];
-
-		return $common_settings;
 	}
 
 	/**

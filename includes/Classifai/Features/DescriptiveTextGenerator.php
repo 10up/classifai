@@ -354,9 +354,8 @@ class DescriptiveTextGenerator extends Feature {
 	 */
 	public function get_processing_mode(): string {
 		$settings = $this->get_settings();
-		$value    = $settings['processing_mode'] ?? 'automatic';
 
-		return $value;
+		return $settings['processing_mode'] ?? 'automatic';
 	}
 
 	/**
@@ -498,7 +497,7 @@ class DescriptiveTextGenerator extends Feature {
 		if ( isset( $old_settings['enable_image_captions'] ) ) {
 			$new_settings['descriptive_text_fields'] = $old_settings['enable_image_captions'];
 
-			foreach ( $new_settings['descriptive_text_fields'] as $key => $value ) {
+			foreach ( $new_settings['descriptive_text_fields'] as $value ) {
 				if ( '0' !== $value ) {
 					$new_settings['status'] = '1';
 					break;

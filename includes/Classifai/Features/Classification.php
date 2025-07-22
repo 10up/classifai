@@ -1058,18 +1058,19 @@ class Classification extends Feature {
 			}
 
 			// Post statuses
-			if ( isset( $old_settings['post_statuses'] ) ) {
-				if ( is_array( $old_settings['post_statuses'] ) ) {
-					foreach ( $old_settings['post_statuses'] as $post_status => $value ) {
-						if ( 1 === $value ) {
-							$new_settings['post_statuses'][ $post_status ] = $post_status;
-							continue;
-						} elseif ( is_null( $value ) ) {
-							$new_settings['post_statuses'][ $post_status ] = '0';
-							continue;
-						}
-						$new_settings['post_statuses'][ $post_status ] = $value;
+			if (
+				isset( $old_settings['post_statuses'] ) &&
+				is_array( $old_settings['post_statuses'] )
+			) {
+				foreach ( $old_settings['post_statuses'] as $post_status => $value ) {
+					if ( 1 === $value ) {
+						$new_settings['post_statuses'][ $post_status ] = $post_status;
+						continue;
+					} elseif ( is_null( $value ) ) {
+						$new_settings['post_statuses'][ $post_status ] = '0';
+						continue;
 					}
+					$new_settings['post_statuses'][ $post_status ] = $value;
 				}
 			}
 

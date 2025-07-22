@@ -136,11 +136,6 @@ class SmartCropping {
 				continue;
 			}
 
-			$data = [
-				'width'  => $size_data['width'],
-				'height' => $size_data['height'],
-			];
-
 			$data = $this->get_cropped_thumbnail( $attachment_id, $size_data );
 
 			if ( is_wp_error( $data ) ) {

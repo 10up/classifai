@@ -95,9 +95,7 @@ class TaxonomyFactory {
 				$class = 'Classifai\Taxonomy\\' . $class;
 			}
 
-			$instance = new $class();
-
-			return $instance;
+			return new $class();
 		} else {
 			throw new \Exception( esc_html( "Mapping not found for Taxonomy: $taxonomy " ) );
 		}

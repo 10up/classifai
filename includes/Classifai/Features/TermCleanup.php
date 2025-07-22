@@ -76,12 +76,15 @@ class TermCleanup extends Feature {
 	public function setup() {
 		parent::setup();
 
-		if ( $this->is_configured() && $this->is_enabled() ) {
-			// Check if ElasticPress plugin is installed and use EP selected.
-			if ( is_elasticpress_installed() && '1' === $this->get_settings( 'use_ep' ) ) {
-				$this->ep_integration = new TermCleanupEPIntegration( $this );
-				$this->ep_integration->init();
-			}
+		// Check if ElasticPress plugin is installed and use EP selected.
+		if (
+			$this->is_configured() &&
+			$this->is_enabled() &&
+			is_elasticpress_installed() &&
+			'1' === $this->get_settings( 'use_ep' )
+		) {
+			$this->ep_integration = new TermCleanupEPIntegration( $this );
+			$this->ep_integration->init();
 		}
 
 		$this->setting_page_url = admin_url( 'tools.php?page=classifai-term-cleanup' );
@@ -273,13 +276,11 @@ class TermCleanup extends Feature {
 			$tax_settings[ "{$name}_threshold" ] = 75;
 		}
 
-		$settings = [
+		return [
 			'provider'   => OpenAIEmbeddings::ID,
 			'use_ep'     => is_elasticpress_installed() ? 1 : 0,
 			'taxonomies' => $tax_settings,
 		];
-
-		return $settings;
 	}
 
 	/**
@@ -611,7 +612,7 @@ class TermCleanup extends Feature {
 		$calculations  = new EmbeddingCalculations();
 		$similar_terms = [];
 
-		foreach ( $results as $index => $result ) {
+		foreach ( $results as $result ) {
 			// Skip if the term is the same as the term we are comparing.
 			if ( $term_id === $result->term_id ) {
 				continue;
@@ -705,7 +706,7 @@ class TermCleanup extends Feature {
 				}
 			);
 
-			foreach ( $filtered_results as $index => $result ) {
+			foreach ( $filtered_results as $result ) {
 				$compare_term_id        = $result['term_id'];
 				$existing_similar_terms = get_term_meta( $compare_term_id, 'classifai_similar_terms', true );
 

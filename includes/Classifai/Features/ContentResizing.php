@@ -317,8 +317,6 @@ class ContentResizing extends Feature {
 	 * @return array
 	 */
 	public function sanitize_default_feature_settings( array $new_settings ): array {
-		$settings = $this->get_settings();
-
 		$new_settings['condense_text_prompt'] = sanitize_prompts( 'condense_text_prompt', $new_settings );
 		$new_settings['expand_text_prompt']   = sanitize_prompts( 'expand_text_prompt', $new_settings );
 

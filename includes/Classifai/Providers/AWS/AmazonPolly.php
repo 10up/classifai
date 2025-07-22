@@ -451,8 +451,8 @@ class AmazonPolly extends Provider {
 			$result       = $polly_client->synthesizeSpeech( $synthesize_data );
 
 			update_post_meta( $post_id, TextToSpeech::AUDIO_HASH_KEY, md5( $post_content ) );
-			$contents = $result['AudioStream']->getContents();
-			return $contents;
+
+			return $result['AudioStream']->getContents();
 		} catch ( \Exception $e ) {
 			return new WP_Error(
 				'aws_polly_http_error',

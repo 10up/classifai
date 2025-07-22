@@ -106,7 +106,7 @@ abstract class AbstractTaxonomy {
 		$plural_label   = $this->get_plural_label();
 		$singular_label = $this->get_singular_label();
 
-		$labels = array(
+		return array(
 			'name'                       => $plural_label, // Already translated via get_plural_label().
 			'singular_name'              => $singular_label, // Already translated via get_singular_label().
 			'search_items'               => sprintf(
@@ -170,8 +170,6 @@ abstract class AbstractTaxonomy {
 				strtolower( $plural_label )
 			),
 		);
-
-		return $labels;
 	}
 
 	/**
@@ -202,10 +200,12 @@ abstract class AbstractTaxonomy {
 	public function get_feature_enabled( $feature ) {
 		$settings = get_option( 'classifai_settings' );
 
-		if ( ! empty( $settings ) && ! empty( $settings['features'] ) ) {
-			if ( ! empty( $settings['features'][ $feature ] ) ) {
-				return filter_var( $settings['features'][ $feature ], FILTER_VALIDATE_BOOLEAN );
-			}
+		if (
+			! empty( $settings ) &&
+			! empty( $settings['features'] ) &&
+			! empty( $settings['features'][ $feature ] )
+		) {
+			return filter_var( $settings['features'][ $feature ], FILTER_VALIDATE_BOOLEAN );
 		}
 
 		return false;

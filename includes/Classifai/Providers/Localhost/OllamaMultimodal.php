@@ -179,10 +179,8 @@ class OllamaMultimodal extends Ollama {
 			$attachment_id
 		);
 
-		// Make our API request.
-		$response = $this->request( $this->get_api_generate_url( $settings['endpoint_url'] ?? '' ), $body );
-
-		return $response;
+		// Make our API request and return the response.
+		return $this->request( $this->get_api_generate_url( $settings['endpoint_url'] ?? '' ), $body );
 	}
 
 	/**

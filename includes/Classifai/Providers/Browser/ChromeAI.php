@@ -53,11 +53,9 @@ class ChromeAI extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		return [
 			'authenticated' => true,
 		];
-
-		return $common_settings;
 	}
 
 	/**
@@ -178,7 +176,7 @@ class ChromeAI extends Provider {
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters(
+		return apply_filters(
 			'classifai_chrome_ai_excerpt_request_body',
 			[
 				'prompt'  => $system_prompt . ' ' . $prompt,
@@ -187,8 +185,6 @@ class ChromeAI extends Provider {
 			],
 			$post_id
 		);
-
-		return $body;
 	}
 
 	/**
@@ -258,7 +254,7 @@ class ChromeAI extends Provider {
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters(
+		return apply_filters(
 			'classifai_chrome_ai_title_request_body',
 			[
 				'prompt'  => $system_prompt . ' ' . $prompt,
@@ -267,8 +263,6 @@ class ChromeAI extends Provider {
 			],
 			$post_id
 		);
-
-		return $body;
 	}
 
 	/**
@@ -317,7 +311,7 @@ class ChromeAI extends Provider {
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters(
+		return apply_filters(
 			'classifai_chrome_ai_resize_content_request_body',
 			[
 				'prompt'  => 'You will be provided with content delimited by triple quotes. ' . $prompt,
@@ -326,8 +320,6 @@ class ChromeAI extends Provider {
 			],
 			$post_id
 		);
-
-		return $body;
 	}
 
 	/**

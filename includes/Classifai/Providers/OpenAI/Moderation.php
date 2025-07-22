@@ -111,12 +111,10 @@ class Moderation extends Provider {
 	 * @return array
 	 */
 	public function get_default_provider_settings(): array {
-		$common_settings = [
+		return [
 			'api_key'       => '',
 			'authenticated' => false,
 		];
-
-		return $common_settings;
 	}
 
 	/**

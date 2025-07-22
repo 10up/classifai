@@ -241,33 +241,35 @@ class TitleGeneration extends Feature {
 			$screen = get_current_screen();
 
 			// Load the assets for the classic editor.
-			if ( $screen && ! $screen->is_block_editor() ) {
-				if ( post_type_supports( $screen->post_type, 'title' ) ) {
-					wp_enqueue_style(
-						'classifai-plugin-classic-title-generation-css',
-						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
-						[],
-						get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
-						'all'
-					);
+			if (
+				$screen &&
+				! $screen->is_block_editor() &&
+				post_type_supports( $screen->post_type, 'title' )
+			) {
+				wp_enqueue_style(
+					'classifai-plugin-classic-title-generation-css',
+					CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.css',
+					[],
+					get_asset_info( 'classifai-plugin-classic-title-generation', 'version' ),
+					'all'
+				);
 
-					wp_enqueue_script(
-						'classifai-plugin-classic-title-generation-js',
-						CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.js',
-						array_merge( get_asset_info( 'classifai-plugin-classic-title-generation', 'dependencies' ), array( 'wp-api' ) ),
-						get_asset_info( 'generate-title-classic', 'version' ),
-						true
-					);
+				wp_enqueue_script(
+					'classifai-plugin-classic-title-generation-js',
+					CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classic-title-generation.js',
+					array_merge( get_asset_info( 'classifai-plugin-classic-title-generation', 'dependencies' ), array( 'wp-api' ) ),
+					get_asset_info( 'generate-title-classic', 'version' ),
+					true
+				);
 
-					wp_add_inline_script(
-						'classifai-plugin-classic-title-generation-js',
-						sprintf(
-							'var classifaiChatGPTData = %s;',
-							wp_json_encode( $this->get_localised_vars() )
-						),
-						'before'
-					);
-				}
+				wp_add_inline_script(
+					'classifai-plugin-classic-title-generation-js',
+					sprintf(
+						'var classifaiChatGPTData = %s;',
+						wp_json_encode( $this->get_localised_vars() )
+					),
+					'before'
+				);
 			}
 		}
 	}

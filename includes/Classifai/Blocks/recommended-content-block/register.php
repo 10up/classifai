@@ -60,6 +60,6 @@ function render_block_callback( array $attributes ): string {
 
 	// Render block in Front-end.
 	ob_start();
-	include __DIR__ . '/markup.php';
+	include_once __DIR__ . '/markup.php';
 	return ob_get_clean();
 }

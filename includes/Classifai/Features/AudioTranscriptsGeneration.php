@@ -10,7 +10,6 @@ use WP_REST_Request;
 
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
-use function Classifai\get_resource_type;
 
 /**
  * Class AudioTranscriptsGeneration

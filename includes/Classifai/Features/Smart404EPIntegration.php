@@ -200,17 +200,15 @@ class Smart404EPIntegration {
 						}
 
 						// Show an error message if something went wrong.
-						if ( is_wp_error( $embedding ) ) {
-							if ( is_indexing_wpcli() ) {
-								WP_CLI::warning(
-									sprintf(
-										/* translators: %d is the post ID; %s is the error message */
-										esc_html__( 'Error generating embedding for ID #%1$d: %2$s', 'classifai' ),
-										$post_id,
-										$embedding->get_error_message()
-									)
-								);
-							}
+						if ( is_wp_error( $embedding ) && ! is_indexing_wpcli() ) {
+							WP_CLI::warning(
+								sprintf(
+									/* translators: %d is the post ID; %s is the error message */
+									esc_html__( 'Error generating embedding for ID #%1$d: %2$s', 'classifai' ),
+									$post_id,
+									$embedding->get_error_message()
+								)
+							);
 						}
 					}
 				} else {
@@ -331,9 +329,7 @@ class Smart404EPIntegration {
 	 */
 	public function get_embeddings( array $strings ) {
 		// Generate the embeddings.
-		$embeddings = $this->embeddings_handler->generate_embeddings( $strings, new Smart404() );
-
-		return $embeddings;
+		return $this->embeddings_handler->generate_embeddings( $strings, new Smart404() );
 	}
 
 	/**
@@ -582,9 +578,7 @@ class Smart404EPIntegration {
 		$search_query->query      = wp_parse_args( $search_args );
 		$search_query->query_vars = $search_query->query;
 
-		$default_query = $indexable->format_args( $search_query->query_vars, $search_query );
-
-		return $default_query;
+		return $indexable->format_args( $search_query->query_vars, $search_query );
 	}
 
 	/**

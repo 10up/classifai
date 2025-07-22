@@ -304,7 +304,7 @@ function attachment_is_pdf( $post ): bool {
  */
 function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
-		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
+		$asset = require_once CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
 		return null;
 	}
@@ -353,12 +353,10 @@ function clean_input( string $key = '', bool $is_get = false, string $sanitize_c
 	if ( $is_get ) {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		return isset( $_GET[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_GET[ $key ] ) ) : '';
-	} else {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
 	}
 
-	return false;
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+	return isset( $_POST[ $key ] ) ? call_user_func( $sanitize_callback, wp_unslash( $_POST[ $key ] ) ) : '';
 }
 
 /**
@@ -592,7 +590,7 @@ function sanitize_number_of_responses_field( string $key, array $new_settings, a
 function get_classification_feature_enabled( string $classify_by ): bool {
 	$settings = ( new Classification() )->get_settings();
 
-	return ( ! empty( $settings[ $classify_by ] ) );
+	return ! empty( $settings[ $classify_by ] );
 }
 
 /**

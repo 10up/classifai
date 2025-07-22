@@ -817,13 +817,14 @@ abstract class Feature {
 		$setting_index = $this->get_settings();
 		$default_value = '';
 
-		if ( isset( $setting_index['enable_image_captions'] ) ) {
-			if ( ! is_array( $setting_index['enable_image_captions'] ) ) {
-				if ( '1' === $setting_index['enable_image_captions'] ) {
-					$default_value = 'alt';
-				} elseif ( 'no' === $setting_index['enable_image_captions'] ) {
-					$default_value = '';
-				}
+		if (
+			isset( $setting_index['enable_image_captions'] ) &&
+			! is_array( $setting_index['enable_image_captions'] )
+		) {
+			if ( '1' === $setting_index['enable_image_captions'] ) {
+				$default_value = 'alt';
+			} elseif ( 'no' === $setting_index['enable_image_captions'] ) {
+				$default_value = '';
 			}
 		}
 
@@ -1202,10 +1203,9 @@ abstract class Feature {
 			return null;
 		}
 
-		$provider_class    = get_class( $provider_instance );
-		$provider_instance = new $provider_class( $this );
+		$provider_class = get_class( $provider_instance );
 
-		return $provider_instance;
+		return new $provider_class( $this );
 	}
 
 	/**

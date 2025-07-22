@@ -132,10 +132,11 @@ class Moderation extends Feature {
 		}
 
 		// Handle checks for the comment item_type.
-		if ( 'comment' === $item_type ) {
-			if ( ! in_array( 'comments', $this->get_moderation_content_settings(), true ) ) {
-				return new WP_Error( 'not_enabled', esc_html__( 'Comment moderation not currently enabled.', 'classifai' ) );
-			}
+		if (
+			'comment' === $item_type &&
+			! in_array( 'comments', $this->get_moderation_content_settings(), true )
+		) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Comment moderation not currently enabled.', 'classifai' ) );
 		}
 
 		// Ensure the feature is enabled. Also runs a user check.

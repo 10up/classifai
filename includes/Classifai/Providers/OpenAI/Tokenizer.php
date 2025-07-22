@@ -122,10 +122,11 @@ class Tokenizer {
 		$trimmed_content    = mb_substr( $content, 0, $max_content_length );
 
 		// Ensure we our final string ends on a full word instead of truncating in the middle.
-		if ( ! preg_match( '/\\W/u', mb_substr( $content, $max_content_length - 1, 2 ) ) ) {
-			if ( preg_match( '/.*\\W/u', $trimmed_content, $matches ) ) {
-				$trimmed_content = $matches[0];
-			}
+		if (
+			! preg_match( '/\\W/u', mb_substr( $content, $max_content_length - 1, 2 ) ) &&
+			preg_match( '/.*\\W/u', $trimmed_content, $matches )
+		) {
+			$trimmed_content = $matches[0];
 		}
 
 		return trim( $trimmed_content );

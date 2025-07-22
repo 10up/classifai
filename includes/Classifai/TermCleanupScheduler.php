@@ -241,8 +241,7 @@ class TermCleanupScheduler {
 
 		$action_id = ! empty( $running_action_id ) ? $running_action_id : $pending_action_id;
 		$action    = $store->fetch_action( $action_id );
-		$args      = $action->get_args();
 
-		return $args;
+		return $action->get_args();
 	}
 }

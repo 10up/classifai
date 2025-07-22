@@ -144,8 +144,7 @@ class RSSImporterCommand extends \WP_CLI_Command {
 	 * @param string $feed_url The feed URL.
 	 */
 	public function get_rss_feed( $feed_url ) {
-		$rss = simplexml_load_file( $feed_url );
-		return $rss;
+		return simplexml_load_file( $feed_url );
 	}
 
 	/**

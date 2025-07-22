@@ -949,7 +949,6 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		$image_cropping = new ImageCropping();
 		$provider       = $image_cropping->get_feature_provider_instance();
 		$provider_class = get_class( $provider );
-		$settings       = $image_cropping->get_settings( $provider_class::ID );
 		$default_opts   = [
 			'limit' => false,
 		];

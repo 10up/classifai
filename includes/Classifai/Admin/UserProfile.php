@@ -52,7 +52,7 @@ class UserProfile {
 		}
 		?>
 		<div id="classifai-profile-features-section">
-			<h3><?php esc_html_e( 'ClassifAI features', 'classifai' ); ?></h3>
+			<h3><?php esc_html_e( 'ClassifAI Features', 'classifai' ); ?></h3>
 
 			<table class="form-table" role="presentation">
 				<?php
@@ -61,7 +61,7 @@ class UserProfile {
 					?>
 					<tr class="classifai-features-row">
 						<th scope="row"><?php echo esc_html( $feature_name ); ?></th>
-						<td >
+						<td>
 							<label for="<?php echo esc_attr( $this->opt_out_key . '_' . $feature ); ?>">
 								<input
 									name="<?php echo esc_attr( $this->opt_out_key . '[]' ); ?>"

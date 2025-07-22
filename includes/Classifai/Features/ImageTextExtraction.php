@@ -475,9 +475,8 @@ class ImageTextExtraction extends Feature {
 	 */
 	public function get_processing_mode(): string {
 		$settings = $this->get_settings();
-		$value    = $settings['processing_mode'] ?? 'automatic';
 
-		return $value;
+		return $settings['processing_mode'] ?? 'automatic';
 	}
 
 	/**

@@ -323,7 +323,6 @@ class ServicesManager {
 			if ( ! empty( $service ) && isset( $this->service_classes[ $service ] ) ) {
 				// Render settings page for a specific service.
 				$this->service_classes[ $service ]->render_settings_page();
-				return;
 			} else {
 				?>
 				<div class="classifai-content">

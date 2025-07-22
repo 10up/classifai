@@ -313,12 +313,10 @@ class ComputerVision extends Provider {
 		$status  = get_post_meta( $attachment_id, '_classifai_azure_read_status', true );
 		$running = ( ! empty( $status['status'] ) && 'running' === $status['status'] );
 
-		$resp = [
+		return [
 			'read'    => $read,
 			'running' => $running,
 		];
-
-		return $resp;
 	}
 
 	/**
@@ -734,9 +732,7 @@ class ComputerVision extends Provider {
 			$api_features[] = 'read';
 		}
 
-		$endpoint = add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
-
-		return $endpoint;
+		return add_query_arg( 'features', implode( ',', $api_features ), trailingslashit( $settings['endpoint_url'] ) . $this->analyze_url );
 	}
 
 	/**

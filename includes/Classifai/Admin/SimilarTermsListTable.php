@@ -158,7 +158,12 @@ class SimilarTermsListTable extends WP_List_Table {
 			's'        => isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : false, // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		$merge_url = add_query_arg( $args, wp_nonce_url( admin_url( 'admin-post.php' ), 'classifai_merge_term' ) );
-		$score     = $score ? ( $score > 1 ? $score - 1 : $score ) : '';
+
+		if ( ! $score ) {
+			$score = '';
+		} else {
+			$score = $score > 1 ? $score - 1 : $score;
+		}
 
 		return sprintf(
 			// translators: %s: Term name, %d: Term ID.
