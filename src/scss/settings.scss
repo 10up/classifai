@@ -32,7 +32,6 @@
 
 		.classifai-header-layout {
 			justify-content: space-between;
-			padding: 18px 20px;
 			display: flex;
 			align-items: center;
 			margin: 0 auto;
@@ -97,8 +96,7 @@
 		.settings-label {
 			align-items: center;
 			font-weight: bold;
-			flex-shrink: 0;
-			flex: 20%;
+			flex: 1 0 20%;
 			padding: 12px 0px;
 		}
 
@@ -648,7 +646,7 @@
 	gap: 8px;
 	padding: 16px 0;
 	color: #757575;
-	
+
 	.components-icon {
 		animation: spin 1s linear infinite;
 	}
@@ -665,7 +663,7 @@
 
 .classifai-provider-selection {
 	margin: 16px 0;
-	
+
 	.classifai-provider-option {
 		display: flex;
 		align-items: center;
@@ -676,32 +674,32 @@
 		border-radius: 4px;
 		cursor: pointer;
 		transition: border-color 0.2s, background-color 0.2s;
-		
+
 		&:hover {
 			border-color: var(--classifai-admin-theme-color);
 			background-color: #f9f9f9;
 		}
-		
+
 		input[type="radio"] {
 			margin: 0;
 		}
-		
+
 		&:has(input[type="radio"]:checked) {
 			border-color: var(--classifai-admin-theme-color);
 			background-color: #f0f6fc;
 		}
 	}
-	
+
 	.classifai-provider-info {
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
-		
+
 		strong {
 			color: #1d2327;
 			font-weight: 600;
 		}
-		
+
 		.classifai-feature-label {
 			font-size: 13px;
 			color: #757575;
