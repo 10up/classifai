@@ -48,6 +48,12 @@ jobs:
     - name: Install composer dependencies
       run: composer install --no-dev -o
 
+    - name: Run Strauss to namespace dependencies
+      run: php -d memory_limit=1024M bin/strauss.phar
+
+    - name: Remove vendor directory (keep only vendor-prefixed)
+      run: rm -rf vendor
+
     - name: Build
       run: |
         npm run build

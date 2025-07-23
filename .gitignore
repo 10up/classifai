@@ -1,5 +1,6 @@
 release
 /vendor/*
+/vendor-prefixed/*
 phpunit.xml
 .phpunit.result.cache
 /dist
@@ -50,3 +51,6 @@ tests/cypress/screenshots
 tests/cypress/videos
 tests/cypress/reports
 .wp-env.override.json
+
+# Strauss
+bin/strauss.phar

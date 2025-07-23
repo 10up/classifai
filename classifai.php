@@ -82,8 +82,8 @@ require_once __DIR__ . '/config.php';
  * @return bool True or false if autoloading was successful.
  */
 function classifai_autoload() {
-	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
-		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
+	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php' ) ) {
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php';
 
 		return true;
 	} else {
@@ -152,8 +152,8 @@ register_activation_hook( __FILE__, 'classifai_activation' );
 classifai_autorun();
 
 // Include in case we have composer issues.
-if ( file_exists( __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' ) ) {
-	require_once __DIR__ . '/vendor/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
+if ( file_exists( __DIR__ . '/vendor-prefixed/yahnis-elsts/plugin-update-checker/plugin-update-checker.php' ) ) {
+	require_once __DIR__ . '/vendor-prefixed/yahnis-elsts/plugin-update-checker/plugin-update-checker.php';
 } else {
 	add_action( 'admin_notices', 'classifai_dev_notice' );
 	add_action( 'network_admin_notices', 'classifai_dev_notice' );
