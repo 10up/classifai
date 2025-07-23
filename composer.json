@@ -35,8 +35,7 @@
     "johnbillion/wp-compat": "^1.1.0",
     "phpstan/phpstan-deprecation-rules": "^2.0.1",
     "sirbrillig/phpcs-changed": "^2.11",
-    "phpcompatibility/php-compatibility": "dev-develop as 9.99.99",
-    "brianhenryie/strauss": "^0.22.0"
+    "phpcompatibility/php-compatibility": "dev-develop as 9.99.99"
   },
   "scripts": {
     "lint": "phpcs -s . --runtime-set testVersion 7.4-",
@@ -64,32 +63,7 @@
   },
   "archive": {
     "exclude": [
-      "vendor/",
-      "node_modules/",
-      ".git/",
-      ".github/",
-      "tests/",
-      "phpunit.xml",
-      ".gitignore",
-      ".gitattributes",
-      "composer.json",
-      "composer.lock",
-      "package.json",
-      "package-lock.json",
-      ".nvmrc",
-      "webpack.config.js",
-      "postcss.config.js",
-      "babel.config.js",
-      ".eslintrc.js",
-      ".eslintignore",
-      ".prettierrc",
-      ".prettierignore",
-      "phpcs.xml",
-      "phpstan.neon",
-      "README.md",
-      "CHANGELOG.md",
-      "CONTRIBUTING.md",
-      "bin/"
+      "!/vendor/"
     ]
   },
   "extra": {
@@ -101,10 +75,7 @@
       "namespace_prefix": "ClassifaiVendor\\",
       "classmap_prefix": "ClassifaiVendor_",
       "packages": [
-        "aws/aws-sdk-php",
-        "yahnis-elsts/plugin-update-checker",
-        "ua-parser/uap-php",
-        "woocommerce/action-scheduler"
+        "aws/aws-sdk-php"
       ],
       "delete_vendor_packages": true,
       "update_call_sites": false
