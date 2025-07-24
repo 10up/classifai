@@ -304,7 +304,7 @@ function attachment_is_pdf( $post ): bool {
  */
 function get_asset_info( string $slug, ?string $attribute = null ) {
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php' ) ) {
-		$asset = require_once CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
+		$asset = require CLASSIFAI_PLUGIN_DIR . '/dist/' . $slug . '.asset.php';
 	} else {
 		return null;
 	}
