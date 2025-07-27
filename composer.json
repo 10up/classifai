@@ -13,7 +13,7 @@
     "php": ">=7.4",
     "yahnis-elsts/plugin-update-checker": "5.1",
     "ua-parser/uap-php": "dev-master",
-    "aws/aws-sdk-php": "^3.300",
+    "aws/aws-sdk-php": "3.350.0",
     "woocommerce/action-scheduler": "3.8.1"
   },
   "autoload": {
@@ -44,7 +44,7 @@
     "pre-autoload-dump": "Aws\\Script\\Composer\\Composer::removeUnusedServices",
     "prefix-namespaces": [
         "sh -c 'test -f ./bin/strauss.phar || curl -o bin/strauss.phar -L -C - https://github.com/BrianHenryIE/strauss/releases/latest/download/strauss.phar'",
-        "php -d memory_limit=1024M bin/strauss.phar",
+        "php -d memory_limit=2048M -d max_execution_time=300 bin/strauss.phar",
         "@composer dump-autoload"
     ],
     "post-install-cmd": [
