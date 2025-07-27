@@ -83,12 +83,14 @@ require_once __DIR__ . '/config.php';
  */
 function classifai_autoload() {
 
-	// Load the prefixed vendor autoloader first (contains AWS SDK)
+	// Load the prefixed vendor autoloader (contains AWS SDK and all other dependencies)
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php' ) ) {
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php';
+
+		return true;
 	}
 
-	// Load the main vendor autoloader (contains plugin classes and other dependencies)
+	// Fallback to main vendor autoloader (for development)
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
 

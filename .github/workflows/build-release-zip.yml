@@ -51,8 +51,14 @@ jobs:
     - name: Run Strauss to namespace dependencies
       run: php -d memory_limit=2048M -d max_execution_time=300 bin/strauss.phar
 
-    - name: Remove vendor directory (keep only vendor-prefixed)
-      run: rm -rf vendor
+    - name: Copy all dependencies to vendor-prefixed and remove vendor
+      run: |
+        # Copy all non-AWS dependencies from vendor to vendor-prefixed
+        cp -r vendor/yahnis-elsts vendor-prefixed/ 2>/dev/null || true
+        cp -r vendor/ua-parser vendor-prefixed/ 2>/dev/null || true
+        cp -r vendor/woocommerce vendor-prefixed/ 2>/dev/null || true
+        # Remove original vendor directory
+        rm -rf vendor
 
     - name: Build
       run: |
