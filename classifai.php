@@ -82,6 +82,13 @@ require_once __DIR__ . '/config.php';
  * @return bool True or false if autoloading was successful.
  */
 function classifai_autoload() {
+
+	// Load the prefixed vendor autoloader first (contains AWS SDK)
+	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php' ) ) {
+		require_once CLASSIFAI_PLUGIN_DIR . '/vendor-prefixed/autoload.php';
+	}
+
+	// Load the main vendor autoloader (contains plugin classes and other dependencies)
 	if ( file_exists( CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php' ) ) {
 		require_once CLASSIFAI_PLUGIN_DIR . '/vendor/autoload.php';
 
