@@ -153,9 +153,9 @@ class Images extends Provider {
 		 * @since 3.5.0
 		 * @hook classifai_googleai_images_aspect_ratio_options
 		 *
-		 * @param int $model The default aspect ratio options.
+		 * @param array $options The default aspect ratio options.
 		 *
-		 * @return int The aspect ratio options.
+		 * @return array The aspect ratio options.
 		 */
 		return apply_filters( 'classifai_googleai_images_aspect_ratio_options', $options );
 	}

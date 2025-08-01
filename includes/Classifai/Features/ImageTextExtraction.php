@@ -223,11 +223,11 @@ class ImageTextExtraction extends Feature {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_text_post_args
 		 *
-		 * @param string $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
+		 * @param array  $post_args      Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
 		 * @param int    $attachment_id ID of the attachment post.
-		 * @param object $result        The full scan results from the API.
+		 * @param string $result        The full scan results from the API.
 		 *
-		 * @return string The filtered text data.
+		 * @return array The filtered post arguments.
 		 */
 		$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $result );
 

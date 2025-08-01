@@ -147,9 +147,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_quality_options
 		 *
-		 * @param int $model The default quality options.
+		 * @param array $options The default quality options.
 		 *
-		 * @return int  The quality options.
+		 * @return array The quality options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_quality_options', $options );
 	}
@@ -176,9 +176,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_size_options
 		 *
-		 * @param int $model The default size options.
+		 * @param array $options The default size options.
 		 *
-		 * @return int  The size options.
+		 * @return array The size options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_size_options', $options );
 	}
@@ -200,9 +200,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_style_options
 		 *
-		 * @param int $model The default style options.
+		 * @param array $options The default style options.
 		 *
-		 * @return int  The style options.
+		 * @return array The style options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_style_options', $options );
 	}

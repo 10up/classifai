@@ -597,8 +597,8 @@ class TextToSpeech extends Feature {
 		 * @since 2.2.0
 		 * @hook classifai_disable_post_to_audio_block
 		 *
-		 * @param bool    $is_disabled Whether to disable the display or not. By default - false.
-		 * @param WP_Post $_post       The Post object.
+		 * @param bool     $is_disabled Whether to disable the display or not. By default - false.
+		 * @param \WP_Post $_post       The Post object.
 		 *
 		 * @return bool Whether the audio block should be shown.
 		 */
@@ -829,7 +829,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * Fetch the subsequent state of audio generation once audio is generated for the post.
 	 *
-	 * @param int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
 	 *                                   return the current global post inside the loop. A numerically valid post ID that
 	 *                                   points to a non-existent post returns `null`. Defaults to global $post.
 	 * @return bool                    The subsequent state of audio generation. Default false.
