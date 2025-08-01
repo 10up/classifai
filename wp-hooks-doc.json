@@ -1,0 +1,16 @@
+{
+  "input": ".",
+  "outputDir": "./docs",
+  "ignoreFiles": [],
+  "templatesDir": "./wp-hooks-docs",
+  "ignoreHooks": [],
+  "title": "ClassifAI Developer Documentation",
+  "tagline": "Documentation for actions, filters, and WP-CLI commands found in the ClassifAI plugin",
+  "url": "https://classifaiplugin.com",
+  "baseUrl": "/classifai/",
+  "repoUrl": "https://github.com/10up/classifai",
+  "githubSourceCodeUrl": "https://github.com/10up/classifai/blob/trunk",
+  "organizationName": "10up",
+  "projectName": "classifai",
+  "footerStyle": "dark"
+}
