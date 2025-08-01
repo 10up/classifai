@@ -46,7 +46,8 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "node-wp-i18n": "^1.2.8",
-    "svg-react-loader": "^0.4.6"
+    "svg-react-loader": "^0.4.6",
+    "wp-hooks-documentor": "github:iamdharmesh/wp-hooks-documentor#build"
   },
   "dependencies": {
     "@wordpress/icons": "^10.17.0",
