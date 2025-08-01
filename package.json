@@ -44,12 +44,9 @@
     "cypress-mochawesome-reporter": "^4.0.0",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^9.1.7",
-    "jsdoc": "^4.0.4",
     "lint-staged": "^16.1.2",
     "node-wp-i18n": "^1.2.8",
-    "svg-react-loader": "^0.4.6",
-    "taffydb": "2.7.3",
-    "wp-hookdoc": "^0.2.0"
+    "svg-react-loader": "^0.4.6"
   },
   "dependencies": {
     "@wordpress/icons": "^10.17.0",
