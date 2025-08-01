@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { registerPlugin } from '@wordpress/plugins';
-import { useSelect } from '@wordpress/data';
+import { useSelect, dispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
@@ -20,6 +20,7 @@ const PrePublishClassificationContent = () => {
 	const [ resultReceived, setResultReceived ] = useState( false );
 	const [ featureTaxonomies, setFeatureTaxonomies ] = useState( [] );
 	const [ taxQuery, setTaxQuery ] = useState( {} );
+	const [ isSaved, setIsSaved ] = useState( false );
 
 	let [ taxTermsAI, setTaxTermsAI ] = useState( {} );
 	const { postType, postId, postTypeLabel } = useSelect( ( select ) => {
@@ -113,6 +114,59 @@ const PrePublishClassificationContent = () => {
 		setResultReceived( true );
 	};
 
+	/**
+	 * Save the terms (Modal).
+	 *
+	 * @param {Object} taxTerms Taxonomy terms.
+	 */
+	const saveTerms = async ( taxTerms ) => {
+		// Remove index values from the nested object
+		// Convert the object into an array of key-value pairs
+		const taxTermsArray = Object.entries( taxTerms );
+
+		// Remove index values from the nested objects and convert back to an object
+		const newtaxTerms = Object.fromEntries(
+			taxTermsArray.map( ( [ key, value ] ) => {
+				if ( typeof value === 'object' ) {
+					return [ key, Object.values( value ) ];
+				}
+				return [ key, value ];
+			} )
+		);
+
+		await dispatch( 'core' ).editEntityRecord(
+			'postType',
+			postType,
+			postId,
+			newtaxTerms
+		);
+
+		// If no edited values in post trigger save.
+		const isDirty = await wp.data
+			.select( 'core/editor' )
+			.isEditedPostDirty();
+		if ( ! isDirty ) {
+			await dispatch( 'core' ).saveEditedEntityRecord(
+				'postType',
+				postType,
+				postId
+			);
+		}
+
+		// Display success notice.
+		dispatch( 'core/notices' ).createSuccessNotice(
+			sprintf(
+				/** translators: %s is post type label. */
+				__( '%s classified successfully.', 'classifai' ),
+				postTypeLabel
+			),
+			{ type: 'snackbar' }
+		);
+
+		// Mark as saved
+		setIsSaved( true );
+	};
+
 	const handleClassifyClick = ( e ) => {
 		setIsLoading( true );
 		handleClick( {
@@ -142,6 +196,7 @@ const PrePublishClassificationContent = () => {
 			<TaxonomyControls
 				onChange={ ( newTaxQuery ) => {
 					setTaxQuery( newTaxQuery );
+					setIsSaved( false ); // Reset saved state when user makes changes.
 				} }
 				query={ {
 					contentPostType: postType,
@@ -167,6 +222,13 @@ const PrePublishClassificationContent = () => {
 						'classifai'
 					) }
 				</div>
+				<Button
+					variant={ 'secondary' }
+					onClick={ () => saveTerms( updatedTaxQuery ) }
+					disabled={ isSaved }
+				>
+					{ isSaved ? __( 'Saved!', 'classifai' ) : __( 'Save', 'classifai' ) }
+				</Button>
 			</div>
 			<DisableFeatureButton feature="content_classification" />
 		</>
