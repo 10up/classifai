@@ -227,11 +227,9 @@ const PrePublishClassificationContent = () => {
 					onClick={ () => saveTerms( updatedTaxQuery ) }
 					disabled={ isSaved }
 				>
-					{
-						isSaved
-							? __( 'Saved!', 'classifai' )
-							: __( 'Save', 'classifai' )
-					}
+					{ isSaved
+						? __( 'Saved!', 'classifai' )
+						: __( 'Save', 'classifai' ) }
 				</Button>
 			</div>
 			<DisableFeatureButton feature="content_classification" />
