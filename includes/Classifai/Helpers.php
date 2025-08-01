@@ -104,9 +104,9 @@ function get_post_types_for_language_settings(): array {
 	 * @since 1.6.0
 	 * @hook classifai_language_settings_post_types
 	 *
-	 * @param {array} $post_types Array of post types to show in language processing settings.
+	 * @param array $post_types Array of post types to show in language processing settings.
 	 *
-	 * @return {array} Array of post types.
+	 * @return array Array of post types.
 	 */
 	return apply_filters( 'classifai_language_settings_post_types', $post_types );
 }
@@ -127,9 +127,9 @@ function get_post_statuses_for_language_settings(): array {
 	 * @since 1.7.1
 	 * @hook classifai_language_settings_post_statuses
 	 *
-	 * @param {array} $post_statuses Array of post statuses to show in language processing settings.
+	 * @param array $post_statuses Array of post statuses to show in language processing settings.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_language_settings_post_statuses', $post_statuses );
 }
@@ -148,9 +148,9 @@ function computer_vision_max_filesize(): int {
 	 * @since 1.5.0
 	 * @hook classifai_computer_vision_max_filesize
 	 *
-	 * @param {int} file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
+	 * @param int file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
 	 *
-	 * @return {int} Filtered filesize in bytes.
+	 * @return int Filtered filesize in bytes.
 	 */
 	return apply_filters( 'classifai_computer_vision_max_filesize', 20 * MB_IN_BYTES ); // 20MB default.
 }
@@ -270,10 +270,10 @@ function get_modified_image_source_url( int $post_id ) {
 	 * @since 1.6.0
 	 * @hook classifai_generate_image_alt_tags_source_url
 	 *
-	 * @param {mixed} $image_url New image path for given attachment ID.
-	 * @param {int}   $post_id   The ID of the attachment to be used in classification.
+	 * @param mixed $image_url New image path for given attachment ID.
+	 * @param int   $post_id   The ID of the attachment to be used in classification.
 	 *
-	 * @return {mixed} NULL or filtered URl for given attachment id.
+	 * @return mixed NULL or filtered URl for given attachment id.
 	 */
 	return apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $post_id );
 }
@@ -436,9 +436,9 @@ function get_all_post_statuses(): array {
 	 * @since 2.2.2
 	 * @hook classifai_all_post_statuses
 	 *
-	 * @param {array} $all_statuses Array of post statuses.
+	 * @param array $all_statuses Array of post statuses.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
@@ -629,10 +629,10 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 	 * @since 3.0.0
 	 * @hook classifai_feature_classification_taxonomy_for_feature
 	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 * @param string $taxonomy    The slug of the taxonomy to use.
+	 * @param string $classify_by The NLU feature this taxonomy is for.
 	 *
-	 * @return {string} The filtered taxonomy slug.
+	 * @return string The filtered taxonomy slug.
 	 */
 	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
 }
@@ -678,9 +678,9 @@ function should_use_legacy_settings_panel(): bool {
 	 * @since 3.2.0
 	 * @hook classifai_use_legacy_settings_panel
 	 *
-	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
+	 * @param bool $use_legacy_settings_panel Whether to use the legacy settings panel.
 	 *
-	 * @return {bool} Whether to use the legacy settings panel.
+	 * @return bool Whether to use the legacy settings panel.
 	 */
 	return apply_filters( 'classifai_use_legacy_settings_panel', false );
 }

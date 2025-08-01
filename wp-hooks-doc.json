@@ -1,7 +1,11 @@
 {
   "input": ".",
   "outputDir": "./docs",
-  "ignoreFiles": [],
+  "ignoreFiles": [
+    "/tests/",
+    "/vendor/",
+    "/node_modules/"
+  ],
   "templatesDir": "./wp-hooks-docs",
   "ignoreHooks": [],
   "title": "ClassifAI Developer Documentation",

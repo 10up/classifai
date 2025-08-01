@@ -107,7 +107,7 @@ class ComputerVision extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_ms_computer_vision_render_provider_fields
 		 *
-		 * @param {object} $this The Provider object.
+		 * @param object $this The Provider object.
 		 */
 		do_action( 'classifai_' . static::ID . '_render_provider_fields', $this );
 	}
@@ -363,11 +363,11 @@ class ComputerVision extends Provider {
 		 * @since 1.5.0
 		 * @hook classifai_should_smart_crop_image
 		 *
-		 * @param {bool}  $should_smart_crop Whether to apply smart cropping. The default value is set in ComputerVision settings.
-		 * @param {array} $metadata          Image metadata.
-		 * @param {int}   $attachment_id     The attachment ID.
+		 * @param bool  $should_smart_crop Whether to apply smart cropping. The default value is set in ComputerVision settings.
+		 * @param array $metadata          Image metadata.
+		 * @param int   $attachment_id     The attachment ID.
 		 *
-		 * @return {bool} Whether to apply smart cropping.
+		 * @return bool Whether to apply smart cropping.
 		 */
 		if ( ! apply_filters( 'classifai_should_smart_crop_image', $should_smart_crop, $metadata, $attachment_id ) ) {
 			return [];
@@ -411,11 +411,11 @@ class ComputerVision extends Provider {
 		 * @since 1.6.0
 		 * @hook classifai_should_ocr_scan_image
 		 *
-		 * @param {bool}  $should_scan   Whether to run OCR scanning. Defaults to feature being enabled.
-		 * @param {string} $image_url    URL of image to process.
-		 * @param {int}   $attachment_id The attachment ID.
+		 * @param bool  $should_scan   Whether to run OCR scanning. Defaults to feature being enabled.
+		 * @param string $image_url    URL of image to process.
+		 * @param int   $attachment_id The attachment ID.
 		 *
-		 * @return {bool} Whether to run OCR scanning.
+		 * @return bool Whether to run OCR scanning.
 		 */
 		if ( ! apply_filters( 'classifai_should_ocr_scan_image', $feature->is_feature_enabled(), $image_url, $attachment_id ) ) {
 			return '';
@@ -453,10 +453,10 @@ class ComputerVision extends Provider {
 				 * @since 1.6.0
 				 * @hook classifai_ocr_text
 				 *
-				 * @param {string} $text    The returned text data.
-				 * @param {object} $details The full scan results from the API.
+				 * @param string $text    The returned text data.
+				 * @param object $details The full scan results from the API.
 				 *
-				 * @return {string} The filtered text data.
+				 * @return string The filtered text data.
 				 */
 				$rtn = apply_filters( 'classifai_ocr_text', implode( ' ', $text ), $details );
 
@@ -499,9 +499,9 @@ class ComputerVision extends Provider {
 		 * @since 1.4.0
 		 * @hook classifai_computer_vision_captions
 		 *
-		 * @param {array} $caption The returned caption data.
+		 * @param array $caption The returned caption data.
 		 *
-		 * @return {array} The filtered caption data.
+		 * @return array The filtered caption data.
 		 */
 		$caption = apply_filters( 'classifai_computer_vision_captions', $caption );
 
@@ -523,8 +523,8 @@ class ComputerVision extends Provider {
 				 * @since 1.5.0
 				 * @hook classifai_computer_vision_caption_failed
 				 *
-				 * @param {array} $caption   The caption data.
-				 * @param {int}   $threshold The caption_threshold setting.
+				 * @param array $caption   The caption data.
+				 * @param int   $threshold The caption_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $caption, $threshold );
 			}
@@ -599,9 +599,9 @@ class ComputerVision extends Provider {
 		 * @since 1.4.0
 		 * @hook classifai_computer_vision_image_tags
 		 *
-		 * @param {array} $tags The image tag data.
+		 * @param array $tags The image tag data.
 		 *
-		 * @return {array} The filtered image tags.
+		 * @return array The filtered image tags.
 		 */
 		$tags = apply_filters( 'classifai_computer_vision_image_tags', $tags );
 
@@ -626,8 +626,8 @@ class ComputerVision extends Provider {
 				 * @since 1.5.0
 				 * @hook classifai_computer_vision_image_tag_failed
 				 *
-				 * @param {array} $tags      The image tag data.
-				 * @param {int}   $threshold The tag_threshold setting.
+				 * @param array $tags      The image tag data.
+				 * @param int   $threshold The tag_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}
@@ -679,9 +679,9 @@ class ComputerVision extends Provider {
 				 * @since 3.1.0
 				 * @hook classifai_ms_computer_vision_scan_image_timeout
 				 *
-				 * @param {int} $timeout Timeout in seconds.
+				 * @param int $timeout Timeout in seconds.
 				 *
-				 * @return {int} Timeout in seconds.
+				 * @return int Timeout in seconds.
 				 */
 				'timeout' => apply_filters(
 					'classifai_' . self::ID . '_scan_image_timeout',

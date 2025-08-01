@@ -100,9 +100,9 @@ class TermCleanupScheduler {
 				 * @since 3.2.0
 				 * @hook classifai_feature_term_cleanup_get_similar_terms
 				 *
-				 * @param {array|bool|WP_Error} $res      Response from the get_similar_terms method.
-				 * @param {string}              $taxonomy Taxonomy of terms we are comparing.
-				 * @param {array}               $args     Arguments used for getting similar terms.
+				 * @param array|bool|\WP_Error $res      Response from the get_similar_terms method.
+				 * @param string               $taxonomy Taxonomy of terms we are comparing.
+				 * @param array                $args     Arguments used for getting similar terms.
 				 */
 				do_action( 'classifai_feature_term_cleanup_get_similar_terms', $res, $taxonomy, $args );
 

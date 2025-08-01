@@ -327,10 +327,10 @@ class AudioTranscriptsGeneration extends Feature {
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_result
 		 *
-		 * @param {string} $text Text extracted from the response.
-		 * @param {int}    $attachment_id The attachment ID.
+		 * @param string $text Text extracted from the response.
+		 * @param int    $attachment_id The attachment ID.
 		 *
-		 * @return {string}
+		 * @return string
 		 */
 		$text = apply_filters( 'classifai_whisper_transcribe_result', $text, $attachment_id );
 
