@@ -1071,6 +1071,11 @@ class Embeddings extends Provider {
 				continue;
 			}
 
+			// Convert the post embedding to an array if it's not already.
+			if ( ! is_array( $post_embedding[0] ) ) {
+				$post_embedding = [ $post_embedding ];
+			}
+
 			// Loop through the chunks and run a similarity calculation on each.
 			foreach ( $post_embedding as $chunk ) {
 				$similarity = $calculations->cosine_similarity( $embedding, $chunk );
