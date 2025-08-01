@@ -816,8 +816,8 @@ class TextToSpeech extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_audio_generation_initial_state
 		 *
-		 * @param bool    $state Initial state of audio generation toggle on a post. Default true.
-		 * @param WP_Post $post  The current Post object.
+		 * @param bool     $state Initial state of audio generation toggle on a post. Default true.
+		 * @param \WP_Post $post  The current Post object.
 		 *
 		 * @return bool            Initial state the audio generation toggle should be set to when no audio exists.
 		 */
