@@ -138,6 +138,9 @@ export const TermCleanupSettings = () => {
 										},
 									} );
 								} }
+								min="0"
+								max="100"
+								step="0.01"
 							/>
 						</SettingsRow>
 					);

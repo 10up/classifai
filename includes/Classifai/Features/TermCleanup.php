@@ -361,7 +361,7 @@ class TermCleanup extends Feature {
 
 		$settings  = $this->get_settings( 'taxonomies' );
 		$taxonomy  = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
-		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? absint( $settings[ $taxonomy . '_threshold' ] ) : 75;
+		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? floatval( $settings[ $taxonomy . '_threshold' ] ) : 75;
 
 		if ( empty( $taxonomy ) ) {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'classifai' ) );

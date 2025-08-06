@@ -242,11 +242,11 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
-			$new_settings[ static::ID ]['descriptive_confidence_threshold'] = absint( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
+			$new_settings[ static::ID ]['descriptive_confidence_threshold'] = floatval( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
-			$new_settings[ static::ID ]['tag_confidence_threshold'] = absint( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
+			$new_settings[ static::ID ]['tag_confidence_threshold'] = floatval( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
 		}
 
 		return $new_settings;
