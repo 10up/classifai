@@ -246,7 +246,9 @@ class ExcerptGeneration extends Feature {
 
 			// If generation was successful and we have a post ID, save to target field.
 			if ( ! is_wp_error( $result ) && $post_id ) {
-				$save_result = $this->save_excerpt_to_target_field( $result, $post_id );
+				$excerpt     = is_array( $result ) ? $result['content'] : $result;
+				$excerpt     = is_string( $excerpt ) ? $excerpt : '';
+				$save_result = $this->save_excerpt_to_target_field( $excerpt, $post_id );
 				if ( is_wp_error( $save_result ) ) {
 					return rest_ensure_response( $save_result );
 				}
