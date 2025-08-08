@@ -36,11 +36,11 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const [ targetFieldValue, setTargetFieldValue ] = useState( '' );
 	const [ targetFieldSettings, setTargetFieldSettings ] = useState( null );
 
-	const postId = useSelect( ( select ) =>
-		select( 'core/editor' ).getCurrentPostId()
+	const postId = useSelect( ( wpSelect ) =>
+		wpSelect( 'core/editor' ).getCurrentPostId()
 	);
-	const isPublishPanelOpen = useSelect( ( select ) =>
-		select( 'core/edit-post' ).isPublishSidebarOpened()
+	const isPublishPanelOpen = useSelect( ( wpSelect ) =>
+		wpSelect( 'core/edit-post' ).isPublishSidebarOpened()
 	);
 
 	// Get target field settings and value on component mount.
@@ -411,10 +411,10 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 }
 
 export default compose( [
-	withSelect( ( select ) => {
+	withSelect( ( wpSelect ) => {
 		return {
 			excerpt:
-				select( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
+				wpSelect( 'core/editor' ).getEditedPostAttribute( 'excerpt' ),
 		};
 	} ),
 	withDispatch( ( dispatch ) => ( {

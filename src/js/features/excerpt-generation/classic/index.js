@@ -139,11 +139,11 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			}
 
 			// Make sure the regenerate button is visible.
-			const regenerateButton = $(
+			const existingRegenerateButton = $(
 				'#classifai-excerpt-generation__excerpt-generate-btn'
 			);
-			if ( regenerateButton.length ) {
-				regenerateButton.show();
+			if ( existingRegenerateButton.length ) {
+				existingRegenerateButton.show();
 			}
 		}
 
@@ -244,11 +244,11 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 						postExcerptDiv.append( customFieldContainer );
 
 						// Move the regenerate button to after the custom field container.
-						const regenerateButton = $(
+						const existingRegenerateButton = $(
 							'#classifai-excerpt-generation__excerpt-generate-btn'
 						);
-						if ( regenerateButton.length ) {
-							regenerateButton
+						if ( existingRegenerateButton.length ) {
+							existingRegenerateButton
 								.detach()
 								.insertAfter( customFieldContainer )
 								.show();
@@ -261,7 +261,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 						if ( errorMessage.length ) {
 							errorMessage
 								.detach()
-								.insertAfter( regenerateButton );
+								.insertAfter( existingRegenerateButton );
 						}
 
 						// Move the disable link as well
@@ -373,11 +373,11 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 				postExcerptDiv.append( customFieldContainer );
 
 				// Move the regenerate button to after the custom field container.
-				const regenerateButton = $(
+				const existingRegenerateButton = $(
 					'#classifai-excerpt-generation__excerpt-generate-btn'
 				);
-				if ( regenerateButton.length ) {
-					regenerateButton
+				if ( existingRegenerateButton.length ) {
+					existingRegenerateButton
 						.detach()
 						.insertAfter( customFieldContainer )
 						.show();
@@ -388,7 +388,9 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 					'.classifai-excerpt-generation__excerpt-generate-error'
 				);
 				if ( errorMessage.length ) {
-					errorMessage.detach().insertAfter( regenerateButton );
+					errorMessage
+						.detach()
+						.insertAfter( existingRegenerateButton );
 				}
 
 				// Move the disable link as well.
@@ -448,28 +450,24 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 						} else {
 							$( excerptContainer ).val( result );
 						}
-					} else {
-						// Check if we should update the custom field or default excerpt.
-						if (
-							targetFieldSettings &&
-							targetFieldSettings.field_type !== 'post_excerpt'
-						) {
-							// Update custom field display first.
-							const customField = $(
-								'#classifai-custom-excerpt'
-							);
-							if ( customField.length ) {
-								customField.text( result );
-								targetFieldValue = result;
-							}
-
-							// Update visible meta field values on the page (this also updates custom field display).
-							updateVisibleMetaFields( result );
-						} else {
-							// Update default excerpt field.
-							$( excerptContainer ).val( result );
+					} else if (
+						targetFieldSettings &&
+						targetFieldSettings.field_type !== 'post_excerpt'
+					) {
+						// Update custom field display first.
+						const customField = $( '#classifai-custom-excerpt' );
+						if ( customField.length ) {
+							customField.text( result );
+							targetFieldValue = result;
 						}
+
+						// Update visible meta field values on the page (this also updates custom field display).
+						updateVisibleMetaFields( result );
+					} else {
+						// Update default excerpt field.
+						$( excerptContainer ).val( result );
 					}
+
 					$( excerptContainer ).trigger( 'input' );
 					generateTextEl.text(
 						isProduct
