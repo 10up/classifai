@@ -635,4 +635,87 @@ class ExcerptGeneration extends Feature {
 
 		return $new_settings;
 	}
+
+	/**
+	 * Save the generated excerpt to the target field.
+	 *
+	 * @param string $excerpt The generated excerpt.
+	 * @param int    $post_id The post ID.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
+	 */
+	public function save_excerpt_to_target_field( $excerpt, $post_id ) {
+		$settings = $this->get_settings();
+		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
+
+		/**
+		 * Filter the excerpt before saving to target field.
+		 *
+		 * @since 3.x.x
+		 * @hook classifai_excerpt_before_save_to_target
+		 *
+		 * @param {string} $excerpt   The generated excerpt.
+		 * @param {int}    $post_id   The post ID.
+		 * @param {string} $field_type The target field type.
+		 *
+		 * @return {string} The excerpt to save.
+		 */
+		$excerpt = apply_filters( 'classifai_excerpt_before_save_to_target', $excerpt, $post_id, $field_type );
+
+		switch ( $field_type ) {
+			case 'post_excerpt':
+				$result = wp_update_post( [
+					'ID'           => $post_id,
+					'post_excerpt' => wp_kses_post( $excerpt ),
+				] );
+				return is_wp_error( $result ) ? $result : true;
+
+			case 'custom_meta':
+				$meta_key = $settings['target_custom_field'] ?? '';
+				if ( empty( $meta_key ) ) {
+					return new WP_Error( 'no_meta_key', __( 'No custom meta key specified.', 'classifai' ) );
+				}
+				
+				/**
+				 * Filter the meta key for custom meta field saving.
+				 *
+				 * @since 3.x.x
+				 * @hook classifai_excerpt_custom_meta_key
+				 *
+				 * @param {string} $meta_key The meta key.
+				 * @param {int}    $post_id  The post ID.
+				 *
+				 * @return {string} The meta key to use.
+				 */
+				$meta_key = apply_filters( 'classifai_excerpt_custom_meta_key', $meta_key, $post_id );
+				
+				update_post_meta( $post_id, $meta_key, wp_kses_post( $excerpt ) );
+				return true;
+
+			case 'acf_field':
+				$acf_field_key = $settings['target_acf_field'] ?? '';
+				if ( empty( $acf_field_key ) ) {
+					return new WP_Error( 'no_acf_field', __( 'No ACF field specified.', 'classifai' ) );
+				}
+				if ( function_exists( 'update_field' ) ) {
+					update_field( $acf_field_key, wp_kses_post( $excerpt ), $post_id );
+					return true;
+				}
+				return new WP_Error( 'acf_not_available', __( 'ACF plugin is not available.', 'classifai' ) );
+
+			default:
+				/**
+				 * Filter for custom target field types.
+				 *
+				 * @since 3.x.x
+				 * @hook classifai_excerpt_save_to_custom_target
+				 *
+				 * @param {string} $excerpt    The generated excerpt.
+				 * @param {int}    $post_id    The post ID.
+				 * @param {string} $field_type The target field type.
+				 *
+				 * @return {bool|WP_Error} True on success, WP_Error on failure.
+				 */
+				return apply_filters( 'classifai_excerpt_save_to_custom_target', new WP_Error( 'invalid_field_type', __( 'Invalid target field type.', 'classifai' ) ), $excerpt, $post_id, $field_type );
+		}
+	}
 }
