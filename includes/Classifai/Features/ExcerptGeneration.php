@@ -413,6 +413,95 @@ class ExcerptGeneration extends Feature {
 	}
 
 	/**
+	 * Render the target field settings.
+	 *
+	 * @param array $args Field arguments.
+	 */
+	public function render_target_field_settings( $args ) {
+		$settings     = $this->get_settings();
+		$target_field = $settings['target_field'] ?? 'post_excerpt';
+		$field_type   = $settings['target_field_type'] ?? 'post_excerpt';
+		$custom_field = $settings['target_custom_field'] ?? '';
+
+		?>
+		<div class="classifai-target-field-settings">
+			<select name="<?php echo esc_attr( $this->get_option_name() ); ?>[target_field_type]" id="target_field_type">
+				<option value="post_excerpt" <?php selected( $field_type, 'post_excerpt' ); ?>>
+					<?php esc_html_e( 'Default excerpt field', 'classifai' ); ?>
+				</option>
+				<option value="custom_meta" <?php selected( $field_type, 'custom_meta' ); ?>>
+					<?php esc_html_e( 'Custom meta field', 'classifai' ); ?>
+				</option>
+				<?php if ( function_exists( 'acf_get_field_groups' ) ) : ?>
+				<option value="acf_field" <?php selected( $field_type, 'acf_field' ); ?>>
+					<?php esc_html_e( 'ACF field', 'classifai' ); ?>
+				</option>
+				<?php endif; ?>
+			</select>
+
+			<div id="custom_meta_field_container" style="<?php echo 'custom_meta' === $field_type ? '' : 'display: none;'; ?>">
+				<br>
+				<label for="target_custom_field">
+					<?php esc_html_e( 'Meta key:', 'classifai' ); ?>
+				</label>
+				<input 
+					type="text" 
+					id="target_custom_field" 
+					name="<?php echo esc_attr( $this->get_option_name() ); ?>[target_custom_field]" 
+					value="<?php echo esc_attr( $custom_field ); ?>"
+					placeholder="<?php esc_attr_e( 'e.g., editorial_subtitle, custom_excerpt', 'classifai' ); ?>"
+				/>
+			</div>
+
+			<div id="acf_field_container" style="<?php echo 'acf_field' === $field_type ? '' : 'display: none;'; ?>">
+				<br>
+				<label for="target_acf_field">
+					<?php esc_html_e( 'ACF field key:', 'classifai' ); ?>
+				</label>
+				<select id="target_acf_field" name="<?php echo esc_attr( $this->get_option_name() ); ?>[target_acf_field]">
+					<option value=""><?php esc_html_e( 'Select ACF field', 'classifai' ); ?></option>
+					<?php
+					if ( function_exists( 'acf_get_field_groups' ) ) {
+						$field_groups = acf_get_field_groups();
+						foreach ( $field_groups as $field_group ) {
+							$fields = acf_get_fields( $field_group );
+							if ( $fields ) {
+								echo '<optgroup label="' . esc_attr( $field_group['title'] ) . '">';
+								foreach ( $fields as $field ) {
+									if ( in_array( $field['type'], [ 'text', 'textarea', 'wysiwyg' ], true ) ) {
+										$selected = ( $settings['target_acf_field'] ?? '' ) === $field['key'] ? 'selected' : '';
+										echo '<option value="' . esc_attr( $field['key'] ) . '" ' . $selected . '>';
+										echo esc_html( $field['label'] );
+										echo '</option>';
+									}
+								}
+								echo '</optgroup>';
+							}
+						}
+					}
+					?>
+				</select>
+			</div>
+		</div>
+
+		<script>
+		jQuery(document).ready(function($) {
+			$('#target_field_type').on('change', function() {
+				var fieldType = $(this).val();
+				$('#custom_meta_field_container, #acf_field_container').hide();
+				
+				if (fieldType === 'custom_meta') {
+					$('#custom_meta_field_container').show();
+				} else if (fieldType === 'acf_field') {
+					$('#acf_field_container').show();
+				}
+			});
+		});
+		</script>
+		<?php
+	}
+
+	/**
 	 * Returns the default settings for the feature.
 	 *
 	 * @return array
