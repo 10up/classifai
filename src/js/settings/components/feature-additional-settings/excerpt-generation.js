@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
 	CheckboxControl,
+	SelectControl,
 } from '@wordpress/components';
 
 /**
@@ -33,6 +34,9 @@ export const ExcerptGenerationSettings = () => {
 			generate_excerpt_prompt: prompts,
 		} );
 	};
+
+	// Get available ACF fields if ACF is active.
+	const acfFields = window.classifAISettings?.acfFields || [];
 
 	return (
 		<>
@@ -93,6 +97,65 @@ export const ExcerptGenerationSettings = () => {
 						setFeatureSettings( { length: value } )
 					}
 				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Target field', 'classifai' ) }
+				description={ __(
+					'Choose where to save the generated excerpt. You can target the default excerpt field, custom meta fields, or ACF fields.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					value={ featureSettings.target_field_type || 'post_excerpt' }
+					options={ [
+						{
+							label: __( 'Default excerpt field', 'classifai' ),
+							value: 'post_excerpt',
+						},
+						{
+							label: __( 'Custom meta field', 'classifai' ),
+							value: 'custom_meta',
+						},
+						...( acfFields.length > 0 ? [
+							{
+								label: __( 'ACF field', 'classifai' ),
+								value: 'acf_field',
+							},
+						] : [] ),
+					] }
+					onChange={ ( value ) =>
+						setFeatureSettings( { target_field_type: value } )
+					}
+				/>
+				{ featureSettings.target_field_type === 'custom_meta' && (
+					<InputControl
+						label={ __( 'Meta key', 'classifai' ) }
+						value={ featureSettings.target_custom_field || '' }
+						onChange={ ( value ) =>
+							setFeatureSettings( { target_custom_field: value } )
+						}
+						placeholder={ __( 'e.g., editorial_subtitle, custom_excerpt', 'classifai' ) }
+					/>
+				) }
+				{ featureSettings.target_field_type === 'acf_field' && (
+					<SelectControl
+						label={ __( 'ACF field', 'classifai' ) }
+						value={ featureSettings.target_acf_field || '' }
+						options={ [
+							{
+								label: __( 'Select ACF field', 'classifai' ),
+								value: '',
+							},
+							...acfFields.map( ( field ) => ( {
+								label: field.label,
+								value: field.key,
+							} ) ),
+						] }
+						onChange={ ( value ) =>
+							setFeatureSettings( { target_acf_field: value } )
+						}
+					/>
+				) }
 			</SettingsRow>
 		</>
 	);
