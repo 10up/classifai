@@ -826,4 +826,13 @@ class ExcerptGeneration extends Feature {
 
 		return $info;
 	}
+
+	/**
+	 * Check if ACF is available and active.
+	 *
+	 * @return bool True if ACF is available.
+	 */
+	public function is_acf_available() {
+		return function_exists( 'acf_get_field_groups' ) && function_exists( 'acf_get_fields' );
+	}
 }
