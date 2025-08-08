@@ -234,17 +234,25 @@ class ExcerptGeneration extends Feature {
 			 */
 			$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
 
-			return rest_ensure_response(
-				$this->run(
-					$post_id,
-					'excerpt',
-					[
-						'content' => $request->get_param( 'content' ),
-						'title'   => $request->get_param( 'title' ),
-						'author'  => $author_name,
-					]
-				)
+			$result = $this->run(
+				$post_id,
+				'excerpt',
+				[
+					'content' => $request->get_param( 'content' ),
+					'title'   => $request->get_param( 'title' ),
+					'author'  => $author_name,
+				]
 			);
+
+			// If generation was successful and we have a post ID, save to target field.
+			if ( ! is_wp_error( $result ) && $post_id ) {
+				$save_result = $this->save_excerpt_to_target_field( $result, $post_id );
+				if ( is_wp_error( $save_result ) ) {
+					return rest_ensure_response( $save_result );
+				}
+			}
+
+			return rest_ensure_response( $result );
 		}
 
 		return parent::rest_endpoint_callback( $request );
