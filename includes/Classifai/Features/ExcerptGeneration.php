@@ -396,6 +396,20 @@ class ExcerptGeneration extends Feature {
 				'description'   => __( 'How many words should the excerpt be? Note that the final result may not exactly match this, it often tends to exceed this number by 10-15 words.', 'classifai' ),
 			]
 		);
+
+		// Add target field settings.
+		add_settings_field(
+			'target_field',
+			esc_html__( 'Target field', 'classifai' ),
+			[ $this, 'render_target_field_settings' ],
+			$this->get_option_name(),
+			$this->get_option_name() . '_section',
+			[
+				'label_for'     => 'target_field',
+				'default_value' => $settings['target_field'] ?? 'post_excerpt',
+				'description'   => __( 'Choose where to save the generated excerpt. You can target the default excerpt field, custom meta fields, or ACF fields.', 'classifai' ),
+			]
+		);
 	}
 
 	/**
