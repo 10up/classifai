@@ -110,6 +110,7 @@ class Settings {
 			'postStatuses'     => get_post_statuses_for_language_settings(),
 			'isEPinstalled'    => is_elasticpress_installed(),
 			'nluTaxonomies'    => $this->get_nlu_taxonomies(),
+			'acfFields'        => $this->get_acf_fields(),
 		);
 
 		wp_add_inline_script(
@@ -218,6 +219,49 @@ class Settings {
 		return apply_filters( 'classifai_settings_ibm_watson_nlu_taxonomies', $taxonomies );
 	}
 
+	/**
+	 * Get ACF fields if ACF is active.
+	 *
+	 * @since 3.6.0
+	 *
+	 * @return array
+	 */
+	public function get_acf_fields(): array {
+		$acf_fields = array();
+
+		// Check if ACF is active.
+		if ( ! function_exists( 'acf_get_field_groups' ) ) {
+			return $acf_fields;
+		}
+
+		// Get all ACF field groups.
+		$field_groups = acf_get_field_groups();
+		
+		if ( empty( $field_groups ) ) {
+			return $acf_fields;
+		}
+
+		// Loop through field groups and get their fields.
+		foreach ( $field_groups as $field_group ) {
+			$fields = acf_get_fields( $field_group );
+			
+			if ( ! empty( $fields ) ) {
+				foreach ( $fields as $field ) {
+					// Only include text, textarea, and wysiwyg fields for excerpt generation.
+					if ( in_array( $field['type'], array( 'text', 'textarea', 'wysiwyg' ), true ) ) {
+						$acf_fields[] = array(
+							'key'   => $field['key'],
+							'name'  => $field['name'],
+							'label' => $field['label'],
+							'type'  => $field['type'],
+						);
+					}
+				}
+			}
+		}
+
+		return $acf_fields;
+	}
 
 	/**
 	 * Get the settings.
