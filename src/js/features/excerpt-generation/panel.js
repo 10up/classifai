@@ -3,9 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button, ExternalLink, TextareaControl } from '@wordpress/components';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withSelect, withDispatch, useSelect, select } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 
 /**
@@ -172,7 +172,7 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			) }
 			{ targetFieldValue && targetFieldValue !== excerpt && (
 				<div style={ { marginTop: '1rem', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px' } }>
-					<strong>{ __( 'Target field value:', 'classifai' ) }</strong>
+					<strong>{ __( 'Custom excerpt:', 'classifai' ) }</strong>
 					<p style={ { margin: '5px 0 0 0' } }>{ targetFieldValue }</p>
 				</div>
 			) }
