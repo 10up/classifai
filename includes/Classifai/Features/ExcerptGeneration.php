@@ -718,4 +718,46 @@ class ExcerptGeneration extends Feature {
 				return apply_filters( 'classifai_excerpt_save_to_custom_target', new WP_Error( 'invalid_field_type', __( 'Invalid target field type.', 'classifai' ) ), $excerpt, $post_id, $field_type );
 		}
 	}
+
+	/**
+	 * Get the current value from the target field.
+	 *
+	 * @param int $post_id The post ID.
+	 * @return string The current value.
+	 */
+	public function get_current_target_field_value( $post_id ) {
+		$settings = $this->get_settings();
+		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
+
+		switch ( $field_type ) {
+			case 'post_excerpt':
+				return get_the_excerpt( $post_id );
+
+			case 'custom_meta':
+				$meta_key = $settings['target_custom_field'] ?? '';
+				return get_post_meta( $post_id, $meta_key, true );
+
+			case 'acf_field':
+				$acf_field_key = $settings['target_acf_field'] ?? '';
+				if ( function_exists( 'get_field' ) ) {
+					return get_field( $acf_field_key, $post_id );
+				}
+				return '';
+
+			default:
+				/**
+				 * Filter for custom target field types when getting current value.
+				 *
+				 * @since 3.x.x
+				 * @hook classifai_excerpt_get_custom_target_value
+				 *
+				 * @param {string} $value      The current value.
+				 * @param {int}    $post_id    The post ID.
+				 * @param {string} $field_type The target field type.
+				 *
+				 * @return {string} The current value.
+				 */
+				return apply_filters( 'classifai_excerpt_get_custom_target_value', '', $post_id, $field_type );
+		}
+	}
 }
