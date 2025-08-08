@@ -460,7 +460,7 @@ class ExcerptGeneration extends Feature {
 			$this->get_option_name() . '_section',
 			[
 				'label_for'     => 'target_field',
-				'default_value' => $settings['target_field'] ?? 'post_excerpt',
+				'default_value' => $settings['target_field_type'] ?? 'post_excerpt',
 				'description'   => __( 'Choose where to save the generated excerpt. You can target the default excerpt field, custom meta fields, or ACF fields.', 'classifai' ),
 			]
 		);
@@ -473,7 +473,6 @@ class ExcerptGeneration extends Feature {
 	 */
 	public function render_target_field_settings( $args ) {
 		$settings     = $this->get_settings();
-		$target_field = $settings['target_field'] ?? 'post_excerpt';
 		$field_type   = $settings['target_field_type'] ?? 'post_excerpt';
 		$custom_field = $settings['target_custom_field'] ?? '';
 
@@ -518,7 +517,7 @@ class ExcerptGeneration extends Feature {
 					if ( function_exists( 'acf_get_field_groups' ) ) {
 						$field_groups = acf_get_field_groups();
 						foreach ( $field_groups as $field_group ) {
-							$fields = acf_get_fields( $field_group );
+							$fields = function_exists( 'acf_get_fields' ) ? acf_get_fields( $field_group ) : array();
 							if ( $fields ) {
 								echo '<optgroup label="' . esc_attr( $field_group['title'] ) . '">';
 								foreach ( $fields as $field ) {
@@ -759,19 +758,7 @@ class ExcerptGeneration extends Feature {
 				return new WP_Error( 'acf_not_available', __( 'ACF plugin is not available.', 'classifai' ) );
 
 			default:
-				/**
-				 * Filter for custom target field types.
-				 *
-				 * @since 3.x.x
-				 * @hook classifai_excerpt_save_to_custom_target
-				 *
-				 * @param {string} $excerpt    The generated excerpt.
-				 * @param {int}    $post_id    The post ID.
-				 * @param {string} $field_type The target field type.
-				 *
-				 * @return {bool|WP_Error} True on success, WP_Error on failure.
-				 */
-				return apply_filters( 'classifai_excerpt_save_to_custom_target', new WP_Error( 'invalid_field_type', __( 'Invalid target field type.', 'classifai' ) ), $excerpt, $post_id, $field_type );
+				return new WP_Error( 'invalid_field_type', __( 'Invalid target field type.', 'classifai' ) );
 		}
 	}
 
@@ -831,7 +818,7 @@ class ExcerptGeneration extends Feature {
 
 		$field_groups = acf_get_field_groups();
 		foreach ( $field_groups as $field_group ) {
-			$acf_fields = acf_get_fields( $field_group );
+			$acf_fields = function_exists( 'acf_get_fields' ) ? acf_get_fields( $field_group ) : array();
 			if ( $acf_fields ) {
 				foreach ( $acf_fields as $field ) {
 					// Only include text-based fields.

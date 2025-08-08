@@ -243,7 +243,7 @@ class Settings {
 
 		// Loop through field groups and get their fields.
 		foreach ( $field_groups as $field_group ) {
-			$fields = acf_get_fields( $field_group );
+			$fields = function_exists( 'acf_get_fields' ) ? acf_get_fields( $field_group ) : array();
 
 			if ( ! empty( $fields ) ) {
 				foreach ( $fields as $field ) {
