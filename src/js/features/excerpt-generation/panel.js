@@ -28,14 +28,32 @@ import { browserAITextGeneration } from '../../helpers';
 function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const [ error, setError ] = useState( false );
+	const [ targetFieldValue, setTargetFieldValue ] = useState( '' );
 
-	const { select } = wp.data;
-	const postId = select( 'core/editor' ).getCurrentPostId();
-	const buttonText =
-		'' === excerpt
-			? __( 'Generate excerpt', 'classifai' )
-			: __( 'Re-generate excerpt', 'classifai' );
-	const isPublishPanelOpen = select( 'core/editor' ).isPublishSidebarOpened();
+	const postId = useSelect( ( select ) =>
+		select( 'core/editor' ).getCurrentPostId()
+	);
+	const isPublishPanelOpen = useSelect( ( select ) =>
+		select( 'core/edit-post' ).isPublishSidebarOpened()
+	);
+
+	// Get target field value on component mount.
+	useEffect( () => {
+		if ( postId ) {
+			apiFetch( {
+				path: `/classifai/v1/get-target-field-value/${ postId }`,
+			} ).then( ( result ) => {
+				setTargetFieldValue( result.value || '' );
+			} ).catch( () => {
+				// If endpoint doesn't exist, fall back to excerpt.
+				setTargetFieldValue( excerpt || '' );
+			} );
+		}
+	}, [ postId, excerpt ] );
+
+	const buttonText = excerpt
+		? __( 'Re-generate excerpt', 'classifai' )
+		: __( 'Generate excerpt', 'classifai' );
 
 	const buttonClick = async ( path ) => {
 		const postContent =
@@ -87,7 +105,9 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					}
 				}
 
+				// Update both the excerpt field and target field value.
 				onUpdateExcerpt( res.trim() );
+				setTargetFieldValue( res.trim() );
 				setError( false );
 				setIsLoading( false );
 			},
@@ -149,6 +169,12 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 				>
 					{ error }
 				</span>
+			) }
+			{ targetFieldValue && targetFieldValue !== excerpt && (
+				<div style={ { marginTop: '1rem', padding: '10px', backgroundColor: '#f0f0f0', borderRadius: '4px' } }>
+					<strong>{ __( 'Target field value:', 'classifai' ) }</strong>
+					<p style={ { margin: '5px 0 0 0' } }>{ targetFieldValue }</p>
+				</div>
 			) }
 			<DisableFeatureButton feature="feature_excerpt_generation" />
 		</div>
