@@ -106,7 +106,9 @@ export const ExcerptGenerationSettings = () => {
 				) }
 			>
 				<SelectControl
-					value={ featureSettings.target_field_type || 'post_excerpt' }
+					value={
+						featureSettings.target_field_type || 'post_excerpt'
+					}
 					options={ [
 						{
 							label: __( 'Default excerpt field', 'classifai' ),
@@ -116,12 +118,14 @@ export const ExcerptGenerationSettings = () => {
 							label: __( 'Custom meta field', 'classifai' ),
 							value: 'custom_meta',
 						},
-						...( acfFields.length > 0 ? [
-							{
-								label: __( 'ACF field', 'classifai' ),
-								value: 'acf_field',
-							},
-						] : [] ),
+						...( acfFields.length > 0
+							? [
+									{
+										label: __( 'ACF field', 'classifai' ),
+										value: 'acf_field',
+									},
+							  ]
+							: [] ),
 					] }
 					onChange={ ( value ) =>
 						setFeatureSettings( { target_field_type: value } )
@@ -134,7 +138,10 @@ export const ExcerptGenerationSettings = () => {
 						onChange={ ( value ) =>
 							setFeatureSettings( { target_custom_field: value } )
 						}
-						placeholder={ __( 'e.g., editorial_subtitle, custom_excerpt', 'classifai' ) }
+						placeholder={ __(
+							'e.g., editorial_subtitle, custom_excerpt',
+							'classifai'
+						) }
 					/>
 				) }
 				{ featureSettings.target_field_type === 'acf_field' && (

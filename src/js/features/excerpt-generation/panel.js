@@ -2,7 +2,12 @@
  * External Dependencies.
  */
 import { __ } from '@wordpress/i18n';
-import { Button, ExternalLink, TextareaControl, Notice } from '@wordpress/components';
+import {
+	Button,
+	ExternalLink,
+	TextareaControl,
+	Notice,
+} from '@wordpress/components';
 import { withSelect, withDispatch, useSelect, select } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { useState, useEffect } from '@wordpress/element';
@@ -44,25 +49,29 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 			// Get target field settings
 			apiFetch( {
 				path: '/classifai/v1/get-target-field-settings/',
-			} ).then( ( result ) => {
-				setTargetFieldSettings( result );
-			} ).catch( () => {
-				// Fall back to default settings.
-				setTargetFieldSettings( {
-					field_type: 'post_excerpt',
-					field_name: __( 'Default excerpt field', 'classifai' ),
+			} )
+				.then( ( result ) => {
+					setTargetFieldSettings( result );
+				} )
+				.catch( () => {
+					// Fall back to default settings.
+					setTargetFieldSettings( {
+						field_type: 'post_excerpt',
+						field_name: __( 'Default excerpt field', 'classifai' ),
+					} );
 				} );
-			} );
 
 			// Get target field value
 			apiFetch( {
 				path: `/classifai/v1/get-target-field-value/${ postId }`,
-			} ).then( ( result ) => {
-				setTargetFieldValue( result.value || '' );
-			} ).catch( () => {
-				// Fall back to default excerpt.
-				setTargetFieldValue( excerpt || '' );
-			} );
+			} )
+				.then( ( result ) => {
+					setTargetFieldValue( result.value || '' );
+				} )
+				.catch( () => {
+					// Fall back to default excerpt.
+					setTargetFieldValue( excerpt || '' );
+				} );
 		}
 	}, [ postId, excerpt ] );
 
@@ -138,18 +147,24 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 
 	// Function to update visible meta field values on the page.
 	const updateVisibleMetaFields = ( value ) => {
-		if ( ! targetFieldSettings || targetFieldSettings.field_type === 'post_excerpt' ) {
+		if (
+			! targetFieldSettings ||
+			targetFieldSettings.field_type === 'post_excerpt'
+		) {
 			return;
 		}
 
-		const metaKey = targetFieldSettings.meta_key || targetFieldSettings.field_name;
+		const metaKey =
+			targetFieldSettings.meta_key || targetFieldSettings.field_name;
 		if ( ! metaKey ) {
 			return;
 		}
 
 		// Update meta field input that is visible on the page.
 		// Directly target the textarea by its name attribute using the metaKey.
-		const metaInput = document.querySelector( `textarea[name="meta[${ metaKey }][value]"]` );
+		const metaInput = document.querySelector(
+			`textarea[name="meta[${ metaKey }][value]"]`
+		);
 		if ( metaInput ) {
 			metaInput.value = value;
 
@@ -163,15 +178,20 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 		}
 
 		// Also check for ACF fields if this is an ACF field
-		if ( targetFieldSettings.field_type === 'acf_field' && targetFieldSettings.meta_key ) {
-			const acfInputs = document.querySelectorAll( `input[name*="${targetFieldSettings.meta_key}"], textarea[name*="${targetFieldSettings.meta_key}"]` );
+		if (
+			targetFieldSettings.field_type === 'acf_field' &&
+			targetFieldSettings.meta_key
+		) {
+			const acfInputs = document.querySelectorAll(
+				`input[name*="${ targetFieldSettings.meta_key }"], textarea[name*="${ targetFieldSettings.meta_key }"]`
+			);
 			acfInputs.forEach( ( input ) => {
 				input.value = value;
-				
+
 				// Trigger change events
 				const inputEvent = new Event( 'input', { bubbles: true } );
 				input.dispatchEvent( inputEvent );
-				
+
 				const changeEvent = new Event( 'change', { bubbles: true } );
 				input.dispatchEvent( changeEvent );
 			} );
@@ -190,37 +210,48 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 
 	// Function to listen for changes in meta fields and update our custom field display
 	const setupMetaFieldListeners = () => {
-		if ( ! targetFieldSettings || targetFieldSettings.field_type === 'post_excerpt' ) {
+		if (
+			! targetFieldSettings ||
+			targetFieldSettings.field_type === 'post_excerpt'
+		) {
 			return;
 		}
 
-		const metaKey = targetFieldSettings.meta_key || targetFieldSettings.field_name;
+		const metaKey =
+			targetFieldSettings.meta_key || targetFieldSettings.field_name;
 		if ( ! metaKey ) {
 			return;
 		}
 
 		// Listen for changes in meta field inputs (including both textarea and input for consistency).
 		// Directly target the textarea by its name attribute using the metaKey.
-		const metaInput = document.querySelector( `textarea[name="meta[${ metaKey }][value]"]` );
+		const metaInput = document.querySelector(
+			`textarea[name="meta[${ metaKey }][value]"]`
+		);
 
 		if ( metaInput ) {
 			metaInput.addEventListener( 'input', ( event ) => {
 				updateCustomFieldDisplay( event.target.value );
 			} );
-			
+
 			metaInput.addEventListener( 'change', ( event ) => {
 				updateCustomFieldDisplay( event.target.value );
 			} );
 		}
 
 		// Listen for ACF field changes
-		if ( targetFieldSettings.field_type === 'acf_field' && targetFieldSettings.meta_key ) {
-			const acfInputs = document.querySelectorAll( `input[name*="${targetFieldSettings.meta_key}"], textarea[name*="${targetFieldSettings.meta_key}"]` );
+		if (
+			targetFieldSettings.field_type === 'acf_field' &&
+			targetFieldSettings.meta_key
+		) {
+			const acfInputs = document.querySelectorAll(
+				`input[name*="${ targetFieldSettings.meta_key }"], textarea[name*="${ targetFieldSettings.meta_key }"]`
+			);
 			acfInputs.forEach( ( input ) => {
 				input.addEventListener( 'input', ( event ) => {
 					updateCustomFieldDisplay( event.target.value );
 				} );
-				
+
 				input.addEventListener( 'change', ( event ) => {
 					updateCustomFieldDisplay( event.target.value );
 				} );
@@ -230,7 +261,10 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 
 	// Set up listeners when component mounts or target field settings change
 	useEffect( () => {
-		if ( targetFieldSettings && targetFieldSettings.field_type !== 'post_excerpt' ) {
+		if (
+			targetFieldSettings &&
+			targetFieldSettings.field_type !== 'post_excerpt'
+		) {
 			// Small delay to ensure DOM elements are available.
 			const timer = setTimeout( () => {
 				setupMetaFieldListeners();
@@ -243,8 +277,10 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 	}, [ targetFieldSettings ] );
 
 	// Check if we should show the custom field instead of the default excerpt field
-	const shouldShowCustomField = targetFieldSettings && targetFieldSettings.field_type !== 'post_excerpt';
-	const fieldLabel = shouldShowCustomField 
+	const shouldShowCustomField =
+		targetFieldSettings &&
+		targetFieldSettings.field_type !== 'post_excerpt';
+	const fieldLabel = shouldShowCustomField
 		? targetFieldSettings?.field_name || __( 'Custom excerpt', 'classifai' )
 		: __( 'Write an excerpt (optional)', 'classifai' );
 
@@ -274,43 +310,59 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 					) }
 				</>
 			) }
-			
+
 			{ shouldShowCustomField && (
 				<>
 					<TextareaControl
 						__nextHasNoMarginBottom
-						label={
-							! isPublishPanelOpen
-								? fieldLabel
-								: null
-						}
+						label={ ! isPublishPanelOpen ? fieldLabel : null }
 						className="editor-post-excerpt__textarea"
 						value={ targetFieldValue }
 						readOnly
-						help={ __( 'This field is read-only. The value is stored in a custom field.', 'classifai' ) }
+						help={ __(
+							'This field is read-only. The value is stored in a custom field.',
+							'classifai'
+						) }
 					/>
-					<Notice 
-						status="info" 
+					<Notice
+						status="info"
 						isDismissible={ false }
 						className="classifai-custom-field-notice"
 					>
-						{ targetFieldSettings?.field_type === 'acf_field' 
-							? __( 'This excerpt is stored in an ACF field. To edit it, you can:', 'classifai' )
-							: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' )
-						}
+						{ targetFieldSettings?.field_type === 'acf_field'
+							? __(
+									'This excerpt is stored in an ACF field. To edit it, you can:',
+									'classifai'
+							  )
+							: __(
+									'This excerpt is stored in a custom field. To edit it, you can:',
+									'classifai'
+							  ) }
 						<ul style={ { margin: '5px 0 0 20px' } }>
 							<li>
-								{ __( 'Use the button below to regenerate it', 'classifai' ) }
+								{ __(
+									'Use the button below to regenerate it',
+									'classifai'
+								) }
 							</li>
 							<li>
-								{ targetFieldSettings?.field_type === 'acf_field'
-									? __( 'Edit the ACF field directly in the post editor or ACF fields panel', 'classifai' )
-									: __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' )
-								}
+								{ targetFieldSettings?.field_type ===
+								'acf_field'
+									? __(
+											'Edit the ACF field directly in the post editor or ACF fields panel',
+											'classifai'
+									  )
+									: __(
+											'Edit the custom field directly in the post editor or custom fields panel',
+											'classifai'
+									  ) }
 							</li>
 							<li>
-								{ __( 'Change the target field in ', 'classifai' ) }
-								<a 
+								{ __(
+									'Change the target field in',
+									'classifai'
+								) }
+								<a
 									href={ `${ window.location.origin }/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation` }
 									target="_blank"
 									rel="noopener noreferrer"
