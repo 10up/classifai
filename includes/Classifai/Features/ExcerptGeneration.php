@@ -143,6 +143,25 @@ class ExcerptGeneration extends Feature {
 				],
 			]
 		);
+
+		// Add endpoint to get target field value.
+		register_rest_route(
+			'classifai/v1',
+			'get-target-field-value/(?P<id>\d+)',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_target_field_value_callback' ],
+				'args'                => [
+					'id' => [
+						'required'          => true,
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+						'description'       => esc_html__( 'Post ID to get target field value for.', 'classifai' ),
+					],
+				],
+				'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
+			]
+		);
 	}
 
 	/**
