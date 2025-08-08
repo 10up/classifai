@@ -336,7 +336,7 @@ class ExcerptGeneration extends Feature {
 	 * @return string
 	 */
 	public function get_enable_description(): string {
-		return esc_html__( 'A button will be added to the excerpt panel that can be used to generate an excerpt.', 'classifai' );
+		return esc_html__( 'A button will be added to the excerpt panel that can be used to generate an excerpt. You can configure where the generated excerpt is saved (default excerpt field, custom meta fields, or ACF fields).', 'classifai' );
 	}
 
 	/**
