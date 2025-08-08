@@ -520,6 +520,9 @@ class ExcerptGeneration extends Feature {
 			],
 			'length'                  => absint( apply_filters( 'excerpt_length', 55 ) ),
 			'provider'                => ChatGPT::ID,
+			'target_field_type'       => 'post_excerpt',
+			'target_custom_field'     => '',
+			'target_acf_field'        => '',
 		];
 	}
 
