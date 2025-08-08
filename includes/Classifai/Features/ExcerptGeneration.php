@@ -792,4 +792,38 @@ class ExcerptGeneration extends Feature {
 
 		return $fields;
 	}
+
+	/**
+	 * Get target field information for JavaScript.
+	 *
+	 * @return array Target field information.
+	 */
+	public function get_target_field_info() {
+		$settings = $this->get_settings();
+		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
+		
+		$info = [
+			'field_type' => $field_type,
+			'field_name' => __( 'Default excerpt field', 'classifai' ),
+		];
+
+		switch ( $field_type ) {
+			case 'custom_meta':
+				$meta_key = $settings['target_custom_field'] ?? '';
+				$info['field_name'] = $meta_key ? sprintf( __( 'Custom meta: %s', 'classifai' ), $meta_key ) : __( 'Custom meta field', 'classifai' );
+				break;
+				
+			case 'acf_field':
+				$acf_field_key = $settings['target_acf_field'] ?? '';
+				if ( $acf_field_key && function_exists( 'acf_get_field' ) ) {
+					$acf_field = acf_get_field( $acf_field_key );
+					$info['field_name'] = $acf_field ? $acf_field['label'] : __( 'ACF field', 'classifai' );
+				} else {
+					$info['field_name'] = __( 'ACF field', 'classifai' );
+				}
+				break;
+		}
+
+		return $info;
+	}
 }
