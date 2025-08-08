@@ -236,7 +236,7 @@ class Settings {
 
 		// Get all ACF field groups.
 		$field_groups = acf_get_field_groups();
-		
+
 		if ( empty( $field_groups ) ) {
 			return $acf_fields;
 		}
@@ -244,7 +244,7 @@ class Settings {
 		// Loop through field groups and get their fields.
 		foreach ( $field_groups as $field_group ) {
 			$fields = acf_get_fields( $field_group );
-			
+
 			if ( ! empty( $fields ) ) {
 				foreach ( $fields as $field ) {
 					// Only include text, textarea, and wysiwyg fields for excerpt generation.

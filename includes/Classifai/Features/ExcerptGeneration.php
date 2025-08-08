@@ -294,9 +294,11 @@ class ExcerptGeneration extends Feature {
 		$post_id = $request->get_param( 'id' );
 		$value   = $this->get_current_target_field_value( $post_id );
 
-		return rest_ensure_response( [
-			'value' => $value,
-		] );
+		return rest_ensure_response(
+			[
+				'value' => $value,
+			]
+		);
 	}
 
 	/**
@@ -368,10 +370,10 @@ class ExcerptGeneration extends Feature {
 							'var classifaiGenerateExcerpt = %s;',
 							wp_json_encode(
 								[
-									'path'               => '/classifai/v1/generate-excerpt/',
-									'buttonText'         => __( 'Generate excerpt', 'classifai' ),
-									'regenerateText'     => __( 'Re-generate excerpt', 'classifai' ),
-									'target_field_info'  => $target_field_info,
+									'path'              => '/classifai/v1/generate-excerpt/',
+									'buttonText'        => __( 'Generate excerpt', 'classifai' ),
+									'regenerateText'    => __( 'Re-generate excerpt', 'classifai' ),
+									'target_field_info' => $target_field_info,
 								]
 							)
 						),
@@ -522,7 +524,7 @@ class ExcerptGeneration extends Feature {
 								foreach ( $fields as $field ) {
 									if ( in_array( $field['type'], [ 'text', 'textarea', 'wysiwyg' ], true ) ) {
 										$selected = ( $settings['target_acf_field'] ?? '' ) === $field['key'] ? 'selected' : '';
-										echo '<option value="' . esc_attr( $field['key'] ) . '" ' . $selected . '>';
+										echo '<option value="' . esc_attr( $field['key'] ) . '" ' . esc_attr( $selected ) . '>';
 										echo esc_html( $field['label'] );
 										echo '</option>';
 									}
@@ -616,7 +618,7 @@ class ExcerptGeneration extends Feature {
 
 		// Sanitize target field settings.
 		$new_settings['target_field_type'] = sanitize_text_field( $new_settings['target_field_type'] ?? 'post_excerpt' );
-		
+
 		if ( 'custom_meta' === $new_settings['target_field_type'] ) {
 			$new_settings['target_custom_field'] = sanitize_text_field( $new_settings['target_custom_field'] ?? '' );
 		} elseif ( 'acf_field' === $new_settings['target_field_type'] ) {
@@ -696,7 +698,7 @@ class ExcerptGeneration extends Feature {
 	 * @return bool|WP_Error True on success, WP_Error on failure.
 	 */
 	public function save_excerpt_to_target_field( $excerpt, $post_id ) {
-		$settings = $this->get_settings();
+		$settings   = $this->get_settings();
 		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
 
 		/**
@@ -715,10 +717,12 @@ class ExcerptGeneration extends Feature {
 
 		switch ( $field_type ) {
 			case 'post_excerpt':
-				$result = wp_update_post( [
-					'ID'           => $post_id,
-					'post_excerpt' => wp_kses_post( $excerpt ),
-				] );
+				$result = wp_update_post(
+					[
+						'ID'           => $post_id,
+						'post_excerpt' => wp_kses_post( $excerpt ),
+					]
+				);
 				return is_wp_error( $result ) ? $result : true;
 
 			case 'custom_meta':
@@ -726,7 +730,7 @@ class ExcerptGeneration extends Feature {
 				if ( empty( $meta_key ) ) {
 					return new WP_Error( 'no_meta_key', __( 'No custom meta key specified.', 'classifai' ) );
 				}
-				
+
 				/**
 				 * Filter the meta key for custom meta field saving.
 				 *
@@ -739,7 +743,7 @@ class ExcerptGeneration extends Feature {
 				 * @return {string} The meta key to use.
 				 */
 				$meta_key = apply_filters( 'classifai_excerpt_custom_meta_key', $meta_key, $post_id );
-				
+
 				update_post_meta( $post_id, $meta_key, wp_kses_post( $excerpt ) );
 				return true;
 
@@ -778,7 +782,7 @@ class ExcerptGeneration extends Feature {
 	 * @return string The current value.
 	 */
 	public function get_current_target_field_value( $post_id ) {
-		$settings = $this->get_settings();
+		$settings   = $this->get_settings();
 		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
 
 		switch ( $field_type ) {
@@ -820,7 +824,7 @@ class ExcerptGeneration extends Feature {
 	 */
 	public function get_available_acf_fields() {
 		$fields = [];
-		
+
 		if ( ! function_exists( 'acf_get_field_groups' ) ) {
 			return $fields;
 		}
@@ -851,9 +855,9 @@ class ExcerptGeneration extends Feature {
 	 * @return array Target field information.
 	 */
 	public function get_target_field_info() {
-		$settings = $this->get_settings();
+		$settings   = $this->get_settings();
 		$field_type = $settings['target_field_type'] ?? 'post_excerpt';
-		
+
 		$info = [
 			'field_type' => $field_type,
 			'field_name' => __( 'Default excerpt field', 'classifai' ),
@@ -862,16 +866,17 @@ class ExcerptGeneration extends Feature {
 		switch ( $field_type ) {
 			case 'custom_meta':
 				$meta_key = $settings['target_custom_field'] ?? '';
+				// translators: %s is the custom meta key.
 				$info['field_name'] = $meta_key ? sprintf( __( 'Custom meta: %s', 'classifai' ), $meta_key ) : __( 'Custom meta field', 'classifai' );
-				$info['meta_key'] = $meta_key;
+				$info['meta_key']   = $meta_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				break;
-				
+
 			case 'acf_field':
 				$acf_field_key = $settings['target_acf_field'] ?? '';
 				if ( $acf_field_key && function_exists( 'acf_get_field' ) ) {
-					$acf_field = acf_get_field( $acf_field_key );
+					$acf_field          = acf_get_field( $acf_field_key );
 					$info['field_name'] = $acf_field ? $acf_field['label'] : __( 'ACF field', 'classifai' );
-					$info['meta_key'] = $acf_field_key;
+					$info['meta_key']   = $acf_field_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				} else {
 					$info['field_name'] = __( 'ACF field', 'classifai' );
 				}
