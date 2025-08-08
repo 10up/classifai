@@ -94,9 +94,6 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 								descriptive_confidence_threshold: value,
 							} )
 						}
-						min="0"
-						max="100"
-						step="0.01"
 					/>
 				</SettingsRow>
 			) }
@@ -119,9 +116,6 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 								tag_confidence_threshold: value,
 							} )
 						}
-						min="0"
-						max="100"
-						step="0.01"
 					/>
 				</SettingsRow>
 			) }
