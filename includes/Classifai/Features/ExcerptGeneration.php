@@ -760,4 +760,36 @@ class ExcerptGeneration extends Feature {
 				return apply_filters( 'classifai_excerpt_get_custom_target_value', '', $post_id, $field_type );
 		}
 	}
+
+	/**
+	 * Get available ACF fields for the target field selector.
+	 *
+	 * @return array Array of ACF fields.
+	 */
+	public function get_available_acf_fields() {
+		$fields = [];
+		
+		if ( ! function_exists( 'acf_get_field_groups' ) ) {
+			return $fields;
+		}
+
+		$field_groups = acf_get_field_groups();
+		foreach ( $field_groups as $field_group ) {
+			$acf_fields = acf_get_fields( $field_group );
+			if ( $acf_fields ) {
+				foreach ( $acf_fields as $field ) {
+					// Only include text-based fields.
+					if ( in_array( $field['type'], [ 'text', 'textarea', 'wysiwyg' ], true ) ) {
+						$fields[] = [
+							'key'   => $field['key'],
+							'label' => $field['label'],
+							'group' => $field_group['title'],
+						];
+					}
+				}
+			}
+		}
+
+		return $fields;
+	}
 }
