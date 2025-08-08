@@ -294,13 +294,19 @@ function PostExcerpt( { excerpt, onUpdateExcerpt } ) {
 						isDismissible={ false }
 						className="classifai-custom-field-notice"
 					>
-						{ __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' ) }
+						{ targetFieldSettings?.field_type === 'acf_field' 
+							? __( 'This excerpt is stored in an ACF field. To edit it, you can:', 'classifai' )
+							: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' )
+						}
 						<ul style={ { margin: '5px 0 0 20px' } }>
 							<li>
 								{ __( 'Use the button below to regenerate it', 'classifai' ) }
 							</li>
 							<li>
-								{ __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' ) }
+								{ targetFieldSettings?.field_type === 'acf_field'
+									? __( 'Edit the ACF field directly in the post editor or ACF fields panel', 'classifai' )
+									: __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' )
+								}
 							</li>
 							<li>
 								{ __( 'Change the target field in ', 'classifai' ) }

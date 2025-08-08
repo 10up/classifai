@@ -99,7 +99,7 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 			path: '/classifai/v1/get-target-field-settings/',
 		} ).then( ( result ) => {
 			targetFieldSettings = result;
-			
+
 			// If custom field is enabled, hide the default excerpt field and show custom field info.
 			if ( targetFieldSettings && targetFieldSettings.field_type !== 'post_excerpt' ) {
 				hideDefaultExcerptField();
@@ -176,10 +176,16 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 					style: 'margin-top: 10px;',
 				} ).append(
 					$( '<p>', {
-						html: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' ) +
+						html: ( targetFieldSettings.field_type === 'acf_field' 
+							? __( 'This excerpt is stored in an ACF field. To edit it, you can:', 'classifai' )
+							: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' )
+						) +
 							'<ul style="margin: 5px 0 0 20px;">' +
 							'<li>' + __( 'Use the regenerate excerpt button to regenerate it', 'classifai' ) + '</li>' +
-							'<li>' + __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' ) + '</li>' +
+							( targetFieldSettings.field_type === 'acf_field'
+								? '<li>' + __( 'Edit the ACF field directly in the post editor or ACF fields panel', 'classifai' ) + '</li>'
+								: '<li>' + __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' ) + '</li>'
+							) +
 							'<li>' + __( 'Change the target field in ', 'classifai' ) + 
 							'<a href="' + window.location.origin + '/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation" target="_blank" rel="noopener noreferrer">' + 
 							__( 'ClassifAI Settings', 'classifai' ) + '</a></li>' +
@@ -253,10 +259,16 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 				style: 'margin-top: 10px;',
 			} ).append(
 				$( '<p>', {
-					html: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' ) +
+					html: ( targetFieldSettings.field_type === 'acf_field' 
+						? __( 'This excerpt is stored in an ACF field. To edit it, you can:', 'classifai' )
+						: __( 'This excerpt is stored in a custom field. To edit it, you can:', 'classifai' )
+					) +
 						'<ul style="margin: 5px 0 0 20px;">' +
 						'<li>' + __( 'Use the regenerate excerpt button to regenerate it', 'classifai' ) + '</li>' +
-						'<li>' + __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' ) + '</li>' +
+						( targetFieldSettings.field_type === 'acf_field'
+							? '<li>' + __( 'Edit the ACF field directly in the post editor or ACF fields panel', 'classifai' ) + '</li>'
+							: '<li>' + __( 'Edit the custom field directly in the post editor or custom fields panel', 'classifai' ) + '</li>'
+						) +
 						'<li>' + __( 'Change the target field in ', 'classifai' ) + 
 						'<a href="' + window.location.origin + '/wp-admin/tools.php?page=classifai&tab=language_processing&feature=feature_excerpt_generation" target="_blank" rel="noopener noreferrer">' + 
 						__( 'ClassifAI Settings', 'classifai' ) + '</a></li>' +
