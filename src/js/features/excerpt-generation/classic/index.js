@@ -140,6 +140,27 @@ const classifaiExcerptData = window.classifaiGenerateExcerpt || {};
 							? __( 'Re-generate short description', 'classifai' )
 							: classifaiExcerptData?.regenerateText ?? ''
 					);
+
+					// Show notification about target field if different from excerpt.
+					if ( classifaiExcerptData?.target_field_info ) {
+						const targetInfo = classifaiExcerptData.target_field_info;
+						if ( targetInfo.field_type !== 'post_excerpt' ) {
+							const notification = $( '<div>', {
+								class: 'notice notice-success',
+								style: 'margin-top: 10px;',
+							} ).append(
+								$( '<p>', {
+									text: __( 'Excerpt generated and saved to target field: ', 'classifai' ) + targetInfo.field_name,
+								} )
+							);
+							$( excerptContainer ).after( notification );
+							
+							// Remove notification after 5 seconds.
+							setTimeout( () => {
+								notification.fadeOut();
+							}, 5000 );
+						}
+					}
 				} )
 				.catch( ( error ) => {
 					generateTextEl.css( 'opacity', '1' );
