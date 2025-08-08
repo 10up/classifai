@@ -162,6 +162,17 @@ class ExcerptGeneration extends Feature {
 				'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
 			]
 		);
+
+		// Add endpoint to get target field settings.
+		register_rest_route(
+			'classifai/v1',
+			'get-target-field-settings',
+			[
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => [ $this, 'get_target_field_settings_callback' ],
+				'permission_callback' => [ $this, 'generate_excerpt_permissions_check' ],
+			]
+		);
 	}
 
 	/**
@@ -178,8 +189,23 @@ class ExcerptGeneration extends Feature {
 	public function generate_excerpt_permissions_check( WP_REST_Request $request ) {
 		$post_id = $request->get_param( 'id' );
 
+		// For endpoints that don't require a post ID (like get-target-field-settings),
+		// just check if the feature is enabled and user has appropriate permissions.
+		if ( empty( $post_id ) ) {
+			if ( ! current_user_can( 'edit_posts' ) ) {
+				return false;
+			}
+
+			// Ensure the feature is enabled. Also runs a user check.
+			if ( ! $this->is_feature_enabled() ) {
+				return new WP_Error( 'not_enabled', esc_html__( 'Excerpt generation not currently enabled.', 'classifai' ) );
+			}
+
+			return true;
+		}
+
 		// Ensure we have a logged in user that can edit the item.
-		if ( empty( $post_id ) || ! current_user_can( 'edit_post', $post_id ) ) {
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return false;
 		}
 
@@ -246,9 +272,7 @@ class ExcerptGeneration extends Feature {
 
 			// If generation was successful and we have a post ID, save to target field.
 			if ( ! is_wp_error( $result ) && $post_id ) {
-				$excerpt     = is_array( $result ) ? $result['content'] : $result;
-				$excerpt     = is_string( $excerpt ) ? $excerpt : '';
-				$save_result = $this->save_excerpt_to_target_field( $excerpt, $post_id );
+				$save_result = $this->save_excerpt_to_target_field( $result, $post_id );
 				if ( is_wp_error( $save_result ) ) {
 					return rest_ensure_response( $save_result );
 				}
@@ -273,6 +297,17 @@ class ExcerptGeneration extends Feature {
 		return rest_ensure_response( [
 			'value' => $value,
 		] );
+	}
+
+	/**
+	 * REST API callback to get target field settings.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_target_field_settings_callback() {
+		$settings = $this->get_target_field_info();
+
+		return rest_ensure_response( $settings );
 	}
 
 	/**
@@ -828,6 +863,7 @@ class ExcerptGeneration extends Feature {
 			case 'custom_meta':
 				$meta_key = $settings['target_custom_field'] ?? '';
 				$info['field_name'] = $meta_key ? sprintf( __( 'Custom meta: %s', 'classifai' ), $meta_key ) : __( 'Custom meta field', 'classifai' );
+				$info['meta_key'] = $meta_key;
 				break;
 				
 			case 'acf_field':
@@ -835,6 +871,7 @@ class ExcerptGeneration extends Feature {
 				if ( $acf_field_key && function_exists( 'acf_get_field' ) ) {
 					$acf_field = acf_get_field( $acf_field_key );
 					$info['field_name'] = $acf_field ? $acf_field['label'] : __( 'ACF field', 'classifai' );
+					$info['meta_key'] = $acf_field_key;
 				} else {
 					$info['field_name'] = __( 'ACF field', 'classifai' );
 				}
