@@ -307,15 +307,19 @@ class ExcerptGeneration extends Feature {
 						true
 					);
 
+					// Get target field information for JavaScript.
+					$target_field_info = $this->get_target_field_info();
+
 					wp_add_inline_script(
 						'classifai-plugin-classic-excerpt-generation-js',
 						sprintf(
 							'var classifaiGenerateExcerpt = %s;',
 							wp_json_encode(
 								[
-									'path'           => '/classifai/v1/generate-excerpt/',
-									'buttonText'     => __( 'Generate excerpt', 'classifai' ),
-									'regenerateText' => __( 'Re-generate excerpt', 'classifai' ),
+									'path'               => '/classifai/v1/generate-excerpt/',
+									'buttonText'         => __( 'Generate excerpt', 'classifai' ),
+									'regenerateText'     => __( 'Re-generate excerpt', 'classifai' ),
+									'target_field_info'  => $target_field_info,
 								]
 							)
 						),
