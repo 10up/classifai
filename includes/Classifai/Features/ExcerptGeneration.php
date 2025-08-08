@@ -630,6 +630,9 @@ class ExcerptGeneration extends Feature {
 			$new_settings['user_based_opt_out'] = $old_settings['excerpt_generation_user_based_opt_out'];
 		}
 
+		// Set default target field type for existing installations.
+		$new_settings['target_field_type'] = 'post_excerpt';
+
 		return $new_settings;
 	}
 }
