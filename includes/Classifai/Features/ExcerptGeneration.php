@@ -259,6 +259,21 @@ class ExcerptGeneration extends Feature {
 	}
 
 	/**
+	 * REST API callback to get target field value.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response
+	 */
+	public function get_target_field_value_callback( WP_REST_Request $request ) {
+		$post_id = $request->get_param( 'id' );
+		$value   = $this->get_current_target_field_value( $post_id );
+
+		return rest_ensure_response( [
+			'value' => $value,
+		] );
+	}
+
+	/**
 	 * Enqueue the editor scripts.
 	 */
 	public function enqueue_editor_assets() {
