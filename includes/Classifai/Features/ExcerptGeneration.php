@@ -562,6 +562,15 @@ class ExcerptGeneration extends Feature {
 
 		$new_settings['length'] = absint( $new_settings['length'] ?? $settings['length'] );
 
+		// Sanitize target field settings.
+		$new_settings['target_field_type'] = sanitize_text_field( $new_settings['target_field_type'] ?? 'post_excerpt' );
+		
+		if ( 'custom_meta' === $new_settings['target_field_type'] ) {
+			$new_settings['target_custom_field'] = sanitize_text_field( $new_settings['target_custom_field'] ?? '' );
+		} elseif ( 'acf_field' === $new_settings['target_field_type'] ) {
+			$new_settings['target_acf_field'] = sanitize_text_field( $new_settings['target_acf_field'] ?? '' );
+		}
+
 		foreach ( $post_types as $post_type ) {
 			if ( ! post_type_supports( $post_type->name, 'excerpt' ) ) {
 				continue;
