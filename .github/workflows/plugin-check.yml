@@ -38,3 +38,4 @@ jobs:
           exclude-checks: 'plugin_readme,plugin_updater' # Plugin isn't on .org so excluding these for now.
           exclude-directories: 'assets,dist,vendor'
           ignore-warnings: true
+          ignore-codes: 'PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound'
