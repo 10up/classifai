@@ -128,8 +128,9 @@ class ComputerVision extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'descriptive_confidence_threshold',
 				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
+				'min'           => 0,
+				'max'           => 100,
+				'step'          => 0.01,
 				'default_value' => $settings['descriptive_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added generated text, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
@@ -153,8 +154,9 @@ class ComputerVision extends Provider {
 				'option_index'  => static::ID,
 				'label_for'     => 'tag_confidence_threshold',
 				'input_type'    => 'number',
-				'min'           => 1,
-				'step'          => 1,
+				'min'           => 0,
+				'max'           => 100,
+				'step'          => 0.01,
 				'default_value' => $settings['tag_confidence_threshold'],
 				'description'   => esc_html__( 'Minimum confidence score for automatically added image tags, numeric value from 0-100. Recommended to be set to at least 70.', 'classifai' ),
 				'class'         => 'classifai-provider-field hidden provider-scope-' . static::ID, // Important to add this.
@@ -242,11 +244,11 @@ class ComputerVision extends Provider {
 		}
 
 		if ( $this->feature_instance instanceof DescriptiveTextGenerator ) {
-			$new_settings[ static::ID ]['descriptive_confidence_threshold'] = absint( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
+			$new_settings[ static::ID ]['descriptive_confidence_threshold'] = floatval( $new_settings[ static::ID ]['descriptive_confidence_threshold'] ?? $settings[ static::ID ]['descriptive_confidence_threshold'] );
 		}
 
 		if ( $this->feature_instance instanceof ImageTagsGenerator ) {
-			$new_settings[ static::ID ]['tag_confidence_threshold'] = absint( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
+			$new_settings[ static::ID ]['tag_confidence_threshold'] = floatval( $new_settings[ static::ID ]['tag_confidence_threshold'] ?? $settings[ static::ID ]['tag_confidence_threshold'] );
 		}
 
 		return $new_settings;
@@ -514,8 +516,8 @@ class ComputerVision extends Provider {
 			if ( isset( $caption['confidence'] ) && $caption['confidence'] * 100 > $threshold ) {
 				$rtn = ucfirst( $caption['text'] ?? '' );
 			} else {
-				/* translators: 1: Confidence score, 2: Threshold setting */
-				$rtn = new WP_Error( 'threshold', sprintf( esc_html__( 'Caption confidence score is %1$d%% which is lower than your threshold setting of %2$d%%', 'classifai' ), $caption['confidence'] * 100, $threshold ) );
+				/* translators: 1: Confidence score (percentage), 2: Threshold setting (percentage). */
+				$rtn = new WP_Error( 'threshold', sprintf( esc_html__( 'Caption confidence score is %1$s which is lower than your threshold setting of %2$s', 'classifai' ), number_format_i18n( $caption['confidence'] * 100, 2 ) . '%', number_format_i18n( (float) $threshold, 2 ) . '%' ) );
 
 				/**
 				 * Fires if there were no captions returned.
@@ -524,7 +526,7 @@ class ComputerVision extends Provider {
 				 * @hook classifai_computer_vision_caption_failed
 				 *
 				 * @param {array} $caption   The caption data.
-				 * @param {int}   $threshold The caption_threshold setting.
+				 * @param {float} $threshold The caption_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $caption, $threshold );
 			}
@@ -627,7 +629,7 @@ class ComputerVision extends Provider {
 				 * @hook classifai_computer_vision_image_tag_failed
 				 *
 				 * @param {array} $tags      The image tag data.
-				 * @param {int}   $threshold The tag_threshold setting.
+				 * @param {float} $threshold The tag_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}
