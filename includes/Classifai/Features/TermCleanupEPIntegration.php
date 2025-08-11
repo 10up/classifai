@@ -175,7 +175,7 @@ class TermCleanupEPIntegration {
 	 * @param int    $term_id Term ID to search for.
 	 * @param string $index Indexable to run the query against. Default term.
 	 * @param int    $num Number of items to return.
-	 * @param int    $threshold Threshold for the minimum score.
+	 * @param float  $threshold Threshold for the minimum score.
 	 * @return array|WP_Error
 	 */
 	public function exact_knn_search( int $term_id, string $index = 'term', int $num = 1000, $threshold = 75 ) {
