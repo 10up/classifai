@@ -526,7 +526,7 @@ class ComputerVision extends Provider {
 				 * @hook classifai_computer_vision_caption_failed
 				 *
 				 * @param {array} $caption   The caption data.
-				 * @param {int}   $threshold The caption_threshold setting.
+				 * @param {float} $threshold The caption_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_caption_failed', $caption, $threshold );
 			}
@@ -629,7 +629,7 @@ class ComputerVision extends Provider {
 				 * @hook classifai_computer_vision_image_tag_failed
 				 *
 				 * @param {array} $tags      The image tag data.
-				 * @param {int}   $threshold The tag_threshold setting.
+				 * @param {float} $threshold The tag_threshold setting.
 				 */
 				do_action( 'classifai_computer_vision_image_tag_failed', $tags, $threshold );
 			}
