@@ -115,7 +115,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 						onChange( { number_of_images: value } )
 					}
 					value={ providerSettings.number_of_images || '1' }
-					options={ Array.from( { length: 10 }, ( v, i ) => ( {
+					options={ Array.from( { length: 5 }, ( v, i ) => ( {
 						label: i + 1,
 						value: i + 1,
 					} ) ) }

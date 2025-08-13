@@ -265,76 +265,48 @@ class StableDiffusion extends Provider {
 		}
 
 		/**
-		 * Filter the prompt we will send to OpenAI.
+		 * Filter the prompt we will send to Stable Diffusion.
 		 *
-		 * @since 2.0.0
-		 * @hook classifai_dalle_prompt
+		 * @since x.x.x
+		 * @hook classifai_stable_diffusion_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to OpenAI.
+		 * @param {string} $prompt Prompt we are sending to Stable Diffusion.
 		 *
 		 * @return {string} Prompt.
 		 */
-		$prompt = apply_filters( 'classifai_dalle_prompt', $prompt );
+		$prompt = apply_filters( 'classifai_stable_diffusion_prompt', $prompt );
 
-		$max_prompt_chars = $this->get_max_prompt_chars();
+		$request = new APIRequest( 'test', 'generate-image' );
 
-		// If our prompt exceeds the max length, throw an error.
-		if ( mb_strlen( $prompt ) > $max_prompt_chars ) {
-			/* translators: %d is the maximum number of characters allowed in the prompt. */
-			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $max_prompt_chars ) );
-		}
-
-		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
-
-		$model = $this->get_model();
-		$body  = [
-			'prompt'          => sanitize_text_field( $prompt ),
-			'model'           => $model,
-			'n'               => absint( $args['num'] ),
-			'quality'         => sanitize_text_field( $args['quality'] ),
-			'response_format' => sanitize_text_field( $args['format'] ),
-			'size'            => sanitize_text_field( $args['size'] ),
-			'style'           => sanitize_text_field( $args['style'] ),
+		$dimensions = $this->get_dimensions_from_size( $args['size'] );
+		$body       = [
+			'prompt'     => sanitize_text_field( $prompt ),
+			'batch_size' => 1,
+			'height'     => absint( $dimensions['height'] ),
+			'width'      => absint( $dimensions['width'] ),
+			'steps'      => 20,
 		];
 
-		if ( 'gpt-image-1' === $model ) {
-			// The gpt-image-1 model doesn't support response_format or style.
-			unset( $body['response_format'] );
-			unset( $body['style'] );
-		} elseif ( 'dall-e-3' === $model ) {
-			// DALL·E 3 doesn't support multiple images per request.
-			$body['n'] = 1;
-		}
-
 		/**
-		 * Filter the request body before sending to OpenAI.
+		 * Filter the request body before sending to Stable Diffusion.
 		 *
-		 * @since 2.0.0
-		 * @hook classifai_dalle_request_body
+		 * @since x.x.x
+		 * @hook classifai_stable_diffusion_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
+		 * @param {array} $body Request body that will be sent to Stable Diffusion.
 		 *
 		 * @return {array} Request body.
 		 */
-		$body = apply_filters( 'classifai_dalle_request_body', $body );
+		$body = apply_filters( 'classifai_stable_diffusion_request_body', $body );
 
 		$responses = [];
 
-		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
-		if ( 'dall-e-3' === $model ) {
-			for ( $i = 0; $i < $args['num']; $i++ ) {
-				$responses[] = $request->post(
-					$this->get_api_url(),
-					[
-						'body' => wp_json_encode( $body ),
-					]
-				);
-			}
-		} else {
+		for ( $i = 0; $i < $args['num']; $i++ ) {
 			$responses[] = $request->post(
-				$this->get_api_url(),
+				$this->get_api_url( $settings['endpoint_url'] ),
 				[
-					'body' => wp_json_encode( $body ),
+					'body'    => wp_json_encode( $body ),
+					'timeout' => 120,
 				]
 			);
 		}
@@ -343,15 +315,9 @@ class StableDiffusion extends Provider {
 
 		foreach ( $responses as $response ) {
 			// Extract out the image response, if it exists.
-			if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
-				foreach ( $response['data'] as $data ) {
-					if ( ! empty( $data[ $args['format'] ] ) ) {
-						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
-						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
-						}
-					}
+			if ( ! is_wp_error( $response ) && ! empty( $response['images'] ) ) {
+				foreach ( $response['images'] as $image ) {
+					$cleaned_responses[] = [ 'url' => $image ];
 				}
 			} elseif ( is_wp_error( $response ) ) {
 				return $response;
@@ -399,7 +365,22 @@ class StableDiffusion extends Provider {
 	 * @param string $endpoint_url The endpoint URL.
 	 * @return string
 	 */
-	public function get_api_image_generation_url( string $endpoint_url ): string {
+	public function get_api_url( string $endpoint_url ): string {
 		return sprintf( '%s%s', trailingslashit( $endpoint_url ), 'sdapi/v1/txt2img' );
+	}
+
+	/**
+	 * Get the dimensions from the size.
+	 *
+	 * @param string $size The size.
+	 * @return array
+	 */
+	public function get_dimensions_from_size( string $size ): array {
+		$dimensions = explode( 'x', $size );
+
+		return [
+			'width'  => $dimensions[0],
+			'height' => $dimensions[1],
+		];
 	}
 }

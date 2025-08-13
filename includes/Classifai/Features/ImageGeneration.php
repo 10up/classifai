@@ -303,7 +303,7 @@ class ImageGeneration extends Feature {
 					}
 					?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ?? 1000 ); ?>"></textarea>
 				<br>
 				<?php if ( $per_image_settings ) : ?>
 					<input type="checkbox" id="view-additional-image-generation-settings" />
