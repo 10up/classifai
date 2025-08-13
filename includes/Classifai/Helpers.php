@@ -863,7 +863,6 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
 	}
 
 	if ( function_exists( 'vip_safe_wp_remote_request' ) ) {
-		// VIP signature: ( $url, $fallback, $threshold, $timeout, $retry, $args )
 		$fallback  = '';
 		$threshold = 3;
 		$retry     = 20;
@@ -898,10 +897,18 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  * @param array  $args     Optional HTTP args (timeout, headers, etc.).
  * @return string|false Raw contents on success; false on failure.
  */
-function safe_file_get_contents( string $resource ) {
+function safe_file_get_contents( string $resource, array $args = [] ) {
 	// Remote URL: use HTTP API.
 	if ( filter_var( $resource, FILTER_VALIDATE_URL ) ) {
-		$response = safe_wp_remote_get( $resource );
+		// Use VIP function if available
+		if ( function_exists( 'wpcom_vip_file_get_contents' ) ) {
+			$content = wpcom_vip_file_get_contents( $resource );
+			if ( false !== $content ) {
+				return $content;
+			}
+		}
+
+		$response = safe_wp_remote_get( $resource, $args );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -916,7 +923,7 @@ function safe_file_get_contents( string $resource ) {
 	}
 
 	// Local file path: fall back to native.
-	return @file_get_contents( $resource ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged
+	return @file_get_contents( $resource ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
 }
 
 /**
