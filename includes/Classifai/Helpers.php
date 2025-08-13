@@ -852,14 +852,12 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
 
 	// Ensure a clear UA but allow to override.
 	if ( empty( $args['headers']['User-Agent'] ) ) {
-		$plugin_version = defined( 'CLASSIFAI_VERSION' ) ? CLASSIFAI_VERSION : null;
-		if ( empty( $plugin_version ) ) {
-			// Try to get from plugin header.
-			$plugin_data    = get_file_data( CLASSIFAI_PLUGIN_DIR . '/classifai.php', array( 'Version' => 'Version' ) );
-			$plugin_version = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : 'unknown';
+		static $cached_user_agent = null;
+		if ( null === $cached_user_agent ) {
+			$version           = defined( 'CLASSIFAI_VERSION' ) ? CLASSIFAI_VERSION : 'unknown';
+			$cached_user_agent = 'ClassifAI/' . $version;
 		}
-
-		$args['headers']['User-Agent'] = 'ClassifAI/' . $plugin_version;
+		$args['headers']['User-Agent'] = $cached_user_agent;
 	}
 
 	if ( function_exists( 'vip_safe_wp_remote_request' ) ) {
