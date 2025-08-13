@@ -228,7 +228,7 @@ class StableDiffusion extends Provider {
 		$response = $request->get(
 			$this->get_api_model_url( $default['endpoint_url'] ),
 			[
-				'timeout' => 30,
+				'timeout' => 30, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 
@@ -336,7 +336,7 @@ class StableDiffusion extends Provider {
 				$this->get_api_url( $settings['endpoint_url'] ),
 				[
 					'body'    => wp_json_encode( $body ),
-					'timeout' => 180,
+					'timeout' => 180, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 				]
 			);
 		}
