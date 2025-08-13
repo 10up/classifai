@@ -1,6 +1,6 @@
 The following table lists out all the Providers that are in ClassifAI and what Features within ClassifAI each of those Providers support.
 
-| | Amazon Polly | Azure AI Personalizer | Azure AI Speech | Azure AI Vision | Azure OpenAI | Elasticsearch | Google Gemini | IBM Watson NLU | Ollama | OpenAI | xAI Grok |
+| | Amazon Polly | Azure AI Personalizer | Azure AI Speech | Azure AI Vision | Azure OpenAI | Elasticsearch | Google Gemini | IBM Watson NLU | Localhost | OpenAI | xAI Grok |
 |------------------------------|---|---|---|---|---|---|---|---|---|---|---|
 | Classification               |   |   |   |   | X |   |   | X | X | X |   |
 | Title Generation             |   |   |   |   | X |   | X |   | X | X | X |
@@ -17,6 +17,6 @@ The following table lists out all the Providers that are in ClassifAI and what F
 | Image Tags Generator         |   |   |   | X |   |   |   |   | X | X |   |
 | Image Cropping               |   |   |   | X |   |   |   |   |   |   |   |
 | Image Text Extraction        |   |   |   | X |   |   |   |   | X | X |   |
-| Image Generation             |   |   |   |   |   |   | X |   |   | X |   |
+| Image Generation             |   |   |   |   |   |   | X |   | X | X |   |
 | PDF Text Extraction          |   |   |   | X |   |   |   |   |   |   |   |
 | Recommended Content          |   | X |   |   |   |   |   |   |   | X |   |
