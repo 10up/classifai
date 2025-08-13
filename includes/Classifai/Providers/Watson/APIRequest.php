@@ -4,6 +4,9 @@ namespace Classifai\Providers\Watson;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
+use function Classifai\safe_wp_remote_get;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_request;
 
 /**
  * APIRequest class is the low level class to make IBM Watson API
@@ -42,10 +45,22 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|\WP_Error
 	 */
-	public function request( string $url, array $options = [] ) {
-		$this->add_headers( $options );
-		return $this->get_result( wp_remote_request( $url, $options ) );
-	}
+    public function request( string $url, array $options = [] ) {
+        $this->add_headers( $options );
+
+        $method = strtoupper( $options['method'] ?? 'GET' );
+
+        if ( 'GET' === $method ) {
+            return $this->get_result( safe_wp_remote_get( $url, $options ) );
+        }
+
+        if ( 'POST' === $method ) {
+            return $this->get_result( safe_wp_remote_post( $url, $options ) );
+        }
+
+        // Fallback for other HTTP verbs.
+        return $this->get_result( safe_wp_remote_request( $method, $url, $options ) );
+    }
 
 	/**
 	 * Makes an authorized GET request and returns the parsed JSON
@@ -57,7 +72,7 @@ class APIRequest {
 	 */
 	public function get( string $url, array $options = [] ) {
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		return $this->get_result( safe_wp_remote_get( $url, $options ) );
 	}
 
 	/**
@@ -70,7 +85,7 @@ class APIRequest {
 	 */
 	public function post( string $url, array $options = [] ) {
 		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		return $this->get_result( safe_wp_remote_post( $url, $options ) );
 	}
 
 	/**

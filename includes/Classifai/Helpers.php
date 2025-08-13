@@ -828,3 +828,116 @@ function is_remote_url( string $resource_ref ): bool {
 function is_local_path( string $resource_ref ): bool {
 	return 'path' === get_resource_type( $resource_ref );
 }
+
+/**
+ * Safe generic HTTP wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_request() when available.
+ * - Fall back to wp_remote_request() on other scenarios.
+ * - Respect all call args (timeout, headers, method, etc).
+ *
+ * @since x.x.x
+ *
+ * @param string $method HTTP method.
+ * @param string $url    Request URL.
+ * @param array  $args   Request args.
+ * @return array|\WP_Error
+ */
+function safe_wp_remote_request( string $method, string $url, array $args = [] ) {
+	$method         = strtoupper( $method );
+	$args['method'] = $method;
+
+	// Respect timeout if caller set.
+	$timeout = isset( $args['timeout'] ) ? (int) $args['timeout'] : 20;
+
+	// Ensure a clear UA but allow to override.
+	if ( empty( $args['headers']['User-Agent'] ) ) {
+		$plugin_version = defined( 'CLASSIFAI_VERSION' ) ? CLASSIFAI_VERSION : null;
+		if ( empty( $plugin_version ) ) {
+			// Try to get from plugin header.
+			$plugin_data    = get_file_data( CLASSIFAI_PLUGIN_DIR . '/classifai.php', array( 'Version' => 'Version' ) );
+			$plugin_version = isset( $plugin_data['Version'] ) ? $plugin_data['Version'] : 'unknown';
+		}
+
+		$args['headers']['User-Agent'] = 'ClassifAI/' . $plugin_version;
+	}
+
+	if ( function_exists( 'vip_safe_wp_remote_request' ) ) {
+		// VIP signature: ( $url, $fallback, $threshold, $timeout, $retry, $args )
+		$fallback  = '';
+		$threshold = 3;
+		$retry     = 20;
+
+		return vip_safe_wp_remote_request( $url, $fallback, $threshold, min( max( 1, $timeout ), 20 ), $retry, $args );
+	}
+
+	$args = wp_parse_args(
+		$args,
+		[
+			'timeout' => $timeout,
+		]
+	);
+
+	return wp_remote_request( $url, $args ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_request_wp_remote_request
+}
+
+/**
+ * VIP-safe replacement for file_get_contents() supporting remote URLs.
+ *
+ * For http/https URLs, performs an HTTP GET via safe_wp_remote_get()/VIP wrapper
+ * and returns the raw body string on 2xx; returns false on error to mirror
+ * file_get_contents() semantics. For local paths, falls back to native
+ * file_get_contents(). This keeps calling code simple while staying VIP-safe.
+ *
+ * Important: This function intentionally does NOT return WP_Error to match the
+ * native signature; callers should check for strict false.
+ *
+ * @since x.x.x
+ *
+ * @param string $resource Path or URL.
+ * @param array  $args     Optional HTTP args (timeout, headers, etc.).
+ * @return string|false Raw contents on success; false on failure.
+ */
+function safe_file_get_contents( string $resource ) {
+	// Remote URL: use HTTP API.
+	if ( filter_var( $resource, FILTER_VALIDATE_URL ) ) {
+		$response = safe_wp_remote_get( $resource );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			return false;
+		}
+
+		return wp_remote_retrieve_body( $response );
+	}
+
+	// Local file path: fall back to native.
+	return @file_get_contents( $resource ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged
+}
+
+/**
+ * Safe GET wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_get() when available.
+ * - Fall back to wp_remote_get() on other scenarios.
+ * - Respect all call args (timeout, headers, etc).
+ */
+function safe_wp_remote_get( string $url, array $args = [] ) {
+	return safe_wp_remote_request( 'GET', $url, $args );
+}
+
+/**
+ * Safe POST wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_post() when available.
+ * - Fall back to wp_remote_post() on other scenarios.
+ * - Respect all call args (timeout, headers, etc).
+ */
+function safe_wp_remote_post( string $url, array $args = [] ) {
+	return safe_wp_remote_request( 'POST', $url, $args );
+}
+
