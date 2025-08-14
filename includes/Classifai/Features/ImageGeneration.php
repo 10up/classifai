@@ -37,7 +37,7 @@ class ImageGeneration extends Feature {
 		$this->supported_providers = [
 			OpenAIImages::ID     => __( 'OpenAI Images', 'classifai' ),
 			GoogleAIImagen::ID   => __( 'Google AI Imagen', 'classifai' ),
-			TogetherAIImages::ID => __( 'Together.AI', 'classifai' ),
+			TogetherAIImages::ID => __( 'Together AI', 'classifai' ),
 		];
 	}
 

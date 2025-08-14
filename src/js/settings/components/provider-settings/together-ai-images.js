@@ -17,7 +17,7 @@ import { STORE_NAME } from '../../data/store';
 import { TogetherAISettings } from './together-ai';
 
 /**
- * Component for the Together.AI Images Provider settings.
+ * Component for the Together AI Images Provider settings.
  *
  * @param {Object}  props              Component props.
  * @param {boolean} props.isConfigured Whether the provider is configured.

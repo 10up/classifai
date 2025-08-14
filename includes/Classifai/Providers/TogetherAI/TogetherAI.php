@@ -1,6 +1,6 @@
 <?php
 /**
- * TogetherAI shared functionality
+ * Together AI shared functionality
  */
 
 namespace Classifai\Providers\TogetherAI;
@@ -11,14 +11,14 @@ use WP_Error;
 trait TogetherAI {
 
 	/**
-	 * TogetherAI base API URL
+	 * Together AI base API URL
 	 *
 	 * @var string
 	 */
 	protected $api_url = 'https://api.together.xyz/v1';
 
 	/**
-	 * TogetherAI model path
+	 * Together AI model path
 	 *
 	 * @var string
 	 */
@@ -32,7 +32,7 @@ trait TogetherAI {
 	 */
 	public function get_api_url( string $path = '' ): string {
 		/**
-		 * Filter the TogetherAI API URL.
+		 * Filter the Together AI API URL.
 		 *
 		 * @since x.x.x
 		 * @hook classifai_togetherai_api_url
@@ -94,7 +94,7 @@ trait TogetherAI {
 	protected function get_models( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
-			return new WP_Error( 'auth', esc_html__( 'Please enter your Together.AI API key.', 'classifai' ) );
+			return new WP_Error( 'auth', esc_html__( 'Please enter your Together AI API key.', 'classifai' ) );
 		}
 
 		$request  = new APIRequest( $api_key );

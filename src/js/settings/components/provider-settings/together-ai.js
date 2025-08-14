@@ -4,9 +4,9 @@ import { __ } from '@wordpress/i18n';
 import { SettingsRow } from '../settings-row';
 
 /**
- * Component for Together.AI Provider settings.
+ * Component for Together AI Provider settings.
  *
- * This is the base component for Together.AI settings.
+ * This is the base component for Together AI settings.
  *
  * @param {Object}   props                  Component props.
  * @param {Object}   props.providerSettings The provider settings.
@@ -17,9 +17,9 @@ import { SettingsRow } from '../settings-row';
 export const TogetherAISettings = ( { providerSettings, onChange } ) => {
 	const Description = () => (
 		<>
-			{ __( "Don't have a Together.AI account yet?", 'classifai' ) }{ ' ' }
+			{ __( "Don't have a Together AI account yet?", 'classifai' ) }{ ' ' }
 			<a
-				title={ __( 'Sign up for a Together.AI account', 'classifai' ) }
+				title={ __( 'Sign up for a Together AI account', 'classifai' ) }
 				href="https://api.together.ai/"
 				target="_blank"
 				rel="noopener noreferrer"
