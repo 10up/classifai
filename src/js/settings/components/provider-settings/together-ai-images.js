@@ -63,7 +63,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 					<SettingsRow
 						label={ __( 'Model', 'classifai' ) }
 						description={ __(
-							'Choose the model you want to use. If no models are shown or you want to use a different model, please ensure this is installed in Stable Diffusion first.',
+							'Choose the model you want to use.',
 							'classifai'
 						) }
 					>

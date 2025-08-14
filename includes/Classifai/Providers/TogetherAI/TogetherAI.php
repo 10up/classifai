@@ -15,14 +15,14 @@ trait TogetherAI {
 	 *
 	 * @var string
 	 */
-	protected $api_url = 'https://api.together.xyz';
+	protected $api_url = 'https://api.together.xyz/v1';
 
 	/**
 	 * TogetherAI model path
 	 *
 	 * @var string
 	 */
-	protected $model_path = 'v1/models';
+	protected $model_path = 'models';
 
 	/**
 	 * Build the API URL.
