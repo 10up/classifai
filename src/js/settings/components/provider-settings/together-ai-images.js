@@ -1,0 +1,119 @@
+/**
+ * WordPress dependencies
+ */
+import {
+	__experimentalInputControl as InputControl, // eslint-disable-line @wordpress/no-unsafe-wp-apis
+	SelectControl,
+	ToggleControl,
+} from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { SettingsRow } from '../settings-row';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { STORE_NAME } from '../../data/store';
+import { TogetherAISettings } from './together-ai';
+
+/**
+ * Component for the Together.AI Images Provider settings.
+ *
+ * @param {Object}  props              Component props.
+ * @param {boolean} props.isConfigured Whether the provider is configured.
+ *
+ * @return {React.ReactElement} TogetherAIImagesSettings component.
+ */
+export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
+	const providerName = 'togetherai_image';
+	const providerSettings = useSelect(
+		( select ) =>
+			select( STORE_NAME ).getFeatureSettings( providerName ) || {}
+	);
+	const { setProviderSettings } = useDispatch( STORE_NAME );
+	const onChange = ( data ) => setProviderSettings( providerName, data );
+
+	const models = [
+		{ label: __( '-- Choose Model --', 'classifai' ), value: '' },
+	];
+
+	// Convert providerSettings.models to an array from an object.
+	if (
+		providerSettings?.models &&
+		! Array.isArray( providerSettings.models )
+	) {
+		models.push(
+			...Object.entries( providerSettings.models ).map(
+				( [ key, model ] ) => ( {
+					label: model.display_name || key,
+					value: model.id || key,
+				} )
+			)
+		);
+	}
+
+	return (
+		<>
+			{ ! isConfigured && (
+				<>
+					<TogetherAISettings
+						providerSettings={ providerSettings }
+						onChange={ onChange }
+					/>
+					<SettingsRow
+						label={ __( 'Model', 'classifai' ) }
+						description={ __(
+							'Choose the model you want to use. If no models are shown or you want to use a different model, please ensure this is installed in Stable Diffusion first.',
+							'classifai'
+						) }
+					>
+						<SelectControl
+							id={ `${ providerName }_model` }
+							onChange={ ( value ) =>
+								onChange( { model: value } )
+							}
+							value={ providerSettings?.model || '' }
+							options={ models }
+							__nextHasNoMarginBottom
+						/>
+					</SettingsRow>
+				</>
+			) }
+			<SettingsRow
+				label={ __( 'Number of images', 'classifai' ) }
+				description={ __(
+					'Number of images that will be generated in one request. Note that more images will incur more cost.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					id={ `${ providerName }_number_of_images` }
+					onChange={ ( value ) =>
+						onChange( { number_of_images: value } )
+					}
+					value={ providerSettings.number_of_images || '1' }
+					options={ Array.from( { length: 10 }, ( v, i ) => ( {
+						label: i + 1,
+						value: i + 1,
+					} ) ) }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
+			<SettingsRow
+				label={ __( 'Per-image settings', 'classifai' ) }
+				description={ __(
+					'If enabled, allows users to select the size when generating an image.',
+					'classifai'
+				) }
+			>
+				<ToggleControl
+					id={ `${ providerName }_per_image_settings` }
+					onChange={ ( value ) =>
+						onChange( { per_image_settings: value } )
+					}
+					checked={ providerSettings.per_image_settings || false }
+				/>
+			</SettingsRow>
+		</>
+	);
+};
