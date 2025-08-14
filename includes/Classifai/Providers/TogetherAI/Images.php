@@ -17,6 +17,13 @@ class Images extends Provider {
 	const ID = 'togetherai_image';
 
 	/**
+	 * Maximum number of characters a prompt can have.
+	 *
+	 * @var int
+	 */
+	public $max_prompt_chars = 1000;
+
+	/**
 	 * TogetherAI Image API path.
 	 *
 	 * @var string
@@ -47,6 +54,34 @@ class Images extends Provider {
 
 		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 		add_filter( 'classifai_dalle_caption', [ $this, 'modify_default_caption' ] );
+	}
+
+	/**
+	 * Returns the image size options.
+	 *
+	 * @return array
+	 */
+	public static function get_image_size_options(): array {
+		$options = [
+			'1024x1024' => __( '1024x1024 (square)', 'classifai' ),
+			'1536x1024' => __( '1536x1024 (landscape)', 'classifai' ),
+			'1024x1536' => __( '1024x1536 (portrait)', 'classifai' ),
+		];
+
+		/**
+		 * Filter the image size options that are available.
+		 *
+		 * Useful if you want to change to a different model
+		 * that has different options.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_togetherai_image_size_options
+		 *
+		 * @param {array} $options The default size options.
+		 *
+		 * @return {array} The size options.
+		 */
+		return apply_filters( 'classifai_togetherai_image_size_options', $options );
 	}
 
 	/**
@@ -95,6 +130,12 @@ class Images extends Provider {
 			}
 
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
+
+			if ( in_array( $new_settings[ static::ID ]['image_size'], array_keys( $this->get_image_size_options() ), true ) ) {
+				$new_settings[ static::ID ]['image_size'] = sanitize_text_field( $new_settings[ static::ID ]['image_size'] );
+			} else {
+				$new_settings[ static::ID ]['image_size'] = $settings[ static::ID ]['image_size'];
+			}
 		}
 
 		return $new_settings;
@@ -232,6 +273,13 @@ class Images extends Provider {
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
+			],
+			'size'   => [
+				'type'              => 'string',
+				'enum'              => array_keys( $this->get_image_size_options() ),
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
+				'description'       => esc_html__( 'Size of generated image', 'classifai' ),
 			],
 			'format' => [
 				'type'              => 'string',

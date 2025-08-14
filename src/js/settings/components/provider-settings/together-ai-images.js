@@ -100,6 +100,34 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 				/>
 			</SettingsRow>
 			<SettingsRow
+				label={ __( 'Image size', 'classifai' ) }
+				description={ __(
+					'Size of generated images. Larger sizes will take longer to generate.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					id={ `${ providerName }_image_size` }
+					onChange={ ( value ) => onChange( { image_size: value } ) }
+					value={ providerSettings.image_size || '1024x1024' }
+					options={ [
+						{
+							label: __( '1024x1024 (square)', 'classifai' ),
+							value: '1024x1024',
+						},
+						{
+							label: __( '1536x1024 (landscape)', 'classifai' ),
+							value: '1536x1024',
+						},
+						{
+							label: __( '1024x1536 (portrait)', 'classifai' ),
+							value: '1024x1536',
+						},
+					] }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
+			<SettingsRow
 				label={ __( 'Per-image settings', 'classifai' ) }
 				description={ __(
 					'If enabled, allows users to select the size when generating an image.',
