@@ -2,9 +2,23 @@ name: VIPCS
 
 on:
   pull_request:
+    branches:
+      - develop
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths:
+      - '**/*.php'
+      - 'phpcs.xml*'
   push:
     branches:
       - develop
+      - trunk
+    paths:
+      - '**/*.php'
+      - 'phpcs.xml*'
 
 jobs:
   vipcs:
@@ -22,4 +36,3 @@ jobs:
           enable_warnings: true
           only_changed_lines: false
           excludes: tests
-
