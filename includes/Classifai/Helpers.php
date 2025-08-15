@@ -896,9 +896,7 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  * @return string|false Raw contents on success; false on failure.
  */
 function safe_file_get_contents( string $resource, array $args = [] ) {
-	// Remote URL: use HTTP API.
-	if ( filter_var( $resource, FILTER_VALIDATE_URL ) ) {
-		// Use VIP function if available
+	if ( is_remote_url( $resource ) ) {
 		if ( function_exists( 'wpcom_vip_file_get_contents' ) ) {
 			$content = wpcom_vip_file_get_contents( $resource );
 			if ( false !== $content ) {
