@@ -55,30 +55,27 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<TogetherAISettings
-						providerSettings={ providerSettings }
-						onChange={ onChange }
-					/>
-					<SettingsRow
-						label={ __( 'Model', 'classifai' ) }
-						description={ __(
-							'Choose the model you want to use.',
-							'classifai'
-						) }
-					>
-						<SelectControl
-							id={ `${ providerName }_model` }
-							onChange={ ( value ) =>
-								onChange( { model: value } )
-							}
-							value={ providerSettings?.model || '' }
-							options={ models }
-							__nextHasNoMarginBottom
-						/>
-					</SettingsRow>
-				</>
+				<TogetherAISettings
+					providerSettings={ providerSettings }
+					onChange={ onChange }
+				/>
 			) }
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ __(
+					'Choose the model you want to use.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					disabled={ ! isConfigured }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
 			<SettingsRow
 				label={ __( 'Number of images', 'classifai' ) }
 				description={ __(

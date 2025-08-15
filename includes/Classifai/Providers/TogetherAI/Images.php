@@ -124,9 +124,9 @@ class Images extends Provider {
 				fn( $model ) => 'image' === $model['type']
 			);
 
-			// If the model being saved isn't valid, reset it..
+			// Ensure the model being saved is valid. If not valid or we don't have one, use the first model.
 			if ( ! in_array( $new_settings[ static::ID ]['model'], array_column( $new_settings[ static::ID ]['models'], 'id' ), true ) ) {
-				$new_settings[ static::ID ]['model'] = '';
+				$new_settings[ static::ID ]['model'] = array_column( $new_settings[ static::ID ]['models'], 'id' )[0];
 			}
 
 			$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
