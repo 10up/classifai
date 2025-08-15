@@ -45,22 +45,22 @@ class APIRequest {
 	 * @param array  $options Additional query params
 	 * @return array|\WP_Error
 	 */
-    public function request( string $url, array $options = [] ) {
-        $this->add_headers( $options );
+	public function request( string $url, array $options = [] ) {
+		$this->add_headers( $options );
 
-        $method = strtoupper( $options['method'] ?? 'GET' );
+		$method = strtoupper( $options['method'] ?? 'GET' );
 
-        if ( 'GET' === $method ) {
-            return $this->get_result( safe_wp_remote_get( $url, $options ) );
-        }
+		if ( 'GET' === $method ) {
+			return $this->get_result( safe_wp_remote_get( $url, $options ) );
+		}
 
-        if ( 'POST' === $method ) {
-            return $this->get_result( safe_wp_remote_post( $url, $options ) );
-        }
+		if ( 'POST' === $method ) {
+			return $this->get_result( safe_wp_remote_post( $url, $options ) );
+		}
 
-        // Fallback for other HTTP verbs.
-        return $this->get_result( safe_wp_remote_request( $method, $url, $options ) );
-    }
+		// Fallback for other HTTP verbs.
+		return $this->get_result( safe_wp_remote_request( $method, $url, $options ) );
+	}
 
 	/**
 	 * Makes an authorized GET request and returns the parsed JSON
