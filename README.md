@@ -21,7 +21,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision) or [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen) or [Together AI's API](https://docs.together.ai/docs/images-overview)
 * Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
@@ -64,6 +64,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality or Image Generation functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
+* To utilize the Together AI Image Generation functionality, you will need an active [Together AI](https://api.together.ai/) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
 * To utilize the Ollama Language or Image Processing functionality, you will need to install [Ollama](https://ollama.com/) and download the appropriate models.
 * To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
@@ -686,6 +687,35 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 * Select **Google AI Imagen** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific Image Generation features
+
+* Turn on the Image Generation Feature.
+* Configure other options as needed.
+
+### 4. Trigger the media flow within a content item
+
+* Create a new content item
+* Insert an Image block or choose to add a featured image and choose a new item from the Media Library
+* In the media modal that opens, click on the `Generate image` tab
+* Enter in a prompt to generate an image
+* Once images are generated, choose one or more images to import into your media library
+* Choose one image to insert into the content
+
+## Set Up Image Generation (via Together AI)
+
+### 1. Sign up for Together AI
+
+* [Sign up for a Together AI account](https://api.together.ai/) or sign into your existing one.
+* Within your account settings, find the API Keys section or go to the [API key page](https://api.together.ai/settings/api-keys) directly.
+* Copy the exisintg key or create a new one and copy it.
+
+### 2. Configure API Keys under Tools > ClassifAI > Image Processing > Image Generation > Settings
+
+* Select **Together AI** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Save the settings which will validate the API key.
+* Once valid, the models will be available to select from. Choose the [image generation model](https://docs.together.ai/docs/serverless-models#image-models) you want to use.
 
 ### 3. Enable specific Image Generation features
 
