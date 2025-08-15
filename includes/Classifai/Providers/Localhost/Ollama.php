@@ -478,30 +478,51 @@ class Ollama extends Provider {
 					],
 				],
 				'stream'   => false,
+				'format'   => [
+					'type'       => 'object',
+					'properties' => [
+						'content' => [
+							'type' => 'string',
+						],
+					],
+					'required'   => [ 'content' ],
+				],
 			],
 			$post_id
 		);
 
-		// Make our API request.
-		$request  = new APIRequest( 'test' );
-		$response = $request->post(
-			$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		// Make our API requests.
+		$request = new APIRequest( 'test', $feature->get_option_name() );
 
-		if ( is_wp_error( $response ) ) {
-			return $response;
+		$responses = [];
+		for ( $i = 0; $i < $args['num']; $i++ ) {
+			$responses[] = $request->post(
+				$this->get_api_chat_url( $settings[ static::ID ]['endpoint_url'] ?? '' ),
+				[
+					'body' => wp_json_encode( $body ),
+				]
+			);
 		}
 
-		// If we have a message, return it.
-		$return = [];
-		if ( isset( $response['message'], $response['message']['content'] ) ) {
-			$return[] = sanitize_text_field( trim( $response['message']['content'], ' "\'' ) );
+		$cleaned_responses = [];
+
+		foreach ( $responses as $response ) {
+			// Extract out the response, if it exists.
+			if ( ! is_wp_error( $response ) && isset( $response['message'], $response['message']['content'] ) ) {
+				// We expect the response to be valid json since we requested that schema.
+				$content = json_decode( $response['message']['content'], true );
+
+				if ( isset( $content['content'] ) ) {
+					$cleaned_responses[] = sanitize_text_field( trim( $content['content'], ' "\'' ) );
+				} else {
+					return new WP_Error( 'refusal', esc_html__( 'Request failed', 'classifai' ) );
+				}
+			} elseif ( is_wp_error( $response ) ) {
+				return $response;
+			}
 		}
 
-		return $return;
+		return $cleaned_responses;
 	}
 
 	/**
