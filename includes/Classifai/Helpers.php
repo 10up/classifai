@@ -891,20 +891,20 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  *
  * @since x.x.x
  *
- * @param string $resource Path or URL.
+ * @param string $file_path Path or URL.
  * @param array  $args     Optional HTTP args (timeout, headers, etc.).
  * @return string|false Raw contents on success; false on failure.
  */
-function safe_file_get_contents( string $resource, array $args = [] ) {
-	if ( is_remote_url( $resource ) ) {
+function safe_file_get_contents( string $file_path, array $args = [] ) {
+	if ( is_remote_url( $file_path ) ) {
 		if ( function_exists( 'wpcom_vip_file_get_contents' ) ) {
-			$content = wpcom_vip_file_get_contents( $resource );
+			$content = wpcom_vip_file_get_contents( $file_path );
 			if ( false !== $content ) {
 				return $content;
 			}
 		}
 
-		$response = safe_wp_remote_get( $resource, $args );
+		$response = safe_wp_remote_get( $file_path, $args );
 
 		if ( is_wp_error( $response ) ) {
 			return false;
@@ -919,7 +919,7 @@ function safe_file_get_contents( string $resource, array $args = [] ) {
 	}
 
 	// Local file path: fall back to native.
-	return @file_get_contents( $resource ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+	return @file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
 }
 
 /**
@@ -928,6 +928,12 @@ function safe_file_get_contents( string $resource, array $args = [] ) {
  * - Use vip_safe_wp_remote_get() when available.
  * - Fall back to wp_remote_get() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
+ *
+ * @since x.x.x
+ *
+ * @param string $url Request URL.
+ * @param array  $args Request args.
+ * @return array|\WP_Error
  */
 function safe_wp_remote_get( string $url, array $args = [] ) {
 	return safe_wp_remote_request( 'GET', $url, $args );
@@ -939,6 +945,12 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
  * - Use vip_safe_wp_remote_post() when available.
  * - Fall back to wp_remote_post() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
+ *
+ * @since x.x.x
+ *
+ * @param string $url Request URL.
+ * @param array  $args Request args.
+ * @return array|\WP_Error
  */
 function safe_wp_remote_post( string $url, array $args = [] ) {
 	return safe_wp_remote_request( 'POST', $url, $args );
