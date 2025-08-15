@@ -17,8 +17,7 @@ use Classifai\Providers\Watson\NLU;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
-use function Classifai\is_remote_url;
-use function Classifai\safe_wp_remote_request;
+use function Classifai\safe_file_get_contents;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -177,15 +176,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! empty( $opts['input'] ) ) {
-			if ( is_remote_url( $opts['input'] ) ) {
-				$response = safe_wp_remote_request( 'GET', $opts['input'], [] );
-				if ( is_wp_error( $response ) ) {
-					\WP_CLI::error( 'Failed to fetch remote input: ' . $response->get_error_message() );
-				}
-				$text = wp_remote_retrieve_body( $response );
-			} else {
-				$text = file_get_contents( $opts['input'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			}
+			$text = safe_file_get_contents( $opts['input'] );
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
