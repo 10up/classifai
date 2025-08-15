@@ -17,7 +17,7 @@ describe( '[Language processing] Classify Content (Ollama) Tests', () => {
 		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( '#true_model' ).select( 'nomic-embed-text:latest' );
+		cy.get( '#ollama_model' ).select( 'nomic-embed-text:latest' );
 		cy.get(
 			'.settings-allowed-post-statuses input#post_status_publish'
 		).check();
