@@ -20,12 +20,6 @@ describe( 'Image Generation (Stable Diffusion)', () => {
 		cy.allowFeatureToAdmin();
 
 		cy.saveFeatureSettings();
-
-		cy.selectProvider( 'stable_diffusion' );
-		cy.get( '#stable_diffusion_model' ).select(
-			'sd-v1-4.ckpt [fe4efff1e1]'
-		);
-		cy.saveFeatureSettings();
 	} );
 
 	it( 'Can generate images in the media modal', () => {
