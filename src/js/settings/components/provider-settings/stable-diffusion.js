@@ -69,39 +69,36 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<SettingsRow
-						label={ __( 'Endpoint URL', 'classifai' ) }
-						description={ <Description /> }
-					>
-						<InputControl
-							id={ `${ providerName }_endpoint_url` }
-							type="text"
-							value={ providerSettings?.endpoint_url || '' }
-							onChange={ ( value ) =>
-								onChange( { endpoint_url: value } )
-							}
-						/>
-					</SettingsRow>
-					<SettingsRow
-						label={ __( 'Model', 'classifai' ) }
-						description={ __(
-							'Choose the model you want to use. If no models are shown or you want to use a different model, please ensure this is installed in Stable Diffusion first.',
-							'classifai'
-						) }
-					>
-						<SelectControl
-							id={ `${ providerName }_model` }
-							onChange={ ( value ) =>
-								onChange( { model: value } )
-							}
-							value={ providerSettings?.model || '' }
-							options={ models }
-							__nextHasNoMarginBottom
-						/>
-					</SettingsRow>
-				</>
+				<SettingsRow
+					label={ __( 'Endpoint URL', 'classifai' ) }
+					description={ <Description /> }
+				>
+					<InputControl
+						id={ `${ providerName }_endpoint_url` }
+						type="text"
+						value={ providerSettings?.endpoint_url || '' }
+						onChange={ ( value ) =>
+							onChange( { endpoint_url: value } )
+						}
+					/>
+				</SettingsRow>
 			) }
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ __(
+					'Choose the model you want to use. If no models are shown or you want to use a different model, please ensure this is installed in Stable Diffusion first.',
+					'classifai'
+				) }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					disabled={ ! isConfigured }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
 			<SettingsRow
 				label={ __( 'Number of images', 'classifai' ) }
 				description={ __(

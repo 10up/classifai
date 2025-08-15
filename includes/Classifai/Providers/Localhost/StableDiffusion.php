@@ -105,8 +105,7 @@ class StableDiffusion extends Provider {
 	 * @return array
 	 */
 	public function sanitize_settings( array $new_settings ): array {
-		$settings            = $this->feature_instance->get_settings();
-		$credentials_changed = false;
+		$settings = $this->feature_instance->get_settings();
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
@@ -119,21 +118,13 @@ class StableDiffusion extends Provider {
 				]
 			);
 
-			// Check to see if credentials have changed.
-			if ( $new_url !== $settings[ static::ID ]['endpoint_url'] || ! $new_settings[ static::ID ]['authenticated'] ) {
-				$credentials_changed = true;
-			}
+			$new_settings[ static::ID ]['endpoint_url'] = $new_url;
 
-			// If they have changed, make a request to get models and ensure the connection works.
-			if ( $credentials_changed ) {
-				$new_settings[ static::ID ]['endpoint_url'] = $new_url;
-
-				if ( ! empty( $new_settings[ static::ID ]['models'] ) ) {
-					$new_settings[ static::ID ]['authenticated'] = true;
-				} else {
-					$new_settings[ static::ID ]['models']        = [];
-					$new_settings[ static::ID ]['authenticated'] = false;
-				}
+			if ( ! empty( $new_settings[ static::ID ]['models'] ) ) {
+				$new_settings[ static::ID ]['authenticated'] = true;
+			} else {
+				$new_settings[ static::ID ]['models']        = [];
+				$new_settings[ static::ID ]['authenticated'] = false;
 			}
 		} else {
 			$new_settings[ static::ID ]['endpoint_url'] = $settings[ static::ID ]['endpoint_url'];
@@ -147,6 +138,11 @@ class StableDiffusion extends Provider {
 		}
 
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
+
+		// Ensure the model being saved is valid. If not valid or we don't have one, use the first model.
+		if ( ! in_array( $new_settings[ static::ID ]['model'], array_keys( $new_settings[ static::ID ]['models'] ), true ) ) {
+			$new_settings[ static::ID ]['model'] = array_keys( $new_settings[ static::ID ]['models'] )[0];
+		}
 
 		$new_settings[ static::ID ]['number_of_images'] = absint( $new_settings[ static::ID ]['number_of_images'] ?? $settings[ static::ID ]['number_of_images'] );
 
@@ -170,7 +166,7 @@ class StableDiffusion extends Provider {
 			'n'    => [
 				'type'              => 'integer',
 				'minimum'           => 1,
-				'maximum'           => 10,
+				'maximum'           => 5,
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 				'description'       => esc_html__( 'Number of images to generate', 'classifai' ),
