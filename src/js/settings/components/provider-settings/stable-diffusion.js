@@ -40,7 +40,7 @@ export const StableDiffusionSettings = ( { isConfigured = false } ) => {
 			) }
 			<a
 				title={ __( 'Install Stable Diffusion', 'classifai' ) }
-				href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/"
+				href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/#installation-and-running"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
