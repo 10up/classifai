@@ -36,7 +36,7 @@ export const OllamaEmbeddingsSettings = ( { isConfigured = false } ) => {
 	return (
 		<OllamaBaseSettings
 			providerSettings={ providerSettings }
-			providerName
+			providerName={ providerName }
 			onChange={ onChange }
 		/>
 	);
