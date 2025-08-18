@@ -21,7 +21,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate titles from post content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
-* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen) or [Together AI's API](https://docs.together.ai/docs/images-overview)
+* Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen), [Together AI's API](https://docs.together.ai/docs/images-overview) or locally using [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 * Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
@@ -67,6 +67,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * To utilize the Together AI Image Generation functionality, you will need an active [Together AI](https://api.together.ai/) account.
 * To utilize the AWS Language Processing functionality, you will need an active [AWS](https://console.aws.amazon.com/) account.
 * To utilize the Ollama Language or Image Processing functionality, you will need to install [Ollama](https://ollama.com/) and download the appropriate models.
+* To utilize the Stable Diffusion Image Processing functionality, you will need to install [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) and download the appropriate models.
 * To utilize the Smart 404 feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access and you will need to use [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 * To utilize the Term Cleanup feature, you will need an active [OpenAI](https://platform.openai.com/signup) account or [Microsoft Azure](https://signup.azure.com/signup) account with OpenAI access. For better performance, you will need [ElasticPress](https://github.com/10up/ElasticPress) 5.0.0+ and [Elasticsearch](https://www.elastic.co/elasticsearch) 7.0+.
 
@@ -775,7 +776,9 @@ Note that [Azure AI Vision](https://docs.microsoft.com/en-us/azure/cognitive-ser
 
 Some of the Features in ClassifAI can be set up to use locally hosted LLMs. This has the benefit of complete privacy and data control, as well as being able to be run without any cost. The trade-offs here are performance isn't as great and results may also be less accurate.
 
-Right now, this is powered by Ollama, a tool that allows you to host and run LLMs locally. To set this up, follow the steps below:
+Right now, text generation and image analysis are powered by Ollama, a tool that allows you to host and run LLMs locally.  Image generation is powered by Stable Diffusion, a tool that allows you to host and run image generation models locally.
+
+To set up Ollama, follow the steps below:
 
 ### 1. Install Ollama
 
@@ -791,6 +794,23 @@ Right now, this is powered by Ollama, a tool that allows you to host and run LLM
 
 * Once Ollama is running and the model is installed, you can proceed to use it as a Provider for the desired Feature.
 * Note that when using locally hosted LLMs, performance may be slower than using cloud-based services, especially for initial requests. Results may also be less accurate but these are the trade-offs for privacy and data control.
+
+To set up Stable Diffusion, follow the steps below:
+
+### 1. Install Stable Diffusion
+
+* [Install Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/) on your local machine.
+* By default Stable Diffusion runs at `http://localhost:7860/`.
+
+### 2. Install the model
+
+* Decide which model you want to use to generate images. There are [many models available](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon#downloading-stable-diffusion-models) with various trade-offs between quality, speed and size.
+* Install the model locally by downloading it and placing it in the `models/Stable-diffusion` directory.
+
+### 3. Configure Provider
+
+* Once Stable Diffusion is running and the model is installed, you can proceed to use it as a Provider for Image Generation.
+* Note that when using locally hosted LLMs, performance may be slower than using cloud-based services, especially for initial requests. Results may also be lower quality but these are the trade-offs for privacy and data control.
 
 ## WP CLI Commands
 

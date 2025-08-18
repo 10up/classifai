@@ -133,6 +133,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/ollama-structured-title.json' );
 			}
 		}
+	} elseif ( strpos( $url, 'http://127.0.0.1:7860/sdapi/v1/sd-models' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/stable-diffusion-models.json' );
+	} elseif ( strpos( $url, 'http://127.0.0.1:7860/sdapi/v1/txt2img' ) !== false ) {
+		$response = file_get_contents( __DIR__ . '/stable-diffusion.json' );
 	}
 
 	if ( ! empty( $response ) ) {
