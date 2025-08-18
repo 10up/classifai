@@ -33,6 +33,7 @@ import { XAIGrokSettings } from './xai-grok';
 import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
+import { TogetherAIImagesSettings } from './together-ai-images';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -77,6 +78,9 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'openai_dalle':
 			return <OpenAIImagesSettings isConfigured={ isConfigured } />;
+
+		case 'togetherai_image':
+			return <TogetherAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;

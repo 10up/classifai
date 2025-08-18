@@ -60,6 +60,7 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\GoogleAI\Images',
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\OllamaMultimodal',
+				'Classifai\Providers\TogetherAI\Images',
 			]
 		);
 	}
