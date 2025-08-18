@@ -7,7 +7,7 @@ describe( '[Language processing] Resize Content Tests', () => {
 		cy.enableFeature();
 		cy.selectProvider( 'ollama' );
 		cy.saveFeatureSettings();
-		cy.get( '#true_model' ).select( 'deepseek-llm:latest' );
+		cy.get( '#ollama_model' ).select( 'deepseek-llm:latest' );
 		cy.optInAllFeatures();
 		cy.disableClassicEditor();
 	} );

@@ -61,6 +61,7 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\OllamaMultimodal',
 				'Classifai\Providers\Localhost\StableDiffusion',
+				'Classifai\Providers\TogetherAI\Images',
 			]
 		);
 	}

@@ -6,6 +6,7 @@ use Classifai\Services\ImageProcessing;
 use Classifai\Providers\OpenAI\Images as OpenAIImages;
 use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
 use Classifai\Providers\Localhost\StableDiffusion as LocalhostStableDiffusion;
+use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -37,6 +38,7 @@ class ImageGeneration extends Feature {
 		$this->supported_providers = [
 			OpenAIImages::ID             => __( 'OpenAI Images', 'classifai' ),
 			GoogleAIImagen::ID           => __( 'Google AI Imagen', 'classifai' ),
+			TogetherAIImages::ID         => __( 'Together AI', 'classifai' ),
 			LocalhostStableDiffusion::ID => __( 'Stable Diffusion (local)', 'classifai' ),
 		];
 	}
