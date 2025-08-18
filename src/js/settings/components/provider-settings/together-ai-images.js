@@ -68,7 +68,7 @@ export const TogetherAIImagesSettings = ( { isConfigured = false } ) => {
 					onChange={ ( value ) => onChange( { model: value } ) }
 					value={ providerSettings?.model || '' }
 					options={ models }
-					disabled={ ! isConfigured }
+					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
