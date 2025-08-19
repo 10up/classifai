@@ -7,7 +7,7 @@ namespace Classifai\Providers\Localhost;
 
 use Classifai\Admin\Notifications;
 use Classifai\Features\Classification;
-use Classifai\Providers\OpenAI\APIRequest;
+use Classifai\Providers\Localhost\APIRequest;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\Providers\OpenAI\Tokenizer;
 use Classifai\Features\Feature;
