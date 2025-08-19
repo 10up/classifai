@@ -48,10 +48,17 @@ class Images extends Provider {
 
 	/**
 	 * Register what we need for the provider.
-	 *
-	 * This only fires if can_register returns true.
 	 */
 	public function register() {
+		$feature = new ImageGeneration();
+
+		if (
+			! $feature->is_feature_enabled() ||
+			$feature->get_feature_provider_instance()::ID !== static::ID
+		) {
+			return;
+		}
+
 		add_filter( 'classifai_' . ImageGeneration::ID . '_rest_route_generate-image_args', [ $this, 'register_rest_args' ] );
 	}
 
@@ -87,13 +94,13 @@ class Images extends Provider {
 		 * dall-e-3.
 		 *
 		 * @since 3.4.0
-		 * @hook classifai_openai_dalle_embeddings_model
+		 * @hook classifai_openai_dalle_model
 		 *
 		 * @param {string} $model The default model to use.
 		 *
 		 * @return {string} The model to use.
 		 */
-		return apply_filters( 'classifai_openai_dalle_embeddings_model', $this->model );
+		return apply_filters( 'classifai_openai_dalle_model', $this->model );
 	}
 
 	/**
@@ -140,9 +147,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_quality_options
 		 *
-		 * @param {int} $model The default quality options.
+		 * @param {array} $options The default quality options.
 		 *
-		 * @return {int} The quality options.
+		 * @return {array} The quality options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_quality_options', $options );
 	}
@@ -169,9 +176,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_size_options
 		 *
-		 * @param {int} $model The default size options.
+		 * @param {array} $options The default size options.
 		 *
-		 * @return {int} The size options.
+		 * @return {array} The size options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_size_options', $options );
 	}
@@ -193,9 +200,9 @@ class Images extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_dalle_style_options
 		 *
-		 * @param {int} $model The default style options.
+		 * @param {array} $options The default style options.
 		 *
-		 * @return {int} The style options.
+		 * @return {array} The style options.
 		 */
 		return apply_filters( 'classifai_openai_dalle_style_options', $options );
 	}

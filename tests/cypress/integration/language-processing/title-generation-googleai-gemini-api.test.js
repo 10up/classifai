@@ -17,9 +17,7 @@ describe( '[Language processing] Title Generation Tests', () => {
 		);
 		cy.get( '#classifai-logo' ).should( 'exist' );
 		cy.selectProvider( 'googleai_gemini_api' );
-		cy.get( 'input#googleai_gemini_api_api_key' )
-			.clear()
-			.type( 'password' );
+		cy.get( 'input#googleai_gemini_api_key' ).clear().type( 'password' );
 		cy.enableFeature();
 		cy.allowFeatureToAdmin();
 		cy.saveFeatureSettings();
@@ -128,7 +126,9 @@ describe( '[Language processing] Title Generation Tests', () => {
 			.should( 'have.value', data );
 
 		cy.get( '.classifai-title-generation__select-title' ).first().click();
-		cy.get( '#classifai-title-generation__modal' ).should( 'not.be.visible' );
+		cy.get( '#classifai-title-generation__modal' ).should(
+			'not.be.visible'
+		);
 		cy.get( '#title' ).should( 'have.value', data );
 
 		cy.disableClassicEditor();

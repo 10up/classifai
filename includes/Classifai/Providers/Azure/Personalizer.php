@@ -11,6 +11,8 @@ use Classifai\Features\RecommendedContent;
 use WP_Error;
 use WP_REST_Server;
 use UAParser\Parser;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 use function Classifai\safe_wp_remote_get;
 
@@ -659,7 +661,7 @@ class Personalizer extends Provider {
 	protected function personalizer_get_ranked_action( array $rank_request ) {
 		$feature  = new RecommendedContent();
 		$settings = $feature->get_settings( static::ID );
-		$result   = wp_remote_post(
+		$result   = safe_wp_remote_post(
 			trailingslashit( $settings['endpoint_url'] ) . $this->rank_endpoint,
 			[
 				'headers' => [
@@ -693,7 +695,7 @@ class Personalizer extends Provider {
 		$settings = $feature->get_settings( static::ID );
 
 		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
-		$result          = wp_remote_post(
+		$result          = safe_wp_remote_post(
 			trailingslashit( $settings['endpoint_url'] ) . $reward_endpoint,
 			[
 				'headers' => [

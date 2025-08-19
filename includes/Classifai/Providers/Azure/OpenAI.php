@@ -16,6 +16,7 @@ use WP_Error;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
+use function Classifai\safe_wp_remote_post;
 
 class OpenAI extends Provider {
 
@@ -279,7 +280,7 @@ class OpenAI extends Provider {
 		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
@@ -432,7 +433,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -539,7 +540,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -646,7 +647,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -717,7 +718,7 @@ class OpenAI extends Provider {
 		 * only want to run when triggered manually, you can
 		 * filter the return value to false.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_azure_openai_key_takeaways_auto_run
 		 *
 		 * @param {bool} $run Whether to run the key takeaways generation.
@@ -807,7 +808,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -843,7 +844,7 @@ class OpenAI extends Provider {
 				// If the request was refused, return an error.
 				if ( isset( $choice['message'], $choice['message']['refusal'] ) ) {
 					// translators: %s: error message.
-					return new WP_Error( 'refusal', sprintf( esc_html__( 'Request failed: %s', 'classifai' ), esc_html( $choice['message']['refusal'] ) ) );
+					return new WP_Error( 'refusal', sprintf( esc_html__( 'Request failed: %s', 'classifai' ), wp_kses_post( $choice['message']['refusal'] ) ) );
 				}
 			}
 		}
@@ -960,7 +961,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [

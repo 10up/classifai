@@ -109,13 +109,22 @@ The following WP-CLI commands are supported by ClassifAI:
     * `true` to run in dry-run mode
     * `false` to run in normal mode
 
-* `wp classifai transcribe_audio <attachment_ids> [--per_page=<per_page>] [--force=<bool>] [--dry-run=<bool>]`
+* `wp classifai transcribe_audio <attachment_ids> [--files=<files>] [--per_page=<per_page>] [--force=<bool>] [--dry-run=<bool>]`
 
-  Batch generation of audio transcriptions using OpenAI's Audio Transcription API.
+  Batch generation of audio transcriptions using OpenAI's Audio Transcription API. Can either process existing attachments or process files from the local filesystem or remote URLs.
 
   * `<attachment_ids>`: A comma-delimited list of attachment IDs to generate transcriptions for. If not set, will instead run a query to get all audio attachments to process.
 
     default: `null`
+
+  * `[--files=<files>]`: A comma-delimited list of file paths to generate transcriptions for. Will take precedence over `attachment_ids` if set.
+
+    default: `null`
+
+    options:
+
+    * path to local file
+    * path to remote URL
 
   * `[--per_page=<int>]`: How many items should be processed at a time. Will still process all items but will do it in batches matching this number. Defaults to 100.
 

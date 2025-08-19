@@ -941,7 +941,7 @@ class ChatGPT extends Provider {
 		 * only want to run when triggered manually, you can
 		 * filter the return value to false.
 		 *
-		 * @since x.x.x
+		 * @since 3.5.0
 		 * @hook classifai_chatgpt_key_takeaways_auto_run
 		 *
 		 * @param {bool} $run Whether to run the key takeaways generation.
@@ -1065,7 +1065,7 @@ class ChatGPT extends Provider {
 				// If the request was refused, return an error.
 				if ( isset( $choice['message'], $choice['message']['refusal'] ) ) {
 					// translators: %s: error message.
-					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), esc_html( $choice['message']['refusal'] ) ) );
+					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), wp_kses_post( $choice['message']['refusal'] ) ) );
 				}
 			}
 		}

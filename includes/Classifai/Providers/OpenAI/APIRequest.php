@@ -3,6 +3,8 @@
 namespace Classifai\Providers\OpenAI;
 
 use WP_Error;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 use function Classifai\safe_wp_remote_get;
 
@@ -116,7 +118,7 @@ class APIRequest {
 		$options = wp_parse_args(
 			$options,
 			[
-				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
 			]
 		);
 
@@ -165,7 +167,7 @@ class APIRequest {
 		 */
 		return apply_filters(
 			'classifai_openai_api_response_post',
-			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$this->get_result( safe_wp_remote_post( $url, $options ) ),
 			$url,
 			$options,
 			$this->feature
@@ -260,7 +262,7 @@ class APIRequest {
 		 */
 		return apply_filters(
 			'classifai_openai_api_response_post_form',
-			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$this->get_result( safe_wp_remote_post( $url, $options ) ),
 			$url,
 			$options,
 			$this->feature

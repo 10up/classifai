@@ -12,6 +12,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use function Classifai\safe_wp_remote_post;
 
 class Embeddings extends OpenAI {
 	const ID = 'azure_openai_embeddings';
@@ -278,7 +279,7 @@ class Embeddings extends OpenAI {
 		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
 		$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
@@ -366,11 +367,11 @@ class Embeddings extends OpenAI {
 	}
 
 	/**
-	 * Trigger embedding generation for content being saved.
+	 * Trigger embedding generation for a post.
 	 *
-	 * @param int  $post_id ID of post being saved.
+	 * @param int  $post_id ID of post.
 	 * @param bool $force Whether to force generation of embeddings even if they already exist. Default false.
-	 * @return array|WP_Error
+	 * @return array[]|WP_Error Array of embedding vectors on success, WP_Error on failure.
 	 */
 	public function generate_embeddings_for_post( int $post_id, bool $force = false ) {
 		// Don't run on autosaves.
@@ -427,6 +428,8 @@ class Embeddings extends OpenAI {
 
 					if ( $embedding && ! is_wp_error( $embedding ) ) {
 						$embeddings[] = array_map( 'floatval', $embedding );
+					} elseif ( is_wp_error( $embedding ) ) {
+						return $embedding;
 					}
 				}
 			} else {
@@ -440,6 +443,8 @@ class Embeddings extends OpenAI {
 						},
 						$all_embeddings
 					);
+				} elseif ( is_wp_error( $all_embeddings ) ) {
+					return $all_embeddings;
 				}
 			}
 		}
@@ -934,6 +939,8 @@ class Embeddings extends OpenAI {
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
+				} elseif ( is_wp_error( $embedding ) ) {
+					return $embedding;
 				}
 			}
 		}
@@ -986,7 +993,7 @@ class Embeddings extends OpenAI {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -1065,7 +1072,7 @@ class Embeddings extends OpenAI {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -1217,7 +1224,7 @@ class Embeddings extends OpenAI {
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
 				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $settings[ $tax ], 1 );
-				$debug_info[ "Taxonomy ($tax threshold)" ] = absint( $settings[ $tax . '_threshold' ] );
+				$debug_info[ "Taxonomy ($tax threshold)" ] = floatval( $settings[ $tax . '_threshold' ] );
 			}
 
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_embeddings_latest_response' ) );

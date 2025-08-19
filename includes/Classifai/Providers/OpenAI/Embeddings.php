@@ -396,7 +396,7 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( isset( $new_settings[ static::ID ]['embedding_threshold'] ) ) {
-			$new_settings[ static::ID ]['embedding_threshold'] = absint( $new_settings[ static::ID ]['embedding_threshold'] );
+			$new_settings[ static::ID ]['embedding_threshold'] = floatval( $new_settings[ static::ID ]['embedding_threshold'] );
 		}
 
 		if (
@@ -587,12 +587,12 @@ class Embeddings extends Provider {
 	}
 
 	/**
-	 * Trigger embedding generation for content being saved.
+	 * Trigger embedding generation for a post.
 	 *
-	 * @param int          $post_id ID of post being saved.
+	 * @param int          $post_id ID of post.
 	 * @param bool         $force Whether to force generation of embeddings even if they already exist. Default false.
 	 * @param Feature|null $feature The feature instance.
-	 * @return array|WP_Error
+	 * @return array[]|WP_Error Array of embedding vectors on success, WP_Error on failure.
 	 */
 	public function generate_embeddings_for_post( int $post_id, bool $force = false, $feature = null ) {
 		// Don't run on autosaves.
@@ -1430,6 +1430,8 @@ class Embeddings extends Provider {
 
 				if ( $embedding && ! is_wp_error( $embedding ) ) {
 					$embeddings[] = array_map( 'floatval', $embedding );
+				} elseif ( is_wp_error( $embedding ) ) {
+					return $embedding;
 				}
 			}
 		}

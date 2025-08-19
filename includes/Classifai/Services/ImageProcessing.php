@@ -57,8 +57,11 @@ class ImageProcessing extends Service {
 				'Classifai\Providers\Azure\ComputerVision',
 				'Classifai\Providers\OpenAI\ChatGPT',
 				'Classifai\Providers\OpenAI\Images',
+				'Classifai\Providers\GoogleAI\Images',
 				'Classifai\Providers\XAI\Grok',
 				'Classifai\Providers\Localhost\OllamaMultimodal',
+				'Classifai\Providers\Localhost\StableDiffusion',
+				'Classifai\Providers\TogetherAI\Images',
 			]
 		);
 	}

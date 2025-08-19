@@ -162,7 +162,7 @@ class Read {
 			return $this->log_error( new WP_Error( 'invalid_attachment', esc_html__( 'Document does not exist.', 'classifai' ) ) );
 		}
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$url,
 			[
 				'body'    => wp_json_encode(

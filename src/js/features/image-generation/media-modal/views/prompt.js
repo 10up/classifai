@@ -35,22 +35,28 @@ const Prompt = wp.media.View.extend( {
 	 */
 	promptRequest: function ( event ) {
 		let prompt = '';
-		let quality = '';
-		let size = '';
-		let style = '';
 		const parent = event.target.parentElement;
 
 		if ( event.which === 13 ) {
 			prompt = event.target.value.trim();
 		} else if ( event.target.nodeName === 'BUTTON' ) {
 			prompt = parent.querySelector( '.prompt' ).value.trim();
-			quality = parent?.querySelector( '.quality' )?.value.trim();
-			size = parent?.querySelector( '.size' )?.value.trim();
-			style = parent?.querySelector( '.style' )?.value.trim();
 		}
 
+		const quality = parent?.querySelector( '.quality' )?.value.trim() || '';
+		const size = parent?.querySelector( '.size' )?.value.trim() || '';
+		const style = parent?.querySelector( '.style' )?.value.trim() || '';
+		const aspectRatio =
+			parent?.querySelector( '.aspect-ratio' )?.value.trim() || '';
+
 		if ( prompt ) {
-			new GeneratedImagesContainer( { prompt, quality, size, style } );
+			new GeneratedImagesContainer( {
+				prompt,
+				quality,
+				size,
+				style,
+				aspectRatio,
+			} );
 		}
 	},
 } );

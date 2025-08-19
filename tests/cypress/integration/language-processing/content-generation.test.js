@@ -39,7 +39,7 @@ describe( '[Language processing] Content Generation Tests', () => {
 		cy.selectProvider( 'ollama' );
 
 		cy.saveFeatureSettings();
-		cy.get( '#true_model' ).select( 'deepseek-llm:latest' );
+		cy.get( '#ollama_model' ).select( 'deepseek-llm:latest' );
 		cy.saveFeatureSettings();
 	} );
 

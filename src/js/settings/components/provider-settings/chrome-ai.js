@@ -22,18 +22,13 @@ export const ChromeAISettings = () => {
 
 	useEffect( () => {
 		const checkBrowserSupport = async () => {
-			if ( ! window.ai ) {
+			if ( ! window.LanguageModel ) {
 				return setSupported( false );
 			}
 
 			try {
-				const capabilities =
-					await window.ai.languageModel.capabilities();
-				if (
-					capabilities &&
-					capabilities.available &&
-					'readily' === capabilities.available
-				) {
+				const available = await window.LanguageModel?.availability();
+				if ( available && available !== 'unavailable' ) {
 					setSupported( true );
 				}
 			} catch ( error ) {
@@ -46,7 +41,7 @@ export const ChromeAISettings = () => {
 		checkBrowserSupport();
 	}, [] );
 
-	if ( ! window.ai ) {
+	if ( ! window.LanguageModel ) {
 		return null;
 	}
 
