@@ -6,7 +6,7 @@
 namespace Classifai\Providers\Localhost;
 
 use Classifai\Providers\Provider;
-use Classifai\Providers\OpenAI\APIRequest;
+use Classifai\Providers\Localhost\APIRequest;
 use Classifai\Features\ImageGeneration;
 use WP_Error;
 
