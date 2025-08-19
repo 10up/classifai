@@ -4,6 +4,7 @@ namespace Classifai\Providers\Watson;
 
 use Classifai\Features\Classification;
 use Classifai\Providers\Watson\NLU;
+use Classifai\Providers\Watson\APIRequest;
 use Classifai\Normalizer;
 
 /**
