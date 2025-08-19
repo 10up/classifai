@@ -17,6 +17,7 @@ use WP_Error;
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_modified_image_source_url;
+use function Classifai\safe_wp_remote_post;
 
 class ComputerVision extends Provider {
 
@@ -666,7 +667,7 @@ class ComputerVision extends Provider {
 			$image_url = get_site_url() . $image_url;
 		}
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$endpoint_url,
 			[
 				'headers' => [
@@ -750,7 +751,7 @@ class ComputerVision extends Provider {
 	 */
 	protected function authenticate_credentials( string $url, string $api_key ) {
 		$rtn     = false;
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			add_query_arg( 'features', 'caption', trailingslashit( $url ) . $this->analyze_url ),
 			[
 				'headers' => [
