@@ -10,6 +10,7 @@ use Classifai\Taxonomy\TaxonomyFactory;
 use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\Providers\Watson\PostClassifier;
+use Classifai\Providers\Watson\APIRequest;
 use WP_Error;
 
 use function Classifai\get_classification_feature_taxonomy;
