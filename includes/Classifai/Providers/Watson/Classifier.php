@@ -2,6 +2,8 @@
 
 namespace Classifai\Providers\Watson;
 
+use Classifai\Providers\Watson\APIRequest;
+
 /**
  * The Classifier object uses the IBM Watson NLU API to classify plain
  * text into NLU features. The low level API Request object is used here
