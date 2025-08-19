@@ -32,6 +32,7 @@ export const GoogleAIGeminiSettings = ( { isConfigured = false } ) => {
 				<GoogleAISettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
+					providerName={ providerName }
 				/>
 			) }
 		</>

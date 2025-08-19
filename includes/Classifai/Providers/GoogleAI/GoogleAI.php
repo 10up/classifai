@@ -25,13 +25,13 @@ trait GoogleAI {
 	 * @return array
 	 */
 	public function sanitize_api_key_settings( array $new_settings = [], array $settings = [] ): array {
-		$authenticated = $this->authenticate_credentials( $new_settings[ static::ID ]['api_key'] ?? '' );
+		$models = $this->get_models( $new_settings[ static::ID ]['api_key'] ?? '' );
 
 		$new_settings[ static::ID ]['authenticated'] = $settings[ static::ID ]['authenticated'];
 
-		if ( is_wp_error( $authenticated ) ) {
+		if ( is_wp_error( $models ) ) {
 			$new_settings[ static::ID ]['authenticated'] = false;
-			$error_message                               = $authenticated->get_error_message();
+			$error_message                               = $models->get_error_message();
 
 			// Add an error message.
 			add_settings_error(
@@ -42,6 +42,7 @@ trait GoogleAI {
 			);
 		} else {
 			$new_settings[ static::ID ]['authenticated'] = true;
+			$new_settings[ static::ID ]['models']        = $models;
 		}
 
 		$new_settings[ static::ID ]['api_key'] = sanitize_text_field( $new_settings[ static::ID ]['api_key'] ?? $settings[ static::ID ]['api_key'] );
@@ -50,12 +51,13 @@ trait GoogleAI {
 	}
 
 	/**
-	 * Authenticate our credentials.
+	 * Get the available models.
+	 * This function also authenticates the credentials.
 	 *
 	 * @param string $api_key Api Key.
-	 * @return bool|WP_Error
+	 * @return array|WP_Error
 	 */
-	protected function authenticate_credentials( string $api_key = '' ) {
+	protected function get_models( string $api_key = '' ) {
 		// Check that we have credentials before hitting the API.
 		if ( empty( $api_key ) ) {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your Google AI (Gemini) key.', 'classifai' ) );
@@ -65,6 +67,27 @@ trait GoogleAI {
 		$request  = new APIRequest( $api_key );
 		$response = $request->get( $this->model_url );
 
-		return ! is_wp_error( $response ) ? true : $response;
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$models = [];
+		foreach ( $response['models'] as $model ) {
+			if ( 'googleai_gemini_api' === self::ID && is_array( $model['supportedGenerationMethods'] ) && in_array( 'generateContent', $model['supportedGenerationMethods'], true ) ) {
+				$models[ $model['name'] ] = $model['displayName'];
+			}
+		}
+
+		/**
+		 * Filter the models returned by the Google AI API.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_googleai_models
+		 *
+		 * @param {array} $models The models.
+		 *
+		 * @return {array} The models.
+		 */
+		return apply_filters( 'classifai_googleai_models', $models, self::ID );
 	}
 }
