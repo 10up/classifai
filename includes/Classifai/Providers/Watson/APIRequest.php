@@ -2,6 +2,8 @@
 
 namespace Classifai\Providers\Watson;
 
+use Classifai\Providers\HTTPClient;
+use WP_Error;
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
 
@@ -18,7 +20,7 @@ use function Classifai\Providers\Watson\get_password;
  * $request = new APIRequest();
  * $request->post( $nlu_url, $options );
  */
-class APIRequest {
+class APIRequest extends HTTPClient {
 
 	/**
 	 * The Watson API username.
@@ -35,12 +37,33 @@ class APIRequest {
 	public $password;
 
 	/**
+	 * Watson APIRequest constructor.
+	 *
+	 * @param string $api_key Not used for Watson, kept for compatibility.
+	 * @param string $feature Feature name.
+	 */
+	public function __construct( string $api_key = '', string $feature = '' ) {
+		parent::__construct( $api_key, $feature );
+		$this->username = get_username();
+		$this->password = get_password();
+	}
+
+	/**
+	 * Get the filter prefix for this provider.
+	 *
+	 * @return string
+	 */
+	protected function get_filter_prefix(): string {
+		return 'classifai_watson';
+	}
+
+	/**
 	 * Adds authorization headers to the request options and makes an
 	 * HTTP request. The result is parsed and returned if valid JSON.
 	 *
 	 * @param string $url The Watson API url
 	 * @param array  $options Additional query params
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function request( string $url, array $options = [] ) {
 		$this->add_headers( $options );
@@ -53,49 +76,11 @@ class APIRequest {
 	 *
 	 * @param string $url The Watson API url
 	 * @param array  $options Additional query params
-	 * @return array|\WP_Error
+	 * @return array|WP_Error
 	 */
 	public function get( string $url, array $options = [] ) {
-		$this->add_headers( $options );
-		return $this->get_result( wp_remote_get( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
-	}
-
-	/**
-	 * Makes an authorized POST request and returns the parsed JSON
-	 * response if valid.
-	 *
-	 * @param string $url The Watson API url
-	 * @param array  $options Additional query params
-	 * @return array|\WP_Error
-	 */
-	public function post( string $url, array $options = [] ) {
-		$this->add_headers( $options );
-		return $this->get_result( wp_remote_post( $url, $options ) ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
-	}
-
-	/**
-	 * Get results from the response.
-	 *
-	 * @param object $response The API response.
-	 * @return array|\WP_Error
-	 */
-	public function get_result( $response ) {
-		if ( ! is_wp_error( $response ) ) {
-			$body = wp_remote_retrieve_body( $response );
-			$json = json_decode( $body, true );
-
-			if ( json_last_error() === JSON_ERROR_NONE ) {
-				if ( empty( $json['error'] ) ) {
-					return $json;
-				} else {
-					return new \WP_Error( $json['code'], $json['error'] );
-				}
-			} else {
-				return new \WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
-			}
-		} else {
-			return $response;
-		}
+		// Ensure filter hooks are called
+		return parent::get( $url, $options );
 	}
 
 	/**
@@ -146,17 +131,11 @@ class APIRequest {
 	}
 
 	/**
-	 * Add the headers.
+	 * Add authentication header.
 	 *
 	 * @param array $options The header options, passed by reference.
 	 */
-	public function add_headers( array &$options ) {
-		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
-		}
-
+	protected function add_auth_header( array &$options ) {
 		$options['headers']['Authorization'] = $this->get_auth_header();
-		$options['headers']['Accept']        = 'application/json';
-		$options['headers']['Content-Type']  = 'application/json';
 	}
 }
