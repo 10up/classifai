@@ -1728,6 +1728,10 @@ class Embeddings extends Provider {
 	 * @return bool
 	 */
 	public function is_embeddings_generation_in_progress(): bool {
+		if ( null === self::$scheduler_instance ) {
+			return false;
+		}
+
 		if ( $this->feature_instance instanceof Classification ) {
 			return self::$scheduler_instance->is_embeddings_generation_in_progress( 'classifai_generate_term_embedding_job' );
 		}
