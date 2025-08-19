@@ -2,6 +2,7 @@
 
 namespace Classifai\Providers\XAI;
 
+use Classifai\Providers\HTTPClient;
 use WP_Error;
 
 /**
@@ -16,207 +17,43 @@ use WP_Error;
  * $request = new Classifai\Providers\XAI\APIRequest();
  * $request->post( $xai_url, $options );
  */
-class APIRequest {
-
-	/**
-	 * The xAI API key.
-	 *
-	 * @var string
-	 */
-	public $api_key;
-
-	/**
-	 * The feature name.
-	 *
-	 * @var string
-	 */
-	public $feature;
+class APIRequest extends HTTPClient {
 
 	/**
 	 * xAI APIRequest constructor.
 	 *
-	 * @param string $api_key xAI API key.
+	 * @param string $api_key API key.
 	 * @param string $feature Feature name.
 	 */
 	public function __construct( string $api_key = '', string $feature = '' ) {
-		$this->api_key = $api_key;
-		$this->feature = $feature;
+		parent::__construct( $api_key, $feature );
 	}
 
 	/**
-	 * Makes an authorized GET request.
+	 * Get the filter prefix for this provider.
 	 *
-	 * @param string $url The xAI API url
-	 * @param array  $options Additional query params
-	 * @return array|WP_Error
+	 * @return string
 	 */
-	public function get( string $url, array $options = [] ) {
-		/**
-		 * Filter the URL for the get request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_request_get_url
-		 *
-		 * @param {string} $url The URL for the request.
-		 * @param {array} $options The options for the request.
-		 * @param {string} $this->feature The feature name.
-		 *
-		 * @return {string} The URL for the request.
-		 */
-		$url = apply_filters( 'classifai_xai_api_request_get_url', $url, $options, $this->feature );
-
-		/**
-		 * Filter the options for the get request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_request_get_options
-		 *
-		 * @param {array} $options The options for the request.
-		 * @param {string} $url The URL for the request.
-		 * @param {string} $this->feature The feature name.
-		 *
-		 * @return {array} The options for the request.
-		 */
-		$options = apply_filters( 'classifai_xai_api_request_get_options', $options, $url, $this->feature );
-
-		$this->add_headers( $options );
-
-		/**
-		 * Filter the response from xAI for a get request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_response_get
-		 *
-		 * @param {array|WP_Error} $response The API response.
-		 * @param {string} $url Request URL.
-		 * @param {array} $options Request body options.
-		 * @param {string} $this->feature Feature name.
-		 *
-		 * @return {array} API response.
-		 */
-		return apply_filters(
-			'classifai_xai_api_response_get',
-			$this->get_result( wp_remote_get( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
-			$url,
-			$options,
-			$this->feature
-		);
+	protected function get_filter_prefix(): string {
+		return 'classifai_xai';
 	}
 
 	/**
-	 * Makes an authorized POST request.
+	 * Get the default timeout for xAI requests.
 	 *
-	 * @param string $url The xAI API URL.
-	 * @param array  $options Additional query params.
-	 * @return array|WP_Error
+	 * @return int
 	 */
-	public function post( string $url = '', array $options = [] ) {
-		$options = wp_parse_args(
-			$options,
-			[
-				'timeout' => 60, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
-			]
-		);
-
-		/**
-		 * Filter the URL for the post request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_request_post_url
-		 *
-		 * @param {string} $url The URL for the request.
-		 * @param {array} $options The options for the request.
-		 * @param {string} $this->feature The feature name.
-		 *
-		 * @return {string} The URL for the request.
-		 */
-		$url = apply_filters( 'classifai_xai_api_request_post_url', $url, $options, $this->feature );
-
-		/**
-		 * Filter the options for the post request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_request_post_options
-		 *
-		 * @param {array} $options The options for the request.
-		 * @param {string} $url The URL for the request.
-		 * @param {string} $this->feature The feature name.
-		 *
-		 * @return {array} The options for the request.
-		 */
-		$options = apply_filters( 'classifai_xai_api_request_post_options', $options, $url, $this->feature );
-
-		$this->add_headers( $options );
-
-		/**
-		 * Filter the response from xAI for a post request.
-		 *
-		 * @since 3.3.0
-		 * @hook classifai_xai_api_response_post
-		 *
-		 * @param {array|WP_Error} $response The API response.
-		 * @param {string} $url Request URL.
-		 * @param {array} $options Request body options.
-		 * @param {string} $this->feature Feature name.
-		 *
-		 * @return {array} API response.
-		 */
-		return apply_filters(
-			'classifai_xai_api_response_post',
-			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
-			$url,
-			$options,
-			$this->feature
-		);
+	protected function get_default_timeout(): int {
+		return 60;
 	}
 
 	/**
-	 * Get results from the response.
-	 *
-	 * @param object $response The API response.
-	 * @return array|WP_Error
-	 */
-	public function get_result( $response ) {
-		if ( ! is_wp_error( $response ) ) {
-			$body = wp_remote_retrieve_body( $response );
-			$code = wp_remote_retrieve_response_code( $response );
-			$json = json_decode( $body, true );
-
-			if ( json_last_error() === JSON_ERROR_NONE ) {
-				if ( empty( $json['error'] ) ) {
-					return $json;
-				} else {
-					$message = $json['error']['message'] ?? '';
-					if ( empty( $message ) ) {
-						$message = $json['error'] ?? esc_html__( 'An error occurred', 'classifai' );
-					}
-					return new WP_Error( $code, $message );
-				}
-			} else {
-				return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
-			}
-		} else {
-			return $response;
-		}
-	}
-
-	/**
-	 * Add the headers.
+	 * Add authentication header.
 	 *
 	 * @param array $options The header options, passed by reference.
 	 */
-	public function add_headers( array &$options = [] ) {
-		if ( empty( $options['headers'] ) ) {
-			$options['headers'] = [];
-		}
-
-		if ( ! isset( $options['headers']['Authorization'] ) ) {
-			$options['headers']['Authorization'] = $this->get_auth_header();
-		}
-
-		if ( ! isset( $options['headers']['Content-Type'] ) ) {
-			$options['headers']['Content-Type'] = 'application/json';
-		}
+	protected function add_auth_header( array &$options ) {
+		$options['headers']['Authorization'] = $this->get_auth_header();
 	}
 
 	/**
@@ -224,7 +61,7 @@ class APIRequest {
 	 *
 	 * @return string
 	 */
-	public function get_auth_header() {
+	public function get_auth_header(): string {
 		return 'Bearer ' . $this->get_api_key();
 	}
 
@@ -233,7 +70,7 @@ class APIRequest {
 	 *
 	 * @return string
 	 */
-	public function get_api_key() {
+	public function get_api_key(): string {
 		return $this->api_key;
 	}
 }
