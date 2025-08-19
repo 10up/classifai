@@ -8,7 +8,7 @@ namespace Classifai\Providers\Localhost;
 use Classifai\Features\DescriptiveTextGenerator;
 use Classifai\Features\ImageTagsGenerator;
 use Classifai\Features\ImageTextExtraction;
-use Classifai\Providers\OpenAI\APIRequest;
+use Classifai\Providers\Localhost\APIRequest;
 use WP_Error;
 
 use function Classifai\get_largest_size_and_dimensions_image_url;
