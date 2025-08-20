@@ -3,6 +3,8 @@
 namespace Classifai\Providers\GoogleAI;
 
 use WP_Error;
+use function Classifai\safe_wp_remote_get;
+use function Classifai\safe_wp_remote_post;
 
 /**
  * The APIRequest class is a low level class to make Google AI API
@@ -96,7 +98,7 @@ class APIRequest {
 		 */
 		return apply_filters(
 			'classifai_googleai_api_response_get',
-			$this->get_result( wp_remote_get( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$this->get_result( safe_wp_remote_get( $url, $options ) ),
 			$url,
 			$options,
 			$this->feature
@@ -163,7 +165,7 @@ class APIRequest {
 		 */
 		return apply_filters(
 			'classifai_googleai_api_response_post',
-			$this->get_result( wp_remote_post( $url, $options ) ), // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+			$this->get_result( safe_wp_remote_post( $url, $options ) ),
 			$url,
 			$options,
 			$this->feature

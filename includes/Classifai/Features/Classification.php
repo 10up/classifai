@@ -893,7 +893,7 @@ class Classification extends Feature {
 		if ( ! empty( $provider_instance->nlu_features ) ) {
 			foreach ( array_keys( $provider_instance->nlu_features ) as $feature_name ) {
 				$new_settings[ $feature_name ]               = absint( $new_settings[ $feature_name ] ?? $settings[ $feature_name ] );
-				$new_settings[ "{$feature_name}_threshold" ] = absint( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
+				$new_settings[ "{$feature_name}_threshold" ] = floatval( $new_settings[ "{$feature_name}_threshold" ] ?? $settings[ "{$feature_name}_threshold" ] );
 				$new_settings[ "{$feature_name}_taxonomy" ]  = sanitize_text_field( $new_settings[ "{$feature_name}_taxonomy" ] ?? $settings[ "{$feature_name}_taxonomy" ] );
 			}
 		}
@@ -963,6 +963,9 @@ class Classification extends Feature {
 			'label_for'     => "{$feature}_threshold",
 			'input_type'    => 'number',
 			'default_value' => $labels['threshold_default'],
+			'min'           => 0,
+			'max'           => 100,
+			'step'          => 0.01,
 		];
 		?>
 

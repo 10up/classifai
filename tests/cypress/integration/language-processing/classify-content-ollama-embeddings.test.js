@@ -17,12 +17,16 @@ describe( '[Language processing] Classify Content (Ollama) Tests', () => {
 		cy.visitFeatureSettings( 'language_processing/feature_classification' );
 
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( '#true_model' ).select( 'nomic-embed-text:latest' );
+
+		cy.get( '#ollama_embeddings_model' ).select(
+			'nomic-embed-text:latest'
+		);
 		cy.get(
 			'.settings-allowed-post-statuses input#post_status_publish'
 		).check();
 		cy.get( '#category-enabled' ).check();
-		cy.get( '#category-threshold' ).clear().type( 100 ); // "Test" requires 80% confidence. At 81%, it does not apply.
+		cy.get( '#category-threshold' ).clear().type( 100 );
+
 		cy.saveFeatureSettings();
 	} );
 

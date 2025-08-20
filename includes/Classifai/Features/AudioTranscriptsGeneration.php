@@ -10,7 +10,7 @@ use WP_REST_Request;
 
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
-use function Classifai\get_resource_type;
+use function Classifai\safe_wp_remote_get;
 
 /**
  * Class AudioTranscriptsGeneration
@@ -370,7 +370,7 @@ class AudioTranscriptsGeneration extends Feature {
 			wp_mkdir_p( $temp_dir );
 		}
 
-		$response = wp_safe_remote_get(
+		$response = safe_wp_remote_get(
 			$url,
 			[
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout

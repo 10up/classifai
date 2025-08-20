@@ -5,6 +5,8 @@ namespace Classifai\Features;
 use Classifai\Services\ImageProcessing;
 use Classifai\Providers\OpenAI\Images as OpenAIImages;
 use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
+use Classifai\Providers\Localhost\StableDiffusion as LocalhostStableDiffusion;
+use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -34,8 +36,10 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			OpenAIImages::ID   => __( 'OpenAI Images', 'classifai' ),
-			GoogleAIImagen::ID => __( 'Google AI Imagen', 'classifai' ),
+			OpenAIImages::ID             => __( 'OpenAI Images', 'classifai' ),
+			GoogleAIImagen::ID           => __( 'Google AI Imagen', 'classifai' ),
+			TogetherAIImages::ID         => __( 'Together AI', 'classifai' ),
+			LocalhostStableDiffusion::ID => __( 'Stable Diffusion (local)', 'classifai' ),
 		];
 	}
 
@@ -301,7 +305,7 @@ class ImageGeneration extends Feature {
 					}
 					?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ?? 1000 ); ?>"></textarea>
 				<br>
 				<?php if ( $per_image_settings ) : ?>
 					<input type="checkbox" id="view-additional-image-generation-settings" />

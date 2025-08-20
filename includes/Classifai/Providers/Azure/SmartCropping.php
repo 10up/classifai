@@ -10,6 +10,7 @@ namespace Classifai\Providers\Azure;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\safe_wp_remote_post;
 
 /**
  * SmartCropping class.
@@ -237,7 +238,7 @@ class SmartCropping {
 			$this->get_api_url()
 		);
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$url,
 			[
 				'body'    => wp_json_encode(

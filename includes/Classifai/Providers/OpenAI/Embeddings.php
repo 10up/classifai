@@ -396,7 +396,7 @@ class Embeddings extends Provider {
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
 
 		if ( isset( $new_settings[ static::ID ]['embedding_threshold'] ) ) {
-			$new_settings[ static::ID ]['embedding_threshold'] = absint( $new_settings[ static::ID ]['embedding_threshold'] );
+			$new_settings[ static::ID ]['embedding_threshold'] = floatval( $new_settings[ static::ID ]['embedding_threshold'] );
 		}
 
 		if (

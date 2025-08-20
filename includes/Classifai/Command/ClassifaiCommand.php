@@ -17,6 +17,7 @@ use Classifai\Providers\Watson\NLU;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
+use function Classifai\safe_file_get_contents;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -175,7 +176,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! empty( $opts['input'] ) ) {
-			$text = file_get_contents( $opts['input'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$text = safe_file_get_contents( $opts['input'] );
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {

@@ -16,6 +16,7 @@ use WP_Error;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
+use function Classifai\safe_wp_remote_post;
 
 class OpenAI extends Provider {
 
@@ -279,7 +280,7 @@ class OpenAI extends Provider {
 		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
 		$endpoint = add_query_arg( 'api-version', $this->completion_api_version, $endpoint );
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
@@ -432,7 +433,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -539,7 +540,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -646,7 +647,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -807,7 +808,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -960,7 +961,7 @@ class OpenAI extends Provider {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [

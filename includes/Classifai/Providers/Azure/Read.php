@@ -10,6 +10,8 @@ namespace Classifai\Providers\Azure;
 
 use WP_Error;
 use function Classifai\computer_vision_max_filesize;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 /**
  * Read class
@@ -161,7 +163,7 @@ class Read {
 			return $this->log_error( new WP_Error( 'invalid_attachment', esc_html__( 'Document does not exist.', 'classifai' ) ) );
 		}
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$url,
 			[
 				'body'    => wp_json_encode(
@@ -219,19 +221,14 @@ class Read {
 	 * @return WP_Error|null|array
 	 */
 	public function check_read_result( string $operation_url ) {
-		if ( function_exists( 'vip_safe_wp_remote_get' ) ) {
-			$response = vip_safe_wp_remote_get( $operation_url );
-		} else {
-			// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get -- use of `vip_safe_wp_remote_get` is done when available.
-			$response = wp_remote_get(
-				$operation_url,
-				[
-					'headers' => [
-						'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
-					],
-				]
-			);
-		}
+		$response = safe_wp_remote_get(
+			$operation_url,
+			[
+				'headers' => [
+					'Ocp-Apim-Subscription-Key' => $this->settings['api_key'],
+				],
+			]
+		);
 
 		set_transient( 'classifai_azure_computer_vision_pdf_text_extraction_check_result_latest_response', $response, DAY_IN_SECONDS * 30 );
 

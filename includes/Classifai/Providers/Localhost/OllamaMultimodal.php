@@ -15,6 +15,7 @@ use function Classifai\get_largest_size_and_dimensions_image_url;
 use function Classifai\get_modified_image_source_url;
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_default_prompt;
+use function Classifai\safe_file_get_contents;
 
 /**
  * Ollama Multimodal class
@@ -138,7 +139,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
@@ -206,7 +207,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
@@ -279,7 +280,7 @@ class OllamaMultimodal extends Ollama {
 		}
 
 		// Download the image so we can encode it.
-		$image_data = file_get_contents( $image_url ); // phpcs:ignore
+		$image_data = safe_file_get_contents( $image_url );
 
 		if ( false === $image_data || ! is_string( $image_data ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Image cannot be downloaded.', 'classifai' ) );
