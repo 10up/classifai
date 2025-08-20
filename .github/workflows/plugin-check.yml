@@ -39,4 +39,3 @@ jobs:
           exclude-directories: 'assets,dist,vendor'
           ignore-codes: 'PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound' # Plugin isn't on .org so we load the textdomain manually.
           ignore-warnings: true
-          ignore-codes: 'PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound'
