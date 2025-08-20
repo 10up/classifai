@@ -30,7 +30,7 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 		cy.selectProvider( 'ollama_embeddings' );
 		cy.get( 'input#ollama_embeddings_endpoint_url' )
 			.clear()
-			.type( 'https://e2e-test-ollama.test/' );
+			.type( 'http://localhost:11434/api/tags' );
 		cy.get( '#ollama_embeddings_model' ).select(
 			'nomic-embed-text:latest'
 		);
