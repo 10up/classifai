@@ -29,6 +29,9 @@ describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 		cy.get( 'input#ollama_embeddings_endpoint_url' )
 			.clear()
 			.type( 'https://e2e-test-ollama.test/' );
+		cy.get( '#ollama_embeddings_model' ).select(
+			'nomic-embed-text:latest'
+		);
 
 		// Change all settings.
 		cy.get( '#category-enabled' ).uncheck();
