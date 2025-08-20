@@ -1,54 +1,45 @@
 /**
- * External dependencies.
+ * WordPress dependencies
  */
-import { dispatch, useSelect } from '@wordpress/data';
+import { registerPlugin } from '@wordpress/plugins';
+import { useSelect, dispatch } from '@wordpress/data';
 import { useState } from '@wordpress/element';
-import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
+import PrePubClassifyPost from './pre-publish-classify-post';
 import TaxonomyControls from './taxonomy-controls';
 import { DisableFeatureButton } from '../../components';
 import { handleClick } from '../../../js/helpers';
 
-/**
- * Classify button.
- *
- * Used to manually classify the content.
- */
-export const ClassificationButton = () => {
-	const processContent = useSelect( ( select ) =>
-		select( 'core/editor' ).getEditedPostAttribute(
-			'classifai_process_content'
-		)
-	);
-
-	const postId = wp.data.select( 'core/editor' ).getCurrentPostId();
-	const postType = wp.data.select( 'core/editor' ).getCurrentPostType();
-	const postTypeLabel =
-		wp.data.select( 'core/editor' ).getPostTypeLabel() ||
-		__( 'Post', 'classifai' );
-
-	const [ isLoading, setLoading ] = useState( false );
-	const [ isOpen, setOpen ] = useState( false );
-	const openModal = () => setOpen( true );
-	const closeModal = () => setOpen( false );
-
-	const [ taxQuery, setTaxQuery ] = useState( [] );
+const PrePublishClassificationContent = () => {
+	const [ isLoading, setIsLoading ] = useState( false );
+	const [ resultReceived, setResultReceived ] = useState( false );
 	const [ featureTaxonomies, setFeatureTaxonomies ] = useState( [] );
-	let [ taxTermsAI, setTaxTermsAI ] = useState( [] );
+	const [ taxQuery, setTaxQuery ] = useState( {} );
+	const [ isSaved, setIsSaved ] = useState( false );
 
-	/**
-	 * Callback function to handle API response.
-	 *
-	 * @param {Object} resp         Response from the API.
-	 * @param {Object} callbackArgs Callback arguments.
-	 */
-	const buttonClickCallBack = async ( resp, callbackArgs ) => {
+	let [ taxTermsAI, setTaxTermsAI ] = useState( {} );
+	const { postType, postId, postTypeLabel } = useSelect( ( select ) => {
+		const { getCurrentPostType, getCurrentPostId, getPostTypeLabel } =
+			select( 'core/editor' );
+		const currentPostType = getCurrentPostType();
+		const currentPostId = getCurrentPostId();
+
+		return {
+			postType: currentPostType,
+			postId: currentPostId,
+			postTypeLabel: getPostTypeLabel() || __( 'Post', 'classifai' ),
+		};
+	} );
+
+	const buttonText = __( 'Suggest terms & tags', 'classifai' );
+
+	const buttonClickCallBack = async ( resp ) => {
 		if ( resp && resp.terms ) {
-			// set feature taxonomies
 			if ( resp?.feature_taxonomies ) {
 				setFeatureTaxonomies( resp.feature_taxonomies );
 			}
@@ -119,10 +110,8 @@ export const ClassificationButton = () => {
 			setTaxQuery( taxTerms );
 			setTaxTermsAI( taxTermsAI );
 		}
-		if ( callbackArgs?.openPopup ) {
-			openModal();
-		}
-		setLoading( false );
+		setIsLoading( false );
+		setResultReceived( true );
 	};
 
 	/**
@@ -173,21 +162,26 @@ export const ClassificationButton = () => {
 			),
 			{ type: 'snackbar' }
 		);
-		closeModal();
+
+		// Mark as saved
+		setIsSaved( true );
 	};
 
-	// Display classify post button only when process content on update is disabled.
-	const enabled = 'no' === processContent ? 'no' : 'yes';
-	if ( 'yes' === enabled ) {
-		return null;
-	}
-
-	const buttonText = __( 'Suggest terms & tags', 'classifai' );
+	const handleClassifyClick = ( e ) => {
+		setIsLoading( true );
+		handleClick( {
+			button: e?.target,
+			endpoint: '/classifai/v1/classify/',
+			callback: buttonClickCallBack,
+			callbackArgs: {},
+			buttonText,
+			linkTerms: false,
+		} );
+	};
 
 	let updatedTaxQuery = Object.entries( taxQuery || {} ).reduce(
 		( accumulator, [ taxonomySlug, terms ] ) => {
 			accumulator[ taxonomySlug ] = terms;
-
 			return accumulator;
 		},
 		{}
@@ -202,6 +196,7 @@ export const ClassificationButton = () => {
 			<TaxonomyControls
 				onChange={ ( newTaxQuery ) => {
 					setTaxQuery( newTaxQuery );
+					setIsSaved( false ); // Reset saved state when user makes changes.
 				} }
 				query={ {
 					contentPostType: postType,
@@ -230,8 +225,11 @@ export const ClassificationButton = () => {
 				<Button
 					variant={ 'secondary' }
 					onClick={ () => saveTerms( updatedTaxQuery ) }
+					disabled={ isSaved }
 				>
-					{ __( 'Save', 'classifai' ) }
+					{ isSaved
+						? __( 'Saved!', 'classifai' )
+						: __( 'Save', 'classifai' ) }
 				</Button>
 			</div>
 			<DisableFeatureButton feature="content_classification" />
@@ -239,47 +237,43 @@ export const ClassificationButton = () => {
 	);
 
 	return (
-		<div id="classify-post-component">
-			{ isOpen && (
-				<Modal
-					title={ __( 'Confirm Classification', 'classifai' ) }
-					onRequestClose={ closeModal }
-					isFullScreen={ false }
-					className="classify-modal"
-				>
-					{ modalData }
-				</Modal>
+		<PrePubClassifyPost popupOpened={ false }>
+			{ ! resultReceived && (
+				<>
+					<p>
+						{ __(
+							'Get AI-powered suggestions for categories and tags.',
+							'classifai'
+						) }
+					</p>
+					<Button
+						variant="secondary"
+						data-id={ postId }
+						onClick={ handleClassifyClick }
+						isBusy={ isLoading }
+						disabled={ isLoading }
+					>
+						{ buttonText }
+					</Button>
+					<span
+						className="spinner classify"
+						style={ { float: 'none', display: 'none' } }
+					></span>
+					<span
+						className="error"
+						style={ {
+							display: 'none',
+							color: '#bc0b0b',
+							padding: '5px',
+						} }
+					></span>
+				</>
 			) }
-			<Button
-				variant={ 'secondary' }
-				data-id={ postId }
-				onClick={ ( e ) => {
-					handleClick( {
-						button: e.target,
-						endpoint: '/classifai/v1/classify/',
-						callback: buttonClickCallBack,
-						callbackArgs: {
-							openPopup: true,
-						},
-						buttonText,
-						linkTerms: false,
-					} );
-				} }
-			>
-				{ buttonText }
-			</Button>
-			<span
-				className="spinner"
-				style={ { display: 'none', float: 'none' } }
-			></span>
-			<span
-				className="error"
-				style={ {
-					display: 'none',
-					color: '#bc0b0b',
-					padding: '5px',
-				} }
-			></span>
-		</div>
+			{ resultReceived && modalData }
+		</PrePubClassifyPost>
 	);
 };
+
+registerPlugin( 'classifai-plugin-classification-pre-publish', {
+	render: PrePublishClassificationContent,
+} );
