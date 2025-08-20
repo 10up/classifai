@@ -1434,9 +1434,7 @@ abstract class Feature {
 		}
 
 		// Get readme content.
-		$readme_request = function_exists( 'vip_safe_wp_remote_get' )
-			? vip_safe_wp_remote_get( CLASSIFAI_PLUGIN_README_URL )
-			: wp_remote_get( CLASSIFAI_PLUGIN_README_URL ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
+		$readme_request = wp_safe_remote_get( CLASSIFAI_PLUGIN_README_URL );
 
 		if ( is_wp_error( $readme_request ) ) {
 			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
@@ -1447,6 +1445,8 @@ abstract class Feature {
 		if ( empty( $readme_content ) || ! is_string( $readme_content ) ) {
 			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
 		}
+
+		$readme_content = wp_kses_post( $readme_content );
 
 		// Cache readme content.
 		set_transient( 'classifai_readme_content', $readme_content, DAY_IN_SECONDS );

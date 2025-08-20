@@ -44,6 +44,7 @@ import { getFeature } from '../../utils/utils';
  * - The modal content is loaded dynamically from feature context data.
  * - The icon can be customized based on info type.
  * - Uses `dangerouslySetInnerHTML` to render content.
+ * - The content rendering here has already been sanitized on the server.
  */
 export const FieldInfo = ( props ) => {
 	const { featureName } = useFeatureContext();
