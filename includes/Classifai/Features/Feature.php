@@ -7,6 +7,7 @@ use WP_Error;
 use function Classifai\find_provider_class;
 use function Classifai\should_use_legacy_settings_panel;
 use function Classifai\get_asset_info;
+use function Classifai\safe_wp_remote_get;
 
 abstract class Feature {
 	/**
@@ -1434,7 +1435,7 @@ abstract class Feature {
 		}
 
 		// Get readme content.
-		$readme_request = wp_safe_remote_get( CLASSIFAI_PLUGIN_README_URL );
+		$readme_request = safe_wp_remote_get( CLASSIFAI_PLUGIN_README_URL );
 
 		if ( is_wp_error( $readme_request ) ) {
 			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
