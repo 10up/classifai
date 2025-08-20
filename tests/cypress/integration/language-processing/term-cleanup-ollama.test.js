@@ -14,6 +14,9 @@ describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 
 	it( "ElasticPress option is hidden if the plugin isn't active", () => {
 		cy.disableElasticPress();
+
+		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
+
 		cy.get( '#use_ep' ).should( 'be.disabled' );
 	} );
 

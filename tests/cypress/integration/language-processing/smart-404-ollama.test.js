@@ -14,6 +14,9 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 
 	it( "See error message if ElasticPress isn't activate", () => {
 		cy.disableElasticPress();
+
+		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
+
 		cy.get( '.elasticpress-required-notice.components-notice ' ).should(
 			'exist'
 		);
