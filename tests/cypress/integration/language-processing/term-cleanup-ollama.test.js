@@ -1,6 +1,10 @@
 describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 	before( () => {
 		cy.login();
+		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
+		cy.enableFeature();
+		cy.selectProvider( 'ollama_embeddings' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -10,25 +14,14 @@ describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 
 	it( "ElasticPress option is hidden if the plugin isn't active", () => {
 		cy.disableElasticPress();
-
-		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
-
 		cy.get( '#use_ep' ).should( 'be.disabled' );
 	} );
 
 	it( 'Can save Term Cleanup settings', () => {
 		cy.enableElasticPress();
 
-		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
-
-		// Enable Feature.
-		cy.enableFeature();
-
 		// Setup Provider.
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( 'input#ollama_embeddings_endpoint_url' )
-			.clear()
-			.type( 'http://localhost:11434/api/tags' );
 		cy.get( '#ollama_embeddings_model' ).select(
 			'nomic-embed-text:latest'
 		);

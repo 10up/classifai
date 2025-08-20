@@ -1,6 +1,10 @@
 describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 	before( () => {
 		cy.login();
+		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
+		cy.enableFeature();
+		cy.selectProvider( 'ollama_embeddings' );
+		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -10,9 +14,6 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 
 	it( "See error message if ElasticPress isn't activate", () => {
 		cy.disableElasticPress();
-
-		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
-
 		cy.get( '.elasticpress-required-notice.components-notice ' ).should(
 			'exist'
 		);
@@ -23,14 +24,8 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 
 		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
 
-		// Enabled Feature.
-		cy.enableFeature();
-
 		// Setup Provider.
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( 'input#ollama_embeddings_endpoint_url' )
-			.clear()
-			.type( 'http://localhost:11434/api/tags' );
 		cy.get( '#ollama_embeddings_model' ).select(
 			'nomic-embed-text:latest'
 		);
