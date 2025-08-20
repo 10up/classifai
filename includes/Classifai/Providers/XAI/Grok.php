@@ -223,7 +223,7 @@ class Grok extends Provider {
 				case ContentResizing::ID:
 				case TitleGeneration::ID:
 				case ExcerptGeneration::ID:
-					$text_models = array_filter( $models, fn( $model ) => in_array( 'text', $model['input_modalities'], true ) );
+					$text_models      = array_filter( $models, fn( $model ) => in_array( 'text', $model['input_modalities'], true ) );
 					$formatted_models = array();
 					foreach ( $text_models as $model ) {
 						$formatted_models[ $model['id'] ] = $model['id'];
@@ -232,7 +232,7 @@ class Grok extends Provider {
 					break;
 
 				case DescriptiveTextGenerator::ID:
-					$image_models = array_filter( $models, fn( $model ) => in_array( 'image', $model['input_modalities'], true ) );
+					$image_models     = array_filter( $models, fn( $model ) => in_array( 'image', $model['input_modalities'], true ) );
 					$formatted_models = array();
 					foreach ( $image_models as $model ) {
 						$formatted_models[ $model['id'] ] = $model['id'];

@@ -85,6 +85,7 @@ trait GoogleAI {
 		 * @hook classifai_googleai_models
 		 *
 		 * @param {array} $models The models.
+		 * @param {string} $id The provider ID.
 		 *
 		 * @return {array} The models.
 		 */
