@@ -1,10 +1,6 @@
 describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
-		cy.enableFeature();
-		cy.selectProvider( 'ollama_embeddings' );
-		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -25,6 +21,12 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 	it( 'Can save Smart 404 settings', () => {
 		cy.enableElasticPress();
 
+		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
+
+		// Enabled Feature.
+		cy.enableFeature();
+
+		// The models don't always refresh correctly, without reloading the page.
 		cy.visitFeatureSettings( 'language_processing/feature_smart_404' );
 
 		// Setup Provider.

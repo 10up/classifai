@@ -1,10 +1,6 @@
 describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 	before( () => {
 		cy.login();
-		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
-		cy.enableFeature();
-		cy.selectProvider( 'ollama_embeddings' );
-		cy.saveFeatureSettings();
 		cy.optInAllFeatures();
 	} );
 
@@ -22,6 +18,9 @@ describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 
 	it( 'Can save Term Cleanup settings', () => {
 		cy.enableElasticPress();
+
+		cy.visitFeatureSettings( 'language_processing/feature_term_cleanup' );
+		cy.enableFeature();
 
 		// Setup Provider.
 		cy.selectProvider( 'ollama_embeddings' );
