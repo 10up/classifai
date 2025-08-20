@@ -24,9 +24,6 @@ describe( '[Language processing] Term Cleanup - Ollama Tests', () => {
 
 		// Setup Provider.
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( '#ollama_embeddings_model' ).select(
-			'nomic-embed-text:latest'
-		);
 
 		// Change all settings.
 		cy.get( '#category-enabled' ).uncheck();

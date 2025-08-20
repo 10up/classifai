@@ -31,9 +31,6 @@ describe( '[Language processing] Smart 404 - Ollama Tests', () => {
 
 		// Setup Provider.
 		cy.selectProvider( 'ollama_embeddings' );
-		cy.get( '#ollama_embeddings_model' ).select(
-			'nomic-embed-text:latest'
-		);
 
 		// Change all settings.
 		cy.get( '#feature_smart_404_num' ).clear().type( 5 );
