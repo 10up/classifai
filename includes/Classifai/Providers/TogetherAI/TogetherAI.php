@@ -5,7 +5,7 @@
 
 namespace Classifai\Providers\TogetherAI;
 
-use Classifai\Providers\OpenAI\APIRequest;
+use Classifai\Providers\TogetherAI\APIRequest;
 use WP_Error;
 
 trait TogetherAI {
