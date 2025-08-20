@@ -114,36 +114,30 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 	return (
 		<>
 			{ ! isConfigured && (
-				<>
-					<SettingsRow
-						label={ __( 'API Key', 'classifai' ) }
-						description={ <Description /> }
-					>
-						<InputControl
-							id={ `${ providerName }_api_key` }
-							type="password"
-							value={ providerSettings.api_key || '' }
-							onChange={ ( value ) =>
-								onChange( { api_key: value } )
-							}
-						/>
-					</SettingsRow>
-					<SettingsRow
-						label={ __( 'Model', 'classifai' ) }
-						description={ <ModelDescription /> }
-					>
-						<SelectControl
-							id={ `${ providerName }_model` }
-							onChange={ ( value ) =>
-								onChange( { model: value } )
-							}
-							value={ providerSettings?.model || '' }
-							options={ models }
-							__nextHasNoMarginBottom
-						/>
-					</SettingsRow>
-				</>
+				<SettingsRow
+					label={ __( 'API Key', 'classifai' ) }
+					description={ <Description /> }
+				>
+					<InputControl
+						id={ `${ providerName }_api_key` }
+						type="password"
+						value={ providerSettings.api_key || '' }
+						onChange={ ( value ) => onChange( { api_key: value } ) }
+					/>
+				</SettingsRow>
 			) }
+			<SettingsRow
+				label={ __( 'Model', 'classifai' ) }
+				description={ <ModelDescription /> }
+			>
+				<SelectControl
+					id={ `${ providerName }_model` }
+					onChange={ ( value ) => onChange( { model: value } ) }
+					value={ providerSettings?.model || '' }
+					options={ models }
+					__nextHasNoMarginBottom
+				/>
+			</SettingsRow>
 			{ [
 				'feature_content_resizing',
 				'feature_title_generation',

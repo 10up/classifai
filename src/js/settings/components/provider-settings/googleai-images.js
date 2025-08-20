@@ -35,7 +35,6 @@ export const GoogleAIImagesSettings = ( { isConfigured = false } ) => {
 				<GoogleAISettings
 					providerSettings={ providerSettings }
 					onChange={ onChange }
-					providerName={ providerName }
 				/>
 			) }
 			<SettingsRow
