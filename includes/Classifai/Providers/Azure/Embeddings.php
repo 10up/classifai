@@ -12,6 +12,7 @@ use Classifai\Features\Classification;
 use Classifai\Features\Feature;
 use Classifai\EmbeddingsScheduler;
 use WP_Error;
+use function Classifai\safe_wp_remote_post;
 
 class Embeddings extends OpenAI {
 	const ID = 'azure_openai_embeddings';
@@ -278,7 +279,7 @@ class Embeddings extends OpenAI {
 		$endpoint = trailingslashit( $url ) . str_replace( '{deployment-id}', $deployment, $this->embeddings_url );
 		$endpoint = add_query_arg( 'api-version', $this->api_version, $endpoint );
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			$endpoint,
 			[
 				'headers' => [
@@ -992,7 +993,7 @@ class Embeddings extends OpenAI {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -1071,7 +1072,7 @@ class Embeddings extends OpenAI {
 		);
 
 		// Make our API request.
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$this->prep_api_url( $feature ),
 			[
 				'headers' => [
@@ -1223,7 +1224,7 @@ class Embeddings extends OpenAI {
 		if ( $this->feature_instance instanceof Classification ) {
 			foreach ( array_keys( $this->feature_instance->get_supported_taxonomies() ) as $tax ) {
 				$debug_info[ "Taxonomy ($tax)" ]           = Feature::get_debug_value_text( $settings[ $tax ], 1 );
-				$debug_info[ "Taxonomy ($tax threshold)" ] = absint( $settings[ $tax . '_threshold' ] );
+				$debug_info[ "Taxonomy ($tax threshold)" ] = floatval( $settings[ $tax . '_threshold' ] );
 			}
 
 			$debug_info[ __( 'Latest response', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_azure_openai_embeddings_latest_response' ) );

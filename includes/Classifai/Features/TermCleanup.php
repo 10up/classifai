@@ -372,7 +372,7 @@ class TermCleanup extends Feature {
 
 		$settings  = $this->get_settings( 'taxonomies' );
 		$taxonomy  = isset( $_POST['classifai_term_cleanup_taxonomy'] ) ? sanitize_text_field( wp_unslash( $_POST['classifai_term_cleanup_taxonomy'] ) ) : '';
-		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? absint( $settings[ $taxonomy . '_threshold' ] ) : 75;
+		$threshold = isset( $settings[ $taxonomy . '_threshold' ] ) ? floatval( $settings[ $taxonomy . '_threshold' ] ) : 75;
 
 		if ( empty( $taxonomy ) ) {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'classifai' ) );
@@ -526,11 +526,11 @@ class TermCleanup extends Feature {
 	 * Get similar terms.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $threshold Threshold to consider terms as duplicates.
+	 * @param float  $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms( string $taxonomy, int $threshold, array $args = [] ) {
+	public function get_similar_terms( string $taxonomy, float $threshold, array $args = [] ) {
 		if ( class_exists( '\\ElasticPress\\Feature' ) && '1' === $this->get_settings( 'use_ep' ) ) {
 			return $this->get_similar_terms_using_elasticpress( $taxonomy, $threshold, $args );
 		}
@@ -546,11 +546,11 @@ class TermCleanup extends Feature {
 	 * when ElasticPress is not installed or not in use.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $threshold Threshold to consider terms as duplicates.
+	 * @param float  $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool
 	 */
-	public function get_similar_terms_using_wpdb( string $taxonomy, int $threshold, array $args = [] ) {
+	public function get_similar_terms_using_wpdb( string $taxonomy, float $threshold, array $args = [] ) {
 		$processed = $args['processed'] ?? 0;
 		$term_id   = $args['term_id'] ?? 0;
 		$offset    = $args['offset'] ?? 0;
@@ -666,11 +666,11 @@ class TermCleanup extends Feature {
 	 * Get similar terms using Elasticsearch via ElasticPress.
 	 *
 	 * @param string $taxonomy Taxonomy to process.
-	 * @param int    $threshold Threshold to consider terms as duplicates.
+	 * @param float  $threshold Threshold to consider terms as duplicates.
 	 * @param array  $args     Additional arguments.
 	 * @return array|bool|WP_Error
 	 */
-	public function get_similar_terms_using_elasticpress( string $taxonomy, int $threshold, array $args = [] ) {
+	public function get_similar_terms_using_elasticpress( string $taxonomy, float $threshold, array $args = [] ) {
 		$processed = $args['processed'] ?? 0;
 		$meta_key  = sanitize_text_field( $this->get_embeddings_meta_key() );
 

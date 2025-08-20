@@ -6,6 +6,7 @@
 namespace Classifai\Services;
 
 use function Classifai\should_use_legacy_settings_panel;
+use function Classifai\safe_wp_remote_post;
 
 class ServicesManager {
 
@@ -360,7 +361,7 @@ class ServicesManager {
 	 */
 	public function check_license_key( string $email, string $license_key ): bool {
 
-		$request = wp_remote_post(
+		$request = safe_wp_remote_post(
 			'https://classifaiplugin.com/wp-json/classifai-theme/v1/validate-license',
 			[
 				'timeout' => 10, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout

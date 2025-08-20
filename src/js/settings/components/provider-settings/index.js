@@ -25,6 +25,7 @@ import { OpenAISpeechToTextSettings } from './openai-speech-to-text';
 import { AzureAIVisionSettings } from './azure-ai-vision';
 import { AzurePersonalizerSettings } from './azure-personlizer';
 import { OpenAIImagesSettings } from './openai-images';
+import { StableDiffusionSettings } from './stable-diffusion';
 import { AmazonPollySettings } from './amazon-polly';
 import { AzureTextToSpeechSettings } from './azure-text-to-speech';
 import { OpenAITextToSpeechSettings } from './openai-text-to-speech';
@@ -33,6 +34,7 @@ import { XAIGrokSettings } from './xai-grok';
 import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
+import { TogetherAIImagesSettings } from './together-ai-images';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -77,6 +79,12 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'openai_dalle':
 			return <OpenAIImagesSettings isConfigured={ isConfigured } />;
+
+		case 'stable_diffusion':
+			return <StableDiffusionSettings isConfigured={ isConfigured } />;
+
+		case 'togetherai_image':
+			return <TogetherAIImagesSettings isConfigured={ isConfigured } />;
 
 		case 'ms_computer_vision':
 			return <AzureAIVisionSettings isConfigured={ isConfigured } />;

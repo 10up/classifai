@@ -103,7 +103,7 @@ function get_feature_threshold( string $feature ): float {
 	if ( ! empty( $settings ) && ! empty( $settings[ $feature . '_threshold' ] ) ) {
 		$threshold = filter_var(
 			$settings[ $feature . '_threshold' ],
-			FILTER_VALIDATE_INT
+			FILTER_VALIDATE_FLOAT
 		);
 	}
 
@@ -111,7 +111,7 @@ function get_feature_threshold( string $feature ): float {
 		$constant = 'WATSON_' . strtoupper( $feature ) . '_THRESHOLD';
 
 		if ( defined( $constant ) ) {
-			$threshold = intval( constant( $constant ) );
+			$threshold = floatval( constant( $constant ) );
 		}
 	}
 
