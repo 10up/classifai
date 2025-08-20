@@ -71,7 +71,7 @@ class StableDiffusion extends Provider {
 		 * Useful if you want to change to a different model
 		 * that has different options.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_stable_diffusion_size_options
 		 *
 		 * @param {array} $options The default size options.
@@ -284,7 +284,7 @@ class StableDiffusion extends Provider {
 		/**
 		 * Filter the prompt we will send to Stable Diffusion.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_stable_diffusion_prompt
 		 *
 		 * @param {string} $prompt Prompt we are sending to Stable Diffusion.
@@ -316,7 +316,7 @@ class StableDiffusion extends Provider {
 		/**
 		 * Filter the request body before sending to Stable Diffusion.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_stable_diffusion_request_body
 		 *
 		 * @param {array} $body Request body that will be sent to Stable Diffusion.
