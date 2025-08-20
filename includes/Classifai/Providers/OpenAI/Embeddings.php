@@ -919,11 +919,6 @@ class Embeddings extends Provider {
 				$term_embedding = get_term_meta( $term_id, 'classifai_openai_embeddings', true );
 
 				if ( ! empty( $term_embedding ) ) {
-					// Convert the term embedding to an array if it's not already.
-					if ( ! is_array( $term_embedding[0] ) ) {
-						$term_embedding = [ $term_embedding ];
-					}
-
 					// Loop through the chunks and run a similarity calculation on each.
 					foreach ( $term_embedding as $chunk ) {
 						$similarity = $calculations->cosine_similarity( $embedding, $chunk );
@@ -1069,11 +1064,6 @@ class Embeddings extends Provider {
 
 			if ( empty( $post_embedding ) ) {
 				continue;
-			}
-
-			// Convert the post embedding to an array if it's not already.
-			if ( ! is_array( $post_embedding[0] ) ) {
-				$post_embedding = [ $post_embedding ];
 			}
 
 			// Loop through the chunks and run a similarity calculation on each.
