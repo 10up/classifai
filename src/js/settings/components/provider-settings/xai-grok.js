@@ -135,6 +135,7 @@ export const XAIGrokSettings = ( { isConfigured = false } ) => {
 					onChange={ ( value ) => onChange( { model: value } ) }
 					value={ providerSettings?.model || '' }
 					options={ models }
+					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
 				/>
 			</SettingsRow>
