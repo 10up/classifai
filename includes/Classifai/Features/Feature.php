@@ -79,7 +79,7 @@ abstract class Feature {
 	/**
 	 * Setup any hooks the feature needs.
 	 *
-	 * Only fires if the feature is enabled.
+	 * Only fires if the feature is enabled, configured and user has access.
 	 */
 	public function feature_setup() {
 	}

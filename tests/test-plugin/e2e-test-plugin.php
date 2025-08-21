@@ -48,6 +48,8 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 				$response = file_get_contents( __DIR__ . '/chatgpt-custom-title-prompt.json' );
 			} else if ( str_contains( $prompt, 'This is a custom shrink prompt' ) || str_contains( $prompt, 'This is a custom grow prompt' ) ) {
 				$response = file_get_contents( __DIR__ . '/resize-content-custom-prompt.json' );
+			} else if ( str_contains( $prompt, 'provide a summary that captures all the important points' ) ) {
+				$response = file_get_contents( __DIR__ . '/chatgpt-key-takeaways.json' );
 			}
 		}
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/moderations' ) !== false ) {
