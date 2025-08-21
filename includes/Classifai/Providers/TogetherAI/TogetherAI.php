@@ -37,10 +37,10 @@ trait TogetherAI {
 		 * @since 3.6.0
 		 * @hook classifai_togetherai_api_url
 		 *
-		 * @param {string} $url The default API URL.
-		 * @param {string} $path The path to the API endpoint.
+		 * @param string $url The default API URL.
+		 * @param string $path The path to the API endpoint.
 		 *
-		 * @return {string} The API URL.
+		 * @return string The API URL.
 		 */
 		return apply_filters( 'classifai_togetherai_api_url', trailingslashit( $this->api_url ) . $path, $path );
 	}

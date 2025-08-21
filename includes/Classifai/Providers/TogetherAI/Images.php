@@ -77,9 +77,9 @@ class Images extends Provider {
 		 * @since 3.6.0
 		 * @hook classifai_togetherai_image_size_options
 		 *
-		 * @param {array} $options The default size options.
+		 * @param array $options The default size options.
 		 *
-		 * @return {array} The size options.
+		 * @return array The size options.
 		 */
 		return apply_filters( 'classifai_togetherai_image_size_options', $options );
 	}
@@ -197,9 +197,9 @@ class Images extends Provider {
 		 * @since 3.6.0
 		 * @hook classifai_togetherai_image_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Together AI.
+		 * @param string $prompt Prompt we are sending to Together AI.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_togetherai_image_prompt', $prompt );
 
@@ -221,9 +221,9 @@ class Images extends Provider {
 		 * @since 3.6.0
 		 * @hook classifai_togetherai_image_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Together AI.
+		 * @param array $body Request body that will be sent to Together AI.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters( 'classifai_togetherai_image_request_body', $body );
 

@@ -261,10 +261,10 @@ class Personalizer extends Provider {
 			 * @since 1.8.0
 			 * @hook classifai_recommended_content_post_args
 			 *
-			 * @param {array} $query_args Array of query args to get posts
-			 * @param {array} $attributes The block attributes.
+			 * @param array $query_args Array of query args to get posts
+			 * @param array $attributes The block attributes.
 			 *
-			 * @return {array} Array of query args to get posts
+			 * @return array Array of query args to get posts
 			 */
 			$query_args = apply_filters(
 				'classifai_recommended_content_post_args',
@@ -382,9 +382,9 @@ class Personalizer extends Provider {
 		 * @since 2.0.0
 		 * @hook classifai_recommended_block_attributes
 		 *
-		 * @param {array}  $attributes   Attributes of blocks.
+		 * @param array  $attributes   Attributes of blocks.
 		 *
-		 * @return {string} The filtered attributes.
+		 * @return string The filtered attributes.
 		 */
 		$attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
 		$content    = $this->get_recommended_content( $attributes );
@@ -573,12 +573,12 @@ class Personalizer extends Provider {
 		 * @since 1.8.0
 		 * @hook classifai_recommended_block_markup
 		 *
-		 * @param {string} $final_markup HTML Markup of recommended content block.
-		 * @param {array}  $attributes   Attributes of blocks.
-		 * @param {object} $response     Object of personalizer response.
-		 * @param {array}  $actions      Selected actions(posts) to send in request to personalizer.
+		 * @param string $final_markup HTML Markup of recommended content block.
+		 * @param array  $attributes   Attributes of blocks.
+		 * @param object $response     Object of personalizer response.
+		 * @param array  $actions      Selected actions(posts) to send in request to personalizer.
 		 *
-		 * @return {string} The filtered markup.
+		 * @return string The filtered markup.
 		 */
 		return apply_filters( 'classifai_recommended_block_markup', $final_markup, $attributes, $response, $actions );
 	}

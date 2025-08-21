@@ -13,7 +13,8 @@
     "test": "./vendor/bin/phpunit",
     "tests:e2e": "./vendor/bin/wpacceptance run",
     "makepot": "wpi18n makepot && echo '.pot file updated'",
-    "build:docs": "rm -rf docs && jsdoc -c hookdoc-conf.json classifai.php includes",
+    "prebuild:docs": "cp ./CHANGELOG.md ./wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md",
+    "build:docs": "rm -rf docs && wp-hooks-documentor generate",
     "cypress:open": "cypress open --config-file tests/cypress/config.config.js",
     "cypress:run": "cypress run --browser chrome --config-file tests/cypress/config.config.js",
     "env": "wp-env",
@@ -44,12 +45,10 @@
     "cypress-mochawesome-reporter": "^4.0.0",
     "cypress-plugin-tab": "^1.0.5",
     "husky": "^9.1.7",
-    "jsdoc": "^4.0.4",
     "lint-staged": "^16.1.2",
     "node-wp-i18n": "^1.2.8",
     "svg-react-loader": "^0.4.6",
-    "taffydb": "2.7.3",
-    "wp-hookdoc": "^0.2.0"
+    "wp-hooks-documentor": "github:10up/wp-hooks-documentor#build"
   },
   "dependencies": {
     "@wordpress/icons": "^10.17.0",

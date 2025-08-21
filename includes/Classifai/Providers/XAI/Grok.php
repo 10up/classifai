@@ -89,9 +89,9 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_xai_grok_model', $model );
 	}
@@ -114,9 +114,9 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_vision_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_xai_grok_vision_model', $model );
 	}
@@ -374,10 +374,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok.
-		 * @param {int} $post_id ID of attachment we are describing.
+		 * @param string $prompt  Prompt we are sending to xAI Grok.
+		 * @param int    $post_id ID of attachment we are describing.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $post_id );
 
@@ -387,10 +387,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_descriptive_text_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of attachment we are describing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of attachment we are describing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_descriptive_text_request_body',
@@ -492,11 +492,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending to xAI Grok. Gets added before post content.
+		 * @param int    $post_id        ID of post we are summarizing.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -514,10 +514,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_excerpt_request_body',
@@ -596,11 +596,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to xAI Grok. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to xAI Grok. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_title_prompt', $prompt, $post_id, $args );
 
@@ -618,10 +618,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_title_request_body',
@@ -700,11 +700,11 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending to xAI Grok. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending to xAI Grok. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_xai_grok_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -714,10 +714,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to xAI Grok.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body Request body that will be sent to xAI Grok.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_xai_grok_resize_content_request_body',
@@ -825,10 +825,10 @@ class Grok extends Provider {
 		 * @since 3.3.0
 		 * @hook classifai_xai_grok_content
 		 *
-		 * @param {string} $content Content that will be sent to xAI Grok.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $content Content that will be sent to xAI Grok.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_xai_grok_content', $content, $post_id );
 	}

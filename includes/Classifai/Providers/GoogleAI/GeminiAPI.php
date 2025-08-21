@@ -66,9 +66,9 @@ class GeminiAPI extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_googleai_gemini_api_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_googleai_gemini_api_model', $model );
 	}
@@ -231,11 +231,11 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_gemini_api_excerpt_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Gemini API. Gets added before post content.
-		 * @param {int} $post_id ID of post we are summarizing.
-		 * @param {int} $excerpt_length Length of final excerpt.
+		 * @param string $prompt         Prompt we are sending to Gemini API. Gets added before post content.
+		 * @param int    $post_id        ID of post we are summarizing.
+		 * @param int    $excerpt_length Length of final excerpt.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_excerpt_prompt', $prompt, $post_id, $excerpt_length );
 
@@ -255,10 +255,10 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_gemini_api_excerpt_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Gemini API.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to Gemini API.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_excerpt_request_body',
@@ -347,11 +347,11 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_gemini_api_title_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Gemini API. Gets added before post content.
-		 * @param {int}    $post_id ID of post we are summarizing.
-		 * @param {array}  $args Arguments passed to endpoint.
+		 * @param string $prompt  Prompt we are sending to Gemini API. Gets added before post content.
+		 * @param int    $post_id ID of post we are summarizing.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_title_prompt', $prompt, $post_id, $args );
 
@@ -371,10 +371,10 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_gemini_api_title_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Gemini API.
-		 * @param {int}   $post_id ID of post we are summarizing.
+		 * @param array $body    Request body that will be sent to Gemini API.
+		 * @param int   $post_id ID of post we are summarizing.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_title_request_body',
@@ -462,11 +462,11 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_gemini_api_' . $args['resize_type'] . '_content_prompt
 		 *
-		 * @param {string} $prompt Resize prompt we are sending to Gemini API. Gets added as a system prompt.
-		 * @param {int} $post_id ID of post.
-		 * @param {array} $args Arguments passed to endpoint.
+		 * @param string $prompt  Resize prompt we are sending to Gemini API. Gets added as a system prompt.
+		 * @param int    $post_id ID of post.
+		 * @param array  $args    Arguments passed to endpoint.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_googleai_gemini_api_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
@@ -476,10 +476,10 @@ class GeminiAPI extends Provider {
 		 * @since 2.3.0
 		 * @hook classifai_googleai_gemini_api_resize_content_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Gemini API.
-		 * @param {int}   $post_id ID of post.
+		 * @param array $body Request body that will be sent to Gemini API.
+		 * @param int   $post_id ID of post.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_googleai_gemini_api_resize_content_request_body',
@@ -568,10 +568,10 @@ class GeminiAPI extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_googleai_content
 		 *
-		 * @param {string} $content Content that will be sent to GoogleAI.
-		 * @param {int} $post_id ID of post we are summarizing.
+		 * @param string $content Content that will be sent to GoogleAI.
+		 * @param int    $post_id ID of post we are summarizing.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_googleai_gemini_api_content', $content, $post_id );
 	}

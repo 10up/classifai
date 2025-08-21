@@ -219,10 +219,10 @@ class CredentialReuse {
 		 * @since 3.6.0
 		 * @hook classifai_reusable_credentials
 		 *
-		 * @param {array}  $reusable   Array of reusable credentials.
-		 * @param {string} $feature_id The feature ID.
+		 * @param array  $reusable   Array of reusable credentials.
+		 * @param string $feature_id The feature ID.
 		 *
-		 * @return {array} Filtered reusable credentials.
+		 * @return array Filtered reusable credentials.
 		 */
 		return apply_filters( 'classifai_reusable_credentials', $reusable, $feature_id );
 	}
@@ -281,9 +281,9 @@ class CredentialReuse {
 		 * @since 3.6.0
 		 * @hook classifai_credentials_copied
 		 *
-		 * @param {string} $source_feature_id Source feature ID.
-		 * @param {string} $target_feature_id Target feature ID.
-		 * @param {string} $provider_id       Provider ID that was copied.
+		 * @param string $source_feature_id Source feature ID.
+		 * @param string $target_feature_id Target feature ID.
+		 * @param string $provider_id       Provider ID that was copied.
 		 */
 		do_action( 'classifai_credentials_copied', $source_feature_id, $target_feature_id, $provider_id );
 
