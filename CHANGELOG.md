@@ -26,7 +26,7 @@ All notable changes to this project will be documented in this file, per [the Ke
 - Ensure a Feature supports a Provider before we save that Provider with the Feature settings (props [@faisal-alvi](https://github.com/faisal-alvi), [@dkotter](https://github.com/dkotter) via [#959](https://github.com/10up/classifai/pull/959)).
 - Replace remote `file_get_contents()` (Ollama, CLI remote input) with HTTP API (props [@MiguelAxcar](https://github.com/MiguelAxcar), [@dkotter](https://github.com/dkotter) via [#972](https://github.com/10up/classifai/pull/972)).
 - Restored "Classify Post" suggestion in Pre-Publish panel after regression (props [@faisal-alvi](https://github.com/faisal-alvi), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#962](https://github.com/10up/classifai/pull/962)).
-- Ensure they Key Takeaways block renders properly on the front-end for non-logged in users (props [@JeremyEnglert](https://github.com/JeremyEnglert), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#984](https://github.com/10up/classifai/pull/984)).
+- Ensure the Key Takeaways block renders properly on the front-end for non-logged in users (props [@JeremyEnglert](https://github.com/JeremyEnglert), [@iamdharmesh](https://github.com/iamdharmesh), [@dkotter](https://github.com/dkotter) via [#984](https://github.com/10up/classifai/pull/984)).
 
 ### Security
 
