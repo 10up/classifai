@@ -814,7 +814,7 @@ To set up Stable Diffusion, follow the steps below:
 
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/advanced-docs/wp-cli).
 
 ## Building and Running Documentation Site
 
