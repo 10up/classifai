@@ -64,9 +64,9 @@ class Normalizer {
 		 * @since 3.1.0
 		 * @hook classifai_pre_normalize
 		 *
-		 * @param {string} $post_content The post content.
+		 * @param string $post_content The post content.
 		 *
-		 * @return {string} The filtered Post content.
+		 * @return string The filtered Post content.
 		 */
 		$post_content = apply_filters( 'classifai_pre_normalize', $post_content );
 
@@ -90,10 +90,10 @@ class Normalizer {
 		 * @since 0.1.0
 		 * @hook classifai_normalize
 		 *
-		 * @param {string} $post_content The normalized post content.
-		 * @param {int}    $post_id      The ID of the post whose content is being normalized.
+		 * @param string $post_content The normalized post content.
+		 * @param int    $post_id      The ID of the post whose content is being normalized.
 		 *
-		 * @return {string} The filtered normalized post content.
+		 * @return string The filtered normalized post content.
 		 */
 		$post_content = apply_filters( 'classifai_normalize', trim( $post_content ), $post_id );
 

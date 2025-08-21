@@ -1,0 +1,42 @@
+name: Build Developer Docs
+
+on:
+  push:
+    branches:
+    - trunk
+
+jobs:
+  release:
+    name: Push (merge) to trunk
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+    - name: Setup proper PHP version
+      uses: shivammathur/setup-php@9e72090525849c5e82e596468b86eb55e9cc5401 # v2.32.0
+      with:
+        php-version: 8.3
+
+    - name: Setup node
+      uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+      with:
+        node-version-file: .nvmrc
+
+    - name: Install dependencies and build assets
+      run: |
+        npm install
+        npm run build
+        npm run makepot
+        composer install --no-dev -o
+
+    - name: Build docs
+      run: |
+        npm run build:docs
+
+    - name: Deploy docs update
+      uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: './docs/build'

@@ -30,9 +30,9 @@ class Personalizer extends Service {
 		 * @since 3.0.0
 		 * @hook classifai_recommendation_service_providers
 		 *
-		 * @param {array} $providers Array of available providers for the service.
+		 * @param array $providers Array of available providers for the service.
 		 *
-		 * @return {array} The filtered available providers.
+		 * @return array The filtered available providers.
 		 */
 		return apply_filters(
 			'classifai_recommendation_service_providers',

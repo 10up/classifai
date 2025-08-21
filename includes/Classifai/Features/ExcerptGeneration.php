@@ -208,10 +208,10 @@ class ExcerptGeneration extends Feature {
 			 * @since 3.x.x
 			 * @hook classifai_excerpt_generation_author_name
 			 *
-			 * @param {string} $author_name The author's display name.
-			 * @param {int}    $post_id     The post ID.
+			 * @param string $author_name The author's display name.
+			 * @param int    $post_id     The post ID.
 			 *
-			 * @return {string} The author name to use in the prompt.
+			 * @return string The author name to use in the prompt.
 			 */
 			$author_name = apply_filters( 'classifai_excerpt_generation_author_name', $author_name, $post_id );
 

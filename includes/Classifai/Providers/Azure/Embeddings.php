@@ -108,9 +108,9 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_dimensions
 		 *
-		 * @param {int} $dimensions The default dimensions.
+		 * @param int $dimensions The default dimensions.
 		 *
-		 * @return {int} The dimensions.
+		 * @return int The dimensions.
 		 */
 		return apply_filters( 'classifai_azure_openai_embeddings_dimensions', $this->dimensions );
 	}
@@ -131,9 +131,9 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_max_tokens
 		 *
-		 * @param {int} $model The default maximum tokens.
+		 * @param int $model The default maximum tokens.
 		 *
-		 * @return {int} The maximum tokens.
+		 * @return int The maximum tokens.
 		 */
 		return apply_filters( 'classifai_azure_openai_embeddings_max_tokens', $this->max_tokens );
 	}
@@ -154,9 +154,9 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_max_terms
 		 *
-		 * @param {int} $terms The default maximum terms.
+		 * @param int $terms The default maximum terms.
 		 *
-		 * @return {int} The maximum terms.
+		 * @return int The maximum terms.
 		 */
 		return apply_filters( 'classifai_azure_openai_embeddings_max_terms', $this->max_terms );
 	}
@@ -331,10 +331,10 @@ class Embeddings extends OpenAI {
 		 * @since 2.5.0
 		 * @hook classifai_threshold
 		 *
-		 * @param {float} $threshold The threshold to use.
-		 * @param {string} $taxonomy The taxonomy to get the threshold for.
+		 * @param float  $threshold The threshold to use.
+		 * @param string $taxonomy  The taxonomy to get the threshold for.
 		 *
-		 * @return {float} The threshold to use.
+		 * @return float The threshold to use.
 		 */
 		return apply_filters( 'classifai_threshold', $threshold, $taxonomy );
 	}
@@ -392,11 +392,11 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
-		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
-		 * @param {int}    $id   The ID of the item to be considered for classification.
-		 * @param {string} $type The type of item to be considered for classification.
+		 * @param bool   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
+		 * @param int    $id              The ID of the item to be considered for classification.
+		 * @param string $type            The type of item to be considered for classification.
 		 *
-		 * @return {bool} Whether the item should be classified.
+		 * @return bool Whether the item should be classified.
 		 */
 		if ( ! apply_filters( 'classifai_azure_openai_embeddings_should_classify', true, $post_id, 'post' ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
@@ -492,10 +492,10 @@ class Embeddings extends OpenAI {
 		 * @since 3.3.1
 		 * @hook classifai_azure_openai_embeddings_pre_sort_embeddings_similarity
 		 *
-		 * @param {array} $embeddings_similarity The embeddings similarity results.
-		 * @param {int} $post_id ID of post to set terms on.
-		 * @param {array} $embeddings Embeddings data.
-		 * @param {bool} $link Whether to link the terms or not.
+		 * @param array $embeddings_similarity The embeddings similarity results.
+		 * @param int   $post_id               ID of post to set terms on.
+		 * @param array $embeddings            Embeddings data.
+		 * @param bool  $link                  Whether to link the terms or not.
 		 */
 		do_action( 'classifai_azure_openai_embeddings_pre_sort_embeddings_similarity', $embeddings_similarity, $post_id, $embeddings, $link );
 
@@ -524,11 +524,11 @@ class Embeddings extends OpenAI {
 		 * @since 3.3.1
 		 * @hook classifai_azure_openai_embeddings_post_sort_embeddings_similarity
 		 *
-		 * @param {array} $sorted_results The sorted embeddings similarity results.
-		 * @param {array} $embeddings_similarity The embeddings similarity results.
-		 * @param {int} $post_id ID of post to set terms on.
-		 * @param {array} $embeddings Embeddings data.
-		 * @param {bool} $link Whether to link the terms or not.
+		 * @param array $sorted_results        The sorted embeddings similarity results.
+		 * @param array $embeddings_similarity The embeddings similarity results.
+		 * @param int   $post_id               ID of post to set terms on.
+		 * @param array $embeddings            Embeddings data.
+		 * @param bool  $link                  Whether to link the terms or not.
 		 */
 		do_action( 'classifai_azure_openai_embeddings_post_sort_embeddings_similarity', $sorted_results, $embeddings_similarity, $post_id, $embeddings, $link );
 
@@ -706,12 +706,12 @@ class Embeddings extends OpenAI {
 						 * @since 3.3.1
 						 * @hook classifai_azure_openai_embeddings_single_embedding_similarity
 						 *
-						 * @param {bool|float} $similarity The embeddings similarity result.
-						 * @param {array} $embedding Post embedding data.
-						 * @param {array} $chunk Term chunk embedding data.
-						 * @param {int} $term_id ID of term we're comparing.
-						 * @param {string} $tax Taxonomy of term.
-						 * @param {bool} $consider_threshold Whether to consider the threshold or not.
+						 * @param bool|float $similarity         The embeddings similarity result.
+						 * @param array      $embedding          Post embedding data.
+						 * @param array      $chunk              Term chunk embedding data.
+						 * @param int        $term_id            ID of term we're comparing.
+						 * @param string     $tax                Taxonomy of term.
+						 * @param bool       $consider_threshold Whether to consider the threshold or not.
 						 */
 						do_action( 'classifai_azure_openai_embeddings_single_embedding_similarity', $similarity, $embedding, $chunk, $term_id, $tax, $consider_threshold );
 
@@ -764,9 +764,9 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_terms_per_job
 		 *
-		 * @param {int} $number Number of terms to process per job.
+		 * @param int $number Number of terms to process per job.
 		 *
-		 * @return {int} Filtered number of terms to process per job.
+		 * @return int Filtered number of terms to process per job.
 		 */
 		$number = apply_filters( 'classifai_azure_openai_embeddings_terms_per_job', 100 );
 
@@ -910,11 +910,11 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_should_classify
 		 *
-		 * @param {bool}   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
-		 * @param {int}    $id   The ID of the item to be considered for classification.
-		 * @param {string} $type The type of item to be considered for classification.
+		 * @param bool   $should_classify Whether the item should be classified. Default `true`, return `false` to skip.
+		 * @param int    $id              The ID of the item to be considered for classification.
+		 * @param string $type            The type of item to be considered for classification.
 		 *
-		 * @return {bool} Whether the item should be classified.
+		 * @return bool Whether the item should be classified.
 		 */
 		if ( ! apply_filters( 'classifai_azure_openai_embeddings_should_classify', true, $term_id, 'term' ) ) {
 			return new WP_Error( 'invalid', esc_html__( 'Classification is disabled for this item.', 'classifai' ) );
@@ -978,10 +978,10 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {string} $text Text we are getting embeddings for.
+		 * @param array  $body Request body that will be sent to OpenAI.
+		 * @param string $text Text we are getting embeddings for.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_embeddings_request_body',
@@ -1057,10 +1057,10 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {array} $strings Array of text we are getting embeddings for.
+		 * @param array $body    Request body that will be sent to OpenAI.
+		 * @param array $strings Array of text we are getting embeddings for.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_azure_openai_embeddings_request_body',
@@ -1177,11 +1177,11 @@ class Embeddings extends OpenAI {
 		 * @since 3.1.0
 		 * @hook classifai_azure_openai_embeddings_content
 		 *
-		 * @param {string} $content Content that will be sent to OpenAI.
-		 * @param {int} $post_id ID of post we are submitting.
-		 * @param {string} $type Type of content.
+		 * @param string $content Content that will be sent to OpenAI.
+		 * @param int    $post_id ID of post we are submitting.
+		 * @param string $type    Type of content.
 		 *
-		 * @return {string} Content.
+		 * @return string Content.
 		 */
 		return apply_filters( 'classifai_azure_openai_embeddings_content', $content, $id, $type );
 	}

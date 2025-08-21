@@ -105,10 +105,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_roles
 		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
+		 * @param array $roles            Array of arrays containing role information.
+		 * @param array $default_settings Default setting values.
 		 *
-		 * @return {array} Roles array.
+		 * @return array Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $this->roles, $default_settings );
 	}
@@ -134,9 +134,9 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_label
 		 *
-		 * @param {string} $label Feature label.
+		 * @param string $label Feature label.
 		 *
-		 * @return {string} Filtered label.
+		 * @return string Filtered label.
 		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_label',
@@ -237,10 +237,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_get_default_settings
 		 *
-		 * @param {array} $defaults Default feature settings.
-		 * @param {object} $this Feature instance.
+		 * @param array  $defaults Default feature settings.
+		 * @param object $this     Feature instance.
 		 *
-		 * @return {array} Filtered default feature settings.
+		 * @return array Filtered default feature settings.
 		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_get_default_settings',
@@ -309,10 +309,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{$feature}_sanitize_settings
 		 *
-		 * @param {array} $new_settings     Settings being saved.
-		 * @param {array} $current_settings Existing settings.
+		 * @param array $new_settings     Settings being saved.
+		 * @param array $current_settings Existing settings.
 		 *
-		 * @return {array} Filtered settings.
+		 * @return array Filtered settings.
 		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_sanitize_settings',
@@ -470,9 +470,9 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_providers
 		 *
-		 * @param {array} $providers Feature providers.
+		 * @param array $providers Feature providers.
 		 *
-		 * @return {array} Filtered providers.
+		 * @return array Filtered providers.
 		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_providers',
@@ -986,10 +986,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{$feature}_has_access
 		 *
-		 * @param {bool}  $access   Current access value.
-		 * @param {array} $settings Feature settings.
+		 * @param bool  $access   Current access value.
+		 * @param array $settings Feature settings.
 		 *
-		 * @return {bool} Should the user have access?
+		 * @return bool Should the user have access?
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_has_access', $access, $settings );
 	}
@@ -1026,10 +1026,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{$feature}_is_feature_enabled
 		 *
-		 * @param {bool}  $is_feature_enabled Is the feature enabled?
-		 * @param {array} $settings           Current feature settings.
+		 * @param bool  $is_feature_enabled Is the feature enabled?
+		 * @param array $settings           Current feature settings.
 		 *
-		 * @return {bool} Returns true if the user has access and the feature is enabled, false otherwise.
+		 * @return bool Returns true if the user has access and the feature is enabled, false otherwise.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_is_feature_enabled', $is_feature_enabled, $settings );
 	}
@@ -1058,10 +1058,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{$feature}_is_enabled
 		 *
-		 * @param {bool}  $is_enabled Is the feature enabled?
-		 * @param {array} $settings   Current feature settings.
+		 * @param bool  $is_enabled Is the feature enabled?
+		 * @param array $settings   Current feature settings.
 		 *
-		 * @return {bool} Returns true if the feature is enabled, false otherwise.
+		 * @return bool Returns true if the feature is enabled, false otherwise.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_is_enabled', $is_enabled, $settings );
 	}
@@ -1089,9 +1089,9 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_post_types
 		 *
-		 * @param {array} $post_types Array of post types to be classified.
+		 * @param array $post_types Array of post types to be classified.
 		 *
-		 * @return {array} Array of post types.
+		 * @return array Array of post types.
 		 */
 		$post_types = apply_filters( 'classifai_' . static::ID . '_post_types', $post_types );
 
@@ -1121,9 +1121,9 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_post_statuses
 		 *
-		 * @param {array} $post_types Array of post statuses to be classified.
+		 * @param array $post_types Array of post statuses to be classified.
 		 *
-		 * @return {array} Array of post statuses.
+		 * @return array Array of post statuses.
 		 */
 		$post_statuses = apply_filters( 'classifai_' . static::ID . '_post_statuses', $post_statuses );
 
@@ -1162,10 +1162,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_setting_taxonomies
 		 *
-		 * @param {array} $supported Array of supported taxonomies.
-		 * @param {object} $this Current instance of the class.
+		 * @param array $supported Array of supported taxonomies.
+		 * @param object $this Current instance of the class.
 		 *
-		 * @return {array} Array of taxonomies.
+		 * @return array Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_' . static::ID . '_setting_taxonomies', $supported, $this );
 	}
@@ -1327,10 +1327,10 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_debug_information
 		 *
-		 * @param {array} $all_debug_info Debug information
-		 * @param {object} $this Current feature class.
+		 * @param array  $all_debug_info Debug information
+		 * @param object $this           Current feature class.
 		 *
-		 * @return {array} Returns debug information.
+		 * @return array Returns debug information.
 		 */
 		return apply_filters(
 			'classifai_' . self::ID . '_debug_information',
@@ -1396,12 +1396,12 @@ abstract class Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_run
 		 *
-		 * @param {mixed} $result Result of running the feature.
-		 * @param {Providers} $provider_instance Provider used.
-		 * @param {mixed} $args Arguments used by the feature.
-		 * @param {Feature} $this Current feature class.
+		 * @param mixed                         $result            Result of running the feature.
+		 * @param \Classifai\Providers\Provider $provider_instance Provider used.
+		 * @param mixed                         $args              Arguments used by the feature.
+		 * @param \Classifai\Features\Feature   $this              Current feature class.
 		 *
-		 * @return {mixed} Results.
+		 * @return mixed Results.
 		 */
 		return apply_filters(
 			'classifai_' . static::ID . '_run',
