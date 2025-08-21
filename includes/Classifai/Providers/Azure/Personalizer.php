@@ -11,6 +11,8 @@ use Classifai\Features\RecommendedContent;
 use WP_Error;
 use WP_REST_Server;
 use UAParser\Parser;
+use function Classifai\safe_wp_remote_post;
+use function Classifai\safe_wp_remote_get;
 
 class Personalizer extends Provider {
 
@@ -259,10 +261,10 @@ class Personalizer extends Provider {
 			 * @since 1.8.0
 			 * @hook classifai_recommended_content_post_args
 			 *
-			 * @param {array} $query_args Array of query args to get posts
-			 * @param {array} $attributes The block attributes.
+			 * @param array $query_args Array of query args to get posts
+			 * @param array $attributes The block attributes.
 			 *
-			 * @return {array} Array of query args to get posts
+			 * @return array Array of query args to get posts
 			 */
 			$query_args = apply_filters(
 				'classifai_recommended_content_post_args',
@@ -380,9 +382,9 @@ class Personalizer extends Provider {
 		 * @since 2.0.0
 		 * @hook classifai_recommended_block_attributes
 		 *
-		 * @param {array}  $attributes   Attributes of blocks.
+		 * @param array  $attributes   Attributes of blocks.
 		 *
-		 * @return {string} The filtered attributes.
+		 * @return string The filtered attributes.
 		 */
 		$attributes = apply_filters( 'classifai_recommended_block_attributes', $attributes );
 		$content    = $this->get_recommended_content( $attributes );
@@ -571,12 +573,12 @@ class Personalizer extends Provider {
 		 * @since 1.8.0
 		 * @hook classifai_recommended_block_markup
 		 *
-		 * @param {string} $final_markup HTML Markup of recommended content block.
-		 * @param {array}  $attributes   Attributes of blocks.
-		 * @param {object} $response     Object of personalizer response.
-		 * @param {array}  $actions      Selected actions(posts) to send in request to personalizer.
+		 * @param string $final_markup HTML Markup of recommended content block.
+		 * @param array  $attributes   Attributes of blocks.
+		 * @param object $response     Object of personalizer response.
+		 * @param array  $actions      Selected actions(posts) to send in request to personalizer.
 		 *
-		 * @return {string} The filtered markup.
+		 * @return string The filtered markup.
 		 */
 		return apply_filters( 'classifai_recommended_block_markup', $final_markup, $attributes, $response, $actions );
 	}
@@ -657,7 +659,7 @@ class Personalizer extends Provider {
 	protected function personalizer_get_ranked_action( array $rank_request ) {
 		$feature  = new RecommendedContent();
 		$settings = $feature->get_settings( static::ID );
-		$result   = wp_remote_post(
+		$result   = safe_wp_remote_post(
 			trailingslashit( $settings['endpoint_url'] ) . $this->rank_endpoint,
 			[
 				'headers' => [
@@ -691,7 +693,7 @@ class Personalizer extends Provider {
 		$settings = $feature->get_settings( static::ID );
 
 		$reward_endpoint = str_replace( '{eventId}', sanitize_text_field( $event_id ), $this->reward_endpoint );
-		$result          = wp_remote_post(
+		$result          = safe_wp_remote_post(
 			trailingslashit( $settings['endpoint_url'] ) . $reward_endpoint,
 			[
 				'headers' => [
@@ -722,9 +724,8 @@ class Personalizer extends Provider {
 	 * @return bool|WP_Error
 	 */
 	protected function authenticate_credentials( string $url, string $api_key ) {
-		$rtn = false;
-		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_get_wp_remote_get
-		$result = wp_remote_get(
+		$rtn    = false;
+		$result = safe_wp_remote_get(
 			trailingslashit( $url ) . $this->status_endpoint,
 			[
 				'headers' => [

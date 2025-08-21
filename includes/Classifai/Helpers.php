@@ -104,9 +104,9 @@ function get_post_types_for_language_settings(): array {
 	 * @since 1.6.0
 	 * @hook classifai_language_settings_post_types
 	 *
-	 * @param {array} $post_types Array of post types to show in language processing settings.
+	 * @param array $post_types Array of post types to show in language processing settings.
 	 *
-	 * @return {array} Array of post types.
+	 * @return array Array of post types.
 	 */
 	return apply_filters( 'classifai_language_settings_post_types', $post_types );
 }
@@ -127,9 +127,9 @@ function get_post_statuses_for_language_settings(): array {
 	 * @since 1.7.1
 	 * @hook classifai_language_settings_post_statuses
 	 *
-	 * @param {array} $post_statuses Array of post statuses to show in language processing settings.
+	 * @param array $post_statuses Array of post statuses to show in language processing settings.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_language_settings_post_statuses', $post_statuses );
 }
@@ -148,9 +148,9 @@ function computer_vision_max_filesize(): int {
 	 * @since 1.5.0
 	 * @hook classifai_computer_vision_max_filesize
 	 *
-	 * @param {int} file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
+	 * @param int file_size The maximum allowed filesize for Computer Vision in bytes. Default `4 * MB_IN_BYTES`.
 	 *
-	 * @return {int} Filtered filesize in bytes.
+	 * @return int Filtered filesize in bytes.
 	 */
 	return apply_filters( 'classifai_computer_vision_max_filesize', 20 * MB_IN_BYTES ); // 20MB default.
 }
@@ -270,10 +270,10 @@ function get_modified_image_source_url( int $post_id ) {
 	 * @since 1.6.0
 	 * @hook classifai_generate_image_alt_tags_source_url
 	 *
-	 * @param {mixed} $image_url New image path for given attachment ID.
-	 * @param {int}   $post_id   The ID of the attachment to be used in classification.
+	 * @param mixed $image_url New image path for given attachment ID.
+	 * @param int   $post_id   The ID of the attachment to be used in classification.
 	 *
-	 * @return {mixed} NULL or filtered URl for given attachment id.
+	 * @return mixed NULL or filtered URl for given attachment id.
 	 */
 	return apply_filters( 'classifai_generate_image_alt_tags_source_url', null, $post_id );
 }
@@ -436,9 +436,9 @@ function get_all_post_statuses(): array {
 	 * @since 2.2.2
 	 * @hook classifai_all_post_statuses
 	 *
-	 * @param {array} $all_statuses Array of post statuses.
+	 * @param array $all_statuses Array of post statuses.
 	 *
-	 * @return {array} Array of post statuses.
+	 * @return array Array of post statuses.
 	 */
 	return apply_filters( 'classifai_all_post_statuses', $all_statuses );
 }
@@ -629,10 +629,10 @@ function get_classification_feature_taxonomy( string $classify_by = '' ): string
 	 * @since 3.0.0
 	 * @hook classifai_feature_classification_taxonomy_for_feature
 	 *
-	 * @param {string} $taxonomy The slug of the taxonomy to use.
-	 * @param {string} $classify_by The NLU feature this taxonomy is for.
+	 * @param string $taxonomy    The slug of the taxonomy to use.
+	 * @param string $classify_by The NLU feature this taxonomy is for.
 	 *
-	 * @return {string} The filtered taxonomy slug.
+	 * @return string The filtered taxonomy slug.
 	 */
 	return apply_filters( 'classifai_feature_classification_taxonomy_for_feature', $taxonomy, $classify_by );
 }
@@ -678,9 +678,9 @@ function should_use_legacy_settings_panel(): bool {
 	 * @since 3.2.0
 	 * @hook classifai_use_legacy_settings_panel
 	 *
-	 * @param {bool} $use_legacy_settings_panel Whether to use the legacy settings panel.
+	 * @param bool $use_legacy_settings_panel Whether to use the legacy settings panel.
 	 *
-	 * @return {bool} Whether to use the legacy settings panel.
+	 * @return bool Whether to use the legacy settings panel.
 	 */
 	return apply_filters( 'classifai_use_legacy_settings_panel', false );
 }
@@ -828,3 +828,131 @@ function is_remote_url( string $resource_ref ): bool {
 function is_local_path( string $resource_ref ): bool {
 	return 'path' === get_resource_type( $resource_ref );
 }
+
+/**
+ * Safe generic HTTP wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_request() when available.
+ * - Fall back to wp_remote_request() on other scenarios.
+ * - Respect all call args (timeout, headers, method, etc).
+ *
+ * @since 3.6.0
+ *
+ * @param string $method HTTP method.
+ * @param string $url    Request URL.
+ * @param array  $args   Request args.
+ * @return array|\WP_Error
+ */
+function safe_wp_remote_request( string $method, string $url, array $args = [] ) {
+	$method         = strtoupper( $method );
+	$args['method'] = $method;
+
+	// Respect timeout if caller set.
+	$timeout = isset( $args['timeout'] ) ? (int) $args['timeout'] : 20;
+
+	// Ensure a clear UA but allow to override.
+	if ( empty( $args['headers']['User-Agent'] ) ) {
+		static $cached_user_agent = null;
+		if ( null === $cached_user_agent ) {
+			$version           = defined( 'CLASSIFAI_VERSION' ) ? CLASSIFAI_VERSION : 'unknown';
+			$cached_user_agent = 'ClassifAI/' . $version;
+		}
+		$args['headers']['User-Agent'] = $cached_user_agent;
+	}
+
+	if ( function_exists( 'vip_safe_wp_remote_request' ) ) {
+		$fallback  = '';
+		$threshold = 3;
+		$retry     = 20;
+
+		return vip_safe_wp_remote_request( $url, $fallback, $threshold, min( max( 1, $timeout ), 20 ), $retry, $args );
+	}
+
+	$args = wp_parse_args(
+		$args,
+		[
+			'timeout' => $timeout,
+		]
+	);
+
+	return wp_remote_request( $url, $args ); // phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.wp_remote_request_wp_remote_request
+}
+
+/**
+ * VIP-safe replacement for file_get_contents() supporting remote URLs.
+ *
+ * For http/https URLs, performs an HTTP GET via safe_wp_remote_get()/VIP wrapper
+ * and returns the raw body string on 2xx; returns false on error to mirror
+ * file_get_contents() semantics. For local paths, falls back to native
+ * file_get_contents(). This keeps calling code simple while staying VIP-safe.
+ *
+ * Important: This function intentionally does NOT return WP_Error to match the
+ * native signature; callers should check for strict false.
+ *
+ * @since 3.6.0
+ *
+ * @param string $file_path Path or URL.
+ * @param array  $args     Optional HTTP args (timeout, headers, etc.).
+ * @return string|false Raw contents on success; false on failure.
+ */
+function safe_file_get_contents( string $file_path, array $args = [] ) {
+	if ( is_remote_url( $file_path ) ) {
+		if ( function_exists( 'wpcom_vip_file_get_contents' ) ) {
+			$content = wpcom_vip_file_get_contents( $file_path );
+			if ( false !== $content ) {
+				return $content;
+			}
+		}
+
+		$response = safe_wp_remote_get( $file_path, $args );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			return false;
+		}
+
+		return wp_remote_retrieve_body( $response );
+	}
+
+	// Local file path: fall back to native.
+	return @file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.PHP.NoSilencedErrors.Discouraged, WordPressVIPMinimum.Performance.FetchingRemoteData.FileGetContentsUnknown
+}
+
+/**
+ * Safe GET wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_get() when available.
+ * - Fall back to wp_remote_get() on other scenarios.
+ * - Respect all call args (timeout, headers, etc).
+ *
+ * @since 3.6.0
+ *
+ * @param string $url Request URL.
+ * @param array  $args Request args.
+ * @return array|\WP_Error
+ */
+function safe_wp_remote_get( string $url, array $args = [] ) {
+	return safe_wp_remote_request( 'GET', $url, $args );
+}
+
+/**
+ * Safe POST wrapper compatible with WP VIP.
+ *
+ * - Use vip_safe_wp_remote_post() when available.
+ * - Fall back to wp_remote_post() on other scenarios.
+ * - Respect all call args (timeout, headers, etc).
+ *
+ * @since 3.6.0
+ *
+ * @param string $url Request URL.
+ * @param array  $args Request args.
+ * @return array|\WP_Error
+ */
+function safe_wp_remote_post( string $url, array $args = [] ) {
+	return safe_wp_remote_request( 'POST', $url, $args );
+}
+

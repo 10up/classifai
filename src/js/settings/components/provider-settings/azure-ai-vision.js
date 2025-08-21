@@ -85,6 +85,9 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					<InputControl
 						id={ `${ providerName }_descriptive_confidence_threshold` }
 						type="number"
+						min={ 0 }
+						max={ 100 }
+						step={ 0.01 }
 						value={
 							providerSettings.descriptive_confidence_threshold ||
 							70
@@ -108,6 +111,9 @@ export const AzureAIVisionSettings = ( { isConfigured = false } ) => {
 					<InputControl
 						id={ `${ providerName }_tag_confidence_threshold` }
 						type="number"
+						min={ 0 }
+						max={ 100 }
+						step={ 0.01 }
 						value={
 							providerSettings.tag_confidence_threshold || 70
 						}

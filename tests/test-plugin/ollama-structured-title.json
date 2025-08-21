@@ -1,0 +1,16 @@
+{
+  "model": "llama3.1:latest",
+  "created_at": "2025-08-15T18:11:59.18395Z",
+  "message": {
+    "role": "assistant",
+    "content": "{\"title\": \"Hello there, how may I assist you today?\" }"
+  },
+  "done_reason": "stop",
+  "done": true,
+  "total_duration": 9147498458,
+  "load_duration": 4301577750,
+  "prompt_eval_count": 139,
+  "prompt_eval_duration": 4015511708,
+  "eval_count": 23,
+  "eval_duration": 814617125
+}

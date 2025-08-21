@@ -35,10 +35,37 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 		} ).then( () => {
 			cy.getBlockEditor()
 				.find(
-					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
+					'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeaways__content ul li'
 				)
-				.should( 'contain.text', 'OpenAI request failed' );
+				.should(
+					'contain.text',
+					'Spring symbolizes renewal and beauty, inspiring creativity and reflection.'
+				)
+				.should( 'have.length', 4 );
 		} );
+	} );
+
+	it( 'Block is visible on the front-end for logged in and logged out users', () => {
+		cy.visit( '/test-key-takeaways-post/' );
+		cy.get(
+			'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeaways__content ul li'
+		)
+			.should(
+				'contain.text',
+				'Spring symbolizes renewal and beauty, inspiring creativity and reflection.'
+			)
+			.should( 'have.length', 4 );
+
+		cy.logout();
+		cy.visit( '/test-key-takeaways-post/' );
+		cy.get(
+			'.wp-block-classifai-key-takeaways .wp-block-classifai-key-takeaways__content ul li'
+		)
+			.should(
+				'contain.text',
+				'Spring symbolizes renewal and beauty, inspiring creativity and reflection.'
+			)
+			.should( 'have.length', 4 );
 	} );
 
 	it( 'Can set multiple custom prompts, select one as the default and delete one.', () => {
@@ -130,8 +157,13 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 			},
 		} ).then( () => {
 			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
+				.find(
+					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
+				)
+				.should(
+					'contain.text',
+					'Key takeaways not currently enabled'
+				);
 		} );
 	} );
 
@@ -152,8 +184,13 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 			},
 		} ).then( () => {
 			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
+				.find(
+					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
+				)
+				.should(
+					'contain.text',
+					'Key takeaways not currently enabled'
+				);
 		} );
 	} );
 
@@ -173,8 +210,13 @@ describe( '[Language processing] Key Takeaways Tests', () => {
 			},
 		} ).then( () => {
 			cy.getBlockEditor()
-				.find( '.wp-block-classifai-key-takeaways' )
-				.should( 'not.exist' );
+				.find(
+					'.wp-block-classifai-key-takeaways .components-placeholder__fieldset'
+				)
+				.should(
+					'contain.text',
+					'Key takeaways not currently enabled'
+				);
 		} );
 	} );
 } );

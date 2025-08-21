@@ -17,6 +17,7 @@ use Classifai\Providers\Watson\NLU;
 
 use function Classifai\Providers\Watson\get_username;
 use function Classifai\Providers\Watson\get_password;
+use function Classifai\safe_file_get_contents;
 
 /**
  * ClassifaiCommand is the command line interface of the ClassifAI plugin.
@@ -175,7 +176,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		}
 
 		if ( ! empty( $opts['input'] ) ) {
-			$text = file_get_contents( $opts['input'] ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$text = safe_file_get_contents( $opts['input'] );
 		} elseif ( ! empty( $args ) ) {
 			$text = $args[0];
 		} else {
@@ -903,12 +904,16 @@ class ClassifaiCommand extends \WP_CLI_Command {
 			$text_result = $text_feature->run( $attachment_id, 'descriptive_text' );
 			if ( $text_result && ! is_wp_error( $text_result ) ) {
 				$text_feature->save( $text_result, $attachment_id );
+			} elseif ( is_wp_error( $text_result ) ) {
+				$errors[ $attachment_id ] = $text_result;
 			}
 
 			$crop_result = $crop_feature->run( $attachment_id, 'crop' );
 			if ( ! empty( $crop_result ) && ! is_wp_error( $crop_result ) ) {
 				$meta = $crop_feature->save( $crop_result, $attachment_id );
 				wp_update_attachment_metadata( $attachment_id, $meta );
+			} elseif ( is_wp_error( $crop_result ) ) {
+				$errors[ $attachment_id ] = $crop_result;
 			}
 		}
 
@@ -920,7 +925,7 @@ class ClassifaiCommand extends \WP_CLI_Command {
 		\WP_CLI::success( "Classified $total_success images, $total_errors errors." );
 
 		foreach ( $errors as $attachment_id => $error ) {
-			\WP_CLI::log( $attachment_id . ': ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
+			\WP_CLI::log( 'Attachment ID: ' . $attachment_id . ' - ' . $error->get_error_code() . ' - ' . $error->get_error_message() );
 		}
 	}
 

@@ -50,3 +50,6 @@ tests/cypress/screenshots
 tests/cypress/videos
 tests/cypress/reports
 .wp-env.override.json
+
+# docs
+wp-hooks-docs/docs/01.get-started/05.CHANGELOG.md
