@@ -5,6 +5,8 @@ namespace Classifai\Features;
 use Classifai\Services\ImageProcessing;
 use Classifai\Providers\OpenAI\Images as OpenAIImages;
 use Classifai\Providers\GoogleAI\Images as GoogleAIImagen;
+use Classifai\Providers\Localhost\StableDiffusion as LocalhostStableDiffusion;
+use Classifai\Providers\TogetherAI\Images as TogetherAIImages;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
@@ -34,8 +36,10 @@ class ImageGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			OpenAIImages::ID   => __( 'OpenAI Images', 'classifai' ),
-			GoogleAIImagen::ID => __( 'Google AI Imagen', 'classifai' ),
+			OpenAIImages::ID             => __( 'OpenAI Images', 'classifai' ),
+			GoogleAIImagen::ID           => __( 'Google AI Imagen', 'classifai' ),
+			TogetherAIImages::ID         => __( 'Together AI', 'classifai' ),
+			LocalhostStableDiffusion::ID => __( 'Stable Diffusion (local)', 'classifai' ),
 		];
 	}
 
@@ -74,9 +78,9 @@ class ImageGeneration extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_rest_route_{route}_args
 		 *
-		 * @param {array} $args Array of arguments for the REST route.
+		 * @param array $args Array of arguments for the REST route.
 		 *
-		 * @return {array} Modified array of arguments.
+		 * @return array Modified array of arguments.
 		 */
 		$args = apply_filters(
 			'classifai_' . static::ID . '_rest_route_' . $route . '_args',
@@ -217,9 +221,9 @@ class ImageGeneration extends Feature {
 		 * @since 2.1.0
 		 * @hook classifai_dalle_caption
 		 *
-		 * @param {string} $caption Attribution to be added as a caption to the image.
+		 * @param string $caption Attribution to be added as a caption to the image.
 		 *
-		 * @return {string} Caption.
+		 * @return string Caption.
 		 */
 		$caption = apply_filters(
 			'classifai_dalle_caption',
@@ -301,7 +305,7 @@ class ImageGeneration extends Feature {
 					}
 					?>
 				</p>
-				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ); ?>"></textarea>
+				<textarea class="prompt" placeholder="<?php esc_attr_e( 'Enter prompt', 'classifai' ); ?>" rows="4" maxlength="<?php echo absint( $provider_instance->max_prompt_chars ?? 1000 ); ?>"></textarea>
 				<br>
 				<?php if ( $per_image_settings ) : ?>
 					<input type="checkbox" id="view-additional-image-generation-settings" />
@@ -448,10 +452,10 @@ class ImageGeneration extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_feature_image_generation_roles
 		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
+		 * @param array $roles            Array of arrays containing role information.
+		 * @param array $default_settings Default setting values.
 		 *
-		 * @return {array} Roles array.
+		 * @return array Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $default_settings );
 	}

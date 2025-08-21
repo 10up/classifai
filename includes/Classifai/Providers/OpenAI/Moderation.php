@@ -53,9 +53,9 @@ class Moderation extends Provider {
 		 * @since 3.2.0
 		 * @hook classifai_openai_moderation_model
 		 *
-		 * @param {string} $model The default model to use.
+		 * @param string $model The default model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_openai_moderation_model', $this->model );
 	}
@@ -211,10 +211,10 @@ class Moderation extends Provider {
 		 * @since 3.0.0
 		 * @hook classifai_openai_moderation_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to OpenAI.
-		 * @param {int} $comment_id ID of comment we are moderating.
+		 * @param array $body       Request body that will be sent to OpenAI.
+		 * @param int   $comment_id ID of comment we are moderating.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_openai_moderation_request_body',

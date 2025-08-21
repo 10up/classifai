@@ -77,9 +77,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_model
 		 *
-		 * @param {string} $model The current model to use.
+		 * @param string $model The current model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_model', $model );
 	}
@@ -97,9 +97,9 @@ class SpeechToText extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_speech_to_text_api_url
 		 *
-		 * @param {string} $url The default API URL.
+		 * @param string $url The default API URL.
 		 *
-		 * @return {string} The API URL.
+		 * @return string The API URL.
 		 */
 		return apply_filters( 'classifai_openai_speech_to_text_api_url', sprintf( '%s%s', trailingslashit( $this->audio_url ), $path ) );
 	}
@@ -297,11 +297,11 @@ class SpeechToText extends Provider {
 		 * @since 2.2.0
 		 * @hook classifai_whisper_transcribe_request_body
 		 *
-		 * @param {array}  $body      Request body that will be sent to OpenAI.
-		 * @param {string} $file_path Path of the attachment we are transcribing.
-		 * @param {args}   $args      Additional args.
+		 * @param array  $body      Request body that will be sent to OpenAI.
+		 * @param string $file_path Path of the attachment we are transcribing.
+		 * @param array  $args      Additional args.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_whisper_transcribe_request_body',

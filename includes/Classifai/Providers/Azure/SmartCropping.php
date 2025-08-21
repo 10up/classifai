@@ -10,6 +10,7 @@ namespace Classifai\Providers\Azure;
 
 use function Classifai\computer_vision_max_filesize;
 use function Classifai\get_largest_acceptable_image_url;
+use function Classifai\safe_wp_remote_post;
 
 /**
  * SmartCropping class.
@@ -63,9 +64,9 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_crop_max_pixel_dimension
 		 *
-		 * @param {int} $max The max width/height in pixels. Default 1024.
+		 * @param int $max The max width/height in pixels. Default 1024.
 		 *
-		 * @return {int} Filtered max dimension in pixels.
+		 * @return int Filtered max dimension in pixels.
 		 */
 		return apply_filters( 'classifai_smart_crop_max_pixel_dimension', 1024 );
 	}
@@ -109,10 +110,10 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_should_crop_size
 		 *
-		 * @param {bool}   $return Whether non-position-based cropping was opted into when registering the image size.
-		 * @param {string} $size   The image size.
+		 * @param bool   $return Whether non-position-based cropping was opted into when registering the image size.
+		 * @param string $size   The image size.
 		 *
-		 * @return {bool} Whether this image size should be smart cropped.
+		 * @return bool Whether this image size should be smart cropped.
 		 */
 		return apply_filters( 'classifai_should_crop_size', $return, $size );
 	}
@@ -175,10 +176,10 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_source_url
 		 *
-		 * @param {null|string} url            `null` to use default plugin behavior; `string` to override.
-		 * @param {int}         $attachment_id The attachment image ID.
+		 * @param null|string $url            `null` to use default plugin behavior; `string` to override.
+		 * @param int         $attachment_id The attachment image ID.
 		 *
-		 * @return {null|string} URL to be sent to Computer Vision for smart cropping.
+		 * @return null|string URL to be sent to Computer Vision for smart cropping.
 		 */
 		$url = apply_filters( 'classifai_smart_cropping_source_url', null, $attachment_id );
 
@@ -237,7 +238,7 @@ class SmartCropping {
 			$this->get_api_url()
 		);
 
-		$response = wp_remote_post(
+		$response = safe_wp_remote_post(
 			$url,
 			[
 				'body'    => wp_json_encode(
@@ -258,9 +259,9 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_after_request
 		 *
-		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
-		 * @param {string} The request URL with query args added.
-		 * @param {array}  Array containing the image height and width.
+		 * @param array|\WP_Error $response Response data or a WP_Error if the request failed.
+		 * @param string          $url      The request URL with query args added.
+		 * @param array           $data     Array containing the image height and width.
 		 */
 		do_action( 'classifai_smart_cropping_after_request', $response, $url, $data );
 
@@ -282,9 +283,9 @@ class SmartCropping {
 		 * @since 1.5.0
 		 * @hook classifai_smart_cropping_unsuccessful_response
 		 *
-		 * @param {array|WP_Error} Response data or a WP_Error if the request failed.
-		 * @param {string} The request URL with query args added.
-		 * @param {array}  Array containing the image height and width.
+		 * @param array|\WP_Error $response Response data or a WP_Error if the request failed.
+		 * @param string          $url      The request URL with query args added.
+		 * @param array           $data     Array containing the image height and width.
 		 */
 		do_action( 'classifai_smart_cropping_unsuccessful_response', $response, $url, $data );
 

@@ -474,11 +474,11 @@ class NLU extends Provider {
 		 * @since 1.2.0
 		 * @hook classifai_should_classify_post
 		 *
-		 * @param {bool} $should_classify Whether the post should be classified. Default `true`, return `false` to skip
+		 * @param bool $should_classify Whether the post should be classified. Default `true`, return `false` to skip
 		 *                                classification for this post.
-		 * @param {int}  $post_id         The ID of the post to be considered for classification.
+		 * @param int  $post_id         The ID of the post to be considered for classification.
 		 *
-		 * @return {bool} Whether the post should be classified.
+		 * @return bool Whether the post should be classified.
 		 */
 		$should_classify = apply_filters( 'classifai_should_classify_post', true, $post_id );
 		if ( ! $should_classify ) {
