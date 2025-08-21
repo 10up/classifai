@@ -836,7 +836,7 @@ function is_local_path( string $resource_ref ): bool {
  * - Fall back to wp_remote_request() on other scenarios.
  * - Respect all call args (timeout, headers, method, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $method HTTP method.
  * @param string $url    Request URL.
@@ -889,7 +889,7 @@ function safe_wp_remote_request( string $method, string $url, array $args = [] )
  * Important: This function intentionally does NOT return WP_Error to match the
  * native signature; callers should check for strict false.
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $file_path Path or URL.
  * @param array  $args     Optional HTTP args (timeout, headers, etc.).
@@ -929,7 +929,7 @@ function safe_file_get_contents( string $file_path, array $args = [] ) {
  * - Fall back to wp_remote_get() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $url Request URL.
  * @param array  $args Request args.
@@ -946,7 +946,7 @@ function safe_wp_remote_get( string $url, array $args = [] ) {
  * - Fall back to wp_remote_post() on other scenarios.
  * - Respect all call args (timeout, headers, etc).
  *
- * @since x.x.x
+ * @since 3.6.0
  *
  * @param string $url Request URL.
  * @param array  $args Request args.

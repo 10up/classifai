@@ -34,7 +34,7 @@ trait TogetherAI {
 		/**
 		 * Filter the Together AI API URL.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_togetherai_api_url
 		 *
 		 * @param string $url The default API URL.

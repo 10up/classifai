@@ -13,14 +13,14 @@ use function Classifai\get_plugin;
  *
  * Handles detection and reuse of service provider credentials across features.
  *
- * @since x.x.x
+ * @since 3.6.0
  */
 class CredentialReuse {
 
 	/**
 	 * Provider groups that share the same API key.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @var array
 	 */
@@ -48,7 +48,7 @@ class CredentialReuse {
 	/**
 	 * Get all configured providers across all features.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @return array Array of configured providers with their credentials.
 	 */
@@ -76,7 +76,7 @@ class CredentialReuse {
 	/**
 	 * Get the provider group for a given provider ID.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $provider_id The provider ID.
 	 * @return string|null The provider group name or null if not found.
@@ -93,7 +93,7 @@ class CredentialReuse {
 	/**
 	 * Get all providers in the same group as the given provider.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $provider_id The provider ID.
 	 * @return array Array of provider IDs in the same group.
@@ -109,7 +109,7 @@ class CredentialReuse {
 	/**
 	 * Check if a provider is compatible with a feature.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $provider_id The provider ID to check.
 	 * @param string $feature_id  The feature ID to check against.
@@ -129,7 +129,7 @@ class CredentialReuse {
 	/**
 	 * Check if any provider in the same group is compatible with a feature.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $provider_id The provider ID to check.
 	 * @param string $feature_id  The feature ID to check against.
@@ -150,7 +150,7 @@ class CredentialReuse {
 	/**
 	 * Get the best matching provider ID for a feature from a provider group.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $source_provider_id The source provider ID.
 	 * @param string $feature_id         The target feature ID.
@@ -177,7 +177,7 @@ class CredentialReuse {
 	/**
 	 * Get reusable credentials for a feature.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $feature_id The feature ID to get credentials for.
 	 * @return array Array of compatible providers with existing credentials.
@@ -216,7 +216,7 @@ class CredentialReuse {
 		/**
 		 * Filter the reusable credentials for a feature.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_reusable_credentials
 		 *
 		 * @param array  $reusable   Array of reusable credentials.
@@ -230,7 +230,7 @@ class CredentialReuse {
 	/**
 	 * Copy credentials from one feature to another.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $source_feature_id Source feature ID.
 	 * @param string $target_feature_id Target feature ID.
@@ -278,7 +278,7 @@ class CredentialReuse {
 		/**
 		 * Fires after credentials are copied between features.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_credentials_copied
 		 *
 		 * @param string $source_feature_id Source feature ID.
@@ -293,7 +293,7 @@ class CredentialReuse {
 	/**
 	 * Get all feature instances.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @return array Array of feature instances.
 	 */
@@ -320,7 +320,7 @@ class CredentialReuse {
 	/**
 	 * Get a user-friendly provider name.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @param string $provider_id The provider ID.
 	 * @return string The formatted provider name.
@@ -352,7 +352,7 @@ class CredentialReuse {
 	/**
 	 * Get provider groups for external use.
 	 *
-	 * @since x.x.x
+	 * @since 3.6.0
 	 *
 	 * @return array Array of provider groups.
 	 */

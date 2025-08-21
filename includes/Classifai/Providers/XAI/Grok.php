@@ -272,7 +272,7 @@ class Grok extends Provider {
 		/**
 		 * Filter the models returned by the xAI Grok API.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_xai_grok_models
 		 *
 		 * @param {array} $models The models.

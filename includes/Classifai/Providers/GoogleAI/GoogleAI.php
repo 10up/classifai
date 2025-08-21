@@ -81,7 +81,7 @@ trait GoogleAI {
 		/**
 		 * Filter the models returned by the Google AI API.
 		 *
-		 * @since x.x.x
+		 * @since 3.6.0
 		 * @hook classifai_googleai_models
 		 *
 		 * @param {array} $models The models.
