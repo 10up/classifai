@@ -12,7 +12,6 @@
   "require": {
     "php": ">=7.4",
     "yahnis-elsts/plugin-update-checker": "5.1",
-    "ua-parser/uap-php": "dev-master",
     "aws/aws-sdk-php": "^3.300",
     "woocommerce/action-scheduler": "3.8.1"
   },
