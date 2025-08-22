@@ -58,7 +58,6 @@ class Personalizer extends Provider {
 			add_action( 'wp_ajax_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'wp_ajax_nopriv_classifai_render_recommended_content', [ $this, 'ajax_render_recommended_content' ] );
 			add_action( 'save_post', [ $this, 'maybe_clear_transient' ] );
-			Blocks\setup();
 		}
 	}
 

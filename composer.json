@@ -22,7 +22,6 @@
     },
     "files": [
       "includes/Classifai/Helpers.php",
-      "includes/Classifai/Blocks.php",
       "includes/Classifai/Providers/Watson/Helpers.php"
     ]
   },
