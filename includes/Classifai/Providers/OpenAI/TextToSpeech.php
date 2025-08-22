@@ -42,9 +42,9 @@ class TextToSpeech extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_text_to_speech_api_url
 		 *
-		 * @param {string} $url The default API URL.
+		 * @param string $url The default API URL.
 		 *
-		 * @return {string} The API URL.
+		 * @return string The API URL.
 		 */
 		return apply_filters( 'classifai_openai_text_to_speech_api_url', $this->api_url );
 	}
@@ -66,9 +66,9 @@ class TextToSpeech extends Provider {
 		 * @since 3.4.0
 		 * @hook classifai_openai_text_to_speech_model
 		 *
-		 * @param {string} $model The current model to use.
+		 * @param string $model The current model to use.
 		 *
-		 * @return {string} The model to use.
+		 * @return string The model to use.
 		 */
 		return apply_filters( 'classifai_openai_text_to_speech_model', $model );
 	}

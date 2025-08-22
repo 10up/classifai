@@ -212,9 +212,9 @@ class Settings {
 		 * @since 3.2.0
 		 * @hook classifai_settings_ibm_watson_nlu_taxonomies
 		 *
-		 * @param {array} $taxonomies Array of IBM Watson NLU taxonomies.
+		 * @param array $taxonomies Array of IBM Watson NLU taxonomies.
 		 *
-		 * @return {array} Array of taxonomies.
+		 * @return array Array of taxonomies.
 		 */
 		return apply_filters( 'classifai_settings_ibm_watson_nlu_taxonomies', $taxonomies );
 	}

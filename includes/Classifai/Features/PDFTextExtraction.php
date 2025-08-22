@@ -168,10 +168,10 @@ class PDFTextExtraction extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_feature_pdf_to_text_generation_read_status
 		 *
-		 * @param {array} $status Status of the PDF read operation.
-		 * @param {int} $post_id ID of attachment.
+		 * @param array $status  Status of the PDF read operation.
+		 * @param int   $post_id ID of attachment.
 		 *
-		 * @return {array} Status.
+		 * @return array Status.
 		 */
 		$status = apply_filters( 'classifai_' . static::ID . '_read_status', [], $post->ID );
 

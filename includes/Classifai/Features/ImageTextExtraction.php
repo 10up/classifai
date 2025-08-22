@@ -235,11 +235,11 @@ class ImageTextExtraction extends Feature {
 		 * @since 1.6.0
 		 * @hook classifai_ocr_text_post_args
 		 *
-		 * @param {string} $post_args     Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
-		 * @param {int}    $attachment_id ID of the attachment post.
-		 * @param {object} $result        The full scan results from the API.
+		 * @param array  $post_args      Array of post data for the attachment post update. Defaults to `ID` and `post_content`.
+		 * @param int    $attachment_id ID of the attachment post.
+		 * @param string $result        The full scan results from the API.
 		 *
-		 * @return {string} The filtered text data.
+		 * @return array The filtered post arguments.
 		 */
 		$post_args = apply_filters( 'classifai_ocr_text_post_args', $post_args, $attachment_id, $result );
 
@@ -323,8 +323,8 @@ class ImageTextExtraction extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_render_attachment_metabox
 		 *
-		 * @param {WP_Post} $post The post object.
-		 * @param {object} $this The Provider object.
+		 * @param \WP_Post $post The post object.
+		 * @param object   $this The Provider object.
 		 */
 		do_action( 'classifai_render_attachment_metabox', $post, $this );
 	}

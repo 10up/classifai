@@ -212,11 +212,11 @@ class ImageCropping extends Feature {
 			 * @since 1.5.0
 			 * @hook classifai_smart_cropping_thumb_file_name
 			 *
-			 * @param {string} Default file name.
-			 * @param {int}    The ID of the attachment being processed.
-			 * @param {array}  Width and height data for the image.
+			 * @param string Default file name.
+			 * @param int    The ID of the attachment being processed.
+			 * @param array  Width and height data for the image.
 			 *
-			 * @return {string} Filtered file name.
+			 * @return string Filtered file name.
 			 */
 			$new_thumb_file_name = apply_filters(
 				'classifai_smart_cropping_thumb_file_name',
@@ -280,8 +280,8 @@ class ImageCropping extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_render_attachment_metabox
 		 *
-		 * @param {WP_Post} $post The post object.
-		 * @param {object} $this The Provider object.
+		 * @param \WP_Post $post The post object.
+		 * @param object   $this The Provider object.
 		 */
 		do_action( 'classifai_render_attachment_metabox', $post, $this );
 	}
@@ -401,9 +401,9 @@ class ImageCropping extends Feature {
 		 * @since 1.5.0
 		 * @hook classifai_smart_crop_wp_filesystem
 		 *
-		 * @param {WP_Filesystem_Base} $this->wp_filesystem Filesystem class for saving images.
+		 * @param \WP_Filesystem_Base $this->wp_filesystem Filesystem class for saving images.
 		 *
-		 * @return {WP_Filesystem_Base} Filtered Filesystem class.
+		 * @return \WP_Filesystem_Base Filtered Filesystem class.
 		 */
 		return apply_filters( 'classifai_smart_crop_wp_filesystem', $this->wp_filesystem );
 	}

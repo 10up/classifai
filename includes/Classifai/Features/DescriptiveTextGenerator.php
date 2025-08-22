@@ -258,8 +258,8 @@ class DescriptiveTextGenerator extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_render_attachment_metabox
 		 *
-		 * @param {WP_Post} $post The post object.
-		 * @param {object} $this The Provider object.
+		 * @param \WP_Post $post The post object.
+		 * @param object   $this The Provider object.
 		 */
 		do_action( 'classifai_render_attachment_metabox', $post, $this );
 	}

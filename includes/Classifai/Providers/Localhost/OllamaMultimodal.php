@@ -151,10 +151,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt Prompt we are sending to Ollama.
+		 * @param int $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_descriptive_text_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -164,10 +164,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_descriptive_text_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body          Request body that will be sent to Ollama.
+		 * @param int   $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_descriptive_text_request_body',
@@ -219,10 +219,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt        Prompt we are sending to Ollama.
+		 * @param int    $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_ocr_processing_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -232,10 +232,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_ocr_processing_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body          Request body that will be sent to Ollama.
+		 * @param int   $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_ocr_processing_request_body',
@@ -292,10 +292,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_prompt
 		 *
-		 * @param {string} $prompt Prompt we are sending to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param string $prompt        Prompt we are sending to Ollama.
+		 * @param int    $attachment_id ID of attachment.
 		 *
-		 * @return {string} Prompt.
+		 * @return string Prompt.
 		 */
 		$prompt = apply_filters( 'classifai_ollama_image_tag_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $attachment_id );
 
@@ -305,10 +305,10 @@ class OllamaMultimodal extends Ollama {
 		 * @since 3.3.0
 		 * @hook classifai_ollama_image_tag_request_body
 		 *
-		 * @param {array} $body Request body that will be sent to Ollama.
-		 * @param {int} $attachment_id ID of attachment.
+		 * @param array $body Request body that will be sent to Ollama.
+		 * @param int $attachment_id ID of attachment.
 		 *
-		 * @return {array} Request body.
+		 * @return array Request body.
 		 */
 		$body = apply_filters(
 			'classifai_ollama_image_tag_request_body',

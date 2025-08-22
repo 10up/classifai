@@ -124,10 +124,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.5.0",
+            "version": "3.6.0",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.5.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.6.0.zip",
                 "type": "zip"
             }
         }
@@ -139,7 +139,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.5.0"
+    "10up/classifai": "3.6.0"
 }
 ```
 
@@ -814,7 +814,36 @@ To set up Stable Diffusion, follow the steps below:
 
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/advanced-docs/wp-cli).
+
+## Building and Running Documentation Site
+
+The ClassifAI documentation site is built using [WP Hooks Documentor](https://github.com/10up/wp-hooks-documentor). Follow these steps to build and run the documentation site locally:
+
+### 1. Build Documentation
+
+```bash
+# Install dependencies and build the plugin
+npm i && npm run build:docs
+```
+
+This will:
+- Install all required dependencies
+- Process all hook documentation from the codebase
+- Generate the documentation site in the `./docs` directory
+
+### 2. Run Documentation Site Locally
+
+```bash
+# Navigate to docs directory and start the server
+cd ./docs && npm run serve
+```
+
+The documentation site will be available at [http://localhost:3000](http://localhost:3000).
+
+### 3. Deployment
+
+The documentation site will automatically deploy to GitHub Pages when changes are merged into the `trunk` branch. You can view the live documentation at [https://10up.github.io/classifai/](https://10up.github.io/classifai/).
 
 ## Frequently Asked Questions
 

@@ -89,9 +89,9 @@ class ImageGeneration extends Feature {
 		 * @since 3.0.0
 		 * @hook classifai_{feature}_rest_route_{route}_args
 		 *
-		 * @param {array} $args Array of arguments for the REST route.
+		 * @param array $args Array of arguments for the REST route.
 		 *
-		 * @return {array} Modified array of arguments.
+		 * @return array Modified array of arguments.
 		 */
 		$args = apply_filters(
 			'classifai_' . static::ID . '_rest_route_' . $route . '_args',
@@ -232,9 +232,9 @@ class ImageGeneration extends Feature {
 		 * @since 2.1.0
 		 * @hook classifai_dalle_caption
 		 *
-		 * @param {string} $caption Attribution to be added as a caption to the image.
+		 * @param string $caption Attribution to be added as a caption to the image.
 		 *
-		 * @return {string} Caption.
+		 * @return string Caption.
 		 */
 		$caption = apply_filters(
 			'classifai_dalle_caption',
@@ -463,10 +463,10 @@ class ImageGeneration extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_feature_image_generation_roles
 		 *
-		 * @param {array} $roles            Array of arrays containing role information.
-		 * @param {array} $default_settings Default setting values.
+		 * @param array $roles            Array of arrays containing role information.
+		 * @param array $default_settings Default setting values.
 		 *
-		 * @return {array} Roles array.
+		 * @return array Roles array.
 		 */
 		$this->roles = apply_filters( 'classifai_' . static::ID . '_roles', $roles, $default_settings );
 	}

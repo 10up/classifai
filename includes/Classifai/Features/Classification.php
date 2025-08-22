@@ -250,12 +250,12 @@ class Classification extends Feature {
 		 * @since 3.1.0
 		 * @hook classifai_feature_classification_pre_save_results
 		 *
-		 * @param {array} $supported Term results.
-		 * @param {int} $post_id Post ID.
-		 * @param {bool} $link Whether to link the terms or not.
-		 * @param {object} $this Current instance of the class.
+		 * @param array  $supported Term results.
+		 * @param int    $post_id   Post ID.
+		 * @param bool   $link      Whether to link the terms or not.
+		 * @param object $this      Current instance of the class.
 		 *
-		 * @return {array} Term results.
+		 * @return array Term results.
 		 */
 		$results = apply_filters( 'classifai_' . static::ID . '_pre_save_results', $results, $post_id, $link, $this );
 
@@ -358,6 +358,14 @@ class Classification extends Feature {
 			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification.js',
 			array_merge( get_asset_info( 'classifai-plugin-classification', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
 			get_asset_info( 'classifai-plugin-classification', 'version' ),
+			true
+		);
+
+		wp_enqueue_script(
+			'classifai-plugin-classification-pre-publish-js',
+			CLASSIFAI_PLUGIN_URL . 'dist/classifai-plugin-classification-pre-publish.js',
+			array_merge( get_asset_info( 'classifai-plugin-classification-pre-publish', 'dependencies' ), array( 'lodash' ), array( Feature::PLUGIN_AREA_SCRIPT ) ),
+			get_asset_info( 'classifai-plugin-classification-pre-publish', 'version' ),
 			true
 		);
 

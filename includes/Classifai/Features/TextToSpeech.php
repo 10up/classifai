@@ -609,10 +609,10 @@ class TextToSpeech extends Feature {
 		 * @since 2.2.0
 		 * @hook classifai_disable_post_to_audio_block
 		 *
-		 * @param  {bool}    $is_disabled Whether to disable the display or not. By default - false.
-		 * @param  {WP_Post} $_post       The Post object.
+		 * @param bool     $is_disabled Whether to disable the display or not. By default - false.
+		 * @param \WP_Post $_post       The Post object.
 		 *
-		 * @return {bool} Whether the audio block should be shown.
+		 * @return bool Whether the audio block should be shown.
 		 */
 		if ( apply_filters( 'classifai_disable_post_to_audio_block', false, $_post ) ) {
 			return $content;
@@ -656,13 +656,13 @@ class TextToSpeech extends Feature {
 		 * @hook classifai_pre_render_post_audio_controls
 		 * @since 2.2.3
 		 *
-		 * @param {bool|string} $markup               Audio markup to use. Defaults to false.
-		 * @param {string}      $content              Content of the current post.
-		 * @param {WP_Post}     $_post                The Post object.
-		 * @param {int}         $audio_attachment_id  The audio attachment ID.
-		 * @param {string}      $audio_attachment_url The URL to the audio attachment file.
+		 * @param bool|string  $markup               Audio markup to use. Defaults to false.
+		 * @param string       $content              Content of the current post.
+		 * @param \WP_Post     $_post                The Post object.
+		 * @param int          $audio_attachment_id  The audio attachment ID.
+		 * @param string       $audio_attachment_url The URL to the audio attachment file.
 		 *
-		 * @return {bool|string} Custom audio block markup. Will be prepended to the post content.
+		 * @return bool|string Custom audio block markup. Will be prepended to the post content.
 		 */
 		$markup = apply_filters( 'classifai_pre_render_post_audio_controls', false, $content, $_post, $audio_attachment_id, $audio_attachment_url );
 
@@ -704,10 +704,10 @@ class TextToSpeech extends Feature {
 								 * @since 2.2.0
 								 * @hook classifai_listen_to_this_post_text
 								 *
-								 * @param {string} The text to filter.
-								 * @param {int}    Post ID.
+								 * @param string The text to filter.
+								 * @param int    Post ID.
 								 *
-								 * @return {string} Filtered text.
+								 * @return string Filtered text.
 								 */
 								apply_filters( 'classifai_listen_to_this_post_text', '%s %s', $_post->ID ),
 								esc_html__( 'Listen to this', 'classifai' ),
@@ -828,10 +828,10 @@ class TextToSpeech extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_audio_generation_initial_state
 		 *
-		 * @param  {bool}    $state Initial state of audio generation toggle on a post. Default true.
-		 * @param  {WP_Post} $post  The current Post object.
+		 * @param bool     $state Initial state of audio generation toggle on a post. Default true.
+		 * @param \WP_Post $post  The current Post object.
 		 *
-		 * @return {bool}           Initial state the audio generation toggle should be set to when no audio exists.
+		 * @return bool            Initial state the audio generation toggle should be set to when no audio exists.
 		 */
 		return apply_filters( 'classifai_audio_generation_initial_state', true, get_post( $post ) );
 	}
@@ -841,7 +841,7 @@ class TextToSpeech extends Feature {
 	 *
 	 * Fetch the subsequent state of audio generation once audio is generated for the post.
 	 *
-	 * @param int|WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
+	 * @param int|\WP_Post|null $post   Optional. Post ID or post object. `null`, `false`, `0` and other PHP falsey values
 	 *                                   return the current global post inside the loop. A numerically valid post ID that
 	 *                                   points to a non-existent post returns `null`. Defaults to global $post.
 	 * @return bool                    The subsequent state of audio generation. Default false.
@@ -853,10 +853,10 @@ class TextToSpeech extends Feature {
 		 * @since 2.3.0
 		 * @hook classifai_audio_generation_subsequent_state
 		 *
-		 * @param  {bool}    $state Subsequent state of audio generation toggle on a post. Default false.
-		 * @param  {WP_Post} $post  The current Post object.
+		 * @param bool     $state Subsequent state of audio generation toggle on a post. Default false.
+		 * @param \WP_Post $post  The current Post object.
 		 *
-		 * @return {bool}           Subsequent state the audio generation toggle should be set to when audio exists.
+		 * @return bool            Subsequent state the audio generation toggle should be set to when audio exists.
 		 */
 		return apply_filters( 'classifai_audio_generation_subsequent_state', false, get_post( $post ) );
 	}
