@@ -6,6 +6,7 @@ use Classifai\Admin\SimilarTermsListTable;
 use Classifai\Services\LanguageProcessing;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 use Classifai\Providers\Azure\Embeddings as AzureEmbeddings;
+use Classifai\Providers\Localhost\OllamaEmbeddings;
 use Classifai\Providers\OpenAI\EmbeddingCalculations;
 use Classifai\TermCleanupScheduler;
 use WP_Error;
@@ -65,6 +66,7 @@ class TermCleanup extends Feature {
 		$this->supported_providers = [
 			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 			AzureEmbeddings::ID  => __( 'Azure OpenAI Embeddings', 'classifai' ),
+			OllamaEmbeddings::ID => __( 'Ollama', 'classifai' ),
 		];
 
 		// Get readme content.
@@ -320,6 +322,10 @@ class TermCleanup extends Feature {
 
 		if ( $provider instanceof AzureEmbeddings ) {
 			$meta_key = 'classifai_azure_openai_embeddings';
+		}
+
+		if ( $provider instanceof OllamaEmbeddings ) {
+			$meta_key = 'classifai_ollama_embeddings';
 		}
 
 		/**
