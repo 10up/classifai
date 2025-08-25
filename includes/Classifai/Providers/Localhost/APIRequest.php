@@ -3,7 +3,6 @@
 namespace Classifai\Providers\Localhost;
 
 use Classifai\Providers\HTTPClient;
-use WP_Error;
 
 /**
  * The APIRequest class is a low level class to make Localhost API
@@ -62,7 +61,7 @@ class APIRequest extends HTTPClient {
 	 *
 	 * @return string
 	 */
-	public function get_api_key():string {
+	public function get_api_key(): string {
 		return $this->api_key;
 	}
 }
