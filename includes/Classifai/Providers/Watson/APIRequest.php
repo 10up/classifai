@@ -57,19 +57,6 @@ class APIRequest extends HTTPClient {
 	}
 
 	/**
-	 * Makes an authorized GET request and returns the parsed JSON
-	 * response if valid.
-	 *
-	 * @param string $url The Watson API url
-	 * @param array  $options Additional query params
-	 * @return array|WP_Error
-	 */
-	public function get( string $url, array $options = [] ) {
-		// Ensure filter hooks are called
-		return parent::get( $url, $options );
-	}
-
-	/**
 	 * Get the Watson username.
 	 *
 	 * @return string $username.
