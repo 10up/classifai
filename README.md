@@ -4,7 +4,7 @@
 
 [![Support Level](https://img.shields.io/badge/support-active-green.svg)](#support-level) [![Release Version](https://img.shields.io/github/release/10up/classifai.svg)](https://github.com/10up/classifai/releases/latest) ![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.8%20tested-success.svg) [![GPLv2 License](https://img.shields.io/github/license/10up/classifai.svg)](https://github.com/10up/classifai/blob/develop/LICENSE.md) [![WordPress Playground Demo](https://img.shields.io/badge/Playground_Demo-8A2BE2?logo=wordpress&logoColor=FFFFFF&labelColor=3858E9&color=3858E9)](https://playground.wordpress.net/?blueprint-url=https://raw.githubusercontent.com/10up/classifai/develop/.github/blueprints/blueprint.json)
 
-[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
+[![E2E Testing](https://github.com/10up/classifai/actions/workflows/cypress.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/cypress.yml) [![PHPUnit Testing](https://github.com/10up/classifai/actions/workflows/phpunit.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpunit.yml) [![Linting](https://github.com/10up/classifai/actions/workflows/phpcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/phpcs.yml) [![VIPCS](https://github.com/10up/classifai/actions/workflows/vipcs.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/vipcs.yml) [![CodeQL](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/codeql-analysis.yml) [![Dependency Review](https://github.com/10up/classifai/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/10up/classifai/actions/workflows/dependency-review.yml)
 
 > Supercharge WordPress Content Workflows and Engagement with Artificial Intelligence.
 
@@ -124,10 +124,10 @@ Add this repository to composer.json, specifying a release version, as shown bel
         "type": "package",
         "package": {
             "name": "10up/classifai",
-            "version": "3.5.0",
+            "version": "3.6.0",
             "type": "wordpress-plugin",
             "dist": {
-                "url": "https://github.com/10up/classifai/archive/refs/tags/3.5.0.zip",
+                "url": "https://github.com/10up/classifai/archive/refs/tags/3.6.0.zip",
                 "type": "zip"
             }
         }
@@ -139,7 +139,7 @@ Finally, require the plugin, using the version number you specified in the previ
 
 ```json
 "require": {
-    "10up/classifai": "3.5.0"
+    "10up/classifai": "3.6.0"
 }
 ```
 
@@ -814,7 +814,36 @@ To set up Stable Diffusion, follow the steps below:
 
 ## WP CLI Commands
 
-- Check out the [ClassifAI docs](https://10up.github.io/classifai/).
+- Check out the [ClassifAI docs](https://10up.github.io/classifai/advanced-docs/wp-cli).
+
+## Building and Running Documentation Site
+
+The ClassifAI documentation site is built using [WP Hooks Documentor](https://github.com/10up/wp-hooks-documentor). Follow these steps to build and run the documentation site locally:
+
+### 1. Build Documentation
+
+```bash
+# Install dependencies and build the plugin
+npm i && npm run build:docs
+```
+
+This will:
+- Install all required dependencies
+- Process all hook documentation from the codebase
+- Generate the documentation site in the `./docs` directory
+
+### 2. Run Documentation Site Locally
+
+```bash
+# Navigate to docs directory and start the server
+cd ./docs && npm run serve
+```
+
+The documentation site will be available at [http://localhost:3000](http://localhost:3000).
+
+### 3. Deployment
+
+The documentation site will automatically deploy to GitHub Pages when changes are merged into the `trunk` branch. You can view the live documentation at [https://10up.github.io/classifai/](https://10up.github.io/classifai/).
 
 ## Frequently Asked Questions
 

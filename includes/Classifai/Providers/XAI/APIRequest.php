@@ -4,6 +4,8 @@ namespace Classifai\Providers\XAI;
 
 use Classifai\Providers\HTTPClient;
 use WP_Error;
+use function Classifai\safe_wp_remote_get;
+use function Classifai\safe_wp_remote_post;
 
 /**
  * The APIRequest class is a low level class to make xAI API

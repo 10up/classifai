@@ -124,10 +124,10 @@ function get_feature_threshold( string $feature ): float {
 	 * @since 1.0.0
 	 * @hook classifai_feature_threshold
 	 *
-	 * @param {float} $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
-	 * @param {string} $feature  The feature in question.
+	 * @param float  $threshold The threshold to use, expressed as a decimal between 0 and 1 inclusive.
+	 * @param string $feature   The feature in question.
 	 *
-	 * @return {float} The filtered threshold.
+	 * @return float The filtered threshold.
 	 */
 	return apply_filters( 'classifai_feature_threshold', $threshold, $feature );
 }

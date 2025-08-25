@@ -286,9 +286,9 @@ class AmazonPolly extends Provider {
 			 * @since 3.1.0
 			 * @hook classifai_aws_polly_pre_connect_to_service
 			 *
-			 * @param {bool} $pre The value of pre connect to service. Default false. non-false value will short-circuit the describe voices request.
+			 * @param bool $pre The value of pre connect to service. Default false. non-false value will short-circuit the describe voices request.
 			 *
-			 * @return {bool|mixed} The filtered value of connect to service.
+			 * @return bool|mixed The filtered value of connect to service.
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_connect_to_service', false );
 
@@ -406,12 +406,12 @@ class AmazonPolly extends Provider {
 			 * @since 3.1.0
 			 * @hook classifai_aws_polly_synthesize_speech_args
 			 *
-			 * @param {array} Associative array of synthesize speech args.
-			 * @param {int}   $post_id Post ID.
-			 * @param {object} $provider_instance Provider instance.
-			 * @param {object} $feature_instance Feature instance.
+			 * @param array  $args              Associative array of synthesize speech args.
+			 * @param int    $post_id           Post ID.
+			 * @param object $provider_instance Provider instance.
+			 * @param object $feature_instance  Feature instance.
 			 *
-			 * @return {array} The filtered array of synthesize speech args.
+			 * @return array The filtered array of synthesize speech args.
 			 */
 			$synthesize_data = apply_filters(
 				'classifai_' . self::ID . '_synthesize_speech_args',
@@ -436,10 +436,10 @@ class AmazonPolly extends Provider {
 			 * @since 3.1.0
 			 * @hook classifai_aws_polly_pre_synthesize_speech
 			 *
-			 * @param {bool}   $pre A value of pre synthesize speech. Default false.
-			 * @param {array}  $synthesize_data HTTP request arguments.
+			 * @param bool   $pre             A value of pre synthesize speech. Default false.
+			 * @param array  $synthesize_data HTTP request arguments.
 			 *
-			 * @return {bool|mixed} The filtered value of pre synthesize speech.
+			 * @return bool|mixed The filtered value of pre synthesize speech.
 			 */
 			$pre = apply_filters( 'classifai_' . self::ID . '_pre_synthesize_speech', false, $synthesize_data );
 

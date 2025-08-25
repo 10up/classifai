@@ -55,11 +55,11 @@ class DebugInfo {
 		 * @hook classifai_debug_information
 		 * @see {@link https://developer.wordpress.org/reference/hooks/debug_information/|debug_information}
 		 *
-		 * @param {array} 'debug_info' Array of associative arrays corresponding to lines shown on the Site Health screen. Each array
+		 * @param array 'debug_info' Array of associative arrays corresponding to lines shown on the Site Health screen. Each array
 		 *              requires a `label` and a `value` field. Other accepted fields are `debug` and `private`.
-		 * @param {array} $information The full array of site debug information.
+		 * @param array $information The full array of site debug information.
 		 *
-		 * @return {array} Filtered array of debug information.
+		 * @return array Filtered array of debug information.
 		 */
 		$fields = apply_filters(
 			'classifai_debug_information',

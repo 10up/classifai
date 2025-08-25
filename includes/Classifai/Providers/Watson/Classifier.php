@@ -74,9 +74,9 @@ class Classifier {
 		 * @since 1.0.0
 		 * @hook classifai_classified_data
 		 *
-		 * @param {array} $classified_data The classified data.
+		 * @param array $classified_data The classified data.
 		 *
-		 * @return {array} The filtered classified data.
+		 * @return array The filtered classified data.
 		 */
 		return apply_filters( 'classifai_classified_data', $classified_data );
 	}
