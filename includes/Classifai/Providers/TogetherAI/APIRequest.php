@@ -19,16 +19,6 @@ use Classifai\Providers\HTTPClient;
 class APIRequest extends HTTPClient {
 
 	/**
-	 * TogetherAI APIRequest constructor.
-	 *
-	 * @param string $api_key API key.
-	 * @param string $feature Feature name.
-	 */
-	public function __construct( string $api_key = '', string $feature = '' ) {
-		parent::__construct( $api_key, $feature );
-	}
-
-	/**
 	 * Get the filter prefix for this provider.
 	 *
 	 * @return string
