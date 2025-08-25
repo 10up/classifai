@@ -3,9 +3,7 @@
 namespace Classifai\Providers\OpenAI;
 
 use Classifai\Providers\HTTPClient;
-use WP_Error;
 use function Classifai\safe_wp_remote_post;
-use function Classifai\safe_wp_remote_get;
 
 /**
  * The APIRequest class is a low level class to make OpenAI API
@@ -47,7 +45,7 @@ class APIRequest extends HTTPClient {
 	 * @param array  $body The body of the request.
 	 * @return array|WP_Error
 	 */
-	public function post_form( $url = '', $body = [] ) {
+	public function post_form( string $url = '', array $body = [] ) {
 		/**
 		 * Filter the URL for the post form request.
 		 *
