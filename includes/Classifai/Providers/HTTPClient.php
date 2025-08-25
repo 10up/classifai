@@ -274,7 +274,7 @@ abstract class HTTPClient {
 	 *
 	 * @param array $options The header options, passed by reference.
 	 */
-	protected function add_headers( array &$options = [] ) {
+	public function add_headers( array &$options = [] ) {
 		if ( empty( $options['headers'] ) ) {
 			$options['headers'] = [];
 		}
