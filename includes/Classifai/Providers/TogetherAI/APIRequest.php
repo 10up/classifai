@@ -3,7 +3,6 @@
 namespace Classifai\Providers\TogetherAI;
 
 use Classifai\Providers\HTTPClient;
-use WP_Error;
 
 /**
  * The APIRequest class is a low level class to make TogetherAI API
