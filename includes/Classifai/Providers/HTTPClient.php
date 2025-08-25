@@ -200,7 +200,7 @@ abstract class HTTPClient {
 		// Error responses
 		if ( $code >= 400 ) {
 			$response_message = wp_remote_retrieve_response_message( $response );
-			$status_text = $response_message ?: __( 'Unknown error', 'classifai' );
+			$status_text      = $response_message ? $response_message : __( 'Unknown error', 'classifai' );
 
 			// Try to extract specific error message from the server response
 			$server_response = $this->extract_error_message( $response );
@@ -226,7 +226,7 @@ abstract class HTTPClient {
 		}
 
 		// Successful responses
-		$headers = wp_remote_retrieve_headers( $response );
+		$headers      = wp_remote_retrieve_headers( $response );
 		$content_type = false;
 
 		if ( ! empty( $headers ) ) {
@@ -240,22 +240,30 @@ abstract class HTTPClient {
 			if ( json_last_error() === JSON_ERROR_NONE ) {
 				if ( isset( $json['error'] ) && $json['error'] ) {
 					$error_message = $this->extract_error_message( $response );
-					return new WP_Error( 'api_error', $error_message ?: __( 'API returned an error', 'classifai' ) );
+					return new WP_Error( 'api_error', $error_message ? $error_message : __( 'API returned an error', 'classifai' ) );
 				}
 
 				return $json;
 			} else {
 				$error_msg = __( 'Invalid JSON response: ', 'classifai' ) . json_last_error_msg();
-				return new WP_Error( 'invalid_json', $error_msg, [
-					'body' => wp_is_stream( $body ) ? null : wp_html_excerpt( (string) $body, 1000, '…' ),
-				] );
+				return new WP_Error(
+					'invalid_json',
+					$error_msg,
+					[
+						'body' => wp_is_stream( $body ) ? null : wp_html_excerpt( (string) $body, 1000, '…' ),
+					]
+				);
 			}
 		} else {
 			$error_msg = __( 'Unsupported response content type', 'classifai' );
-			return new WP_Error( 'invalid_content_type', $error_msg, [
-				'content_type' => $content_type,
-				'body' => wp_is_stream( $body ) ? null : wp_html_excerpt( (string) $body, 1000, '…' ),
-			] );
+			return new WP_Error(
+				'invalid_content_type',
+				$error_msg,
+				[
+					'content_type' => $content_type,
+					'body'         => wp_is_stream( $body ) ? null : wp_html_excerpt( (string) $body, 1000, '…' ),
+				]
+			);
 		}
 	}
 
@@ -335,8 +343,8 @@ abstract class HTTPClient {
 	 * @return string
 	 */
 	protected function extract_error_message( array $response ): string {
-		$body = wp_remote_retrieve_body( $response );
-		$headers = wp_remote_retrieve_headers( $response );
+		$body         = wp_remote_retrieve_body( $response );
+		$headers      = wp_remote_retrieve_headers( $response );
 		$content_type = isset( $headers['content-type'] ) ? $headers['content-type'] : false;
 
 		if ( $content_type && false !== strpos( $content_type, 'application/json' ) ) {
@@ -364,5 +372,4 @@ abstract class HTTPClient {
 	protected function get_default_timeout(): int {
 		return 90;
 	}
-
 }
