@@ -29,7 +29,8 @@ class APIRequestTest extends \WP_UnitTestCase {
 
 	function test_it_uses_option_username_if_present() {
 		update_option( 'classifai_feature_classification', [ 'ibm_watson_nlu' => [ 'username' => 'foo-option' ] ] );
-		$actual = $this->request->get_username();
+		$request = new APIRequest();
+		$actual = $request->get_username();
 		$this->assertEquals( 'foo-option', $actual );
 	}
 
@@ -50,7 +51,8 @@ class APIRequestTest extends \WP_UnitTestCase {
 
 	function test_it_uses_option_password_if_present() {
 		update_option( 'classifai_feature_classification', [ 'ibm_watson_nlu' => [ 'password' => 'foo-option' ] ] );
-		$actual = $this->request->get_password();
+		$request = new APIRequest();
+		$actual = $request->get_password();
 		$this->assertEquals( 'foo-option', $actual );
 	}
 
