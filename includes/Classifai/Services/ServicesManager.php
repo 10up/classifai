@@ -138,7 +138,7 @@ class ServicesManager {
 	/**
 	 * Get general ClassifAI settings
 	 *
-	 * @param string $index Optional specific setting to be retrieved.
+	 * @param string|bool $index Optional specific setting to be retrieved. If false, all settings will be returned.
 	 * @return mixed
 	 */
 	public function get_settings( $index = false ) {
@@ -187,6 +187,7 @@ class ServicesManager {
 	public function sanitize_settings( $settings ): array {
 		$new_settings = [];
 
+		// Save registration settings.
 		if ( isset( $settings['email'] )
 			&& isset( $settings['license_key'] )
 			&& $this->check_license_key( $settings['email'], $settings['license_key'] )
@@ -206,6 +207,9 @@ class ServicesManager {
 				'error'
 			);
 		}
+
+		// Save block AI bots setting.
+		$new_settings['block_ai_bots'] = $settings['block_ai_bots'] ?? '0';
 
 		return $new_settings;
 	}
