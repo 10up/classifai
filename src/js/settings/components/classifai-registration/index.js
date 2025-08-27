@@ -106,6 +106,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 							onChange={ ( value ) => {
 								setSettings( { ...settings, email: value } );
 							} }
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 					<SettingsRow
@@ -141,6 +142,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 									license_key: value,
 								} );
 							} }
+							__next40pxDefaultSize
 						/>
 					</SettingsRow>
 				</PanelBody>
