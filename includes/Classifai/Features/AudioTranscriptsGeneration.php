@@ -3,7 +3,8 @@
 namespace Classifai\Features;
 
 use Classifai\Services\LanguageProcessing;
-use Classifai\Providers\OpenAI\SpeechToText;
+use Classifai\Providers\OpenAI\SpeechToText as OpenAISpeechToText;
+use Classifai\Providers\ElevenLabs\SpeechToText as ElevenLabsSpeechToText;
 use WP_Error;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -34,7 +35,8 @@ class AudioTranscriptsGeneration extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			SpeechToText::ID => __( 'OpenAI Audio Transcription', 'classifai' ),
+			OpenAISpeechToText::ID     => __( 'OpenAI Audio Transcription', 'classifai' ),
+			ElevenLabsSpeechToText::ID => __( 'ElevenLabs Audio Transcription', 'classifai' ),
 		];
 	}
 
@@ -271,7 +273,7 @@ class AudioTranscriptsGeneration extends Feature {
 	 */
 	public function get_feature_default_settings(): array {
 		return [
-			'provider' => SpeechToText::ID,
+			'provider' => OpenAISpeechToText::ID,
 		];
 	}
 
