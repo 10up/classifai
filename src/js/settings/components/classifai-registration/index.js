@@ -157,7 +157,7 @@ export const ClassifAIRegistrationForm = ( { onSaveSuccess = () => {} } ) => {
 						description={
 							<>
 								{ __(
-									'If you turn on this setting, ClassifAI will modify your robots.txt file to request that known AI bots do not index your site. Note it is up to each bot to respect this request.',
+									'If you turn on this setting, ClassifAI will modify your robots.txt file to request that known AI data scraping bots do not index your site. This will not block AI search bots, just data scraping bots. At the moment, the following bots are blocked: Applebot-Extended, CCBot, ClaudeBot, FacebookBot, Google-Extended, GPTbot, Meta-ExternalAgent.',
 									'classifai'
 								) }
 							</>
