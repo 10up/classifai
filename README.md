@@ -34,6 +34,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Smartly crop images using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Scan PDF files for embedded text and save for use in post meta using [Microsoft Azure's AI Vision API](https://azure.microsoft.com/en-us/services/cognitive-services/computer-vision/)
 * Bulk classify content with [WP-CLI](https://wp-cli.org/)
+* Modification of your `robots.txt` file to block the most common AI data scraping bots from indexing your site
 
 ### Language Processing
 
