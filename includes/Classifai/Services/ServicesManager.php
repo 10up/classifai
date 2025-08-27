@@ -188,8 +188,8 @@ class ServicesManager {
 		$new_settings = [];
 
 		// Save registration settings.
-		if ( isset( $settings['email'] )
-			&& isset( $settings['license_key'] )
+		if ( ! empty( $settings['email'] )
+			&& ! empty( $settings['license_key'] )
 			&& $this->check_license_key( $settings['email'], $settings['license_key'] )
 		) {
 			$new_settings['valid_license'] = true;
