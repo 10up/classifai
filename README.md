@@ -22,7 +22,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Expand or condense text content using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service), [Google's Gemini API](https://ai.google.dev/docs/gemini_api_overview), [xAI's Grok](https://x.ai/) or locally using [Ollama](https://ollama.com/)
 * Draft a full length article using [OpenAI's ChatGPT API](https://platform.openai.com/docs/guides/chat), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen), [Together AI's API](https://docs.together.ai/docs/images-overview) or locally using [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
-* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text)
+* Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text) or [ElevenLabs Speech to Text API](https://elevenlabs.io/docs/capabilities/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
 * Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
@@ -61,6 +61,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * [WordPress](http://wordpress.org) 6.7+
 * To utilize the NLU Language Processing functionality, you will need an active [IBM Watson](https://cloud.ibm.com/registration) account.
 * To utilize the ChatGPT, Embeddings, Text to Speech or Speech to Text Language Processing functionality or Image Generation functionality, you will need an active [OpenAI](https://platform.openai.com/signup) account.
+* To utilize the ElevenLabs Speech to Text Language Processing functionality, you will need an active [ElevenLabs](https://elevenlabs.io/sign-up) account.
 * To utilize the Azure AI Vision Image Processing functionality or Text to Speech Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account.
 * To utilize the Azure OpenAI Language Processing functionality, you will need an active [Microsoft Azure](https://signup.azure.com/signup) account and you will need to [apply](https://aka.ms/oai/access) for OpenAI access.
 * To utilize the Google Gemini Language Processing functionality or Image Generation functionality, you will need an active [Google Gemini](https://ai.google.dev/tutorials/setup) account.
@@ -359,6 +360,36 @@ Note that [OpenAI](https://platform.openai.com/docs/guides/speech-to-text) can c
 
 * Select **OpenAI Embeddings** in the provider dropdown.
 * Enter your API Key copied from the above step into the `API Key` field.
+
+### 3. Enable specific features
+
+* Choose to enable the ability to automatically generate transcripts from supported audio files.
+* Choose which user roles have access to this ability.
+* Save settings. An error will show if API authentication fails.
+
+### 4. Upload a new audio file
+
+* Upload a new audio file.
+* Check to make sure the transcript was stored in the Description field.
+
+## Set Up Audio Transcripts Generation (via ElevenLabs Speech to Text)
+
+Note that [ElevenLabs](https://elevenlabs.io/docs/capabilities/speech-to-text) can create a transcript for audio files that meet the following requirements:
+
+* The file must be presented in mp3, mp4, mpeg, wav, or ogg format
+* The file size must be less than 100 megabytes (MB)
+
+### 1. Sign up for ElevenLabs
+
+* [Sign up for an ElevenLabs account](https://elevenlabs.io/sign-up) or sign into your existing one.
+* Log into your account and go to the [API key page](https://elevenlabs.io/app/developers/api-keys).
+* Click `Create Key` create a new API key and ensure you turn on access to the Speech to Text endpoint and turn on Read access to the Models endpoint.
+
+### 2. Configure ElevenLabs API Keys under Tools > ClassifAI > Language Processing > Audio Transcripts Generation > Settings
+
+* Select **ElevenLabs Audio Transcription** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Select the model you want to use for the transcription after saving and verifying the connection.
 
 ### 3. Enable specific features
 
