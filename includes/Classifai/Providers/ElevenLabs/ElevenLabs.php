@@ -5,10 +5,10 @@
 
 namespace Classifai\Providers\ElevenLabs;
 
-use Classifai\Providers\OpenAI\APIRequest;
 use WP_Error;
 
-use function Classifai\get_all_post_statuses;
+use function Classifai\safe_wp_remote_get;
+use function Classifai\safe_wp_remote_post;
 
 trait ElevenLabs {
 
@@ -48,6 +48,104 @@ trait ElevenLabs {
 	}
 
 	/**
+	 * Make a request to the ElevenLabs API.
+	 *
+	 * Note instead of adding a new APIRequest class like we do elsewhere,
+	 * doing a lightweight version of that here instead. The goal is to
+	 * replace this with a more robust APIRequest class in the future,
+	 * based on the PHP AI SDK.
+	 *
+	 * @param string $url The URL for the request.
+	 * @param string $api_key The API key.
+	 * @param string $type The type of request.
+	 * @param array  $options The options for the request.
+	 * @return array|WP_Error
+	 */
+	public function request( string $url, string $api_key = '', string $type = 'post', array $options = [] ) {
+		/**
+		 * Filter the URL for the request.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_elevenlabs_api_request_url
+		 *
+		 * @param string $url The URL for the request.
+		 * @param array  $options The options for the request.
+		 *
+		 * @return string The URL for the request.
+		 */
+		$url = apply_filters( 'classifai_elevenlabs_api_request_url', $url, $options );
+
+		// Set our default options.
+		$options = wp_parse_args(
+			$options,
+			[
+				'timeout' => 90, // phpcs:ignore WordPressVIPMinimum.Performance.RemoteRequestTimeout.timeout_timeout
+			]
+		);
+
+		/**
+		 * Filter the options for the request.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_elevenlabs_api_request_options
+		 *
+		 * @param array  $options The options for the request.
+		 * @param string $url The URL for the request.
+		 *
+		 * @return array The options for the request.
+		 */
+		$options = apply_filters( 'classifai_elevenlabs_api_request_options', $options, $url );
+
+		// Set our default headers.
+		if ( empty( $options['headers'] ) ) {
+			$options['headers'] = [];
+		}
+
+		if ( ! isset( $options['headers']['xi-api-key'] ) ) {
+			$options['headers']['xi-api-key'] = $api_key;
+		}
+
+		if ( ! isset( $options['headers']['Content-Type'] ) ) {
+			$options['headers']['Content-Type'] = 'application/json';
+		}
+
+		// Make the request.
+		if ( 'post' === $type ) {
+			$response = safe_wp_remote_post( $url, $options );
+		} else {
+			$response = safe_wp_remote_get( $url, $options );
+		}
+
+		// Parse out the response.
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		$code = wp_remote_retrieve_response_code( $response );
+		$json = json_decode( $body, true );
+
+		if ( 200 !== $code ) {
+			if ( isset( $json['detail']['message'] ) ) {
+				return new WP_Error( $json['detail']['status'] ?? $code, $json['detail']['message'] ?? esc_html__( 'An error occurred', 'classifai' ) );
+			}
+		}
+
+		if ( json_last_error() === JSON_ERROR_NONE ) {
+			if ( empty( $json['error'] ) ) {
+				return $json;
+			} else {
+				$message = $json['error']['message'] ?? esc_html__( 'An error occurred', 'classifai' );
+				return new WP_Error( $code, $message );
+			}
+		} elseif ( ! empty( wp_remote_retrieve_response_message( $response ) ) ) {
+			return new WP_Error( $code, wp_remote_retrieve_response_message( $response ) );
+		} else {
+			return new WP_Error( 'Invalid JSON: ' . json_last_error_msg(), $body );
+		}
+	}
+
+	/**
 	 * Sanitize the API key, showing an error message if needed.
 	 *
 	 * @param array $new_settings Incoming settings, if any.
@@ -64,12 +162,6 @@ trait ElevenLabs {
 			$new_settings[ static::ID ]['authenticated'] = false;
 			$new_settings[ static::ID ]['models']        = [];
 			$error_message                               = $models->get_error_message();
-
-			// For response code 429, credentials are valid but rate limit is reached.
-			if ( 429 === (int) $models->get_error_code() ) {
-				$new_settings[ static::ID ]['authenticated'] = true;
-				$new_settings[ static::ID ]['models']        = $settings[ static::ID ]['models'];
-			}
 
 			add_settings_error(
 				'api_key',
@@ -99,8 +191,7 @@ trait ElevenLabs {
 			return new WP_Error( 'auth', esc_html__( 'Please enter your ElevenLabs API key.', 'classifai' ) );
 		}
 
-		$request  = new APIRequest( $api_key );
-		$response = $request->get( $this->get_api_url( $this->model_path ) );
+		$response = $this->request( $this->get_api_url( $this->model_path ), $api_key, 'get' );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -109,10 +200,8 @@ trait ElevenLabs {
 		// Get the model data we need.
 		$models = array_map(
 			fn( $model ) => [
-				'id'             => $model['id'] ?? '',
-				'type'           => $model['type'] ?? '',
-				'display_name'   => $model['display_name'] ?? '',
-				'context_length' => $model['context_length'] ?? '',
+				'id'           => $model['model_id'] ?? '',
+				'display_name' => $model['name'] ?? '',
 			],
 			$response
 		);

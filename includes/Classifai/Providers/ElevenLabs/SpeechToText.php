@@ -32,7 +32,7 @@ class SpeechToText extends Provider {
 	protected $api_path = 'speech-to-text';
 
 	/**
-	 * Supported file formats
+	 * Supported file formats.
 	 *
 	 * @var array
 	 */
@@ -45,11 +45,15 @@ class SpeechToText extends Provider {
 	];
 
 	/**
-	 * Maximum file size our model supports
+	 * Maximum file size our model supports.
+	 *
+	 * Note that ElevenLabs supports larger files, up to 3GB.
+	 * We enforce a smaller limit to avoid performance issues
+	 * since we don't process asynchronously.
 	 *
 	 * @var int
 	 */
-	public $max_file_size = 25 * MB_IN_BYTES;
+	public $max_file_size = 100 * MB_IN_BYTES;
 
 	/**
 	 * ElevenLabs Speech to Text constructor.
@@ -86,7 +90,19 @@ class SpeechToText extends Provider {
 
 		$new_settings[ static::ID ]['api_key']       = $api_key_settings[ static::ID ]['api_key'];
 		$new_settings[ static::ID ]['authenticated'] = $api_key_settings[ static::ID ]['authenticated'];
-		$new_settings[ static::ID ]['models']        = $api_key_settings[ static::ID ]['models'];
+
+		// Speech To Text only supports two models and they don't seem to be
+		// in the models endpoint, so we hardcode them here.
+		$new_settings[ static::ID ]['models'] = [
+			[
+				'id'           => 'scribe_v1',
+				'display_name' => 'Scribe v1',
+			],
+			[
+				'id'           => 'scribe_v1_experimental',
+				'display_name' => 'Scribe v1 Experimental',
+			],
+		];
 
 		$new_settings[ static::ID ]['model'] = sanitize_text_field( $new_settings[ static::ID ]['model'] ?? $settings[ static::ID ]['model'] );
 

@@ -34,10 +34,7 @@ export const ElevenLabsSpeechToTextSettings = ( { isConfigured = false } ) => {
 	];
 
 	// Convert providerSettings.models to an array from an object.
-	if (
-		providerSettings?.models &&
-		! Array.isArray( providerSettings.models )
-	) {
+	if ( providerSettings?.models ) {
 		models.push(
 			...Object.entries( providerSettings.models ).map(
 				( [ key, model ] ) => ( {
@@ -70,6 +67,7 @@ export const ElevenLabsSpeechToTextSettings = ( { isConfigured = false } ) => {
 					options={ models }
 					disabled={ models.length <= 1 }
 					__nextHasNoMarginBottom
+					__next40pxDefaultSize
 				/>
 			</SettingsRow>
 		</>
