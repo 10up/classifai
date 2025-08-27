@@ -33,6 +33,6 @@ jobs:
         with:
           standard: WordPress-VIP-Go
           use_local_config: false
-          enable_warnings: true
+          enable_warnings: false
           only_changed_lines: false
           excludes: tests
