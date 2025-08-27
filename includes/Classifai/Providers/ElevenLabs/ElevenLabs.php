@@ -128,6 +128,8 @@ trait ElevenLabs {
 		if ( 200 !== $code ) {
 			if ( isset( $json['detail']['message'] ) ) {
 				return new WP_Error( $json['detail']['status'] ?? $code, $json['detail']['message'] ?? esc_html__( 'An error occurred', 'classifai' ) );
+			} else {
+				return new WP_Error( $code, esc_html__( 'An error occurred', 'classifai' ) );
 			}
 		}
 

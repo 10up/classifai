@@ -12,6 +12,8 @@ use WP_REST_Request;
 use function Classifai\get_asset_info;
 use function Classifai\clean_input;
 use function Classifai\safe_wp_remote_get;
+use function Classifai\is_remote_url;
+use function Classifai\is_local_path;
 
 /**
  * Class AudioTranscriptsGeneration
@@ -470,6 +472,87 @@ class AudioTranscriptsGeneration extends Feature {
 		}
 
 		return $temp_file_path;
+	}
+
+	/**
+	 * Generates a transcript from a given attachment ID.
+	 *
+	 * Validates that the current user can edit the attachment,
+	 * ensures the feature is enabled, and checks whether the attachment
+	 * meets the processing criteria (e.g., correct file type and size).
+	 *
+	 * @param int   $attachment_id Attachment post ID.
+	 * @param array $args          Optional arguments to pass to the route.
+	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
+	 */
+	public function transcribe_from_attachment( int $attachment_id = 0, array $args = [] ) {
+		if ( $attachment_id && ! current_user_can( 'edit_post', $attachment_id ) && ( ! defined( 'WP_CLI' ) || ! WP_CLI ) ) {
+			return new WP_Error( 'no_permission', esc_html__( 'User does not have permission to edit this attachment.', 'classifai' ) );
+		}
+
+		if ( ! $this->is_feature_enabled() ) {
+			return new WP_Error( 'not_enabled', esc_html__( 'Transcript generation is disabled. Please check your settings.', 'classifai' ) );
+		}
+
+		if ( ! $this->should_process( $attachment_id ) ) {
+			return new WP_Error( 'process_error', esc_html__( 'Attachment does not meet processing requirements. Ensure the file type and size meet requirements.', 'classifai' ) );
+		}
+
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'];
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		if ( ! $provider_instance || ! method_exists( $provider_instance, 'transcribe_audio' ) ) {
+			return new WP_Error( 'provider_error', esc_html__( 'Provider instance not found.', 'classifai' ) );
+		}
+
+		return $provider_instance->transcribe_audio(
+			get_attached_file( $attachment_id ),
+			array_merge( $args, array( 'attachment_id' => $attachment_id ) )
+		);
+	}
+
+	/**
+	 * Generates a transcript from a file path or remote URL.
+	 *
+	 * If the path is a remote URL, it is downloaded to a temporary
+	 * location and deleted after processing. If it's a local path
+	 * and the file exists, it is processed directly.
+	 *
+	 * @param string $path Absolute local path or remote URL to an audio file.
+	 * @param array  $args  Optional arguments to pass to the route.
+	 * @return string|WP_Error Transcription result on success, or WP_Error on failure.
+	 */
+	public function transcribe_from_path( string $path, array $args = [] ) {
+		$settings          = $this->get_settings();
+		$provider_id       = $settings['provider'];
+		$provider_instance = $this->get_feature_provider_instance( $provider_id );
+
+		if ( ! $provider_instance || ! method_exists( $provider_instance, 'transcribe_audio' ) ) {
+			return new WP_Error( 'provider_error', esc_html__( 'Provider instance not found.', 'classifai' ) );
+		}
+
+		$result = '';
+
+		if ( is_remote_url( $path ) ) {
+			$temp_file_path = self::remote_url_to_path( $path );
+
+			if ( is_wp_error( $temp_file_path ) ) {
+				return $temp_file_path;
+			}
+
+			$result = $provider_instance->transcribe_audio( $temp_file_path, $args );
+			wp_delete_file( $temp_file_path );
+		} elseif ( is_local_path( $path ) ) {
+			if ( file_exists( $path ) ) {
+				return $provider_instance->transcribe_audio( $path, $args );
+
+			} else {
+				return $result;
+			}
+		}
+
+		return $result;
 	}
 
 	/**
