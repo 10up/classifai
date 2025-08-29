@@ -16,6 +16,7 @@ use Classifai\Features\KeyTakeaways;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use WP_Error;
+use WordPress\AiClient\AiClient;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
@@ -715,7 +716,9 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
+		if ( ! defined( 'OPENAI_API_KEY' ) ) {
+			define( 'OPENAI_API_KEY', $settings[ static::ID ]['api_key'] ?? '' );
+		}
 
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
@@ -768,31 +771,29 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Make our API request.
-		$response = $request->post(
-			$this->chatgpt_url,
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		try {
+			$provider_class_name = AiClient::defaultRegistry()->getProviderClassName( 'openai' );
 
-		set_transient( 'classifai_openai_chatgpt_title_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
-
-		if ( is_wp_error( $response ) ) {
-			return $response;
+			// Make our API request.
+			$response = AiClient::prompt( '"""' . $message_content . '"""' )
+				->usingProvider( 'openai' )
+				->usingModel( $provider_class_name::model( $this->chatgpt_model ) )
+				->usingSystemInstruction( $body['messages'][0]['content'] )
+				->usingTemperature( $body['temperature'] ?? 0.9 )
+				->generateTexts( $body['n'] ?? 1 );
+		} catch ( \Exception $e ) {
+			$response = [];
 		}
 
-		if ( empty( $response['choices'] ) ) {
+		if ( empty( $response ) ) {
 			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from OpenAI.', 'classifai' ) );
 		}
 
 		// Extract out the text response.
 		$return = [];
-		foreach ( $response['choices'] as $choice ) {
-			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
-			}
+		foreach ( $response as $choice ) {
+			// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+			$return[] = sanitize_text_field( trim( $choice, ' "\'' ) );
 		}
 
 		return $return;
@@ -1359,7 +1360,6 @@ class ChatGPT extends Provider {
 		if ( $this->feature_instance instanceof TitleGeneration ) {
 			$debug_info[ __( 'No. of titles', 'classifai' ) ]         = $provider_settings['number_of_suggestions'] ?? 1;
 			$debug_info[ __( 'Generate title prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_title_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]       = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_title_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
