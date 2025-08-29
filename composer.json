@@ -14,7 +14,8 @@
     "yahnis-elsts/plugin-update-checker": "5.1",
     "ua-parser/uap-php": "dev-master",
     "aws/aws-sdk-php": "^3.300",
-    "woocommerce/action-scheduler": "3.8.1"
+    "woocommerce/action-scheduler": "3.8.1",
+    "wordpress/php-ai-client": "dev-trunk"
   },
   "autoload": {
     "psr-4": {
@@ -47,7 +48,8 @@
   "config": {
     "allow-plugins": {
       "dealerdirect/phpcodesniffer-composer-installer": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "php-http/discovery": true
     }
   },
   "archive": {
