@@ -3,7 +3,6 @@
 namespace Classifai\Features;
 
 use Classifai\Services\Personalizer as PersonalizerService;
-use Classifai\Providers\Azure\Personalizer as PersonalizerProvider;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 
 use function Classifai\get_asset_info;
@@ -32,7 +31,6 @@ class RecommendedContent extends Feature {
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
 			OpenAIEmbeddings::ID     => __( 'OpenAI Embeddings', 'classifai' ),
-			PersonalizerProvider::ID => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 		];
 	}
 
@@ -279,27 +277,6 @@ class RecommendedContent extends Feature {
 	}
 
 	/**
-	 * Runs the feature.
-	 *
-	 * @param mixed ...$args Arguments required by the feature depending on the provider selected.
-	 * @return mixed
-	 */
-	public function run( ...$args ) {
-		$settings          = $this->get_settings();
-		$provider_id       = $settings['provider'] ?? PersonalizerProvider::ID;
-		$provider_instance = $this->get_feature_provider_instance( $provider_id );
-		$result            = '';
-
-		if ( PersonalizerProvider::ID === $provider_instance::ID ) {
-			/** @var PersonalizerProvider $provider_instance */
-			$result = call_user_func_array(
-				[ $provider_instance, 'personalizer_send_reward' ],
-				[ ...$args ]
-			);
-		}
-	}
-
-	/**
 	 * Get status of embeddings generation process.
 	 *
 	 * @return bool
@@ -327,20 +304,6 @@ class RecommendedContent extends Feature {
 
 		if ( isset( $old_settings['enable_recommended_content'] ) ) {
 			$new_settings['status'] = $old_settings['enable_recommended_content'];
-		}
-
-		$new_settings['provider'] = PersonalizerProvider::ID;
-
-		if ( isset( $old_settings['url'] ) ) {
-			$new_settings[ PersonalizerProvider::ID ]['endpoint_url'] = $old_settings['url'];
-		}
-
-		if ( isset( $old_settings['api_key'] ) ) {
-			$new_settings[ PersonalizerProvider::ID ]['api_key'] = $old_settings['api_key'];
-		}
-
-		if ( isset( $old_settings['authenticated'] ) ) {
-			$new_settings[ PersonalizerProvider::ID ]['authenticated'] = $old_settings['authenticated'];
 		}
 
 		if ( isset( $old_settings['recommended_content_roles'] ) ) {

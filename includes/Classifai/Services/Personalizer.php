@@ -38,7 +38,6 @@ class Personalizer extends Service {
 			'classifai_recommendation_service_providers',
 			[
 				'Classifai\Providers\OpenAI\Embeddings',
-				'Classifai\Providers\Azure\Personalizer',
 			]
 		);
 	}

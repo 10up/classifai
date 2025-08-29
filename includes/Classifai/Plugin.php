@@ -310,7 +310,6 @@ class Plugin {
 		$tts_settings          = get_option( 'classifai_azure_text_to_speech', [] );
 		$vision_settings       = get_option( 'classifai_computer_vision', [] );
 		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
-		$personalizer_settings = get_option( 'classifai_personalizer', [] );
 
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
@@ -342,11 +341,6 @@ class Plugin {
 		if ( ! empty( $dalle_settings ) ) {
 			$features[] = \Classifai\Features\ImageGeneration::class;
 		}
-
-		if ( ! empty( $personalizer_settings ) ) {
-			$features[] = \Classifai\Features\RecommendedContent::class;
-		}
-
 		// Migrate settings.
 		$migration_needed = ! empty( $features );
 		foreach ( $features as $feature ) {
