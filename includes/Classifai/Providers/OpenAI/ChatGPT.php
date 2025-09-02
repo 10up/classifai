@@ -16,8 +16,6 @@ use Classifai\Features\KeyTakeaways;
 use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use WP_Error;
-use WordPress\AiClient\AiClient;
-use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
@@ -608,8 +606,6 @@ class ChatGPT extends Provider {
 
 		$excerpt_length = absint( $settings['length'] ?? 55 );
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-
 		// Overwrite the prompt if we are generating an excerpt for a product.
 		if ( 'product' === $post_type ) {
 			$excerpt_prompt = $feature->woo_prompt;
@@ -645,17 +641,17 @@ class ChatGPT extends Provider {
 		$message_content = $this->get_content( $post_id, $excerpt_length, false, $args['content'] );
 
 		/**
-		 * Filter the request body before sending to ChatGPT.
+		 * Filter the request data before sending to ChatGPT.
 		 *
 		 * @since 2.0.0
 		 * @hook classifai_chatgpt_excerpt_request_body
 		 *
-		 * @param array $body Request body that will be sent to ChatGPT.
+		 * @param array $data Request data that will be sent to ChatGPT.
 		 * @param int $post_id ID of post we are summarizing.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters(
+		$data = apply_filters(
 			'classifai_chatgpt_excerpt_request_body',
 			[
 				'model'       => $this->chatgpt_model,
@@ -665,27 +661,32 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		// Filter out the system prompt from the messages.
+		$system_prompt = array_filter(
+			$data['messages'],
+			function ( $message ) {
+				return 'system' === $message['role'];
+			}
+		);
+		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
+
 		// Make our API request.
-		$response = $request->post(
-			$this->chatgpt_url,
+		$response = $request->client(
+			'"""' . $message_content . '"""',
 			[
-				'body' => wp_json_encode( $body ),
+				'model'              => $data['model'] ?? $this->chatgpt_model,
+				'system_instruction' => $system_prompt,
+				'temperature'        => $data['temperature'] ?? 0.9,
 			]
 		);
 
-		set_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response', $response, DAY_IN_SECONDS * 30 );
-
-		// Extract out the text response, if it exists.
-		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
-			foreach ( $response['choices'] as $choice ) {
-				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
-				}
-			}
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
 
-		return $response;
+		return is_array( $response ) ? $response[0] : $response;
 	}
 
 	/**
@@ -779,10 +780,11 @@ class ChatGPT extends Provider {
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
+		// Make our API request.
 		$response = $request->client(
 			'"""' . $message_content . '"""',
 			[
-				'model'              => $this->chatgpt_model,
+				'model'              => $data['model'] ?? $this->chatgpt_model,
 				'system_instruction' => $system_prompt,
 				'temperature'        => $data['temperature'] ?? 0.9,
 				'n'                  => $data['n'] ?? 1,
@@ -1360,7 +1362,6 @@ class ChatGPT extends Provider {
 		} elseif ( $this->feature_instance instanceof ExcerptGeneration ) {
 			$debug_info[ __( 'Excerpt length', 'classifai' ) ]          = $settings['length'] ?? 55;
 			$debug_info[ __( 'Generate excerpt prompt', 'classifai' ) ] = wp_json_encode( $settings['generate_excerpt_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]         = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_excerpt_generation_latest_response' ) );
 		} elseif ( $this->feature_instance instanceof ContentResizing ) {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
 			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
