@@ -379,8 +379,6 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image Text Extraction is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-
 		/**
 		 * Filter the prompt we will send to ChatGPT.
 		 *
@@ -395,17 +393,17 @@ class ChatGPT extends Provider {
 		$prompt = apply_filters( 'classifai_chatgpt_ocr_prompt', get_default_prompt( $settings[ static::ID ]['prompt'] ?? [] ) ?? $feature->prompt, $post_id );
 
 		/**
-		 * Filter the request body before sending to ChatGPT.
+		 * Filter the request data before sending to ChatGPT.
 		 *
 		 * @since 3.3.0
 		 * @hook classifai_chatgpt_ocr_request_body
 		 *
-		 * @param array $body Request body that will be sent to ChatGPT.
+		 * @param array $data Request data that will be sent to ChatGPT.
 		 * @param int $post_id ID of attachment we are describing.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters(
+		$data = apply_filters(
 			'classifai_chatgpt_ocr_request_body',
 			[
 				'model'       => $this->vision_model,
@@ -433,31 +431,26 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
+
 		// Make our API request.
-		$response = $request->post(
-			$this->chatgpt_url,
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		$response = $request->client( null, $data );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
 		// Extract out the text response, if it exists.
-		if ( ! empty( $response['choices'] ) ) {
-			foreach ( $response['choices'] as $choice ) {
-				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-					$response = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
+		if ( ! empty( $response ) ) {
+			foreach ( $response as $choice ) {
+				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
+				$response = sanitize_text_field( trim( $choice, ' "\'' ) );
 
-					if ( ! $response || 'none' === $response ) {
-						$response = new WP_Error( 'no_choices', esc_html__( 'No text found.', 'classifai' ) );
-					} else {
-						// Save all the results for later
-						update_post_meta( $post_id, 'classifai_computer_vision_ocr', $response );
-					}
+				if ( ! $response || 'none' === $response ) {
+					$response = new WP_Error( 'no_choices', esc_html__( 'No text found.', 'classifai' ) );
+				} else {
+					// Save all the results for later
+					update_post_meta( $post_id, 'classifai_computer_vision_ocr', $response );
 				}
 			}
 		} else {
