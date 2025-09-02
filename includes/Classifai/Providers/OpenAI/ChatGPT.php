@@ -661,20 +661,32 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Filter out the system prompt from the messages.
-		$system_prompt = array_filter(
-			$data['messages'],
-			function ( $message ) {
-				return 'system' === $message['role'];
-			}
+		// Filter out the prompt types from the messages.
+		$system_prompt = array_values(
+			array_filter(
+				$data['messages'],
+				function ( $message ) {
+					return 'system' === $message['role'];
+				}
+			)
 		);
 		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
+
+		$user_prompt = array_values(
+			array_filter(
+				$data['messages'],
+				function ( $message ) {
+					return 'user' === $message['role'];
+				}
+			)
+		);
+		$user_prompt = ! empty( $user_prompt ) ? $user_prompt[0]['content'] : '"""' . $message_content . '"""';
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
 		// Make our API request.
 		$response = $request->client(
-			'"""' . $message_content . '"""',
+			$user_prompt,
 			[
 				'model'              => $data['model'] ?? $this->chatgpt_model,
 				'system_instruction' => $system_prompt,
@@ -769,20 +781,33 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Filter out the system prompt from the messages.
-		$system_prompt = array_filter(
-			$data['messages'],
-			function ( $message ) {
-				return 'system' === $message['role'];
-			}
+		// Filter out the prompt types from the messages.
+		$system_prompt = array_values(
+			array_filter(
+				$data['messages'],
+				function ( $message ) {
+					return 'system' === $message['role'];
+				}
+			)
 		);
 		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
+
+		$user_prompt = array_values(
+			array_filter(
+				$data['messages'],
+				function ( $message ) {
+					return 'user' === $message['role'];
+				}
+			)
+		);
+
+		$user_prompt = ! empty( $user_prompt ) ? $user_prompt[0]['content'] : '"""' . $message_content . '"""';
 
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
 		// Make our API request.
 		$response = $request->client(
-			'"""' . $message_content . '"""',
+			$user_prompt,
 			[
 				'model'              => $data['model'] ?? $this->chatgpt_model,
 				'system_instruction' => $system_prompt,

@@ -219,17 +219,17 @@ abstract class APIRequest {
 			$prompt_builder = AiClient::prompt( $prompt );
 			$prompt_builder = $prompt_builder->usingProvider( static::PROVIDER_ID );
 
-			if ( isset( $options['model'] ) ) {
+			if ( ! empty( $options['model'] ) ) {
 				$registry            = AiClient::defaultRegistry();
 				$provider_class_name = $registry->getProviderClassName( static::PROVIDER_ID );
 				$prompt_builder      = $prompt_builder->usingModel( $provider_class_name::model( $options['model'] ) );
 			}
 
-			if ( isset( $options['system_instruction'] ) ) {
+			if ( ! empty( $options['system_instruction'] ) ) {
 				$prompt_builder = $prompt_builder->usingSystemInstruction( $options['system_instruction'] );
 			}
 
-			if ( isset( $options['temperature'] ) ) {
+			if ( ! empty( $options['temperature'] ) ) {
 				$prompt_builder = $prompt_builder->usingTemperature( $options['temperature'] );
 			}
 
