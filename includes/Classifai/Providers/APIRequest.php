@@ -144,7 +144,7 @@ abstract class APIRequest {
 	 * @param array  $options Additional options.
 	 * @return array|WP_Error
 	 */
-	public function generate_with_ai_client( string $prompt, array $options = [] ) {
+	public function client( string $prompt, array $options = [] ) {
 		if ( ! $this->use_client || ! $this->ai_client ) {
 			return new WP_Error( 'ai_client_not_available', __( 'AI Client is not available', 'classifai' ) );
 		}
@@ -167,28 +167,27 @@ abstract class APIRequest {
 				$prompt_builder = $prompt_builder->usingTemperature( $options['temperature'] );
 			}
 
-			$count    = isset( $options['n'] ) ? $options['n'] : 1;
+			$count    = $options['n'] ?? 1;
 			$response = $prompt_builder->generateTexts( $count );
 
-			return $this->process_ai_client_response( $response );
-
+			return $this->get_client_response( $response );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'ai_client_error', $e->getMessage() );
 		}
 	}
 
 	/**
-	 * Process AI Client response.
+	 * Process the AI Client response.
 	 *
 	 * @param array $response The AI Client response.
 	 * @return array|WP_Error
 	 */
-	protected function process_ai_client_response( array $response ) {
+	protected function get_client_response( array $response ) {
 		if ( empty( $response ) ) {
 			return new WP_Error( 'no_choices', __( 'No choices were returned from the AI provider', 'classifai' ) );
 		}
 
-		$results = array();
+		$results = [];
 		foreach ( $response as $choice ) {
 			$results[] = $this->sanitize_choice( $choice );
 		}
@@ -247,7 +246,9 @@ abstract class APIRequest {
 		}
 
 		if ( ! empty( $json['error'] ) ) {
-			$message = isset( $json['error']['message'] ) ? $json['error']['message'] : __( 'An error occurred', 'classifai' );
+			$message = is_string( $json['error'] )
+				? $json['error']
+				: ( $json['error']['message'] ?? __( 'An error occurred', 'classifai' ) );
 			return new WP_Error( $code, $message );
 		}
 

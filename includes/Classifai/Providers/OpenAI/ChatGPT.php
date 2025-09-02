@@ -777,40 +777,23 @@ class ChatGPT extends Provider {
 		);
 		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
 
-		// TODO: Add a base APIRequest class that can be used, allowing easier support for non-SDK.
-		try {
-			$registry = AiClient::defaultRegistry();
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
-			$registry->setProviderRequestAuthentication(
-				'openai',
-				new ApiKeyRequestAuthentication( $settings[ static::ID ]['api_key'] ?? '' )
-			);
+		$response = $request->client(
+			'"""' . $message_content . '"""',
+			[
+				'model'              => $this->chatgpt_model,
+				'system_instruction' => $system_prompt,
+				'temperature'        => $data['temperature'] ?? 0.9,
+				'n'                  => $data['n'] ?? 1,
+			]
+		);
 
-			$provider_class_name = $registry->getProviderClassName( 'openai' );
-
-			$prompt_builder = AiClient::prompt( '"""' . $message_content . '"""' );
-			$prompt_builder = $prompt_builder->usingProvider( 'openai' );
-			$prompt_builder = $prompt_builder->usingModel( $provider_class_name::model( $this->chatgpt_model ) );
-			$prompt_builder = $prompt_builder->usingSystemInstruction( $system_prompt );
-			$prompt_builder = $prompt_builder->usingTemperature( $data['temperature'] ?? 0.9 );
-
-			$response = $prompt_builder->generateTexts( $data['n'] ?? 1 );
-		} catch ( \Exception $e ) {
-			$response = [];
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
 
-		if ( empty( $response ) ) {
-			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from OpenAI.', 'classifai' ) );
-		}
-
-		// Extract out the text response.
-		$return = [];
-		foreach ( $response as $choice ) {
-			// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-			$return[] = sanitize_text_field( trim( $choice, ' "\'' ) );
-		}
-
-		return $return;
+		return $response;
 	}
 
 	/**
