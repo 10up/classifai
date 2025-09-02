@@ -820,8 +820,6 @@ class ChatGPT extends Provider {
 			]
 		);
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-
 		if ( 'shrink' === $args['resize_type'] ) {
 			$prompt = esc_textarea( get_default_prompt( $settings['condense_text_prompt'] ) ?? $feature->condense_prompt );
 		} else {
@@ -843,17 +841,17 @@ class ChatGPT extends Provider {
 		$prompt = apply_filters( 'classifai_chatgpt_' . $args['resize_type'] . '_content_prompt', $prompt, $post_id, $args );
 
 		/**
-		 * Filter the resize request body before sending to ChatGPT.
+		 * Filter the resize request data before sending to ChatGPT.
 		 *
 		 * @since 2.3.0
 		 * @hook classifai_chatgpt_resize_content_request_body
 		 *
-		 * @param array $body Request body that will be sent to ChatGPT.
+		 * @param array $data Request data that will be sent to ChatGPT.
 		 * @param int   $post_id ID of post.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters(
+		$data = apply_filters(
 			'classifai_chatgpt_resize_content_request_body',
 			[
 				'model'       => $this->chatgpt_model,
@@ -873,35 +871,33 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		// Filter out the system prompt from the messages.
+		$system_prompt = array_filter(
+			$data['messages'],
+			function ( $message ) {
+				return 'system' === $message['role'];
+			}
+		);
+		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
+
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
+
 		// Make our API request.
-		$response = $request->post(
-			$this->chatgpt_url,
+		$response = $request->client(
+			'"""' . esc_html( $args['content'] ) . '"""',
 			[
-				'body' => wp_json_encode( $body ),
+				'model'              => $data['model'] ?? $this->chatgpt_model,
+				'system_instruction' => $system_prompt,
+				'temperature'        => $data['temperature'] ?? 0.9,
+				'n'                  => $data['n'] ?? 1,
 			]
 		);
-
-		set_transient( 'classifai_openai_chatgpt_content_resizing_latest_response', $response, DAY_IN_SECONDS * 30 );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		if ( empty( $response['choices'] ) ) {
-			return new WP_Error( 'no_choices', esc_html__( 'No choices were returned from OpenAI.', 'classifai' ) );
-		}
-
-		// Extract out the text response.
-		$return = [];
-
-		foreach ( $response['choices'] as $choice ) {
-			if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-				// ChatGPT often adds quotes to strings, so remove those as well as extra spaces.
-				$return[] = sanitize_text_field( trim( $choice['message']['content'], ' "\'' ) );
-			}
-		}
-
-		return $return;
+		return $response;
 	}
 
 	/**
@@ -1366,7 +1362,6 @@ class ChatGPT extends Provider {
 			$debug_info[ __( 'No. of suggestions', 'classifai' ) ]   = $provider_settings['number_of_suggestions'] ?? 1;
 			$debug_info[ __( 'Expand text prompt', 'classifai' ) ]   = wp_json_encode( $settings['expand_text_prompt'] ?? [] );
 			$debug_info[ __( 'Condense text prompt', 'classifai' ) ] = wp_json_encode( $settings['condense_text_prompt'] ?? [] );
-			$debug_info[ __( 'Latest response', 'classifai' ) ]      = $this->get_formatted_latest_response( get_transient( 'classifai_openai_chatgpt_content_resizing_latest_response' ) );
 		}
 
 		return apply_filters(
