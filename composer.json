@@ -15,7 +15,7 @@
     "ua-parser/uap-php": "dev-master",
     "aws/aws-sdk-php": "^3.300",
     "woocommerce/action-scheduler": "3.8.1",
-    "wordpress/php-ai-client": "dev-trunk"
+    "wordpress/php-ai-client": "^0.1"
   },
   "autoload": {
     "psr-4": {
