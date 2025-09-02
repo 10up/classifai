@@ -747,17 +747,17 @@ class ChatGPT extends Provider {
 		$message_content = $this->get_content( $post_id, absint( $args['num'] ) * 15, false, $args['content'] );
 
 		/**
-		 * Filter the request body before sending to ChatGPT.
+		 * Filter the request data before sending to ChatGPT.
 		 *
 		 * @since 2.2.0
 		 * @hook classifai_chatgpt_title_request_body
 		 *
-		 * @param array $body Request body that will be sent to ChatGPT.
+		 * @param array $data Request data that will be sent to ChatGPT.
 		 * @param int $post_id ID of post we are summarizing.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters( // TODO: rename to $data?
+		$data = apply_filters(
 			'classifai_chatgpt_title_request_body',
 			[
 				'model'       => $this->chatgpt_model,
@@ -783,9 +783,9 @@ class ChatGPT extends Provider {
 			$response = AiClient::prompt( '"""' . $message_content . '"""' )
 				->usingProvider( 'openai' )
 				->usingModel( $provider_class_name::model( $this->chatgpt_model ) )
-				->usingSystemInstruction( $body['messages'][0]['content'] ) // TODO: better filtering to ensure we are pulling the system instruction.
-				->usingTemperature( $body['temperature'] ?? 0.9 )
-				->generateTexts( $body['n'] ?? 1 );
+				->usingSystemInstruction( $data['messages'][0]['content'] ) // TODO: better filtering to ensure we are pulling the system instruction.
+				->usingTemperature( $data['temperature'] ?? 0.9 )
+				->generateTexts( $data['n'] ?? 1 );
 		} catch ( \Exception $e ) {
 			$response = [];
 		}
