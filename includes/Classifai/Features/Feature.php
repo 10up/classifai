@@ -1515,7 +1515,7 @@ abstract class Feature {
 			return esc_html__( 'Instruction content cannot be downloaded.', 'classifai' );
 		}
 
-		$locally_hosted_instruction = wp_kses_post( preg_replace('/^---\s*[\s\S]*?\s*---\s*/', '', $locally_hosted_instruction) );
+		$locally_hosted_instruction = wp_kses_post( preg_replace( '/^---\s*[\s\S]*?\s*---\s*/', '', $locally_hosted_instruction ) );
 
 		// Cache content.
 		set_transient( $transient_key, $locally_hosted_instruction, DAY_IN_SECONDS );
