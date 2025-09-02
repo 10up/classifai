@@ -21,6 +21,13 @@ class RecommendedContent extends Feature {
 	const ID = 'feature_recommended_content';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '18.recommended-content.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -36,12 +43,12 @@ class RecommendedContent extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				OpenAIEmbeddings::ID     => preg_match( '/## Set Up Recommended Content \(via OpenAI Embeddings\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAIEmbeddings::ID     => preg_match( '/## Set Up via OpenAI Embeddings(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				PersonalizerProvider::ID => '',
 			],
 		];

@@ -28,6 +28,13 @@ class ContentGeneration extends Feature {
 	const ID = 'feature_content_generation';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '04.content-generation.md';
+
+	/**
 	 * Prompt for creating content.
 	 *
 	 * @var string
@@ -97,14 +104,14 @@ EOD;
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ChatGPT::ID => preg_match( '/## Set Up Language Processing Features \(via OpenAI ChatGPT\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				OpenAI::ID  => preg_match( '/## Set Up Language Processing Features \(via Azure OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				Ollama::ID  => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ChatGPT::ID => preg_match( '/## Set Up via OpenAI ChatGPT(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAI::ID  => preg_match( '/## Set Up via Azure OpenAI(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				Ollama::ID  => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

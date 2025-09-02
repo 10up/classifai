@@ -22,6 +22,13 @@ class ImageCropping extends Feature {
 	const ID = 'feature_image_cropping';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '14.image-cropping.md';
+
+	/**
 	 * WP_Filesystem_Base instance.
 	 *
 	 * @since 1.5.0
@@ -45,12 +52,12 @@ class ImageCropping extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ComputerVision::ID => preg_match( '/## Set Up via Microsoft Azure(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

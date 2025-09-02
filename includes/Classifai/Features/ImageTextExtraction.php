@@ -33,6 +33,13 @@ class ImageTextExtraction extends Feature {
 	public $prompt = 'You are an assistant that extracts text from images. You will be provided with an image and will return whatever text is in the image. Return only the text, nothing else. If there is no text present, return the word none.';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '15.image-text-extraction.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -49,14 +56,14 @@ class ImageTextExtraction extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ComputerVision::ID => preg_match( '/## Set Up via Microsoft Azure(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				ChatGPT::ID        => '',
-				OllamaMM::ID       => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OllamaMM::ID       => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

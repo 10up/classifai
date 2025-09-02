@@ -21,6 +21,13 @@ class Moderation extends Feature {
 	const ID = 'feature_moderation';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '09.moderation.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -35,12 +42,12 @@ class Moderation extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ModerationProvider::ID => preg_match( '/## Set Up Comment Moderation \(via OpenAI Moderation\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ModerationProvider::ID => preg_match( '/## Set Up via OpenAI Moderation(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

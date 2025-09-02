@@ -42,6 +42,13 @@ class ContentResizing extends Feature {
 	public $expand_prompt = 'Increase the content length no more than 2 to 4 sentences.';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '05.content-resizing.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -61,17 +68,17 @@ class ContentResizing extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ChatGPT::ID   => preg_match( '/## Set Up Language Processing Features \(via OpenAI ChatGPT\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				GeminiAPI::ID => preg_match( '/## Set Up Language Processing Features \(via Google AI \(Gemini API\)\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				OpenAI::ID    => preg_match( '/## Set Up Language Processing Features \(via Azure OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ChatGPT::ID   => preg_match( '/## Set Up via OpenAI ChatGPT(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				GeminiAPI::ID => preg_match( '/## Set Up via Google AI \(Gemini API\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAI::ID    => preg_match( '/## Set Up via Azure OpenAI(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				Grok::ID      => '',
 				ChromeAI::ID  => '',
-				Ollama::ID    => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				Ollama::ID    => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

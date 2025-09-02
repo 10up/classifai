@@ -39,6 +39,13 @@ EOD;
 	// phpcs:enable Squiz.PHP.Heredoc.NotAllowed
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '13.image-tags-generator.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -55,14 +62,14 @@ EOD;
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ComputerVision::ID => preg_match( '/## Set Up via Microsoft Azure(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				ChatGPT::ID        => '',
-				OllamaMM::ID       => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OllamaMM::ID       => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

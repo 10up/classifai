@@ -42,6 +42,13 @@ class TitleGeneration extends Feature {
 	public $woo_prompt = 'Write an SEO-friendly, engaging product title that encourages clicks and purchases. Use key details like product type, attributes, and categories while keeping it within 40 to 60 characters and format it in sentence case.';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '02.title-generation.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -61,17 +68,17 @@ class TitleGeneration extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ChatGPT::ID   => preg_match( '/## Set Up Language Processing Features \(via OpenAI ChatGPT\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				GeminiAPI::ID => preg_match( '/## Set Up Language Processing Features \(via Google AI \(Gemini API\)\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				OpenAI::ID    => preg_match( '/## Set Up Language Processing Features \(via Azure OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ChatGPT::ID   => preg_match( '/## Set Up via OpenAI ChatGPT(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				GeminiAPI::ID => preg_match( '/## Set Up via Google AI \(Gemini API\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAI::ID    => preg_match( '/## Set Up via Azure OpenAI(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				Grok::ID      => '',
 				ChromeAI::ID  => '',
-				Ollama::ID    => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				Ollama::ID    => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

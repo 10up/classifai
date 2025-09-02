@@ -24,6 +24,13 @@ class AudioTranscriptsGeneration extends Feature {
 	const ID = 'feature_audio_transcripts_generation';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '08.audio-transcripts-generation.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -38,12 +45,12 @@ class AudioTranscriptsGeneration extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				SpeechToText::ID => preg_match( '/## Set Up Audio Transcripts Generation \(via OpenAI Speech to Text\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				SpeechToText::ID => preg_match( '/## Set Up via OpenAI Speech to Text(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

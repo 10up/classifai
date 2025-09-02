@@ -31,6 +31,13 @@ class Classification extends Feature {
 	const ID = 'feature_classification';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '01.classification.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -48,15 +55,15 @@ class Classification extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				NLU::ID              => preg_match( '/## Set Up Classification \(via IBM Watson\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				OpenAIEmbeddings::ID => preg_match( '/## Set Up Classification \(via OpenAI Embeddings\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				NLU::ID              => preg_match( '/## Set Up via IBM Watson(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAIEmbeddings::ID => preg_match( '/## Set Up via OpenAI Embeddings(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 				AzureEmbeddings::ID  => '',
-				OllamaEmbeddings::ID => preg_match( '/## Run locally hosted LLMs(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OllamaEmbeddings::ID => $this->get_locally_hosted_llm_instruction(),
 			],
 		];
 	}

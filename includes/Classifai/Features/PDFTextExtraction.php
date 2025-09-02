@@ -23,6 +23,13 @@ class PDFTextExtraction extends Feature {
 	const ID = 'feature_pdf_to_text_generation';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '17.pdf-text-extraction.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -37,12 +44,12 @@ class PDFTextExtraction extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				ComputerVision::ID => preg_match( '/## Set Up Image Processing features \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				ComputerVision::ID => preg_match( '/## Set Up via Microsoft Azure(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

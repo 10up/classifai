@@ -55,6 +55,13 @@ class TextToSpeech extends Feature {
 	const AUDIO_HASH_KEY = '_classifai_post_audio_hash';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '07.text-to-speech.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -71,14 +78,14 @@ class TextToSpeech extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				AmazonPolly::ID => preg_match( '/## Set Up Text to Speech \(via Amazon Polly\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				Speech::ID      => preg_match( '/## Set Up Text to Speech \(via Microsoft Azure\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				OpenAITTS::ID   => preg_match( '/## Set Up Text to Speech \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				AmazonPolly::ID => preg_match( '/## Set Up via Amazon Polly(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				Speech::ID      => preg_match( '/## Set Up via Microsoft Azure(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAITTS::ID   => preg_match( '/## Set Up via OpenAI(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

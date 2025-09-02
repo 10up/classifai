@@ -26,6 +26,13 @@ class ImageGeneration extends Feature {
 	const ID = 'feature_image_generation';
 
 	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '16.image-generation.md';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -43,13 +50,13 @@ class ImageGeneration extends Feature {
 		];
 
 		// Get readme content.
-		$readme_content = $this->get_readme_content();
+		$readme_content = $this->get_instruction_content();
 
 		// Contains supported providers data.
 		$this->supported_providers_data = [
 			'instruction' => [
-				OpenAIImages::ID   => preg_match( '/## Set Up Image Generation \(via OpenAI\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
-				GoogleAIImagen::ID => preg_match( '/## Set Up Image Generation \(via Google AI Imagen\)(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				OpenAIImages::ID   => preg_match( '/## Set Up via OpenAI(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
+				GoogleAIImagen::ID => preg_match( '/## Set Up via Google AI Imagen(.*?)(?:\n## |\z)/s', $readme_content, $matches ) ? $matches[1] : '',
 			],
 		];
 	}

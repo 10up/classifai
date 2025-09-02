@@ -30,6 +30,20 @@ abstract class Feature {
 	const PLUGIN_AREA_SCRIPT = 'classifai-plugin-fill-js';
 
 	/**
+	 * Plugin feature instruction directory URL.
+	 *
+	 * @var string
+	 */
+	const PLUGIN_FEATURE_INSTRUCTION_DIR = 'https://raw.githubusercontent.com/10up/classifai/refs/heads/develop/wp-hooks-docs/docs/02.feature-configuration';
+
+	/**
+	 * Locally hosted instruction file.
+	 *
+	 * @var string
+	 */
+	const PLUGIN_LOCALLY_HOSTED_INSTRUCTION_URL = 'https://raw.githubusercontent.com/10up/classifai/refs/heads/develop/wp-hooks-docs/docs/03.advanced-docs/06.run-locally-hosted-llms.md';
+
+	/**
 	 * Feature label.
 	 *
 	 * @var string
@@ -65,6 +79,13 @@ abstract class Feature {
 	 * @var \Classifai\Providers\Provider[]
 	 */
 	public $supported_providers_data = [];
+
+	/**
+	 * Instruction file name for the feature.
+	 *
+	 * @var string
+	 */
+	public $instruction_file = '';
 
 	/**
 	 * Set up necessary hooks.
@@ -1421,37 +1442,84 @@ abstract class Feature {
 	}
 
 	/**
-	 * Get content from README.md file.
+	 * Get Feature Instructions from related file.
 	 *
 	 * @return string
 	 */
-	public function get_readme_content() {
+	public function get_instruction_content() {
+		$instruction_file = $this->instruction_file ?? '';
+		$provider         = static::ID;
 
-		// Get readme content from cache.
-		$readme_content = get_transient( 'classifai_readme_content' );
-
-		if ( ! empty( $readme_content ) ) {
-			return $readme_content;
+		if ( empty( $instruction_file ) || empty( $provider ) ) {
+			return;
 		}
 
-		// Get readme content.
-		$readme_request = safe_wp_remote_get( CLASSIFAI_PLUGIN_README_URL );
+		$transient_key = 'classifai_instruction_' . $provider;
 
-		if ( is_wp_error( $readme_request ) ) {
-			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
+		// Get content from cache.
+		$feature_instruction = get_transient( $transient_key );
+
+		if ( ! empty( $feature_instruction ) ) {
+			return $feature_instruction;
 		}
 
-		$readme_content = wp_remote_retrieve_body( $readme_request );
+		$instruction_content_url = trailingslashit( self::PLUGIN_FEATURE_INSTRUCTION_DIR ) . $instruction_file;
 
-		if ( empty( $readme_content ) || ! is_string( $readme_content ) ) {
-			return esc_html__( 'Readme cannot be downloaded.', 'classifai' );
+		// Get content.
+		$instruction_request = safe_wp_remote_get( $instruction_content_url );
+
+		if ( is_wp_error( $instruction_request ) ) {
+			return esc_html__( 'Instruction content cannot be downloaded.', 'classifai' );
 		}
 
-		$readme_content = wp_kses_post( $readme_content );
+		$feature_instruction = wp_remote_retrieve_body( $instruction_request );
 
-		// Cache readme content.
-		set_transient( 'classifai_readme_content', $readme_content, DAY_IN_SECONDS );
+		if ( empty( $feature_instruction ) || ! is_string( $feature_instruction ) ) {
+			return esc_html__( 'Instruction content cannot be downloaded.', 'classifai' );
+		}
 
-		return $readme_content;
+		$feature_instruction = wp_kses_post( $feature_instruction );
+
+		// Cache content.
+		set_transient( $transient_key, $feature_instruction, DAY_IN_SECONDS );
+
+		return $feature_instruction;
+	}
+
+	/**
+	 * Get Feature Instructions for locally hosted LLMs.
+	 *
+	 * @return string
+	 */
+	public function get_locally_hosted_llm_instruction() {
+
+		$transient_key = 'classifai_instruction_locally_hosted_llm';
+
+		// Get content from cache.
+		$locally_hosted_instruction = get_transient( $transient_key );
+
+		if ( ! empty( $locally_hosted_instruction ) ) {
+			return $locally_hosted_instruction;
+		}
+
+		$instruction_content_url = self::PLUGIN_LOCALLY_HOSTED_INSTRUCTION_URL;
+		$instruction_request     = safe_wp_remote_get( $instruction_content_url );
+
+		if ( is_wp_error( $instruction_request ) ) {
+			return esc_html__( 'Instruction content cannot be downloaded.', 'classifai' );
+		}
+
+		$locally_hosted_instruction = wp_remote_retrieve_body( $instruction_request );
+
+		if ( empty( $locally_hosted_instruction ) || ! is_string( $locally_hosted_instruction ) ) {
+			return esc_html__( 'Instruction content cannot be downloaded.', 'classifai' );
+		}
+
+		$locally_hosted_instruction = wp_kses_post( preg_replace('/^---\s*[\s\S]*?\s*---\s*/', '', $locally_hosted_instruction) );
+
+		// Cache content.
+		set_transient( $transient_key, $locally_hosted_instruction, DAY_IN_SECONDS );
+
+		return $locally_hosted_instruction;
 	}
 }
