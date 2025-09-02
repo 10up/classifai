@@ -5,6 +5,7 @@ namespace Classifai\Providers;
 use WP_Error;
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
+
 use function Classifai\safe_wp_remote_get;
 use function Classifai\safe_wp_remote_post;
 
@@ -206,17 +207,29 @@ abstract class APIRequest {
 	/**
 	 * Make a request using the AI Client SDK.
 	 *
-	 * @param string $prompt  The prompt to send.
-	 * @param array  $options Additional options.
+	 * @param string|null $prompt Prompt to send.
+	 * @param array       $options Options to send.
 	 * @return array|WP_Error
 	 */
-	public function client( string $prompt, array $options = [] ) {
+	public function client( $prompt = null, array $options = [] ) {
 		if ( ! $this->use_client || ! $this->ai_client ) {
 			return new WP_Error( 'ai_client_not_available', __( 'AI Client is not available', 'classifai' ) );
 		}
 
+		// Get the system prompt from messages, if they exist.
+		if ( ! isset( $options['system_instruction'] ) && isset( $options['messages'] ) ) {
+			$options['system_instruction'] = $this->get_prompt_from_messages( $options['messages'], 'system' );
+		}
+
+		// Get the user prompt from messages, if they exist.
+		if ( empty( $prompt ) && isset( $options['messages'] ) ) {
+			$user_prompt = $this->get_prompt_from_messages( $options['messages'], 'user' );
+		}
+
+		unset( $options['messages'] );
+
 		try {
-			$prompt_builder = AiClient::prompt( $prompt );
+			$prompt_builder = AiClient::prompt( $user_prompt );
 			$prompt_builder = $prompt_builder->usingProvider( static::PROVIDER_ID );
 
 			if ( ! empty( $options['model'] ) ) {
@@ -233,6 +246,10 @@ abstract class APIRequest {
 				$prompt_builder = $prompt_builder->usingTemperature( $options['temperature'] );
 			}
 
+			if ( ! empty( $options['response_format']['json_schema'] ) ) {
+				$prompt_builder = $prompt_builder->asJsonResponse( $options['response_format']['json_schema'] );
+			}
+
 			$count    = $options['n'] ?? 1;
 			$response = $prompt_builder->generateTexts( $count );
 
@@ -240,6 +257,30 @@ abstract class APIRequest {
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'ai_client_error', $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Get the prompt from the messages array.
+	 *
+	 * This is mostly here to maintain backwards compatibility
+	 * with how we used to handle messages and how the PHP SDK
+	 * expects them.
+	 *
+	 * @param array  $messages Messages to get the prompt from.
+	 * @param string $prompt_type Prompt type to get.
+	 * @return string
+	 */
+	protected function get_prompt_from_messages( array $messages, string $prompt_type = 'system' ) {
+		$prompt = array_values(
+			array_filter(
+				$messages,
+				function ( $message ) use ( $prompt_type ) {
+					return $prompt_type === $message['role'];
+				}
+			)
+		);
+
+		return ! empty( $prompt[0]['content'] ) ? $prompt[0]['content'] : '';
 	}
 
 	/**

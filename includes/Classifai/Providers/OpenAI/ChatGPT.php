@@ -661,38 +661,10 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Filter out the prompt types from the messages.
-		$system_prompt = array_values(
-			array_filter(
-				$data['messages'],
-				function ( $message ) {
-					return 'system' === $message['role'];
-				}
-			)
-		);
-		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
-
-		$user_prompt = array_values(
-			array_filter(
-				$data['messages'],
-				function ( $message ) {
-					return 'user' === $message['role'];
-				}
-			)
-		);
-		$user_prompt = ! empty( $user_prompt ) ? $user_prompt[0]['content'] : '"""' . $message_content . '"""';
-
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
 		// Make our API request.
-		$response = $request->client(
-			$user_prompt,
-			[
-				'model'              => $data['model'] ?? $this->chatgpt_model,
-				'system_instruction' => $system_prompt,
-				'temperature'        => $data['temperature'] ?? 0.9,
-			]
-		);
+		$response = $request->client( null, $data );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -781,40 +753,10 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Filter out the prompt types from the messages.
-		$system_prompt = array_values(
-			array_filter(
-				$data['messages'],
-				function ( $message ) {
-					return 'system' === $message['role'];
-				}
-			)
-		);
-		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
-
-		$user_prompt = array_values(
-			array_filter(
-				$data['messages'],
-				function ( $message ) {
-					return 'user' === $message['role'];
-				}
-			)
-		);
-
-		$user_prompt = ! empty( $user_prompt ) ? $user_prompt[0]['content'] : '"""' . $message_content . '"""';
-
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
 		// Make our API request.
-		$response = $request->client(
-			$user_prompt,
-			[
-				'model'              => $data['model'] ?? $this->chatgpt_model,
-				'system_instruction' => $system_prompt,
-				'temperature'        => $data['temperature'] ?? 0.9,
-				'n'                  => $data['n'] ?? 1,
-			]
-		);
+		$response = $request->client( null, $data );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -896,27 +838,10 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
-		// Filter out the system prompt from the messages.
-		$system_prompt = array_filter(
-			$data['messages'],
-			function ( $message ) {
-				return 'system' === $message['role'];
-			}
-		);
-		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
-
 		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
 
 		// Make our API request.
-		$response = $request->client(
-			'"""' . esc_html( $args['content'] ) . '"""',
-			[
-				'model'              => $data['model'] ?? $this->chatgpt_model,
-				'system_instruction' => $system_prompt,
-				'temperature'        => $data['temperature'] ?? 0.9,
-				'n'                  => $data['n'] ?? 1,
-			]
-		);
+		$response = $request->client( null, $data );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
@@ -982,8 +907,6 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'no_content', esc_html__( 'No content found. Please add content then click the "Generate results" button.', 'classifai' ) );
 		}
 
-		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name() );
-
 		$prompt = esc_textarea( get_default_prompt( $settings['key_takeaways_prompt'] ) ?? $feature->prompt );
 
 		// Replace our variables in the prompt.
@@ -1005,17 +928,17 @@ class ChatGPT extends Provider {
 		$prompt = apply_filters( 'classifai_chatgpt_key_takeaways_prompt', $prompt, $post_id );
 
 		/**
-		 * Filter the request body before sending to ChatGPT.
+		 * Filter the request data before sending to ChatGPT.
 		 *
 		 * @since 3.3.0
 		 * @hook classifai_chatgpt_key_takeaways_request_body
 		 *
-		 * @param array $body Request body that will be sent to ChatGPT.
+		 * @param array $data Request data that will be sent to ChatGPT.
 		 * @param int $post_id ID of post we are summarizing.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters(
+		$data = apply_filters(
 			'classifai_chatgpt_key_takeaways_request_body',
 			[
 				'model'           => $this->chatgpt_model,
@@ -1054,40 +977,29 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		$request = new APIRequest( $settings[ static::ID ]['api_key'] ?? '', $feature->get_option_name(), true );
+
 		// Make our API request.
-		$response = $request->post(
-			$this->chatgpt_url,
-			[
-				'body' => wp_json_encode( $body ),
-			]
-		);
+		$response = $request->client( null, $data );
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
 
 		// Extract out the response, if it exists.
-		if ( ! is_wp_error( $response ) && ! empty( $response['choices'] ) ) {
-			foreach ( $response['choices'] as $choice ) {
-				if ( isset( $choice['message'], $choice['message']['content'] ) ) {
-					// We expect the response to be valid json since we requested that schema.
-					$takeaways = json_decode( $choice['message']['content'], true );
+		foreach ( $response as $choice ) {
+			// We expect the response to be valid json since we requested that schema.
+			$takeaways = json_decode( $choice, true );
 
-					if ( isset( $takeaways['takeaways'] ) && is_array( $takeaways['takeaways'] ) ) {
-						$response = array_map(
-							function ( $takeaway ) {
-								return sanitize_text_field( trim( $takeaway, ' "\'' ) );
-							},
-							$takeaways['takeaways']
-						);
-					} else {
-						return new WP_Error( 'refusal', esc_html__( 'OpenAI request failed', 'classifai' ) );
-					}
-				} else {
-					return new WP_Error( 'refusal', esc_html__( 'OpenAI request failed', 'classifai' ) );
-				}
-
-				// If the request was refused, return an error.
-				if ( isset( $choice['message'], $choice['message']['refusal'] ) ) {
-					// translators: %s: error message.
-					return new WP_Error( 'refusal', sprintf( esc_html__( 'OpenAI request failed: %s', 'classifai' ), wp_kses_post( $choice['message']['refusal'] ) ) );
-				}
+			if ( isset( $takeaways['takeaways'] ) && is_array( $takeaways['takeaways'] ) ) {
+				$response = array_map(
+					function ( $takeaway ) {
+						return sanitize_text_field( trim( $takeaway, ' "\'' ) );
+					},
+					$takeaways['takeaways']
+				);
+			} else {
+				return new WP_Error( 'refusal', esc_html__( 'OpenAI request failed', 'classifai' ) );
 			}
 		}
 
