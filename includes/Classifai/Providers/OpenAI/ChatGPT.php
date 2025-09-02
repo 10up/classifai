@@ -17,6 +17,7 @@ use Classifai\Providers\Provider;
 use Classifai\Normalizer;
 use WP_Error;
 use WordPress\AiClient\AiClient;
+use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
 
 use function Classifai\get_default_prompt;
 use function Classifai\sanitize_number_of_responses_field;
@@ -716,10 +717,6 @@ class ChatGPT extends Provider {
 			return new WP_Error( 'not_enabled', esc_html__( 'Title generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
-		if ( ! defined( 'OPENAI_API_KEY' ) ) {
-			define( 'OPENAI_API_KEY', $settings[ static::ID ]['api_key'] ?? '' );
-		}
-
 		// Overwrite the prompt if we are generating titles for a product.
 		if ( 'product' === $post_type ) {
 			$prompt = $feature->woo_prompt;
@@ -760,7 +757,7 @@ class ChatGPT extends Provider {
 		 *
 		 * @return array Request body.
 		 */
-		$body = apply_filters(
+		$body = apply_filters( // TODO: rename to $data?
 			'classifai_chatgpt_title_request_body',
 			[
 				'model'       => $this->chatgpt_model,
@@ -771,14 +768,22 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		// TODO: Add a base APIRequest class that can be used, allowing easier support for non-SDK.
 		try {
-			$provider_class_name = AiClient::defaultRegistry()->getProviderClassName( 'openai' );
+			$registry = AiClient::defaultRegistry();
+
+			$registry->setProviderRequestAuthentication(
+				'openai',
+				new ApiKeyRequestAuthentication( $settings[ static::ID ]['api_key'] ?? '' )
+			);
+
+			$provider_class_name = $registry->getProviderClassName( 'openai' );
 
 			// Make our API request.
 			$response = AiClient::prompt( '"""' . $message_content . '"""' )
 				->usingProvider( 'openai' )
 				->usingModel( $provider_class_name::model( $this->chatgpt_model ) )
-				->usingSystemInstruction( $body['messages'][0]['content'] )
+				->usingSystemInstruction( $body['messages'][0]['content'] ) // TODO: better filtering to ensure we are pulling the system instruction.
 				->usingTemperature( $body['temperature'] ?? 0.9 )
 				->generateTexts( $body['n'] ?? 1 );
 		} catch ( \Exception $e ) {
