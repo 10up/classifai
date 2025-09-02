@@ -768,6 +768,15 @@ class ChatGPT extends Provider {
 			$post_id
 		);
 
+		// Filter out the system prompt from the messages.
+		$system_prompt = array_filter(
+			$data['messages'],
+			function ( $message ) {
+				return 'system' === $message['role'];
+			}
+		);
+		$system_prompt = ! empty( $system_prompt ) ? $system_prompt[0]['content'] : '';
+
 		// TODO: Add a base APIRequest class that can be used, allowing easier support for non-SDK.
 		try {
 			$registry = AiClient::defaultRegistry();
@@ -779,13 +788,13 @@ class ChatGPT extends Provider {
 
 			$provider_class_name = $registry->getProviderClassName( 'openai' );
 
-			// Make our API request.
-			$response = AiClient::prompt( '"""' . $message_content . '"""' )
-				->usingProvider( 'openai' )
-				->usingModel( $provider_class_name::model( $this->chatgpt_model ) )
-				->usingSystemInstruction( $data['messages'][0]['content'] ) // TODO: better filtering to ensure we are pulling the system instruction.
-				->usingTemperature( $data['temperature'] ?? 0.9 )
-				->generateTexts( $data['n'] ?? 1 );
+			$prompt_builder = AiClient::prompt( '"""' . $message_content . '"""' );
+			$prompt_builder = $prompt_builder->usingProvider( 'openai' );
+			$prompt_builder = $prompt_builder->usingModel( $provider_class_name::model( $this->chatgpt_model ) );
+			$prompt_builder = $prompt_builder->usingSystemInstruction( $system_prompt );
+			$prompt_builder = $prompt_builder->usingTemperature( $data['temperature'] ?? 0.9 );
+
+			$response = $prompt_builder->generateTexts( $data['n'] ?? 1 );
 		} catch ( \Exception $e ) {
 			$response = [];
 		}
