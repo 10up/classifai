@@ -216,14 +216,21 @@ abstract class APIRequest {
 			return new WP_Error( 'ai_client_not_available', __( 'AI Client is not available', 'classifai' ) );
 		}
 
-		// Get the system prompt from messages, if they exist.
+		// Get the system prompt from messages.
 		if ( ! isset( $options['system_instruction'] ) && isset( $options['messages'] ) ) {
 			$options['system_instruction'] = $this->get_prompt_from_messages( $options['messages'], 'system' );
 		}
 
-		// Get the user prompt from messages, if they exist.
+		// Get the user prompt from messages.
 		if ( empty( $prompt ) && isset( $options['messages'] ) ) {
 			$user_prompt = $this->get_prompt_from_messages( $options['messages'], 'user' );
+
+			// If the user prompt is an image, save the image URL to attach later.
+			if ( isset( $user_prompt[0]['type'] ) && 'image_url' === $user_prompt[0]['type'] ) {
+				$options['image_url'] = $user_prompt[0]['image_url']['url'] ?? null;
+
+				$user_prompt = null;
+			}
 		}
 
 		unset( $options['messages'] );
@@ -239,19 +246,27 @@ abstract class APIRequest {
 			}
 
 			if ( ! empty( $options['system_instruction'] ) ) {
-				$prompt_builder = $prompt_builder->usingSystemInstruction( $options['system_instruction'] );
+				$prompt_builder = $prompt_builder->usingSystemInstruction( (string) $options['system_instruction'] );
+			}
+
+			if ( ! empty( $options['image_url'] ) ) {
+				$prompt_builder = $prompt_builder->withFile( $options['image_url'] );
 			}
 
 			if ( ! empty( $options['temperature'] ) ) {
-				$prompt_builder = $prompt_builder->usingTemperature( $options['temperature'] );
+				$prompt_builder = $prompt_builder->usingTemperature( (float) $options['temperature'] );
+			}
+
+			if ( ! empty( $options['max_tokens'] ) ) {
+				$prompt_builder = $prompt_builder->usingMaxTokens( (int) $options['max_tokens'] );
 			}
 
 			if ( ! empty( $options['response_format']['json_schema'] ) ) {
-				$prompt_builder = $prompt_builder->asJsonResponse( $options['response_format']['json_schema'] );
+				$prompt_builder = $prompt_builder->asJsonResponse( (array) $options['response_format']['json_schema'] );
 			}
 
 			$count    = $options['n'] ?? 1;
-			$response = $prompt_builder->generateTexts( $count );
+			$response = $prompt_builder->generateTexts( (int) $count );
 
 			return $this->get_client_response( $response );
 		} catch ( \Exception $e ) {
