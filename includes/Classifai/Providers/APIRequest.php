@@ -82,8 +82,6 @@ abstract class APIRequest {
 
 	/**
 	 * Initialize the AI Client.
-	 *
-	 * @since x.x.x
 	 */
 	protected function initialize_client() {
 		try {
@@ -214,7 +212,7 @@ abstract class APIRequest {
 	 * @return array|WP_Error
 	 */
 	public function client( $user_prompt = null, array $options = [] ) {
-		if ( ! $this->use_client || ! $this->ai_client ) {
+		if ( ! $this->is_ai_client_available() ) {
 			return new WP_Error( 'ai_client_not_available', __( 'AI Client is not available', 'classifai' ) );
 		}
 
@@ -251,7 +249,7 @@ abstract class APIRequest {
 				$provider_class_name = $registry->getProviderClassName( static::PROVIDER_ID );
 				$prompt_builder      = $prompt_builder->usingModel( $provider_class_name::model( $options['model'] ) );
 
-				if ( str_contains( $options['model'], 'image' ) ) {
+				if ( str_starts_with( $options['model'], 'gpt-image-' ) ) {
 					$output = 'image';
 				}
 			}
@@ -289,7 +287,7 @@ abstract class APIRequest {
 	 * @param string $prompt_type Prompt type to get.
 	 * @return string
 	 */
-	protected function get_prompt_from_messages( array $messages, string $prompt_type = 'system' ) {
+	protected function get_prompt_from_messages( array $messages, string $prompt_type = 'system' ): string {
 		$prompt = array_values(
 			array_filter(
 				$messages,
@@ -305,7 +303,7 @@ abstract class APIRequest {
 	/**
 	 * Process the model config.
 	 *
-	 * @param array $options The options.
+	 * @param array $options The options to add to the model config.
 	 * @return ModelConfig
 	 */
 	protected function process_model_config( array $options ): ModelConfig {
@@ -360,7 +358,7 @@ abstract class APIRequest {
 	 * The keys we use match what the various AI APIs expect
 	 * but we want to standardize them to the PHP SDK's expected keys.
 	 *
-	 * @param array $options The options.
+	 * @param array $options The options to standardize.
 	 * @return array
 	 */
 	protected function standardize_option_keys( array $options ): array {
@@ -625,59 +623,11 @@ abstract class APIRequest {
 	}
 
 	/**
-	 * Get the API key.
-	 *
-	 * @return string
-	 */
-	public function get_api_key(): string {
-		return $this->api_key;
-	}
-
-	/**
-	 * Get the Feature name.
-	 *
-	 * @return string
-	 */
-	public function get_feature(): string {
-		return $this->feature;
-	}
-
-	/**
-	 * Set timeout for requests.
-	 *
-	 * @param int $timeout Timeout in seconds.
-	 */
-	public function set_timeout( int $timeout ) {
-		$this->timeout = $timeout;
-	}
-
-	/**
-	 * Enable or disable AI Client usage.
-	 *
-	 * @param bool $use_client Whether to use AI Client.
-	 */
-	public function set_use_client( bool $use_client ) {
-		$this->use_client = $use_client;
-		if ( $use_client && ! $this->ai_client ) {
-			$this->initialize_client();
-		}
-	}
-
-	/**
 	 * Check if AI Client is available and initialized.
 	 *
 	 * @return bool
 	 */
 	public function is_ai_client_available(): bool {
 		return $this->use_client && null !== $this->ai_client;
-	}
-
-	/**
-	 * Get the Provider ID.
-	 *
-	 * @return string
-	 */
-	public function get_provider_id(): string {
-		return static::PROVIDER_ID;
 	}
 }
