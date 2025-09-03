@@ -423,7 +423,6 @@ class Images extends Provider {
 			$debug_info[ __( 'Number of images', 'classifai' ) ] = $provider_settings['number_of_images'] ?? 1;
 			$debug_info[ __( 'Quality', 'classifai' ) ]          = $provider_settings['quality'] ?? 'standard';
 			$debug_info[ __( 'Size', 'classifai' ) ]             = $provider_settings['image_size'] ?? '1024x1024';
-			$debug_info[ __( 'Latest response:', 'classifai' ) ] = $this->get_formatted_latest_response( get_transient( 'classifai_openai_dalle_latest_response' ) );
 		}
 
 		return apply_filters(

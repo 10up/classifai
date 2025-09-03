@@ -291,14 +291,18 @@ abstract class APIRequest {
 				$using_model_config = true;
 			}
 
-			if ( ! empty( $options['response_format']['json_schema'] ) ) {
-				$prompt_builder = $prompt_builder->asJsonResponse( (array) $options['response_format']['json_schema'] );
-			}
+			if ( ! empty( $options['response_format'] ) ) {
+				if ( ! empty( $options['response_format']['json_schema'] ) && is_array( $options['response_format']['json_schema'] ) ) {
+					$prompt_builder = $prompt_builder->asJsonResponse( $options['response_format']['json_schema'] );
+				}
 
-			if ( ! empty( $options['response_format']['b64_json'] ) ) {
-				$prompt_builder = $prompt_builder->asOutputFileType( FileTypeEnum::inline() );
+				if ( is_string( $options['response_format'] ) ) {
+					if ( 'b64_json' === $options['response_format'] ) {
+						$prompt_builder = $prompt_builder->asOutputFileType( FileTypeEnum::inline() );
 
-				$output = 'image';
+						$output = 'image';
+					}
+				}
 			}
 
 			if ( $using_model_config ) {
@@ -308,9 +312,9 @@ abstract class APIRequest {
 			$count = $options['n'] ?? 1;
 
 			if ( 'text' === $output ) {
-				return $this->get_client_response( $prompt_builder->generateTexts( (int) $count ), 'text' );
+				return $this->get_client_result( $prompt_builder->generateTexts( (int) $count ), 'text' );
 			} elseif ( 'image' === $output ) {
-				return $this->get_client_response( $prompt_builder->generateImages( (int) $count ), 'image' );
+				return $this->get_client_result( $prompt_builder->generateImages( (int) $count ), 'image' );
 			}
 
 			return [];
@@ -350,7 +354,7 @@ abstract class APIRequest {
 	 * @param string $type The type of response.
 	 * @return array|WP_Error
 	 */
-	protected function get_client_response( array $response, string $type = 'text' ) {
+	protected function get_client_result( array $response, string $type = 'text' ) {
 		if ( empty( $response ) ) {
 			return new WP_Error( 'no_choices', __( 'No choices were returned from the AI provider', 'classifai' ) );
 		}
