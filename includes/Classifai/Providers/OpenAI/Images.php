@@ -300,9 +300,9 @@ class Images extends Provider {
 			return new WP_Error( 'prompt_required', esc_html__( 'A prompt is required to generate an image.', 'classifai' ) );
 		}
 
-		$image_generation = new ImageGeneration();
-		$settings         = $image_generation->get_settings( static::ID );
-		$args             = wp_parse_args(
+		$feature  = new ImageGeneration();
+		$settings = $feature->get_settings( static::ID );
+		$args     = wp_parse_args(
 			array_filter( $args ),
 			[
 				'num'     => $settings['number_of_images'] ?? 1,
@@ -323,7 +323,7 @@ class Images extends Provider {
 			$args['size'] = '1024x1024';
 		}
 
-		if ( ! $image_generation->is_feature_enabled() ) {
+		if ( ! $feature->is_feature_enabled() ) {
 			return new WP_Error( 'not_enabled', esc_html__( 'Image generation is disabled or OpenAI authentication failed. Please check your settings.', 'classifai' ) );
 		}
 
@@ -347,10 +347,8 @@ class Images extends Provider {
 			return new WP_Error( 'invalid_param', sprintf( esc_html__( 'Your image prompt is too long. Please ensure it doesn\'t exceed %d characters.', 'classifai' ), $max_prompt_chars ) );
 		}
 
-		$request = new APIRequest( $settings['api_key'] ?? '', 'generate-image' );
-
 		$model = $this->get_model();
-		$body  = [
+		$data  = [
 			'prompt'          => sanitize_text_field( $prompt ),
 			'model'           => $model,
 			'n'               => absint( $args['num'] ),
@@ -362,62 +360,49 @@ class Images extends Provider {
 
 		if ( 'gpt-image-1' === $model ) {
 			// The gpt-image-1 model doesn't support response_format or style.
-			unset( $body['response_format'] );
-			unset( $body['style'] );
+			unset( $data['response_format'] );
+			unset( $data['style'] );
 		} elseif ( 'dall-e-3' === $model ) {
 			// DALL·E 3 doesn't support multiple images per request.
-			$body['n'] = 1;
+			$data['n'] = 1;
 		}
 
 		/**
-		 * Filter the request body before sending to OpenAI.
+		 * Filter the request data before sending to OpenAI.
 		 *
 		 * @since 2.0.0
 		 * @hook classifai_dalle_request_body
 		 *
-		 * @param array $body Request body that will be sent to OpenAI.
+		 * @param array $data Request data that will be sent to OpenAI.
 		 *
-		 * @return array Request body.
+		 * @return array Request data.
 		 */
-		$body = apply_filters( 'classifai_dalle_request_body', $body );
+		$data = apply_filters( 'classifai_dalle_request_body', $data );
+
+		$request = new APIRequest( $settings['api_key'] ?? '', $feature->get_option_name(), true );
 
 		$responses = [];
 
 		// DALL·E 3 doesn't support multiple images in a single request so make one request per image.
 		if ( 'dall-e-3' === $model ) {
 			for ( $i = 0; $i < $args['num']; $i++ ) {
-				$responses[] = $request->post(
-					$this->get_api_url(),
-					[
-						'body' => wp_json_encode( $body ),
-					]
-				);
+				$responses[] = $request->client( $data['prompt'], $data );
 			}
 		} else {
-			$responses[] = $request->post(
-				$this->get_api_url(),
-				[
-					'body' => wp_json_encode( $body ),
-				]
-			);
+			$responses[] = $request->client( $data['prompt'], $data );
 		}
 
 		$cleaned_responses = [];
 
 		foreach ( $responses as $response ) {
-			// Extract out the image response, if it exists.
-			if ( ! is_wp_error( $response ) && ! empty( $response['data'] ) ) {
-				foreach ( $response['data'] as $data ) {
-					if ( ! empty( $data[ $args['format'] ] ) ) {
-						if ( 'url' === $args['format'] ) {
-							$cleaned_responses[] = [ 'url' => esc_url_raw( $data[ $args['format'] ] ) ];
-						} else {
-							$cleaned_responses[] = [ 'url' => $data[ $args['format'] ] ];
-						}
-					}
-				}
-			} elseif ( is_wp_error( $response ) ) {
+			if ( is_wp_error( $response ) ) {
 				return $response;
+			}
+
+			if ( 'url' === $args['format'] ) {
+				$cleaned_responses[] = [ 'url' => esc_url_raw( $response[0] ) ];
+			} else {
+				$cleaned_responses[] = [ 'url' => $response[0] ];
 			}
 		}
 

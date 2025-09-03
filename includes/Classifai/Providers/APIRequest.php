@@ -5,6 +5,8 @@ namespace Classifai\Providers;
 use WP_Error;
 use WordPress\AiClient\AiClient;
 use WordPress\AiClient\Providers\Http\DTO\ApiKeyRequestAuthentication;
+use WordPress\AiClient\Providers\Models\DTO\ModelConfig;
+use WordPress\AiClient\Files\Enums\FileTypeEnum;
 
 use function Classifai\safe_wp_remote_get;
 use function Classifai\safe_wp_remote_post;
@@ -207,14 +209,16 @@ abstract class APIRequest {
 	/**
 	 * Make a request using the AI Client SDK.
 	 *
-	 * @param string|null $prompt Prompt to send.
+	 * @param string|null $user_prompt Prompt to send.
 	 * @param array       $options Options to send.
 	 * @return array|WP_Error
 	 */
-	public function client( $prompt = null, array $options = [] ) {
+	public function client( $user_prompt = null, array $options = [] ) {
 		if ( ! $this->use_client || ! $this->ai_client ) {
 			return new WP_Error( 'ai_client_not_available', __( 'AI Client is not available', 'classifai' ) );
 		}
+
+		$output = 'text';
 
 		// Get the system prompt from messages.
 		if ( ! isset( $options['system_instruction'] ) && isset( $options['messages'] ) ) {
@@ -222,7 +226,7 @@ abstract class APIRequest {
 		}
 
 		// Get the user prompt from messages.
-		if ( empty( $prompt ) && isset( $options['messages'] ) ) {
+		if ( empty( $user_prompt ) && isset( $options['messages'] ) ) {
 			$user_prompt = $this->get_prompt_from_messages( $options['messages'], 'user' );
 
 			// If the user prompt is an image, save the image URL to attach later.
@@ -236,6 +240,9 @@ abstract class APIRequest {
 		unset( $options['messages'] );
 
 		try {
+			$model_config       = new ModelConfig();
+			$using_model_config = false;
+
 			$prompt_builder = AiClient::prompt( $user_prompt );
 			$prompt_builder = $prompt_builder->usingProvider( static::PROVIDER_ID );
 
@@ -243,6 +250,10 @@ abstract class APIRequest {
 				$registry            = AiClient::defaultRegistry();
 				$provider_class_name = $registry->getProviderClassName( static::PROVIDER_ID );
 				$prompt_builder      = $prompt_builder->usingModel( $provider_class_name::model( $options['model'] ) );
+
+				if ( str_contains( $options['model'], 'image' ) ) {
+					$output = 'image';
+				}
 			}
 
 			if ( ! empty( $options['system_instruction'] ) ) {
@@ -253,6 +264,10 @@ abstract class APIRequest {
 				$prompt_builder = $prompt_builder->withFile( $options['image_url'] );
 			}
 
+			if ( ! empty( $options['n'] ) ) {
+				$prompt_builder = $prompt_builder->usingCandidateCount( (int) $options['n'] );
+			}
+
 			if ( ! empty( $options['temperature'] ) ) {
 				$prompt_builder = $prompt_builder->usingTemperature( (float) $options['temperature'] );
 			}
@@ -261,14 +276,44 @@ abstract class APIRequest {
 				$prompt_builder = $prompt_builder->usingMaxTokens( (int) $options['max_tokens'] );
 			}
 
+			if ( ! empty( $options['quality'] ) ) {
+				$model_config->setCustomOption( 'quality', $options['quality'] );
+				$using_model_config = true;
+			}
+
+			if ( ! empty( $options['style'] ) ) {
+				$model_config->setCustomOption( 'style', $options['style'] );
+				$using_model_config = true;
+			}
+
+			if ( ! empty( $options['size'] ) ) {
+				$model_config->setCustomOption( 'size', $options['size'] );
+				$using_model_config = true;
+			}
+
 			if ( ! empty( $options['response_format']['json_schema'] ) ) {
 				$prompt_builder = $prompt_builder->asJsonResponse( (array) $options['response_format']['json_schema'] );
 			}
 
-			$count    = $options['n'] ?? 1;
-			$response = $prompt_builder->generateTexts( (int) $count );
+			if ( ! empty( $options['response_format']['b64_json'] ) ) {
+				$prompt_builder = $prompt_builder->asOutputFileType( FileTypeEnum::inline() );
 
-			return $this->get_client_response( $response );
+				$output = 'image';
+			}
+
+			if ( $using_model_config ) {
+				$prompt_builder = $prompt_builder->usingModelConfig( $model_config );
+			}
+
+			$count = $options['n'] ?? 1;
+
+			if ( 'text' === $output ) {
+				return $this->get_client_response( $prompt_builder->generateTexts( (int) $count ), 'text' );
+			} elseif ( 'image' === $output ) {
+				return $this->get_client_response( $prompt_builder->generateImages( (int) $count ), 'image' );
+			}
+
+			return [];
 		} catch ( \Exception $e ) {
 			return new WP_Error( 'ai_client_error', $e->getMessage() );
 		}
@@ -301,17 +346,22 @@ abstract class APIRequest {
 	/**
 	 * Process the AI Client response.
 	 *
-	 * @param array $response The AI Client response.
+	 * @param array  $response The AI Client response.
+	 * @param string $type The type of response.
 	 * @return array|WP_Error
 	 */
-	protected function get_client_response( array $response ) {
+	protected function get_client_response( array $response, string $type = 'text' ) {
 		if ( empty( $response ) ) {
 			return new WP_Error( 'no_choices', __( 'No choices were returned from the AI provider', 'classifai' ) );
 		}
 
 		$results = [];
 		foreach ( $response as $choice ) {
-			$results[] = $this->sanitize_choice( $choice );
+			if ( 'image' === $type ) {
+				$results[] = $this->sanitize_choice( $choice->getBase64Data() );
+			} else {
+				$results[] = $this->sanitize_choice( $choice );
+			}
 		}
 
 		return $results;
