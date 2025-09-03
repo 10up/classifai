@@ -240,12 +240,12 @@ abstract class APIRequest {
 		unset( $options['messages'] );
 
 		try {
-			$model_config       = new ModelConfig();
-			$using_model_config = false;
-
+			$model_config   = $this->process_model_config( $options );
 			$prompt_builder = AiClient::prompt( $user_prompt );
+			$prompt_builder = $prompt_builder->usingModelConfig( $model_config );
 			$prompt_builder = $prompt_builder->usingProvider( static::PROVIDER_ID );
 
+			// Set the provider and model.
 			if ( ! empty( $options['model'] ) ) {
 				$registry            = AiClient::defaultRegistry();
 				$provider_class_name = $registry->getProviderClassName( static::PROVIDER_ID );
@@ -256,65 +256,20 @@ abstract class APIRequest {
 				}
 			}
 
-			if ( ! empty( $options['system_instruction'] ) ) {
-				$prompt_builder = $prompt_builder->usingSystemInstruction( (string) $options['system_instruction'] );
-			}
-
+			// If we have an image, attach it to the list of messages.
 			if ( ! empty( $options['image_url'] ) ) {
 				$prompt_builder = $prompt_builder->withFile( $options['image_url'] );
 			}
 
-			if ( ! empty( $options['n'] ) ) {
-				$prompt_builder = $prompt_builder->usingCandidateCount( (int) $options['n'] );
+			// If we have an output file type set, we are generating an image.
+			if ( $model_config->getOutputFileType() !== null ) {
+				$output = 'image';
 			}
-
-			if ( ! empty( $options['temperature'] ) ) {
-				$prompt_builder = $prompt_builder->usingTemperature( (float) $options['temperature'] );
-			}
-
-			if ( ! empty( $options['max_tokens'] ) ) {
-				$prompt_builder = $prompt_builder->usingMaxTokens( (int) $options['max_tokens'] );
-			}
-
-			if ( ! empty( $options['quality'] ) ) {
-				$model_config->setCustomOption( 'quality', $options['quality'] );
-				$using_model_config = true;
-			}
-
-			if ( ! empty( $options['style'] ) ) {
-				$model_config->setCustomOption( 'style', $options['style'] );
-				$using_model_config = true;
-			}
-
-			if ( ! empty( $options['size'] ) ) {
-				$model_config->setCustomOption( 'size', $options['size'] );
-				$using_model_config = true;
-			}
-
-			if ( ! empty( $options['response_format'] ) ) {
-				if ( ! empty( $options['response_format']['json_schema'] ) && is_array( $options['response_format']['json_schema'] ) ) {
-					$prompt_builder = $prompt_builder->asJsonResponse( $options['response_format']['json_schema'] );
-				}
-
-				if ( is_string( $options['response_format'] ) ) {
-					if ( 'b64_json' === $options['response_format'] ) {
-						$prompt_builder = $prompt_builder->asOutputFileType( FileTypeEnum::inline() );
-
-						$output = 'image';
-					}
-				}
-			}
-
-			if ( $using_model_config ) {
-				$prompt_builder = $prompt_builder->usingModelConfig( $model_config );
-			}
-
-			$count = $options['n'] ?? 1;
 
 			if ( 'text' === $output ) {
-				return $this->get_client_result( $prompt_builder->generateTexts( (int) $count ), 'text' );
+				return $this->get_client_result( $prompt_builder->generateTexts(), 'text' );
 			} elseif ( 'image' === $output ) {
-				return $this->get_client_result( $prompt_builder->generateImages( (int) $count ), 'image' );
+				return $this->get_client_result( $prompt_builder->generateImages(), 'image' );
 			}
 
 			return [];
@@ -345,6 +300,111 @@ abstract class APIRequest {
 		);
 
 		return ! empty( $prompt[0]['content'] ) ? $prompt[0]['content'] : '';
+	}
+
+	/**
+	 * Process the model config.
+	 *
+	 * @param array $options The options.
+	 * @return ModelConfig
+	 */
+	protected function process_model_config( array $options ): ModelConfig {
+		$custom  = [
+			'quality',
+			'style',
+			'size',
+		];
+		$options = $this->standardize_option_keys( $options );
+
+		$schema       = ModelConfig::getJsonSchema()['properties'];
+		$model_config = [];
+
+		foreach ( $options as $key => $value ) {
+			if ( in_array( $key, $custom, true ) ) {
+				$model_config['customOptions'][ $key ] = $value;
+				continue;
+			}
+
+			if ( ! isset( $schema[ $key ] ) ) {
+				continue;
+			}
+
+			$property_schema = $schema[ $key ];
+			$type            = $property_schema['type'] ?? null;
+
+			$processed_value = (string) $value;
+
+			if ( 'array' === $type || 'object' === $type ) {
+				$processed_value = (array) $value;
+			} elseif ( 'integer' === $type ) {
+				$processed_value = (int) $value;
+			} elseif ( 'number' === $type ) {
+				$processed_value = (float) $value;
+			} elseif ( 'boolean' === $type ) {
+				$processed_value = filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+				if ( null === $processed_value ) {
+					continue;
+				}
+			}
+
+			$model_config[ $key ] = $processed_value;
+		}
+
+		return ModelConfig::fromArray( $model_config );
+	}
+
+	/**
+	 * Standardize the option keys.
+	 *
+	 * The keys we use match what the various AI APIs expect
+	 * but we want to standardize them to the PHP SDK's expected keys.
+	 *
+	 * @param array $options The options.
+	 * @return array
+	 */
+	protected function standardize_option_keys( array $options ): array {
+		if ( empty( $options ) ) {
+			return [];
+		}
+
+		$key_mappings = [
+			'frequency_penalty'  => 'frequencyPenalty',
+			'n'                  => 'candidateCount',
+			'max_tokens'         => 'maxTokens',
+			'presence_penalty'   => 'presencePenalty',
+			'stop'               => 'stopSequences',
+			'system_instruction' => 'systemInstruction',
+			'top_p'              => 'topP',
+			'top_logprobs'       => 'topLogprobs',
+			'web_search_options' => 'webSearch',
+		];
+
+		$standardized = [];
+
+		foreach ( $options as $key => $value ) {
+			// Handle special case for response_format.
+			if ( 'response_format' === $key ) {
+				if ( is_array( $value ) && isset( $value['json_schema'] ) ) {
+					$standardized['outputSchema'] = $value['json_schema'];
+					continue;
+				}
+
+				if (
+					is_string( $options['response_format'] ) &&
+					'b64_json' === $options['response_format']
+				) {
+					$standardized['outputFileType'] = FileTypeEnum::inline();
+					continue;
+				}
+			}
+
+			// Use mapped key if available, otherwise keep original key.
+			$new_key                  = $key_mappings[ $key ] ?? $key;
+			$standardized[ $new_key ] = $value;
+		}
+
+		return $standardized;
 	}
 
 	/**
