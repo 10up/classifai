@@ -273,7 +273,8 @@ class OpenAI extends Provider {
 			( $feature instanceof ContentResizing ||
 			$feature instanceof ExcerptGeneration ||
 			$feature instanceof TitleGeneration ||
-			$feature instanceof KeyTakeaways ) &&
+			$feature instanceof KeyTakeaways ||
+			$feature instanceof ContentGeneration ) &&
 			$deployment
 		) {
 			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
