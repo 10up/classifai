@@ -21,7 +21,7 @@ describe( 'Common Feature Fields', () => {
 			feature_image_to_text_generator: 'Image Text Extraction',
 			feature_pdf_to_text_generation: 'PDF Text Extraction',
 		},
-		personalizer: {
+		content_recommendation: {
 			feature_recommended_content: 'Recommended Content',
 		},
 	};
