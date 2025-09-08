@@ -30,7 +30,7 @@ class RecommendedContent extends Feature {
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
-			OpenAIEmbeddings::ID     => __( 'OpenAI Embeddings', 'classifai' ),
+			OpenAIEmbeddings::ID => __( 'OpenAI Embeddings', 'classifai' ),
 		];
 	}
 

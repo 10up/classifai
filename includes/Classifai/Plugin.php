@@ -303,13 +303,13 @@ class Plugin {
 		$features = array();
 
 		// Get the existing settings.
-		$nlu_settings          = get_option( 'classifai_watson_nlu', [] );
-		$embeddings_settings   = get_option( 'classifai_openai_embeddings', [] );
-		$whisper_settings      = get_option( 'classifai_openai_whisper', [] );
-		$chatgpt_settings      = get_option( 'classifai_openai_chatgpt', [] );
-		$tts_settings          = get_option( 'classifai_azure_text_to_speech', [] );
-		$vision_settings       = get_option( 'classifai_computer_vision', [] );
-		$dalle_settings        = get_option( 'classifai_openai_dalle', [] );
+		$nlu_settings        = get_option( 'classifai_watson_nlu', [] );
+		$embeddings_settings = get_option( 'classifai_openai_embeddings', [] );
+		$whisper_settings    = get_option( 'classifai_openai_whisper', [] );
+		$chatgpt_settings    = get_option( 'classifai_openai_chatgpt', [] );
+		$tts_settings        = get_option( 'classifai_azure_text_to_speech', [] );
+		$vision_settings     = get_option( 'classifai_computer_vision', [] );
+		$dalle_settings      = get_option( 'classifai_openai_dalle', [] );
 
 		// If settings are there, migrate them.
 		if ( ! empty( $nlu_settings ) || ! empty( $embeddings_settings ) ) {
