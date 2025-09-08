@@ -5,21 +5,21 @@
 
 namespace Classifai\Services;
 
-class Personalizer extends Service {
+class ContentRecommendation extends Service {
 
 	/**
-	 * Personalizer constructor.
+	 * ContentRecommendation constructor.
 	 */
 	public function __construct() {
 		parent::__construct(
 			__( 'Recommendation Service', 'classifai' ),
-			'personalizer',
+			'content_recommendation',
 			self::get_service_providers()
 		);
 	}
 
 	/**
-	 * Get service providers for Recommendation service.
+	 * Get service providers for Content Recommendation service.
 	 *
 	 * @return array
 	 */

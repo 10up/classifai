@@ -105,9 +105,9 @@ class Plugin {
 		$classifai_services = apply_filters(
 			'classifai_services',
 			[
-				'language_processing' => 'Classifai\Services\LanguageProcessing',
-				'image_processing'    => 'Classifai\Services\ImageProcessing',
-				'personalizer'        => 'Classifai\Services\Personalizer',
+				'language_processing'    => 'Classifai\Services\LanguageProcessing',
+				'image_processing'       => 'Classifai\Services\ImageProcessing',
+				'content_recommendation' => 'Classifai\Services\ContentRecommendation',
 			]
 		);
 

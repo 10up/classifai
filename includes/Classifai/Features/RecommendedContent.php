@@ -2,7 +2,7 @@
 
 namespace Classifai\Features;
 
-use Classifai\Services\Personalizer as PersonalizerService;
+use Classifai\Services\ContentRecommendation as ContentRecommendationService;
 use Classifai\Providers\OpenAI\Embeddings as OpenAIEmbeddings;
 
 use function Classifai\get_asset_info;
@@ -26,7 +26,7 @@ class RecommendedContent extends Feature {
 		$this->label = __( 'Recommended Content', 'classifai' );
 
 		// Contains all providers that are registered to the service.
-		$this->provider_instances = $this->get_provider_instances( PersonalizerService::get_service_providers() );
+		$this->provider_instances = $this->get_provider_instances( ContentRecommendationService::get_service_providers() );
 
 		// Contains just the providers this feature supports.
 		$this->supported_providers = [
