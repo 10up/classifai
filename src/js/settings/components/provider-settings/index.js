@@ -35,6 +35,7 @@ import { OllamaSettings } from './ollama';
 import { OllamaMultimodalSettings } from './ollama-multimodal';
 import { OllamaEmbeddingsSettings } from './ollama-embeddings';
 import { TogetherAIImagesSettings } from './together-ai-images';
+import { ElevenLabsSpeechToTextSettings } from './elevenlabs/speech-to-text';
 
 /**
  * Component for rendering provider setting fields based on the selected provider.
@@ -73,6 +74,11 @@ const ProviderFields = ( { provider, isConfigured } ) => {
 
 		case 'openai_whisper':
 			return <OpenAISpeechToTextSettings isConfigured={ isConfigured } />;
+
+		case 'elevenlabs_speech_to_text':
+			return (
+				<ElevenLabsSpeechToTextSettings isConfigured={ isConfigured } />
+			);
 
 		case 'openai_moderation':
 			return <OpenAIModerationSettings isConfigured={ isConfigured } />;
