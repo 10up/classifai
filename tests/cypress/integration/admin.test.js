@@ -48,13 +48,13 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 			.contains( 'Image Processing' );
 	} );
 
-	it( 'Can visit "ClassifAI Registration" settings page and see all settings.', () => {
+	it( 'Can visit the general settings page and see all settings.', () => {
 		// Check Selected Navigation menu
-		cy.visitFeatureSettings( 'classifai_registration' );
+		cy.visitFeatureSettings( 'settings' );
 		cy.get( '.classifai-tabs' ).should( 'exist' );
 		cy.get( '.classifai-tabs a.active-tab' )
 			.first()
-			.contains( 'ClassifAI Registration' );
+			.contains( 'Settings' );
 
 		// Check that all settings are present.
 		cy.get( '.components-input-control input[type="email"]' ).should(
@@ -70,7 +70,7 @@ describe( 'Admin can login and make sure plugin is activated', () => {
 	} );
 
 	it( 'Can turn on "Block AI Bots" setting and it works.', () => {
-		cy.visitFeatureSettings( 'classifai_registration' );
+		cy.visitFeatureSettings( 'settings' );
 
 		cy.get( '.classifai-enable-bot-block input' ).check();
 
