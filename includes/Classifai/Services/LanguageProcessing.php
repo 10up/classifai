@@ -43,6 +43,7 @@ class LanguageProcessing extends Service {
 				'Classifai\Providers\OpenAI\Embeddings',
 				'Classifai\Providers\OpenAI\Moderation',
 				'Classifai\Providers\OpenAI\SpeechToText',
+				'Classifai\Providers\ElevenLabs\SpeechToText',
 				'Classifai\Providers\Watson\NLU',
 				'Classifai\Providers\GoogleAI\GeminiAPI',
 				'Classifai\Providers\Azure\OpenAI',

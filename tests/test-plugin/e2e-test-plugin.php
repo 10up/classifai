@@ -23,7 +23,12 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 
 	if ( strpos( $url, 'http://e2e-test-nlu-server.test/v1/analyze' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/nlu.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/models' ) !== false || strpos( $url, 'https://api.x.ai/v1/language-models' ) !== false || strpos( $url, 'https://api.together.xyz/v1/models' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://api.openai.com/v1/models' ) !== false ||
+		strpos( $url, 'https://api.x.ai/v1/language-models' ) !== false ||
+		strpos( $url, 'https://api.together.xyz/v1/models' ) !== false ||
+		strpos( $url, 'https://api.elevenlabs.io/v1/models' ) !== false
+	) {
 		$response = file_get_contents( __DIR__ . '/models.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/completions' ) !== false || strpos( $url, 'https://api.x.ai/v1/completions' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/chatgpt.json' );
@@ -54,7 +59,10 @@ function classifai_test_mock_http_requests( $preempt, $parsed_args, $url ) {
 		}
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/moderations' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/moderation.json' );
-	} elseif ( strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ) {
+	} elseif (
+		strpos( $url, 'https://api.openai.com/v1/audio/transcriptions' ) !== false ||
+		strpos( $url, 'https://api.elevenlabs.io/v1/speech-to-text' ) !== false
+	) {
 		$response = file_get_contents( __DIR__ . '/whisper.json' );
 	} elseif ( strpos( $url, 'https://api.openai.com/v1/images/generations' ) !== false || strpos( $url, 'https://api.together.xyz/v1/images/generations' ) !== false ) {
 		$response = file_get_contents( __DIR__ . '/dalle.json' );
