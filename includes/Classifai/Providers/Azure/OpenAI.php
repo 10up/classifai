@@ -46,14 +46,14 @@ class OpenAI extends Provider {
 	 *
 	 * @var string
 	 */
-	protected $chat_completion_api_version = '2023-05-15';
+	protected $chat_completion_api_version = '2024-10-21';
 
 	/**
 	 * Completion API version.
 	 *
 	 * @var string
 	 */
-	protected $completion_api_version = '2023-05-15';
+	protected $completion_api_version = '2024-10-21';
 
 	/**
 	 * GeminiAPI constructor.
