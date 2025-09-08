@@ -65,6 +65,25 @@ class OpenAI extends Provider {
 	}
 
 	/**
+	 * Get the API version.
+	 *
+	 * @return string
+	 */
+	public function get_api_version(): string {
+		/**
+		 * Filter the API version.
+		 *
+		 * @since x.x.x
+		 * @hook classifai_azure_openai_api_version
+		 *
+		 * @param string $version The default API version.
+		 *
+		 * @return string The API version.
+		 */
+		return apply_filters( 'classifai_azure_openai_api_version', $this->chat_completion_api_version );
+	}
+
+	/**
 	 * Render the provider fields.
 	 */
 	public function render_provider_fields() {
@@ -258,7 +277,7 @@ class OpenAI extends Provider {
 			$deployment
 		) {
 			$endpoint = trailingslashit( $endpoint ) . str_replace( '{deployment-id}', $deployment, $this->chat_completion_url );
-			$endpoint = add_query_arg( 'api-version', $this->chat_completion_api_version, $endpoint );
+			$endpoint = add_query_arg( 'api-version', $this->get_api_version(), $endpoint );
 		}
 
 		return $endpoint;
