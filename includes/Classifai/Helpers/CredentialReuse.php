@@ -336,7 +336,6 @@ class CredentialReuse {
 			'azure_openai'          => __( 'Azure OpenAI', 'classifai' ),
 			'azure_ai_vision'       => __( 'Azure AI Vision', 'classifai' ),
 			'azure_speech'          => __( 'Microsoft Azure AI Speech', 'classifai' ),
-			'ms_azure_personalizer' => __( 'Microsoft Azure AI Personalizer', 'classifai' ),
 			'aws_polly'             => __( 'Amazon Polly', 'classifai' ),
 			'google_gemini_api'     => __( 'Google AI Gemini API', 'classifai' ),
 			'ibm_watson_nlu'        => __( 'IBM Watson NLU', 'classifai' ),

@@ -12,12 +12,6 @@ module.exports = {
 		'key-takeaways-block': [
 			'./includes/Classifai/Blocks/key-takeaways/index.js',
 		],
-		'recommended-content-block': [
-			'./includes/Classifai/Blocks/recommended-content-block/index.js',
-		],
-		'recommended-content-block-frontend': [
-			'./includes/Classifai/Blocks/recommended-content-block/frontend.js',
-		],
 		'recommended-content-block-variation': [
 			'./src/js/features/recommended-content/variation.js',
 		],
