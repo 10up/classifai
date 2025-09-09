@@ -24,7 +24,7 @@ Tap into leading cloud-based services like [OpenAI](https://openai.com/), [Micro
 * Generate new images on demand to use in-content or as a featured image using [OpenAI's Image Generation API](https://platform.openai.com/docs/guides/images-vision), [Google AI's Imagen API](https://ai.google.dev/gemini-api/docs/image-generation#imagen), [Together AI's API](https://docs.together.ai/docs/images-overview) or locally using [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui/)
 * Generate transcripts of audio files using [OpenAI's Audio Transcription API](https://platform.openai.com/docs/guides/speech-to-text) or [ElevenLabs Speech to Text API](https://elevenlabs.io/docs/capabilities/speech-to-text)
 * Moderate incoming comments for sensitive content using [OpenAI's Moderation API](https://platform.openai.com/docs/guides/moderation)
-* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/) or [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech)
+* Convert text content into audio and output a "read-to-me" feature on the front-end to play this audio using [Microsoft Azure's Text to Speech API](https://learn.microsoft.com/en-us/azure/cognitive-services/speech-service/text-to-speech), [Amazon Polly](https://aws.amazon.com/polly/), [OpenAI's Text to Speech API](https://platform.openai.com/docs/guides/text-to-speech) or [ElevenLabs' Text to Speech API](https://elevenlabs.io/docs/capabilities/text-to-speech)
 * Classify post content using [IBM Watson's Natural Language Understanding API](https://www.ibm.com/watson/services/natural-language-understanding/), [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings), [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) or locally using [Ollama](https://ollama.com/)
 * Create a smart 404 page that has a recommended results section that suggests relevant content to the user based on the page URL they were trying to access using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress)
 * Find similar terms to merge together using either [OpenAI's Embedding API](https://platform.openai.com/docs/guides/embeddings) or [Microsoft Azure's OpenAI service](https://azure.microsoft.com/en-us/products/ai-services/openai-service) in combination with [ElasticPress](https://github.com/10up/ElasticPress). Note this only compares top-level terms and if you merge a term that has children, these become top-level terms as per default WordPress behavior
@@ -482,6 +482,27 @@ Note that [ElevenLabs](https://elevenlabs.io/docs/capabilities/speech-to-text) c
 * If connected successfully, a new dropdown with the label "Voices" will be displayed.
 * Select a voice and voice engine as per your choice.
 * Select a post type that should use this service.
+
+### 3. Using the Text to Speech service
+
+* Assuming the post type selected is "post", create a new post and publish it.
+* After a few seconds, a "Preview" button will appear under the ClassifAI settings panel.
+* Click the button to preview the generated speech audio for the post.
+* View the post on the front-end and see a read-to-me feature has been added
+
+## Set Up Text to Speech (via ElevenLabs)
+
+### 1. Sign up for ElevenLabs
+
+* [Sign up for an ElevenLabs account](https://elevenlabs.io/sign-up) or sign into your existing one.
+* Log into your account and go to the [API key page](https://elevenlabs.io/app/developers/api-keys).
+* Click `Create Key` create a new API key and ensure you turn on access to the Text to Speech endpoint and turn on Read access to the Models and Voices endpoint.
+
+### 2. Configure ElevenLabs API Keys under Tools > ClassifAI > Language Processing > Text to Speech > Settings
+
+* Select **ElevenLabs** in the Provider dropdown.
+* Enter your API Key copied from the above step into the `API Key` field.
+* Select the model and voice you want to use for the text to speech after saving and verifying the connection.
 
 ### 3. Using the Text to Speech service
 
