@@ -70,7 +70,7 @@ abstract class Feature {
 		}
 
 		add_action( 'admin_enqueue_scripts', [ $this, 'register_plugin_area_script' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'register_chat_ui_script' ], 10, 99 );
+		add_action( 'admin_enqueue_scripts', [ $this, 'register_chat_ui_script' ], 99 );
 
 		if ( $this->is_feature_enabled() ) {
 			$this->feature_setup();
